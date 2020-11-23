@@ -11,12 +11,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Arc.h" />
+    <ClInclude Include="src\Arc\Log.h" />
+    <ClInclude Include="src\ArcEngine.h" />
     <ClInclude Include="src\Arc\Application.h" />
     <ClInclude Include="src\Arc\Core.h" />
     <ClInclude Include="src\Arc\EntryPoint.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Arc\Log.cpp" />
     <ClCompile Include="src\Arc\Application.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -70,6 +72,7 @@
       <PreprocessorDefinitions>ARC_PLATFORM_WINDOWS;ARC_BUILD_DLL;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Arc\vendor\spdlog\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -85,6 +88,7 @@
       <PreprocessorDefinitions>ARC_PLATFORM_WINDOWS;ARC_BUILD_DLL;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Arc\vendor\spdlog\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

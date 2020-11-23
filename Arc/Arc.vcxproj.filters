@@ -21,15 +21,21 @@
     <ClInclude Include="src\Arc\Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Arc.h">
+    <ClInclude Include="src\Arc\EntryPoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Arc\EntryPoint.h">
+    <ClInclude Include="src\Arc\Log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ArcEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Arc\Application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Arc\Log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

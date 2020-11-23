@@ -2,7 +2,7 @@
 
 #include "Core.h"
 
-namespace Arc
+namespace ArcEngine
 {
 	class ARC_API Application
 	{
