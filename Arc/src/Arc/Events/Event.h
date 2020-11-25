@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arcpch.h"
 #include "Arc/Core.h"
 
 namespace ArcEngine
