@@ -20,6 +20,9 @@ project "Arc"
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
+	pchheader "arcpch.h"
+	pchsource "Arc/src/arcpch.cpp"
+
 	files
 	{
 		"%{prj.name}/src/**.h",
@@ -29,6 +32,7 @@ project "Arc"
 	-- Includes --
 	includedirs
 	{
+		"%{prj.name}/src",
 		"%{prj.name}/vendor/spdlog/include"
 	}
 
