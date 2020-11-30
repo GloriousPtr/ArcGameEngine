@@ -11,6 +11,12 @@ workspace "Arc"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}";
 
+-- Include directories relavtive to root folder (solution directory)
+IncludeDir = {}
+IncludeDir["GLFW"] = "Arc/vendor/GLFW/include"
+
+include "Arc/vendor/GLFW"
+
 project "Arc"
 	location "Arc"
 	-- DLL --
@@ -33,7 +39,14 @@ project "Arc"
 	includedirs
 	{
 		"%{prj.name}/src",
-		"%{prj.name}/vendor/spdlog/include"
+		"%{prj.name}/vendor/spdlog/include",
+		"%{IncludeDir.GLFW}"
+	}
+
+	links
+	{
+		"GLFW",
+		"opengl32.lib"
 	}
 
 	-- Filters --

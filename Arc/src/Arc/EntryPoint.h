@@ -7,7 +7,7 @@ extern ArcEngine::Application* ArcEngine::CreateApplication();
 int main(int argc, char** argv)
 {
 	ArcEngine::Log::Init();
-	ARC_CORE_INFO("Initialized Log!");
+	ARC_CORE_TRACE("Initialized Log!");
 	
 	auto* app = ArcEngine::CreateApplication();
 	app->Run();
