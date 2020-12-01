@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Arc/Window.h"
 
 #include "GLFW/glfw3.h"

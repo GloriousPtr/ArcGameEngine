@@ -14,8 +14,10 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}";
 -- Include directories relavtive to root folder (solution directory)
 IncludeDir = {}
 IncludeDir["GLFW"] = "Arc/vendor/GLFW/include"
+IncludeDir["Glad"] = "Arc/vendor/Glad/include"
 
 include "Arc/vendor/GLFW"
+include "Arc/vendor/Glad"
 
 project "Arc"
 	location "Arc"
@@ -40,12 +42,14 @@ project "Arc"
 	{
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/spdlog/include",
-		"%{IncludeDir.GLFW}"
+		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.Glad}"
 	}
 
 	links
 	{
 		"GLFW",
+		"Glad",
 		"opengl32.lib"
 	}
 
@@ -58,7 +62,8 @@ project "Arc"
 		defines
 		{
 			"ARC_PLATFORM_WINDOWS",
-			"ARC_BUILD_DLL"
+			"ARC_BUILD_DLL",
+			"GLFW_INCLUDE_NONE"
 		}
 
 		postbuildcommands
