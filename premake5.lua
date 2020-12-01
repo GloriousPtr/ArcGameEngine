@@ -17,9 +17,12 @@ IncludeDir["GLFW"] = "Arc/vendor/GLFW/include"
 IncludeDir["Glad"] = "Arc/vendor/Glad/include"
 IncludeDir["ImGui"] = "Arc/vendor/imgui"
 
-include "Arc/vendor/GLFW"
-include "Arc/vendor/Glad"
-include "Arc/vendor/imgui"
+group "Dependencies"
+	include "Arc/vendor/GLFW"
+	include "Arc/vendor/Glad"
+	include "Arc/vendor/imgui"
+
+group ""
 
 project "Arc"
 	location "Arc"
