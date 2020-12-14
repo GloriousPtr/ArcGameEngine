@@ -10,12 +10,10 @@ public:
 
 	void OnUpdate() override
 	{
-		ARC_INFO("ExampleLayer::Update");
 	}
 
 	void OnEvent(ArcEngine::Event& event) override
 	{
-		ARC_TRACE("{0}", event);
 	}
 };
 
