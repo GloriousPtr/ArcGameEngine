@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Arc/Window.h"
+#include "Arc/Renderer/GraphicsContext.h"
 
 #include "GLFW/glfw3.h"
 
@@ -28,6 +29,7 @@ namespace ArcEngine
 		virtual void Shutdown();
 	private:
 		GLFWwindow* m_Window;
+		GraphicsContext* m_Context;
 
 		struct WindowData
 		{
