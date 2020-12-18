@@ -1,5 +1,7 @@
 #include <ArcEngine.h>
 
+#include "imgui/imgui.h"
+
 class ExampleLayer : public ArcEngine::Layer
 {
 public:
@@ -8,13 +10,20 @@ public:
 	{
 	}
 
-	void OnUpdate() override
+	virtual void OnUpdate() override
 	{
 		if(ArcEngine::Input::IsKeyPressed(ARC_KEY_TAB))
 			ARC_TRACE("Tab key is pressed (poll)!");
 	}
 
-	void OnEvent(ArcEngine::Event& event) override
+	virtual void OnImGuiRender() override
+	{
+		ImGui::Begin("Test");
+		ImGui::Text("Hello World");
+		ImGui::End();
+	}
+	
+	virtual void OnEvent(ArcEngine::Event& event) override
 	{
 		if(event.GetEventType() == ArcEngine::EventType::KeyPressed)
 		{
@@ -32,7 +41,6 @@ public:
 	Sandbox()
 	{
 		PushLayer(new ExampleLayer());
-		PushOverlay(new ArcEngine::ImGuiLayer());
 	}
 
 	~Sandbox()
