@@ -6,7 +6,7 @@
 
 namespace ArcEngine
 {
-	OpenGLContext::OpenGLContext(class GLFWwindow* windowHandle)
+	OpenGLContext::OpenGLContext(GLFWwindow* windowHandle)
 		: m_WindowHandle(windowHandle)
 	{
 		ARC_CORE_ASSERT(m_WindowHandle, "Handle is null!");
