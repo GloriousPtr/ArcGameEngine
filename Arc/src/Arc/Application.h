@@ -8,6 +8,8 @@
 
 #include "Arc/ImGui/ImGuiLayer.h"
 
+#include "Arc/Renderer/Shader.h"
+
 namespace ArcEngine
 {
 	class ARC_API Application
@@ -35,6 +37,7 @@ namespace ArcEngine
 		LayerStack m_LayerStack;
 
 		unsigned int m_VertexArray, m_VertexBuffer, m_IndexBuffer;
+		std::unique_ptr<Shader> m_Shader;
 	private:
 		static Application* s_Instance;
 	};
