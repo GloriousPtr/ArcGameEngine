@@ -7,9 +7,4 @@ namespace ArcEngine
 		:m_DebugName(name)
 	{
 	}
-
-	Layer::~Layer()
-	{
-		
-	}
 }

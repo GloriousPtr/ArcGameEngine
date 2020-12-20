@@ -112,10 +112,6 @@ namespace ArcEngine
 		m_Shader.reset(new Shader(vertexSource, fragmentSource));
 	}
 
-	Application::~Application()
-	{
-	}
-
 	void Application::PushLayer(Layer* layer)
 	{
 		m_LayerStack.PushLayer(layer);
