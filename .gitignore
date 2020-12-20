@@ -1,5 +1,5 @@
 # Binaries
-bin/
+/bin/
 bin-int/
 
 # Visual Studio files and folder
@@ -9,3 +9,6 @@ bin-int/
 *.vcxproj.filters
 *.vcxproj.user
 *.ini
+
+# GLAD binaries
+**/Glad/bin/
