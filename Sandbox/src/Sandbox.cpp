@@ -1,8 +1,11 @@
 #include <ArcEngine.h>
 
+#include "Platform/OpenGL/OpenGLShader.h"
+
 #include "imgui/imgui.h"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include "glm/gtc/type_ptr.hpp"
 
 class ExampleLayer : public ArcEngine::Layer
 {
@@ -89,10 +92,10 @@ public:
 		
 		)";
 
-		m_Shader.reset(new ArcEngine::Shader(vertexSource, fragmentSource));
+		m_Shader.reset(ArcEngine::Shader::Create(vertexSource, fragmentSource));
 		
 		// BlueShader
-		std::string blueShaderVertexSource = R"(
+		std::string flatColorShaderVertexSource = R"(
 			#version 330 core
 
 			layout(location = 0) in vec3 a_Position;
@@ -104,22 +107,22 @@ public:
 			{
 				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
 			}
-		
 		)";
 
-		std::string blueShaderFragmentSource = R"(
+		std::string flatColorShaderFragmentSource = R"(
 			#version 330 core
 
 			layout(location = 0) out vec4 color;
 
+			uniform vec3 u_Color;
+
 			void main()
 			{
-				color = vec4(0.2, 0.3, 0.8, 1.0);
+				color = vec4(u_Color, 1.0);
 			}
-		
 		)";
 		
-		m_BlueShader.reset(new ArcEngine::Shader(blueShaderVertexSource, blueShaderFragmentSource));
+		m_FlatColorShader.reset(ArcEngine::Shader::Create(flatColorShaderVertexSource, flatColorShaderFragmentSource));
 	}
 
 	virtual void OnUpdate(ArcEngine::Timestep ts) override
@@ -150,15 +153,18 @@ public:
 
 		ArcEngine::Renderer::BeginScene(m_Camera);
 
+		std::dynamic_pointer_cast<ArcEngine::OpenGLShader>(m_FlatColorShader)->Bind();
+		
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
-		for (int y = 0; y < 10; y++)
+		std::dynamic_pointer_cast<ArcEngine::OpenGLShader>(m_FlatColorShader)->UploadUniformFloat3("u_Color", m_SquareColor);
+		for (int y = 0; y < 20; y++)
 		{
-			for (int x = 0; x < 10; x++)
+			for (int x = 0; x < 20; x++)
 			{
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
-				ArcEngine::Renderer::Submit(m_BlueShader, m_SquareVA, transform);
+				ArcEngine::Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
 			}
 		}
 		ArcEngine::Renderer::Submit(m_Shader, m_VertexArray);
@@ -168,7 +174,9 @@ public:
 
 	virtual void OnImGuiRender() override
 	{
-		
+		ImGui::Begin("Settings");
+		ImGui::ColorEdit3("Square Color", glm::value_ptr(m_SquareColor));
+		ImGui::End();
 	}
 	
 	virtual void OnEvent(ArcEngine::Event& event) override
@@ -179,7 +187,7 @@ private:
 	std::shared_ptr<ArcEngine::Shader> m_Shader;
 	std::shared_ptr<ArcEngine::VertexArray> m_VertexArray;
 
-	std::shared_ptr<ArcEngine::Shader> m_BlueShader;
+	std::shared_ptr<ArcEngine::Shader> m_FlatColorShader;
 	std::shared_ptr<ArcEngine::VertexArray> m_SquareVA;
 
 	ArcEngine::OrthographicCamera m_Camera;
@@ -188,6 +196,8 @@ private:
 	
 	float m_CameraRotation = 0.0f;
 	float m_CameraRotationSpeed = 90.0f;
+
+	glm::vec3 m_SquareColor = { 0.2f, 0.3f, 0.8f };
 };
 
 class Sandbox : public ArcEngine::Application
