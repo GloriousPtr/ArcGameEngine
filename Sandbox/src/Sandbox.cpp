@@ -118,22 +118,22 @@ public:
 		m_BlueShader.reset(new ArcEngine::Shader(blueShaderVertexSource, blueShaderFragmentSource));
 	}
 
-	virtual void OnUpdate() override
+	virtual void OnUpdate(ArcEngine::Timestep ts) override
 	{
 		if(ArcEngine::Input::IsKeyPressed(ARC_KEY_RIGHT))
-			m_CameraPosition.x += m_CameraMoveSpeed;
+			m_CameraPosition.x += m_CameraMoveSpeed * ts;
 		else if(ArcEngine::Input::IsKeyPressed(ARC_KEY_LEFT))
-			m_CameraPosition.x -= m_CameraMoveSpeed;
+			m_CameraPosition.x -= m_CameraMoveSpeed * ts;
 
 		if(ArcEngine::Input::IsKeyPressed(ARC_KEY_UP))
-			m_CameraPosition.y += m_CameraMoveSpeed;
+			m_CameraPosition.y += m_CameraMoveSpeed * ts;
 		else if(ArcEngine::Input::IsKeyPressed(ARC_KEY_DOWN))
-			m_CameraPosition.y -= m_CameraMoveSpeed;
+			m_CameraPosition.y -= m_CameraMoveSpeed * ts;
 
 		if(ArcEngine::Input::IsKeyPressed(ARC_KEY_A))
-			m_CameraRotation += m_CameraRotationSpeed;
+			m_CameraRotation += m_CameraRotationSpeed * ts;
 		else if(ArcEngine::Input::IsKeyPressed(ARC_KEY_D))
-			m_CameraRotation -= m_CameraRotationSpeed;
+			m_CameraRotation -= m_CameraRotationSpeed * ts;
 		
 		ArcEngine::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		ArcEngine::RenderCommand::Clear();
@@ -167,10 +167,10 @@ private:
 
 	ArcEngine::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition;
-	float m_CameraMoveSpeed = 0.1f;
+	float m_CameraMoveSpeed = 5.0f;
 	
 	float m_CameraRotation = 0.0f;
-	float m_CameraRotationSpeed = 2.0f;
+	float m_CameraRotationSpeed = 90.0f;
 };
 
 class Sandbox : public ArcEngine::Application
