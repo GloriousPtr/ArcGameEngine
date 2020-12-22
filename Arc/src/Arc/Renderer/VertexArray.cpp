@@ -10,8 +10,8 @@ namespace ArcEngine
 	{
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::None:		ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-			case RendererAPI::OpenGL:	return new OpenGLVertexArray();
+			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
+			case RendererAPI::API::OpenGL:	return new OpenGLVertexArray();
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");

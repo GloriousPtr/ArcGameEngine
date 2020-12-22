@@ -10,8 +10,8 @@ namespace ArcEngine
 	{
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::None:		ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-			case RendererAPI::OpenGL:	return new OpenGLVertexBuffer(verticies, size);
+			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
+			case RendererAPI::API::OpenGL:	return new OpenGLVertexBuffer(verticies, size);
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -22,8 +22,8 @@ namespace ArcEngine
 	{
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::None:		ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-			case RendererAPI::OpenGL:	return new OpenGLIndexBuffer(indices, count);
+			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
+			case RendererAPI::API::OpenGL:	return new OpenGLIndexBuffer(indices, count);
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
