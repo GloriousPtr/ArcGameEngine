@@ -20,7 +20,7 @@ public:
 			 0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
 			 0.0f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f
 		};
-		std::shared_ptr<ArcEngine::VertexBuffer> vertexBuffer;
+		ArcEngine::Ref<ArcEngine::VertexBuffer> vertexBuffer;
 		vertexBuffer.reset(ArcEngine::VertexBuffer::Create(vertices, sizeof(vertices)));
 
 		ArcEngine::BufferLayout layout = {
@@ -32,7 +32,7 @@ public:
 		m_VertexArray->AddVertexBuffer(vertexBuffer);
 		
 		uint32_t indices[3] = { 0, 1, 2 };
-		std::shared_ptr<ArcEngine::IndexBuffer> indexBuffer;
+		ArcEngine::Ref<ArcEngine::IndexBuffer> indexBuffer;
 		indexBuffer.reset(ArcEngine::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 
@@ -43,7 +43,7 @@ public:
 			 0.5f,  0.5f, 0.0f,
 			-0.5f,  0.5f, 0.0f,
 		};
-		std::shared_ptr<ArcEngine::VertexBuffer> squareVB;
+		ArcEngine::Ref<ArcEngine::VertexBuffer> squareVB;
 		squareVB.reset(ArcEngine::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
 		squareVB->SetLayout({
 			{ArcEngine::ShaderDataType::Float3, "a_Position" }
@@ -51,7 +51,7 @@ public:
 		m_SquareVA->AddVertexBuffer(squareVB);
 
 		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
-		std::shared_ptr<ArcEngine::IndexBuffer> squareIB;
+		ArcEngine::Ref<ArcEngine::IndexBuffer> squareIB;
 		squareIB.reset(ArcEngine::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
 		m_SquareVA->SetIndexBuffer(squareIB);
 		
@@ -184,11 +184,11 @@ public:
 		
 	}
 private:
-	std::shared_ptr<ArcEngine::Shader> m_Shader;
-	std::shared_ptr<ArcEngine::VertexArray> m_VertexArray;
-
-	std::shared_ptr<ArcEngine::Shader> m_FlatColorShader;
-	std::shared_ptr<ArcEngine::VertexArray> m_SquareVA;
+	ArcEngine::Ref<ArcEngine::Shader> m_Shader;
+	ArcEngine::Ref<ArcEngine::VertexArray> m_VertexArray;
+	
+	ArcEngine::Ref<ArcEngine::Shader> m_FlatColorShader;
+	ArcEngine::Ref<ArcEngine::VertexArray> m_SquareVA;
 
 	ArcEngine::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition;
