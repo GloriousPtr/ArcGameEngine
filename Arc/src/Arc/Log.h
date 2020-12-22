@@ -24,10 +24,10 @@ namespace ArcEngine
 #define ARC_CORE_INFO(...)		::ArcEngine::Log::GetCoreLogger()->info(__VA_ARGS__)
 #define ARC_CORE_WARN(...)		::ArcEngine::Log::GetCoreLogger()->warn(__VA_ARGS__)
 #define ARC_CORE_ERROR(...)		::ArcEngine::Log::GetCoreLogger()->error(__VA_ARGS__)
-#define ARC_CORE_FATAL(...)		::ArcEngine::Log::GetCoreLogger()->critical(__VA_ARGS__)
+#define ARC_CORE_CRITICAL(...)	::ArcEngine::Log::GetCoreLogger()->critical(__VA_ARGS__)
 
 #define ARC_TRACE(...)			::ArcEngine::Log::GetClientLogger()->trace(__VA_ARGS__)
 #define ARC_INFO(...)			::ArcEngine::Log::GetClientLogger()->info(__VA_ARGS__)
 #define ARC_WARN(...)			::ArcEngine::Log::GetClientLogger()->warn(__VA_ARGS__)
 #define ARC_ERROR(...)			::ArcEngine::Log::GetClientLogger()->error(__VA_ARGS__)
-#define ARC_FATAL(...)			::ArcEngine::Log::GetClientLogger()->critical(__VA_ARGS__)
+#define ARC_CRITICAL(...)		::ArcEngine::Log::GetClientLogger()->critical(__VA_ARGS__)
