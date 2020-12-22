@@ -12,6 +12,17 @@
 
 #include "Arc/ImGui/ImGuiLayer.h"
 
+//-----Renderer-----------------------------------
+#include "Arc/Renderer/Renderer.h"
+#include "Arc/Renderer/RenderCommand.h"
+
+#include "Arc/Renderer/Buffer.h"
+#include "Arc/Renderer/Shader.h"
+#include "Arc/Renderer/VertexArray.h"
+
+#include "Arc/Renderer/OrthographicCamera.h"
+//------------------------------------------------
+
 //-----Entry Point--------------------------------
 #include "Arc/EntryPoint.h"
 //------------------------------------------------
