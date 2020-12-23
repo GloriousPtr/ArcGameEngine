@@ -24,8 +24,8 @@ public:
 		vertexBuffer.reset(ArcEngine::VertexBuffer::Create(vertices, sizeof(vertices)));
 
 		ArcEngine::BufferLayout layout = {
-			{ArcEngine::ShaderDataType::Float3, "a_Position" },
-			{ArcEngine::ShaderDataType::Float4, "a_Color" }
+			{ ArcEngine::ShaderDataType::Float3, "a_Position" },
+			{ ArcEngine::ShaderDataType::Float4, "a_Color" }
 		};
 
 		vertexBuffer->SetLayout(layout);
@@ -37,16 +37,17 @@ public:
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 
 		m_SquareVA.reset(ArcEngine::VertexArray::Create());
-		float squareVertices[3 * 4] = {
-			-0.5f, -0.5f, 0.0f,
- 			 0.5f, -0.5f, 0.0f,
-			 0.5f,  0.5f, 0.0f,
-			-0.5f,  0.5f, 0.0f,
+		float squareVertices[5 * 4] = {
+			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+ 			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
+			-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
 		};
 		ArcEngine::Ref<ArcEngine::VertexBuffer> squareVB;
 		squareVB.reset(ArcEngine::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
 		squareVB->SetLayout({
-			{ArcEngine::ShaderDataType::Float3, "a_Position" }
+			{ ArcEngine::ShaderDataType::Float3, "a_Position" },
+			{ ArcEngine::ShaderDataType::Float2, "a_TexCoord" }
 		});
 		m_SquareVA->AddVertexBuffer(squareVB);
 
@@ -123,6 +124,49 @@ public:
 		)";
 		
 		m_FlatColorShader.reset(ArcEngine::Shader::Create(flatColorShaderVertexSource, flatColorShaderFragmentSource));
+
+
+
+		// TextureShader
+		std::string textureShaderVertexSource = R"(
+			#version 330 core
+
+			layout(location = 0) in vec3 a_Position;
+			layout(location = 1) in vec2 a_TexCoord;
+
+			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
+
+			out vec2 v_TexCoord;
+
+			void main()
+			{
+				v_TexCoord = a_TexCoord;
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
+			}
+		)";
+
+		std::string textureShaderFragmentSource = R"(
+			#version 330 core
+
+			layout(location = 0) out vec4 color;
+
+			in vec2 v_TexCoord;
+
+			uniform sampler2D u_Texture;
+
+			void main()
+			{
+				color = texture(u_Texture, v_TexCoord);
+			}
+		)";
+		
+		m_TextureShader.reset(ArcEngine::Shader::Create(textureShaderVertexSource, textureShaderFragmentSource));
+
+		m_Texture = ArcEngine::Texture2D::Create("assets/textures/Checkerboard.png");
+
+		std::dynamic_pointer_cast<ArcEngine::OpenGLShader>(m_TextureShader)->Bind();
+		std::dynamic_pointer_cast<ArcEngine::OpenGLShader>(m_TextureShader)->UploadUniformInt("u_Texture", 0);
 	}
 
 	virtual void OnUpdate(ArcEngine::Timestep ts) override
@@ -153,11 +197,11 @@ public:
 
 		ArcEngine::Renderer::BeginScene(m_Camera);
 
-		std::dynamic_pointer_cast<ArcEngine::OpenGLShader>(m_FlatColorShader)->Bind();
-		
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
+		std::dynamic_pointer_cast<ArcEngine::OpenGLShader>(m_FlatColorShader)->Bind();
 		std::dynamic_pointer_cast<ArcEngine::OpenGLShader>(m_FlatColorShader)->UploadUniformFloat3("u_Color", m_SquareColor);
+
 		for (int y = 0; y < 20; y++)
 		{
 			for (int x = 0; x < 20; x++)
@@ -167,7 +211,12 @@ public:
 				ArcEngine::Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
 			}
 		}
-		ArcEngine::Renderer::Submit(m_Shader, m_VertexArray);
+
+		m_Texture->Bind();
+		ArcEngine::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		
+		// Triangle
+		// ArcEngine::Renderer::Submit(m_Shader, m_VertexArray);
 
 		ArcEngine::Renderer::EndScene();
 	}
@@ -187,9 +236,11 @@ private:
 	ArcEngine::Ref<ArcEngine::Shader> m_Shader;
 	ArcEngine::Ref<ArcEngine::VertexArray> m_VertexArray;
 	
-	ArcEngine::Ref<ArcEngine::Shader> m_FlatColorShader;
+	ArcEngine::Ref<ArcEngine::Shader> m_FlatColorShader, m_TextureShader;
 	ArcEngine::Ref<ArcEngine::VertexArray> m_SquareVA;
 
+	ArcEngine::Ref<ArcEngine::Texture2D> m_Texture;
+	
 	ArcEngine::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition;
 	float m_CameraMoveSpeed = 5.0f;
