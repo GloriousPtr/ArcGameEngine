@@ -6,7 +6,12 @@ namespace ArcEngine
 {
 	class ARC_API Input
 	{
+	protected:
+		Input() = default;
 	public:
+		Input(const Input&) = delete;
+		Input& operator=(const Input&) = delete;
+		
 		virtual ~Input() = default;
 		inline static bool IsKeyPressed(int keycode) { return s_Instance->IsKeyPressedImpl(keycode); }
 		
