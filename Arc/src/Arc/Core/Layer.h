@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Arc/Core.h"
+#include "Arc/Core/Core.h"
 #include "Arc/Events/Event.h"
-#include "Core/Timestep.h"
+#include "Arc/Core/Timestep.h"
 
 namespace ArcEngine
 {

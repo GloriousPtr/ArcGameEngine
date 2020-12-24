@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Arc/Window.h"
+#include "Arc/Core/Window.h"
 #include "Arc/Renderer/GraphicsContext.h"
 
 #include "GLFW/glfw3.h"

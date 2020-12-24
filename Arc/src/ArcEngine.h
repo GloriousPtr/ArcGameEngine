@@ -2,16 +2,16 @@
 
 // For use by Arc applications
 
-#include "Arc/Application.h"
-#include "Arc/Layer.h"
-#include "Arc/Log.h"
+#include "Arc/Core/Application.h"
+#include "Arc/Core/Layer.h"
+#include "Arc/Core/Log.h"
 
 #include "Arc/Core/Timestep.h"
 
-#include "Arc/Input.h"
-#include "Arc/KeyCodes.h"
-#include "Arc/MouseButtonCodes.h"
-#include "Arc/OrthographicCameraController.h"
+#include "Arc/Core/Input.h"
+#include "Arc/Core/KeyCodes.h"
+#include "Arc/Core/MouseButtonCodes.h"
+#include "Arc/Renderer/OrthographicCameraController.h"
 
 #include "Arc/ImGui/ImGuiLayer.h"
 
@@ -28,5 +28,5 @@
 //------------------------------------------------
 
 //-----Entry Point--------------------------------
-#include "Arc/EntryPoint.h"
+#include "Arc/Core/EntryPoint.h"
 //------------------------------------------------

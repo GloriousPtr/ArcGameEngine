@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Arc/Core.h"
+#include "Arc/Core/Core.h"
 
 namespace ArcEngine
 {

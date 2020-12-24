@@ -3,7 +3,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "Arc/Application.h"
+#include "Arc/Core/Application.h"
 
 namespace ArcEngine
 {

@@ -1,7 +1,7 @@
 #include "arcpch.h"
 #include "Application.h"
 
-#include "Core/Timestep.h"
+#include "Arc/Core/Timestep.h"
 
 #include <GLFW/glfw3.h>
 

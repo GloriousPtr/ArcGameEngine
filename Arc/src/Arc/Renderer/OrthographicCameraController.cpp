@@ -1,9 +1,9 @@
 #include "arcpch.h"
 #include "OrthographicCameraController.h"
 
-#include "Arc/Input.h"
-#include "Arc/KeyCodes.h"
-#include "Arc/MouseButtonCodes.h"
+#include "Arc/Core/Input.h"
+#include "Arc/Core/KeyCodes.h"
+#include "Arc/Core/MouseButtonCodes.h"
 
 namespace ArcEngine
 {
