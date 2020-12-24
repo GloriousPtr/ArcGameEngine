@@ -5,7 +5,7 @@
 #include "Arc/Events/MouseEvent.h"
 #include "Arc/Events/KeyEvent.h"
 
-#include "OpenGL/OpenGLContext.h"
+#include "Platform/OpenGL/OpenGLContext.h"
 
 namespace ArcEngine
 {
@@ -64,6 +64,7 @@ namespace ArcEngine
 			data.Height = height;
 
 			WindowResizeEvent event(width, height);
+			data.EventCallback(event);
 		});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)

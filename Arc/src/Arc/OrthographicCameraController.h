@@ -19,6 +19,8 @@ namespace ArcEngine
 		OrthographicCamera& GetCamera() { return m_Camera; }
 		const OrthographicCamera& GetCamera() const { return m_Camera; }
 
+		float GetZoomLevel() const { return m_ZoomLevel; }
+		void SetZoomLevel(float level) { m_ZoomLevel = level; }
 		void SetZoomSpeed(const float value) { m_ZoomSpeed = value; }
 		void SetTranslationSpeed(const float value) { m_CameraTranslationSpeed = value; }
 		void SetRotationSpeed(const float value) { m_CameraRotationSpeed = value; }

@@ -41,7 +41,7 @@ namespace ArcEngine
 			m_Camera.SetRotation(m_CameraRotation);
 		}
 	}
-
+	
 	void OrthographicCameraController::OnEvent(Event& e)
 	{
 		EventDispatcher dispatcher(e);
