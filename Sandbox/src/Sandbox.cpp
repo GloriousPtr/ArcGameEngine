@@ -93,7 +93,7 @@ public:
 		
 		)";
 
-		m_Shader.reset(ArcEngine::Shader::Create(vertexSource, fragmentSource));
+		m_Shader = ArcEngine::Shader::Create("VertexPosColor", vertexSource, fragmentSource);
 		
 		// BlueShader
 		std::string flatColorShaderVertexSource = R"(
@@ -123,19 +123,17 @@ public:
 			}
 		)";
 		
-		m_FlatColorShader.reset(ArcEngine::Shader::Create(flatColorShaderVertexSource, flatColorShaderFragmentSource));
+		m_FlatColorShader = ArcEngine::Shader::Create("FlatColor", flatColorShaderVertexSource, flatColorShaderFragmentSource);
 
 
 
 		// TextureShader
-		ArcEngine::Shader::Create("assets/shaders/Texture.glsl");
+		auto textureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
 		
-		m_TextureShader.reset(ArcEngine::Shader::Create("assets/shaders/Texture.glsl"));
-
 		m_Texture = ArcEngine::Texture2D::Create("assets/textures/Logo.png");
 
-		std::dynamic_pointer_cast<ArcEngine::OpenGLShader>(m_TextureShader)->Bind();
-		std::dynamic_pointer_cast<ArcEngine::OpenGLShader>(m_TextureShader)->UploadUniformInt("u_Texture", 0);
+		std::dynamic_pointer_cast<ArcEngine::OpenGLShader>(textureShader)->Bind();
+		std::dynamic_pointer_cast<ArcEngine::OpenGLShader>(textureShader)->UploadUniformInt("u_Texture", 0);
 	}
 
 	virtual void OnUpdate(ArcEngine::Timestep ts) override
@@ -181,8 +179,10 @@ public:
 			}
 		}
 
+		auto textureShader = m_ShaderLibrary.Get("Texture");
+		
 		m_Texture->Bind();
-		ArcEngine::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		ArcEngine::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 		
 		// Triangle
 		// ArcEngine::Renderer::Submit(m_Shader, m_VertexArray);
@@ -202,10 +202,11 @@ public:
 		
 	}
 private:
+	ArcEngine::ShaderLibrary m_ShaderLibrary;
 	ArcEngine::Ref<ArcEngine::Shader> m_Shader;
 	ArcEngine::Ref<ArcEngine::VertexArray> m_VertexArray;
 	
-	ArcEngine::Ref<ArcEngine::Shader> m_FlatColorShader, m_TextureShader;
+	ArcEngine::Ref<ArcEngine::Shader> m_FlatColorShader;
 	ArcEngine::Ref<ArcEngine::VertexArray> m_SquareVA;
 
 	ArcEngine::Ref<ArcEngine::Texture2D> m_Texture;
