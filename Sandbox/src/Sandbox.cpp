@@ -163,7 +163,7 @@ public:
 		
 		m_TextureShader.reset(ArcEngine::Shader::Create(textureShaderVertexSource, textureShaderFragmentSource));
 
-		m_Texture = ArcEngine::Texture2D::Create("assets/textures/Checkerboard.png");
+		m_Texture = ArcEngine::Texture2D::Create("assets/textures/Logo.png");
 
 		std::dynamic_pointer_cast<ArcEngine::OpenGLShader>(m_TextureShader)->Bind();
 		std::dynamic_pointer_cast<ArcEngine::OpenGLShader>(m_TextureShader)->UploadUniformInt("u_Texture", 0);
