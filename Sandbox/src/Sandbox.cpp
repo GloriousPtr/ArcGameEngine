@@ -11,7 +11,7 @@ class ExampleLayer : public ArcEngine::Layer
 {
 public:
 	ExampleLayer()
-		: Layer("Example"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition(0.0f)
+		: Layer("Example"), m_CameraController(1280.0f / 720.0f)
 	{
 		m_VertexArray.reset(ArcEngine::VertexArray::Create());
 		
@@ -138,31 +138,14 @@ public:
 
 	virtual void OnUpdate(ArcEngine::Timestep ts) override
 	{
-		if(ArcEngine::Input::IsMouseButtonPressed(ARC_MOUSE_BUTTON_RIGHT))
-		{
-			if(ArcEngine::Input::IsKeyPressed(ARC_KEY_D))
-				m_CameraPosition.x += m_CameraMoveSpeed * ts;
-			else if(ArcEngine::Input::IsKeyPressed(ARC_KEY_A))
-				m_CameraPosition.x -= m_CameraMoveSpeed * ts;
+		// Update
+		m_CameraController.OnUpdate(ts);
 
-			if(ArcEngine::Input::IsKeyPressed(ARC_KEY_W))
-				m_CameraPosition.y += m_CameraMoveSpeed * ts;
-			else if(ArcEngine::Input::IsKeyPressed(ARC_KEY_S))
-				m_CameraPosition.y -= m_CameraMoveSpeed * ts;
-
-			if(ArcEngine::Input::IsKeyPressed(ARC_KEY_Q))
-				m_CameraRotation += m_CameraRotationSpeed * ts;
-			else if(ArcEngine::Input::IsKeyPressed(ARC_KEY_E))
-				m_CameraRotation -= m_CameraRotationSpeed * ts;
-
-			m_Camera.SetPosition(m_CameraPosition);
-			m_Camera.SetRotation(m_CameraRotation);
-		}
-		
+		// Render
 		ArcEngine::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		ArcEngine::RenderCommand::Clear();
 
-		ArcEngine::Renderer::BeginScene(m_Camera);
+		ArcEngine::Renderer::BeginScene(m_CameraController.GetCamera());
 
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
@@ -197,9 +180,9 @@ public:
 		ImGui::End();
 	}
 	
-	virtual void OnEvent(ArcEngine::Event& event) override
+	virtual void OnEvent(ArcEngine::Event& e) override
 	{
-		
+		m_CameraController.OnEvent(e);
 	}
 private:
 	ArcEngine::ShaderLibrary m_ShaderLibrary;
@@ -211,12 +194,7 @@ private:
 
 	ArcEngine::Ref<ArcEngine::Texture2D> m_Texture;
 	
-	ArcEngine::OrthographicCamera m_Camera;
-	glm::vec3 m_CameraPosition;
-	float m_CameraMoveSpeed = 5.0f;
-	
-	float m_CameraRotation = 0.0f;
-	float m_CameraRotationSpeed = 90.0f;
+	ArcEngine::OrthographicCameraController m_CameraController;
 
 	glm::vec3 m_SquareColor = { 0.2f, 0.3f, 0.8f };
 };
