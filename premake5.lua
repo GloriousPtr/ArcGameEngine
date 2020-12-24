@@ -9,6 +9,11 @@ workspace "Arc"
 		"Dist"
 	}
 
+	flags
+	{
+		"MultiProcessorCompile"
+	}
+
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}";
 
 -- Include directories relavtive to root folder (solution directory)
