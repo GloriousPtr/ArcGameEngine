@@ -1,14 +1,14 @@
 #pragma once
 
 #include "Arc/Core/Core.h"
-#include "Layer.h"
+#include "Arc/Core/Layer.h"
 
 namespace ArcEngine
 {
-	class ARC_API LayerStack
+	class LayerStack
 	{
 	public:
-		LayerStack();
+		LayerStack() = default;
 		~LayerStack();
 
 		void PushLayer(Layer* layer);

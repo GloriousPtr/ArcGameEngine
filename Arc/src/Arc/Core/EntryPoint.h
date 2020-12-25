@@ -1,4 +1,5 @@
 #pragma once
+#include "Arc/Core/Core.h"
 
 #ifdef ARC_PLATFORM_WINDOWS
 

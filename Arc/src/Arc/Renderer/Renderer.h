@@ -1,8 +1,9 @@
 #pragma once
 
-#include "RenderCommand.h"
-#include "OrthographicCamera.h"
-#include "Shader.h"
+#include "Arc/Renderer/RenderCommand.h"
+
+#include "Arc/Renderer/OrthographicCamera.h"
+#include "Arc/Renderer/Shader.h"
 
 namespace ArcEngine
 {
@@ -10,6 +11,8 @@ namespace ArcEngine
 	{
 	public:
 		static void Init();
+		static void Shutdown();
+		
 		static void OnWindowResize(uint32_t width, uint32_t height);
 		
 		static void BeginScene(OrthographicCamera& camera);

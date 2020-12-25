@@ -1,5 +1,5 @@
 #include "arcpch.h"
-#include "OrthographicCamera.h"
+#include "Arc/Renderer/OrthographicCamera.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 

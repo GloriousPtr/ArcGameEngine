@@ -1,20 +1,22 @@
 #pragma once
 
-#include "Core.h"
+#include "Arc/Core/Core.h"
 
-#include "LayerStack.h"
-#include "Window.h"
+#include "Arc/Core/Window.h"
+#include "Arc/Core/LayerStack.h"
 #include "Arc/Events/ApplicationEvent.h"
+
+#include "Arc/Core/Timestep.h"
 
 #include "Arc/ImGui/ImGuiLayer.h"
 
 namespace ArcEngine
 {
-	class ARC_API Application
+	class Application
 	{
 	public:
 		Application();
-		virtual ~Application() = default;
+		virtual ~Application();
 
 		void Run();
 

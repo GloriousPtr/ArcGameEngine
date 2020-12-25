@@ -1,5 +1,5 @@
 #include "arcpch.h"
-#include "OpenGLShader.h"
+#include "Platform/OpenGL/OpenGLShader.h"
 
 #include <fstream>
 #include <glad/glad.h>

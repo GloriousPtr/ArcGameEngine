@@ -4,7 +4,7 @@
 
 namespace ArcEngine
 {
-	class ARC_API Input
+	class Input
 	{
 	protected:
 		Input() = default;

@@ -1,12 +1,12 @@
 #pragma once
 
 #include "Arc/Core/Core.h"
-#include "Arc/Events/Event.h"
 #include "Arc/Core/Timestep.h"
+#include "Arc/Events/Event.h"
 
 namespace ArcEngine
 {
-	class ARC_API Layer
+	class Layer
 	{
 	public:
 		Layer(const std::string& name = "Layer");

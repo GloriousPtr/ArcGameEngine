@@ -1,11 +1,9 @@
 #include "arcpch.h"
-#include "Application.h"
-
-#include "Arc/Core/Timestep.h"
-
-#include <GLFW/glfw3.h>
+#include "Arc/Core/Application.h"
 
 #include "Arc/Renderer/Renderer.h"
+
+#include <GLFW/glfw3.h>
 
 namespace ArcEngine
 {
@@ -23,6 +21,11 @@ namespace ArcEngine
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
+	}
+
+	Application::~Application()
+	{
+		Renderer::Shutdown();
 	}
 
 	void Application::PushLayer(Layer* layer)

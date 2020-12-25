@@ -1,12 +1,8 @@
 #include "arcpch.h"
-#include "LayerStack.h"
+#include "Arc/Core/LayerStack.h"
 
 namespace ArcEngine
 {
-	LayerStack::LayerStack()
-	{
-	}
-
 	LayerStack::~LayerStack()
 	{
 		for (Layer* layer : m_Layers)

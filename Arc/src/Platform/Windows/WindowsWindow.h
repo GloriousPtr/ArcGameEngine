@@ -3,7 +3,7 @@
 #include "Arc/Core/Window.h"
 #include "Arc/Renderer/GraphicsContext.h"
 
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 
 namespace ArcEngine
 {
@@ -29,7 +29,7 @@ namespace ArcEngine
 		virtual void Shutdown();
 	private:
 		GLFWwindow* m_Window;
-		GraphicsContext* m_Context;
+		Scope<GraphicsContext> m_Context;
 
 		struct WindowData
 		{

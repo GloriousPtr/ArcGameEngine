@@ -20,7 +20,7 @@ namespace ArcEngine
 	};
 
 	// Interface representing a desktop system based Window
-	class ARC_API Window
+	class Window
 	{
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
@@ -38,7 +38,7 @@ namespace ArcEngine
 
 		virtual void* GetNativeWindow() const = 0;
 		
-		static Window* Create(const WindowProps& props = WindowProps());
+		static Scope<Window> Create(const WindowProps& props = WindowProps());
 	};
 }
 

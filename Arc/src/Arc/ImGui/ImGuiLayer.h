@@ -8,7 +8,7 @@
 
 namespace ArcEngine
 {
-	class ARC_API ImGuiLayer : public Layer
+	class ImGuiLayer : public Layer
 	{
 	public:
 		ImGuiLayer();

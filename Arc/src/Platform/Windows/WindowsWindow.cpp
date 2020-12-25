@@ -1,5 +1,5 @@
 #include "arcpch.h"
-#include "WindowsWindow.h"
+#include "Platform/Windows/WindowsWindow.h"
 
 #include "Arc/Events/ApplicationEvent.h"
 #include "Arc/Events/MouseEvent.h"
@@ -16,9 +16,9 @@ namespace ArcEngine
 		ARC_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
 	}
 	
-	Window* Window::Create(const WindowProps& props)
+	Scope<Window> Window::Create(const WindowProps& props)
 	{
-		return new WindowsWindow(props);
+		return CreateScope<WindowsWindow>(props);
 	}
 	
 	WindowsWindow::WindowsWindow(const WindowProps& props)
@@ -41,7 +41,6 @@ namespace ArcEngine
 		
 		if(s_GLFWWindowCount == 0)
 		{
-			ARC_CORE_INFO("Initializing GLFW");
 			int success = glfwInit();
 			ARC_CORE_ASSERT(success, "Could not initialize GLFW!");
 			glfwSetErrorCallback(GLFWErrorCallback);
@@ -50,7 +49,7 @@ namespace ArcEngine
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		++s_GLFWWindowCount;
 		
-		m_Context = new OpenGLContext(m_Window);
+		m_Context = GraphicsContext::Create(m_Window);
 		m_Context->Init();
 		
 		glfwSetWindowUserPointer(m_Window, &m_Data);
@@ -80,24 +79,24 @@ namespace ArcEngine
 
 			switch (action)
 			{
-			case GLFW_PRESS:
-			{
-				KeyPressedEvent event(key, 0);
-				data.EventCallback(event);
-				break;
-			}
-			case GLFW_RELEASE:
-			{
-				KeyReleasedEvent event(key);
-				data.EventCallback(event);
-				break;
-			}
-			case GLFW_REPEAT:
-			{
-				KeyPressedEvent event(key, 1);
-				data.EventCallback(event);
-				break;
-			}
+				case GLFW_PRESS:
+				{
+					KeyPressedEvent event(key, 0);
+					data.EventCallback(event);
+					break;
+				}
+				case GLFW_RELEASE:
+				{
+					KeyReleasedEvent event(key);
+					data.EventCallback(event);
+					break;
+				}
+				case GLFW_REPEAT:
+				{
+					KeyPressedEvent event(key, 1);
+					data.EventCallback(event);
+					break;
+				}
 			}
 		});
 
@@ -115,18 +114,18 @@ namespace ArcEngine
 
 			switch (action)
 			{
-			case GLFW_PRESS:
-			{
-				MouseButtonPressedEvent event(button);
-				data.EventCallback(event);
-				break;
-			}
-			case GLFW_RELEASE:
-			{
-				MouseButtonReleasedEvent event(button);
-				data.EventCallback(event);
-				break;
-			}
+				case GLFW_PRESS:
+				{
+					MouseButtonPressedEvent event(button);
+					data.EventCallback(event);
+					break;
+				}
+				case GLFW_RELEASE:
+				{
+					MouseButtonReleasedEvent event(button);
+					data.EventCallback(event);
+					break;
+				}
 			}
 		});
 
@@ -150,12 +149,10 @@ namespace ArcEngine
 	void WindowsWindow::Shutdown()
 	{
 		glfwDestroyWindow(m_Window);
-
-		if(--s_GLFWWindowCount == 0)
-		{
-			ARC_CORE_INFO("Terminating GLFW");
+		--s_GLFWWindowCount;
+		
+		if(s_GLFWWindowCount == 0)
 			glfwTerminate();
-		}
 	}
 
 	void WindowsWindow::OnUpdate()

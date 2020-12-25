@@ -1,7 +1,7 @@
 #include "arcpch.h"
-#include "Texture.h"
+#include "Arc/Renderer/Texture.h"
 
-#include "Renderer.h"
+#include "Arc/Renderer/Renderer.h"
 #include "Platform/OpenGL/OpenGLTexture.h"
 
 namespace ArcEngine
@@ -11,7 +11,7 @@ namespace ArcEngine
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-			case RendererAPI::API::OpenGL:	return std::make_shared<OpenGLTexture2D>(width, height);
+			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLTexture2D>(width, height);
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -23,7 +23,7 @@ namespace ArcEngine
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-			case RendererAPI::API::OpenGL:	return std::make_shared<OpenGLTexture2D>(path);
+			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLTexture2D>(path);
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");

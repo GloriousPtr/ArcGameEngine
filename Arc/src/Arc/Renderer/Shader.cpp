@@ -1,7 +1,7 @@
 #include "arcpch.h"
-#include "Shader.h"
+#include "Arc/Renderer/Shader.h"
 
-#include "Renderer.h"
+#include "Arc/Renderer/Renderer.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
 namespace ArcEngine
@@ -11,7 +11,7 @@ namespace ArcEngine
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-			case RendererAPI::API::OpenGL:	return std::make_shared<OpenGLShader>(filepath);
+			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLShader>(filepath);
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -23,7 +23,7 @@ namespace ArcEngine
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-			case RendererAPI::API::OpenGL:	return std::make_shared<OpenGLShader>(name, vertexSrc, fragmentSrc);
+			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLShader>(name, vertexSrc, fragmentSrc);
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");

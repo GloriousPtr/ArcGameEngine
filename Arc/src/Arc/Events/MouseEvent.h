@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Event.h"
+#include "Arc/Events/Event.h"
 
 namespace ArcEngine
 {
-	class ARC_API MouseMovedEvent : public Event
+	class MouseMovedEvent : public Event
 	{
 	public:
 		MouseMovedEvent(float x, float y)
@@ -28,7 +28,7 @@ namespace ArcEngine
 		float m_MouseY;
 	};
 
-	class ARC_API MouseScrolledEvent : public Event
+	class MouseScrolledEvent : public Event
 	{
 	public:
 		MouseScrolledEvent(float xOffset, float yOffset)
@@ -52,7 +52,7 @@ namespace ArcEngine
 		float m_YOffset;
 	};
 
-	class ARC_API MouseButtonEvent : public Event
+	class MouseButtonEvent : public Event
 	{
 	public:
 		int GetMouseButton() const { return m_Button; }
@@ -65,7 +65,7 @@ namespace ArcEngine
 		int m_Button;
 	};
 
-	class ARC_API MouseButtonPressedEvent : public MouseButtonEvent
+	class MouseButtonPressedEvent : public MouseButtonEvent
 	{
 	public:
 		MouseButtonPressedEvent(int button)
@@ -81,7 +81,7 @@ namespace ArcEngine
 		EVENT_CLASS_TYPE(MouseButtonPressed)
 	};
 
-	class ARC_API MouseButtonReleasedEvent : public MouseButtonEvent
+	class MouseButtonReleasedEvent : public MouseButtonEvent
 	{
 	public:
 		MouseButtonReleasedEvent(int button)

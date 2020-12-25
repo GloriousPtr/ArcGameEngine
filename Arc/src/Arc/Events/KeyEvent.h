@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Event.h"
+#include "Arc/Events/Event.h"
 
 namespace ArcEngine
 {
-	class ARC_API KeyEvent : public Event
+	class KeyEvent : public Event
 	{
 	public:
 		int GetKeyCode() const { return m_KeyCode; }
@@ -53,7 +53,7 @@ namespace ArcEngine
 		EVENT_CLASS_TYPE(KeyReleased)
 	};
 
-	class ARC_API KeyTypedEvent : public KeyEvent
+	class KeyTypedEvent : public KeyEvent
 	{
 	public:
 		KeyTypedEvent(int keycode)

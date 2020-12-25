@@ -1,9 +1,7 @@
 #include "arcpch.h"
-#include "RenderCommand.h"
-
-#include "Platform/OpenGL/OpenGLRendererAPI.h"
+#include "Arc/Renderer/RenderCommand.h"
 
 namespace ArcEngine
 {
-	RendererAPI* RenderCommand::s_RendererAPI = new OpenGLRendererAPI;
+	Scope<RendererAPI> RenderCommand::s_RendererAPI = RendererAPI::Create();
 }

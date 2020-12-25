@@ -28,12 +28,9 @@ void Sandbox2D::OnUpdate(ArcEngine::Timestep ts)
 
 	ArcEngine::Renderer2D::BeginScene(m_CameraController.GetCamera());
 	ArcEngine::Renderer2D::DrawQuad({ -1.0f, 0.0f }, 45.0f, { 0.8f, 0.8f }, nullptr,	{ 0.8f, 0.2f, 0.3f, 1.0f });
-	ArcEngine::Renderer2D::DrawQuad({ 0.5f, -0.5f }, -60.0f, { 0.5f, 0.75f }, nullptr, { 0.2f, 0.3f, 0.8f, 1.0f });
+	ArcEngine::Renderer2D::DrawQuad({ 0.5f, -0.5f }, -60.0f, { 0.5f, 0.75f }, nullptr, m_SquareColor);
 	ArcEngine::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, 0.0f, { 10.0f, 10.0f }, m_CheckerboardTexture);
 	ArcEngine::Renderer2D::EndScene();
-
-	// std::dynamic_pointer_cast<ArcEngine::OpenGLShader>(m_FlatColorShader)->Bind();
-	// std::dynamic_pointer_cast<ArcEngine::OpenGLShader>(m_FlatColorShader)->UploadUniformFloat4("u_Color", m_SquareColor);
 }
 
 void Sandbox2D::OnImGuiRender()
