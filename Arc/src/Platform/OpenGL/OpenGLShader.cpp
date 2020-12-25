@@ -67,11 +67,18 @@ namespace ArcEngine
 		glUseProgram(0);
 	}
 
-	void OpenGLShader::SetInt(const std::string& name, const int value)
+	void OpenGLShader::SetInt(const std::string& name, int value)
 	{
 		ARC_PROFILE_FUNCTION();
 		
 		UploadUniformInt(name, value);
+	}
+
+	void OpenGLShader::SetFloat(const std::string& name, float value)
+	{
+		ARC_PROFILE_FUNCTION();
+		
+		UploadUniformFloat(name, value);
 	}
 
 	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
