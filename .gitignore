@@ -12,3 +12,6 @@ bin-int/
 
 # GLAD binaries
 **/Glad/bin/
+
+#Profiling Output
+*.json

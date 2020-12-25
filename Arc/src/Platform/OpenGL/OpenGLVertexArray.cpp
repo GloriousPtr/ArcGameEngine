@@ -28,26 +28,36 @@ namespace ArcEngine
 	
 	OpenGLVertexArray::OpenGLVertexArray()
 	{
+		ARC_PROFILE_FUNCTION();
+		
 		glCreateVertexArrays(1, &m_RendererID);
 	}
 
 	OpenGLVertexArray::~OpenGLVertexArray()
 	{
+		ARC_PROFILE_FUNCTION();
+		
 		glDeleteVertexArrays(1, &m_RendererID);
 	}
 
 	void OpenGLVertexArray::Bind() const
 	{
+		ARC_PROFILE_FUNCTION();
+		
 		glBindVertexArray(m_RendererID);
 	}
 
 	void OpenGLVertexArray::Unbind() const
 	{
+		ARC_PROFILE_FUNCTION();
+		
 		glBindVertexArray(0);
 	}
 
 	void OpenGLVertexArray::AddVertexBuffer(Ref<VertexBuffer>& vertexBuffer)
 	{
+		ARC_PROFILE_FUNCTION();
+		
 		ARC_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
 		
 		glBindVertexArray(m_RendererID);
@@ -70,6 +80,8 @@ namespace ArcEngine
 
 	void OpenGLVertexArray::SetIndexBuffer(Ref<IndexBuffer>& indexBuffer)
 	{
+		ARC_PROFILE_FUNCTION();
+		
 		glBindVertexArray(m_RendererID);
 		indexBuffer->Bind();
 

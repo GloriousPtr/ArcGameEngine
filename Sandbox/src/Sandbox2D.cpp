@@ -10,15 +10,21 @@ Sandbox2D::Sandbox2D()
 
 void Sandbox2D::OnAttach()
 {
+	ARC_PROFILE_FUNCTION();
+	
 	m_CheckerboardTexture = ArcEngine::Texture2D::Create("assets/textures/Checkerboard.png");
 }
 
 void Sandbox2D::OnDetach()
 {
+	ARC_PROFILE_FUNCTION();
+	
 }
 
 void Sandbox2D::OnUpdate(ArcEngine::Timestep ts)
 {
+	ARC_PROFILE_FUNCTION();
+	
 	// Update
 	m_CameraController.OnUpdate(ts);
 
@@ -35,6 +41,8 @@ void Sandbox2D::OnUpdate(ArcEngine::Timestep ts)
 
 void Sandbox2D::OnImGuiRender()
 {
+	ARC_PROFILE_FUNCTION();
+	
 	ImGui::Begin("Settings");
 	ImGui::ColorEdit4("Square Color", glm::value_ptr(m_SquareColor));
 	ImGui::End();

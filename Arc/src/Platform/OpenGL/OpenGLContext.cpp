@@ -14,6 +14,8 @@ namespace ArcEngine
 
 	void OpenGLContext::Init()
 	{
+		ARC_PROFILE_FUNCTION();
+		
 		glfwMakeContextCurrent(m_WindowHandle);
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		ARC_CORE_ASSERT(status, "Failed to initialize Glad!");
@@ -26,6 +28,8 @@ namespace ArcEngine
 
 	void OpenGLContext::SwapBuffers()
 	{
+		ARC_PROFILE_FUNCTION();
+		
 		glfwSwapBuffers(m_WindowHandle);
 	}
 }

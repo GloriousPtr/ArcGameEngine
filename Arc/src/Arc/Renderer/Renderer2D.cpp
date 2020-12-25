@@ -20,6 +20,8 @@ namespace ArcEngine
 	
 	void Renderer2D::Init()
 	{
+		ARC_PROFILE_FUNCTION();
+		
 		s_Data = new Renderer2DStorage();
 		
 		s_Data->QuadVertexArray = VertexArray::Create();
@@ -53,17 +55,23 @@ namespace ArcEngine
 
 	void Renderer2D::Shutdown()
 	{
+		ARC_PROFILE_FUNCTION();
+		
 		delete s_Data;
 	}
 
 	void Renderer2D::BeginScene(const OrthographicCamera& camera)
 	{
+		ARC_PROFILE_FUNCTION();
+		
 		s_Data->TextureShader->Bind();
 		s_Data->TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 	}
 
 	void Renderer2D::EndScene()
 	{
+		ARC_PROFILE_FUNCTION();
+		
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& color)
@@ -73,6 +81,8 @@ namespace ArcEngine
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& color)
 	{
+		ARC_PROFILE_FUNCTION();
+		
 		if(texture)
 			texture->Bind();
 		else

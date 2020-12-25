@@ -15,6 +15,8 @@
 
 #include "Arc/Core/Log.h"
 
+#include "Arc/Debug/Instrumentor.h"
+
 #ifdef ARC_PLATFORM_WINDOWS
 	#include <Windows.h>
 #endif

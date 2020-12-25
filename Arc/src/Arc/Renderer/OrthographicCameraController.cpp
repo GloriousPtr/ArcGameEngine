@@ -14,6 +14,8 @@ namespace ArcEngine
 
 	void OrthographicCameraController::OnUpdate(Timestep ts)
 	{
+		ARC_PROFILE_FUNCTION();
+		
 		if(!Input::IsMouseButtonPressed(ARC_MOUSE_BUTTON_RIGHT))
 			return;
 
@@ -44,6 +46,8 @@ namespace ArcEngine
 	
 	void OrthographicCameraController::OnEvent(Event& e)
 	{
+		ARC_PROFILE_FUNCTION();
+		
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<MouseScrolledEvent>(ARC_BIND_EVENT_FN(OrthographicCameraController::OnMouseScrolled));
 		dispatcher.Dispatch<WindowResizeEvent>(ARC_BIND_EVENT_FN(OrthographicCameraController::OnWindowResized));
@@ -51,6 +55,8 @@ namespace ArcEngine
 
 	bool OrthographicCameraController::OnMouseScrolled(MouseScrolledEvent& e)
 	{
+		ARC_PROFILE_FUNCTION();
+		
 		m_ZoomLevel -= e.GetYOffset() * m_ZoomSpeedMultiplier * m_ZoomSpeed;
 		m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
 		m_Camera.SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
@@ -63,6 +69,8 @@ namespace ArcEngine
 
 	bool OrthographicCameraController::OnWindowResized(WindowResizeEvent& e)
 	{
+		ARC_PROFILE_FUNCTION();
+		
 		m_AspectRatio = (float)e.GetWidth() / (float)e.GetHeight();
 		m_Camera.SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
 		return false;
