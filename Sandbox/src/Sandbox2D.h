@@ -21,5 +21,7 @@ private:
 	ArcEngine::Ref<ArcEngine::VertexArray> m_SquareVA;
 	ArcEngine::Ref<ArcEngine::Shader> m_FlatColorShader;
 
+	ArcEngine::Ref<ArcEngine::Texture2D> m_CheckerboardTexture;
+
 	glm::vec4 m_SquareColor = { 0.2f, 0.3f, 0.8f, 1.0f };
 };
