@@ -10,6 +10,15 @@ namespace ArcEngine
 	// VertexBuffer //////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////
 
+	OpenGLVertexBuffer::OpenGLVertexBuffer(uint32_t size)
+	{
+		ARC_PROFILE_FUNCTION();
+
+		glCreateBuffers(1, &m_RendererID);
+		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+	}
+
 	OpenGLVertexBuffer::OpenGLVertexBuffer(float* vertices, uint32_t size)
 	{
 		ARC_PROFILE_FUNCTION();
@@ -40,7 +49,13 @@ namespace ArcEngine
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	
+	void OpenGLVertexBuffer::SetData(const void* data, uint32_t size)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+	}
+
+
 	//////////////////////////////////////////////////////////////////////
 	// IndexBuffer ///////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////

@@ -166,7 +166,7 @@ namespace ArcEngine
 	};
 }
 
-#define ARC_PROFILE 1
+#define ARC_PROFILE 0
 #if ARC_PROFILE
 	#define ARC_PROFILE_BEGIN_SESSION(name, filepath) ::ArcEngine::Instrumentor::Get().BeginSession(name, filepath)
 	#define ARC_PROFILE_END_SESSION() ::ArcEngine::Instrumentor::Get().EndSession()
