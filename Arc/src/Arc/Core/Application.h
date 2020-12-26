@@ -10,6 +10,8 @@
 
 #include "Arc/ImGui/ImGuiLayer.h"
 
+int main(int argc, char** argv);
+
 namespace ArcEngine
 {
 	class Application
@@ -17,9 +19,7 @@ namespace ArcEngine
 	public:
 		Application();
 		virtual ~Application();
-
-		void Run();
-
+		
 		void OnEvent(Event& e);
 
 		void PushLayer(Layer* layer);
@@ -29,6 +29,7 @@ namespace ArcEngine
 		
 		inline Window& GetWindow() { return *m_Window; }
 	private:
+		void Run();
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
 		
@@ -40,6 +41,7 @@ namespace ArcEngine
 		float m_LastFrameTime = 0.0f;
 	private:
 		static Application* s_Instance;
+		friend int ::main(int argc, char** argv);
 	};
 
 	// Should be defined in CLIENT
