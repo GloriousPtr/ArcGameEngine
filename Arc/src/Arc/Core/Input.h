@@ -16,7 +16,6 @@ namespace ArcEngine
 		Input(const Input&) = delete;
 		Input& operator=(const Input&) = delete;
 		
-		virtual ~Input() = default;
 		inline static bool IsKeyPressed(KeyCode key) { return s_Instance->IsKeyPressedImpl(key); }
 		
 		inline static bool IsMouseButtonPressed(MouseCode button) { return s_Instance->IsMouseButtonPressedImpl(button); }
