@@ -47,7 +47,12 @@ namespace ArcEngine
 		m_LayerStack.PushOverlay(layer);
 		layer->OnAttach();
 	}
-
+	
+	void Application::Close()
+	{
+		m_Running = false;
+	}
+	
 	void Application::OnEvent(Event& e)
 	{
 		ARC_PROFILE_FUNCTION();
