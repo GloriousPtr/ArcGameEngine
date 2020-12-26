@@ -20,7 +20,6 @@ private:
 	// Temp
 	ArcEngine::Ref<ArcEngine::VertexArray> m_SquareVA;
 	ArcEngine::Ref<ArcEngine::Shader> m_FlatColorShader;
-	ArcEngine::Ref<ArcEngine::Framebuffer> m_Framebuffer;
 
 	ArcEngine::Ref<ArcEngine::Texture2D> m_CheckerboardTexture;
 

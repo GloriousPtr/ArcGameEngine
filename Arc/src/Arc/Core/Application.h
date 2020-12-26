@@ -17,7 +17,7 @@ namespace ArcEngine
 	class Application
 	{
 	public:
-		Application();
+		Application(const std::string& name = "Arc App");
 		virtual ~Application();
 		
 		void OnEvent(Event& e);
