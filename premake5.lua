@@ -1,6 +1,6 @@
 workspace "Arc"
 	architecture "x86_64"
-	startproject "Sandbox"
+	startproject "Arc-Editor"
 
 	configurations
 	{
