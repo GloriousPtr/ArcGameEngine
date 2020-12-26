@@ -58,9 +58,10 @@ namespace ArcEngine
 
 		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
 		{
-			(*it)->OnEvent(e);
 			if (e.Handled)
 				break;
+			
+			(*it)->OnEvent(e);
 		}
 	}
 
