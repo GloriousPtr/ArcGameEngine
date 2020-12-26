@@ -159,9 +159,6 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_FUNCTION();
 
-		if(s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
-			FlushAndReset();
-
 		float textureIndex = 0.0f;
 
 		if(texture)
@@ -177,10 +174,13 @@ namespace ArcEngine
 
 			if(textureIndex == 0.0f)
 			{
+				if(s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
+				FlushAndReset();
+				
 				textureIndex = (float)s_Data.TextureSlotIndex;
 				s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
 				s_Data.TextureSlotIndex++;
-			}	
+			}
 		}
 
 		constexpr size_t quadVertexCount = 4;
