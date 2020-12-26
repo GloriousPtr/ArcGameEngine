@@ -1,26 +1,27 @@
 #pragma once
 
 #include "Arc/Events/Event.h"
+#include "Arc/Core/Input.h"
 
 namespace ArcEngine
 {
 	class KeyEvent : public Event
 	{
 	public:
-		int GetKeyCode() const { return m_KeyCode; }
+		inline KeyCode GetKeyCode() const { return m_KeyCode; }
 
 		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 	protected:
-		KeyEvent(int keyCode)
+		KeyEvent(KeyCode keyCode)
 			:m_KeyCode(keyCode) {}
 
-		int m_KeyCode;
+		KeyCode m_KeyCode;
 	};
 	
 	class KeyPressedEvent : public KeyEvent
 	{
 	public:
-		KeyPressedEvent(int keyCode, int repeatCount)
+		KeyPressedEvent(KeyCode keyCode, int repeatCount)
 			: KeyEvent(keyCode), m_RepeatCount(repeatCount) {}
 
 		int GetRepeatCount() const { return m_RepeatCount; }
@@ -40,7 +41,7 @@ namespace ArcEngine
 	class KeyReleasedEvent : public KeyEvent
 	{
 	public:
-		KeyReleasedEvent(int keyCode)
+		KeyReleasedEvent(KeyCode keyCode)
 			: KeyEvent(keyCode) {}
 
 		std::string ToString() const override
@@ -56,7 +57,7 @@ namespace ArcEngine
 	class KeyTypedEvent : public KeyEvent
 	{
 	public:
-		KeyTypedEvent(int keycode)
+		KeyTypedEvent(KeyCode keycode)
 			: KeyEvent(keycode) {}
 
 		std::string ToString() const override

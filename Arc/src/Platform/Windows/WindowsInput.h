@@ -6,9 +6,9 @@ namespace ArcEngine
 	class WindowsInput : public Input
 	{
 	protected:
-		virtual bool IsKeyPressedImpl(int keycode) override;
+		virtual bool IsKeyPressedImpl(KeyCode keycode) override;
 		
-		virtual bool IsMouseButtonPressedImpl(int button) override;
+		virtual bool IsMouseButtonPressedImpl(MouseCode button) override;
 		std::pair<float, float> GetMousePositionImpl() override;
 		virtual float GetMouseXImpl() override;
 		virtual float GetMouseYImpl() override;

@@ -3,7 +3,7 @@
 
 #include "Arc/Core/Input.h"
 #include "Arc/Core/KeyCodes.h"
-#include "Arc/Core/MouseButtonCodes.h"
+#include "Arc/Core/MouseCodes.h"
 
 namespace ArcEngine
 {
