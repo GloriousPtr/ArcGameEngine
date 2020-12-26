@@ -128,7 +128,7 @@ namespace ArcEngine
 	#define ARC_PROFILE_BEGIN_SESSION(name, filepath) ::ArcEngine::Instrumentor::Get().BeginSession(name, filepath)
 	#define ARC_PROFILE_END_SESSION() ::ArcEngine::Instrumentor::Get().EndSession()
 	#define ARC_PROFILE_SCOPE(name) ::ArcEngine::InstrumentationTimer timer##__LINE__(name)
-	#define ARC_PROFILE_FUNCTION() ARC_PROFILE_SCOPE(__FUNCSIG__)
+	#define ARC_PROFILE_FUNCTION() ARC_PROFILE_SCOPE(ARC_FUNC_SIG)
 #else
 	#define ARC_PROFILE_BEGIN_SESSION(name, filepath)
 	#define ARC_PROFILE_END_SESSION()
