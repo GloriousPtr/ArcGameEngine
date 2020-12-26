@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "Arc/Core/Core.h"
+#include "Arc/Core/Base.h"
 
 namespace ArcEngine
 {

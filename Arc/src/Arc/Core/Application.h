@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Arc/Core/Core.h"
+#include "Arc/Core/Base.h"
 
 #include "Arc/Core/Window.h"
 #include "Arc/Core/LayerStack.h"
