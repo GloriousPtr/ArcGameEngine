@@ -16,3 +16,5 @@ bin-int/
 # ArcEngine files
 *.log
 *.json
+
+!/Arc-Editor/imgui.ini
