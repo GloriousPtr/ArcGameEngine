@@ -112,7 +112,7 @@ ExampleLayer::ExampleLayer()
 	auto textureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
 
 	m_Texture = ArcEngine::Texture2D::Create("assets/textures/Checkerboard.png");
-	m_ChernoLogoTexture = ArcEngine::Texture2D::Create("assets/textures/ChernoLogo.png");
+	m_ChernoLogoTexture = ArcEngine::Texture2D::Create("assets/textures/Logo.png");
 
 	textureShader->Bind();
 	textureShader->SetInt("u_Texture", 0);
