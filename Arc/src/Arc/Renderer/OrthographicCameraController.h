@@ -42,7 +42,7 @@ namespace ArcEngine
 		float m_CameraRotationSpeed = 1.0f;
 		
 		float m_ZoomSpeedMultiplier = 0.25f;
-		float m_CameraTranslationSpeedMultiplier = 3.0f;
+		float m_CameraTranslationSpeedMultiplier = 1.0f;
 		float m_CameraRotationSpeedMultiplier = 90.0f;
 	};
 }
