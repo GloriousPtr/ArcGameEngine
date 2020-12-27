@@ -34,6 +34,37 @@ namespace ArcEngine
 		m_SecondCameraEntity = m_ActiveScene->CreateEntity("Clip-Space Camera Entity");
 		auto& cc = m_SecondCameraEntity.AddComponent<CameraComponent>();
 		cc.Primary = false;
+
+		class CameraController : public ScriptableEntity
+		{
+		public:
+			float speed = 5.0f;
+			void OnCreate()
+			{
+			}
+
+			void OnDestroy()
+			{
+			}
+
+			void OnUpdate(Timestep ts)
+			{
+				auto& transform = GetComponent<TransformComponent>().Transform;
+
+				if(Input::IsKeyPressed(KeyCode::A))
+					transform[3][0] -= speed * ts;
+				else if(Input::IsKeyPressed(KeyCode::D))
+					transform[3][0] += speed * ts;
+
+				if(Input::IsKeyPressed(KeyCode::S))
+					transform[3][1] -= speed * ts;
+				else if(Input::IsKeyPressed(KeyCode::W))
+					transform[3][1] += speed * ts;
+			}
+		};
+
+		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+		m_SecondCameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 	}
 
 	void EditorLayer::OnDetach()
