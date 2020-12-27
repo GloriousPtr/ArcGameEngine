@@ -16,18 +16,18 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_FUNCTION();
 		
-		if(!Input::IsMouseButtonPressed(ARC_MOUSE_BUTTON_RIGHT))
+		if(!Input::IsMouseButtonPressed(Mouse::ButtonRight))
 			return;
 
 		// Translation
-		if(Input::IsKeyPressed(ARC_KEY_D))
+		if(Input::IsKeyPressed(Key::D))
 			m_CameraPosition.x += m_CameraTranslationSpeedMultiplier * ts;
-		else if(Input::IsKeyPressed(ARC_KEY_A))
+		else if(Input::IsKeyPressed(Key::A))
 			m_CameraPosition.x -= m_CameraTranslationSpeedMultiplier * ts;
 
-		if(Input::IsKeyPressed(ARC_KEY_W))
+		if(Input::IsKeyPressed(Key::W))
 			m_CameraPosition.y += m_CameraTranslationSpeedMultiplier * ts;
-		else if(Input::IsKeyPressed(ARC_KEY_S))
+		else if(Input::IsKeyPressed(Key::S))
 			m_CameraPosition.y -= m_CameraTranslationSpeedMultiplier * ts;
 
 		m_Camera.SetPosition(m_CameraPosition);
@@ -35,9 +35,9 @@ namespace ArcEngine
 		// Rotation
 		if(m_Rotation)
 		{
-			if(Input::IsKeyPressed(ARC_KEY_Q))
+			if(Input::IsKeyPressed(Key::Q))
 				m_CameraRotation += m_CameraRotationSpeedMultiplier * ts;
-			else if(Input::IsKeyPressed(ARC_KEY_E))
+			else if(Input::IsKeyPressed(Key::E))
 				m_CameraRotation -= m_CameraRotationSpeedMultiplier * ts;
 
 			m_Camera.SetRotation(m_CameraRotation);

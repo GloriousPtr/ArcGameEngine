@@ -94,7 +94,7 @@ namespace ArcEngine
 		s_Data.TextureShader->Bind();
 		s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
 
-		// Set all texture slots to 0
+		// Set first texture slot to 0
 		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
 
 		s_Data.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
@@ -223,7 +223,7 @@ namespace ArcEngine
 		{
 			for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
 			{
-				if(*s_Data.TextureSlots[i].get() == *texture.get())
+				if(*s_Data.TextureSlots[i] == *texture)
 				{
 					textureIndex = (float)i;
 					break;

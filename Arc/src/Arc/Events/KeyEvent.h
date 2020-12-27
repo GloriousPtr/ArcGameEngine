@@ -1,18 +1,18 @@
 #pragma once
 
 #include "Arc/Events/Event.h"
-#include "Arc/Core/Input.h"
+#include "Arc/Core/KeyCodes.h"
 
 namespace ArcEngine
 {
 	class KeyEvent : public Event
 	{
 	public:
-		inline KeyCode GetKeyCode() const { return m_KeyCode; }
+		KeyCode GetKeyCode() const { return m_KeyCode; }
 
 		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 	protected:
-		KeyEvent(KeyCode keyCode)
+		KeyEvent(const KeyCode keyCode)
 			:m_KeyCode(keyCode) {}
 
 		KeyCode m_KeyCode;
@@ -21,10 +21,10 @@ namespace ArcEngine
 	class KeyPressedEvent : public KeyEvent
 	{
 	public:
-		KeyPressedEvent(KeyCode keyCode, int repeatCount)
+		KeyPressedEvent(const KeyCode keyCode, const uint16_t repeatCount)
 			: KeyEvent(keyCode), m_RepeatCount(repeatCount) {}
 
-		int GetRepeatCount() const { return m_RepeatCount; }
+		uint16_t GetRepeatCount() const { return m_RepeatCount; }
 
 		std::string ToString() const override
 		{
@@ -35,13 +35,13 @@ namespace ArcEngine
 
 		EVENT_CLASS_TYPE(KeyPressed)
 	private:
-		int m_RepeatCount;
+		uint16_t m_RepeatCount;
 	};
 
 	class KeyReleasedEvent : public KeyEvent
 	{
 	public:
-		KeyReleasedEvent(KeyCode keyCode)
+		KeyReleasedEvent(const KeyCode keyCode)
 			: KeyEvent(keyCode) {}
 
 		std::string ToString() const override
@@ -57,7 +57,7 @@ namespace ArcEngine
 	class KeyTypedEvent : public KeyEvent
 	{
 	public:
-		KeyTypedEvent(KeyCode keycode)
+		KeyTypedEvent(const KeyCode keycode)
 			: KeyEvent(keycode) {}
 
 		std::string ToString() const override
