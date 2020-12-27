@@ -1,7 +1,9 @@
 #include "EditorLayer.h"
 
-#include "glm/gtc/type_ptr.hpp"
-#include "imgui/imgui.h"
+#include <glm/gtc/type_ptr.hpp>
+#include <imgui/imgui.h>
+
+#include "Panels/SceneHierarchyPanel.h"
 
 namespace ArcEngine
 {
@@ -65,6 +67,8 @@ namespace ArcEngine
 
 		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 		m_SecondCameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+
+		m_SceneHierarchyPanel.SetContent(m_ActiveScene);
 	}
 
 	void EditorLayer::OnDetach()
@@ -168,6 +172,8 @@ namespace ArcEngine
 
 			ImGui::EndMenuBar();
 		}
+
+		m_SceneHierarchyPanel.OnImGuiRender();
 
 		ImGui::Begin("Settings");
 

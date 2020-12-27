@@ -1,6 +1,8 @@
 #pragma once
 
-#include "ArcEngine.h"
+#include <ArcEngine.h>
+
+#include "Panels/SceneHierarchyPanel.h"
 
 namespace ArcEngine
 {
@@ -38,5 +40,8 @@ namespace ArcEngine
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 
 		float frameTime = 0.0f;
+
+		// Panels
+		SceneHierarchyPanel m_SceneHierarchyPanel;
 	};
 }
