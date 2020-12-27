@@ -197,8 +197,10 @@ namespace ArcEngine
 #if ARC_PROFILE
 	#define ARC_PROFILE_BEGIN_SESSION(name, filepath) ::ArcEngine::Instrumentor::Get().BeginSession(name, filepath)
 	#define ARC_PROFILE_END_SESSION() ::ArcEngine::Instrumentor::Get().EndSession()
-	#define ARC_PROFILE_SCOPE(name) constexpr auto fixedName = ::ArcEngine::InstrumentorUtils::CleanupOutputString(name, "__cdecl ");\
-									::ArcEngine::InstrumentationTimer timer##__LINE__(fixedName.Data)
+	#define ARC_PROFILE_SCOPE_LINE2(name, line) constexpr auto fixedName##line = ::ArcEngine::InstrumentorUtils::CleanupOutputString(name, "__cdecl ");\
+											   ::ArcEngine::InstrumentationTimer timer##line(fixedName##line.Data)
+	#define ARC_PROFILE_SCOPE_LINE(name, line) ARC_PROFILE_SCOPE_LINE2(name, line)
+	#define ARC_PROFILE_SCOPE(name) ARC_PROFILE_SCOPE_LINE(name, __LINE__)
 	#define ARC_PROFILE_FUNCTION() ARC_PROFILE_SCOPE(ARC_FUNC_SIG)
 #else
 	#define ARC_PROFILE_BEGIN_SESSION(name, filepath)
