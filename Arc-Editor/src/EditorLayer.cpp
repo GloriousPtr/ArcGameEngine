@@ -20,6 +20,13 @@ namespace ArcEngine
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
+
+		m_ActiveScene = CreateRef<Scene>();
+
+		auto square = m_ActiveScene->CreateEntity("Square Entity");
+		square.AddComponent<SpriteRendererComponent>(glm::vec4{ 0.0f, 1.0f, 0.0f, 1.0f });
+
+		m_SquareEntity = square;
 	}
 
 	void EditorLayer::OnDetach()
@@ -46,30 +53,20 @@ namespace ArcEngine
 		// Update
 		if(m_ViewportFocused)
 			m_CameraController.OnUpdate(ts);
-
+		
 		//Render
 		m_Framebuffer->Bind();
 		Renderer2D::ResetStats();
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		RenderCommand::Clear();
 
-		static float rotation = 0.0f;
-		rotation += ts * 50.0f;
-
 		Renderer2D::BeginScene(m_CameraController.GetCamera());
-		Renderer2D::DrawQuad({ -1.0f, 0.0f }, rotation, { 0.8f, 0.8f }, nullptr,	{ 0.8f, 0.2f, 0.3f, 1.0f });
-		Renderer2D::DrawQuad({ 0.5f, -0.5f }, -rotation, { 0.5f, 0.75f }, nullptr, m_SquareColor);
-		Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, 0.0f, { 20.0f, 20.0f }, m_CheckerboardTexture, glm::vec4(1.0f), 10.0f);
 
-		for (float y = -5.0f; y < 5.0f; y += 0.5f)
-		{
-			for (float x = -5.0f; x < 5.0f; x += 0.5f)
-			{
-				glm::vec4 color = { (x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.5f };
-				Renderer2D::DrawQuad({ x, y }, 0.0f, { 0.45f, 0.45f }, nullptr, color);
-			}
-		}
+		// Update scene
+		m_ActiveScene->OnUpdate(ts);
+
 		Renderer2D::EndScene();
+		
 		m_Framebuffer->Unbind();
 	}
 
@@ -157,8 +154,16 @@ namespace ArcEngine
 		}
 		ImGui::Text("FrameTime: %f ms", ft);
 		ImGui::Text("FPS: %d", (int)frameRate);
-		
-		ImGui::ColorEdit4("Square Color", glm::value_ptr(m_SquareColor));
+
+		if(m_SquareEntity)
+		{
+			ImGui::Separator();
+			ImGui::Text("%s", m_SquareEntity.GetComponent<TagComponent>().Tag.c_str());
+			
+			auto& squareColor = m_SquareEntity.GetComponent<SpriteRendererComponent>().Color;
+			ImGui::ColorEdit4("Square Color", glm::value_ptr(squareColor));
+			ImGui::Separator();
+		}
 
 		ImGui::End();
 

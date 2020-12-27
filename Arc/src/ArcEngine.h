@@ -17,6 +17,10 @@
 
 #include "Arc/ImGui/ImGuiLayer.h"
 
+#include "Arc/Scene/Scene.h"
+#include "Arc/Scene/Entity.h"
+#include "Arc/Scene/Components.h"
+
 //-----Renderer-----------------------------------
 #include "Arc/Renderer/Renderer.h"
 #include "Arc/Renderer/Renderer2D.h"
