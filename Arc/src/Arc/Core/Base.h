@@ -18,13 +18,8 @@
 	#define ARC_DEBUGBREAK()
 #endif
 
-#ifdef ARC_ENABLE_ASSERTS
-	#define ARC_ASSERT(x, ...) { if(!(x)) { ARC_ERROR("Assertion Failed: {0}", __VA_ARGS__); ARC_DEBUGBREAK(); } }
-	#define ARC_CORE_ASSERT(x, ...) { if(!(x)) { ARC_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); ARC_DEBUGBREAK(); } }
-#else
-	#define ARC_ASSERT(x, ...) 
-	#define ARC_CORE_ASSERT(x, ...) 
-#endif
+#define ARC_EXPAND_MACRO(x) x
+#define ARC_STRINGIFY_MACRO(x) #x
 
 #define BIT(x) (1 << x)
 
@@ -70,3 +65,6 @@ namespace ArcEngine
 		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
 }
+
+#include "Arc/Core/Log.h"
+#include "Arc/Core/Assert.h"

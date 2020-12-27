@@ -7,6 +7,7 @@
 #include "Arc/Core/Application.h"
 #include "Arc/Core/Layer.h"
 #include "Arc/Core/Log.h"
+#include "Arc/Core/Assert.h"
 
 #include "Arc/Core/Timestep.h"
 
