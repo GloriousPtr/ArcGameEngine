@@ -3,6 +3,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
+
 #include "Arc/Scene/SceneCamera.h"
 #include "Arc/Scene/ScriptableEntity.h"
 
@@ -31,11 +34,7 @@ namespace ArcEngine
 
 		glm::mat4 GetTransform() const
 		{
-			const glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), Rotation.x, { 1, 0, 0 })
-									 * glm::rotate(glm::mat4(1.0f), Rotation.y, { 0, 1, 0 })
-									 * glm::rotate(glm::mat4(1.0f), Rotation.z, { 0, 0, 1 });
-			
-			return glm::translate(glm::mat4(1.0f), Translation) * rotation * glm::scale(glm::mat4(1.0f), Scale);
+			return glm::translate(glm::mat4(1.0f), Translation) * glm::toMat4(glm::quat(Rotation)) * glm::scale(glm::mat4(1.0f), Scale);
 		}
 	};
 

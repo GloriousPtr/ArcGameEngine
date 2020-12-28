@@ -19,7 +19,8 @@ project "Arc-Editor"
 		"%{wks.location}/Arc/src",
 		"%{wks.location}/Arc/vendor",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.entt}"
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.ImGuizmo}",
 	}
 
 	links
