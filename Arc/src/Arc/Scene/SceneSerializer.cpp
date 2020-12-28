@@ -144,6 +144,8 @@ namespace ArcEngine
 
 			auto& spriteRendererComponent = entity.GetComponent<SpriteRendererComponent>();
 			out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.Color;
+			out << YAML::Key << "TextureFilepath" << YAML::Value << spriteRendererComponent.TextureFilepath;
+			out << YAML::Key << "TilingFactor" << YAML::Value << spriteRendererComponent.TilingFactor;
 
 			out << YAML::EndMap; // SpriteRendererComponent
 		}
@@ -242,6 +244,10 @@ namespace ArcEngine
 				{
 					auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
 					src.Color = spriteRendererComponent["Color"].as<glm::vec4>();
+					std::string textureFilepath = spriteRendererComponent["TextureFilepath"].as<std::string>();
+					if(!textureFilepath.empty())
+						src.SetTexture(textureFilepath);
+					src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
 				}
 			}
 		}

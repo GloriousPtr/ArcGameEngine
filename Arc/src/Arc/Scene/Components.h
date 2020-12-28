@@ -6,6 +6,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
+
+#include "Arc/Renderer/Texture.h"
 #include "Arc/Scene/SceneCamera.h"
 #include "Arc/Scene/ScriptableEntity.h"
 
@@ -41,11 +43,20 @@ namespace ArcEngine
 	struct SpriteRendererComponent
 	{
 		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		Ref<Texture2D> Texture = nullptr;
+		float TilingFactor = 1.0f;
+		std::string TextureFilepath;
 
 		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;
 		SpriteRendererComponent(const glm::vec4& color)
 			: Color(color) {}
+		void SetTexture(std::string& filepath)
+		{
+			Texture = Texture2D::Create(filepath);
+			TextureFilepath = filepath;
+		}
+		void RemoveTexture() { Texture = nullptr; }
 	};
 
 	struct CameraComponent

@@ -1,5 +1,7 @@
 ﻿#include "SceneHierarchyPanel.h"
 
+#include "Arc/Utils/PlatformUtils.h"
+
 #include <glm/gtc/type_ptr.hpp>
 
 #include <imgui/imgui.h>
@@ -82,6 +84,21 @@ namespace ArcEngine
 			if(m_SelectionContext == entity)
 				m_SelectionContext = {};
 		}
+	}
+
+	static void DrawFloatControl(const std::string& label, float* value, float columnWidth = 100.0f)
+	{
+		ImGui::PushID(label.c_str());
+		
+		ImGui::Columns(2);
+		ImGui::SetColumnWidth(0, columnWidth);
+		ImGui::Text(label.c_str());
+		ImGui::NextColumn();
+
+		ImGui::DragFloat("##value", value, 0.1f);
+
+		ImGui::Columns(1);
+		ImGui::PopID();
 	}
 
 	static void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
@@ -231,7 +248,7 @@ namespace ArcEngine
 
 		ImGui::PopItemWidth();
 		
-		DrawComponent<TransformComponent>("Transform", entity, [](auto& component)
+		DrawComponent<TransformComponent>("Transform", entity, [](TransformComponent& component)
 		{
 			DrawVec3Control("Translation", component.Translation);
 			
@@ -242,7 +259,7 @@ namespace ArcEngine
 			DrawVec3Control("Scale", component.Scale, 1.0f);
 		}, false);
 
-		DrawComponent<CameraComponent>("Camera", entity, [](auto& component)
+		DrawComponent<CameraComponent>("Camera", entity, [](CameraComponent& component)
 		{
 			auto& camera = component.Camera;
 
@@ -301,9 +318,41 @@ namespace ArcEngine
 			}
 		});
 		
-		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component)
+		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](SpriteRendererComponent& component)
 		{
 			ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+
+			const uint32_t id = component.Texture == nullptr ? 0 : component.Texture->GetRendererID();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+			
+			ImGui::Text("Texture");
+			const ImVec2 buttonSize = { 80, 80 };
+			ImGui::SameLine(ImGui::GetWindowWidth() * 0.6f);
+
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
+			if(ImGui::ImageButton((ImTextureID)id, buttonSize, { 1, 1 }, { 0, 0}, 0))
+			{
+				std::string filepath = FileDialogs::OpenFile("Texture (*.png)\0*.png\0");
+				if (!filepath.empty())
+					component.SetTexture(filepath);
+			}
+			ImGui::PopStyleColor(3);
+
+			ImGui::SameLine();
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.3f, 0.3f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
+			if(ImGui::Button("x", { buttonSize.x / 4, buttonSize.y } ))
+				component.RemoveTexture();
+			ImGui::PopStyleColor(3);
+			ImGui::PopStyleVar();
+
+			ImGui::Spacing();
+			
+			DrawFloatControl("Tiling Factor", &component.TilingFactor, 200);
 		});
 	}
 }
