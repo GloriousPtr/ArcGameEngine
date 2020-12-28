@@ -32,6 +32,8 @@ namespace ArcEngine
 
 		m_ActiveScene = CreateRef<Scene>();
 
+		m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
+
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
@@ -54,13 +56,15 @@ namespace ArcEngine
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
-
+			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 		
 		// Update
 		if(m_ViewportFocused)
 			m_CameraController.OnUpdate(ts);
+
+		m_EditorCamera.OnUpdate(ts);
 		
 		//Render
 		m_Framebuffer->Bind();
@@ -69,7 +73,7 @@ namespace ArcEngine
 		RenderCommand::Clear();
 
 		// Update scene
-		m_ActiveScene->OnUpdate(ts);
+		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
 		
 		m_Framebuffer->Unbind();
 	}
@@ -172,7 +176,7 @@ namespace ArcEngine
 			frameRate = 1.0f / frameTime;
 			frameTimeRefreshTimer = 0.0f;
 		}
-		ImGui::Text("FrameTime: %f ms", ft);
+		ImGui::Text("FrameTime: %.3f ms", ft);
 		ImGui::Text("FPS: %d", (int)frameRate);
 
 		ImGui::End();
@@ -201,11 +205,14 @@ namespace ArcEngine
 			float windowHeight = (float)ImGui::GetWindowHeight();
 			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
 
-			auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
-			const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
-			const glm::mat4& cameraProjection = camera.GetProjection();
-			glm::mat4 camView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
+			// Runtime Camera
+			// auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
+			// const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
+			// const glm::mat4& cameraProjection = camera.GetProjection();
+			// glm::mat4 camView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
 
+			const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
+			const glm::mat4& cameraView = m_EditorCamera.GetViewMatrix();
 			// Entity Transform
 			auto& tc = selectedEntity.GetComponent<TransformComponent>();
 			glm::mat4 transform = tc.GetTransform();
@@ -218,7 +225,7 @@ namespace ArcEngine
 
 			float snapValues[3] = { snapValue, snapValue, snapValue };
 			
-			ImGuizmo::Manipulate(glm::value_ptr(camView), glm::value_ptr(cameraProjection), (ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
+			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), (ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
 
 			if(ImGuizmo::IsUsing())
 			{
@@ -242,7 +249,8 @@ namespace ArcEngine
 	void EditorLayer::OnEvent(Event& e)
 	{
 		m_CameraController.OnEvent(e);
-
+		m_EditorCamera.OnEvent(e);
+		
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(ARC_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
 	}

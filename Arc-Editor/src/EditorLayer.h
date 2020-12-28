@@ -4,6 +4,8 @@
 
 #include "Panels/SceneHierarchyPanel.h"
 
+#include "Arc/Renderer/EditorCamera.h"
+
 namespace ArcEngine
 {
 	class EditorLayer : public Layer
@@ -38,6 +40,8 @@ namespace ArcEngine
 		Entity m_SecondCameraEntity;
 
 		bool m_PrimaryCamera = true;
+
+		EditorCamera m_EditorCamera;
 
 		Ref<Texture2D> m_CheckerboardTexture;
 
