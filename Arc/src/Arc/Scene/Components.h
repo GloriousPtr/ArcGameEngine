@@ -44,8 +44,8 @@ namespace ArcEngine
 	{
 		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
 		Ref<Texture2D> Texture = nullptr;
-		float TilingFactor = 1.0f;
 		std::string TextureFilepath;
+		float TilingFactor = 1.0f;
 
 		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;
