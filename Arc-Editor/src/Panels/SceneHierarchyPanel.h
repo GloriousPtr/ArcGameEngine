@@ -9,7 +9,7 @@ namespace ArcEngine
 		SceneHierarchyPanel() = default;
 		SceneHierarchyPanel(const Ref<Scene>& context);
 
-		void SetContent(const Ref<Scene>& context);
+		void SetContext(const Ref<Scene>& context);
 
 		void OnImGuiRender();
 	private:
