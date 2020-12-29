@@ -5,6 +5,7 @@
 #include "Arc/Renderer/Renderer2D.h"
 
 #include <glm/glm.hpp>
+#include <glad/glad.h>
 
 #include "Entity.h"
 
@@ -42,7 +43,7 @@ namespace ArcEngine
 		{
 			auto [transform, sprite] = view.get<TransformComponent, SpriteRendererComponent>(entity);
 			
-			Renderer2D::DrawQuad(transform.GetTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+			Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
 		}
 
 		Renderer2D::EndScene();
@@ -93,7 +94,7 @@ namespace ArcEngine
 			{
 				auto [transform, sprite] = view.get<TransformComponent, SpriteRendererComponent>(entity);
 				
-				Renderer2D::DrawQuad(transform.GetTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+				Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
 			}
 
 			Renderer2D::EndScene();
@@ -114,6 +115,14 @@ namespace ArcEngine
 				cameraComponent.Camera.SetViewportSize(width, height);
 		}
 
+	}
+
+	int Scene::GetPixelDataAtPoint(const int x, const int y)
+	{
+		glReadBuffer(GL_COLOR_ATTACHMENT1);
+		int pixelData;
+		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
+		return pixelData;
 	}
 
 	Entity Scene::GetPrimaryCameraEntity()

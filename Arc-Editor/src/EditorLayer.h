@@ -22,6 +22,7 @@ namespace ArcEngine
 		virtual void OnEvent(Event& e) override;
 	private:
 		bool OnKeyPressed(KeyPressedEvent& e);
+		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
 		void NewScene();
 		void OpenScene();
@@ -29,25 +30,19 @@ namespace ArcEngine
 	private:
 		OrthographicCameraController m_CameraController;
 
-		// Temp
-		Ref<VertexArray> m_SquareVA;
-		Ref<Shader> m_FlatColorShader;
 		Ref<Framebuffer> m_Framebuffer;
+		Ref<Framebuffer> m_IDFrameBuffer;
 
 		Ref<Scene> m_ActiveScene;
-		Entity m_SquareEntity;
-		Entity m_CameraEntity;
-		Entity m_SecondCameraEntity;
 
-		bool m_PrimaryCamera = true;
+		Entity m_HoveredEntity;
 
 		EditorCamera m_EditorCamera;
-
-		Ref<Texture2D> m_CheckerboardTexture;
 
 		bool m_ViewportFocused = false;
 		bool m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
+		glm::vec2 m_ViewportBounds[2];
 
 		float frameTime = 0.0f;
 
