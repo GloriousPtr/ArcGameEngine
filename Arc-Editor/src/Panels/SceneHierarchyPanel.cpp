@@ -1,5 +1,8 @@
 ﻿#include "SceneHierarchyPanel.h"
 
+#include <iostream>
+
+
 #include "Arc/Utils/PlatformUtils.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -262,13 +265,19 @@ namespace ArcEngine
 		{
 			if (ImGui::MenuItem("Camera"))
 			{
-				m_SelectionContext.AddComponent<CameraComponent>();
+				if (!entity.HasComponent<CameraComponent>())
+					entity.AddComponent<CameraComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Camera Component!");
 				ImGui::CloseCurrentPopup();
 			}
-
+			
 			if (ImGui::MenuItem("Sprite Renderer"))
 			{
-				m_SelectionContext.AddComponent<SpriteRendererComponent>();
+				if (!entity.HasComponent<SpriteRendererComponent>())
+					entity.AddComponent<SpriteRendererComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Sprite Renderer Component!");
 				ImGui::CloseCurrentPopup();
 			}
 			
