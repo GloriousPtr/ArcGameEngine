@@ -13,6 +13,17 @@
 
 namespace ArcEngine
 {
+	struct IDComponent
+	{
+		uint32_t ID = 0;
+
+		IDComponent() = default;
+		IDComponent(const IDComponent&) = default;
+		IDComponent(const uint32_t id)
+			: ID(id) {}
+		operator uint32_t() { return ID; }
+	};
+
 	struct TagComponent
 	{
 		std::string Tag;

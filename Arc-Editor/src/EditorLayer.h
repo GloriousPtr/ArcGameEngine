@@ -27,6 +27,9 @@ namespace ArcEngine
 		void NewScene();
 		void OpenScene();
 		void SaveSceneAs();
+
+		void OnScenePlay();
+		void OnSceneStop();
 	private:
 		OrthographicCameraController m_CameraController;
 
@@ -34,6 +37,14 @@ namespace ArcEngine
 		Ref<Framebuffer> m_IDFrameBuffer;
 
 		Ref<Scene> m_ActiveScene;
+		Ref<Scene> m_EditorScene;
+		Ref<Scene> m_RuntimeScene;
+
+		enum class SceneState
+		{
+			Edit = 0, Play = 1, Pause = 2
+		};
+		SceneState m_SceneState = SceneState::Edit;
 
 		Entity m_HoveredEntity;
 

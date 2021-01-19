@@ -30,7 +30,9 @@ namespace ArcEngine
 		
 		m_IDFrameBuffer = Framebuffer::Create(fbSpec);
 
-		m_ActiveScene = CreateRef<Scene>();
+		
+		m_EditorScene = CreateRef<Scene>();
+		m_ActiveScene = m_EditorScene;
 
 		m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 
@@ -41,6 +43,30 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_FUNCTION();
 		
+	}
+
+	void EditorLayer::OnScenePlay()
+	{
+		m_SceneState = SceneState::Play;
+
+		m_RuntimeScene = CreateRef<Scene>();
+		m_EditorScene->CopyTo(m_RuntimeScene);
+		m_ActiveScene = m_RuntimeScene;
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+		m_ActiveScene->OnRuntimeStart();
+	}
+
+	void EditorLayer::OnSceneStop()
+	{
+		m_SceneState = SceneState::Edit;
+		m_ActiveScene = m_EditorScene;
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+		m_RuntimeScene->OnRuntimeEnd();
+		m_RuntimeScene = nullptr;
 	}
 
 	void EditorLayer::OnUpdate(Timestep ts)
@@ -65,8 +91,6 @@ namespace ArcEngine
 		if(m_ViewportFocused)
 			m_CameraController.OnUpdate(ts);
 
-		m_EditorCamera.OnUpdate(ts);
-		
 		//Render
 		m_Framebuffer->Bind();
 		Renderer2D::ResetStats();
@@ -75,7 +99,27 @@ namespace ArcEngine
 		m_Framebuffer->Bind();
 
 		// Update scene
-		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+		switch (m_SceneState)
+		{
+			case SceneState::Play:
+			{
+				m_EditorCamera.OnUpdate(ts);
+				m_ActiveScene->OnUpdateRuntime(ts);
+				break;
+			}
+			case SceneState::Pause:
+			{
+				m_EditorCamera.OnUpdate(ts);
+				m_ActiveScene->OnUpdateRuntime(ts);
+				break;
+			}
+			case SceneState::Edit:
+			{
+				m_EditorCamera.OnUpdate(ts);
+				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+				break;
+			}
+		}
 
 		// Mouse Picking
 		auto [mx, my] = ImGui::GetMousePos();
@@ -204,6 +248,43 @@ namespace ArcEngine
 		ImGui::Text("FPS: %d", (int)frameRate);
 
 		ImGui::End();
+
+
+
+
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(12, 4));
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(12, 4));
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
+		ImGui::Begin("Toolbar", nullptr);
+		if (m_SceneState == SceneState::Edit)
+		{
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
+			if (ImGui::ArrowButton("Play", ImGuiDir_Right))
+			{
+				OnScenePlay();
+			}
+			ImGui::PopStyleColor(2);
+		}
+		else if (m_SceneState == SceneState::Play)
+		{
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+			if (ImGui::ArrowButton("Play", ImGuiDir_Right))
+			{
+				OnSceneStop();
+			}
+			ImGui::PopStyleColor(2);
+		}
+		ImGui::End();
+		ImGui::PopStyleColor(2);
+		ImGui::PopStyleVar(2);
+
+
+
+
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport");
@@ -347,7 +428,8 @@ namespace ArcEngine
 
 	void EditorLayer::NewScene()
 	{
-		m_ActiveScene = CreateRef<Scene>();
+		m_EditorScene = CreateRef<Scene>();
+		m_ActiveScene = m_EditorScene;
 		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
@@ -357,7 +439,8 @@ namespace ArcEngine
 		std::string filepath = FileDialogs::OpenFile("Arc Scene (*.arc)\0*.arc\0");
 		if (!filepath.empty())
 		{
-			m_ActiveScene = CreateRef<Scene>();
+			m_EditorScene = CreateRef<Scene>();
+			m_ActiveScene = m_EditorScene;
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
