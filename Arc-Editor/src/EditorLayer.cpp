@@ -11,6 +11,7 @@
 #include "Arc/Utils/PlatformUtils.h"
 
 #include "Arc/Math/Math.h"
+#include "Arc/Physics/Physics2D.h"
 
 namespace ArcEngine
 {
@@ -217,6 +218,27 @@ namespace ArcEngine
 		}
 
 		m_SceneHierarchyPanel.OnImGuiRender();
+
+
+
+		ImGui::Begin("Settings");
+
+		ImGui::Text("2D Gravity");
+		ImGui::SameLine();
+		ImGui::DragFloat2("##Gravity2D", glm::value_ptr(Physics2D::Gravity), 0.1f);
+
+		ImGui::Text("2D Physics Timestep");
+		ImGui::SameLine();
+		ImGui::DragFloat("##2DPhysicsTimestep", &Physics2D::Timestep, 0.001f, 0.0001f, 0, "%.4f");
+
+		ImGui::Text("Velocity Iterations");
+		ImGui::SameLine();
+		ImGui::DragInt("##VelocityIterations", &Physics2D::VelocityIterations, 1, 0);
+
+		ImGui::Text("Position Iterations");
+		ImGui::SameLine();
+		ImGui::DragInt("##PositionIterations", &Physics2D::PositionIterations, 1, 0);
+		ImGui::End();
 
 
 		

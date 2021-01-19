@@ -118,7 +118,7 @@ namespace ArcEngine
 		}
 	}
 
-	static void DrawFloatControl(const std::string& label, float* value, float columnWidth = 100.0f)
+	static void DrawFloatControl(const std::string& label, float* value, float min = 0, float max = 0, float columnWidth = 100.0f)
 	{
 		ImGui::PushID(label.c_str());
 		
@@ -127,7 +127,7 @@ namespace ArcEngine
 		ImGui::Text(label.c_str());
 		ImGui::NextColumn();
 
-		ImGui::DragFloat("##value", value, 0.1f);
+		ImGui::DragFloat("##value", value, 0.1f, min, max);
 
 		ImGui::Columns(1);
 		ImGui::PopID();
@@ -194,6 +194,58 @@ namespace ArcEngine
 
 		ImGui::PopStyleVar();
 		
+		ImGui::Columns(1);
+
+		ImGui::PopID();
+	}
+
+	static void DrawVec2Control(const std::string& label, glm::vec2& values, float resetValue = 0.0f, const char* format = "%.2f", float columnWidth = 200.0f)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		auto boldFont = io.Fonts->Fonts[1];
+
+		ImGui::PushID(label.c_str());
+
+		ImGui::Columns(2);
+		ImGui::SetColumnWidth(0, columnWidth);
+		ImGui::Text(label.c_str());
+		ImGui::NextColumn();
+
+		ImGui::PushMultiItemsWidths(2, ImGui::CalcItemWidth());
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+
+		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushFont(boldFont);
+		if (ImGui::Button("X", buttonSize))
+			values.x = resetValue;
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##X", &values.x, 0.1f, 0, 0, format);
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+		ImGui::PushFont(boldFont);
+		if (ImGui::Button("Y", buttonSize))
+			values.y = resetValue;
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##Y", &values.y, 0.1f, 0, 0, format);
+		ImGui::PopItemWidth();
+
+		ImGui::PopStyleVar();
+
 		ImGui::Columns(1);
 
 		ImGui::PopID();
@@ -278,6 +330,24 @@ namespace ArcEngine
 					entity.AddComponent<SpriteRendererComponent>();
 				else
 					ARC_CORE_WARN("This entity already has the Sprite Renderer Component!");
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Rigidbody 2D"))
+			{
+				if (!entity.HasComponent<Rigidbody2DComponent>())
+					entity.AddComponent<Rigidbody2DComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Rigidbody 2D Component!");
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Box Collider 2D"))
+			{
+				if (!entity.HasComponent<BoxCollider2DComponent>())
+					entity.AddComponent<BoxCollider2DComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Box Collider 2D Component!");
 				ImGui::CloseCurrentPopup();
 			}
 			
@@ -390,7 +460,116 @@ namespace ArcEngine
 
 			ImGui::Spacing();
 			
-			DrawFloatControl("Tiling Factor", &component.TilingFactor, 200);
+			DrawFloatControl("Tiling Factor", &component.TilingFactor, 0, 0, 200);
+		});
+
+		DrawComponent<Rigidbody2DComponent>("Rigidbody 2D", entity, [](Rigidbody2DComponent& component)
+		{
+
+			{
+				const char* items[] = { "Static", "Kinematic", "Dynamic" };
+				const char* current_item = items[(int)component.Specification.Type];
+				ImGui::Text("Body Type");
+				ImGui::SameLine();
+				if (ImGui::BeginCombo("##BodyType", current_item))
+				{
+					for (int n = 0; n < 3; n++)
+					{
+						bool is_selected = (current_item == items[n]);
+						if (ImGui::Selectable(items[n], is_selected))
+						{
+							current_item = items[n];
+							component.Specification.Type = (Rigidbody2dType)n;
+						}
+
+						if (is_selected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+			}
+
+			if (component.Specification.Type == Rigidbody2dType::Dynamic)
+			{
+				DrawFloatControl("Linear Damping", &(component.Specification.LinearDamping), 0.0f, 1000000.0f, 200);
+				DrawFloatControl("Angular Damping", &(component.Specification.AngularDamping), 0.0f, 1000000.0f, 200);
+				DrawFloatControl("Gravity Scale", &(component.Specification.GravityScale), -1000000.0f, 1000000.0f, 200);
+			}
+			if (component.Specification.Type == Rigidbody2dType::Dynamic || component.Specification.Type == Rigidbody2dType::Kinematic)
+			{
+				{
+					const char* items[] = { "Discrete", "Continuous" };
+					const char* current_item = items[(int)component.Specification.CollisionDetection];
+					ImGui::Text("Collision Detection");
+					ImGui::SameLine();
+					if (ImGui::BeginCombo("##CollisionDetection", current_item))
+					{
+						for (int n = 0; n < 2; n++)
+						{
+							bool is_selected = (current_item == items[n]);
+							if (ImGui::Selectable(items[n], is_selected))
+							{
+								current_item = items[n];
+								component.Specification.CollisionDetection = (Rigidbody2D::CollisionDetectionType)n;
+							}
+
+							if (is_selected)
+								ImGui::SetItemDefaultFocus();
+						}
+						ImGui::EndCombo();
+					}
+				}
+
+				{
+					const char* items[] = { "NeverSleep", "StartAwake", "StartAsleep" };
+					const char* current_item = items[(int)component.Specification.SleepingMode];
+					ImGui::Text("Sleeping Mode");
+					ImGui::SameLine();
+					if (ImGui::BeginCombo("##SleepingMode", current_item))
+					{
+						for (int n = 0; n < 3; n++)
+						{
+							bool is_selected = (current_item == items[n]);
+							if (ImGui::Selectable(items[n], is_selected))
+							{
+								current_item = items[n];
+								component.Specification.SleepingMode = (Rigidbody2D::SleepType)n;
+							}
+
+							if (is_selected)
+								ImGui::SetItemDefaultFocus();
+						}
+						ImGui::EndCombo();
+					}
+				}
+
+				ImGui::Text("Freeze Rotation");
+				ImGui::SameLine();
+				ImGui::Checkbox("##FreezeRotationZ", &component.Specification.FreezeRotationZ);
+				ImGui::SameLine();
+				ImGui::Text("Z");
+			}
+
+			component.ValidateSpecification();
+		});
+
+		DrawComponent<BoxCollider2DComponent>("Box Collider 2D", entity, [](BoxCollider2DComponent& component)
+		{
+			ImGui::Text("Is Trigger");
+			ImGui::SameLine();
+			ImGui::Checkbox("##IsTrigger", &component.IsTrigger);
+
+			glm::vec2 size = component.Size;
+			DrawVec2Control("Size", size, 1.0f, "%.4f");
+			if (size.x <= 0.1f)
+				size.x = 0.1f;
+			if (size.y <= 0.1f)
+				size.y = 0.1f;
+			component.Size = size;
+
+			DrawVec2Control("Offset", component.Offset, 0.0f, "%.4f");
+
+			component.ValidateSpecification();
 		});
 	}
 }

@@ -3,6 +3,7 @@
 
 #include "Arc/Scene/Components.h"
 #include "Arc/Renderer/Renderer2D.h"
+#include "Arc/Physics/Physics2D.h"
 
 #include <glm/glm.hpp>
 #include <glad/glad.h>
@@ -47,6 +48,8 @@ namespace ArcEngine
 		CopyComponent<TransformComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<CameraComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<SpriteRendererComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<Rigidbody2DComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<BoxCollider2DComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<NativeScriptComponent>(target->m_Registry, m_Registry, enttMap);
 	}
 
@@ -82,16 +85,45 @@ namespace ArcEngine
 	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
 	{
 		Renderer2D::BeginScene(camera);
-		
-		auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
-		for (auto entity : view)
+
 		{
-			auto [transform, sprite] = view.get<TransformComponent, SpriteRendererComponent>(entity);
-			
-			Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
+			for (auto entity : view)
+			{
+				auto [transform, sprite] = view.get<TransformComponent, SpriteRendererComponent>(entity);
+
+				Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+			}
 		}
 
 		Renderer2D::EndScene();
+	}
+
+	void Scene::OnRuntimeStart()
+	{
+		Physics2D::Init();
+
+		{
+			auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
+			for (auto entity : view)
+			{
+				auto [transform, rigidbody2d] = view.get<TransformComponent, Rigidbody2DComponent>(entity);
+				rigidbody2d.StartSimulation(transform.Translation, transform.Rotation.z);
+			}
+		}
+
+		{
+			auto view = m_Registry.view<Rigidbody2DComponent, BoxCollider2DComponent>();
+			for (auto entity : view)
+			{
+				auto [rigidbody2d, boxCollider2d] = view.get<Rigidbody2DComponent, BoxCollider2DComponent>(entity);
+				boxCollider2d.StartSimulation(rigidbody2d.Body2D);
+			}
+		}
+	}
+
+	void Scene::OnRuntimeEnd()
+	{
 	}
 
 	void Scene::OnUpdateRuntime(Timestep ts)
@@ -134,12 +166,36 @@ namespace ArcEngine
 		{
 			Renderer2D::BeginScene(*mainCamera, cameraTransform);
 			
-			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
-			for (auto entity : view)
 			{
-				auto [transform, sprite] = view.get<TransformComponent, SpriteRendererComponent>(entity);
-				
-				Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+				auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
+				for (auto entity : view)
+				{
+					auto [transform, rigidbody2d] = view.get<TransformComponent, Rigidbody2DComponent>(entity);
+
+					rigidbody2d.Body2D->SetRuntimeTransform(transform.Translation, transform.Rotation.z);
+				}
+
+				Physics2D::OnUpdate();
+
+				for (auto entity : view)
+				{
+					auto [transform, rigidbody2d] = view.get<TransformComponent, Rigidbody2DComponent>(entity);
+
+					glm::vec2 position = rigidbody2d.Body2D->GetRuntimePosition();
+					transform.Translation = glm::vec3(position.x, position.y, transform.Translation.z);
+
+					transform.Rotation = glm::vec3(transform.Rotation.x, transform.Rotation.y, rigidbody2d.Body2D->GetRuntimeRotation());
+				}
+			}
+
+			{
+				auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
+				for (auto entity : view)
+				{
+					auto [transform, sprite] = view.get<TransformComponent, SpriteRendererComponent>(entity);
+
+					Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+				}
 			}
 
 			Renderer2D::EndScene();
@@ -216,6 +272,16 @@ namespace ArcEngine
 
 	template<>
 	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
 	{
 	}
 }
