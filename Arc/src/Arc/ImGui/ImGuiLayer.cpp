@@ -31,9 +31,64 @@ namespace ArcEngine
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+		io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleViewports;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
+		io.ConfigWindowsMoveFromTitleBarOnly = true;
+
+		/*
+		io.AddInputCharacter(GLFW_KEY_SPACE);
+	    io.AddInputCharacter(GLFW_KEY_APOSTROPHE);
+	    io.AddInputCharacter(GLFW_KEY_COMMA);
+	    io.AddInputCharacter(GLFW_KEY_MINUS);
+	    io.AddInputCharacter(GLFW_KEY_PERIOD);
+	    io.AddInputCharacter(GLFW_KEY_SLASH);
+	    io.AddInputCharacter(GLFW_KEY_0);
+	    io.AddInputCharacter(GLFW_KEY_1);
+	    io.AddInputCharacter(GLFW_KEY_2);
+	    io.AddInputCharacter(GLFW_KEY_3);
+	    io.AddInputCharacter(GLFW_KEY_4);
+	    io.AddInputCharacter(GLFW_KEY_5);
+	    io.AddInputCharacter(GLFW_KEY_6);
+	    io.AddInputCharacter(GLFW_KEY_7);
+	    io.AddInputCharacter(GLFW_KEY_8);
+	    io.AddInputCharacter(GLFW_KEY_9);
+	    io.AddInputCharacter(GLFW_KEY_SEMICOLON);
+	    io.AddInputCharacter(GLFW_KEY_EQUAL);
+	    io.AddInputCharacter(GLFW_KEY_A);
+	    io.AddInputCharacter(GLFW_KEY_B);
+	    io.AddInputCharacter(GLFW_KEY_C);
+	    io.AddInputCharacter(GLFW_KEY_D);
+	    io.AddInputCharacter(GLFW_KEY_E);
+	    io.AddInputCharacter(GLFW_KEY_F);
+	    io.AddInputCharacter(GLFW_KEY_G);
+	    io.AddInputCharacter(GLFW_KEY_H);
+	    io.AddInputCharacter(GLFW_KEY_I);
+	    io.AddInputCharacter(GLFW_KEY_J);
+	    io.AddInputCharacter(GLFW_KEY_K);
+	    io.AddInputCharacter(GLFW_KEY_L);
+	    io.AddInputCharacter(GLFW_KEY_M);
+	    io.AddInputCharacter(GLFW_KEY_N);
+	    io.AddInputCharacter(GLFW_KEY_O);
+	    io.AddInputCharacter(GLFW_KEY_P);
+	    io.AddInputCharacter(GLFW_KEY_Q);
+	    io.AddInputCharacter(GLFW_KEY_R);
+	    io.AddInputCharacter(GLFW_KEY_S);
+	    io.AddInputCharacter(GLFW_KEY_T);
+	    io.AddInputCharacter(GLFW_KEY_U);
+	    io.AddInputCharacter(GLFW_KEY_V);
+	    io.AddInputCharacter(GLFW_KEY_W);
+	    io.AddInputCharacter(GLFW_KEY_X);
+	    io.AddInputCharacter(GLFW_KEY_Y);
+	    io.AddInputCharacter(GLFW_KEY_Z);
+	    io.AddInputCharacter(GLFW_KEY_LEFT_BRACKET);
+	    io.AddInputCharacter(GLFW_KEY_BACKSLASH);
+	    io.AddInputCharacter(GLFW_KEY_RIGHT_BRACKET);
+	    io.AddInputCharacter(GLFW_KEY_GRAVE_ACCENT);
+	    io.AddInputCharacter(GLFW_KEY_WORLD_1);
+	    io.AddInputCharacter(GLFW_KEY_WORLD_2);
+		*/
 		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Regular.ttf", 18.0f);
 		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Bold.ttf", 18.0f);
 		

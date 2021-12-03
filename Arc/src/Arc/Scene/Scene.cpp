@@ -22,6 +22,8 @@ namespace ArcEngine
 	Entity Scene::CreateEntity(const std::string& name)
 	{
 		Entity entity = { m_Registry.create(), this };
+		m_EntityMap.emplace(entity, entity);
+
 		entity.AddComponent<TransformComponent>();
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
@@ -32,6 +34,12 @@ namespace ArcEngine
 	void Scene::DestroyEntity(Entity entity)
 	{
 		m_Registry.destroy(entity);
+		m_EntityMap.erase(entity);
+	}
+
+	bool Scene::HasEntity(uint32_t entityId)
+	{
+		return m_EntityMap.find(entityId) != m_EntityMap.end();
 	}
 
 	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
@@ -115,6 +123,7 @@ namespace ArcEngine
 				cameraComponent.Camera.SetViewportSize(width, height);
 		}
 
+		m_ViewportDirty = false;
 	}
 
 	int Scene::GetPixelDataAtPoint(const int x, const int y)
