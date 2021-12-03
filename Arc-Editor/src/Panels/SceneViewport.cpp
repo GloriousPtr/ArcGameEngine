@@ -88,14 +88,17 @@ namespace ArcEngine
 		// Update scene
 		scene->OnUpdateEditor(timestep, m_EditorCamera);
 
-		if (ImGui::IsKeyPressed(Key::Q))
-			m_GizmoType = -1;
-		if (ImGui::IsKeyPressed(Key::W))
-			m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
-		if (ImGui::IsKeyPressed(Key::E))
-			m_GizmoType = ImGuizmo::OPERATION::ROTATE;
-		if (ImGui::IsKeyPressed(Key::R))
-			m_GizmoType = ImGuizmo::OPERATION::SCALE;
+		if (!ImGuizmo::IsUsing() && !ImGui::IsMouseDown(ImGuiMouseButton_Right))
+		{
+			if (ImGui::IsKeyPressed(Key::Q))
+				m_GizmoType = -1;
+			if (ImGui::IsKeyPressed(Key::W))
+				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			if (ImGui::IsKeyPressed(Key::E))
+				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			if (ImGui::IsKeyPressed(Key::R))
+				m_GizmoType = ImGuizmo::OPERATION::SCALE;
+		}
 
 		if (ImGui::IsKeyPressed(Key::F) && m_SceneHierarchyPanel)
 		{
