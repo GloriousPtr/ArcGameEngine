@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Arc/Core/UUID.h"
 #include "Arc/Core/Timestep.h"
 #include "Arc/Renderer/EditorCamera.h"
 
@@ -16,6 +17,7 @@ namespace ArcEngine
 		~Scene();
 
 		Entity CreateEntity(const std::string& name = std::string());
+		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
 		void DestroyEntity(Entity entity);
 		bool HasEntity(uint32_t entity);
 

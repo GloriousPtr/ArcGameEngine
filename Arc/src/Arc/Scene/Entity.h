@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Arc/Core/UUID.h"
+#include "Arc/Scene/Components.h"
 #include "Arc/Scene/Scene.h"
 
 #include "entt.hpp"
@@ -41,6 +43,8 @@ namespace ArcEngine
 			ARC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
 			m_Scene->m_Registry.remove<T>(m_EntityHandle);
 		}
+
+		UUID GetUUID() { return GetComponent<IDComponent>(); }
 
 		operator bool() const { return m_EntityHandle != entt::null; }
 		operator entt::entity() const { return m_EntityHandle; }

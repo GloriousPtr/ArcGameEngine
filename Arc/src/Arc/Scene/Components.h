@@ -6,13 +6,23 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-
+#include "Arc/Core/UUID.h"
 #include "Arc/Renderer/Texture.h"
 #include "Arc/Scene/SceneCamera.h"
-#include "Arc/Scene/ScriptableEntity.h"
 
 namespace ArcEngine
 {
+	struct IDComponent
+	{
+		UUID ID;
+
+		IDComponent() = default;
+		IDComponent(const IDComponent&) = default;
+		IDComponent(const uint64_t id)
+			: ID(id) {}
+		operator uint64_t() { return ID; }
+	};
+
 	struct TagComponent
 	{
 		std::string Tag;
@@ -70,6 +80,7 @@ namespace ArcEngine
 		CameraComponent(const CameraComponent&) = default;
 	};
 
+	class ScriptableEntity;
 	struct NativeScriptComponent
 	{
 		ScriptableEntity* Instance = nullptr;
