@@ -16,3 +16,6 @@
 [submodule "Arc/vendor/ImGuizmo"]
 	path = Arc/vendor/ImGuizmo
 	url = https://github.com/TheCherno/ImGuizmo.git
+[submodule "Arc/vendor/assimp"]
+	path = Arc/vendor/assimp
+	url = https://github.com/MohitSethi99/assimp.git

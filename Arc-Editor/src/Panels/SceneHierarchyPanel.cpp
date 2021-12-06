@@ -2,13 +2,16 @@
 
 #include <iostream>
 
-
 #include "Arc/Utils/PlatformUtils.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 namespace ArcEngine
 {
@@ -30,7 +33,8 @@ namespace ArcEngine
 		m_Context->m_Registry.each([&](auto entityID)
 		{
 			Entity entity = { entityID, m_Context.get() };
-			DrawEntityNode(entity);
+			if (!entity.GetParent())
+				DrawEntityNode(entity);
 		});
 
 		if(ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
@@ -55,6 +59,12 @@ namespace ArcEngine
 				m_SelectionContext.AddComponent<SpriteRendererComponent>();
 				ImGui::CloseCurrentPopup();
 			}
+			else if (ImGui::MenuItem("Create Mesh"))
+			{
+				m_SelectionContext = m_Context->CreateEntity("Mesh");
+				m_SelectionContext.AddComponent<MeshComponent>();
+				ImGui::CloseCurrentPopup();
+			}
 			
 			ImGui::EndPopup();
 		}
@@ -75,6 +85,7 @@ namespace ArcEngine
 	{
 		auto& tagComponent = entity.GetComponent<TagComponent>();
 		auto& tag = tagComponent.Tag;
+		auto& transform = entity.GetTransform();
 
 		ImGuiTreeNodeFlags flags = (m_SelectionContext == entity ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -83,9 +94,12 @@ namespace ArcEngine
 			m_SelectionContext = entity;
 
 		bool entityDeleted = false;
+		bool createChild = false;
 		if(ImGui::BeginPopupContextItem())
 		{
-			if (ImGui::MenuItem("Rename")) 
+			if (ImGui::MenuItem("Create"))
+				createChild = true;
+			if (ImGui::MenuItem("Rename"))
 				tagComponent.renaming = true;
 			if(ImGui::MenuItem("Delete Entity"))
 				entityDeleted = true;
@@ -107,7 +121,16 @@ namespace ArcEngine
 		
 		if(opened)
 		{
+			for (size_t i = 0; i < transform.Children.size(); i++)
+				DrawEntityNode(m_Context->GetEntity(transform.Children[i]));
+
 			ImGui::TreePop();
+		}
+
+		if (createChild)
+		{
+			Entity e = m_Context->CreateEntity();
+			e.SetParent(entity);
 		}
 
 		if(entityDeleted)
@@ -199,6 +222,129 @@ namespace ArcEngine
 		ImGui::PopID();
 	}
 
+	static std::vector<Ref<Texture2D>> s_TextureCache;
+	std::vector<Ref<Texture2D>> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const char* filepath)
+    {
+		std::string path = std::string(filepath);
+		std::string dir = path.substr(0, path.find_last_of('\\'));
+        std::vector<Ref<Texture2D>> textures;
+        for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+        {
+			aiString str;
+			mat->GetTexture(type, i, &str);
+
+			bool skip = false;
+			for(unsigned int j = 0; j < s_TextureCache.size(); j++)
+            {
+                if(std::strcmp(s_TextureCache[j]->GetPath().c_str(), std::string(dir + '\\' + str.C_Str()).c_str()) == 0)
+                {
+                    textures.push_back(s_TextureCache[j]);
+                    skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
+                    break;
+                }
+            }
+
+			if (!skip)
+			{
+				Ref<Texture2D> texture = Texture2D::Create(dir + '\\' + str.C_Str());
+				textures.push_back(texture);
+				s_TextureCache.push_back(texture);
+			}
+        }
+        return textures;
+    }
+
+	static void ProcessMesh(aiMesh *mesh, const aiScene *scene, Entity e, const char* filepath)
+	{
+		std::vector<float> vertices;
+		vertices.reserve(mesh->mNumVertices);
+
+		std::vector<uint32_t> indices;
+
+		for(size_t i = 0; i < mesh->mNumVertices; i++)
+		{
+			vertices.push_back(mesh->mVertices[i].x);
+			vertices.push_back(mesh->mVertices[i].y);
+			vertices.push_back(mesh->mVertices[i].z);
+
+			vertices.push_back(mesh->mNormals[i].x);
+			vertices.push_back(mesh->mNormals[i].y);
+			vertices.push_back(mesh->mNormals[i].z);
+
+            if(mesh->mTextureCoords[0])
+            {
+                vertices.push_back(mesh->mTextureCoords[0][i].x); 
+                vertices.push_back(mesh->mTextureCoords[0][i].y);
+            }
+            else
+			{
+				vertices.push_back(0.0f);
+				vertices.push_back(0.0f);
+			}
+		}
+
+		for(size_t i = 0; i < mesh->mNumFaces; i++)
+		{
+			aiFace face = mesh->mFaces[i];
+			indices.reserve(face.mNumIndices);
+			for(size_t j = 0; j < face.mNumIndices; j++)
+				indices.push_back(face.mIndices[j]);
+		}
+
+		Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(&(vertices[0]), (sizeof(float) * vertices.size()));
+		vertexBuffer->SetLayout({
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float3, "a_Normal" },
+			{ ShaderDataType::Float2, "a_TexCoord" }
+		});
+
+		Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(&(indices[0]), indices.size());
+
+		Ref<VertexArray> vertexArray = VertexArray::Create();
+		vertexArray->AddVertexBuffer(vertexBuffer);
+		vertexArray->SetIndexBuffer(indexBuffer);
+
+        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+        std::vector<Ref<Texture2D>> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, filepath);
+
+		auto& meshComponent = e.AddComponent<MeshComponent>();
+		
+		meshComponent.Filepath = filepath;
+		meshComponent.VertexArray = vertexArray;
+
+		if (diffuseMaps.size() > 0)
+			meshComponent.DiffuseMap = diffuseMaps[0];
+	}
+
+	static void ProcessNode(aiNode *node, const aiScene *scene, Ref<Scene> sceneContext, Entity entity, const char* filepath)
+	{
+		for(unsigned int i = 0; i < node->mNumMeshes; i++)
+		{
+			aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+			ProcessMesh(mesh, scene, entity, filepath);
+		}
+
+		for(unsigned int i = 0; i < node->mNumChildren; i++)
+		{
+			std::string name = node->mChildren[i]->mName.C_Str();
+			Entity e = sceneContext->CreateEntity(name);
+			e.SetParent(entity);
+			ProcessNode(node->mChildren[i], scene, sceneContext, e, filepath);
+		}
+	}
+
+	static void LoadMesh(const char* filepath, Ref<Scene> sceneContext, Entity rootEntity)
+	{
+		Assimp::Importer importer;
+		const aiScene *scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_OptimizeMeshes);
+ 
+		ARC_CORE_ASSERT(scene, importer.GetErrorString());
+
+		std::vector<Ref<VertexArray>> vertexArrayList;
+
+		ProcessNode(scene->mRootNode, scene, sceneContext, rootEntity, filepath);
+	}
+
 	template<typename T, typename UIFunction>
 	static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction, const bool removable = true)
 	{
@@ -276,6 +422,15 @@ namespace ArcEngine
 			{
 				if (!entity.HasComponent<SpriteRendererComponent>())
 					entity.AddComponent<SpriteRendererComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Sprite Renderer Component!");
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Mesh"))
+			{
+				if (!entity.HasComponent<MeshComponent>())
+					entity.AddComponent<MeshComponent>();
 				else
 					ARC_CORE_WARN("This entity already has the Sprite Renderer Component!");
 				ImGui::CloseCurrentPopup();
@@ -371,7 +526,7 @@ namespace ArcEngine
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
-			if(ImGui::ImageButton((ImTextureID)id, buttonSize, { 1, 1 }, { 0, 0}, 0))
+			if(ImGui::ImageButton((ImTextureID)id, buttonSize, { 1, 1 }, { 0, 0 }, 0))
 			{
 				std::string filepath = FileDialogs::OpenFile("Texture (*.png)\0*.png\0");
 				if (!filepath.empty())
@@ -392,5 +547,37 @@ namespace ArcEngine
 			
 			DrawFloatControl("Tiling Factor", &component.TilingFactor, 200);
 		});
+
+		DrawComponent<MeshComponent>("Mesh", entity, [&](MeshComponent& component)
+		{
+			ImGui::Text("Mesh");
+			const ImVec2 buttonSize = { 60, 20 };
+
+			ImGui::Text(component.Filepath.c_str());
+
+			ImGui::SameLine(ImGui::GetWindowWidth() - buttonSize.x - 10);
+
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
+			if(ImGui::Button("...", buttonSize))
+			{
+				std::string filepath = FileDialogs::OpenFile("Mesh (*.obj)\0*.obj\0");
+				if (!filepath.empty())
+				{
+					component.Filepath = filepath;
+					LoadMesh(filepath.c_str(), m_Context, entity);
+				}
+			}
+			ImGui::PopStyleColor(3);
+			
+			/*
+			if (component.DiffuseMap)
+			{
+				const uint32_t id = component.DiffuseMap->GetRendererID();
+				ImGui::Image((void*) id, { 1, 1 }, { 0, 0 });
+			}
+			*/
+		}, false);
 	}
 }

@@ -62,14 +62,16 @@ namespace ArcEngine
 				yaw += change.x;
 				pitch = glm::clamp(pitch - change.y, -89.9f, 89.9f);
 
+				float movementSpeed = m_MovementSpeed * (ImGui::IsKeyDown(Key::LeftShift) ? 3.0f : 1.0f);
+
 				if (ImGui::IsKeyDown(Key::W))
-					position += forward * m_MovementSpeed * timestep.GetSeconds();
+					position += forward * movementSpeed * timestep.GetSeconds();
 				else if (ImGui::IsKeyDown(Key::S))
-					position -= forward * m_MovementSpeed * timestep.GetSeconds();
+					position -= forward * movementSpeed * timestep.GetSeconds();
 				if (ImGui::IsKeyDown(Key::D))
-					position += right * m_MovementSpeed * timestep.GetSeconds();
+					position += right * movementSpeed * timestep.GetSeconds();
 				else if (ImGui::IsKeyDown(Key::A))
-					position -= right * m_MovementSpeed * timestep.GetSeconds();
+					position -= right * movementSpeed * timestep.GetSeconds();
 
 				m_EditorCamera.SetYaw(yaw);
 				m_EditorCamera.SetPitch(pitch);
@@ -98,6 +100,8 @@ namespace ArcEngine
 				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
 			if (ImGui::IsKeyPressed(Key::R))
 				m_GizmoType = ImGuizmo::OPERATION::SCALE;
+			if (ImGui::IsKeyPressed(Key::T))
+				m_GizmoType = ImGuizmo::OPERATION::BOUNDS;
 		}
 
 		if (ImGui::IsKeyPressed(Key::F) && m_SceneHierarchyPanel)
@@ -173,7 +177,7 @@ namespace ArcEngine
 				const glm::mat4& cameraView = m_EditorCamera.GetViewMatrix();
 				// Entity Transform
 				auto& tc = selectedEntity.GetComponent<TransformComponent>();
-				glm::mat4 transform = tc.GetTransform();
+				glm::mat4 transform = selectedEntity.GetWorldTransform();
 
 				// Snapping
 				const bool snap = ImGui::IsKeyDown(Key::LeftControl);
@@ -185,10 +189,11 @@ namespace ArcEngine
 				
 				ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), (ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
 
-				if(ImGuizmo::IsUsing())
+				if (ImGuizmo::IsUsing())
 				{
+					glm::mat4& parentWorldTransform = tc.Parent != 0 ? selectedEntity.GetParent().GetWorldTransform() : glm::mat4(1.0f);
 					glm::vec3 translation, rotation, scale;
-					Math::DecomposeTransform(transform, translation, rotation, scale);
+					Math::DecomposeTransform(glm::inverse(parentWorldTransform) * transform, translation, rotation, scale);
 					
 					tc.Translation = translation;
 					const glm::vec3 deltaRotation = rotation - tc.Rotation;

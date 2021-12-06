@@ -1,14 +1,17 @@
 #pragma once
 
+#include "Arc/Core/UUID.h"
+#include "Arc/Renderer/Texture.h"
+#include "Arc/Scene/SceneCamera.h"
+#include "Arc/Renderer/Buffer.h"
+#include "Arc/Renderer/VertexArray.h"
+
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-#include "Arc/Core/UUID.h"
-#include "Arc/Renderer/Texture.h"
-#include "Arc/Scene/SceneCamera.h"
+#include <assimp/Importer.hpp>
 
 namespace ArcEngine
 {
@@ -34,21 +37,20 @@ namespace ArcEngine
 			: Tag(tag) {}
 	};
 	
+	class Entity;
 	struct TransformComponent
 	{
 		glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 
+		UUID Parent = 0;
+		std::vector<UUID> Children;
+
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
 		TransformComponent(const glm::vec3& translation)
 			: Translation(translation) {}
-
-		glm::mat4 GetTransform() const
-		{
-			return glm::translate(glm::mat4(1.0f), Translation) * glm::toMat4(glm::quat(Rotation)) * glm::scale(glm::mat4(1.0f), Scale);
-		}
 	};
 
 	struct SpriteRendererComponent
@@ -94,5 +96,14 @@ namespace ArcEngine
 			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
 			DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
 		}
+	};
+
+	struct MeshComponent
+	{
+		std::string Filepath;
+		Ref<VertexArray> VertexArray;
+		Ref<Texture2D> DiffuseMap = nullptr;
+
+		MeshComponent() = default;
 	};
 }

@@ -1,6 +1,7 @@
 #include "arcpch.h"
 #include "Arc/Renderer/Renderer.h"
 #include "Arc/Renderer/Renderer2D.h"
+#include "Arc/Renderer/Renderer3D.h"
 
 namespace ArcEngine
 {
@@ -12,11 +13,13 @@ namespace ArcEngine
 		
 		RenderCommand::Init();
 		Renderer2D::Init();
+		Renderer3D::Init();
 	}
 
 	void Renderer::Shutdown()
 	{
 		Renderer2D::Shutdown();
+		Renderer3D::Shutdown();
 	}
 
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)

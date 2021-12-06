@@ -39,12 +39,14 @@ namespace ArcEngine
 		void UploadUniformMat3(const std::string& name, const glm::mat3& matrix);
 		void UploadUniformMat4(const std::string& name, const glm::mat4& matrix);
 	private:
+		int GetLocation(const std::string& name);
 		std::string ReadFile(const std::string& filepath);
 		std::unordered_map<GLenum, std::string> PreProcess(const std::string& source);
 		void Compile(const std::unordered_map<GLenum, std::string>& shaderSources);
 	private:
 		uint32_t m_RendererID;
 		std::string m_Name;
+		std::unordered_map<std::string, int> m_UniformLocationCache;
 	};
 }
 

@@ -122,6 +122,8 @@ namespace ArcEngine
 		m_SceneHierarchyPanel.OnImGuiRender();
 		m_MainSceneViewport.OnImGuiRender();
 
+		Application::Get().GetImGuiLayer()->SetBlockEvents(false);
+
 		ImGui::Begin("Stats");
 
 		auto stats = Renderer2D::GetStats();

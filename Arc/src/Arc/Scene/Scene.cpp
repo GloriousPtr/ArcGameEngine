@@ -4,6 +4,7 @@
 #include "Arc/Scene/Components.h"
 #include "Arc/Scene/ScriptableEntity.h"
 #include "Arc/Renderer/Renderer2D.h"
+#include "Arc/Renderer/Renderer3D.h"
 
 #include <glm/glm.hpp>
 #include <glad/glad.h>
@@ -28,10 +29,12 @@ namespace ArcEngine
 	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
 	{
 		Entity entity = { m_Registry.create(), this };
-		m_EntityMap.emplace(entity, entity);
+		m_EntityMap.emplace(uuid, entity);
 
 		entity.AddComponent<IDComponent>(uuid);
+
 		entity.AddComponent<TransformComponent>();
+
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
 
@@ -42,28 +45,53 @@ namespace ArcEngine
 
 	void Scene::DestroyEntity(Entity entity)
 	{
+		entity.Deparent();
+
+		auto& children = entity.GetTransform().Children;
+		for (size_t i = 0; i < children.size(); i++)
+			DestroyEntity(GetEntity(children[i]));
+
+		m_EntityMap.erase(entity.GetUUID());
 		m_Registry.destroy(entity);
-		m_EntityMap.erase(entity);
 	}
 
-	bool Scene::HasEntity(uint32_t entityId)
+	bool Scene::HasEntity(UUID uuid)
 	{
-		return m_EntityMap.find(entityId) != m_EntityMap.end();
+		return m_EntityMap.find(uuid) != m_EntityMap.end();
+	}
+
+	Entity Scene::GetEntity(UUID uuid)
+	{
+		if (m_EntityMap.find(uuid) != m_EntityMap.end())
+			return { m_EntityMap[uuid], this };
+
+		return {};
 	}
 
 	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
 	{
 		Renderer2D::BeginScene(camera);
-		
-		auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
-		for (auto entity : view)
 		{
-			auto [transform, sprite] = view.get<TransformComponent, SpriteRendererComponent>(entity);
-			
-			Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+			auto view = m_Registry.view<IDComponent, SpriteRendererComponent>();
+			for (auto entity : view)
+			{
+				auto [id, sprite] = view.get<IDComponent, SpriteRendererComponent>(entity);
+				Renderer2D::DrawQuad((uint32_t)entity, GetEntity(id.ID).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+			}
 		}
-
 		Renderer2D::EndScene();
+
+		Renderer3D::BeginScene(camera);
+		{
+			auto view = m_Registry.view<IDComponent, MeshComponent>();
+			for (auto entity : view)
+			{
+				auto [id, mesh] = view.get<IDComponent, MeshComponent>(entity);
+				if (mesh.VertexArray != nullptr)
+					Renderer3D::DrawMesh((uint32_t)entity, mesh.VertexArray, mesh.DiffuseMap, GetEntity(id.ID).GetWorldTransform());
+			}
+		}
+		Renderer3D::EndScene();
 	}
 
 	void Scene::OnUpdateRuntime(Timestep ts)
@@ -88,15 +116,15 @@ namespace ArcEngine
 		Camera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
 		{
-			auto view = m_Registry.view<TransformComponent, CameraComponent>();
+			auto view = m_Registry.view<IDComponent, CameraComponent>();
 			for (auto entity : view)
 			{
-				auto [transform, camera] = view.get<TransformComponent, CameraComponent>(entity);
+				auto [id, camera] = view.get<IDComponent, CameraComponent>(entity);
 
 				if(camera.Primary)
 				{
 					mainCamera = &camera.Camera;
-					cameraTransform = transform.GetTransform();
+					cameraTransform = GetEntity(id.ID).GetWorldTransform();
 					break;
 				}
 			}
@@ -106,12 +134,12 @@ namespace ArcEngine
 		{
 			Renderer2D::BeginScene(*mainCamera, cameraTransform);
 			
-			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
+			auto view = m_Registry.view<IDComponent, SpriteRendererComponent>();
 			for (auto entity : view)
 			{
-				auto [transform, sprite] = view.get<TransformComponent, SpriteRendererComponent>(entity);
+				auto [id, sprite] = view.get<IDComponent, SpriteRendererComponent>(entity);
 				
-				Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+				Renderer2D::DrawQuad((uint32_t)entity, GetEntity(id.ID).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
 			}
 
 			Renderer2D::EndScene();
@@ -189,6 +217,11 @@ namespace ArcEngine
 
 	template<>
 	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& component)
 	{
 	}
 }

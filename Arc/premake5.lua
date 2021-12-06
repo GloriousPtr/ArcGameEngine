@@ -40,7 +40,8 @@ project "Arc"
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.ImGuizmo}"
+		"%{IncludeDir.ImGuizmo}",
+		"%{IncludeDir.assimp}"
 	}
 
 	links
@@ -49,6 +50,7 @@ project "Arc"
 		"Glad",
 		"ImGui",
 		"yaml-cpp",
+		"assimp",
 		"opengl32.lib"
 	}
 

@@ -26,6 +26,7 @@
 //-----Renderer-----------------------------------
 #include "Arc/Renderer/Renderer.h"
 #include "Arc/Renderer/Renderer2D.h"
+#include "Arc/Renderer/Renderer3D.h"
 #include "Arc/Renderer/RenderCommand.h"
 
 #include "Arc/Renderer/Buffer.h"

@@ -19,7 +19,8 @@ namespace ArcEngine
 		Entity CreateEntity(const std::string& name = std::string());
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
 		void DestroyEntity(Entity entity);
-		bool HasEntity(uint32_t entity);
+		bool HasEntity(UUID uuid);
+		Entity GetEntity(UUID uuid);
 
 		void OnUpdateEditor(Timestep ts, EditorCamera& camera);
 		void OnUpdateRuntime(Timestep ts);
@@ -34,7 +35,7 @@ namespace ArcEngine
 		void OnComponentAdded(Entity entity, T& component);
 	private:
 		entt::registry m_Registry;
-		std::unordered_map<uint32_t, entt::entity> m_EntityMap;
+		std::unordered_map<UUID, entt::entity> m_EntityMap;
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 		bool m_ViewportDirty = true;
 		
