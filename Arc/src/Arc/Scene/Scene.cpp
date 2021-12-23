@@ -28,6 +28,8 @@ namespace ArcEngine
 
 	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
 	{
+		ARC_PROFILE_FUNCTION();
+
 		Entity entity = { m_Registry.create(), this };
 		m_EntityMap.emplace(uuid, entity);
 
@@ -45,9 +47,11 @@ namespace ArcEngine
 
 	void Scene::DestroyEntity(Entity entity)
 	{
-		entity.Deparent();
+		ARC_PROFILE_FUNCTION();
 
-		auto& children = entity.GetTransform().Children;
+		entity.Deparent();
+		auto children = entity.GetTransform().Children;
+
 		for (size_t i = 0; i < children.size(); i++)
 			DestroyEntity(GetEntity(children[i]));
 
@@ -57,19 +61,60 @@ namespace ArcEngine
 
 	bool Scene::HasEntity(UUID uuid)
 	{
+		ARC_PROFILE_FUNCTION();
+
 		return m_EntityMap.find(uuid) != m_EntityMap.end();
 	}
 
 	Entity Scene::GetEntity(UUID uuid)
 	{
+		ARC_PROFILE_FUNCTION();
+
 		if (m_EntityMap.find(uuid) != m_EntityMap.end())
 			return { m_EntityMap[uuid], this };
 
 		return {};
 	}
 
-	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
+	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera, Ref<Framebuffer> renderTarget)
 	{
+		ARC_PROFILE_FUNCTION();
+		
+		// Lights
+		std::vector<Entity> lights;
+		{
+			auto view = m_Registry.view<IDComponent, LightComponent>();
+			lights.reserve(view.size());
+			for (auto entity : view)
+			{
+				auto [id, light] = view.get<IDComponent, LightComponent>(entity);
+				lights.push_back(GetEntity(id.ID));
+			}
+		}
+		Entity skylight = {};
+		{
+			auto view = m_Registry.view<IDComponent, SkyLightComponent>();
+			for (auto entity : view)
+			{
+				auto [id, light] = view.get<IDComponent, SkyLightComponent>(entity);
+				skylight = GetEntity(id.ID);
+			}
+		}
+
+		Renderer3D::BeginScene(camera, skylight, lights);
+		// Meshes
+		{
+			auto view = m_Registry.view<IDComponent, MeshComponent>();
+			for (auto entity : view)
+			{
+				auto [id, mesh] = view.get<IDComponent, MeshComponent>(entity);
+				Entity e = GetEntity(id.ID);
+				if (mesh.VertexArray != nullptr)
+					Renderer3D::SubmitMesh((uint32_t)entity, mesh, e.GetWorldTransform());
+			}
+		}
+		Renderer3D::EndScene(renderTarget);
+		
 		Renderer2D::BeginScene(camera);
 		{
 			auto view = m_Registry.view<IDComponent, SpriteRendererComponent>();
@@ -80,22 +125,12 @@ namespace ArcEngine
 			}
 		}
 		Renderer2D::EndScene();
-
-		Renderer3D::BeginScene(camera);
-		{
-			auto view = m_Registry.view<IDComponent, MeshComponent>();
-			for (auto entity : view)
-			{
-				auto [id, mesh] = view.get<IDComponent, MeshComponent>(entity);
-				if (mesh.VertexArray != nullptr)
-					Renderer3D::DrawMesh((uint32_t)entity, mesh.VertexArray, mesh.DiffuseMap, GetEntity(id.ID).GetWorldTransform());
-			}
-		}
-		Renderer3D::EndScene();
 	}
 
 	void Scene::OnUpdateRuntime(Timestep ts)
 	{
+		ARC_PROFILE_FUNCTION();
+
 		// Update Scripts
 		{
 			m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
@@ -222,6 +257,16 @@ namespace ArcEngine
 
 	template<>
 	void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<SkyLightComponent>(Entity entity, SkyLightComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<LightComponent>(Entity entity, LightComponent& component)
 	{
 	}
 }

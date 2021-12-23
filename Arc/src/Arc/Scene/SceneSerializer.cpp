@@ -110,6 +110,14 @@ namespace ArcEngine
 			out << YAML::Key << "Translation" << YAML::Value << tc.Translation;
 			out << YAML::Key << "Rotation" << YAML::Value << tc.Rotation;
 			out << YAML::Key << "Scale" << YAML::Value << tc.Scale;
+			out << YAML::Key << "Parent" << YAML::Value << tc.Parent;
+
+			out << YAML::Key << "ChildrenCount" << YAML::Value << tc.Children.size();
+				out << YAML::Key << "Children";
+				out << YAML::BeginMap; // Children
+				for (size_t i = 0; i < tc.Children.size(); i++)
+					out << YAML::Key << i << YAML::Value << tc.Children[i];
+				out << YAML::EndMap; // Children
 
 			out << YAML::EndMap; // TransformComponent
 		}
@@ -150,6 +158,34 @@ namespace ArcEngine
 			out << YAML::Key << "TilingFactor" << YAML::Value << spriteRendererComponent.TilingFactor;
 
 			out << YAML::EndMap; // SpriteRendererComponent
+		}
+
+		if (entity.HasComponent<SkyLightComponent>())
+		{
+			out << YAML::Key << "SkyLightComponent";
+			out << YAML::BeginMap; // MeshComponent
+
+			auto& skyLightComponent = entity.GetComponent<SkyLightComponent>();
+			out << YAML::Key << "TextureFilepath" << YAML::Value << (skyLightComponent.Texture ? skyLightComponent.Texture->GetPath() : "");
+			out << YAML::Key << "Intensity" << YAML::Value << skyLightComponent.Intensity;
+
+			out << YAML::EndMap; // SkyLightComponent
+		}
+
+		if (entity.HasComponent<LightComponent>())
+		{
+			out << YAML::Key << "LightComponent";
+			out << YAML::BeginMap; // LightComponent
+
+			auto& lightComponent = entity.GetComponent<LightComponent>();
+			out << YAML::Key << "Type" << YAML::Value << (int) lightComponent.Type;
+			out << YAML::Key << "Color" << YAML::Value << lightComponent.Color;
+			out << YAML::Key << "Intensity" << YAML::Value << lightComponent.Intensity;
+			out << YAML::Key << "Constant" << YAML::Value << lightComponent.Constant;
+			out << YAML::Key << "Linear" << YAML::Value << lightComponent.Linear;
+			out << YAML::Key << "Quadratic" << YAML::Value << lightComponent.Quadratic;
+
+			out << YAML::EndMap; // LightComponent
 		}
 
 		out << YAML::EndMap; // Entity
@@ -219,6 +255,17 @@ namespace ArcEngine
 					tc.Translation = transformComponent["Translation"].as<glm::vec3>();
 					tc.Rotation = transformComponent["Rotation"].as<glm::vec3>();
 					tc.Scale = transformComponent["Scale"].as<glm::vec3>();
+					tc.Parent = transformComponent["Parent"].as<uint64_t>();
+
+					size_t childCount = transformComponent["ChildrenCount"].as<size_t>();
+					tc.Children.clear();
+					tc.Children.reserve(childCount);
+					auto children = transformComponent["Children"];
+					if (children && childCount > 0)
+					{
+						for (size_t i = 0; i < childCount; i++)
+							tc.Children.push_back(children[i].as<uint64_t>());
+					}
 				}
 
 				auto cameraComponent = entity["CameraComponent"];
@@ -250,6 +297,28 @@ namespace ArcEngine
 					if(!textureFilepath.empty())
 						src.SetTexture(textureFilepath);
 					src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
+				}
+
+				auto skyLightComponent = entity["SkyLightComponent"];
+				if (skyLightComponent)
+				{
+					auto& src = deserializedEntity.AddComponent<SkyLightComponent>();
+					std::string textureFilepath = skyLightComponent["TextureFilepath"].as<std::string>();
+					if(!textureFilepath.empty())
+						src.SetTexture(textureFilepath);
+					src.Intensity = skyLightComponent["Intensity"].as<float>();
+				}
+
+				auto lightComponent = entity["LightComponent"];
+				if (lightComponent)
+				{
+					auto& src = deserializedEntity.AddComponent<LightComponent>();
+					src.Type = (LightComponent::LightType) lightComponent["Type"].as<int>();
+					src.Color = lightComponent["Color"].as<glm::vec3>();
+					src.Intensity = lightComponent["Intensity"].as<float>();
+					src.Constant = lightComponent["Constant"].as<float>();
+					src.Linear = lightComponent["Linear"].as<float>();
+					src.Quadratic = lightComponent["Quadratic"].as<float>();
 				}
 			}
 		}

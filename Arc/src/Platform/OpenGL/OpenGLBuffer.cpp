@@ -90,4 +90,50 @@ namespace ArcEngine
 		
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
+
+	//////////////////////////////////////////////////////////////////////
+	// UniformBuffer /////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////
+	
+	OpenGLUniformBuffer::OpenGLUniformBuffer()
+	{
+		glCreateBuffers(1, &m_RendererID);
+		glBindBuffer(GL_UNIFORM_BUFFER, m_RendererID);
+	}
+
+	OpenGLUniformBuffer::~OpenGLUniformBuffer()
+	{
+		glDeleteBuffers(1, &m_RendererID);
+	}
+
+	void OpenGLUniformBuffer::Bind() const
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, m_RendererID);
+	}
+
+	void OpenGLUniformBuffer::Unbind() const
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}
+
+	void OpenGLUniformBuffer::SetData(void* data, uint32_t offset, uint32_t size)
+	{
+		glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
+	}
+
+	void OpenGLUniformBuffer::SetLayout(const BufferLayout& layout, uint32_t blockIndex, uint32_t count)
+	{
+		m_Layout = layout;
+
+		uint32_t size = 0;
+		for (const auto& element : m_Layout)
+			size += ShaderDataTypeSize(element.Type);
+
+		size *= count;
+
+		glBindBuffer(GL_UNIFORM_BUFFER, m_RendererID);
+		glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_STATIC_DRAW);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		glBindBufferRange(GL_UNIFORM_BUFFER, blockIndex, m_RendererID, 0, size);
+	}
 }

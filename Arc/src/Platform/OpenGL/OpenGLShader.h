@@ -16,6 +16,8 @@ namespace ArcEngine
 		OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
 		virtual ~OpenGLShader();
 
+		virtual void Recompile(const std::string& filepath);
+
 		virtual void Bind() const;
 		virtual void Unbind() const;
 
@@ -25,6 +27,7 @@ namespace ArcEngine
 		virtual void SetFloat3(const std::string& name, const glm::vec3& value) override;
 		virtual void SetFloat4(const std::string& name, const glm::vec4& value) override;
 		virtual void SetMat4(const std::string& name, const glm::mat4& value) override;
+		virtual void SetUniformBlock(const std::string& name, uint32_t blockIndex) override;
 
 		virtual const std::string& GetName() const override { return m_Name; }
 		

@@ -21,6 +21,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_FUNCTION();
 
+		m_Application = &Application::Get();
 		m_ActiveScene = CreateRef<Scene>();
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
@@ -112,17 +113,31 @@ namespace ArcEngine
 				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
 					SaveSceneAs();
 				
-				if (ImGui::MenuItem("Exit")) Application::Get().Close();
+				if (ImGui::MenuItem("Exit"))
+					m_Application->Close();
+				
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Shaders"))
+			{
+				if (ImGui::MenuItem("Reload Shaders"))
+				{
+					Renderer3D::GetShaderLibrary().ReloadAll();
+					Renderer3D::Init();
+				}
+
 				ImGui::EndMenu();
 			}
 
 			ImGui::EndMenuBar();
 		}
 
+		m_RendererSettingsPanel.OnImGuiRender();
 		m_SceneHierarchyPanel.OnImGuiRender();
 		m_MainSceneViewport.OnImGuiRender();
 
-		Application::Get().GetImGuiLayer()->SetBlockEvents(false);
+		m_Application->GetImGuiLayer()->SetBlockEvents(false);
 
 		ImGui::Begin("Stats");
 
@@ -145,6 +160,10 @@ namespace ArcEngine
 		}
 		ImGui::Text("FrameTime: %.3f ms", ft);
 		ImGui::Text("FPS: %d", (int)frameRate);
+
+		bool isVsync = m_Application->GetWindow().IsVSync();
+		if (ImGui::Checkbox("VSync", &isVsync))
+			m_Application->GetWindow().SetVSync(isVsync);
 
 		ImGui::End();
 		

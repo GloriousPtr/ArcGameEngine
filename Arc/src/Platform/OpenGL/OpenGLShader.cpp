@@ -53,6 +53,13 @@ namespace ArcEngine
 		glDeleteProgram(m_RendererID);
 	}
 
+	void OpenGLShader::Recompile(const std::string& filepath)
+	{
+		std::string source = ReadFile(filepath);
+		auto shaderSources = PreProcess(source);
+		Compile(shaderSources);
+	}
+
 	void OpenGLShader::Bind() const
 	{
 		ARC_PROFILE_FUNCTION();
@@ -107,6 +114,11 @@ namespace ArcEngine
 		ARC_PROFILE_FUNCTION();
 		
 		UploadUniformMat4(name, value);
+	}
+
+	void OpenGLShader::SetUniformBlock(const std::string& name, uint32_t blockIndex)
+	{
+		glUniformBlockBinding(m_RendererID, glGetUniformBlockIndex(m_RendererID, name.c_str()), blockIndex);
 	}
 
 	void OpenGLShader::UploadUniformInt(const std::string& name, int value)

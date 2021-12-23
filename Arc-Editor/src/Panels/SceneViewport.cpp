@@ -80,15 +80,8 @@ namespace ArcEngine
 			m_LastMousePosition = m_MousePosition;
 		}
 
-		//Render
-		m_Framebuffer->Bind();
-		Renderer2D::ResetStats();
-		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
-		RenderCommand::Clear();
-		m_Framebuffer->Bind();
-
 		// Update scene
-		scene->OnUpdateEditor(timestep, m_EditorCamera);
+		scene->OnUpdateEditor(timestep, m_EditorCamera, m_Framebuffer);
 
 		if (!ImGuizmo::IsUsing() && !ImGui::IsMouseDown(ImGuiMouseButton_Right))
 		{
@@ -134,12 +127,11 @@ namespace ArcEngine
 			if(mouseX >= 0 && mouseY >= 0 && mouseX < viewportWidth && mouseY < viewportHeight)
 			{
 				int pixelData = scene->GetPixelDataAtPoint(mouseX, mouseY);
-				const Entity selectedEntity = pixelData < 0 || !scene->HasEntity(pixelData) ? Entity() : Entity((entt::entity)pixelData, scene.get());
+				ARC_ERROR(pixelData);
+				const Entity selectedEntity = pixelData < 0 || !scene->HasEntity(pixelData) ? Entity() : scene->GetEntity(pixelData);
 				m_SceneHierarchyPanel->SetSelectedEntity(selectedEntity);
 			}
 		}
-		
-		m_Framebuffer->Unbind();
 	}
 
 	void SceneViewport::OnImGuiRender()

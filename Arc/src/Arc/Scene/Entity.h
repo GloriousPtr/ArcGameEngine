@@ -49,12 +49,16 @@ namespace ArcEngine
 		
 		Entity GetParent()
 		{
+			ARC_PROFILE_FUNCTION();
+
 			auto& transform = GetTransform();
 			return transform.Parent != 0 ? m_Scene->GetEntity(transform.Parent) : Entity {};
 		}
 
 		void SetParent(Entity parent)
 		{
+			ARC_PROFILE_FUNCTION();
+
 			ARC_ASSERT(m_Scene->m_EntityMap.find(parent.GetUUID()) != m_Scene->m_EntityMap.end(), "Parent is not in the same scene as entity");
 			Deparent();
 			
@@ -65,6 +69,8 @@ namespace ArcEngine
 
 		void Deparent()
 		{
+			ARC_PROFILE_FUNCTION();
+
 			auto& transform = GetTransform();
 			if (transform.Parent == 0)
 				return;
@@ -85,6 +91,8 @@ namespace ArcEngine
 		
 		glm::mat4 GetWorldTransform()
 		{
+			ARC_PROFILE_FUNCTION();
+
 			auto& transform = GetTransform();
 			glm::mat4 parentTransform = glm::mat4(1.0f);
 			if (transform.Parent != 0)
@@ -95,6 +103,8 @@ namespace ArcEngine
 
 		glm::mat4 GetLocalTransform()
 		{
+			ARC_PROFILE_FUNCTION();
+
 			auto& transform = GetTransform();
 			return glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);
 		}

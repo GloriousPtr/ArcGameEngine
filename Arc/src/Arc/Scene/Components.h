@@ -69,7 +69,11 @@ namespace ArcEngine
 			Texture = Texture2D::Create(filepath);
 			TextureFilepath = filepath;
 		}
-		void RemoveTexture() { Texture = nullptr; }
+		void RemoveTexture()
+		{
+			Texture = nullptr;
+			TextureFilepath = "";
+		}
 	};
 
 	struct CameraComponent
@@ -102,8 +106,63 @@ namespace ArcEngine
 	{
 		std::string Filepath;
 		Ref<VertexArray> VertexArray;
-		Ref<Texture2D> DiffuseMap = nullptr;
+
+		glm::vec4 AlbedoColor = glm::vec4(1.0f);
+		float NormalStrength = 0.5f;
+		float Metallic = 0.5f;
+		float Roughness = 0.5f;
+		float AO = 0.5f;
+		glm::vec3 EmissiveColor = glm::vec3(0.0f);
+		float EmissiveIntensity = 5.0f;
+
+		bool UseAlbedoMap = false;
+		bool UseNormalMap = false;
+		bool UseMetallicMap = false;
+		bool UseRoughnessMap = false;
+		bool UseOcclusionMap = false;
+		bool UseEmissiveMap = false;
+
+		Ref<Texture2D> AlbedoMap = nullptr;
+		Ref<Texture2D> NormalMap = nullptr;
+		Ref<Texture2D> MetallicMap = nullptr;
+		Ref<Texture2D> RoughnessMap = nullptr;
+		Ref<Texture2D> AmbientOcclusionMap = nullptr;
+		Ref<Texture2D> EmissiveMap = nullptr;
 
 		MeshComponent() = default;
+		MeshComponent(const MeshComponent&) = default;
+	};
+
+	struct SkyLightComponent
+	{
+		Ref<TextureCubemap> Texture = nullptr;
+		float Intensity = 3.0f;
+
+		SkyLightComponent() = default;
+		SkyLightComponent(const SkyLightComponent&) = default;
+		void SetTexture(std::string& filepath)
+		{
+			Texture = TextureCubemap::Create(filepath);
+		}
+		void RemoveTexture()
+		{
+			Texture = nullptr;
+		}
+	};
+
+	struct LightComponent
+	{
+		enum class LightType { Directional = 0, Point };
+
+		LightType Type;
+		glm::vec3 Color = glm::vec3(1.0f);
+		float Intensity = 20.0f;
+
+		float Constant = 1.0f;
+		float Linear = 0.09f;
+		float Quadratic = 0.032f;
+
+		LightComponent() = default;
+		LightComponent(const LightComponent&) = default;
 	};
 }

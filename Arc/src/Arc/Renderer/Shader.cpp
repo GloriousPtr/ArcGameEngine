@@ -46,6 +46,7 @@ namespace ArcEngine
 	{
 		auto shader = Shader::Create(filepath);
 		Add(shader);
+		m_ShaderPaths[shader->GetName()] = filepath;
 		return shader;
 	}
 
@@ -53,7 +54,22 @@ namespace ArcEngine
 	{
 		auto shader = Shader::Create(filepath);
 		Add(name, shader);
+		m_ShaderPaths[name] = filepath;
 		return shader;
+	}
+
+	void ShaderLibrary::ReloadAll()
+	{
+		std::string shaderName;
+		for (auto& it = m_Shaders.begin(); it != m_Shaders.end(); it++)
+		{
+			shaderName = it->first;
+
+			if (m_ShaderPaths.find(shaderName) == m_ShaderPaths.end())
+				continue;
+
+			it->second->Recompile(m_ShaderPaths[shaderName]);
+		}
 	}
 
 	Ref<Shader> ShaderLibrary::Get(const std::string& name)

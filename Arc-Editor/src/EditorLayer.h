@@ -4,6 +4,7 @@
 
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/SceneViewport.h"
+#include "Panels/RendererSettingsPanel.h"
 
 
 namespace ArcEngine
@@ -29,6 +30,7 @@ namespace ArcEngine
 		void SaveSceneAs();
 	private:
 
+		Application* m_Application;
 		Ref<Scene> m_ActiveScene;
 		
 		float frameTime = 0.0f;
@@ -36,5 +38,6 @@ namespace ArcEngine
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		SceneViewport m_MainSceneViewport;
+		RendererSettingsPanel m_RendererSettingsPanel;
 	};
 }
