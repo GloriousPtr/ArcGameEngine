@@ -711,6 +711,26 @@ namespace ArcEngine
 			}
 			ImGui::PopStyleColor(3);
 
+			const char* cullModeTypeStrings[] = { "Front", "Back", "Double Sided" };
+			const char* currentCullModeTypeStrings = cullModeTypeStrings[(int)component.CullMode];
+			if(ImGui::BeginCombo("Cull Mode", currentCullModeTypeStrings))
+			{
+				for (int i = 0; i < 3; i++)
+				{
+					bool isSelected = currentCullModeTypeStrings == cullModeTypeStrings[i];
+					if(ImGui::Selectable(cullModeTypeStrings[i], isSelected))
+					{
+						currentCullModeTypeStrings = cullModeTypeStrings[i];
+						component.CullMode = (MeshComponent::CullModeType)i;
+					}
+
+					if(isSelected)
+						ImGui::SetItemDefaultFocus();
+				}
+				
+				ImGui::EndCombo();
+			}
+
 			ImGui::ColorEdit4("Albedo Color", glm::value_ptr(component.AlbedoColor));
 			ImGui::SliderFloat("Normal Strength", &component.NormalStrength, 0.0f, 1.0f);
 			ImGui::SliderFloat("Metallic", &component.Metallic, 0.0f, 1.0f);

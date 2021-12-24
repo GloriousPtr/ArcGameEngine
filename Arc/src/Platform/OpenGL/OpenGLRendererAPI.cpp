@@ -41,8 +41,6 @@ namespace ArcEngine
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glEnable(GL_DEPTH_TEST);
-
-		glEnable(GL_CULL_FACE);
 	}
 
 	void OpenGLRendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
@@ -70,6 +68,16 @@ namespace ArcEngine
 	void OpenGLRendererAPI::Draw(uint32_t first, uint32_t count)
 	{
 		glDrawArrays(GL_TRIANGLES, first, count);
+	}
+
+	void OpenGLRendererAPI::EnableCulling()
+	{
+		glEnable(GL_CULL_FACE);
+	}
+
+	void OpenGLRendererAPI::DisableCulling()
+	{
+		glDisable(GL_CULL_FACE);
 	}
 
 	void OpenGLRendererAPI::FrontCull()

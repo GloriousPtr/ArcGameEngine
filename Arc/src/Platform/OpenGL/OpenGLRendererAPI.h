@@ -14,6 +14,8 @@ namespace ArcEngine
 		virtual void Clear() override;
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) override;
 		virtual void Draw(uint32_t first, uint32_t count) override;
+		virtual void EnableCulling() override;
+		virtual void DisableCulling() override;
 		virtual void FrontCull() override;
 		virtual void BackCull() override;
 		virtual void SetDepthMask(bool value) override;

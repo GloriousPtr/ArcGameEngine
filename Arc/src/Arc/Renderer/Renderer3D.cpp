@@ -14,6 +14,8 @@ namespace ArcEngine
 		glm::mat4 Transform = glm::mat4(1.0f);
 		Ref<VertexArray> VertexArray = nullptr;
 		
+		MeshComponent::CullModeType CullMode;
+
 		glm::vec4 AlbedoColor = glm::vec4(1.0f);
 		float NormalStrength = 0.5f;
 		float Metallic = 0.5f;
@@ -199,6 +201,8 @@ namespace ArcEngine
 		mesh.VertexArray = meshComponent.VertexArray;
 		mesh.Transform = transform;
 
+		mesh.CullMode = meshComponent.CullMode;
+
 		mesh.AlbedoColor = meshComponent.AlbedoColor;
 		mesh.NormalStrength = meshComponent.NormalStrength;
 		mesh.Metallic = meshComponent.Metallic;
@@ -316,6 +320,7 @@ namespace ArcEngine
 			}
 		}
 
+		MeshComponent::CullModeType currentCullMode = MeshComponent::CullModeType::Unknown;
 		for (auto it = meshes.rbegin(); it != meshes.rend(); it++)
 		{
 			MeshData* meshData = &(*it);
@@ -370,6 +375,28 @@ namespace ArcEngine
 
 			meshData->VertexArray->Bind();
 			meshData->VertexArray->GetIndexBuffer()->Bind();
+
+			if (currentCullMode != meshData->CullMode)
+			{
+				currentCullMode = meshData->CullMode;
+				switch (currentCullMode)
+				{
+				case MeshComponent::CullModeType::DoubleSided:
+					RenderCommand::DisableCulling();
+					break;
+				case MeshComponent::CullModeType::Front:
+					RenderCommand::EnableCulling();
+					RenderCommand::FrontCull();
+					break;
+				case MeshComponent::CullModeType::Back:
+					RenderCommand::EnableCulling();
+					RenderCommand::BackCull();
+					break;
+				default:
+					ARC_CORE_ASSERT(false);
+				}
+			}
+
 			RenderCommand::DrawIndexed(meshData->VertexArray);
 		}
 

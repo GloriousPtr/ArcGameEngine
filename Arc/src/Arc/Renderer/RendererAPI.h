@@ -24,6 +24,8 @@ namespace ArcEngine
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) = 0;
 		virtual void Draw(uint32_t first, uint32_t count) = 0;
 
+		virtual void EnableCulling() = 0;
+		virtual void DisableCulling() = 0;
 		virtual void FrontCull() = 0;
 		virtual void BackCull() = 0;
 		virtual void SetDepthMask(bool value) = 0;

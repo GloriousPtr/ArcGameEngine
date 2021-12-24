@@ -36,6 +36,16 @@ namespace ArcEngine
 			s_RendererAPI->Draw(first, count);
 		}
 
+		inline static void EnableCulling()
+		{
+			s_RendererAPI->EnableCulling();
+		}
+
+		inline static void DisableCulling()
+		{
+			s_RendererAPI->DisableCulling();
+		}
+
 		inline static void FrontCull()
 		{
 			s_RendererAPI->FrontCull();

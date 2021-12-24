@@ -107,6 +107,10 @@ namespace ArcEngine
 		std::string Filepath;
 		Ref<VertexArray> VertexArray;
 
+		enum class CullModeType { Unknown = -1, Front, Back, DoubleSided };
+
+		CullModeType CullMode = CullModeType::Back;
+
 		glm::vec4 AlbedoColor = glm::vec4(1.0f);
 		float NormalStrength = 0.5f;
 		float Metallic = 0.5f;
