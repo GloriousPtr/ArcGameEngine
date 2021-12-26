@@ -31,9 +31,14 @@ namespace ArcEngine
 			s_RendererAPI->DrawIndexed(vertexArray, indexCount);
 		}
 
-		inline static void Draw(uint32_t first, uint32_t count)
+		inline static void Draw(const Ref<VertexArray>& vertexArray, uint32_t count)
 		{
-			s_RendererAPI->Draw(first, count);
+			s_RendererAPI->Draw(vertexArray, count);
+		}
+
+		inline static void DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
+		{
+			s_RendererAPI->DrawLines(vertexArray, vertexCount);
 		}
 
 		inline static void EnableCulling()

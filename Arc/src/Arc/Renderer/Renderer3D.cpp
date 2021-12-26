@@ -169,7 +169,7 @@ namespace ArcEngine
 	void Renderer3D::BeginScene(const EditorCamera& camera, Entity cubemap, std::vector<Entity>& lights)
 	{
 		ARC_PROFILE_FUNCTION();
-
+		
 		cameraView = camera.GetViewMatrix();
 		cameraProjection = camera.GetProjection();
 
@@ -189,8 +189,7 @@ namespace ArcEngine
 
 	void Renderer3D::DrawCube()
 	{
-		cubeVertexArray->Bind();
-		RenderCommand::Draw(0, 36);
+		RenderCommand::Draw(cubeVertexArray, 36);
 	}
 
 	void Renderer3D::SubmitMesh(uint32_t entityID, MeshComponent& meshComponent, const glm::mat4& transform)
@@ -294,8 +293,6 @@ namespace ArcEngine
 	void Renderer3D::RenderPass(Ref<Framebuffer>& renderTarget)
 	{
 		renderTarget->Bind();
-		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
-		RenderCommand::Clear();
 
 		float skylightIntensity = 0.0f;
 		SkyLightComponent* skylightComponent = nullptr;
@@ -373,9 +370,6 @@ namespace ArcEngine
 			shader->SetMat4("u_DirLightView", dirLightView);
 			shader->SetMat4("u_DirLightViewProj", dirLightViewProj);
 
-			meshData->VertexArray->Bind();
-			meshData->VertexArray->GetIndexBuffer()->Bind();
-
 			if (currentCullMode != meshData->CullMode)
 			{
 				currentCullMode = meshData->CullMode;
@@ -439,8 +433,6 @@ namespace ArcEngine
 				MeshData* meshData = &(*it);
 
 				shadowMapShader->SetMat4("u_Model", meshData->Transform);
-				meshData->VertexArray->Bind();
-				meshData->VertexArray->GetIndexBuffer()->Bind();
 				RenderCommand::DrawIndexed(meshData->VertexArray);
 			}
 

@@ -5,6 +5,7 @@
 #include "Arc/Scene/SceneCamera.h"
 #include "Arc/Renderer/Buffer.h"
 #include "Arc/Renderer/VertexArray.h"
+#include "Arc/Utils/AABB.h"
 
 #include <glm/glm.hpp>
 
@@ -106,6 +107,7 @@ namespace ArcEngine
 	{
 		std::string Filepath;
 		Ref<VertexArray> VertexArray;
+		AABB BoundingBox;
 
 		enum class CullModeType { Unknown = -1, Front, Back, DoubleSided };
 

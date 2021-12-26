@@ -144,11 +144,14 @@ namespace ArcEngine
 		StartBatch();
 	}
 
-	void Renderer2D::EndScene()
+	void Renderer2D::EndScene(Ref<Framebuffer> renderTarget)
 	{
 		ARC_PROFILE_FUNCTION();
 		
+		renderTarget->Bind();
+		RenderCommand::DisableCulling();
 		Flush();
+		renderTarget->Unbind();
 	}
 
 	void Renderer2D::StartBatch()

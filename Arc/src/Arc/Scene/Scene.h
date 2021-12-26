@@ -24,7 +24,7 @@ namespace ArcEngine
 		Entity GetEntity(UUID uuid);
 
 		void OnUpdateEditor(Timestep ts, EditorCamera& camera, Ref<Framebuffer> renderTarget);
-		void OnUpdateRuntime(Timestep ts);
+		void OnUpdateRuntime(Timestep ts, Ref<Framebuffer> renderTarget);
 		void OnViewportResize(uint32_t width, uint32_t height);
 		void MarkViewportDirty() { m_ViewportDirty = true; }
 

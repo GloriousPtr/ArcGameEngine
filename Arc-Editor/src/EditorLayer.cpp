@@ -40,6 +40,8 @@ namespace ArcEngine
 
 		frameTime = ts;
 
+		Renderer2D::ResetStats();
+
 		m_MainSceneViewport.OnUpdate(m_ActiveScene, ts);
 	}
 

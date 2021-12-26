@@ -60,14 +60,21 @@ namespace ArcEngine
 
 	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
 	{
+		vertexArray->Bind();
 		const uint32_t count = indexCount != 0 ? indexCount : vertexArray->GetIndexBuffer()->GetCount();
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
-		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	void OpenGLRendererAPI::Draw(uint32_t first, uint32_t count)
+	void OpenGLRendererAPI::Draw(const Ref<VertexArray>& vertexArray, uint32_t count)
 	{
-		glDrawArrays(GL_TRIANGLES, first, count);
+		vertexArray->Bind();
+		glDrawArrays(GL_TRIANGLES, 0, count);
+	}
+
+	void OpenGLRendererAPI::DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
+	{
+		vertexArray->Bind();
+		glDrawArrays(GL_LINES, 0, vertexCount);
 	}
 
 	void OpenGLRendererAPI::EnableCulling()

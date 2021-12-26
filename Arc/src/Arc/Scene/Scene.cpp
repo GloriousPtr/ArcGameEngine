@@ -124,10 +124,10 @@ namespace ArcEngine
 				Renderer2D::DrawQuad((uint32_t)entity, GetEntity(id.ID).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
 			}
 		}
-		Renderer2D::EndScene();
+		Renderer2D::EndScene(renderTarget);
 	}
 
-	void Scene::OnUpdateRuntime(Timestep ts)
+	void Scene::OnUpdateRuntime(Timestep ts, Ref<Framebuffer> renderTarget)
 	{
 		ARC_PROFILE_FUNCTION();
 
@@ -177,7 +177,7 @@ namespace ArcEngine
 				Renderer2D::DrawQuad((uint32_t)entity, GetEntity(id.ID).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
 			}
 
-			Renderer2D::EndScene();
+			Renderer2D::EndScene(renderTarget);
 		}
 	}
 

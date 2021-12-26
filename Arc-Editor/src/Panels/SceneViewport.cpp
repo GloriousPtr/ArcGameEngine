@@ -81,7 +81,11 @@ namespace ArcEngine
 		}
 
 		// Update scene
+		m_Framebuffer->Bind();
+		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+		RenderCommand::Clear();
 		scene->OnUpdateEditor(timestep, m_EditorCamera, m_Framebuffer);
+		m_Framebuffer->Unbind();
 
 		if (!ImGuizmo::IsUsing() && !ImGui::IsMouseDown(ImGuiMouseButton_Right))
 		{
@@ -170,6 +174,8 @@ namespace ArcEngine
 				// Entity Transform
 				auto& tc = selectedEntity.GetComponent<TransformComponent>();
 				glm::mat4 transform = selectedEntity.GetWorldTransform();
+				if (selectedEntity.HasComponent<MeshComponent>())
+					transform = glm::translate(transform, selectedEntity.GetComponent<MeshComponent>().BoundingBox.GetPosition());
 
 				// Snapping
 				const bool snap = ImGui::IsKeyDown(Key::LeftControl);

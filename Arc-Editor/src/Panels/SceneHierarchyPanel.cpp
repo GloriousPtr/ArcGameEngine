@@ -356,13 +356,20 @@ namespace ArcEngine
 		vertices.reserve(count);
 
 		std::vector<uint32_t> indices;
-
+		AABB boundingBox;
 		for(size_t i = 0; i < mesh->mNumVertices; i++)
 		{
 			auto vertexPosition = mesh->mVertices[i];
 			vertices.push_back(vertexPosition.x);
 			vertices.push_back(vertexPosition.y);
 			vertices.push_back(vertexPosition.z);
+
+			boundingBox.Min.x = glm::min(vertexPosition.x, boundingBox.Min.x);
+			boundingBox.Min.y = glm::min(vertexPosition.y, boundingBox.Min.y);
+			boundingBox.Min.z = glm::min(vertexPosition.z, boundingBox.Min.z);
+			boundingBox.Max.x = glm::max(vertexPosition.x, boundingBox.Max.x);
+			boundingBox.Max.y = glm::max(vertexPosition.y, boundingBox.Max.y);
+			boundingBox.Max.z = glm::max(vertexPosition.z, boundingBox.Max.z);
 
 			if(mesh->mTextureCoords[0])
             {
@@ -392,6 +399,8 @@ namespace ArcEngine
 				indices.push_back(face.mIndices[j]);
 		}
 
+		Ref<VertexArray> vertexArray = VertexArray::Create();
+
 		Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(&(vertices[0]), (sizeof(float) * vertices.size()));
 		vertexBuffer->SetLayout({
 			{ ShaderDataType::Float3, "a_Position" },
@@ -399,11 +408,9 @@ namespace ArcEngine
 			{ ShaderDataType::Float3, "a_Normal" },
 			{ ShaderDataType::Float, "a_ObjectID" }
 		});
+		vertexArray->AddVertexBuffer(vertexBuffer);
 
 		Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(&(indices[0]), indices.size());
-
-		Ref<VertexArray> vertexArray = VertexArray::Create();
-		vertexArray->AddVertexBuffer(vertexBuffer);
 		vertexArray->SetIndexBuffer(indexBuffer);
 
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -420,6 +427,7 @@ namespace ArcEngine
 		
 		meshComponent.Filepath = filepath;
 		meshComponent.VertexArray = vertexArray;
+		meshComponent.BoundingBox = boundingBox;
 
 		if (diffuseMaps.size() > 0)
 		{
