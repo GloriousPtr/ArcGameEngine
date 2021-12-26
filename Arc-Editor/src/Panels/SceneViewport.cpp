@@ -1,10 +1,11 @@
 #include "SceneViewport.h"
 
+#include "Arc/Renderer/Framebuffer.h"
+#include "Arc/Math/Math.h"
+
 #include <imgui/imgui.h>
 #include <ImGuizmo.h>
 #include <glm/gtc/type_ptr.hpp>
-
-#include "Arc/Math/Math.h"
 
 namespace ArcEngine
 {
@@ -12,10 +13,10 @@ namespace ArcEngine
 	SceneViewport::SceneViewport()
 	{
 		FramebufferSpecification fbSpec;
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth, FramebufferTextureFormat::R32I };
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
-		m_IDFrameBuffer = Framebuffer::Create(fbSpec);
 
 		m_EditorCamera.SetViewportSize(1280, 720);
 
@@ -34,7 +35,6 @@ namespace ArcEngine
 			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_IDFrameBuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
@@ -155,7 +155,7 @@ namespace ArcEngine
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 		
-		const uint64_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
+		const uint64_t textureID = m_Framebuffer->GetColorAttachmentRendererID(0);
 		ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 		// Gizmos

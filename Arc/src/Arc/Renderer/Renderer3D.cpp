@@ -61,6 +61,7 @@ namespace ArcEngine
 	void Renderer3D::Init()
 	{
 		FramebufferSpecification spec;
+		spec.Attachments = { FramebufferTextureFormat::Depth };
 		spec.Width = 4096;
 		spec.Height = 4096;
 		shadowMapFramebuffer = Framebuffer::Create(spec);
