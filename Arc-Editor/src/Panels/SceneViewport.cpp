@@ -159,7 +159,7 @@ namespace ArcEngine
 		ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 		// Gizmos
-		if (m_ViewportHovered && m_SceneHierarchyPanel && m_GizmoType != -1)
+		if (m_SceneHierarchyPanel && m_GizmoType != -1)
 		{
 			Entity selectedEntity = m_SceneHierarchyPanel->GetSelectedEntity();
 			if(selectedEntity)
@@ -187,7 +187,7 @@ namespace ArcEngine
 				
 				ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), (ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
 
-				if (ImGuizmo::IsUsing())
+				if (m_ViewportHovered && ImGuizmo::IsUsing())
 				{
 					glm::mat4& parentWorldTransform = tc.Parent != 0 ? selectedEntity.GetParent().GetWorldTransform() : glm::mat4(1.0f);
 					glm::vec3 translation, rotation, scale;
