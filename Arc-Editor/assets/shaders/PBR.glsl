@@ -15,6 +15,7 @@ layout (std140, binding = 0) uniform Camera
     mat4 u_ViewProjection;
 
     vec4 u_CameraPosition;
+	float u_Exposure;
 };
 
 uniform mat4 u_Model;
@@ -25,7 +26,7 @@ layout (location = 1) out vec2 v_TexCoord;
 layout (location = 2) out vec3 v_Normal;
 layout (location = 3) out vec3 v_CameraPosition;
 layout (location = 4) out vec4 v_DirLightViewProj;
-layout (location = 5) out flat int v_ObjectID;
+layout (location = 6) out flat int v_ObjectID;
 
 void main()
 {
@@ -49,6 +50,16 @@ void main()
 const float PI = 3.141592653589793;
 
 const int MAX_NUM_LIGHTS = 25;
+
+layout (std140, binding = 0) uniform Camera
+{
+    mat4 u_View;
+    mat4 u_Projection;
+    mat4 u_ViewProjection;
+
+    vec4 u_CameraPosition;
+	float u_Exposure;
+};
 
 struct Light
 {
@@ -107,7 +118,7 @@ layout (location = 1) in vec2 v_TexCoord;
 layout (location = 2) in vec3 v_Normal;
 layout (location = 3) in vec3 v_CameraPosition;
 layout (location = 4) in vec4 v_DirLightViewProj;
-layout (location = 5) in flat int v_ObjectID;
+layout (location = 6) in flat int v_ObjectID;
 
 // =========================================
 layout (location = 0) out vec4 fragColor;
@@ -270,7 +281,7 @@ void main()
     vec3 color = ambient + Lo + emission;
 
     // HDR tonemapping
-    color = color / (color + vec3(1.0));
+    color = vec3(1.0) - exp(-color * u_Exposure);
     // apply gamma correction
     color = pow(color, vec3(1.0/2.2));
 

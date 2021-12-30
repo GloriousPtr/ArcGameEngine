@@ -154,9 +154,32 @@ namespace ArcEngine
 
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
-		
+
 		const uint64_t textureID = m_Framebuffer->GetColorAttachmentRendererID(0);
 		ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+
+		ImGui::SetCursorPos(ImVec2(viewportMaxRegion.x - 100, viewportMinRegion.y));
+
+		static bool settingsOpened = false;
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
+		if (ImGui::Button("Settings"))
+		{
+			settingsOpened = !settingsOpened;
+		}
+		
+		if (settingsOpened)
+		{
+			float exposure = m_EditorCamera.GetExposure();
+			if (ImGui::DragFloat("Exposure", &exposure, 0.1f))
+			{
+				if (exposure > 0.0f)
+					m_EditorCamera.SetExposure(exposure);
+			}
+		}
+		ImGui::PopStyleColor(3);
 
 		// Gizmos
 		if (m_SceneHierarchyPanel && m_GizmoType != -1)

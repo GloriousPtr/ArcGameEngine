@@ -20,6 +20,7 @@ namespace ArcEngine
 		void SetPosition(const glm::vec3& position) { m_Position = position; }
 		void SetYaw(float yaw) { m_Yaw = yaw; }
 		void SetPitch(float pitch) { m_Pitch = pitch; }
+		void SetExposure(float exposure) { m_Exposure = exposure; }
 
 		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
 		const glm::mat4& GetProjectionMatrix() const { return m_Projection; }
@@ -31,6 +32,7 @@ namespace ArcEngine
 		const glm::vec3& GetUp() const { return m_Up; }
 		const float GetYaw() const { return m_Yaw; }
 		const float GetPitch() const { return m_Pitch; }
+		const float GetExposure() const { return m_Exposure; }
 
 	private:
 		float m_Fov = 45.0f;
@@ -47,6 +49,8 @@ namespace ArcEngine
 		float m_Pitch = 0.0f;
 
 		glm::mat4 m_ViewMatrix = glm::mat4(1.0f);
+
+		float m_Exposure = 1.0f;
 	};
 
 }

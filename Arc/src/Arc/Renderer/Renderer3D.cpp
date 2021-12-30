@@ -71,7 +71,8 @@ namespace ArcEngine
 			{ ShaderDataType::Mat4, "u_View" },
 			{ ShaderDataType::Mat4, "u_Projection" },
 			{ ShaderDataType::Mat4, "u_ViewProjection" },
-			{ ShaderDataType::Float4, "u_CameraPosition" }
+			{ ShaderDataType::Float4, "u_CameraPosition" },
+			{ ShaderDataType::Float, "u_Exposure" }
 		}, 0);
 
 		ubLights = UniformBuffer::Create();
@@ -244,10 +245,23 @@ namespace ArcEngine
 	void Renderer3D::SetupCameraData(const EditorCamera& camera)
 	{
 		ubCamera->Bind();
-		ubCamera->SetData((void*)glm::value_ptr(camera.GetViewMatrix()), 0, sizeof(glm::mat4));
-		ubCamera->SetData((void*)glm::value_ptr(camera.GetProjection()), sizeof(glm::mat4), sizeof(glm::mat4));
-		ubCamera->SetData((void*)glm::value_ptr(camera.GetViewProjection()), 2 * sizeof(glm::mat4), sizeof(glm::mat4));
-		ubCamera->SetData((void*)glm::value_ptr(camera.GetPosition()), 3 * sizeof(glm::mat4), sizeof(glm::vec4));
+
+		uint32_t offset = 0;
+
+		ubCamera->SetData((void*)glm::value_ptr(camera.GetViewMatrix()), offset, sizeof(glm::mat4));
+		offset += sizeof(glm::mat4);
+
+		ubCamera->SetData((void*)glm::value_ptr(camera.GetProjection()), offset, sizeof(glm::mat4));
+		offset += sizeof(glm::mat4);
+
+		ubCamera->SetData((void*)glm::value_ptr(camera.GetViewProjection()), offset, sizeof(glm::mat4));
+		offset += sizeof(glm::mat4);
+		
+		ubCamera->SetData((void*)glm::value_ptr(camera.GetPosition()), offset, sizeof(glm::vec4));
+		offset += sizeof(glm::vec4);
+
+		float tmp = camera.GetExposure();
+		ubCamera->SetData((void*)(&tmp), offset, sizeof(float));
 	}
 
 	void Renderer3D::SetupLightsData()
