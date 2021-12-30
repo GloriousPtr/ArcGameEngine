@@ -10,6 +10,7 @@ namespace ArcEngine
 
 		// Color
 		RGBA8,
+		RGBA16,
 		R32I,
 
 		// Depth/Stencil
