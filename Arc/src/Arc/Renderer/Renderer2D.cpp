@@ -16,7 +16,6 @@ namespace ArcEngine
 		glm::vec2 TexCoord;
 		float TexIndex;
 		float TilingFactor;
-		int ObjectID;
 	};
 	
 	struct Renderer2DData
@@ -58,7 +57,6 @@ namespace ArcEngine
 			{ ShaderDataType::Float2, "a_TexCoord" },
 			{ ShaderDataType::Float, "a_TexIndex" },
 			{ ShaderDataType::Float, "a_TilingFactor" },
-			{ ShaderDataType::Int, "a_ObjectID" },
 		});
 		s_Data.QuadVertexArray->AddVertexBuffer(s_Data.QuadVertexBuffer);
 
@@ -183,12 +181,12 @@ namespace ArcEngine
 		StartBatch();
 	}
 
-	void Renderer2D::DrawQuad(uint32_t entityID, const glm::vec2& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
+	void Renderer2D::DrawQuad(const glm::vec2& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
 	{
-		DrawQuad(entityID, { position.x, position.y, 0.0f }, rotation, size, texture, tintColor, tilingFactor);
+		DrawQuad({ position.x, position.y, 0.0f }, rotation, size, texture, tintColor, tilingFactor);
 	}
 
-	void Renderer2D::DrawQuad(uint32_t entityID, const glm::vec3& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
 	{
 		ARC_PROFILE_FUNCTION();
 		
@@ -196,10 +194,10 @@ namespace ArcEngine
 								* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f })
 								* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-		DrawQuad(entityID, transform, texture, tintColor, tilingFactor);
+		DrawQuad(transform, texture, tintColor, tilingFactor);
 	}
 
-	void Renderer2D::DrawQuad(uint32_t entityID, const glm::mat4& transform, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
 	{
 		ARC_PROFILE_FUNCTION();
 		
@@ -218,7 +216,6 @@ namespace ArcEngine
 			s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
 			s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
 			s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-			s_Data.QuadVertexBufferPtr->ObjectID = (int)entityID;
 			s_Data.QuadVertexBufferPtr++;
 		}
 		
@@ -227,7 +224,7 @@ namespace ArcEngine
 		s_Data.Stats.QuadCount++;
 	}
 
-	void Renderer2D::DrawQuad(uint32_t entityID, const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
 	{
 		ARC_PROFILE_FUNCTION();
 		
@@ -265,7 +262,6 @@ namespace ArcEngine
 			s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
 			s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
 			s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-			s_Data.QuadVertexBufferPtr->ObjectID = (int)entityID;
 			s_Data.QuadVertexBufferPtr++;
 		}
 		

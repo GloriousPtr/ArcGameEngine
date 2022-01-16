@@ -6,7 +6,8 @@
 layout(location = 0) in vec3 a_Position;
 layout(location = 1) in vec2 a_TexCoord;
 layout(location = 2) in vec3 a_Normal;
-layout(location = 3) in float a_ObjectID;
+layout(location = 3) in vec3 a_Tangent;
+layout(location = 4) in vec3 a_Bitangent;
 
 layout (std140, binding = 0) uniform Camera
 {
@@ -15,30 +16,42 @@ layout (std140, binding = 0) uniform Camera
     mat4 u_ViewProjection;
 
     vec4 u_CameraPosition;
-	float u_Exposure;
 };
 
 uniform mat4 u_Model;
 uniform mat4 u_DirLightViewProj;
 
-layout (location = 0) out vec3 v_WorldPosition;
-layout (location = 1) out vec2 v_TexCoord;
-layout (location = 2) out vec3 v_Normal;
-layout (location = 3) out vec3 v_CameraPosition;
-layout (location = 4) out vec4 v_DirLightViewProj;
-layout (location = 6) out flat int v_ObjectID;
+struct VertexOutput
+{
+	vec3 WorldPosition;
+	vec3 Normal;
+	vec2 TexCoord;
+	mat3 WorldNormals;
+	mat3 WorldTransform;
+	vec3 Binormal;
+
+	mat3 CameraView;
+	vec3 CameraPosition;
+	vec3 ViewPosition;
+
+	vec4 DirLightViewProj;
+};
+
+layout(location = 0) out VertexOutput Output;
 
 void main()
 {
-	v_WorldPosition = vec3(u_Model * vec4(a_Position, 1.0));
-    v_TexCoord = a_TexCoord;
-    v_CameraPosition = u_CameraPosition.xyz;
+	Output.WorldPosition = vec3(u_Model * vec4(a_Position, 1.0));
+    Output.TexCoord = a_TexCoord;
+    Output.Normal = mat3(u_Model) * a_Normal;
+	Output.WorldNormals = mat3(u_Model) * mat3(a_Tangent, a_Bitangent, a_Normal);
+	Output.WorldTransform = mat3(u_Model);
 
-    v_Normal = mat3(transpose(inverse(u_Model))) * a_Normal;
+	Output.CameraView = mat3(u_View);
+    Output.CameraPosition = u_CameraPosition.xyz;
+	Output.ViewPosition = vec3(u_View * vec4(Output.WorldPosition, 1.0));
 
-	v_DirLightViewProj = u_DirLightViewProj * u_Model * vec4(a_Position, 1.0);
-
-	v_ObjectID = int(a_ObjectID);
+	Output.DirLightViewProj = u_DirLightViewProj * u_Model * vec4(a_Position, 1.0);
 
 	gl_Position = u_ViewProjection * u_Model * vec4(a_Position, 1.0);
 }
@@ -51,25 +64,15 @@ const float PI = 3.141592653589793;
 
 const int MAX_NUM_LIGHTS = 25;
 
-layout (std140, binding = 0) uniform Camera
-{
-    mat4 u_View;
-    mat4 u_Projection;
-    mat4 u_ViewProjection;
-
-    vec4 u_CameraPosition;
-	float u_Exposure;
-};
-
 struct Light
 {
     vec4 u_Position;
     vec4 u_Color;
     
     /* packed into a vec4
-    x: constant factor for attenuation
-    y: linear factor
-    z: quadratic factor
+    x: radius
+    y: falloff
+    z: unused
     w: light type */
     vec4 u_AttenFactors;
     
@@ -97,9 +100,7 @@ uniform float u_EmissiveIntensity;
 
 uniform bool u_UseAlbedoMap;
 uniform bool u_UseNormalMap;
-uniform bool u_UseMetallicMap;
-uniform bool u_UseRoughnessMap;
-uniform bool u_UseOcclusionMap;
+uniform bool u_UseMRAMap;
 uniform bool u_UseEmissiveMap;
 
 uniform samplerCube u_IrradianceMap;
@@ -107,86 +108,74 @@ uniform sampler2D u_DirectionalShadowMap;
 
 uniform sampler2D u_AlbedoMap;
 uniform sampler2D u_NormalMap;
-uniform sampler2D u_MetallicMap;
-uniform sampler2D u_RoughnessMap;
-uniform sampler2D u_AmbientOcclusionMap;
+uniform sampler2D u_MRAMap;
 uniform sampler2D u_EmissiveMap;
 
-// =========================================
-layout (location = 0) in vec3 v_WorldPosition;
-layout (location = 1) in vec2 v_TexCoord;
-layout (location = 2) in vec3 v_Normal;
-layout (location = 3) in vec3 v_CameraPosition;
-layout (location = 4) in vec4 v_DirLightViewProj;
-layout (location = 6) in flat int v_ObjectID;
-
-// =========================================
-layout (location = 0) out vec4 fragColor;
-layout (location = 1) out int o_IDBuffer;
-
-float DistributionGGX(vec3 N, vec3 H, float roughness)
+struct VertexOutput
 {
-    float a = roughness * roughness;
-    float a2 = a * a;
+	vec3 WorldPosition;
+	vec3 Normal;
+	vec2 TexCoord;
+	mat3 WorldNormals;
+	mat3 WorldTransform;
+	vec3 Binormal;
+
+	mat3 CameraView;
+	vec3 CameraPosition;
+	vec3 ViewPosition;
+
+	vec4 DirLightViewProj;
+};
+
+layout(location = 0) in VertexOutput Input;
+
+// =========================================
+layout(location = 0) out vec4 o_FragColor;
+layout(location = 1) out vec4 o_Position;
+layout(location = 2) out vec4 o_Normal;
+
+// N: Normal, H: Halfway, a2: pow(roughness, 4)
+float DistributionGGX(const vec3 N, const vec3 H, const float a2)
+{
     float NdotH = max(dot(N, H), 0.0);
     float NdotH2 = NdotH * NdotH;
 
-    float denom = PI * pow((NdotH2 * (a2 - 1.0) + 1.0), 2);
+	float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
 
     return a2 / denom;
 }
 
-float GeometrySchlickGGX(float NdotV, float roughness)
+// N: Normal, V: View, L: Light, k: roughness * roughness / 2.0
+float GeometrySmith(const float NdotL, const float NdotV, const float k)
 {
-    float a = roughness;
-    float k = (a * a) / 2.0;
-
-    float nom   = NdotV;
-    float denom = NdotV * (1.0 - k) + k;
-
-    return nom / denom;
-}
-
-float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
-{
-    float NdotV = max(dot(N, V), 0.0);
-    float NdotL = max(dot(N, L), 0.0);
-    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
-    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+    float ggx1 = NdotV / (NdotV * (1.0 - k) + k);
+    float ggx2 = NdotL / (NdotL * (1.0 - k) + k);
 
     return ggx1 * ggx2;
 }
 
 vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 {
-    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+	float oneMinusCosTheta = clamp(1.0 - cosTheta, 0.0, 1.0);
+	float oneMinusCosTheta5 = oneMinusCosTheta * oneMinusCosTheta * oneMinusCosTheta * oneMinusCosTheta * oneMinusCosTheta;
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * oneMinusCosTheta5;
 }
 
 vec3 GetNormalFromMap()
 {
-    vec3 tangentNormal = texture(u_NormalMap, v_TexCoord).rgb * 2.0 - 1.0;
-
-    vec3 q1  = dFdx(v_WorldPosition);
-    vec3 q2  = dFdy(v_WorldPosition);
-    vec2 st1 = dFdx(v_TexCoord);
-    vec2 st2 = dFdy(v_TexCoord);
-
-    vec3 N = normalize(v_Normal);
-    vec3 T = normalize(q1*st2.t - q2*st1.t);
-    vec3 B = -normalize(cross(N, T));
-    mat3 TBN = mat3(T, B, N);
-
-    return normalize(TBN * tangentNormal);
+    vec3 tangentNormal = texture(u_NormalMap, Input.TexCoord).rgb * 2.0 - 1.0;
+    return normalize(Input.WorldNormals * tangentNormal);
 }
 
-float CalcDirectionalShadowFactor(Light directionalLight)
+float CalcDirectionalShadowFactor(Light directionalLight, const float NdotL)
 {
-	vec3 projCoords = v_DirLightViewProj.xyz / v_DirLightViewProj.w;
+	vec3 projCoords = Input.DirLightViewProj.xyz / Input.DirLightViewProj.w;
 	projCoords = (projCoords * 0.5) + 0.5;
 
 	float currentDepth = projCoords.z;
 
-	float bias = max(0.0008 * (1.0 - dot(normalize(v_Normal), -1.0 * normalize(directionalLight.u_LightDir.xyz))), 0.0008);
+	float bias = max(0.0008 * (1.0 - NdotL), 0.0008);
 
 	float shadow = 0.0;
 	vec2 texelSize = 1.0 / textureSize(u_DirectionalShadowMap, 0);
@@ -208,70 +197,97 @@ float CalcDirectionalShadowFactor(Light directionalLight)
 	return shadow;
 }
 
+float LengthSq(const vec3 v)
+{
+	return dot(v, v);
+}
+
 // =========================================
 void main()
 {
-    vec4 albedoWithAlpha = u_UseAlbedoMap ? pow(texture(u_AlbedoMap, v_TexCoord) * u_Albedo, vec4(2.2, 2.2, 2.2, 1.0)) : u_Albedo;
+    vec4 albedoWithAlpha	= u_UseAlbedoMap ? pow(texture(u_AlbedoMap, Input.TexCoord) * u_Albedo, vec4(2.2, 2.2, 2.2, 1.0)) : u_Albedo;
 	if (albedoWithAlpha.a < 0.1)
 		discard;
 
-    vec3 albedo = albedoWithAlpha.rgb;
-    float metallic = u_UseMetallicMap ? texture(u_MetallicMap, v_TexCoord).r : u_Metallic;
-    float roughness = u_UseRoughnessMap ? texture(u_RoughnessMap, v_TexCoord).r : u_Roughness;
-    float ao = u_UseOcclusionMap ? texture(u_AmbientOcclusionMap, v_TexCoord).r : u_AO;
+    vec3 albedo	= albedoWithAlpha.rgb;
+    float metallic = u_UseMRAMap ? texture(u_MRAMap, Input.TexCoord).r : u_Metallic;
+    float roughness = u_UseMRAMap ? texture(u_MRAMap, Input.TexCoord).g : u_Roughness;
+    float ao = u_UseMRAMap ? texture(u_MRAMap, Input.TexCoord).b : u_AO;
 
-    vec3 emission = u_UseEmissiveMap ? texture(u_EmissiveMap, v_TexCoord).rgb : u_EmissionColor;
-    emission *= u_EmissiveIntensity;
+    vec3 emission = u_EmissiveIntensity * (u_UseEmissiveMap ? texture(u_EmissiveMap, Input.TexCoord).rgb : u_EmissionColor);
 
-    vec3 N = u_NormalStrength * (u_UseNormalMap ? GetNormalFromMap() : normalize(v_Normal));
-    vec3 V = normalize(v_CameraPosition - v_WorldPosition);
+    vec3 N = u_NormalStrength * (u_UseNormalMap ? GetNormalFromMap() : normalize(Input.Normal));
+
+    vec3 V = normalize(Input.CameraPosition - Input.WorldPosition);
+	float NdotV = max(dot(N, V), 0.0);
 
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallic);
+
+	float a	= roughness * roughness;
+	float a2 = a * a;
+	float k = a * 0.5;
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
 
     for (int i = 0; i < u_NumLights; ++i)
     {
-        vec3 L = normalize(u_Lights[i].u_Position.rgb - v_WorldPosition);
-        uint type = uint(round(u_Lights[i].u_AttenFactors.w));
+		Light light = u_Lights[i];
+        uint type = uint(round(light.u_AttenFactors.w));
+		bool isDirLight = type == 0;
+
+        vec3 L;
+		float NdotL;
 		float shadow = 1.0;
-        if (type == 0)
+        if (isDirLight)
         {
-            L = -1.0 * normalize(u_Lights[i].u_LightDir.xyz);
-			shadow = (1.0 - CalcDirectionalShadowFactor(u_Lights[i]));
-        }
+			L = -1.0 * normalize(light.u_LightDir.xyz);
+			NdotL = max(dot(N, L), 0.0);
+			shadow = (1.0 - CalcDirectionalShadowFactor(light, NdotL));
+		}
+		else
+		{
+			L = normalize(light.u_Position.rgb - Input.WorldPosition);
+			NdotL = max(dot(N, L), 0.0);
+		}
+
+		if (shadow == 0.0)
+			continue;
+
         vec3 H = normalize(L + V);
 
         float attenuation = 1.0;
         if (type == 1)
         {
-            vec4 attenFactor = u_Lights[i].u_AttenFactors;
-            float distance = length(u_Lights[i].u_Position.xyz - v_WorldPosition);
-            attenuation = 1.0 / (attenFactor[0] + attenFactor[1]*distance + attenFactor[2]*(distance*distance));
+            vec4 attenFactor = light.u_AttenFactors;
+            float lightDistance2 = LengthSq(light.u_Position.xyz - Input.WorldPosition);
+			float lightRadius2 = attenFactor.x * attenFactor.x;
+			attenuation = clamp(1 - ((lightDistance2 * lightDistance2) / (lightRadius2 * lightRadius2)), 0.0, 1.0);
+			attenuation = (attenuation * attenuation) / (lightDistance2 + 1.0);
+            //attenuation = clamp(1.0 - (lightDistance2 / lightRadius2), 0.0, 1.0);
+			//attenuation *= mix(attenuation, 1.0, attenFactor.y);
         }
 
-        vec3 radiance = shadow * u_Lights[i].u_Color.rgb * u_Lights[i].u_Intensity * attenuation;
+        vec3 radiance = shadow * light.u_Color.rgb * light.u_Intensity * attenuation;
 
         // Cook-Torrance BRDF
-        float NDF = DistributionGGX(N, H, roughness);
-        float G = GeometrySmith(N, V, L, roughness);
+        float NDF = DistributionGGX(N, H, a2);
+        float G = GeometrySmith(NdotL, NdotV, k);
         vec3 F = FresnelSchlickRoughness(max(dot(H, V), 0.0), F0, roughness);
-		
+
+        vec3 numerator = NDF * G * F;
+        float denom = 4.0 * NdotV * NdotL + 0.0001;
+        vec3 specular = numerator / denom;
+
 		vec3 kS = F;
         vec3 kD = vec3(1.0) - kS;
         kD *= 1.0 - metallic;
 
-        vec3 numerator = NDF * G * F;
-        float denom = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
-        vec3 specular = numerator / denom;
-
-        float NdotL = max(dot(N, L), 0.0);
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     }
 
-    vec3 kS = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    vec3 kS = FresnelSchlickRoughness(NdotV, F0, roughness);
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
     vec3 irradiance = texture(u_IrradianceMap, N).rgb * u_IrradianceIntensity;
@@ -280,12 +296,7 @@ void main()
 
     vec3 color = ambient + Lo + emission;
 
-    // HDR tonemapping
-    color = vec3(1.0) - exp(-color * u_Exposure);
-    // apply gamma correction
-    color = pow(color, vec3(1.0/2.2));
-
-    fragColor = vec4(color, 1.0);
-
-	o_IDBuffer = v_ObjectID;
+    o_FragColor = vec4(color, 1.0);
+	o_Position = vec4(Input.WorldPosition, 1.0);
+	o_Normal = vec4(Input.CameraView * normalize(Input.Normal), 1.0);
 }

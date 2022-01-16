@@ -29,7 +29,6 @@ namespace ArcEngine
 		void MarkViewportDirty() { m_ViewportDirty = true; }
 
 		bool IsViewportDirty() { return m_ViewportDirty; }
-		int GetPixelDataAtPoint(const int x, const int y);
 		Entity GetPrimaryCameraEntity();
 	private:
 		template<typename T>

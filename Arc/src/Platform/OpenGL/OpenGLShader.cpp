@@ -14,6 +14,8 @@ namespace ArcEngine
 			return GL_VERTEX_SHADER;
 		if(type == "fragment" || type == "pixel")
 			return GL_FRAGMENT_SHADER;
+		if(type == "compute")
+			return GL_COMPUTE_SHADER;
 
 		ARC_CORE_ASSERT(false, "Unknown shader type!");
 		return 0;
@@ -55,6 +57,8 @@ namespace ArcEngine
 
 	void OpenGLShader::Recompile(const std::string& filepath)
 	{
+		glDeleteProgram(m_RendererID);
+
 		std::string source = ReadFile(filepath);
 		auto shaderSources = PreProcess(source);
 		Compile(shaderSources);

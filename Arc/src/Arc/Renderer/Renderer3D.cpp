@@ -26,16 +26,12 @@ namespace ArcEngine
 
 		bool UseAlbedoMap = false;
 		bool UseNormalMap = false;
-		bool UseMetallicMap = false;
-		bool UseRoughnessMap = false;
-		bool UseOcclusionMap = false;
+		bool UseMRAMap = false;
 		bool UseEmissiveMap = false;
 
 		Ref<Texture2D> AlbedoMap = nullptr;
 		Ref<Texture2D> NormalMap = nullptr;
-		Ref<Texture2D> MetallicMap = nullptr;
-		Ref<Texture2D> RoughnessMap = nullptr;
-		Ref<Texture2D> AmbientOcclusionMap = nullptr;
+		Ref<Texture2D> MRAMap = nullptr;
 		Ref<Texture2D> EmissiveMap = nullptr;
 	};
 
@@ -43,6 +39,10 @@ namespace ArcEngine
 	static Ref<Shader> shader;
 	static Ref<Shader> shadowMapShader;
 	static Ref<Shader> cubemapShader;
+	static Ref<Shader> gaussianBlurShader;
+	static Ref<Shader> hdrShader;
+	static Ref<Shader> bloomShader;
+	static Ref<VertexArray> quadVertexArray;
 	static Ref<VertexArray> cubeVertexArray;
 	static Ref<UniformBuffer> ubCamera;
 	static Ref<UniformBuffer> ubLights;
@@ -54,25 +54,67 @@ namespace ArcEngine
 	glm::mat4 dirLightView;
 	glm::mat4 dirLightViewProj;
 
-	static Ref<Framebuffer> shadowMapFramebuffer;
+	Ref<Framebuffer> mainFramebuffer;
+	Ref<Framebuffer> ssgiFramebuffer;
+	Ref<Framebuffer> tempBlurFramebuffer;
+	Ref<Framebuffer> Renderer3D::prefilteredFramebuffer;
+	Ref<Framebuffer> Renderer3D::downsampledFramebuffers[blurSamples];
+	Ref<Framebuffer> Renderer3D::upsampledFramebuffers[blurSamples];
 
 	ShaderLibrary Renderer3D::s_ShaderLibrary;
+	Renderer3D::TonemappingType Renderer3D::Tonemapping = Renderer3D::TonemappingType::ACES;
+	float Renderer3D::Exposure = 1.0f;
+	bool Renderer3D::UseBloom = true;
+	float Renderer3D::BloomStrength = 0.1f;
+	float Renderer3D::BloomThreshold = 1.0f;
+	float Renderer3D::BloomKnee = 0.1f;
+	float Renderer3D::BloomClamp = 100.0f;
 
 	void Renderer3D::Init()
 	{
-		FramebufferSpecification spec;
-		spec.Attachments = { FramebufferTextureFormat::Depth };
-		spec.Width = 4096;
-		spec.Height = 4096;
-		shadowMapFramebuffer = Framebuffer::Create(spec);
+		uint32_t width = 1280;
+		uint32_t height = 720;
 
+		FramebufferSpecification spec;
+		spec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::Depth };
+		spec.Width = width;
+		spec.Height = height;
+		mainFramebuffer = Framebuffer::Create(spec);
+
+		FramebufferSpecification ssgiSpec;
+		ssgiSpec.Attachments = { FramebufferTextureFormat::RGBA16F };
+		ssgiSpec.Width = width;
+		ssgiSpec.Height = height;
+		ssgiFramebuffer = Framebuffer::Create(ssgiSpec);
+
+		width /= 2;
+		height /= 2;
+		FramebufferSpecification bloomSpec;
+		bloomSpec.Attachments = { FramebufferTextureFormat::RGBA16F };
+		bloomSpec.Width = width;
+		bloomSpec.Height = height;
+		prefilteredFramebuffer = Framebuffer::Create(bloomSpec);
+		tempBlurFramebuffer = Framebuffer::Create(bloomSpec);
+		
+		for (size_t i = 0; i < blurSamples; i++)
+		{
+			width /= 2;
+			height /= 2;
+			FramebufferSpecification blurSpec;
+			blurSpec.Attachments = { FramebufferTextureFormat::RGBA16F };
+			blurSpec.Width = width;
+			blurSpec.Height = height;
+			downsampledFramebuffers[i] = Framebuffer::Create(blurSpec);
+			upsampledFramebuffers[i] = Framebuffer::Create(blurSpec);
+		}
+		
+		
 		ubCamera = UniformBuffer::Create();
 		ubCamera->SetLayout({
 			{ ShaderDataType::Mat4, "u_View" },
 			{ ShaderDataType::Mat4, "u_Projection" },
 			{ ShaderDataType::Mat4, "u_ViewProjection" },
-			{ ShaderDataType::Float4, "u_CameraPosition" },
-			{ ShaderDataType::Float, "u_Exposure" }
+			{ ShaderDataType::Float4, "u_CameraPosition" }
 		}, 0);
 
 		ubLights = UniformBuffer::Create();
@@ -87,6 +129,9 @@ namespace ArcEngine
 		s_ShaderLibrary = ShaderLibrary();
 		shadowMapShader = s_ShaderLibrary.Load("assets/shaders/DepthShader.glsl");
 		cubemapShader = s_ShaderLibrary.Load("assets/shaders/Cubemap.glsl");
+		gaussianBlurShader = s_ShaderLibrary.Load("assets/shaders/GaussianBlur.glsl");
+		hdrShader = s_ShaderLibrary.Load("assets/shaders/HDR.glsl");
+		bloomShader = s_ShaderLibrary.Load("assets/shaders/Bloom.glsl");
 		shader = s_ShaderLibrary.Load("assets/shaders/PBR.glsl");
 
 		shader->Bind();
@@ -156,6 +201,33 @@ namespace ArcEngine
 			cubeVertexArray = VertexArray::Create();
 			cubeVertexArray->AddVertexBuffer(cubeVertexBuffer);
 		}
+
+		// Quad
+		{
+			float vertices[20] = {
+				 -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+				  1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+				  1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+				 -1.0f,  1.0f, 0.0f, 0.0f, 1.0f
+			};
+
+			uint32_t indices[6] = {
+				0, 1, 2,
+				0, 2, 3
+			};
+
+			quadVertexArray = VertexArray::Create();
+
+			Ref<VertexBuffer> quadVertexBuffer = VertexBuffer::Create(vertices, 20 * sizeof(float));
+			quadVertexBuffer->SetLayout({
+				{ ShaderDataType::Float3, "a_Position" },
+				{ ShaderDataType::Float2, "a_TexCoord" }
+			});
+			quadVertexArray->AddVertexBuffer(quadVertexBuffer);
+
+			Ref<IndexBuffer> quadIndexBuffer = IndexBuffer::Create(indices, 6);
+			quadVertexArray->SetIndexBuffer(quadIndexBuffer);
+		}
 	}
 
 	void Renderer3D::Shutdown()
@@ -194,6 +266,11 @@ namespace ArcEngine
 		RenderCommand::Draw(cubeVertexArray, 36);
 	}
 
+	void DrawQuad()
+	{
+		RenderCommand::DrawIndexed(quadVertexArray);
+	}
+
 	void Renderer3D::SubmitMesh(uint32_t entityID, MeshComponent& meshComponent, const glm::mat4& transform)
 	{
 		ARC_PROFILE_FUNCTION();
@@ -214,31 +291,48 @@ namespace ArcEngine
 
 		mesh.UseAlbedoMap = meshComponent.UseAlbedoMap;
 		mesh.UseNormalMap = meshComponent.UseNormalMap;
-		mesh.UseMetallicMap = meshComponent.UseMetallicMap;
-		mesh.UseRoughnessMap = meshComponent.UseRoughnessMap;
-		mesh.UseOcclusionMap = meshComponent.UseOcclusionMap;
+		mesh.UseMRAMap = meshComponent.UseMRAMap;
 		mesh.UseEmissiveMap = meshComponent.UseEmissiveMap;
 
 		mesh.AlbedoMap = meshComponent.AlbedoMap;
 		mesh.NormalMap = meshComponent.NormalMap;
-		mesh.MetallicMap = meshComponent.MetallicMap;
-		mesh.RoughnessMap = meshComponent.RoughnessMap;
-		mesh.AmbientOcclusionMap = meshComponent.AmbientOcclusionMap;
+		mesh.MRAMap = meshComponent.MRAMap;
 		mesh.UseEmissiveMap = meshComponent.UseEmissiveMap;
 		
 		meshes.push_back(mesh);
 	}
 
-	uint32_t Renderer3D::GetShadowMapTextureID()
-	{
-		return shadowMapFramebuffer->GetDepthAttachmentRendererID();
-	}
-
 	void Renderer3D::Flush(Ref<Framebuffer>& renderTarget)
 	{
 		ARC_PROFILE_FUNCTION();
+
+		auto& targetSpec = renderTarget->GetSpecification();
+		auto& mainSpec = mainFramebuffer->GetSpecification();
+		if (mainSpec.Width != targetSpec.Width || mainSpec.Height != targetSpec.Height)
+		{
+			uint32_t width = targetSpec.Width;
+			uint32_t height = targetSpec.Height;
+			mainFramebuffer->Resize(width, height);
+			ssgiFramebuffer->Resize(width, height);
+
+			width /= 2;
+			height /= 2;
+			prefilteredFramebuffer->Resize(width, height);
+
+			for (size_t i = 0; i < blurSamples; i++)
+			{
+				width /= 2;
+				height /= 2;
+				downsampledFramebuffers[i]->Resize(width, height);
+				upsampledFramebuffers[i]->Resize(width, height);
+			}
+		}
+
 		ShadowMapPass();
-		RenderPass(renderTarget);
+		RenderPass();
+		SSGIPass();
+		BloomPass();
+		CompositePass(renderTarget);
 		meshes.clear();
 	}
 
@@ -259,9 +353,6 @@ namespace ArcEngine
 		
 		ubCamera->SetData((void*)glm::value_ptr(camera.GetPosition()), offset, sizeof(glm::vec4));
 		offset += sizeof(glm::vec4);
-
-		float tmp = camera.GetExposure();
-		ubCamera->SetData((void*)(&tmp), offset, sizeof(float));
 	}
 
 	void Renderer3D::SetupLightsData()
@@ -272,12 +363,12 @@ namespace ArcEngine
 		for (Entity e : sceneLights)
 		{
 			TransformComponent transformComponent = e.GetComponent<TransformComponent>();
-			LightComponent lightComponent = e.GetComponent<LightComponent>();
+			LightComponent& lightComponent = e.GetComponent<LightComponent>();
 			glm::mat4& worldTransform = e.GetWorldTransform();
 			glm::vec4 attenFactors = glm::vec4(
-				lightComponent.Constant,
-				lightComponent.Linear,
-				lightComponent.Quadratic,
+				lightComponent.Radius,
+				lightComponent.Falloff,
+				0.0f,
 				static_cast<uint32_t>(lightComponent.Type));
 
 			uint32_t offset = 0;
@@ -305,9 +396,106 @@ namespace ArcEngine
 		ubLights->SetData(&numLights, 25 * size, sizeof(uint32_t));
 	}
 
-	void Renderer3D::RenderPass(Ref<Framebuffer>& renderTarget)
+	void Renderer3D::CompositePass(Ref<Framebuffer>& renderTarget)
 	{
 		renderTarget->Bind();
+		hdrShader->Bind();
+		glm::vec4 tonemappingParams = glm::vec4(((int) Tonemapping), Exposure, 0.0f, 0.0f);
+		hdrShader->SetFloat4("u_TonemappParams", tonemappingParams);
+		hdrShader->SetFloat("u_BloomStrength", UseBloom ? BloomStrength : 0.0f);
+		hdrShader->SetInt("u_Texture", 0);
+		hdrShader->SetInt("u_BloomTexture", 1);
+		mainFramebuffer->BindColorAttachment(0, 0);
+		upsampledFramebuffers[blurSamples - 1]->BindColorAttachment(0, 1);
+		DrawQuad();
+		renderTarget->Unbind();
+	}
+
+	void Renderer3D::BloomPass()
+	{
+		if (!UseBloom)
+			return;
+		
+		prefilteredFramebuffer->Bind();
+		bloomShader->Bind();
+		glm::vec4 threshold = glm::vec4(BloomThreshold, BloomKnee, BloomKnee * 2.0f, 0.25f / BloomKnee);
+		bloomShader->SetFloat4("u_Threshold", threshold);
+		glm::vec4 params = glm::vec4(BloomClamp, 2.0f, 0.0f, 0.0f);
+		bloomShader->SetFloat4("u_Params", params);
+		bloomShader->SetInt("u_Texture", 0);
+		mainFramebuffer->BindColorAttachment(0, 0);
+		DrawQuad();
+
+		FramebufferSpecification spec = prefilteredFramebuffer->GetSpecification();
+		uint32_t width = spec.Width;
+		uint32_t height = spec.Height;
+		gaussianBlurShader->Bind();
+		gaussianBlurShader->SetInt("u_Texture", 0);
+		for (size_t i = 0; i < blurSamples; i++)
+		{
+			width /= 2;
+			height /= 2;
+
+			tempBlurFramebuffer->Resize(width, height);
+			tempBlurFramebuffer->Bind();
+			gaussianBlurShader->SetInt("u_Horizontal", static_cast<int>(true));
+			if (i == 0)
+				prefilteredFramebuffer->BindColorAttachment(0, 0);
+			else
+				downsampledFramebuffers[i - 1]->BindColorAttachment(0, 0);
+			DrawQuad();
+
+			downsampledFramebuffers[i]->Bind();
+			gaussianBlurShader->SetInt("u_Horizontal", static_cast<int>(false));
+			tempBlurFramebuffer->BindColorAttachment(0, 0);
+			DrawQuad();
+		}
+		
+		bloomShader->Bind();
+		bloomShader->SetFloat4("u_Threshold", threshold);
+		params = glm::vec4(BloomClamp, 3.0f, 1.0f, 1.0f);
+		bloomShader->SetFloat4("u_Params", params);
+		bloomShader->SetInt("u_Texture", 0);
+		bloomShader->SetInt("u_AdditiveTexture", 1);
+		size_t upsampleCount = blurSamples - 1;
+		for (size_t i = 0; i < upsampleCount; i++)
+		{
+			const auto& spec = downsampledFramebuffers[upsampleCount - 1 - i]->GetSpecification();
+			upsampledFramebuffers[i]->Resize(spec.Width, spec.Height);
+			upsampledFramebuffers[i]->Bind();
+			
+			if (i == 0)
+			{
+				downsampledFramebuffers[upsampleCount - i]->BindColorAttachment(0, 0); // 5
+				downsampledFramebuffers[upsampleCount - 1 - i]->BindColorAttachment(0, 1); // 4
+			}
+			else
+			{
+				upsampledFramebuffers[i - 1]->BindColorAttachment(0, 0); // 5
+				downsampledFramebuffers[upsampleCount - 1 - i]->BindColorAttachment(0, 1); // 3
+			}
+			DrawQuad();
+		}
+		
+		upsampledFramebuffers[upsampleCount]->Resize(spec.Width, spec.Height);
+		upsampledFramebuffers[upsampleCount]->Bind();
+		params = glm::vec4(BloomClamp, 3.0f, 1.0f, 0.0f);
+		bloomShader->SetFloat4("u_Params", params);
+		upsampledFramebuffers[upsampleCount - 1]->BindColorAttachment(0, 0);
+		DrawQuad();
+		upsampledFramebuffers[upsampleCount]->Unbind();
+	}
+
+	void Renderer3D::SSGIPass()
+	{
+
+	}
+
+	void Renderer3D::RenderPass()
+	{
+		mainFramebuffer->Bind();
+		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+		RenderCommand::Clear();
 
 		float skylightIntensity = 0.0f;
 		SkyLightComponent* skylightComponent = nullptr;
@@ -351,9 +539,7 @@ namespace ArcEngine
 
 			shader->SetInt("u_UseAlbedoMap", static_cast<int>(meshData->UseAlbedoMap));
 			shader->SetInt("u_UseNormalMap", static_cast<int>(meshData->UseNormalMap));
-			shader->SetInt("u_UseMetallicMap", static_cast<int>(meshData->UseMetallicMap));
-			shader->SetInt("u_UseRoughnessMap", static_cast<int>(meshData->UseRoughnessMap));
-			shader->SetInt("u_UseOcclusionMap", static_cast<int>(meshData->UseOcclusionMap));
+			shader->SetInt("u_UseMRAMap", static_cast<int>(meshData->UseMRAMap));
 			shader->SetInt("u_UseEmissiveMap", static_cast<int>(meshData->UseEmissiveMap));
 
 			shader->SetInt("u_IrradianceMap", 0);
@@ -361,25 +547,20 @@ namespace ArcEngine
 
 			shader->SetInt("u_AlbedoMap", 2);
 			shader->SetInt("u_NormalMap", 3);
-			shader->SetInt("u_MetallicMap", 4);
-			shader->SetInt("u_RoughnessMap", 5);
-			shader->SetInt("u_AmbientOcclusionMap", 6);
-			shader->SetInt("u_EmissiveMap", 7);
+			shader->SetInt("u_MRAMap", 4);
+			shader->SetInt("u_EmissiveMap", 5);
 
-			shadowMapFramebuffer->BindDepthAttachment(1);
+			for (size_t i = 0; i < sceneLights.size(); i++)
+				sceneLights[i].GetComponent<LightComponent>().ShadowMapFramebuffer->BindDepthAttachment(i + 1);
 
 			if (meshData->AlbedoMap)
 				meshData->AlbedoMap->Bind(2);
 			if (meshData->NormalMap)
 				meshData->NormalMap->Bind(3);
-			if (meshData->MetallicMap)
-				meshData->MetallicMap->Bind(4);
-			if (meshData->RoughnessMap)
-				meshData->RoughnessMap->Bind(5);
-			if (meshData->AmbientOcclusionMap)
-				meshData->AmbientOcclusionMap->Bind(6);
+			if (meshData->MRAMap)
+				meshData->MRAMap->Bind(4);
 			if (meshData->EmissiveMap)
-				meshData->EmissiveMap->Bind(7);
+				meshData->EmissiveMap->Bind(5);
 			
 			shader->SetMat4("u_Model", meshData->Transform);
 			shader->SetMat4("u_DirLightView", dirLightView);
@@ -409,7 +590,7 @@ namespace ArcEngine
 			RenderCommand::DrawIndexed(meshData->VertexArray);
 		}
 
-		renderTarget->Unbind();
+		mainFramebuffer->Unbind();
 	}
 
 	void Renderer3D::ShadowMapPass()
@@ -418,11 +599,11 @@ namespace ArcEngine
 		for (size_t i = 0; i < sceneLights.size(); i++)
 		{
 			Entity e = sceneLights[i];
-			LightComponent light = e.GetComponent<LightComponent>();
-			if (light.Type == LightComponent::LightType::Point)
+			LightComponent& light = e.GetComponent<LightComponent>();
+			if (light.Type != LightComponent::LightType::Directional)
 				continue;
 
-			shadowMapFramebuffer->Bind();
+			light.ShadowMapFramebuffer->Bind();
 			RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 			RenderCommand::Clear();
 
@@ -451,7 +632,7 @@ namespace ArcEngine
 				RenderCommand::DrawIndexed(meshData->VertexArray);
 			}
 
-			shadowMapFramebuffer->Unbind();
+			light.ShadowMapFramebuffer->Unbind();
 			
 			break;
 		}

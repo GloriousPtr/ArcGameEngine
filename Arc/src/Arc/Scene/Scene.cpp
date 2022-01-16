@@ -121,7 +121,7 @@ namespace ArcEngine
 			for (auto entity : view)
 			{
 				auto [id, sprite] = view.get<IDComponent, SpriteRendererComponent>(entity);
-				Renderer2D::DrawQuad((uint32_t)entity, GetEntity(id.ID).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+				Renderer2D::DrawQuad(GetEntity(id.ID).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
 			}
 		}
 		Renderer2D::EndScene(renderTarget);
@@ -174,7 +174,7 @@ namespace ArcEngine
 			{
 				auto [id, sprite] = view.get<IDComponent, SpriteRendererComponent>(entity);
 				
-				Renderer2D::DrawQuad((uint32_t)entity, GetEntity(id.ID).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+				Renderer2D::DrawQuad(GetEntity(id.ID).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
 			}
 
 			Renderer2D::EndScene(renderTarget);
@@ -196,14 +196,6 @@ namespace ArcEngine
 		}
 
 		m_ViewportDirty = false;
-	}
-
-	int Scene::GetPixelDataAtPoint(const int x, const int y)
-	{
-		glReadBuffer(GL_COLOR_ATTACHMENT1);
-		int pixelData;
-		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
-		return pixelData;
 	}
 
 	Entity Scene::GetPrimaryCameraEntity()

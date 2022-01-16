@@ -28,16 +28,34 @@ namespace ArcEngine
 		static void SubmitMesh(uint32_t entityID, MeshComponent& meshComponent, const glm::mat4& transform);
 
 		static ShaderLibrary& GetShaderLibrary() { return s_ShaderLibrary; }
-		static uint32_t GetShadowMapTextureID();
 
 	private:
 		static void SetupCameraData(const EditorCamera& camera);
 		static void SetupLightsData();
-		static void RenderPass(Ref<Framebuffer>& renderTarget);
 		static void Flush(Ref<Framebuffer>& renderTarget);
+		static void CompositePass(Ref<Framebuffer>& renderTarget);
+		static void BloomPass();
+		static void SSGIPass();
+		static void RenderPass();
 		static void ShadowMapPass();
 
 	private:
 		static ShaderLibrary s_ShaderLibrary;
+
+	public:
+		enum class TonemappingType { None = 0, ACES, Filmic, Uncharted };
+
+		static const int blurSamples = 6;
+		static Ref<Framebuffer> prefilteredFramebuffer;
+		static Ref<Framebuffer> downsampledFramebuffers[blurSamples];
+		static Ref<Framebuffer> upsampledFramebuffers[blurSamples];
+
+		static TonemappingType Tonemapping;
+		static float Exposure;
+		static bool UseBloom;
+		static float BloomStrength;
+		static float BloomThreshold;
+		static float BloomKnee;
+		static float BloomClamp;
 	};
 }

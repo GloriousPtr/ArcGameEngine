@@ -154,13 +154,13 @@ namespace ArcEngine
 		static float ft = 0.0f;
 		static float frameRate = 0.0f;
 		frameTimeRefreshTimer += frameTime;
-		if(frameTimeRefreshTimer >= 0.25f)
+		if(frameTimeRefreshTimer >= 0.1f)
 		{
 			ft = frameTime;
 			frameRate = 1.0f / frameTime;
 			frameTimeRefreshTimer = 0.0f;
 		}
-		ImGui::Text("FrameTime: %.3f ms", ft);
+		ImGui::Text("FrameTime: %.2f ms", ft * 1000.0f);
 		ImGui::Text("FPS: %d", (int)frameRate);
 
 		bool isVsync = m_Application->GetWindow().IsVSync();

@@ -13,7 +13,7 @@ namespace ArcEngine
 	SceneViewport::SceneViewport()
 	{
 		FramebufferSpecification fbSpec;
-		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth, FramebufferTextureFormat::R32I };
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F };
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
@@ -130,10 +130,11 @@ namespace ArcEngine
 			const int mouseY = (int)my;
 			if(mouseX >= 0 && mouseY >= 0 && mouseX < viewportWidth && mouseY < viewportHeight)
 			{
-				int pixelData = scene->GetPixelDataAtPoint(mouseX, mouseY);
-				ARC_ERROR(pixelData);
+				// TODO: Raycast selection
+				/*
 				const Entity selectedEntity = pixelData < 0 || !scene->HasEntity(pixelData) ? Entity() : scene->GetEntity(pixelData);
 				m_SceneHierarchyPanel->SetSelectedEntity(selectedEntity);
+				*/
 			}
 		}
 	}
@@ -157,29 +158,6 @@ namespace ArcEngine
 
 		const uint64_t textureID = m_Framebuffer->GetColorAttachmentRendererID(0);
 		ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
-
-		ImGui::SetCursorPos(ImVec2(viewportMaxRegion.x - 100, viewportMinRegion.y));
-
-		static bool settingsOpened = false;
-
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
-		if (ImGui::Button("Settings"))
-		{
-			settingsOpened = !settingsOpened;
-		}
-		
-		if (settingsOpened)
-		{
-			float exposure = m_EditorCamera.GetExposure();
-			if (ImGui::DragFloat("Exposure", &exposure, 0.1f))
-			{
-				if (exposure > 0.0f)
-					m_EditorCamera.SetExposure(exposure);
-			}
-		}
-		ImGui::PopStyleColor(3);
 
 		// Gizmos
 		if (m_SceneHierarchyPanel && m_GizmoType != -1)

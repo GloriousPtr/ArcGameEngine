@@ -28,9 +28,5 @@ uniform samplerCube u_EnvironmentMap;
 void main()
 {
 	vec3 color = texture(u_EnvironmentMap, v_Position).rgb;
-
-	color = color / (color + vec3(1.0));
-	color = pow(color, vec3(1.0/2.2));
-
 	o_Color = vec4(color, 1.0);
 }

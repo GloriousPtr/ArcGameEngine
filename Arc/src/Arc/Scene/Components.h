@@ -5,6 +5,7 @@
 #include "Arc/Scene/SceneCamera.h"
 #include "Arc/Renderer/Buffer.h"
 #include "Arc/Renderer/VertexArray.h"
+#include "Arc/Renderer/Framebuffer.h"
 #include "Arc/Utils/AABB.h"
 
 #include <glm/glm.hpp>
@@ -114,7 +115,7 @@ namespace ArcEngine
 		CullModeType CullMode = CullModeType::Back;
 
 		glm::vec4 AlbedoColor = glm::vec4(1.0f);
-		float NormalStrength = 0.5f;
+		float NormalStrength = 1.0f;
 		float Metallic = 0.5f;
 		float Roughness = 0.5f;
 		float AO = 0.5f;
@@ -123,16 +124,12 @@ namespace ArcEngine
 
 		bool UseAlbedoMap = false;
 		bool UseNormalMap = false;
-		bool UseMetallicMap = false;
-		bool UseRoughnessMap = false;
-		bool UseOcclusionMap = false;
+		bool UseMRAMap = false;
 		bool UseEmissiveMap = false;
 
 		Ref<Texture2D> AlbedoMap = nullptr;
 		Ref<Texture2D> NormalMap = nullptr;
-		Ref<Texture2D> MetallicMap = nullptr;
-		Ref<Texture2D> RoughnessMap = nullptr;
-		Ref<Texture2D> AmbientOcclusionMap = nullptr;
+		Ref<Texture2D> MRAMap = nullptr;
 		Ref<Texture2D> EmissiveMap = nullptr;
 
 		MeshComponent() = default;
@@ -160,15 +157,61 @@ namespace ArcEngine
 	{
 		enum class LightType { Directional = 0, Point };
 
-		LightType Type;
+		LightType Type = LightType::Directional;
+		bool UseColorTempratureMode = true;
 		glm::vec3 Color = glm::vec3(1.0f);
-		float Intensity = 20.0f;
+		float Intensity = 70.0f;
 
-		float Constant = 1.0f;
-		float Linear = 0.09f;
-		float Quadratic = 0.032f;
+		float Radius = 1.0f;
+		float Falloff = 1.0f;
+		
+		Ref<Framebuffer> ShadowMapFramebuffer;
 
-		LightComponent() = default;
-		LightComponent(const LightComponent&) = default;
+		LightComponent()
+		{
+			FramebufferSpecification spec;
+			spec.Attachments = { FramebufferTextureFormat::Depth };
+			spec.Width = 4096;
+			spec.Height = 4096;
+			ShadowMapFramebuffer = Framebuffer::Create(spec);
+
+			if (UseColorTempratureMode)
+				SetTemprature(m_Temprature);
+		}
+
+		LightComponent(const LightComponent&)
+		{
+			FramebufferSpecification spec;
+			spec.Attachments = { FramebufferTextureFormat::Depth };
+			spec.Width = 4096;
+			spec.Height = 4096;
+			ShadowMapFramebuffer = Framebuffer::Create(spec);
+		}
+
+		uint32_t GetTemprature() { return m_Temprature; }
+
+		void SetTemprature(const uint32_t kelvin)
+		{
+			m_Temprature = glm::clamp(kelvin, 1000u, 40000u);
+			
+			uint32_t temp = m_Temprature / 100;
+			if (temp <= 66)
+			{
+				Color = glm::vec3(255.0f,
+								  99.4708025861f * glm::log(temp) - 161.1195681661f,
+								  temp <= 19 ? 0.0f : 138.5177312231f * glm::log(temp - 10) - 305.0447927307f) / 255.0f;
+			}
+			else
+			{
+				Color = glm::vec3(329.698727447f * glm::pow(temp - 60, -0.1332047592f),
+								  288.1221695283f * glm::pow(temp - 60, -0.0755148492f),
+								  255.0f) / 255.0f;
+			}
+
+			Color = glm::clamp(Color, glm::vec3(0.0f), glm::vec3(1.0f));
+		}
+
+	private:
+		uint32_t m_Temprature = 6570;
 	};
 }

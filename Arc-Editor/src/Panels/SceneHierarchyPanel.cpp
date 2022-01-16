@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "Arc/Utils/PlatformUtils.h"
+#include "../Utils/UI.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -352,14 +353,14 @@ namespace ArcEngine
 	static void ProcessMesh(aiMesh *mesh, const aiScene *scene, Entity e, const char* filepath)
 	{
 		std::vector<float> vertices;
-		size_t count = mesh->mNumVertices * 9u;
+		size_t count = mesh->mNumVertices * 14;
 		vertices.reserve(count);
 
 		std::vector<uint32_t> indices;
 		AABB boundingBox;
 		for(size_t i = 0; i < mesh->mNumVertices; i++)
 		{
-			auto vertexPosition = mesh->mVertices[i];
+			auto& vertexPosition = mesh->mVertices[i];
 			vertices.push_back(vertexPosition.x);
 			vertices.push_back(vertexPosition.y);
 			vertices.push_back(vertexPosition.z);
@@ -373,8 +374,8 @@ namespace ArcEngine
 
 			if(mesh->mTextureCoords[0])
             {
-                vertices.push_back(mesh->mTextureCoords[0][i].x); 
-                vertices.push_back(-mesh->mTextureCoords[0][i].y);
+                vertices.push_back(mesh->mTextureCoords[0][i].x);
+                vertices.push_back(mesh->mTextureCoords[0][i].y);
             }
             else
 			{
@@ -382,13 +383,20 @@ namespace ArcEngine
 				vertices.push_back(0.0f);
 			}
 			
-			auto normal = mesh->mNormals[i];
+			auto& normal = mesh->mNormals[i];
 			vertices.push_back(normal.x);
 			vertices.push_back(normal.y);
 			vertices.push_back(normal.z);
 
-			float id = (uint32_t) e;
-            vertices.push_back(id);
+			auto tangent = mesh->mTangents[i];
+			vertices.push_back(tangent.x);
+			vertices.push_back(tangent.y);
+			vertices.push_back(tangent.z);
+
+			auto bitangent = mesh->mBitangents[i];
+			vertices.push_back(bitangent.x);
+			vertices.push_back(bitangent.y);
+			vertices.push_back(bitangent.z);
 		}
 
 		for(size_t i = 0; i < mesh->mNumFaces; i++)
@@ -406,7 +414,8 @@ namespace ArcEngine
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float2, "a_TexCoord" },
 			{ ShaderDataType::Float3, "a_Normal" },
-			{ ShaderDataType::Float, "a_ObjectID" }
+			{ ShaderDataType::Float3, "a_Tangent" },
+			{ ShaderDataType::Float3, "a_Bitangent" },
 		});
 		vertexArray->AddVertexBuffer(vertexBuffer);
 
@@ -417,7 +426,6 @@ namespace ArcEngine
         std::vector<Ref<Texture2D>> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, filepath);
 		std::vector<Ref<Texture2D>> normalMaps = LoadMaterialTextures(material, aiTextureType_NORMALS, filepath);
 		std::vector<Ref<Texture2D>> heightMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, filepath);
-		std::vector<Ref<Texture2D>> aoMaps = LoadMaterialTextures(material, aiTextureType_LIGHTMAP, filepath);
 		std::vector<Ref<Texture2D>> emissiveMaps = LoadMaterialTextures(material, aiTextureType_EMISSIVE, filepath);
 
 		if (!e.HasComponent<MeshComponent>())
@@ -444,12 +452,6 @@ namespace ArcEngine
 		{
 			meshComponent.NormalMap = heightMaps[0];
 			meshComponent.UseNormalMap = true;
-		}
-
-		if (aoMaps.size() > 0)
-		{
-			meshComponent.AmbientOcclusionMap = aoMaps[0];
-			meshComponent.UseOcclusionMap = true;
 		}
 
 		if (emissiveMaps.size() > 0)
@@ -480,15 +482,19 @@ namespace ArcEngine
 	{
 		Assimp::Importer importer;
 		importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 80.0f);
-		const uint32_t meshImportFlags = aiProcess_Triangulate
-			| aiProcess_JoinIdenticalVertices
-			| aiProcess_SortByPType
-			| aiProcess_ImproveCacheLocality
-			| aiProcess_GenSmoothNormals
-	        | aiProcess_OptimizeMeshes
-	        | aiProcess_ValidateDataStructure;
+		const uint32_t meshImportFlags =
+			aiProcess_CalcTangentSpace |
+			aiProcess_Triangulate |
+			aiProcess_SortByPType |
+			aiProcess_GenNormals |
+			aiProcess_GenUVCoords |
+	        aiProcess_OptimizeMeshes |
+			aiProcess_JoinIdenticalVertices |
+			aiProcess_GlobalScale |
+			aiProcess_ImproveCacheLocality |
+	        aiProcess_ValidateDataStructure;
 
-		const aiScene *scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_OptimizeMeshes);
+		const aiScene *scene = importer.ReadFile(filepath, meshImportFlags);
  
 		ARC_CORE_ASSERT(scene, importer.GetErrorString());
 
@@ -751,12 +757,8 @@ namespace ArcEngine
 			DrawTexture2DButton("AlbedoMap", component.AlbedoMap);
 			ImGui::Checkbox("##UseNormalMap", &component.UseNormalMap);
 			DrawTexture2DButton("NormalMap", component.NormalMap);
-			ImGui::Checkbox("##UseMetallicMap", &component.UseMetallicMap);
-			DrawTexture2DButton("MetallicMap", component.MetallicMap);
-			ImGui::Checkbox("##UseRoughnessMap", &component.UseRoughnessMap);
-			DrawTexture2DButton("RoughnessMap", component.RoughnessMap);
-			ImGui::Checkbox("##UseOcclusionMap", &component.UseOcclusionMap);
-			DrawTexture2DButton("AmbientOcclusionMap", component.AmbientOcclusionMap);
+			ImGui::Checkbox("##UseMetallicMap", &component.UseMRAMap);
+			DrawTexture2DButton("MetallicMap", component.MRAMap);
 			ImGui::Checkbox("##UseEmissiveMap", &component.UseEmissiveMap);
 			DrawTexture2DButton("EmissiveMap", component.EmissiveMap);
 			
@@ -774,9 +776,14 @@ namespace ArcEngine
 
 		DrawComponent<LightComponent>("Light", entity, [](LightComponent& component)
 		{
+			UI::PushID();
+
 			const char* lightTypeStrings[] = { "Directional", "Point" };
 			const char* currentLightTypeString = lightTypeStrings[(int)component.Type];
-			if(ImGui::BeginCombo("Directional", currentLightTypeString))
+			UI::BeginPropertyGrid();
+			UI::Property("LightType");
+			ImGui::NextColumn();
+			if(ImGui::BeginCombo("##LightType", currentLightTypeString))
 			{
 				for (int i = 0; i < 2; i++)
 				{
@@ -793,18 +800,60 @@ namespace ArcEngine
 				
 				ImGui::EndCombo();
 			}
+			UI::EndPropertyGrid();
 
-			ImGui::ColorEdit3("Color", glm::value_ptr(component.Color));
-			DrawFloatControl("Intensity", &component.Intensity);
-			if (component.Intensity < 0.0f)
-				component.Intensity = 0.0f;
+			UI::BeginPropertyGrid();
+			if (UI::Property("Use color temprature mode", component.UseColorTempratureMode))
+			{
+				if (component.UseColorTempratureMode)
+					component.SetTemprature(component.GetTemprature());
+			}
+			UI::EndPropertyGrid();
+
+			if (component.UseColorTempratureMode)
+			{
+				UI::BeginPropertyGrid();
+				int temp = component.GetTemprature();
+				if (UI::Property("Tempratur (K)", temp, 1000, 40000))
+					component.SetTemprature(temp);
+				UI::EndPropertyGrid();
+			}
+			else
+			{
+				UI::BeginPropertyGrid();
+				UI::Property("Color");
+				ImGui::NextColumn();
+				ImGui::ColorEdit3("##Color", glm::value_ptr(component.Color));
+				UI::EndPropertyGrid();
+			}
+
+			UI::BeginPropertyGrid();
+			if (UI::Property("Intensity", component.Intensity))
+			{
+				if (component.Intensity < 0.0f)
+					component.Intensity = 0.0f;
+			}
+			UI::EndPropertyGrid();
+
+			ImGui::Spacing();
 
 			if (component.Type == LightComponent::LightType::Point)
 			{
-				DrawFloatControl("Constant", &component.Constant);
-				DrawFloatControl("Linear", &component.Linear);
-				DrawFloatControl("Quadratic", &component.Quadratic);
+				UI::BeginPropertyGrid();
+				UI::Property("Radius", component.Radius);
+				UI::EndPropertyGrid();
+
+				UI::BeginPropertyGrid();
+				UI::Property("Falloff", component.Falloff);
+				UI::EndPropertyGrid();
 			}
+			else
+			{
+				uint32_t textureID = component.ShadowMapFramebuffer->GetDepthAttachmentRendererID();
+				ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ 256, 256 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+			}
+
+			UI::PopID();
 		});
 	}
 }
