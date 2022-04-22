@@ -17,12 +17,9 @@ namespace ArcEngine
 		MeshComponent::CullModeType CullMode;
 
 		glm::vec4 AlbedoColor = glm::vec4(1.0f);
-		float NormalStrength = 0.5f;
-		float Metallic = 0.5f;
-		float Roughness = 0.5f;
-		float AO = 0.5f;
-		glm::vec3 EmissiveColor = glm::vec3(0.0f);
-		float EmissiveIntensity = 5.0f;
+		float Metallic = 0.0f;
+		float Roughness = 1.0f;
+		glm::vec4 EmissiveParams = glm::vec4(0.0f);
 
 		bool UseAlbedoMap = false;
 		bool UseNormalMap = false;
@@ -36,6 +33,7 @@ namespace ArcEngine
 	};
 
 	static std::vector<MeshData> meshes;
+	static Ref<Texture2D> s_BRDFLutTexture;
 	static Ref<Shader> shader;
 	static Ref<Shader> shadowMapShader;
 	static Ref<Shader> cubemapShader;
@@ -55,8 +53,7 @@ namespace ArcEngine
 	glm::mat4 dirLightViewProj;
 
 	Ref<Framebuffer> mainFramebuffer;
-	Ref<Framebuffer> ssgiFramebuffer;
-	Ref<Framebuffer> tempBlurFramebuffer;
+	Ref<Framebuffer> Renderer3D::tempBlurFramebuffers[blurSamples];
 	Ref<Framebuffer> Renderer3D::prefilteredFramebuffer;
 	Ref<Framebuffer> Renderer3D::downsampledFramebuffers[blurSamples];
 	Ref<Framebuffer> Renderer3D::upsampledFramebuffers[blurSamples];
@@ -72,6 +69,8 @@ namespace ArcEngine
 
 	void Renderer3D::Init()
 	{
+		OPTICK_EVENT();
+
 		uint32_t width = 1280;
 		uint32_t height = 720;
 
@@ -81,29 +80,23 @@ namespace ArcEngine
 		spec.Height = height;
 		mainFramebuffer = Framebuffer::Create(spec);
 
-		FramebufferSpecification ssgiSpec;
-		ssgiSpec.Attachments = { FramebufferTextureFormat::RGBA16F };
-		ssgiSpec.Width = width;
-		ssgiSpec.Height = height;
-		ssgiFramebuffer = Framebuffer::Create(ssgiSpec);
-
 		width /= 2;
 		height /= 2;
 		FramebufferSpecification bloomSpec;
-		bloomSpec.Attachments = { FramebufferTextureFormat::RGBA16F };
+		bloomSpec.Attachments = { FramebufferTextureFormat::R11G11B10 };
 		bloomSpec.Width = width;
 		bloomSpec.Height = height;
 		prefilteredFramebuffer = Framebuffer::Create(bloomSpec);
-		tempBlurFramebuffer = Framebuffer::Create(bloomSpec);
 		
 		for (size_t i = 0; i < blurSamples; i++)
 		{
 			width /= 2;
 			height /= 2;
 			FramebufferSpecification blurSpec;
-			blurSpec.Attachments = { FramebufferTextureFormat::RGBA16F };
+			blurSpec.Attachments = { FramebufferTextureFormat::R11G11B10 };
 			blurSpec.Width = width;
 			blurSpec.Height = height;
+			tempBlurFramebuffers[i] = Framebuffer::Create(bloomSpec);
 			downsampledFramebuffers[i] = Framebuffer::Create(blurSpec);
 			upsampledFramebuffers[i] = Framebuffer::Create(blurSpec);
 		}
@@ -125,6 +118,8 @@ namespace ArcEngine
 			{ ShaderDataType::Float4, "u_LightDir" },
 			{ ShaderDataType::Float4, "u_Intensity" },
 		}, 1, 26);													// 25 is max number of lights
+
+		s_BRDFLutTexture = Texture2D::Create("Resources/Renderer/BRDF_LUT.tga");
 
 		s_ShaderLibrary = ShaderLibrary();
 		shadowMapShader = s_ShaderLibrary.Load("assets/shaders/DepthShader.glsl");
@@ -232,16 +227,22 @@ namespace ArcEngine
 
 	void Renderer3D::Shutdown()
 	{
+		OPTICK_EVENT();
+
 	}
 
 	void Renderer3D::BeginScene(const Camera& camera, const glm::mat4& transform)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 
 	}
 
 	void Renderer3D::BeginScene(const EditorCamera& camera, Entity cubemap, std::vector<Entity>& lights)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		cameraView = camera.GetViewMatrix();
@@ -256,6 +257,8 @@ namespace ArcEngine
 
 	void Renderer3D::EndScene(Ref<Framebuffer>& renderTarget)
 	{
+		OPTICK_EVENT();
+
 		Flush(renderTarget);
 
 		shader->Unbind();
@@ -263,16 +266,22 @@ namespace ArcEngine
 
 	void Renderer3D::DrawCube()
 	{
+		OPTICK_EVENT();
+
 		RenderCommand::Draw(cubeVertexArray, 36);
 	}
 
-	void DrawQuad()
+	void Renderer3D::DrawQuad()
 	{
+		OPTICK_EVENT();
+
 		RenderCommand::DrawIndexed(quadVertexArray);
 	}
 
-	void Renderer3D::SubmitMesh(uint32_t entityID, MeshComponent& meshComponent, const glm::mat4& transform)
+	void Renderer3D::SubmitMesh(MeshComponent& meshComponent, const glm::mat4& transform)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 
 		MeshData mesh;
@@ -282,12 +291,9 @@ namespace ArcEngine
 		mesh.CullMode = meshComponent.CullMode;
 
 		mesh.AlbedoColor = meshComponent.AlbedoColor;
-		mesh.NormalStrength = meshComponent.NormalStrength;
 		mesh.Metallic = meshComponent.Metallic;
 		mesh.Roughness = meshComponent.Roughness;
-		mesh.AO = meshComponent.AO;
-		mesh.EmissiveColor = meshComponent.EmissiveColor;
-		mesh.EmissiveIntensity = meshComponent.EmissiveIntensity;
+		mesh.EmissiveParams = meshComponent.EmissiveParams;
 
 		mesh.UseAlbedoMap = meshComponent.UseAlbedoMap;
 		mesh.UseNormalMap = meshComponent.UseNormalMap;
@@ -304,8 +310,10 @@ namespace ArcEngine
 
 	void Renderer3D::Flush(Ref<Framebuffer>& renderTarget)
 	{
+		OPTICK_EVENT();
+		
 		ARC_PROFILE_FUNCTION();
-
+		
 		auto& targetSpec = renderTarget->GetSpecification();
 		auto& mainSpec = mainFramebuffer->GetSpecification();
 		if (mainSpec.Width != targetSpec.Width || mainSpec.Height != targetSpec.Height)
@@ -313,7 +321,6 @@ namespace ArcEngine
 			uint32_t width = targetSpec.Width;
 			uint32_t height = targetSpec.Height;
 			mainFramebuffer->Resize(width, height);
-			ssgiFramebuffer->Resize(width, height);
 
 			width /= 2;
 			height /= 2;
@@ -323,6 +330,7 @@ namespace ArcEngine
 			{
 				width /= 2;
 				height /= 2;
+				tempBlurFramebuffers[i]->Resize(width, height);
 				downsampledFramebuffers[i]->Resize(width, height);
 				upsampledFramebuffers[i]->Resize(width, height);
 			}
@@ -330,7 +338,6 @@ namespace ArcEngine
 
 		ShadowMapPass();
 		RenderPass();
-		SSGIPass();
 		BloomPass();
 		CompositePass(renderTarget);
 		meshes.clear();
@@ -338,6 +345,8 @@ namespace ArcEngine
 
 	void Renderer3D::SetupCameraData(const EditorCamera& camera)
 	{
+		OPTICK_EVENT();
+
 		ubCamera->Bind();
 
 		uint32_t offset = 0;
@@ -357,36 +366,44 @@ namespace ArcEngine
 
 	void Renderer3D::SetupLightsData()
 	{
+		OPTICK_EVENT();
+
+		struct LightData
+		{
+			glm::vec4 Position;
+			glm::vec4 Color;
+			glm::vec4 AttenFactors;
+			glm::vec4 LightDir;
+		};
+
 		uint32_t numLights = 0;
-		uint32_t size = 5 * sizeof(glm::vec4);
+		const uint32_t size = sizeof(LightData);
+
 		ubLights->Bind();
+
 		for (Entity e : sceneLights)
 		{
 			TransformComponent transformComponent = e.GetComponent<TransformComponent>();
 			LightComponent& lightComponent = e.GetComponent<LightComponent>();
 			glm::mat4& worldTransform = e.GetWorldTransform();
+			
 			glm::vec4 attenFactors = glm::vec4(
-				lightComponent.Radius,
-				lightComponent.Falloff,
-				0.0f,
+				lightComponent.Range,
+				glm::cos(glm::radians(lightComponent.CutOffAngle)),
+				glm::cos(glm::radians(lightComponent.OuterCutOffAngle)),
 				static_cast<uint32_t>(lightComponent.Type));
-
-			uint32_t offset = 0;
-			ubLights->SetData((void*)glm::value_ptr(worldTransform[3]), size * numLights + offset, sizeof(glm::vec4));
-
-			offset += sizeof(glm::vec4);
-			ubLights->SetData((void*)glm::value_ptr(lightComponent.Color), size * numLights + offset, sizeof(glm::vec4));
-
-			offset += sizeof(glm::vec4);
-			ubLights->SetData((void*)glm::value_ptr(attenFactors), size * numLights + offset, sizeof(glm::vec4));
-
-			offset += sizeof(glm::vec4);
 			// Based off of +Z direction
 			glm::vec4 zDir = worldTransform * glm::vec4(0, 0, 1, 0);
-			ubLights->SetData((void*)glm::value_ptr(zDir), size * numLights + offset, sizeof(glm::vec4));
 
-			offset += sizeof(glm::vec4);
-			ubLights->SetData(&lightComponent.Intensity, size * numLights + offset, sizeof(float));
+			LightData lightData = 
+			{
+				worldTransform[3],
+				glm::vec4(lightComponent.Color, lightComponent.Intensity),
+				attenFactors,
+				zDir
+			};
+
+			ubLights->SetData((void*)(&lightData), size * numLights, size);
 
 			numLights++;
 		}
@@ -398,6 +415,8 @@ namespace ArcEngine
 
 	void Renderer3D::CompositePass(Ref<Framebuffer>& renderTarget)
 	{
+		OPTICK_EVENT();
+
 		renderTarget->Bind();
 		hdrShader->Bind();
 		glm::vec4 tonemappingParams = glm::vec4(((int) Tonemapping), Exposure, 0.0f, 0.0f);
@@ -406,195 +425,212 @@ namespace ArcEngine
 		hdrShader->SetInt("u_Texture", 0);
 		hdrShader->SetInt("u_BloomTexture", 1);
 		mainFramebuffer->BindColorAttachment(0, 0);
-		upsampledFramebuffers[blurSamples - 1]->BindColorAttachment(0, 1);
+		upsampledFramebuffers[0]->BindColorAttachment(0, 1);
 		DrawQuad();
-		renderTarget->Unbind();
 	}
 
 	void Renderer3D::BloomPass()
 	{
+		OPTICK_EVENT();
+
 		if (!UseBloom)
 			return;
 		
-		prefilteredFramebuffer->Bind();
-		bloomShader->Bind();
 		glm::vec4 threshold = glm::vec4(BloomThreshold, BloomKnee, BloomKnee * 2.0f, 0.25f / BloomKnee);
-		bloomShader->SetFloat4("u_Threshold", threshold);
 		glm::vec4 params = glm::vec4(BloomClamp, 2.0f, 0.0f, 0.0f);
-		bloomShader->SetFloat4("u_Params", params);
-		bloomShader->SetInt("u_Texture", 0);
-		mainFramebuffer->BindColorAttachment(0, 0);
-		DrawQuad();
+
+		{
+			OPTICK_EVENT("Prefilter");
+
+			prefilteredFramebuffer->Bind();
+			bloomShader->Bind();
+			bloomShader->SetFloat4("u_Threshold", threshold);
+			bloomShader->SetFloat4("u_Params", params);
+			bloomShader->SetInt("u_Texture", 0);
+			mainFramebuffer->BindColorAttachment(0, 0);
+			DrawQuad();
+		}
 
 		FramebufferSpecification spec = prefilteredFramebuffer->GetSpecification();
-		uint32_t width = spec.Width;
-		uint32_t height = spec.Height;
-		gaussianBlurShader->Bind();
-		gaussianBlurShader->SetInt("u_Texture", 0);
-		for (size_t i = 0; i < blurSamples; i++)
 		{
-			width /= 2;
-			height /= 2;
+			OPTICK_EVENT("Downsample");
 
-			tempBlurFramebuffer->Resize(width, height);
-			tempBlurFramebuffer->Bind();
-			gaussianBlurShader->SetInt("u_Horizontal", static_cast<int>(true));
-			if (i == 0)
-				prefilteredFramebuffer->BindColorAttachment(0, 0);
-			else
-				downsampledFramebuffers[i - 1]->BindColorAttachment(0, 0);
-			DrawQuad();
+			gaussianBlurShader->Bind();
+			gaussianBlurShader->SetInt("u_Texture", 0);
+			for (size_t i = 0; i < blurSamples; i++)
+			{
+				tempBlurFramebuffers[i]->Bind();
+				gaussianBlurShader->SetInt("u_Horizontal", static_cast<int>(true));
+				if (i == 0)
+					prefilteredFramebuffer->BindColorAttachment(0, 0);
+				else
+					downsampledFramebuffers[i - 1]->BindColorAttachment(0, 0);
+				DrawQuad();
 
-			downsampledFramebuffers[i]->Bind();
-			gaussianBlurShader->SetInt("u_Horizontal", static_cast<int>(false));
-			tempBlurFramebuffer->BindColorAttachment(0, 0);
-			DrawQuad();
+				downsampledFramebuffers[i]->Bind();
+				gaussianBlurShader->SetInt("u_Horizontal", static_cast<int>(false));
+				tempBlurFramebuffers[i]->BindColorAttachment(0, 0);
+				DrawQuad();
+			}
 		}
 		
-		bloomShader->Bind();
-		bloomShader->SetFloat4("u_Threshold", threshold);
-		params = glm::vec4(BloomClamp, 3.0f, 1.0f, 1.0f);
-		bloomShader->SetFloat4("u_Params", params);
-		bloomShader->SetInt("u_Texture", 0);
-		bloomShader->SetInt("u_AdditiveTexture", 1);
-		size_t upsampleCount = blurSamples - 1;
-		for (size_t i = 0; i < upsampleCount; i++)
 		{
-			const auto& spec = downsampledFramebuffers[upsampleCount - 1 - i]->GetSpecification();
-			upsampledFramebuffers[i]->Resize(spec.Width, spec.Height);
-			upsampledFramebuffers[i]->Bind();
+			OPTICK_EVENT("Upsample");
+
+			bloomShader->Bind();
+			bloomShader->SetFloat4("u_Threshold", threshold);
+			params = glm::vec4(BloomClamp, 3.0f, 1.0f, 1.0f);
+			bloomShader->SetFloat4("u_Params", params);
+			bloomShader->SetInt("u_Texture", 0);
+			bloomShader->SetInt("u_AdditiveTexture", 1);
+			size_t upsampleCount = blurSamples - 1;
+			for (size_t i = upsampleCount; i > 0; i--)
+			{
+				upsampledFramebuffers[i]->Bind();
 			
-			if (i == 0)
-			{
-				downsampledFramebuffers[upsampleCount - i]->BindColorAttachment(0, 0); // 5
-				downsampledFramebuffers[upsampleCount - 1 - i]->BindColorAttachment(0, 1); // 4
+				if (i == upsampleCount)
+				{
+					downsampledFramebuffers[upsampleCount]->BindColorAttachment(0, 0);
+					downsampledFramebuffers[upsampleCount - 1]->BindColorAttachment(0, 1);
+				}
+				else
+				{
+					downsampledFramebuffers[i]->BindColorAttachment(0, 0);
+					upsampledFramebuffers[i + 1]->BindColorAttachment(0, 1);
+				}
+				DrawQuad();
 			}
-			else
-			{
-				upsampledFramebuffers[i - 1]->BindColorAttachment(0, 0); // 5
-				downsampledFramebuffers[upsampleCount - 1 - i]->BindColorAttachment(0, 1); // 3
-			}
+		
+			upsampledFramebuffers[0]->Bind();
+			params = glm::vec4(BloomClamp, 3.0f, 1.0f, 0.0f);
+			bloomShader->SetFloat4("u_Params", params);
+			upsampledFramebuffers[1]->BindColorAttachment(0, 0);
 			DrawQuad();
 		}
-		
-		upsampledFramebuffers[upsampleCount]->Resize(spec.Width, spec.Height);
-		upsampledFramebuffers[upsampleCount]->Bind();
-		params = glm::vec4(BloomClamp, 3.0f, 1.0f, 0.0f);
-		bloomShader->SetFloat4("u_Params", params);
-		upsampledFramebuffers[upsampleCount - 1]->BindColorAttachment(0, 0);
-		DrawQuad();
-		upsampledFramebuffers[upsampleCount]->Unbind();
-	}
-
-	void Renderer3D::SSGIPass()
-	{
-
 	}
 
 	void Renderer3D::RenderPass()
 	{
+		OPTICK_EVENT();
+
 		mainFramebuffer->Bind();
-		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		RenderCommand::Clear();
 
 		float skylightIntensity = 0.0f;
-		SkyLightComponent* skylightComponent = nullptr;
-		if (skylight)
+		float skylightRotation = 0.0f;
 		{
-			skylightComponent = &(skylight.GetComponent<SkyLightComponent>());
-			if (skylightComponent->Texture)
+			OPTICK_EVENT("Skylight");
+
+			SkyLightComponent* skylightComponent = nullptr;
+			if (skylight)
 			{
-				RenderCommand::SetDepthMask(false);
-
-				skylightIntensity = skylightComponent->Intensity;
-				skylightComponent->Texture->Bind(0);
-				cubemapShader->Bind();
-				cubemapShader->SetMat4("u_View", cameraView);
-				cubemapShader->SetMat4("u_Projection", cameraProjection);
-				DrawCube();
-				cubemapShader->Unbind();
-
-				RenderCommand::SetDepthMask(true);
-
-				skylightComponent->Texture->Bind(1);
-			}
-		}
-
-		MeshComponent::CullModeType currentCullMode = MeshComponent::CullModeType::Unknown;
-		for (auto it = meshes.rbegin(); it != meshes.rend(); it++)
-		{
-			MeshData* meshData = &(*it);
-
-			shader->Bind();
-
-			shader->SetFloat("u_IrradianceIntensity", skylightIntensity);
-			
-			shader->SetFloat4("u_Albedo", meshData->AlbedoColor);
-			shader->SetFloat("u_NormalStrength", meshData->NormalStrength);
-			shader->SetFloat("u_Metallic", meshData->Metallic);
-			shader->SetFloat("u_Roughness", meshData->Roughness);
-			shader->SetFloat("u_AO", meshData->AO);
-			shader->SetFloat3("u_EmissionColor", meshData->EmissiveColor);
-			shader->SetFloat("u_EmissiveIntensity", meshData->EmissiveIntensity);
-
-			shader->SetInt("u_UseAlbedoMap", static_cast<int>(meshData->UseAlbedoMap));
-			shader->SetInt("u_UseNormalMap", static_cast<int>(meshData->UseNormalMap));
-			shader->SetInt("u_UseMRAMap", static_cast<int>(meshData->UseMRAMap));
-			shader->SetInt("u_UseEmissiveMap", static_cast<int>(meshData->UseEmissiveMap));
-
-			shader->SetInt("u_IrradianceMap", 0);
-			shader->SetInt("u_DirectionalShadowMap", 1);
-
-			shader->SetInt("u_AlbedoMap", 2);
-			shader->SetInt("u_NormalMap", 3);
-			shader->SetInt("u_MRAMap", 4);
-			shader->SetInt("u_EmissiveMap", 5);
-
-			for (size_t i = 0; i < sceneLights.size(); i++)
-				sceneLights[i].GetComponent<LightComponent>().ShadowMapFramebuffer->BindDepthAttachment(i + 1);
-
-			if (meshData->AlbedoMap)
-				meshData->AlbedoMap->Bind(2);
-			if (meshData->NormalMap)
-				meshData->NormalMap->Bind(3);
-			if (meshData->MRAMap)
-				meshData->MRAMap->Bind(4);
-			if (meshData->EmissiveMap)
-				meshData->EmissiveMap->Bind(5);
-			
-			shader->SetMat4("u_Model", meshData->Transform);
-			shader->SetMat4("u_DirLightView", dirLightView);
-			shader->SetMat4("u_DirLightViewProj", dirLightViewProj);
-
-			if (currentCullMode != meshData->CullMode)
-			{
-				currentCullMode = meshData->CullMode;
-				switch (currentCullMode)
+				skylightComponent = &(skylight.GetComponent<SkyLightComponent>());
+				if (skylightComponent->Texture)
 				{
-				case MeshComponent::CullModeType::DoubleSided:
-					RenderCommand::DisableCulling();
-					break;
-				case MeshComponent::CullModeType::Front:
-					RenderCommand::EnableCulling();
-					RenderCommand::FrontCull();
-					break;
-				case MeshComponent::CullModeType::Back:
-					RenderCommand::EnableCulling();
-					RenderCommand::BackCull();
-					break;
-				default:
-					ARC_CORE_ASSERT(false);
+					RenderCommand::SetDepthMask(false);
+
+					skylightIntensity = skylightComponent->Intensity;
+					skylightRotation = skylightComponent->Rotation;
+
+					skylightComponent->Texture->Bind(0);
+					cubemapShader->Bind();
+					cubemapShader->SetMat4("u_View", cameraView);
+					cubemapShader->SetMat4("u_Projection", cameraProjection);
+					cubemapShader->SetFloat("u_Intensity", skylightIntensity);
+					cubemapShader->SetFloat("u_Rotation", skylightRotation);
+					DrawCube();
+
+					RenderCommand::SetDepthMask(true);
+
+					skylightComponent->Texture->BindIrradianceMap(0);
+					skylightComponent->Texture->BindRadianceMap(1);
+					s_BRDFLutTexture->Bind(2);
 				}
 			}
-
-			RenderCommand::DrawIndexed(meshData->VertexArray);
 		}
 
-		mainFramebuffer->Unbind();
+		if (meshes.size() > 0)
+		{
+			OPTICK_EVENT("Shader Binding");
+
+			shader->Bind();
+			shader->SetFloat("u_IrradianceIntensity", skylightIntensity);
+			shader->SetFloat("u_EnvironmentRotation", skylightRotation);
+			shader->SetInt("u_IrradianceMap", 0);
+			shader->SetInt("u_RadianceMap", 1);
+			shader->SetInt("u_BRDFLutMap", 2);
+			shader->SetInt("u_DirectionalShadowMap", 3);
+			shader->SetInt("u_AlbedoMap", 4);
+			shader->SetInt("u_NormalMap", 5);
+			shader->SetInt("u_MRAMap", 6);
+			shader->SetInt("u_EmissiveMap", 7);
+
+			shader->SetMat4("u_DirLightView", dirLightView);
+			shader->SetMat4("u_DirLightViewProj", dirLightViewProj);
+		}
+
+		{
+			OPTICK_EVENT("Draw Meshes");
+
+			for (size_t i = 0; i < sceneLights.size(); i++)
+				sceneLights[i].GetComponent<LightComponent>().ShadowMapFramebuffer->BindDepthAttachment(i + 3);
+
+			MeshComponent::CullModeType currentCullMode = MeshComponent::CullModeType::Unknown;
+			for (auto it = meshes.rbegin(); it != meshes.rend(); it++)
+			{
+				MeshData* meshData = &(*it);
+
+				shader->SetFloat4("u_Albedo", meshData->AlbedoColor);
+				shader->SetFloat("u_Metallic", meshData->Metallic);
+				shader->SetFloat("u_Roughness", meshData->Roughness);
+				shader->SetFloat4("u_EmissiveParams", meshData->EmissiveParams);
+
+				shader->SetInt("u_UseAlbedoMap", static_cast<int>(meshData->UseAlbedoMap));
+				shader->SetInt("u_UseNormalMap", static_cast<int>(meshData->UseNormalMap));
+				shader->SetInt("u_UseMRAMap", static_cast<int>(meshData->UseMRAMap));
+				shader->SetInt("u_UseEmissiveMap", static_cast<int>(meshData->UseEmissiveMap));
+
+				if (meshData->AlbedoMap)
+					meshData->AlbedoMap->Bind(4);
+				if (meshData->NormalMap)
+					meshData->NormalMap->Bind(5);
+				if (meshData->MRAMap)
+					meshData->MRAMap->Bind(6);
+				if (meshData->EmissiveMap)
+					meshData->EmissiveMap->Bind(7);
+			
+				shader->SetMat4("u_Model", meshData->Transform);
+
+				if (currentCullMode != meshData->CullMode)
+				{
+					currentCullMode = meshData->CullMode;
+					switch (currentCullMode)
+					{
+					case MeshComponent::CullModeType::DoubleSided:
+						RenderCommand::DisableCulling();
+						break;
+					case MeshComponent::CullModeType::Front:
+						RenderCommand::EnableCulling();
+						RenderCommand::FrontCull();
+						break;
+					case MeshComponent::CullModeType::Back:
+						RenderCommand::EnableCulling();
+						RenderCommand::BackCull();
+						break;
+					default:
+						ARC_CORE_ASSERT(false);
+					}
+				}
+
+				RenderCommand::DrawIndexed(meshData->VertexArray);
+			}
+		}
 	}
 
 	void Renderer3D::ShadowMapPass()
 	{
+		OPTICK_EVENT();
+
 //		RenderCommand::FrontCull();
 		for (size_t i = 0; i < sceneLights.size(); i++)
 		{
@@ -604,7 +640,6 @@ namespace ArcEngine
 				continue;
 
 			light.ShadowMapFramebuffer->Bind();
-			RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 			RenderCommand::Clear();
 
 			glm::mat4 transform = e.GetWorldTransform();
@@ -631,8 +666,6 @@ namespace ArcEngine
 				shadowMapShader->SetMat4("u_Model", meshData->Transform);
 				RenderCommand::DrawIndexed(meshData->VertexArray);
 			}
-
-			light.ShadowMapFramebuffer->Unbind();
 			
 			break;
 		}

@@ -32,18 +32,24 @@ namespace ArcEngine
 
 	void ShaderLibrary::Add(const std::string& name, const Ref<Shader>& shader)
 	{
+		OPTICK_EVENT();
+
 		ARC_CORE_ASSERT(!Exists(name), "Shader already exists!");
 		m_Shaders[name] = shader;
 	}
 
 	void ShaderLibrary::Add(const Ref<Shader>& shader)
 	{
+		OPTICK_EVENT();
+
 		auto& name = shader->GetName();
 		Add(name, shader);
 	}
 
 	Ref<Shader> ShaderLibrary::Load(const std::string& filepath)
 	{
+		OPTICK_EVENT();
+
 		auto shader = Shader::Create(filepath);
 		Add(shader);
 		m_ShaderPaths[shader->GetName()] = filepath;
@@ -52,6 +58,8 @@ namespace ArcEngine
 
 	Ref<Shader> ShaderLibrary::Load(const std::string& name, const std::string& filepath)
 	{
+		OPTICK_EVENT();
+
 		auto shader = Shader::Create(filepath);
 		Add(name, shader);
 		m_ShaderPaths[name] = filepath;
@@ -60,6 +68,8 @@ namespace ArcEngine
 
 	void ShaderLibrary::ReloadAll()
 	{
+		OPTICK_EVENT();
+
 		std::string shaderName;
 		for (auto& it = m_Shaders.begin(); it != m_Shaders.end(); it++)
 		{
@@ -74,12 +84,16 @@ namespace ArcEngine
 
 	Ref<Shader> ShaderLibrary::Get(const std::string& name)
 	{
+		OPTICK_EVENT();
+
 		ARC_CORE_ASSERT(Exists(name), "Shader not found!");
 		return m_Shaders[name];
 	}
 
 	bool ShaderLibrary::Exists(const std::string& name) const
 	{
+		OPTICK_EVENT();
+
 		return m_Shaders.find(name) != m_Shaders.end();
 	}
 

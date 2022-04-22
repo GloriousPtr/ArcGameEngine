@@ -9,6 +9,8 @@ namespace ArcEngine
 
 	void Renderer::Init()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		RenderCommand::Init();
@@ -18,12 +20,16 @@ namespace ArcEngine
 
 	void Renderer::Shutdown()
 	{
+		OPTICK_EVENT();
+
 		Renderer2D::Shutdown();
 		Renderer3D::Shutdown();
 	}
 
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
 	{
+		OPTICK_EVENT();
+
 		RenderCommand::SetViewport(0, 0, width, height);
 	}
 

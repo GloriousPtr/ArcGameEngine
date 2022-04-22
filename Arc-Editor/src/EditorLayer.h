@@ -39,5 +39,9 @@ namespace ArcEngine
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		SceneViewport m_MainSceneViewport;
 		RendererSettingsPanel m_RendererSettingsPanel;
+
+		bool m_ShowSceneHierarchyPanel = true;
+		bool m_ShowMainSceneViewport = true;
+		bool m_ShowRendererSettingsPanel = true;
 	};
 }

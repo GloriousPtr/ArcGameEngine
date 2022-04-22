@@ -20,6 +20,8 @@ namespace ArcEngine
 	
 	WindowsWindow::WindowsWindow(const WindowProps& props)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		Init(props);
@@ -27,6 +29,8 @@ namespace ArcEngine
 	
 	WindowsWindow::~WindowsWindow()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		Shutdown();
@@ -34,6 +38,8 @@ namespace ArcEngine
 
 	void WindowsWindow::Init(const WindowProps& props)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		m_Data.Title = props.Title;
@@ -160,6 +166,8 @@ namespace ArcEngine
 
 	void WindowsWindow::Shutdown()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glfwDestroyWindow(m_Window);
@@ -171,6 +179,8 @@ namespace ArcEngine
 
 	void WindowsWindow::OnUpdate()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glfwPollEvents();
@@ -179,6 +189,8 @@ namespace ArcEngine
 
 	void WindowsWindow::SetVSync(bool enabled)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		if (enabled)

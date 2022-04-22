@@ -22,6 +22,7 @@ project "Arc-Editor"
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.assimp}",
+		"%{IncludeDir.optick}",
 	}
 
 	links

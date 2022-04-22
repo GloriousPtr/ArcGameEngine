@@ -35,6 +35,9 @@ namespace ArcEngine
 	public:
 		static Ref<TextureCubemap> Create(const std::string& path);
 
+		virtual void BindIrradianceMap(uint32_t slot) const = 0;
+		virtual void BindRadianceMap(uint32_t slot) const = 0;
+
 		virtual uint32_t GetHRDRendererID() const = 0;
 	};
 }

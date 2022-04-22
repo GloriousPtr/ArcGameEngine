@@ -23,6 +23,8 @@ namespace ArcEngine
 	
 	OpenGLShader::OpenGLShader(const std::string& filepath)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		std::string source = ReadFile(filepath);
@@ -40,6 +42,8 @@ namespace ArcEngine
 	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
 		: m_Name(name)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		std::unordered_map<GLenum, std::string> sources;
@@ -50,6 +54,8 @@ namespace ArcEngine
 
 	OpenGLShader::~OpenGLShader()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glDeleteProgram(m_RendererID);
@@ -57,6 +63,8 @@ namespace ArcEngine
 
 	void OpenGLShader::Recompile(const std::string& filepath)
 	{
+		OPTICK_EVENT();
+
 		glDeleteProgram(m_RendererID);
 
 		std::string source = ReadFile(filepath);
@@ -66,6 +74,8 @@ namespace ArcEngine
 
 	void OpenGLShader::Bind() const
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glUseProgram(m_RendererID);
@@ -73,6 +83,8 @@ namespace ArcEngine
 
 	void OpenGLShader::Unbind() const
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glUseProgram(0);
@@ -80,6 +92,8 @@ namespace ArcEngine
 
 	void OpenGLShader::SetInt(const std::string& name, int value)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		UploadUniformInt(name, value);
@@ -87,6 +101,8 @@ namespace ArcEngine
 
 	void OpenGLShader::SetIntArray(const std::string& name, int* values, uint32_t count)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		UploadUniformIntArray(name, values, count);		
@@ -94,6 +110,8 @@ namespace ArcEngine
 
 	void OpenGLShader::SetFloat(const std::string& name, float value)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		UploadUniformFloat(name, value);
@@ -101,6 +119,8 @@ namespace ArcEngine
 
 	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		UploadUniformFloat3(name, value);
@@ -108,6 +128,8 @@ namespace ArcEngine
 
 	void OpenGLShader::SetFloat4(const std::string& name, const glm::vec4& value)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		UploadUniformFloat4(name, value);
@@ -115,6 +137,8 @@ namespace ArcEngine
 
 	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		UploadUniformMat4(name, value);
@@ -167,6 +191,8 @@ namespace ArcEngine
 
 	int OpenGLShader::GetLocation(const std::string& name)
 	{
+		OPTICK_EVENT();
+
 		if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
 			return m_UniformLocationCache[name];
 
@@ -177,6 +203,8 @@ namespace ArcEngine
 
 	std::string OpenGLShader::ReadFile(const std::string& filepath)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		std::string result;
@@ -206,6 +234,8 @@ namespace ArcEngine
 
 	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(const std::string& source)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		std::unordered_map<GLenum, std::string> shaderSources;
@@ -231,6 +261,8 @@ namespace ArcEngine
 
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		GLuint program = glCreateProgram();

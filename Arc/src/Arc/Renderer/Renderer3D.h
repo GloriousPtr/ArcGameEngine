@@ -25,7 +25,8 @@ namespace ArcEngine
 		static void EndScene(Ref<Framebuffer>& renderTarget);
 
 		static void DrawCube();
-		static void SubmitMesh(uint32_t entityID, MeshComponent& meshComponent, const glm::mat4& transform);
+		static void DrawQuad();
+		static void SubmitMesh(MeshComponent& meshComponent, const glm::mat4& transform);
 
 		static ShaderLibrary& GetShaderLibrary() { return s_ShaderLibrary; }
 
@@ -35,7 +36,6 @@ namespace ArcEngine
 		static void Flush(Ref<Framebuffer>& renderTarget);
 		static void CompositePass(Ref<Framebuffer>& renderTarget);
 		static void BloomPass();
-		static void SSGIPass();
 		static void RenderPass();
 		static void ShadowMapPass();
 
@@ -47,6 +47,7 @@ namespace ArcEngine
 
 		static const int blurSamples = 6;
 		static Ref<Framebuffer> prefilteredFramebuffer;
+		static Ref<Framebuffer> tempBlurFramebuffers[blurSamples];
 		static Ref<Framebuffer> downsampledFramebuffers[blurSamples];
 		static Ref<Framebuffer> upsampledFramebuffers[blurSamples];
 

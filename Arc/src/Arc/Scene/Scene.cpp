@@ -28,6 +28,8 @@ namespace ArcEngine
 
 	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 
 		Entity entity = { m_Registry.create(), this };
@@ -47,6 +49,8 @@ namespace ArcEngine
 
 	void Scene::DestroyEntity(Entity entity)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 
 		entity.Deparent();
@@ -61,6 +65,8 @@ namespace ArcEngine
 
 	bool Scene::HasEntity(UUID uuid)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 
 		return m_EntityMap.find(uuid) != m_EntityMap.end();
@@ -68,6 +74,8 @@ namespace ArcEngine
 
 	Entity Scene::GetEntity(UUID uuid)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 
 		if (m_EntityMap.find(uuid) != m_EntityMap.end())
@@ -78,39 +86,49 @@ namespace ArcEngine
 
 	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera, Ref<Framebuffer> renderTarget)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		// Lights
 		std::vector<Entity> lights;
+		lights.reserve(25);
 		{
+			OPTICK_EVENT("PrepareLightData");
+
 			auto view = m_Registry.view<IDComponent, LightComponent>();
 			lights.reserve(view.size());
 			for (auto entity : view)
 			{
 				auto [id, light] = view.get<IDComponent, LightComponent>(entity);
-				lights.push_back(GetEntity(id.ID));
+				lights.push_back(Entity(entity, this));
 			}
 		}
 		Entity skylight = {};
 		{
+			OPTICK_EVENT("PrepareSkylightData");
+
 			auto view = m_Registry.view<IDComponent, SkyLightComponent>();
 			for (auto entity : view)
 			{
 				auto [id, light] = view.get<IDComponent, SkyLightComponent>(entity);
-				skylight = GetEntity(id.ID);
+				skylight = Entity(entity, this);
 			}
 		}
 
 		Renderer3D::BeginScene(camera, skylight, lights);
 		// Meshes
 		{
+			OPTICK_EVENT("SubmitMeshData");
+
 			auto view = m_Registry.view<IDComponent, MeshComponent>();
 			for (auto entity : view)
 			{
+				OPTICK_EVENT("Looping Mesh");
+
 				auto [id, mesh] = view.get<IDComponent, MeshComponent>(entity);
-				Entity e = GetEntity(id.ID);
 				if (mesh.VertexArray != nullptr)
-					Renderer3D::SubmitMesh((uint32_t)entity, mesh, e.GetWorldTransform());
+					Renderer3D::SubmitMesh(mesh, Entity(entity, this).GetWorldTransform());
 			}
 		}
 		Renderer3D::EndScene(renderTarget);
@@ -129,6 +147,8 @@ namespace ArcEngine
 
 	void Scene::OnUpdateRuntime(Timestep ts, Ref<Framebuffer> renderTarget)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 
 		// Update Scripts
@@ -183,6 +203,8 @@ namespace ArcEngine
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
 	{
+		OPTICK_EVENT();
+
 		m_ViewportWidth = width;
 		m_ViewportHeight = height;
 
@@ -200,6 +222,8 @@ namespace ArcEngine
 
 	Entity Scene::GetPrimaryCameraEntity()
 	{
+		OPTICK_EVENT();
+
 		auto view = m_Registry.view<CameraComponent>();
 		for (auto entity : view)
 		{

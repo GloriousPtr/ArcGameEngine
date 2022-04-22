@@ -21,6 +21,8 @@ namespace ArcEngine
 
 	void ImGuiLayer::OnAttach()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		// Setup Dear ImGui context
@@ -103,6 +105,8 @@ namespace ArcEngine
 
 	void ImGuiLayer::OnDetach()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		ImGui_ImplOpenGL3_Shutdown();
@@ -122,6 +126,8 @@ namespace ArcEngine
 
 	void ImGuiLayer::Begin()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		ImGui_ImplOpenGL3_NewFrame();
@@ -132,15 +138,20 @@ namespace ArcEngine
 
 	void ImGuiLayer::End()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		ImGuiIO& io = ImGui::GetIO();
 		Application& app = Application::Get();
 		io.DisplaySize = ImVec2((float)app.GetWindow().GetWidth(), (float)app.GetWindow().GetHeight());
 
-		// Rendering
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		{
+			OPTICK_EVENT("ImGui::End::Render");
+			// Rendering
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		}
 
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
@@ -154,8 +165,8 @@ namespace ArcEngine
 	void ImGuiLayer::SetDarkThemeColors()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Regular.ttf", 18.0f);
-		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Bold.ttf", 18.0f);
+		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Regular.ttf", 20.0f);
+		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Bold.ttf", 20.0f);
 		io.Fonts->Build();
 		
 		ImGuiStyle* style = &ImGui::GetStyle();
@@ -170,6 +181,7 @@ namespace ArcEngine
 		const ImVec4 blue = ImVec4(0.317f, 0.882f, 0.910f, 1.000f); //ImVec4(1.000f, 0.391f, 0.000f, 1.000f);
 		const ImVec4 blue_a = ImVec4(0.317f, 0.882f, 0.910f, 0.781f);
 		
+		const ImVec4 gray_685 = ImVec4(0.685f, 0.685f, 0.685f, 1.000f);
 		const ImVec4 gray_469 = ImVec4(0.469f, 0.469f, 0.469f, 1.000f);
 		const ImVec4 gray_391 = ImVec4(0.391f, 0.391f, 0.391f, 1.000f);
 		const ImVec4 gray_195 = ImVec4(0.195f, 0.195f, 0.195f, 1.000f);

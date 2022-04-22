@@ -25,11 +25,40 @@ namespace ArcEngine
 	{
 		m_Context = context;
 		m_SelectionContext = {};
+		m_CurrentlyVisibleEntities = 0;
+	}
+
+	static void DrawRowsBackground(int row_count, float line_height, float x1, float x2, float y_offset, ImU32 col_even, ImU32 col_odd)
+	{
+		ImDrawList* draw_list = ImGui::GetWindowDrawList();
+		float y0 = ImGui::GetCursorScreenPos().y + (float)(int)y_offset;
+
+		int row_display_start;
+		int row_display_end;
+		ImGui::CalcListClipping(row_count, line_height, &row_display_start, &row_display_end);
+		for (int row_n = row_display_start; row_n < row_display_end; row_n++)
+		{
+			ImU32 col = (row_n & 1) ? col_odd : col_even;
+			if ((col & IM_COL32_A_MASK) == 0)
+				continue;
+			float y1 = y0 + (line_height * row_n);
+			float y2 = y1 + line_height;
+			draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), col);
+		}
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
 		ImGui::Begin("Scene Hierarchy");
+
+		float x1 = ImGui::GetCurrentWindow()->WorkRect.Min.x;
+		float x2 = ImGui::GetCurrentWindow()->WorkRect.Max.x;
+		float item_spacing_y = ImGui::GetStyle().ItemSpacing.y;
+		float item_offset_y = -item_spacing_y * 0.5f;
+		float line_height = ImGui::GetTextLineHeight() + item_spacing_y;
+		
+		DrawRowsBackground(m_CurrentlyVisibleEntities, line_height, x1, x2, item_offset_y, 0, ImGui::GetColorU32(ImVec4(0.20f, 0.20f, 0.20f, 1.0f)));
+		m_CurrentlyVisibleEntities = 0;
 
 		m_Context->m_Registry.each([&](auto entityID)
 		{
@@ -37,6 +66,15 @@ namespace ArcEngine
 			if (!entity.GetParent())
 				DrawEntityNode(entity);
 		});
+
+		if (m_DeletedEntity)
+		{
+			if(m_SelectionContext == m_DeletedEntity)
+				m_SelectionContext = {};
+
+			m_Context->DestroyEntity(m_DeletedEntity);
+			m_DeletedEntity = {};
+		}
 
 		if(ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 			m_SelectionContext = {};
@@ -84,9 +122,9 @@ namespace ArcEngine
 			}
 			ImGui::EndPopup();
 		}
-		
+
 		ImGui::End();
-		
+
 
 		
 		ImGui::Begin("Properties");
@@ -97,15 +135,21 @@ namespace ArcEngine
 		ImGui::End();
 	}
 
-	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
+	ImRect SceneHierarchyPanel::DrawEntityNode(Entity entity, bool skipChildren = false)
 	{
+		m_CurrentlyVisibleEntities++;
+
 		auto& tagComponent = entity.GetComponent<TagComponent>();
 		auto& tag = tagComponent.Tag;
 		auto& transform = entity.GetTransform();
+		uint32_t childrenSize = transform.Children.size();
 
 		ImGuiTreeNodeFlags flags = (m_SelectionContext == entity ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
+		flags |= childrenSize == 0 ? ImGuiTreeNodeFlags_Bullet : 0;
+
+		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity.GetUUID(), flags, tag.c_str());
+
 		if(ImGui::IsItemClicked())
 			m_SelectionContext = entity;
 
@@ -134,14 +178,36 @@ namespace ArcEngine
 			if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
 				tagComponent.renaming = false;
 		}
-		
-		if(opened)
-		{
-			for (size_t i = 0; i < transform.Children.size(); i++)
-				DrawEntityNode(m_Context->GetEntity(transform.Children[i]));
 
-			ImGui::TreePop();
+		const ImRect nodeRect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+		if(opened && !skipChildren && !entityDeleted)
+		{
+			const ImColor TreeLineColor = ImGui::GetColorU32(ImGuiCol_Text);
+			const float indentSize = 15.0f;
+			const float SmallOffsetX = 18.0f - indentSize;
+			ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+			ImVec2 verticalLineStart = ImGui::GetCursorScreenPos();
+			verticalLineStart.x += SmallOffsetX; //to nicely line up with the arrow symbol
+			ImVec2 verticalLineEnd = verticalLineStart;
+
+			ImGui::Indent(indentSize);
+			for (size_t i = 0; i < childrenSize; i++)
+			{
+				UUID childId = entity.GetTransform().Children[i];
+				const float HorizontalTreeLineSize = 8.0f; //chosen arbitrarily
+	            const ImRect childRect = DrawEntityNode(m_Context->GetEntity(childId), createChild);
+				const float midpoint = (childRect.Min.y + childRect.Max.y) / 2.0f;
+			    drawList->AddLine(ImVec2(verticalLineStart.x, midpoint), ImVec2(verticalLineStart.x + HorizontalTreeLineSize, midpoint), TreeLineColor);
+				verticalLineEnd.y = midpoint;
+			}
+			ImGui::Unindent(indentSize);
+
+			drawList->AddLine(verticalLineStart, verticalLineEnd, TreeLineColor);
 		}
+
+		if (opened)
+			ImGui::TreePop();
 
 		if (createChild)
 		{
@@ -151,10 +217,10 @@ namespace ArcEngine
 
 		if(entityDeleted)
 		{
-			m_Context->DestroyEntity(entity);
-			if(m_SelectionContext == entity)
-				m_SelectionContext = {};
+			m_DeletedEntity = entity;
 		}
+
+		return nodeRect;
 	}
 
 	static void DrawFloatControl(const std::string& label, float* value, float columnWidth = 100.0f)
@@ -388,15 +454,50 @@ namespace ArcEngine
 			vertices.push_back(normal.y);
 			vertices.push_back(normal.z);
 
-			auto tangent = mesh->mTangents[i];
-			vertices.push_back(tangent.x);
-			vertices.push_back(tangent.y);
-			vertices.push_back(tangent.z);
+			if (mesh->mTangents)
+			{
+				auto tangent = mesh->mTangents[i];
+				vertices.push_back(tangent.x);
+				vertices.push_back(tangent.y);
+				vertices.push_back(tangent.z);
 
-			auto bitangent = mesh->mBitangents[i];
-			vertices.push_back(bitangent.x);
-			vertices.push_back(bitangent.y);
-			vertices.push_back(bitangent.z);
+				auto bitangent = mesh->mBitangents[i];
+				vertices.push_back(bitangent.x);
+				vertices.push_back(bitangent.y);
+				vertices.push_back(bitangent.z);
+			}
+			else
+			{
+				size_t index = i / 3;
+				// Shortcuts for vertices
+				auto& v0 = mesh->mVertices[index + 0];
+				auto& v1 = mesh->mVertices[index + 1];
+				auto& v2 = mesh->mVertices[index + 2];
+
+				// Shortcuts for UVs
+				auto& uv0 = mesh->mTextureCoords[0][index + 0];
+				auto& uv1 = mesh->mTextureCoords[0][index + 1];
+				auto& uv2 = mesh->mTextureCoords[0][index + 2];
+
+				// Edges of the triangle : position delta
+				auto deltaPos1 = v1 - v0;
+				auto deltaPos2 = v2 - v0;
+
+				// UV delta
+				auto deltaUV1 = uv1 - uv0;
+				auto deltaUV2 = uv2 - uv0;
+
+				float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+				auto tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+				auto bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+
+				vertices.push_back(tangent.x);
+				vertices.push_back(tangent.y);
+				vertices.push_back(tangent.z);
+				vertices.push_back(bitangent.x);
+				vertices.push_back(bitangent.y);
+				vertices.push_back(bitangent.z);
+			}
 		}
 
 		for(size_t i = 0; i < mesh->mNumFaces; i++)
@@ -746,12 +847,10 @@ namespace ArcEngine
 			}
 
 			ImGui::ColorEdit4("Albedo Color", glm::value_ptr(component.AlbedoColor));
-			ImGui::SliderFloat("Normal Strength", &component.NormalStrength, 0.0f, 1.0f);
 			ImGui::SliderFloat("Metallic", &component.Metallic, 0.0f, 1.0f);
 			ImGui::SliderFloat("Roughness", &component.Roughness, 0.0f, 1.0f);
-			ImGui::SliderFloat("AO", &component.AO, 0.0f, 1.0f);
-			ImGui::ColorEdit3("Emissive Color", glm::value_ptr(component.EmissiveColor));
-			ImGui::DragFloat("Emissive Intensity", &component.EmissiveIntensity);
+			ImGui::ColorEdit3("Emissive Color", glm::value_ptr(component.EmissiveParams));
+			ImGui::DragFloat("Emissive Intensity", &component.EmissiveParams.w);
 			
 			ImGui::Checkbox("##UseAlbedoMap", &component.UseAlbedoMap);
 			DrawTexture2DButton("AlbedoMap", component.AlbedoMap);
@@ -767,6 +866,10 @@ namespace ArcEngine
 		DrawComponent<SkyLightComponent>("Sky Light", entity, [](SkyLightComponent& component)
 		{
 			DrawFloatControl("Intensity", &component.Intensity);
+			
+			UI::BeginPropertyGrid();
+			UI::Property("Rotation", component.Rotation, 0.0f, 360.0f);
+			UI::EndPropertyGrid();
 
 			const uint32_t id = component.Texture == nullptr ? 0 : component.Texture->GetHRDRendererID();
 			DrawTextureCubemapButton("Texture", component.Texture, id);
@@ -778,14 +881,14 @@ namespace ArcEngine
 		{
 			UI::PushID();
 
-			const char* lightTypeStrings[] = { "Directional", "Point" };
+			const char* lightTypeStrings[] = { "Directional", "Point", "Spot" };
 			const char* currentLightTypeString = lightTypeStrings[(int)component.Type];
 			UI::BeginPropertyGrid();
 			UI::Property("LightType");
 			ImGui::NextColumn();
 			if(ImGui::BeginCombo("##LightType", currentLightTypeString))
 			{
-				for (int i = 0; i < 2; i++)
+				for (int i = 0; i < 3; i++)
 				{
 					bool isSelected = currentLightTypeString == lightTypeStrings[i];
 					if(ImGui::Selectable(lightTypeStrings[i], isSelected))
@@ -840,11 +943,27 @@ namespace ArcEngine
 			if (component.Type == LightComponent::LightType::Point)
 			{
 				UI::BeginPropertyGrid();
-				UI::Property("Radius", component.Radius);
+				UI::Property("Range", component.Range);
+				UI::EndPropertyGrid();
+			}
+			else if (component.Type == LightComponent::LightType::Spot)
+			{
+				UI::BeginPropertyGrid();
+				UI::Property("Range", component.Range);
+				if (component.Range < 0.1f)
+					component.Range = 0.1f;
 				UI::EndPropertyGrid();
 
 				UI::BeginPropertyGrid();
-				UI::Property("Falloff", component.Falloff);
+				UI::Property("Outer Cut-Off Angle", component.OuterCutOffAngle, 1.0f, 90.0f);
+				if (component.OuterCutOffAngle < component.CutOffAngle)
+					component.CutOffAngle = component.OuterCutOffAngle;
+				UI::EndPropertyGrid();
+
+				UI::BeginPropertyGrid();
+				UI::Property("Cut-Off Angle", component.CutOffAngle, 1.0f, 90.0f);
+				if (component.CutOffAngle > component.OuterCutOffAngle)
+					component.OuterCutOffAngle = component.CutOffAngle;
 				UI::EndPropertyGrid();
 			}
 			else

@@ -8,6 +8,8 @@ namespace ArcEngine
 	OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height)
 		: m_Width(width), m_Height(height)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		m_InternalFormat = GL_RGBA8;
@@ -26,12 +28,16 @@ namespace ArcEngine
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& path)
 		: m_Path(path)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		int width, height, channels;
 		stbi_set_flip_vertically_on_load(1);
 		stbi_uc* data = nullptr;
 		{
+			OPTICK_EVENT("stbi_load Texture");
+
 			ARC_PROFILE_SCOPE("stbi_load - OpenGLTexture2D::OpenGLTexture2D(const std::string&)");
 			
 			data = stbi_load(path.c_str(), &width, &height, &channels, 0);
@@ -83,6 +89,8 @@ namespace ArcEngine
 
 	OpenGLTexture2D::~OpenGLTexture2D()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glDeleteTextures(1, &m_RendererID);
@@ -90,6 +98,8 @@ namespace ArcEngine
 
 	void OpenGLTexture2D::SetData(void* data, uint32_t size)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		ARC_CORE_ASSERT(size == m_Width * m_Height * (m_DataFormat == GL_RGBA ? 4 : 3), "Data must be entire texture!");
@@ -98,6 +108,8 @@ namespace ArcEngine
 
 	void OpenGLTexture2D::Bind(uint32_t slot) const
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glBindTextureUnit(slot, m_RendererID);

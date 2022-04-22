@@ -21,6 +21,8 @@ namespace ArcEngine
 		virtual void SetData(void* data, uint32_t size) override;
 
 		virtual void Bind(uint32_t slot = 0) const override;
+		virtual void BindIrradianceMap(uint32_t slot) const override;
+		virtual void BindRadianceMap(uint32_t slot) const override;
 
 		virtual bool operator==(const Texture& other) const override { return m_RendererID == ((OpenGLTextureCubemap&)other).m_RendererID; }
 	private:
@@ -29,6 +31,7 @@ namespace ArcEngine
 		uint32_t m_HRDRendererID;
 		uint32_t m_RendererID;
 		uint32_t m_IrradianceRendererID;
+		uint32_t m_RadianceRendererID;
 		GLenum m_InternalFormat, m_DataFormat;
 	};
 }

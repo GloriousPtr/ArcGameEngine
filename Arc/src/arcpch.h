@@ -30,6 +30,8 @@
 
 #include "Arc/Debug/Instrumentor.h"
 
+#include <optick.h>
+
 #ifdef ARC_PLATFORM_WINDOWS
 	#include <Windows.h>
 #endif

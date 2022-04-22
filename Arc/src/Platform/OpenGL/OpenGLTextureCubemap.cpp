@@ -12,19 +12,25 @@ namespace ArcEngine
 {
 	static Ref<Shader> s_EquirectangularToCubemapShader;
 	static Ref<Shader> s_IrradianceShader;
+	static Ref<Shader> s_RadianceShader;
 
 	OpenGLTextureCubemap::OpenGLTextureCubemap(const std::string& path)
 		: m_Path(path)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 
 		const uint32_t cubemapSize = 2048;
 		const uint32_t irradianceMapSize = 32;
+		const uint32_t radianceMapSize = cubemapSize / 4;
 		
 		int width, height, channels;
 		stbi_set_flip_vertically_on_load(1);
 		float* data = nullptr;
 		{
+			OPTICK_EVENT("stbi_load Texture");
+
 			ARC_PROFILE_SCOPE("stbi_load - OpenGLTexture2D::OpenGLTexture2D(const std::string&)");
 			
 			data = stbi_loadf(path.c_str(), &width, &height, &channels, 0);
@@ -74,7 +80,7 @@ namespace ArcEngine
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
@@ -111,6 +117,9 @@ namespace ArcEngine
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 		// create an irradiance cubemap, and re-scale capture FBO to irradiance scale.
 		glGenTextures(1, &m_IrradianceRendererID);
@@ -149,6 +158,53 @@ namespace ArcEngine
 
 			Renderer3D::DrawCube();
 		}
+
+		// Radiance
+		glGenTextures(1, &m_RadianceRendererID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RadianceRendererID);
+		for (unsigned int i = 0; i < 6; ++i)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, radianceMapSize, radianceMapSize, 0, GL_RGB, GL_FLOAT, nullptr);
+		}
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); 
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+		if(!s_RadianceShader)
+			s_RadianceShader = Shader::Create("assets/shaders/PrefilterCubemap.glsl");
+		s_RadianceShader->Bind();
+		s_RadianceShader->SetInt("u_EnvironmentMap", 0);
+		s_RadianceShader->SetMat4("u_Projection", captureProjection);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+		unsigned int maxMipLevels = 5;
+		for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
+		{
+			// reisze framebuffer according to mip-level size.
+			unsigned int mipWidth  = radianceMapSize * std::pow(0.5, mip);
+			unsigned int mipHeight = radianceMapSize * std::pow(0.5, mip);
+			glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
+			glViewport(0, 0, mipWidth, mipHeight);
+
+			float roughness = (float)mip / (float)(maxMipLevels - 1);
+			s_RadianceShader->SetFloat("u_Roughness", roughness);
+			for (unsigned int i = 0; i < 6; ++i)
+			{
+				s_RadianceShader->SetMat4("u_View", captureViews[i]);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 
+									   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_RadianceRendererID, mip);
+
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				Renderer3D::DrawCube();
+			}
+		}
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
@@ -158,25 +214,48 @@ namespace ArcEngine
 
 	OpenGLTextureCubemap::~OpenGLTextureCubemap()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glDeleteTextures(1, &m_HRDRendererID);
 		glDeleteTextures(1, &m_RendererID);
+		glDeleteTextures(1, &m_IrradianceRendererID);
+		glDeleteTextures(1, &m_RadianceRendererID);
 	}
 
 	void OpenGLTextureCubemap::SetData(void* data, uint32_t size)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 	}
 
 	void OpenGLTextureCubemap::Bind(uint32_t slot) const
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
-		if (slot == 0)
-			glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
-		else
-			glBindTexture(GL_TEXTURE_CUBE_MAP, m_IrradianceRendererID);
+		glBindTextureUnit(slot, m_RendererID);
+	}
+
+	void OpenGLTextureCubemap::BindIrradianceMap(uint32_t slot) const
+	{
+		OPTICK_EVENT();
+
+		ARC_PROFILE_FUNCTION();
+
+		glBindTextureUnit(slot, m_IrradianceRendererID);
+	}
+
+	void OpenGLTextureCubemap::BindRadianceMap(uint32_t slot) const
+	{
+		OPTICK_EVENT();
+
+		ARC_PROFILE_FUNCTION();
+
+		glBindTextureUnit(slot, m_RadianceRendererID);
 	}
 }

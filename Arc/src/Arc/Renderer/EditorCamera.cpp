@@ -13,6 +13,8 @@ namespace ArcEngine
 
 	void EditorCamera::OnUpdate(Timestep timestep)
 	{
+		OPTICK_EVENT();
+
 		float cosYaw = glm::cos(glm::radians(m_Yaw));
 		float sinYaw = glm::sin(glm::radians(m_Yaw));
 		float cosPitch = glm::cos(glm::radians(m_Pitch));
@@ -31,6 +33,8 @@ namespace ArcEngine
 
 	void EditorCamera::SetViewportSize(float width, float height)
 	{
+		OPTICK_EVENT();
+
 		m_AspectRatio = width / height;
 		m_Projection = glm::perspective(m_Fov, m_AspectRatio, m_NearClip, m_FarClip);
 	}

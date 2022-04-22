@@ -61,25 +61,28 @@ void main()
 #version 450 core
 
 const float PI = 3.141592653589793;
+const float EPSILON = 0.000000000000001;
 
 const int MAX_NUM_LIGHTS = 25;
 
 struct Light
 {
     vec4 u_Position;
+
+	/*
+	a: intensity
+	*/
     vec4 u_Color;
     
     /* packed into a vec4
-    x: radius
-    y: falloff
-    z: unused
+    x: range
+    y: cutOffAngle
+    z: outerCutOffAngle
     w: light type */
     vec4 u_AttenFactors;
     
     // Used for directional and spot lights
     vec4 u_LightDir;
-
-    float u_Intensity;
 };
 
 layout (std140, binding = 1) uniform LightBuffer
@@ -89,14 +92,12 @@ layout (std140, binding = 1) uniform LightBuffer
 };
 
 uniform float u_IrradianceIntensity;
+uniform float u_EnvironmentRotation;
 
 uniform vec4  u_Albedo;
-uniform float u_NormalStrength;
 uniform float u_Metallic;
 uniform float u_Roughness;
-uniform float u_AO;
-uniform vec3  u_EmissionColor;
-uniform float u_EmissiveIntensity;
+uniform vec4 u_EmissiveParams;
 
 uniform bool u_UseAlbedoMap;
 uniform bool u_UseNormalMap;
@@ -104,6 +105,8 @@ uniform bool u_UseMRAMap;
 uniform bool u_UseEmissiveMap;
 
 uniform samplerCube u_IrradianceMap;
+uniform samplerCube u_RadianceMap;
+uniform sampler2D u_BRDFLutMap;
 uniform sampler2D u_DirectionalShadowMap;
 
 uniform sampler2D u_AlbedoMap;
@@ -134,19 +137,28 @@ layout(location = 0) out vec4 o_FragColor;
 layout(location = 1) out vec4 o_Position;
 layout(location = 2) out vec4 o_Normal;
 
+struct PBRParameters
+{
+	vec3 Albedo;
+	float Roughness;
+	float Metalness;
+
+	vec3 Normal;
+	vec3 View;
+	float NdotV;
+};
+
+PBRParameters m_Params;
+
 // N: Normal, H: Halfway, a2: pow(roughness, 4)
 float DistributionGGX(const vec3 N, const vec3 H, const float a2)
 {
     float NdotH = max(dot(N, H), 0.0);
-    float NdotH2 = NdotH * NdotH;
-
-	float denom = (NdotH2 * (a2 - 1.0) + 1.0);
-    denom = PI * denom * denom;
-
-    return a2 / denom;
+	float denom = (NdotH * NdotH) * (a2 - 1.0) + 1.0;
+    return a2 / (PI * denom * denom);
 }
 
-// N: Normal, V: View, L: Light, k: roughness * roughness / 2.0
+// N: Normal, V: View, L: Light, k: (roughness + 1)^2 / 8.0
 float GeometrySmith(const float NdotL, const float NdotV, const float k)
 {
     float ggx1 = NdotV / (NdotV * (1.0 - k) + k);
@@ -157,9 +169,7 @@ float GeometrySmith(const float NdotL, const float NdotV, const float k)
 
 vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 {
-	float oneMinusCosTheta = clamp(1.0 - cosTheta, 0.0, 1.0);
-	float oneMinusCosTheta5 = oneMinusCosTheta * oneMinusCosTheta * oneMinusCosTheta * oneMinusCosTheta * oneMinusCosTheta;
-    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * oneMinusCosTheta5;
+	return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
 vec3 GetNormalFromMap()
@@ -202,97 +212,139 @@ float LengthSq(const vec3 v)
 	return dot(v, v);
 }
 
+vec3 RotateVectorAboutY(float angle, vec3 vec)
+{
+	angle = radians(angle);
+	mat3x3 rotationMatrix = { vec3(cos(angle),0.0,sin(angle)),
+							vec3(0.0,1.0,0.0),
+							vec3(-sin(angle),0.0,cos(angle)) };
+	return rotationMatrix * vec;
+}
+
+vec3 IBL(vec3 F0)
+{
+	float NoV = clamp(m_Params.NdotV, 0.0, 1.0);
+	vec3 F = FresnelSchlickRoughness(NoV, F0, m_Params.Roughness);
+	vec3 kd = (1.0 - F) * (1.0 - m_Params.Metalness);
+
+	vec3 irradiance = texture(u_IrradianceMap, RotateVectorAboutY(u_EnvironmentRotation, m_Params.Normal)).rgb;
+	vec3 diffuseIBL = m_Params.Albedo * irradiance;
+
+	int envRadianceTexLevels = textureQueryLevels(u_RadianceMap);
+	vec3 Lr = 2.0 * m_Params.NdotV * m_Params.Normal - m_Params.View;
+	vec3 specularIrradiance = textureLod(u_RadianceMap, RotateVectorAboutY(u_EnvironmentRotation, Lr), m_Params.Roughness * envRadianceTexLevels).rgb;
+
+	vec2 specularBRDF = texture(u_BRDFLutMap, vec2(m_Params.NdotV, 1.0 - m_Params.Roughness)).rg;
+	vec3 specularIBL = specularIrradiance * (F0 * specularBRDF.x + specularBRDF.y);
+	
+	return (kd * diffuseIBL + specularIBL) * u_IrradianceIntensity;
+}
+
 // =========================================
 void main()
 {
-    vec4 albedoWithAlpha	= u_UseAlbedoMap ? pow(texture(u_AlbedoMap, Input.TexCoord) * u_Albedo, vec4(2.2, 2.2, 2.2, 1.0)) : u_Albedo;
+    vec4 albedoWithAlpha = u_UseAlbedoMap ? pow(texture(u_AlbedoMap, Input.TexCoord) * u_Albedo, vec4(2.2, 2.2, 2.2, 1.0)) : u_Albedo;
 	if (albedoWithAlpha.a < 0.1)
 		discard;
 
-    vec3 albedo	= albedoWithAlpha.rgb;
-    float metallic = u_UseMRAMap ? texture(u_MRAMap, Input.TexCoord).r : u_Metallic;
-    float roughness = u_UseMRAMap ? texture(u_MRAMap, Input.TexCoord).g : u_Roughness;
-    float ao = u_UseMRAMap ? texture(u_MRAMap, Input.TexCoord).b : u_AO;
+    m_Params.Albedo	= albedoWithAlpha.rgb;
+    m_Params.Roughness = u_UseMRAMap ? texture(u_MRAMap, Input.TexCoord).g * u_Roughness : u_Roughness;
+	m_Params.Roughness = max(m_Params.Roughness, 0.05); // Minimum roughness of 0.05 to keep specular highlight
+    m_Params.Metalness = u_UseMRAMap ? texture(u_MRAMap, Input.TexCoord).r * u_Metallic : u_Metallic;
 
-    vec3 emission = u_EmissiveIntensity * (u_UseEmissiveMap ? texture(u_EmissiveMap, Input.TexCoord).rgb : u_EmissionColor);
+    float ao = u_UseMRAMap ? texture(u_MRAMap, Input.TexCoord).b : 1.0;
 
-    vec3 N = u_NormalStrength * (u_UseNormalMap ? GetNormalFromMap() : normalize(Input.Normal));
+    vec3 emission = u_EmissiveParams.w * (u_UseEmissiveMap ? texture(u_EmissiveMap, Input.TexCoord).rgb : u_EmissiveParams.rgb);
 
-    vec3 V = normalize(Input.CameraPosition - Input.WorldPosition);
-	float NdotV = max(dot(N, V), 0.0);
+    m_Params.Normal = u_UseNormalMap ? GetNormalFromMap() : normalize(Input.Normal);
+
+    m_Params.View = normalize(Input.CameraPosition - Input.WorldPosition);
+	m_Params.NdotV = max(dot(m_Params.Normal, m_Params.View), 0.0);
 
     vec3 F0 = vec3(0.04);
-    F0 = mix(F0, albedo, metallic);
+    F0 = mix(F0, m_Params.Albedo, m_Params.Metalness);
 
-	float a	= roughness * roughness;
+	float a	= m_Params.Roughness * m_Params.Roughness;
 	float a2 = a * a;
-	float k = a * 0.5;
+	float r = m_Params.Roughness + 1.0;
+	float k = (r * r) / 8.0;
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
-
+	
     for (int i = 0; i < u_NumLights; ++i)
     {
 		Light light = u_Lights[i];
         uint type = uint(round(light.u_AttenFactors.w));
-		bool isDirLight = type == 0;
 
         vec3 L;
 		float NdotL;
 		float shadow = 1.0;
-        if (isDirLight)
-        {
-			L = -1.0 * normalize(light.u_LightDir.xyz);
-			NdotL = max(dot(N, L), 0.0);
-			shadow = (1.0 - CalcDirectionalShadowFactor(light, NdotL));
-		}
-		else
-		{
-			L = normalize(light.u_Position.rgb - Input.WorldPosition);
-			NdotL = max(dot(N, L), 0.0);
-		}
-
-		if (shadow == 0.0)
-			continue;
-
-        vec3 H = normalize(L + V);
-
         float attenuation = 1.0;
-        if (type == 1)
+        switch (type)
         {
-            vec4 attenFactor = light.u_AttenFactors;
-            float lightDistance2 = LengthSq(light.u_Position.xyz - Input.WorldPosition);
-			float lightRadius2 = attenFactor.x * attenFactor.x;
-			attenuation = clamp(1 - ((lightDistance2 * lightDistance2) / (lightRadius2 * lightRadius2)), 0.0, 1.0);
-			attenuation = (attenuation * attenuation) / (lightDistance2 + 1.0);
-            //attenuation = clamp(1.0 - (lightDistance2 / lightRadius2), 0.0, 1.0);
-			//attenuation *= mix(attenuation, 1.0, attenFactor.y);
+			case 0:
+			{
+				L = -1.0 * normalize(light.u_LightDir.xyz);
+				NdotL = max(dot(m_Params.Normal, L), 0.0);
+				shadow = (1.0 - CalcDirectionalShadowFactor(light, NdotL));
+				break;
+			}
+
+			case 1:
+			{
+				L = normalize(light.u_Position.rgb - Input.WorldPosition);
+				NdotL = max(dot(m_Params.Normal, L), 0.0);
+				vec4 attenFactor = light.u_AttenFactors;
+				float lightDistance2 = LengthSq(light.u_Position.xyz - Input.WorldPosition);
+				float lightRadius2 = attenFactor.x * attenFactor.x;
+				attenuation = clamp(1 - ((lightDistance2 * lightDistance2) / (lightRadius2 * lightRadius2)), 0.0, 1.0);
+				attenuation = (attenuation * attenuation) / (lightDistance2 + 1.0);
+				break;
+			}
+			
+			case 2:
+			{
+				L = normalize(light.u_Position.rgb - Input.WorldPosition);
+				NdotL = max(dot(m_Params.Normal, L), 0.0);
+				vec4 attenFactor = light.u_AttenFactors;
+				float lightDistance2 = LengthSq(light.u_Position.xyz - Input.WorldPosition);
+				float lightRadius2 = attenFactor.x * attenFactor.x;
+				if (lightRadius2 > lightDistance2)
+				{
+					float theta = dot(L, normalize(-light.u_LightDir.xyz));
+					float epsilon = attenFactor.y - attenFactor.z;
+					float intensity = clamp((theta - attenFactor.z) / epsilon, 0.0, 1.0);
+					attenuation = intensity / lightDistance2;
+				}
+				else
+				{
+					attenuation = 0.0;
+				}
+				break;
+			}
         }
 
-        vec3 radiance = shadow * light.u_Color.rgb * light.u_Intensity * attenuation;
+		if (shadow <= EPSILON)
+			continue;
+
+        vec3 radiance = shadow * light.u_Color.rgb * light.u_Color.a * attenuation;
 
         // Cook-Torrance BRDF
-        float NDF = DistributionGGX(N, H, a2);
-        float G = GeometrySmith(NdotL, NdotV, k);
-        vec3 F = FresnelSchlickRoughness(max(dot(H, V), 0.0), F0, roughness);
+        vec3 H = normalize(L + m_Params.View);
+        float NDF = DistributionGGX(m_Params.Normal, H, a2);
+        float G = GeometrySmith(NdotL, clamp(m_Params.NdotV, 0.0, 1.0), k);
+        vec3 F = FresnelSchlickRoughness(clamp(dot(H, m_Params.View), 0.0, 1.0), F0, m_Params.Roughness);
 
         vec3 numerator = NDF * G * F;
-        float denom = 4.0 * NdotV * NdotL + 0.0001;
+        float denom = 4.0 * m_Params.NdotV * NdotL + 0.0001;
         vec3 specular = numerator / denom;
 
-		vec3 kS = F;
-        vec3 kD = vec3(1.0) - kS;
-        kD *= 1.0 - metallic;
-
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+        vec3 kD = (1.0 - F) * (1.0 - m_Params.Metalness);
+        Lo += (kD * m_Params.Albedo / PI + specular) * radiance * NdotL;
     }
-
-    vec3 kS = FresnelSchlickRoughness(NdotV, F0, roughness);
-    vec3 kD = 1.0 - kS;
-    kD *= 1.0 - metallic;
-    vec3 irradiance = texture(u_IrradianceMap, N).rgb * u_IrradianceIntensity;
-    vec3 diffuse = irradiance * albedo;
-    vec3 ambient = (kD * diffuse) * ao;
+	
+	vec3 ambient = IBL(F0) * ao;
 
     vec3 color = ambient + Lo + emission;
 

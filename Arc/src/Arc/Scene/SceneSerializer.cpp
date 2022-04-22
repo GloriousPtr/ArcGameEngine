@@ -181,8 +181,9 @@ namespace ArcEngine
 			out << YAML::Key << "Type" << YAML::Value << (int) lightComponent.Type;
 			out << YAML::Key << "Color" << YAML::Value << lightComponent.Color;
 			out << YAML::Key << "Intensity" << YAML::Value << lightComponent.Intensity;
-			out << YAML::Key << "Radius" << YAML::Value << lightComponent.Radius;
-			out << YAML::Key << "Falloff" << YAML::Value << lightComponent.Falloff;
+			out << YAML::Key << "Radius" << YAML::Value << lightComponent.Range;
+			out << YAML::Key << "CutOffAngle" << YAML::Value << lightComponent.CutOffAngle;
+			out << YAML::Key << "OuterCutOffAngle" << YAML::Value << lightComponent.OuterCutOffAngle;
 
 			out << YAML::EndMap; // LightComponent
 		}
@@ -315,8 +316,9 @@ namespace ArcEngine
 					src.Type = (LightComponent::LightType) lightComponent["Type"].as<int>();
 					src.Color = lightComponent["Color"].as<glm::vec3>();
 					src.Intensity = lightComponent["Intensity"].as<float>();
-					src.Radius = lightComponent["Radius"].as<float>();
-					src.Falloff = lightComponent["Falloff"].as<float>();
+					src.Range = lightComponent["Radius"].as<float>();
+					src.CutOffAngle = lightComponent["CutOffAngle"].as<float>();
+					src.OuterCutOffAngle = lightComponent["OuterCutOffAngle"].as<float>();
 				}
 			}
 		}

@@ -115,12 +115,9 @@ namespace ArcEngine
 		CullModeType CullMode = CullModeType::Back;
 
 		glm::vec4 AlbedoColor = glm::vec4(1.0f);
-		float NormalStrength = 1.0f;
-		float Metallic = 0.5f;
-		float Roughness = 0.5f;
-		float AO = 0.5f;
-		glm::vec3 EmissiveColor = glm::vec3(0.0f);
-		float EmissiveIntensity = 5.0f;
+		float Metallic = 0.0f;
+		float Roughness = 1.0f;
+		glm::vec4 EmissiveParams = glm::vec4(0.0f);
 
 		bool UseAlbedoMap = false;
 		bool UseNormalMap = false;
@@ -139,7 +136,8 @@ namespace ArcEngine
 	struct SkyLightComponent
 	{
 		Ref<TextureCubemap> Texture = nullptr;
-		float Intensity = 3.0f;
+		float Intensity = 0.7f;
+		float Rotation = 0.0f;
 
 		SkyLightComponent() = default;
 		SkyLightComponent(const SkyLightComponent&) = default;
@@ -155,15 +153,16 @@ namespace ArcEngine
 
 	struct LightComponent
 	{
-		enum class LightType { Directional = 0, Point };
+		enum class LightType { Directional = 0, Point, Spot };
 
 		LightType Type = LightType::Directional;
 		bool UseColorTempratureMode = true;
 		glm::vec3 Color = glm::vec3(1.0f);
-		float Intensity = 70.0f;
+		float Intensity = 20.0f;
 
-		float Radius = 1.0f;
-		float Falloff = 1.0f;
+		float Range = 1.0f;
+		float CutOffAngle = 12.5f;
+		float OuterCutOffAngle = 17.5f;
 		
 		Ref<Framebuffer> ShadowMapFramebuffer;
 

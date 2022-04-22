@@ -36,6 +36,8 @@ namespace ArcEngine
 
 	void EditorLayer::OnUpdate(Timestep ts)
 	{
+		OPTICK_EVENT("EditorUpdate");
+
 		ARC_PROFILE_FUNCTION();
 
 		frameTime = ts;
@@ -47,6 +49,8 @@ namespace ArcEngine
 
 	void EditorLayer::OnImGuiRender()
 	{
+		OPTICK_EVENT("EditorRender");
+
 		ARC_PROFILE_FUNCTION();
 
 		static bool dockspaceOpen = true;
@@ -121,6 +125,15 @@ namespace ArcEngine
 				ImGui::EndMenu();
 			}
 
+			if (ImGui::BeginMenu("Window"))
+			{
+				ImGui::MenuItem("Viewport", nullptr, &m_ShowMainSceneViewport);
+				ImGui::MenuItem("Hierarchy", nullptr, &m_ShowSceneHierarchyPanel);
+				ImGui::MenuItem("RendererSettings", nullptr, &m_ShowRendererSettingsPanel);
+
+				ImGui::EndMenu();
+			}
+
 			if (ImGui::BeginMenu("Shaders"))
 			{
 				if (ImGui::MenuItem("Reload Shaders"))
@@ -135,9 +148,12 @@ namespace ArcEngine
 			ImGui::EndMenuBar();
 		}
 
-		m_RendererSettingsPanel.OnImGuiRender();
-		m_SceneHierarchyPanel.OnImGuiRender();
-		m_MainSceneViewport.OnImGuiRender();
+		if (m_ShowRendererSettingsPanel)
+			m_RendererSettingsPanel.OnImGuiRender();
+		if (m_ShowSceneHierarchyPanel)
+			m_SceneHierarchyPanel.OnImGuiRender();
+		if (m_ShowMainSceneViewport)
+			m_MainSceneViewport.OnImGuiRender();
 
 		m_Application->GetImGuiLayer()->SetBlockEvents(false);
 

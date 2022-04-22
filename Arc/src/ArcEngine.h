@@ -38,3 +38,4 @@
 #include "Arc/Renderer/OrthographicCamera.h"
 //------------------------------------------------
 
+#include <optick.h>

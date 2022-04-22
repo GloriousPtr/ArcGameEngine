@@ -1,0 +1,41 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  SOLUTION_FILE_PATH: .
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build for ${{matrix.BUILD_CONFIGURATION}}
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        BUILD_CONFIGURATION:
+          - Debug
+          - Release
+          - Dist
+      
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Generate Project Files
+      run: "./scripts/Win-GenProjects.bat"
+      
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /p:Configuration=${{matrix.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}} /t:Clean

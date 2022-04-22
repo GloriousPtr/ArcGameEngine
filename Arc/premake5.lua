@@ -18,7 +18,7 @@ project "Arc"
 		"vendor/stb_image/**.cpp",
 		"vendor/glm/glm/**.hpp",
 		"vendor/glm/glm/**.inl",
-		
+
 		"vendor/ImGuizmo/ImGuizmo.h",
 		"vendor/ImGuizmo/ImGuizmo.cpp",
 	}
@@ -41,7 +41,8 @@ project "Arc"
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGuizmo}",
-		"%{IncludeDir.assimp}"
+		"%{IncludeDir.assimp}",
+		"%{IncludeDir.optick}"
 	}
 
 	links
@@ -51,6 +52,7 @@ project "Arc"
 		"ImGui",
 		"yaml-cpp",
 		"assimp",
+		"optick",
 		"opengl32.lib"
 	}
 

@@ -46,6 +46,8 @@ namespace ArcEngine
 	
 	void Renderer2D::Init()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		s_Data.QuadVertexArray = VertexArray::Create();
@@ -105,6 +107,8 @@ namespace ArcEngine
 
 	void Renderer2D::Shutdown()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 
 		delete[] s_Data.QuadVertexBufferBase;
@@ -112,6 +116,8 @@ namespace ArcEngine
 
 	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 
 		glm::mat4 viewProj = camera.GetProjection() * glm::inverse(transform);
@@ -124,6 +130,8 @@ namespace ArcEngine
 
 	void Renderer2D::BeginScene(const EditorCamera& camera)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		s_Data.TextureShader->Bind();
@@ -134,6 +142,8 @@ namespace ArcEngine
 
 	void Renderer2D::BeginScene(const OrthographicCamera& camera)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		s_Data.TextureShader->Bind();
@@ -144,6 +154,8 @@ namespace ArcEngine
 
 	void Renderer2D::EndScene(Ref<Framebuffer> renderTarget)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		renderTarget->Bind();
@@ -154,6 +166,8 @@ namespace ArcEngine
 
 	void Renderer2D::StartBatch()
 	{
+		OPTICK_EVENT();
+
 		s_Data.QuadIndexCount = 0;
 		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
 
@@ -162,6 +176,8 @@ namespace ArcEngine
 
 	void Renderer2D::Flush()
 	{
+		OPTICK_EVENT();
+
 		if(s_Data.QuadIndexCount == 0)
 			return; // Nothing to draw
 
@@ -199,6 +215,8 @@ namespace ArcEngine
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		constexpr size_t quadVertexCount = 4;
@@ -226,6 +244,8 @@ namespace ArcEngine
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		float textureIndex = 0.0f;

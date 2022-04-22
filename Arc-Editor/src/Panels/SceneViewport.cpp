@@ -30,6 +30,8 @@ namespace ArcEngine
 
 	void SceneViewport::OnUpdate(Ref<Scene>& scene, Timestep timestep)
 	{
+		OPTICK_EVENT();
+
 		if (FramebufferSpecification spec = m_Framebuffer->GetSpecification();
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
 			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
@@ -141,6 +143,8 @@ namespace ArcEngine
 
 	void SceneViewport::OnImGuiRender()
 	{
+		OPTICK_EVENT();
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin(m_ID.c_str());
 
@@ -175,8 +179,6 @@ namespace ArcEngine
 				// Entity Transform
 				auto& tc = selectedEntity.GetComponent<TransformComponent>();
 				glm::mat4 transform = selectedEntity.GetWorldTransform();
-				if (selectedEntity.HasComponent<MeshComponent>())
-					transform = glm::translate(transform, selectedEntity.GetComponent<MeshComponent>().BoundingBox.GetPosition());
 
 				// Snapping
 				const bool snap = ImGui::IsKeyDown(Key::LeftControl);
