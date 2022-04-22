@@ -28,6 +28,8 @@ namespace ArcEngine
 	
 	OpenGLVertexArray::OpenGLVertexArray()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glCreateVertexArrays(1, &m_RendererID);
@@ -35,6 +37,8 @@ namespace ArcEngine
 
 	OpenGLVertexArray::~OpenGLVertexArray()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glDeleteVertexArrays(1, &m_RendererID);
@@ -42,6 +46,8 @@ namespace ArcEngine
 
 	void OpenGLVertexArray::Bind() const
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glBindVertexArray(m_RendererID);
@@ -49,6 +55,8 @@ namespace ArcEngine
 
 	void OpenGLVertexArray::Unbind() const
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glBindVertexArray(0);
@@ -56,6 +64,8 @@ namespace ArcEngine
 
 	void OpenGLVertexArray::AddVertexBuffer(Ref<VertexBuffer>& vertexBuffer)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		ARC_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
@@ -125,6 +135,8 @@ namespace ArcEngine
 
 	void OpenGLVertexArray::SetIndexBuffer(Ref<IndexBuffer>& indexBuffer)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glBindVertexArray(m_RendererID);

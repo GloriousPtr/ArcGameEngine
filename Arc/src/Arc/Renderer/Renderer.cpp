@@ -1,6 +1,7 @@
 #include "arcpch.h"
 #include "Arc/Renderer/Renderer.h"
 #include "Arc/Renderer/Renderer2D.h"
+#include "Arc/Renderer/Renderer3D.h"
 
 namespace ArcEngine
 {
@@ -8,19 +9,27 @@ namespace ArcEngine
 
 	void Renderer::Init()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		RenderCommand::Init();
 		Renderer2D::Init();
+		Renderer3D::Init();
 	}
 
 	void Renderer::Shutdown()
 	{
+		OPTICK_EVENT();
+
 		Renderer2D::Shutdown();
+		Renderer3D::Shutdown();
 	}
 
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
 	{
+		OPTICK_EVENT();
+
 		RenderCommand::SetViewport(0, 0, width, height);
 	}
 

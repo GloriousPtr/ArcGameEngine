@@ -14,6 +14,8 @@ namespace ArcEngine
 			return GL_VERTEX_SHADER;
 		if(type == "fragment" || type == "pixel")
 			return GL_FRAGMENT_SHADER;
+		if(type == "compute")
+			return GL_COMPUTE_SHADER;
 
 		ARC_CORE_ASSERT(false, "Unknown shader type!");
 		return 0;
@@ -21,6 +23,8 @@ namespace ArcEngine
 	
 	OpenGLShader::OpenGLShader(const std::string& filepath)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		std::string source = ReadFile(filepath);
@@ -38,6 +42,8 @@ namespace ArcEngine
 	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
 		: m_Name(name)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		std::unordered_map<GLenum, std::string> sources;
@@ -48,13 +54,28 @@ namespace ArcEngine
 
 	OpenGLShader::~OpenGLShader()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glDeleteProgram(m_RendererID);
 	}
 
+	void OpenGLShader::Recompile(const std::string& filepath)
+	{
+		OPTICK_EVENT();
+
+		glDeleteProgram(m_RendererID);
+
+		std::string source = ReadFile(filepath);
+		auto shaderSources = PreProcess(source);
+		Compile(shaderSources);
+	}
+
 	void OpenGLShader::Bind() const
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glUseProgram(m_RendererID);
@@ -62,6 +83,8 @@ namespace ArcEngine
 
 	void OpenGLShader::Unbind() const
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glUseProgram(0);
@@ -69,6 +92,8 @@ namespace ArcEngine
 
 	void OpenGLShader::SetInt(const std::string& name, int value)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		UploadUniformInt(name, value);
@@ -76,6 +101,8 @@ namespace ArcEngine
 
 	void OpenGLShader::SetIntArray(const std::string& name, int* values, uint32_t count)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		UploadUniformIntArray(name, values, count);		
@@ -83,6 +110,8 @@ namespace ArcEngine
 
 	void OpenGLShader::SetFloat(const std::string& name, float value)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		UploadUniformFloat(name, value);
@@ -90,6 +119,8 @@ namespace ArcEngine
 
 	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		UploadUniformFloat3(name, value);
@@ -97,6 +128,8 @@ namespace ArcEngine
 
 	void OpenGLShader::SetFloat4(const std::string& name, const glm::vec4& value)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		UploadUniformFloat4(name, value);
@@ -104,61 +137,74 @@ namespace ArcEngine
 
 	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		UploadUniformMat4(name, value);
 	}
 
+	void OpenGLShader::SetUniformBlock(const std::string& name, uint32_t blockIndex)
+	{
+		glUniformBlockBinding(m_RendererID, glGetUniformBlockIndex(m_RendererID, name.c_str()), blockIndex);
+	}
+
 	void OpenGLShader::UploadUniformInt(const std::string& name, int value)
 	{
-		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniform1i(location, value);
+		glUniform1i(GetLocation(name), value);
 	}
 
 	void OpenGLShader::UploadUniformIntArray(const std::string& name, int* values, uint32_t count)
 	{
-		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniform1iv(location, count, values);
+		glUniform1iv(GetLocation(name), count, values);
 	}
 
 	void OpenGLShader::UploadUniformFloat(const std::string& name, float value)
 	{
-		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniform1f(location, value);
+		glUniform1f(GetLocation(name), value);
 	}
 
 	void OpenGLShader::UploadUniformFloat2(const std::string& name, const glm::vec2& values)
 	{
-		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniform2f(location, values.x, values.y);
+		glUniform2f(GetLocation(name), values.x, values.y);
 	}
 
 	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& values)
 	{
-		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniform3f(location, values.x, values.y, values.z);
+		glUniform3f(GetLocation(name), values.x, values.y, values.z);
 	}
 
 	void OpenGLShader::UploadUniformFloat4(const std::string& name, const glm::vec4& values)
 	{
-		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniform4f(location, values.x, values.y, values.z, values.w);
+		glUniform4f(GetLocation(name), values.x, values.y, values.z, values.w);
 	}
 	
 	void OpenGLShader::UploadUniformMat3(const std::string& name, const glm::mat3& matrix)
 	{
-		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+		glUniformMatrix3fv(GetLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
 	}
 
 	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& matrix)
 	{
-		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+		glUniformMatrix4fv(GetLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
+	}
+
+	int OpenGLShader::GetLocation(const std::string& name)
+	{
+		OPTICK_EVENT();
+
+		if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
+			return m_UniformLocationCache[name];
+
+		int location = glGetUniformLocation(m_RendererID, name.c_str());
+		m_UniformLocationCache[name] = location;
+		return location;
 	}
 
 	std::string OpenGLShader::ReadFile(const std::string& filepath)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		std::string result;
@@ -188,6 +234,8 @@ namespace ArcEngine
 
 	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(const std::string& source)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		std::unordered_map<GLenum, std::string> shaderSources;
@@ -213,6 +261,8 @@ namespace ArcEngine
 
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		GLuint program = glCreateProgram();

@@ -2,13 +2,17 @@
 
 #include <iostream>
 
-
 #include "Arc/Utils/PlatformUtils.h"
+#include "../Utils/UI.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 namespace ArcEngine
 {
@@ -21,17 +25,56 @@ namespace ArcEngine
 	{
 		m_Context = context;
 		m_SelectionContext = {};
+		m_CurrentlyVisibleEntities = 0;
+	}
+
+	static void DrawRowsBackground(int row_count, float line_height, float x1, float x2, float y_offset, ImU32 col_even, ImU32 col_odd)
+	{
+		ImDrawList* draw_list = ImGui::GetWindowDrawList();
+		float y0 = ImGui::GetCursorScreenPos().y + (float)(int)y_offset;
+
+		int row_display_start;
+		int row_display_end;
+		ImGui::CalcListClipping(row_count, line_height, &row_display_start, &row_display_end);
+		for (int row_n = row_display_start; row_n < row_display_end; row_n++)
+		{
+			ImU32 col = (row_n & 1) ? col_odd : col_even;
+			if ((col & IM_COL32_A_MASK) == 0)
+				continue;
+			float y1 = y0 + (line_height * row_n);
+			float y2 = y1 + line_height;
+			draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), col);
+		}
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
 		ImGui::Begin("Scene Hierarchy");
 
+		float x1 = ImGui::GetCurrentWindow()->WorkRect.Min.x;
+		float x2 = ImGui::GetCurrentWindow()->WorkRect.Max.x;
+		float item_spacing_y = ImGui::GetStyle().ItemSpacing.y;
+		float item_offset_y = -item_spacing_y * 0.5f;
+		float line_height = ImGui::GetTextLineHeight() + item_spacing_y;
+		
+		DrawRowsBackground(m_CurrentlyVisibleEntities, line_height, x1, x2, item_offset_y, 0, ImGui::GetColorU32(ImVec4(0.20f, 0.20f, 0.20f, 1.0f)));
+		m_CurrentlyVisibleEntities = 0;
+
 		m_Context->m_Registry.each([&](auto entityID)
 		{
 			Entity entity = { entityID, m_Context.get() };
-			DrawEntityNode(entity);
+			if (!entity.GetParent())
+				DrawEntityNode(entity);
 		});
+
+		if (m_DeletedEntity)
+		{
+			if(m_SelectionContext == m_DeletedEntity)
+				m_SelectionContext = {};
+
+			m_Context->DestroyEntity(m_DeletedEntity);
+			m_DeletedEntity = {};
+		}
 
 		if(ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 			m_SelectionContext = {};
@@ -39,28 +82,49 @@ namespace ArcEngine
 		if(ImGui::BeginPopupContextWindow(0, 1, false))
 		{
 			m_SelectionContext = {};
-			if(ImGui::MenuItem("Create Empty Entity"))
+			if (ImGui::BeginMenu("Create"))
 			{
-				m_SelectionContext = m_Context->CreateEntity("Empty Entity");
+				if(ImGui::MenuItem("Empty Entity"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Empty Entity");
+				}
+				else if (ImGui::MenuItem("Camera"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Camera");
+					m_SelectionContext.AddComponent<CameraComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				else if (ImGui::MenuItem("Sprite"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Sprite");
+					m_SelectionContext.AddComponent<SpriteRendererComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				else if (ImGui::MenuItem("Mesh"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Mesh");
+					m_SelectionContext.AddComponent<MeshComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				else if (ImGui::MenuItem("Sky Light"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Sky Light");
+					m_SelectionContext.AddComponent<SkyLightComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				else if (ImGui::MenuItem("Light"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Light");
+					m_SelectionContext.AddComponent<LightComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
 			}
-			else if (ImGui::MenuItem("Create Camera"))
-			{
-				m_SelectionContext = m_Context->CreateEntity("Camera");
-				m_SelectionContext.AddComponent<CameraComponent>();
-				ImGui::CloseCurrentPopup();
-			}
-			else if (ImGui::MenuItem("Create Sprite"))
-			{
-				m_SelectionContext = m_Context->CreateEntity("Sprite");
-				m_SelectionContext.AddComponent<SpriteRendererComponent>();
-				ImGui::CloseCurrentPopup();
-			}
-			
 			ImGui::EndPopup();
 		}
-		
+
 		ImGui::End();
-		
+
 
 		
 		ImGui::Begin("Properties");
@@ -71,21 +135,31 @@ namespace ArcEngine
 		ImGui::End();
 	}
 
-	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
+	ImRect SceneHierarchyPanel::DrawEntityNode(Entity entity, bool skipChildren = false)
 	{
+		m_CurrentlyVisibleEntities++;
+
 		auto& tagComponent = entity.GetComponent<TagComponent>();
 		auto& tag = tagComponent.Tag;
+		auto& transform = entity.GetTransform();
+		uint32_t childrenSize = transform.Children.size();
 
 		ImGuiTreeNodeFlags flags = (m_SelectionContext == entity ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
+		flags |= childrenSize == 0 ? ImGuiTreeNodeFlags_Bullet : 0;
+
+		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity.GetUUID(), flags, tag.c_str());
+
 		if(ImGui::IsItemClicked())
 			m_SelectionContext = entity;
 
 		bool entityDeleted = false;
+		bool createChild = false;
 		if(ImGui::BeginPopupContextItem())
 		{
-			if (ImGui::MenuItem("Rename")) 
+			if (ImGui::MenuItem("Create"))
+				createChild = true;
+			if (ImGui::MenuItem("Rename"))
 				tagComponent.renaming = true;
 			if(ImGui::MenuItem("Delete Entity"))
 				entityDeleted = true;
@@ -104,18 +178,49 @@ namespace ArcEngine
 			if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
 				tagComponent.renaming = false;
 		}
-		
-		if(opened)
+
+		const ImRect nodeRect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+		if(opened && !skipChildren && !entityDeleted)
 		{
+			const ImColor TreeLineColor = ImGui::GetColorU32(ImGuiCol_Text);
+			const float indentSize = 15.0f;
+			const float SmallOffsetX = 18.0f - indentSize;
+			ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+			ImVec2 verticalLineStart = ImGui::GetCursorScreenPos();
+			verticalLineStart.x += SmallOffsetX; //to nicely line up with the arrow symbol
+			ImVec2 verticalLineEnd = verticalLineStart;
+
+			ImGui::Indent(indentSize);
+			for (size_t i = 0; i < childrenSize; i++)
+			{
+				UUID childId = entity.GetTransform().Children[i];
+				const float HorizontalTreeLineSize = 8.0f; //chosen arbitrarily
+	            const ImRect childRect = DrawEntityNode(m_Context->GetEntity(childId), createChild);
+				const float midpoint = (childRect.Min.y + childRect.Max.y) / 2.0f;
+			    drawList->AddLine(ImVec2(verticalLineStart.x, midpoint), ImVec2(verticalLineStart.x + HorizontalTreeLineSize, midpoint), TreeLineColor);
+				verticalLineEnd.y = midpoint;
+			}
+			ImGui::Unindent(indentSize);
+
+			drawList->AddLine(verticalLineStart, verticalLineEnd, TreeLineColor);
+		}
+
+		if (opened)
 			ImGui::TreePop();
+
+		if (createChild)
+		{
+			Entity e = m_Context->CreateEntity();
+			e.SetParent(entity);
 		}
 
 		if(entityDeleted)
 		{
-			m_Context->DestroyEntity(entity);
-			if(m_SelectionContext == entity)
-				m_SelectionContext = {};
+			m_DeletedEntity = entity;
 		}
+
+		return nodeRect;
 	}
 
 	static void DrawFloatControl(const std::string& label, float* value, float columnWidth = 100.0f)
@@ -130,6 +235,86 @@ namespace ArcEngine
 		ImGui::DragFloat("##value", value, 0.1f);
 
 		ImGui::Columns(1);
+		ImGui::PopID();
+	}
+
+	static void DrawTextureCubemapButton(const std::string& label, Ref<TextureCubemap>& texture, uint32_t overrideTextureID = 0)
+	{
+		ImGui::PushID(label.c_str());
+
+		uint32_t id = overrideTextureID;
+		
+		if (id == 0)
+			id = texture == nullptr ? 0 : texture->GetHRDRendererID();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+		
+		ImGui::Text(label.c_str());
+		const ImVec2 buttonSize = { 80, 80 };
+		ImGui::SameLine(ImGui::GetWindowWidth() - buttonSize.x - 30);
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
+		if(ImGui::ImageButton((ImTextureID)id, buttonSize, { 1, 1 }, { 0, 0 }, 0))
+		{
+			std::string filepath = FileDialogs::OpenFile("Texture (*.hdr)\0*.hdr\0");
+			if (!filepath.empty())
+			{
+				texture = TextureCubemap::Create(filepath);
+			}
+		}
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.3f, 0.3f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
+		if(ImGui::Button("x", { buttonSize.x / 4, buttonSize.y } ))
+			texture = nullptr;
+		ImGui::PopStyleColor(3);
+		ImGui::PopStyleVar();
+
+		ImGui::PopID();
+	}
+
+	static void DrawTexture2DButton(const std::string& label, Ref<Texture2D>& texture, uint32_t overrideTextureID = 0)
+	{
+		ImGui::PushID(label.c_str());
+
+		uint32_t id = overrideTextureID;
+		
+		if (id == 0)
+			id = texture == nullptr ? 0 : texture->GetRendererID();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+		
+		ImGui::Text(label.c_str());
+		const ImVec2 buttonSize = { 80, 80 };
+		ImGui::SameLine(ImGui::GetWindowWidth() - buttonSize.x - 30);
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
+		if(ImGui::ImageButton((ImTextureID)id, buttonSize, { 1, 1 }, { 0, 0 }, 0))
+		{
+			std::string filepath = FileDialogs::OpenFile("Texture (*.png)\0*.png\0(*.jpg)\0*.jpg\0");
+			if (!filepath.empty())
+			{
+				texture = Texture2D::Create(filepath);
+			}
+		}
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.3f, 0.3f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
+		if(ImGui::Button("x", { buttonSize.x / 4, buttonSize.y } ))
+			texture = nullptr;
+		ImGui::PopStyleColor(3);
+		ImGui::PopStyleVar();
+
 		ImGui::PopID();
 	}
 
@@ -197,6 +382,226 @@ namespace ArcEngine
 		ImGui::Columns(1);
 
 		ImGui::PopID();
+	}
+
+	static std::vector<Ref<Texture2D>> s_TextureCache;
+	std::vector<Ref<Texture2D>> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const char* filepath)
+    {
+		std::string path = std::string(filepath);
+		std::string dir = path.substr(0, path.find_last_of('\\'));
+        std::vector<Ref<Texture2D>> textures;
+        for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+        {
+			aiString str;
+			mat->GetTexture(type, i, &str);
+
+			bool skip = false;
+			for(unsigned int j = 0; j < s_TextureCache.size(); j++)
+            {
+                if(std::strcmp(s_TextureCache[j]->GetPath().c_str(), std::string(dir + '\\' + str.C_Str()).c_str()) == 0)
+                {
+                    textures.push_back(s_TextureCache[j]);
+                    skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
+                    break;
+                }
+            }
+
+			if (!skip)
+			{
+				Ref<Texture2D> texture = Texture2D::Create(dir + '\\' + str.C_Str());
+				textures.push_back(texture);
+				s_TextureCache.push_back(texture);
+			}
+        }
+        return textures;
+    }
+
+	static void ProcessMesh(aiMesh *mesh, const aiScene *scene, Entity e, const char* filepath)
+	{
+		std::vector<float> vertices;
+		size_t count = mesh->mNumVertices * 14;
+		vertices.reserve(count);
+
+		std::vector<uint32_t> indices;
+		AABB boundingBox;
+		for(size_t i = 0; i < mesh->mNumVertices; i++)
+		{
+			auto& vertexPosition = mesh->mVertices[i];
+			vertices.push_back(vertexPosition.x);
+			vertices.push_back(vertexPosition.y);
+			vertices.push_back(vertexPosition.z);
+
+			boundingBox.Min.x = glm::min(vertexPosition.x, boundingBox.Min.x);
+			boundingBox.Min.y = glm::min(vertexPosition.y, boundingBox.Min.y);
+			boundingBox.Min.z = glm::min(vertexPosition.z, boundingBox.Min.z);
+			boundingBox.Max.x = glm::max(vertexPosition.x, boundingBox.Max.x);
+			boundingBox.Max.y = glm::max(vertexPosition.y, boundingBox.Max.y);
+			boundingBox.Max.z = glm::max(vertexPosition.z, boundingBox.Max.z);
+
+			if(mesh->mTextureCoords[0])
+            {
+                vertices.push_back(mesh->mTextureCoords[0][i].x);
+                vertices.push_back(mesh->mTextureCoords[0][i].y);
+            }
+            else
+			{
+				vertices.push_back(0.0f);
+				vertices.push_back(0.0f);
+			}
+			
+			auto& normal = mesh->mNormals[i];
+			vertices.push_back(normal.x);
+			vertices.push_back(normal.y);
+			vertices.push_back(normal.z);
+
+			if (mesh->mTangents)
+			{
+				auto tangent = mesh->mTangents[i];
+				vertices.push_back(tangent.x);
+				vertices.push_back(tangent.y);
+				vertices.push_back(tangent.z);
+
+				auto bitangent = mesh->mBitangents[i];
+				vertices.push_back(bitangent.x);
+				vertices.push_back(bitangent.y);
+				vertices.push_back(bitangent.z);
+			}
+			else
+			{
+				size_t index = i / 3;
+				// Shortcuts for vertices
+				auto& v0 = mesh->mVertices[index + 0];
+				auto& v1 = mesh->mVertices[index + 1];
+				auto& v2 = mesh->mVertices[index + 2];
+
+				// Shortcuts for UVs
+				auto& uv0 = mesh->mTextureCoords[0][index + 0];
+				auto& uv1 = mesh->mTextureCoords[0][index + 1];
+				auto& uv2 = mesh->mTextureCoords[0][index + 2];
+
+				// Edges of the triangle : position delta
+				auto deltaPos1 = v1 - v0;
+				auto deltaPos2 = v2 - v0;
+
+				// UV delta
+				auto deltaUV1 = uv1 - uv0;
+				auto deltaUV2 = uv2 - uv0;
+
+				float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+				auto tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+				auto bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+
+				vertices.push_back(tangent.x);
+				vertices.push_back(tangent.y);
+				vertices.push_back(tangent.z);
+				vertices.push_back(bitangent.x);
+				vertices.push_back(bitangent.y);
+				vertices.push_back(bitangent.z);
+			}
+		}
+
+		for(size_t i = 0; i < mesh->mNumFaces; i++)
+		{
+			aiFace face = mesh->mFaces[i];
+			indices.reserve(face.mNumIndices);
+			for(size_t j = 0; j < face.mNumIndices; j++)
+				indices.push_back(face.mIndices[j]);
+		}
+
+		Ref<VertexArray> vertexArray = VertexArray::Create();
+
+		Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(&(vertices[0]), (sizeof(float) * vertices.size()));
+		vertexBuffer->SetLayout({
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float2, "a_TexCoord" },
+			{ ShaderDataType::Float3, "a_Normal" },
+			{ ShaderDataType::Float3, "a_Tangent" },
+			{ ShaderDataType::Float3, "a_Bitangent" },
+		});
+		vertexArray->AddVertexBuffer(vertexBuffer);
+
+		Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(&(indices[0]), indices.size());
+		vertexArray->SetIndexBuffer(indexBuffer);
+
+        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+        std::vector<Ref<Texture2D>> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, filepath);
+		std::vector<Ref<Texture2D>> normalMaps = LoadMaterialTextures(material, aiTextureType_NORMALS, filepath);
+		std::vector<Ref<Texture2D>> heightMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, filepath);
+		std::vector<Ref<Texture2D>> emissiveMaps = LoadMaterialTextures(material, aiTextureType_EMISSIVE, filepath);
+
+		if (!e.HasComponent<MeshComponent>())
+			e.AddComponent<MeshComponent>();
+
+		auto& meshComponent = e.GetComponent<MeshComponent>();
+		
+		meshComponent.Filepath = filepath;
+		meshComponent.VertexArray = vertexArray;
+		meshComponent.BoundingBox = boundingBox;
+
+		if (diffuseMaps.size() > 0)
+		{
+			meshComponent.AlbedoMap = diffuseMaps[0];
+			meshComponent.UseAlbedoMap = true;
+		}
+
+		if (normalMaps.size() > 0)
+		{
+			meshComponent.NormalMap = normalMaps[0];
+			meshComponent.UseNormalMap = true;
+		}
+		else if (heightMaps.size() > 0)
+		{
+			meshComponent.NormalMap = heightMaps[0];
+			meshComponent.UseNormalMap = true;
+		}
+
+		if (emissiveMaps.size() > 0)
+		{
+			meshComponent.EmissiveMap = emissiveMaps[0];
+			meshComponent.UseEmissiveMap = true;
+		}
+	}
+
+	static void ProcessNode(aiNode *node, const aiScene *scene, Ref<Scene> sceneContext, Entity entity, const char* filepath)
+	{
+		for(unsigned int i = 0; i < node->mNumMeshes; i++)
+		{
+			aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+			ProcessMesh(mesh, scene, entity, filepath);
+		}
+
+		for(unsigned int i = 0; i < node->mNumChildren; i++)
+		{
+			std::string name = node->mChildren[i]->mName.C_Str();
+			Entity e = sceneContext->CreateEntity(name);
+			e.SetParent(entity);
+			ProcessNode(node->mChildren[i], scene, sceneContext, e, filepath);
+		}
+	}
+
+	static void LoadMesh(const char* filepath, Ref<Scene> sceneContext, Entity rootEntity)
+	{
+		Assimp::Importer importer;
+		importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 80.0f);
+		const uint32_t meshImportFlags =
+			aiProcess_CalcTangentSpace |
+			aiProcess_Triangulate |
+			aiProcess_SortByPType |
+			aiProcess_GenNormals |
+			aiProcess_GenUVCoords |
+	        aiProcess_OptimizeMeshes |
+			aiProcess_JoinIdenticalVertices |
+			aiProcess_GlobalScale |
+			aiProcess_ImproveCacheLocality |
+	        aiProcess_ValidateDataStructure;
+
+		const aiScene *scene = importer.ReadFile(filepath, meshImportFlags);
+ 
+		ARC_CORE_ASSERT(scene, importer.GetErrorString());
+
+		if (rootEntity.HasComponent<MeshComponent>())
+			rootEntity.RemoveComponent<MeshComponent>();
+		ProcessNode(scene->mRootNode, scene, sceneContext, rootEntity, filepath);
 	}
 
 	template<typename T, typename UIFunction>
@@ -280,6 +685,33 @@ namespace ArcEngine
 					ARC_CORE_WARN("This entity already has the Sprite Renderer Component!");
 				ImGui::CloseCurrentPopup();
 			}
+
+			if (ImGui::MenuItem("Mesh"))
+			{
+				if (!entity.HasComponent<MeshComponent>())
+					entity.AddComponent<MeshComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Mesh Component!");
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Sky Light"))
+			{
+				if (!entity.HasComponent<SkyLightComponent>())
+					entity.AddComponent<SkyLightComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Sky Light Component!");
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Light"))
+			{
+				if (!entity.HasComponent<LightComponent>())
+					entity.AddComponent<LightComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Light Component!");
+				ImGui::CloseCurrentPopup();
+			}
 			
 			ImGui::EndPopup();
 		}
@@ -360,37 +792,187 @@ namespace ArcEngine
 		{
 			ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
 
-			const uint32_t id = component.Texture == nullptr ? 0 : component.Texture->GetRendererID();
-
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
-			
-			ImGui::Text("Texture");
-			const ImVec2 buttonSize = { 80, 80 };
-			ImGui::SameLine(ImGui::GetWindowWidth() * 0.6f);
-
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
-			if(ImGui::ImageButton((ImTextureID)id, buttonSize, { 1, 1 }, { 0, 0}, 0))
-			{
-				std::string filepath = FileDialogs::OpenFile("Texture (*.png)\0*.png\0");
-				if (!filepath.empty())
-					component.SetTexture(filepath);
-			}
-			ImGui::PopStyleColor(3);
-
-			ImGui::SameLine();
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.3f, 0.3f, 1.0f });
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
-			if(ImGui::Button("x", { buttonSize.x / 4, buttonSize.y } ))
-				component.RemoveTexture();
-			ImGui::PopStyleColor(3);
-			ImGui::PopStyleVar();
+			DrawTexture2DButton("Texture", component.Texture);
 
 			ImGui::Spacing();
 			
 			DrawFloatControl("Tiling Factor", &component.TilingFactor, 200);
+		});
+
+		DrawComponent<MeshComponent>("Mesh", entity, [&](MeshComponent& component)
+		{
+			ImGui::Text("Mesh");
+			const ImVec2 buttonSize = { 60, 20 };
+
+			ImGui::Text(component.Filepath.c_str());
+
+			ImGui::SameLine(ImGui::GetWindowWidth() - buttonSize.x - 10);
+
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
+			if(ImGui::Button("...", buttonSize))
+			{
+				std::string filepath = FileDialogs::OpenFile("Mesh (*.obj)\0*.obj\0(*.fbx)\0*.fbx\0(*.gltf)\0*.gltf\0");
+				if (!filepath.empty())
+				{
+					component.Filepath = filepath;
+					LoadMesh(filepath.c_str(), m_Context, entity);
+					
+					// TEMP
+					ImGui::PopStyleColor(3);
+					return;
+				}
+			}
+			ImGui::PopStyleColor(3);
+
+			const char* cullModeTypeStrings[] = { "Front", "Back", "Double Sided" };
+			const char* currentCullModeTypeStrings = cullModeTypeStrings[(int)component.CullMode];
+			if(ImGui::BeginCombo("Cull Mode", currentCullModeTypeStrings))
+			{
+				for (int i = 0; i < 3; i++)
+				{
+					bool isSelected = currentCullModeTypeStrings == cullModeTypeStrings[i];
+					if(ImGui::Selectable(cullModeTypeStrings[i], isSelected))
+					{
+						currentCullModeTypeStrings = cullModeTypeStrings[i];
+						component.CullMode = (MeshComponent::CullModeType)i;
+					}
+
+					if(isSelected)
+						ImGui::SetItemDefaultFocus();
+				}
+				
+				ImGui::EndCombo();
+			}
+
+			ImGui::ColorEdit4("Albedo Color", glm::value_ptr(component.AlbedoColor));
+			ImGui::SliderFloat("Metallic", &component.Metallic, 0.0f, 1.0f);
+			ImGui::SliderFloat("Roughness", &component.Roughness, 0.0f, 1.0f);
+			ImGui::ColorEdit3("Emissive Color", glm::value_ptr(component.EmissiveParams));
+			ImGui::DragFloat("Emissive Intensity", &component.EmissiveParams.w);
+			
+			ImGui::Checkbox("##UseAlbedoMap", &component.UseAlbedoMap);
+			DrawTexture2DButton("AlbedoMap", component.AlbedoMap);
+			ImGui::Checkbox("##UseNormalMap", &component.UseNormalMap);
+			DrawTexture2DButton("NormalMap", component.NormalMap);
+			ImGui::Checkbox("##UseMetallicMap", &component.UseMRAMap);
+			DrawTexture2DButton("MetallicMap", component.MRAMap);
+			ImGui::Checkbox("##UseEmissiveMap", &component.UseEmissiveMap);
+			DrawTexture2DButton("EmissiveMap", component.EmissiveMap);
+			
+		}, false);
+
+		DrawComponent<SkyLightComponent>("Sky Light", entity, [](SkyLightComponent& component)
+		{
+			DrawFloatControl("Intensity", &component.Intensity);
+			
+			UI::BeginPropertyGrid();
+			UI::Property("Rotation", component.Rotation, 0.0f, 360.0f);
+			UI::EndPropertyGrid();
+
+			const uint32_t id = component.Texture == nullptr ? 0 : component.Texture->GetHRDRendererID();
+			DrawTextureCubemapButton("Texture", component.Texture, id);
+
+			ImGui::Spacing();
+		});
+
+		DrawComponent<LightComponent>("Light", entity, [](LightComponent& component)
+		{
+			UI::PushID();
+
+			const char* lightTypeStrings[] = { "Directional", "Point", "Spot" };
+			const char* currentLightTypeString = lightTypeStrings[(int)component.Type];
+			UI::BeginPropertyGrid();
+			UI::Property("LightType");
+			ImGui::NextColumn();
+			if(ImGui::BeginCombo("##LightType", currentLightTypeString))
+			{
+				for (int i = 0; i < 3; i++)
+				{
+					bool isSelected = currentLightTypeString == lightTypeStrings[i];
+					if(ImGui::Selectable(lightTypeStrings[i], isSelected))
+					{
+						currentLightTypeString = lightTypeStrings[i];
+						component.Type = (LightComponent::LightType)i;
+					}
+
+					if(isSelected)
+						ImGui::SetItemDefaultFocus();
+				}
+				
+				ImGui::EndCombo();
+			}
+			UI::EndPropertyGrid();
+
+			UI::BeginPropertyGrid();
+			if (UI::Property("Use color temprature mode", component.UseColorTempratureMode))
+			{
+				if (component.UseColorTempratureMode)
+					component.SetTemprature(component.GetTemprature());
+			}
+			UI::EndPropertyGrid();
+
+			if (component.UseColorTempratureMode)
+			{
+				UI::BeginPropertyGrid();
+				int temp = component.GetTemprature();
+				if (UI::Property("Tempratur (K)", temp, 1000, 40000))
+					component.SetTemprature(temp);
+				UI::EndPropertyGrid();
+			}
+			else
+			{
+				UI::BeginPropertyGrid();
+				UI::Property("Color");
+				ImGui::NextColumn();
+				ImGui::ColorEdit3("##Color", glm::value_ptr(component.Color));
+				UI::EndPropertyGrid();
+			}
+
+			UI::BeginPropertyGrid();
+			if (UI::Property("Intensity", component.Intensity))
+			{
+				if (component.Intensity < 0.0f)
+					component.Intensity = 0.0f;
+			}
+			UI::EndPropertyGrid();
+
+			ImGui::Spacing();
+
+			if (component.Type == LightComponent::LightType::Point)
+			{
+				UI::BeginPropertyGrid();
+				UI::Property("Range", component.Range);
+				UI::EndPropertyGrid();
+			}
+			else if (component.Type == LightComponent::LightType::Spot)
+			{
+				UI::BeginPropertyGrid();
+				UI::Property("Range", component.Range);
+				if (component.Range < 0.1f)
+					component.Range = 0.1f;
+				UI::EndPropertyGrid();
+
+				UI::BeginPropertyGrid();
+				UI::Property("Outer Cut-Off Angle", component.OuterCutOffAngle, 1.0f, 90.0f);
+				if (component.OuterCutOffAngle < component.CutOffAngle)
+					component.CutOffAngle = component.OuterCutOffAngle;
+				UI::EndPropertyGrid();
+
+				UI::BeginPropertyGrid();
+				UI::Property("Cut-Off Angle", component.CutOffAngle, 1.0f, 90.0f);
+				if (component.CutOffAngle > component.OuterCutOffAngle)
+					component.OuterCutOffAngle = component.CutOffAngle;
+				UI::EndPropertyGrid();
+			}
+			else
+			{
+				uint32_t textureID = component.ShadowMapFramebuffer->GetDepthAttachmentRendererID();
+				ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ 256, 256 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+			}
+
+			UI::PopID();
 		});
 	}
 }

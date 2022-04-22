@@ -1,6 +1,8 @@
 #pragma once
 #include <ArcEngine.h>
 
+struct ImRect;
+
 namespace ArcEngine
 {
 	class SceneHierarchyPanel
@@ -16,10 +18,12 @@ namespace ArcEngine
 		Entity GetSelectedEntity() const { return m_SelectionContext; }
 		void SetSelectedEntity(const Entity entity) { m_SelectionContext = entity; }
 	private:
-		void DrawEntityNode(Entity entity);
+		ImRect DrawEntityNode(Entity entity, bool skipChildren);
 		void DrawComponents(Entity entity);
 	private:
 		Ref<Scene> m_Context = nullptr;
 		Entity m_SelectionContext;
+		Entity m_DeletedEntity;
+		uint32_t m_CurrentlyVisibleEntities;
 	};
 }

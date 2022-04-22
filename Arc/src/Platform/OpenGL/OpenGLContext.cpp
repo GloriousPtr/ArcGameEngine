@@ -14,6 +14,8 @@ namespace ArcEngine
 
 	void OpenGLContext::Init()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glfwMakeContextCurrent(m_WindowHandle);
@@ -30,6 +32,8 @@ namespace ArcEngine
 
 	void OpenGLContext::SwapBuffers()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		glfwSwapBuffers(m_WindowHandle);

@@ -37,4 +37,21 @@ namespace ArcEngine
 		uint32_t m_RendererID;
 		uint32_t m_Count;
 	};
+
+	class OpenGLUniformBuffer : public UniformBuffer
+	{
+	public:
+		OpenGLUniformBuffer();
+		virtual ~OpenGLUniformBuffer();
+
+		virtual void Bind() const override;
+		virtual void Unbind() const override;
+
+		virtual void SetData(void* data, uint32_t offset, uint32_t size) override;
+		virtual void SetLayout(const BufferLayout& layout, uint32_t blockIndex, uint32_t count) override;
+
+	private:
+		uint32_t m_RendererID;
+		BufferLayout m_Layout;
+	};
 }

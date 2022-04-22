@@ -16,7 +16,6 @@ namespace ArcEngine
 		glm::vec2 TexCoord;
 		float TexIndex;
 		float TilingFactor;
-		int ObjectID;
 	};
 	
 	struct Renderer2DData
@@ -47,6 +46,8 @@ namespace ArcEngine
 	
 	void Renderer2D::Init()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		s_Data.QuadVertexArray = VertexArray::Create();
@@ -58,7 +59,6 @@ namespace ArcEngine
 			{ ShaderDataType::Float2, "a_TexCoord" },
 			{ ShaderDataType::Float, "a_TexIndex" },
 			{ ShaderDataType::Float, "a_TilingFactor" },
-			{ ShaderDataType::Int, "a_ObjectID" },
 		});
 		s_Data.QuadVertexArray->AddVertexBuffer(s_Data.QuadVertexBuffer);
 
@@ -107,6 +107,8 @@ namespace ArcEngine
 
 	void Renderer2D::Shutdown()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 
 		delete[] s_Data.QuadVertexBufferBase;
@@ -114,6 +116,8 @@ namespace ArcEngine
 
 	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 
 		glm::mat4 viewProj = camera.GetProjection() * glm::inverse(transform);
@@ -126,6 +130,8 @@ namespace ArcEngine
 
 	void Renderer2D::BeginScene(const EditorCamera& camera)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		s_Data.TextureShader->Bind();
@@ -136,6 +142,8 @@ namespace ArcEngine
 
 	void Renderer2D::BeginScene(const OrthographicCamera& camera)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		s_Data.TextureShader->Bind();
@@ -144,15 +152,22 @@ namespace ArcEngine
 		StartBatch();
 	}
 
-	void Renderer2D::EndScene()
+	void Renderer2D::EndScene(Ref<Framebuffer> renderTarget)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
+		renderTarget->Bind();
+		RenderCommand::DisableCulling();
 		Flush();
+		renderTarget->Unbind();
 	}
 
 	void Renderer2D::StartBatch()
 	{
+		OPTICK_EVENT();
+
 		s_Data.QuadIndexCount = 0;
 		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
 
@@ -161,6 +176,8 @@ namespace ArcEngine
 
 	void Renderer2D::Flush()
 	{
+		OPTICK_EVENT();
+
 		if(s_Data.QuadIndexCount == 0)
 			return; // Nothing to draw
 
@@ -180,12 +197,12 @@ namespace ArcEngine
 		StartBatch();
 	}
 
-	void Renderer2D::DrawQuad(uint32_t entityID, const glm::vec2& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
+	void Renderer2D::DrawQuad(const glm::vec2& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
 	{
-		DrawQuad(entityID, { position.x, position.y, 0.0f }, rotation, size, texture, tintColor, tilingFactor);
+		DrawQuad({ position.x, position.y, 0.0f }, rotation, size, texture, tintColor, tilingFactor);
 	}
 
-	void Renderer2D::DrawQuad(uint32_t entityID, const glm::vec3& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
 	{
 		ARC_PROFILE_FUNCTION();
 		
@@ -193,11 +210,13 @@ namespace ArcEngine
 								* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f })
 								* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-		DrawQuad(entityID, transform, texture, tintColor, tilingFactor);
+		DrawQuad(transform, texture, tintColor, tilingFactor);
 	}
 
-	void Renderer2D::DrawQuad(uint32_t entityID, const glm::mat4& transform, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		constexpr size_t quadVertexCount = 4;
@@ -215,7 +234,6 @@ namespace ArcEngine
 			s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
 			s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
 			s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-			s_Data.QuadVertexBufferPtr->ObjectID = (int)entityID;
 			s_Data.QuadVertexBufferPtr++;
 		}
 		
@@ -224,8 +242,10 @@ namespace ArcEngine
 		s_Data.Stats.QuadCount++;
 	}
 
-	void Renderer2D::DrawQuad(uint32_t entityID, const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		float textureIndex = 0.0f;
@@ -262,7 +282,6 @@ namespace ArcEngine
 			s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
 			s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
 			s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-			s_Data.QuadVertexBufferPtr->ObjectID = (int)entityID;
 			s_Data.QuadVertexBufferPtr++;
 		}
 		

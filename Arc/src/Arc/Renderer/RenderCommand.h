@@ -30,6 +30,46 @@ namespace ArcEngine
 		{
 			s_RendererAPI->DrawIndexed(vertexArray, indexCount);
 		}
+
+		inline static void Draw(const Ref<VertexArray>& vertexArray, uint32_t count)
+		{
+			s_RendererAPI->Draw(vertexArray, count);
+		}
+
+		inline static void DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
+		{
+			s_RendererAPI->DrawLines(vertexArray, vertexCount);
+		}
+
+		inline static void EnableCulling()
+		{
+			s_RendererAPI->EnableCulling();
+		}
+
+		inline static void DisableCulling()
+		{
+			s_RendererAPI->DisableCulling();
+		}
+
+		inline static void FrontCull()
+		{
+			s_RendererAPI->FrontCull();
+		}
+
+		inline static void BackCull()
+		{
+			s_RendererAPI->BackCull();
+		}
+
+		inline static void SetDepthMask(bool value)
+		{
+			s_RendererAPI->SetDepthMask(value);
+		}
+
+		inline static void SetDepthTest(bool value)
+		{
+			s_RendererAPI->SetDepthTest(value);
+		}
 	private:
 		static Scope<RendererAPI> s_RendererAPI;
 	};

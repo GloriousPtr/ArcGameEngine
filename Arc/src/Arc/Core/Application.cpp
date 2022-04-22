@@ -4,6 +4,7 @@
 #include "Arc/Renderer/Renderer.h"
 
 #include <GLFW/glfw3.h>
+#include <optick.config.h>
 
 namespace ArcEngine
 {
@@ -11,6 +12,8 @@ namespace ArcEngine
 
 	Application::Application(const std::string& name)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		ARC_CORE_ASSERT(!s_Instance, "Application already exists!");
@@ -27,13 +30,21 @@ namespace ArcEngine
 
 	Application::~Application()
 	{
-		ARC_PROFILE_FUNCTION();
+		{
+			OPTICK_EVENT();
+
+			ARC_PROFILE_FUNCTION();
 		
-		Renderer::Shutdown();
+			Renderer::Shutdown();
+		}
+
+		OPTICK_SHUTDOWN();
 	}
 
 	void Application::PushLayer(Layer* layer)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		m_LayerStack.PushLayer(layer);
@@ -42,6 +53,8 @@ namespace ArcEngine
 
 	void Application::PushOverlay(Layer* layer)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		m_LayerStack.PushOverlay(layer);
@@ -55,6 +68,8 @@ namespace ArcEngine
 	
 	void Application::OnEvent(Event& e)
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 		EventDispatcher dispatcher(e);
@@ -76,6 +91,8 @@ namespace ArcEngine
 		
 		while (m_Running)
 		{
+			OPTICK_FRAME("MainThread");
+
 			ARC_PROFILE_SCOPE("RunLoop");
 			
 			float time = (float)glfwGetTime();
@@ -85,6 +102,8 @@ namespace ArcEngine
 			if(!m_Minimized)
 			{
 				{
+					OPTICK_EVENT("LayerStack OnUpdate");
+
 					ARC_PROFILE_SCOPE("LayerStack OnUpdate");
 					
 					for (Layer* layer : m_LayerStack)
@@ -93,6 +112,8 @@ namespace ArcEngine
 
 				m_ImGuiLayer->Begin();
 				{
+					OPTICK_EVENT("LayerStack OnImGuiRender");
+
 					ARC_PROFILE_SCOPE("LayerStack OnImGuiRender");
 				
 					for (Layer* layer : m_LayerStack)

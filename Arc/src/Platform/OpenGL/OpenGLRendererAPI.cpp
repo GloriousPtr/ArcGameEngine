@@ -27,6 +27,8 @@ namespace ArcEngine
 	
 	void OpenGLRendererAPI::Init()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 
 		#ifdef ARC_DEBUG
@@ -41,27 +43,97 @@ namespace ArcEngine
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	}
 
 	void OpenGLRendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 	{
+		OPTICK_EVENT();
+
 		glViewport(x, y, width, height);
 	}
 
 	void OpenGLRendererAPI::SetClearColor(const glm::vec4& color)
 	{
+		OPTICK_EVENT();
+
 		glClearColor(color.r, color.g, color.b, color.a);
 	}
 
 	void OpenGLRendererAPI::Clear()
 	{
+		OPTICK_EVENT();
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
 	{
+		OPTICK_EVENT();
+
+		vertexArray->Bind();
 		const uint32_t count = indexCount != 0 ? indexCount : vertexArray->GetIndexBuffer()->GetCount();
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
-		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void OpenGLRendererAPI::Draw(const Ref<VertexArray>& vertexArray, uint32_t count)
+	{
+		OPTICK_EVENT();
+
+		vertexArray->Bind();
+		glDrawArrays(GL_TRIANGLES, 0, count);
+	}
+
+	void OpenGLRendererAPI::DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
+	{
+		OPTICK_EVENT();
+
+		vertexArray->Bind();
+		glDrawArrays(GL_LINES, 0, vertexCount);
+	}
+
+	void OpenGLRendererAPI::EnableCulling()
+	{
+		OPTICK_EVENT();
+
+		glEnable(GL_CULL_FACE);
+	}
+
+	void OpenGLRendererAPI::DisableCulling()
+	{
+		OPTICK_EVENT();
+
+		glDisable(GL_CULL_FACE);
+	}
+
+	void OpenGLRendererAPI::FrontCull()
+	{
+		OPTICK_EVENT();
+
+		glCullFace(GL_FRONT);
+	}
+
+	void OpenGLRendererAPI::BackCull()
+	{
+		OPTICK_EVENT();
+
+		glCullFace(GL_BACK);
+	}
+
+	void OpenGLRendererAPI::SetDepthMask(bool value)
+	{
+		OPTICK_EVENT();
+
+		glDepthMask(value);
+	}
+
+	void OpenGLRendererAPI::SetDepthTest(bool value)
+	{
+		OPTICK_EVENT();
+
+		if (value)
+			glEnable(GL_DEPTH_TEST);
+		else
+			glDisable(GL_DEPTH_TEST);
 	}
 }

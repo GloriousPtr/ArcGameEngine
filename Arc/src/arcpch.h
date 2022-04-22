@@ -20,6 +20,7 @@
 #include <sstream>
 #include <array>
 #include <vector>
+#include <map>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -28,6 +29,8 @@
 #include "Arc/Core/Log.h"
 
 #include "Arc/Debug/Instrumentor.h"
+
+#include <optick.h>
 
 #ifdef ARC_PLATFORM_WINDOWS
 	#include <Windows.h>
