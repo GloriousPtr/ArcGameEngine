@@ -48,5 +48,4 @@ group "Dependencies"
 group ""
 
 include "Arc"
-include "Sandbox"
 include "Arc-Editor"
