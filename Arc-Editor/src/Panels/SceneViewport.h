@@ -26,7 +26,7 @@ namespace ArcEngine
 
 	private:
 		std::string m_ID;
-		Ref<Framebuffer> m_Framebuffer;
+		Ref<RenderGraphData> m_RenderGraphData;
 		EditorCamera m_EditorCamera;
 
 		bool m_ViewportFocused = false;

@@ -52,12 +52,6 @@ namespace ArcEngine
 	glm::mat4 dirLightView;
 	glm::mat4 dirLightViewProj;
 
-	Ref<Framebuffer> mainFramebuffer;
-	Ref<Framebuffer> Renderer3D::tempBlurFramebuffers[blurSamples];
-	Ref<Framebuffer> Renderer3D::prefilteredFramebuffer;
-	Ref<Framebuffer> Renderer3D::downsampledFramebuffers[blurSamples];
-	Ref<Framebuffer> Renderer3D::upsampledFramebuffers[blurSamples];
-
 	ShaderLibrary Renderer3D::s_ShaderLibrary;
 	Renderer3D::TonemappingType Renderer3D::Tonemapping = Renderer3D::TonemappingType::ACES;
 	float Renderer3D::Exposure = 1.0f;
@@ -71,37 +65,6 @@ namespace ArcEngine
 	{
 		OPTICK_EVENT();
 
-		uint32_t width = 1280;
-		uint32_t height = 720;
-
-		FramebufferSpecification spec;
-		spec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::Depth };
-		spec.Width = width;
-		spec.Height = height;
-		mainFramebuffer = Framebuffer::Create(spec);
-
-		width /= 2;
-		height /= 2;
-		FramebufferSpecification bloomSpec;
-		bloomSpec.Attachments = { FramebufferTextureFormat::R11G11B10 };
-		bloomSpec.Width = width;
-		bloomSpec.Height = height;
-		prefilteredFramebuffer = Framebuffer::Create(bloomSpec);
-		
-		for (size_t i = 0; i < blurSamples; i++)
-		{
-			width /= 2;
-			height /= 2;
-			FramebufferSpecification blurSpec;
-			blurSpec.Attachments = { FramebufferTextureFormat::R11G11B10 };
-			blurSpec.Width = width;
-			blurSpec.Height = height;
-			tempBlurFramebuffers[i] = Framebuffer::Create(bloomSpec);
-			downsampledFramebuffers[i] = Framebuffer::Create(blurSpec);
-			upsampledFramebuffers[i] = Framebuffer::Create(blurSpec);
-		}
-		
-		
 		ubCamera = UniformBuffer::Create();
 		ubCamera->SetLayout({
 			{ ShaderDataType::Mat4, "u_View" },
@@ -255,7 +218,7 @@ namespace ArcEngine
 		SetupLightsData();
 	}
 
-	void Renderer3D::EndScene(Ref<Framebuffer>& renderTarget)
+	void Renderer3D::EndScene(Ref<RenderGraphData>& renderTarget)
 	{
 		OPTICK_EVENT();
 
@@ -308,38 +271,16 @@ namespace ArcEngine
 		meshes.push_back(mesh);
 	}
 
-	void Renderer3D::Flush(Ref<Framebuffer>& renderTarget)
+	void Renderer3D::Flush(Ref<RenderGraphData> renderGraphData)
 	{
 		OPTICK_EVENT();
 		
 		ARC_PROFILE_FUNCTION();
 		
-		auto& targetSpec = renderTarget->GetSpecification();
-		auto& mainSpec = mainFramebuffer->GetSpecification();
-		if (mainSpec.Width != targetSpec.Width || mainSpec.Height != targetSpec.Height)
-		{
-			uint32_t width = targetSpec.Width;
-			uint32_t height = targetSpec.Height;
-			mainFramebuffer->Resize(width, height);
-
-			width /= 2;
-			height /= 2;
-			prefilteredFramebuffer->Resize(width, height);
-
-			for (size_t i = 0; i < blurSamples; i++)
-			{
-				width /= 2;
-				height /= 2;
-				tempBlurFramebuffers[i]->Resize(width, height);
-				downsampledFramebuffers[i]->Resize(width, height);
-				upsampledFramebuffers[i]->Resize(width, height);
-			}
-		}
-
 		ShadowMapPass();
-		RenderPass();
-		BloomPass();
-		CompositePass(renderTarget);
+		RenderPass(renderGraphData->RenderPassTarget);
+		BloomPass(renderGraphData);
+		CompositePass(renderGraphData);
 		meshes.clear();
 	}
 
@@ -413,23 +354,23 @@ namespace ArcEngine
 		ubLights->SetData(&numLights, 25 * size, sizeof(uint32_t));
 	}
 
-	void Renderer3D::CompositePass(Ref<Framebuffer>& renderTarget)
+	void Renderer3D::CompositePass(Ref<RenderGraphData> renderGraphData)
 	{
 		OPTICK_EVENT();
 
-		renderTarget->Bind();
+		renderGraphData->CompositePassTarget->Bind();
 		hdrShader->Bind();
 		glm::vec4 tonemappingParams = glm::vec4(((int) Tonemapping), Exposure, 0.0f, 0.0f);
 		hdrShader->SetFloat4("u_TonemappParams", tonemappingParams);
 		hdrShader->SetFloat("u_BloomStrength", UseBloom ? BloomStrength : 0.0f);
 		hdrShader->SetInt("u_Texture", 0);
 		hdrShader->SetInt("u_BloomTexture", 1);
-		mainFramebuffer->BindColorAttachment(0, 0);
-		upsampledFramebuffers[0]->BindColorAttachment(0, 1);
+		renderGraphData->RenderPassTarget->BindColorAttachment(0, 0);
+		renderGraphData->UpsampledFramebuffers[0]->BindColorAttachment(0, 1);
 		DrawQuad();
 	}
 
-	void Renderer3D::BloomPass()
+	void Renderer3D::BloomPass(Ref<RenderGraphData> renderGraphData)
 	{
 		OPTICK_EVENT();
 
@@ -442,16 +383,17 @@ namespace ArcEngine
 		{
 			OPTICK_EVENT("Prefilter");
 
-			prefilteredFramebuffer->Bind();
+			renderGraphData->PrefilteredFramebuffer->Bind();
 			bloomShader->Bind();
 			bloomShader->SetFloat4("u_Threshold", threshold);
 			bloomShader->SetFloat4("u_Params", params);
 			bloomShader->SetInt("u_Texture", 0);
-			mainFramebuffer->BindColorAttachment(0, 0);
+			renderGraphData->RenderPassTarget->BindColorAttachment(0, 0);
 			DrawQuad();
 		}
 
-		FramebufferSpecification spec = prefilteredFramebuffer->GetSpecification();
+		size_t blurSamples = renderGraphData->BlurSamples;
+		FramebufferSpecification spec = renderGraphData->PrefilteredFramebuffer->GetSpecification();
 		{
 			OPTICK_EVENT("Downsample");
 
@@ -459,17 +401,17 @@ namespace ArcEngine
 			gaussianBlurShader->SetInt("u_Texture", 0);
 			for (size_t i = 0; i < blurSamples; i++)
 			{
-				tempBlurFramebuffers[i]->Bind();
+				renderGraphData->TempBlurFramebuffers[i]->Bind();
 				gaussianBlurShader->SetInt("u_Horizontal", static_cast<int>(true));
 				if (i == 0)
-					prefilteredFramebuffer->BindColorAttachment(0, 0);
+					renderGraphData->PrefilteredFramebuffer->BindColorAttachment(0, 0);
 				else
-					downsampledFramebuffers[i - 1]->BindColorAttachment(0, 0);
+					renderGraphData->DownsampledFramebuffers[i - 1]->BindColorAttachment(0, 0);
 				DrawQuad();
 
-				downsampledFramebuffers[i]->Bind();
+				renderGraphData->DownsampledFramebuffers[i]->Bind();
 				gaussianBlurShader->SetInt("u_Horizontal", static_cast<int>(false));
-				tempBlurFramebuffers[i]->BindColorAttachment(0, 0);
+				renderGraphData->TempBlurFramebuffers[i]->BindColorAttachment(0, 0);
 				DrawQuad();
 			}
 		}
@@ -486,34 +428,34 @@ namespace ArcEngine
 			size_t upsampleCount = blurSamples - 1;
 			for (size_t i = upsampleCount; i > 0; i--)
 			{
-				upsampledFramebuffers[i]->Bind();
+				renderGraphData->UpsampledFramebuffers[i]->Bind();
 			
 				if (i == upsampleCount)
 				{
-					downsampledFramebuffers[upsampleCount]->BindColorAttachment(0, 0);
-					downsampledFramebuffers[upsampleCount - 1]->BindColorAttachment(0, 1);
+					renderGraphData->DownsampledFramebuffers[upsampleCount]->BindColorAttachment(0, 0);
+					renderGraphData->DownsampledFramebuffers[upsampleCount - 1]->BindColorAttachment(0, 1);
 				}
 				else
 				{
-					downsampledFramebuffers[i]->BindColorAttachment(0, 0);
-					upsampledFramebuffers[i + 1]->BindColorAttachment(0, 1);
+					renderGraphData->DownsampledFramebuffers[i]->BindColorAttachment(0, 0);
+					renderGraphData->UpsampledFramebuffers[i + 1]->BindColorAttachment(0, 1);
 				}
 				DrawQuad();
 			}
 		
-			upsampledFramebuffers[0]->Bind();
+			renderGraphData->UpsampledFramebuffers[0]->Bind();
 			params = glm::vec4(BloomClamp, 3.0f, 1.0f, 0.0f);
 			bloomShader->SetFloat4("u_Params", params);
-			upsampledFramebuffers[1]->BindColorAttachment(0, 0);
+			renderGraphData->UpsampledFramebuffers[1]->BindColorAttachment(0, 0);
 			DrawQuad();
 		}
 	}
 
-	void Renderer3D::RenderPass()
+	void Renderer3D::RenderPass(Ref<Framebuffer> renderTarget)
 	{
 		OPTICK_EVENT();
 
-		mainFramebuffer->Bind();
+		renderTarget->Bind();
 		RenderCommand::Clear();
 
 		float skylightIntensity = 0.0f;

@@ -152,16 +152,16 @@ namespace ArcEngine
 		StartBatch();
 	}
 
-	void Renderer2D::EndScene(Ref<Framebuffer> renderTarget)
+	void Renderer2D::EndScene(Ref<RenderGraphData>& renderGraphData)
 	{
 		OPTICK_EVENT();
 
 		ARC_PROFILE_FUNCTION();
 		
-		renderTarget->Bind();
+		renderGraphData->CompositePassTarget->Bind();
 		RenderCommand::DisableCulling();
 		Flush();
-		renderTarget->Unbind();
+		renderGraphData->CompositePassTarget->Unbind();
 	}
 
 	void Renderer2D::StartBatch()
