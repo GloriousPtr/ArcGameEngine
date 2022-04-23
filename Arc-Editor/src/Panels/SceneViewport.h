@@ -1,23 +1,28 @@
 #pragma once
 #include <ArcEngine.h>
 
+#include "BasePanel.h"
 #include "SceneHierarchyPanel.h"
 
 namespace ArcEngine
 {
-	class SceneViewport
+	class SceneViewport : public BasePanel
 	{
 	public:
 		SceneViewport();
-		virtual ~SceneViewport();
+		SceneViewport(const char* name);
+		virtual ~SceneViewport() override = default;
 
-		void OnUpdate(Ref<Scene>& scene, Timestep timestep);
-		void OnImGuiRender();
+		virtual void OnUpdate(Ref<Scene>& scene, Timestep timestep);
+		virtual void OnImGuiRender() override;
 
 		void SetSceneHierarchyPanel(SceneHierarchyPanel& sceneHierarchyPanel) { m_SceneHierarchyPanel = &sceneHierarchyPanel; }
 
 		bool IsHovered() { return m_ViewportHovered; }
 		bool IsFocused() { return m_ViewportFocused; }
+
+	private:
+		void OnInit();
 
 	private:
 		std::string m_ID;

@@ -128,7 +128,9 @@ namespace ArcEngine
 			return glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);
 		}
 
-		operator bool() const { return m_EntityHandle != entt::null; }
+		Scene* GetScene() { return m_Scene; }
+
+		operator bool() const { return m_EntityHandle != entt::null && m_Scene != nullptr; }
 		operator entt::entity() const { return m_EntityHandle; }
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
 

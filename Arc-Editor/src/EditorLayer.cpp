@@ -2,13 +2,14 @@
 
 #include <imgui/imgui.h>
 
-#include "Panels/SceneHierarchyPanel.h"
-
+#include "Arc/ImGui/Modules/ImGuiConsole.h"
 #include "Arc/Scene/SceneSerializer.h"
-
 #include "Arc/Utils/PlatformUtils.h"
-
 #include "Arc/Math/Math.h"
+
+#include "Panels/SceneHierarchyPanel.h"
+#include "Panels/RendererSettingsPanel.h"
+#include "Panels/StatsPanel.h"
 
 namespace ArcEngine
 {
@@ -25,7 +26,14 @@ namespace ArcEngine
 		m_ActiveScene = CreateRef<Scene>();
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-		m_MainSceneViewport.SetSceneHierarchyPanel(m_SceneHierarchyPanel);
+
+		m_Viewports.push_back(CreateScope<SceneViewport>());
+		m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
+		
+		m_Properties.push_back(CreateScope<PropertiesPanel>());
+
+		m_Panels.push_back(CreateScope<RendererSettingsPanel>());
+		m_Panels.push_back(CreateScope<StatsPanel>());
 	}
 
 	void EditorLayer::OnDetach()
@@ -40,11 +48,19 @@ namespace ArcEngine
 
 		ARC_PROFILE_FUNCTION();
 
-		frameTime = ts;
-
 		Renderer2D::ResetStats();
 
-		m_MainSceneViewport.OnUpdate(m_ActiveScene, ts);
+		for (size_t i = 0; i < m_Viewports.size(); i++)
+		{
+			if (m_Viewports[i]->IsShowing())
+				m_Viewports[i]->OnUpdate(m_ActiveScene, ts);
+		}
+
+		for (size_t i = 0; i < m_Panels.size(); i++)
+		{
+			if (m_Panels[i]->IsShowing())
+				m_Panels[i]->OnUpdate(ts);
+		}
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -111,25 +127,56 @@ namespace ArcEngine
 				//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
 
 				if (ImGui::MenuItem("New", "Ctrl+N"))
+				{
 					NewScene();
-				
+				}
+
 				if (ImGui::MenuItem("Open..", "Ctrl+O"))
+				{
 					OpenScene();
+				}
 
 				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+				{
 					SaveSceneAs();
-				
+				}
+
 				if (ImGui::MenuItem("Exit"))
+				{
 					m_Application->Close();
-				
+				}
+
 				ImGui::EndMenu();
 			}
 
 			if (ImGui::BeginMenu("Window"))
 			{
-				ImGui::MenuItem("Viewport", nullptr, &m_ShowMainSceneViewport);
+				if (ImGui::BeginMenu("Add"))
+				{
+					if (ImGui::MenuItem("Viewport"))
+					{
+						size_t index = m_Viewports.size();
+						m_Viewports.push_back(CreateScope<SceneViewport>());
+						m_Viewports[index]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
+					}
+
+					if (ImGui::MenuItem("Properties"))
+					{
+						m_Properties.push_back(CreateScope<PropertiesPanel>());
+					}
+
+					ImGui::EndMenu();
+				}
 				ImGui::MenuItem("Hierarchy", nullptr, &m_ShowSceneHierarchyPanel);
-				ImGui::MenuItem("RendererSettings", nullptr, &m_ShowRendererSettingsPanel);
+				ImGui::MenuItem("Console", nullptr, &m_ShowConsole);
+
+				for (size_t i = 0; i < m_Panels.size(); i++)
+				{
+					BasePanel* panel = m_Panels[i].get();
+					bool showing = panel->IsShowing();
+					if (ImGui::MenuItem(panel->GetName(), nullptr, &showing))
+						panel->SetShowing(showing);
+				}
 
 				ImGui::EndMenu();
 			}
@@ -148,42 +195,58 @@ namespace ArcEngine
 			ImGui::EndMenuBar();
 		}
 
-		if (m_ShowRendererSettingsPanel)
-			m_RendererSettingsPanel.OnImGuiRender();
+		// Remove unused scene viewports
+		for (auto it = m_Viewports.begin(); it != m_Viewports.end(); it++)
+		{
+			if (!it->get()->IsShowing())
+			{
+				m_Viewports.erase(it);
+				break;
+			}
+		}
+
+		// Remove unused properties panels
+		for (auto it = m_Properties.begin(); it != m_Properties.end(); it++)
+		{
+			if (!it->get()->IsShowing())
+			{
+				m_Properties.erase(it);
+				break;
+			}
+		}
+
 		if (m_ShowSceneHierarchyPanel)
 			m_SceneHierarchyPanel.OnImGuiRender();
-		if (m_ShowMainSceneViewport)
-			m_MainSceneViewport.OnImGuiRender();
+		Entity selectedContext = m_SceneHierarchyPanel.GetSelectedEntity();
+
+		// Show viewports
+		for (size_t i = 0; i < m_Viewports.size(); i++)
+		{
+			if (m_Viewports[i]->IsShowing())
+				m_Viewports[i]->OnImGuiRender();
+		}
+
+		// Show properties panel
+		for (size_t i = 0; i < m_Properties.size(); i++)
+		{
+			if (m_Properties[i]->IsShowing())
+			{
+				m_Properties[i]->SetContext(selectedContext);
+				m_Properties[i]->OnImGuiRender();
+			}
+		}
+
+		// Show panels
+		for (size_t i = 0; i < m_Panels.size(); i++)
+		{
+			if (m_Panels[i]->IsShowing())
+				m_Panels[i]->OnImGuiRender();
+		}
+
+		if (m_ShowConsole)
+			ImGuiConsole::OnImGuiRender(&m_ShowConsole);
 
 		m_Application->GetImGuiLayer()->SetBlockEvents(false);
-
-		ImGui::Begin("Stats");
-
-		auto stats = Renderer2D::GetStats();
-		ImGui::Text("Renderer2D Stats:");
-		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
-		ImGui::Text("Quads: %d", stats.QuadCount);
-		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
-		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-
-		static float frameTimeRefreshTimer = 0.0f;
-		static float ft = 0.0f;
-		static float frameRate = 0.0f;
-		frameTimeRefreshTimer += frameTime;
-		if(frameTimeRefreshTimer >= 0.1f)
-		{
-			ft = frameTime;
-			frameRate = 1.0f / frameTime;
-			frameTimeRefreshTimer = 0.0f;
-		}
-		ImGui::Text("FrameTime: %.2f ms", ft * 1000.0f);
-		ImGui::Text("FPS: %d", (int)frameRate);
-
-		bool isVsync = m_Application->GetWindow().IsVSync();
-		if (ImGui::Checkbox("VSync", &isVsync))
-			m_Application->GetWindow().SetVSync(isVsync);
-
-		ImGui::End();
 		
 		ImGui::End();
 	}
@@ -236,6 +299,9 @@ namespace ArcEngine
 
 	void EditorLayer::NewScene()
 	{
+		for (size_t i = 0; i < m_Properties.size(); i++)
+			m_Properties[i]->ForceSetContext({});
+
 		m_ActiveScene = CreateRef<Scene>();
 		m_ActiveScene->MarkViewportDirty();
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
@@ -246,6 +312,9 @@ namespace ArcEngine
 		std::string filepath = FileDialogs::OpenFile("Arc Scene (*.arc)\0*.arc\0");
 		if (!filepath.empty())
 		{
+			for (size_t i = 0; i < m_Properties.size(); i++)
+				m_Properties[i]->ForceSetContext({});
+
 			m_ActiveScene = CreateRef<Scene>();
 			m_ActiveScene->MarkViewportDirty();
 			m_SceneHierarchyPanel.SetContext(m_ActiveScene);

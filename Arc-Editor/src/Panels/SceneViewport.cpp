@@ -10,7 +10,20 @@
 namespace ArcEngine
 {
 	static int s_ID = 0;
+	
 	SceneViewport::SceneViewport()
+		: BasePanel("Viewport")
+	{
+		OnInit();
+	}
+
+	SceneViewport::SceneViewport(const char* name)
+		: BasePanel(name)
+	{
+		OnInit();
+	}
+
+	void SceneViewport::OnInit()
 	{
 		FramebufferSpecification fbSpec;
 		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F };
@@ -20,12 +33,9 @@ namespace ArcEngine
 
 		m_EditorCamera.SetViewportSize(1280, 720);
 
-		m_ID = "Viewport" + s_ID;
+		m_ID = "###" + std::to_string(s_ID);
+		m_ID = m_Name + m_ID + m_Name;
 		s_ID++;
-	}
-
-	SceneViewport::~SceneViewport()
-	{
 	}
 
 	void SceneViewport::OnUpdate(Ref<Scene>& scene, Timestep timestep)
@@ -145,9 +155,10 @@ namespace ArcEngine
 	{
 		OPTICK_EVENT();
 
+		ImGui::SetNextWindowSize(ImVec2(640, 480), ImGuiCond_FirstUseEver);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin(m_ID.c_str());
-
+		ImGui::Begin(m_ID.c_str(), &m_Showing);
+		
 		const auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
 		const auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
 		const auto viewportOffset = ImGui::GetWindowPos();

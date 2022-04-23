@@ -1,14 +1,23 @@
 #pragma once
 #include <ArcEngine.h>
 
+#include "BasePanel.h"
+
 namespace ArcEngine
 {
-	class RendererSettingsPanel
+	class RendererSettingsPanel : public BasePanel
 	{
 	public:
-		RendererSettingsPanel();
-		virtual ~RendererSettingsPanel();
+		RendererSettingsPanel()
+			: BasePanel("Render Settings Panel")
+		{}
 
-		void OnImGuiRender();
+		RendererSettingsPanel(const char* name)
+			: BasePanel(name)
+		{}
+
+		virtual ~RendererSettingsPanel() override = default;
+
+		virtual void OnImGuiRender() override;
 	};
 }
