@@ -36,6 +36,7 @@ namespace ArcEngine
 
 			uint32_t GetTotalVertexCount() const { return QuadCount * 4; }
 			uint32_t GetTotalIndexCount() const { return QuadCount * 6; }
+			uint32_t GetTotalTriangleCount() const { return QuadCount * 2; }
 		};
 
 		static void ResetStats();

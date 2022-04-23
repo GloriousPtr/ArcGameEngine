@@ -26,12 +26,37 @@ namespace ArcEngine
 		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
 		ImGui::Begin("Stats", &m_Showing, ImGuiWindowFlags_NoCollapse);
 
-		const auto stats = Renderer2D::GetStats();
-		ImGui::Text("Renderer2D Stats:");
-		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
-		ImGui::Text("Quads: %d", stats.QuadCount);
-		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
-		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+		{
+			const auto stats = Renderer2D::GetStats();
+			ImGui::Text("2D");
+
+			ImGui::Text("Draw Calls: %d", stats.DrawCalls);
+			ImGui::SameLine();
+			ImGui::PushItemWidth(-1);
+			ImGui::Text("Quads: %d", stats.QuadCount);
+			ImGui::SameLine();
+			ImGui::PushItemWidth(-1);
+			ImGui::Text("Tris: %d", stats.GetTotalTriangleCount());
+
+			ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
+			ImGui::SameLine();
+			ImGui::PushItemWidth(-1);
+			ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+		}
+
+		ImGui::Separator();
+
+		{
+			const auto stats = Renderer3D::GetStats();
+			ImGui::Text("3D");
+
+			ImGui::Text("Draw Calls: %d", stats.DrawCalls);
+			ImGui::SameLine();
+			ImGui::PushItemWidth(-1);
+			ImGui::Text("Indices: %d", stats.IndexCount);
+		}
+
+		ImGui::Separator();
 
 		UI::Property("FPS");
 		ImGui::PlotLines("#FPS", m_FpsValues, size);

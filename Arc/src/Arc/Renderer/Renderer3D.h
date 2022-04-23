@@ -31,6 +31,15 @@ namespace ArcEngine
 
 		static ShaderLibrary& GetShaderLibrary() { return s_ShaderLibrary; }
 
+		struct Statistics
+		{
+			uint32_t DrawCalls = 0;
+			uint32_t IndexCount = 0;
+		};
+
+		static void ResetStats();
+		static Statistics GetStats();
+
 	private:
 		static void SetupCameraData(const EditorCamera& camera);
 		static void SetupLightsData();

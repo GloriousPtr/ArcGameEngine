@@ -32,6 +32,7 @@ namespace ArcEngine
 		Ref<Texture2D> EmissiveMap = nullptr;
 	};
 
+	Renderer3D::Statistics s_Stats;
 	static std::vector<MeshData> meshes;
 	static Ref<Texture2D> s_BRDFLutTexture;
 	static Ref<Shader> shader;
@@ -282,6 +283,16 @@ namespace ArcEngine
 		BloomPass(renderGraphData);
 		CompositePass(renderGraphData);
 		meshes.clear();
+	}
+
+	void Renderer3D::ResetStats()
+	{
+		memset(&s_Stats, 0, sizeof(Statistics));
+	}
+
+	Renderer3D::Statistics Renderer3D::GetStats()
+	{
+		return s_Stats;
 	}
 
 	void Renderer3D::SetupCameraData(const EditorCamera& camera)
@@ -565,6 +576,8 @@ namespace ArcEngine
 				}
 
 				RenderCommand::DrawIndexed(meshData->VertexArray);
+				s_Stats.DrawCalls++;
+				s_Stats.IndexCount += meshData->VertexArray->GetIndexBuffer()->GetCount();
 			}
 		}
 	}

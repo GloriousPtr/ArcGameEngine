@@ -49,6 +49,7 @@ namespace ArcEngine
 		ARC_PROFILE_FUNCTION();
 
 		Renderer2D::ResetStats();
+		Renderer3D::ResetStats();
 
 		for (size_t i = 0; i < m_Viewports.size(); i++)
 		{

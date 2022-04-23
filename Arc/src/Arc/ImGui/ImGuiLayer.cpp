@@ -217,7 +217,7 @@ namespace ArcEngine
 		colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.300f, 0.300f, 0.300f, 1.000f);
 		colors[ImGuiCol_ScrollbarGrabActive] = blue;
 		
-		colors[ImGuiCol_CheckMark] = white_a_1;
+		colors[ImGuiCol_CheckMark] = blue;
 		
 		colors[ImGuiCol_SliderGrab] = gray_391;
 		colors[ImGuiCol_SliderGrabActive] = blue;
