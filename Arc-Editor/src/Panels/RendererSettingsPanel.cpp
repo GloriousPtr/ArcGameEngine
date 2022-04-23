@@ -75,6 +75,7 @@ namespace ArcEngine
 			}
 			UI::EndPropertyGrid();
 
+			/*
 			int sampleCount = Renderer3D::blurSamples;
 			static int selectedDownsampled = 0;
 			static int selectedUpsampled = 0;
@@ -85,7 +86,7 @@ namespace ArcEngine
 				textureID = Renderer3D::downsampledFramebuffers[selectedDownsampled]->GetColorAttachmentRendererID();
 			if (ImGui::SliderInt("Upsampled Prefilters", &selectedUpsampled, 0, sampleCount - 1))
 				textureID = Renderer3D::upsampledFramebuffers[selectedUpsampled]->GetColorAttachmentRendererID();
-
+				*/
 			ImGui::TreePop();
 		}
 		UI::PopID();

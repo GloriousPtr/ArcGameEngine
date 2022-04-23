@@ -84,7 +84,7 @@ namespace ArcEngine
 		return {};
 	}
 
-	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera, Ref<Framebuffer> renderTarget)
+	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera, Ref<RenderGraphData>& renderGraphData)
 	{
 		OPTICK_EVENT();
 
@@ -131,7 +131,7 @@ namespace ArcEngine
 					Renderer3D::SubmitMesh(mesh, Entity(entity, this).GetWorldTransform());
 			}
 		}
-		Renderer3D::EndScene(renderTarget);
+		Renderer3D::EndScene(renderGraphData);
 		
 		Renderer2D::BeginScene(camera);
 		{
@@ -142,10 +142,10 @@ namespace ArcEngine
 				Renderer2D::DrawQuad(GetEntity(id.ID).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
 			}
 		}
-		Renderer2D::EndScene(renderTarget);
+		Renderer2D::EndScene(renderGraphData);
 	}
 
-	void Scene::OnUpdateRuntime(Timestep ts, Ref<Framebuffer> renderTarget)
+	void Scene::OnUpdateRuntime(Timestep ts, Ref<RenderGraphData>& renderGraphData)
 	{
 		OPTICK_EVENT();
 
@@ -197,7 +197,7 @@ namespace ArcEngine
 				Renderer2D::DrawQuad(GetEntity(id.ID).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
 			}
 
-			Renderer2D::EndScene(renderTarget);
+			Renderer2D::EndScene(renderGraphData);
 		}
 	}
 

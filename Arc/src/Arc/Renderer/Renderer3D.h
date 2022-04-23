@@ -7,6 +7,7 @@
 #include "VertexArray.h"
 #include "Shader.h"
 #include "Texture.h"
+#include "RenderGraphData.h"
 
 struct aiMesh;
 struct aiScene;
@@ -22,7 +23,7 @@ namespace ArcEngine
 
 		static void BeginScene(const Camera& camera, const glm::mat4& transform);
 		static void BeginScene(const EditorCamera& camera, Entity cubemap, std::vector<Entity>& lights);
-		static void EndScene(Ref<Framebuffer>& renderTarget);
+		static void EndScene(Ref<RenderGraphData>& renderTarget);
 
 		static void DrawCube();
 		static void DrawQuad();
@@ -33,10 +34,10 @@ namespace ArcEngine
 	private:
 		static void SetupCameraData(const EditorCamera& camera);
 		static void SetupLightsData();
-		static void Flush(Ref<Framebuffer>& renderTarget);
-		static void CompositePass(Ref<Framebuffer>& renderTarget);
-		static void BloomPass();
-		static void RenderPass();
+		static void Flush(Ref<RenderGraphData> renderGraphData);
+		static void CompositePass(Ref<RenderGraphData> renderGraphData);
+		static void BloomPass(Ref<RenderGraphData> renderGraphData);
+		static void RenderPass(Ref<Framebuffer> renderTarget);
 		static void ShadowMapPass();
 
 	private:
@@ -44,12 +45,6 @@ namespace ArcEngine
 
 	public:
 		enum class TonemappingType { None = 0, ACES, Filmic, Uncharted };
-
-		static const int blurSamples = 6;
-		static Ref<Framebuffer> prefilteredFramebuffer;
-		static Ref<Framebuffer> tempBlurFramebuffers[blurSamples];
-		static Ref<Framebuffer> downsampledFramebuffers[blurSamples];
-		static Ref<Framebuffer> upsampledFramebuffers[blurSamples];
 
 		static TonemappingType Tonemapping;
 		static float Exposure;

@@ -25,11 +25,46 @@ namespace ArcEngine
 
 	void SceneViewport::OnInit()
 	{
-		FramebufferSpecification fbSpec;
-		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F };
-		fbSpec.Width = 1280;
-		fbSpec.Height = 720;
-		m_Framebuffer = Framebuffer::Create(fbSpec);
+		m_RenderGraphData = CreateRef<RenderGraphData>();
+
+		uint32_t width = 1280;
+		uint32_t height = 720;
+		{
+			FramebufferSpecification spec;
+			spec.Attachments = { FramebufferTextureFormat::RGBA16F };
+			spec.Width = width;
+			spec.Height = height;
+			m_RenderGraphData->CompositePassTarget = Framebuffer::Create(spec);
+		}
+
+		{
+			FramebufferSpecification spec;
+			spec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::Depth };
+			spec.Width = width;
+			spec.Height = height;
+			m_RenderGraphData->RenderPassTarget = Framebuffer::Create(spec);
+		}
+
+		width /= 2;
+		height /= 2;
+		FramebufferSpecification bloomSpec;
+		bloomSpec.Attachments = { FramebufferTextureFormat::R11G11B10 };
+		bloomSpec.Width = width;
+		bloomSpec.Height = height;
+		m_RenderGraphData->PrefilteredFramebuffer = Framebuffer::Create(bloomSpec);
+		
+		for (size_t i = 0; i < m_RenderGraphData->BlurSamples; i++)
+		{
+			width /= 2;
+			height /= 2;
+			FramebufferSpecification blurSpec;
+			blurSpec.Attachments = { FramebufferTextureFormat::R11G11B10 };
+			blurSpec.Width = width;
+			blurSpec.Height = height;
+			m_RenderGraphData->TempBlurFramebuffers[i] = Framebuffer::Create(bloomSpec);
+			m_RenderGraphData->DownsampledFramebuffers[i] = Framebuffer::Create(blurSpec);
+			m_RenderGraphData->UpsampledFramebuffers[i] = Framebuffer::Create(blurSpec);
+		}
 
 		m_EditorCamera.SetViewportSize(1280, 720);
 
@@ -40,13 +75,13 @@ namespace ArcEngine
 
 	void SceneViewport::OnUpdate(Ref<Scene>& scene, Timestep timestep)
 	{
-		OPTICK_EVENT();
+		OPTICK_EVENT(m_ID.c_str());
 
-		if (FramebufferSpecification spec = m_Framebuffer->GetSpecification();
+		if (FramebufferSpecification spec = m_RenderGraphData->CompositePassTarget->GetSpecification();
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
 			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		{
-			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_RenderGraphData->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
@@ -93,11 +128,11 @@ namespace ArcEngine
 		}
 
 		// Update scene
-		m_Framebuffer->Bind();
+		m_RenderGraphData->RenderPassTarget->Bind();
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		RenderCommand::Clear();
-		scene->OnUpdateEditor(timestep, m_EditorCamera, m_Framebuffer);
-		m_Framebuffer->Unbind();
+		scene->OnUpdateEditor(timestep, m_EditorCamera, m_RenderGraphData);
+		m_RenderGraphData->RenderPassTarget->Unbind();
 
 		if (!ImGuizmo::IsUsing() && !ImGui::IsMouseDown(ImGuiMouseButton_Right))
 		{
@@ -171,7 +206,7 @@ namespace ArcEngine
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
-		const uint64_t textureID = m_Framebuffer->GetColorAttachmentRendererID(0);
+		const uint64_t textureID = m_RenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
 		ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 		// Gizmos

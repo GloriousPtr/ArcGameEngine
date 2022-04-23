@@ -3,7 +3,7 @@
 #include "Arc/Core/UUID.h"
 #include "Arc/Core/Timestep.h"
 #include "Arc/Renderer/EditorCamera.h"
-#include "Arc/Renderer/Framebuffer.h"
+#include "Arc/Renderer/RenderGraphData.h"
 
 #include "entt.hpp"
 
@@ -23,8 +23,8 @@ namespace ArcEngine
 		bool HasEntity(UUID uuid);
 		Entity GetEntity(UUID uuid);
 
-		void OnUpdateEditor(Timestep ts, EditorCamera& camera, Ref<Framebuffer> renderTarget);
-		void OnUpdateRuntime(Timestep ts, Ref<Framebuffer> renderTarget);
+		void OnUpdateEditor(Timestep ts, EditorCamera& camera, Ref<RenderGraphData>& renderGraphData);
+		void OnUpdateRuntime(Timestep ts, Ref<RenderGraphData>& renderGraphData);
 		void OnViewportResize(uint32_t width, uint32_t height);
 		void MarkViewportDirty() { m_ViewportDirty = true; }
 
