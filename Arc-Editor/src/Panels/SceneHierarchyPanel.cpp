@@ -49,13 +49,14 @@ namespace ArcEngine
 		
 		DrawRowsBackground(m_CurrentlyVisibleEntities, line_height, x1, x2, item_offset_y, 0, ImGui::GetColorU32(ImVec4(0.20f, 0.20f, 0.20f, 1.0f)));
 		m_CurrentlyVisibleEntities = 0;
-
-		m_Context->m_Registry.each([&](auto entityID)
+		
+		auto view = m_Context->m_Registry.view<IDComponent>();
+		for (auto it = view.rbegin(); it != view.rend(); it++)
 		{
-			Entity entity = { entityID, m_Context.get() };
+			Entity entity = { *it, m_Context.get() };
 			if (!entity.GetParent())
 				DrawEntityNode(entity);
-		});
+		}
 
 		if (m_DeletedEntity)
 		{
@@ -116,7 +117,7 @@ namespace ArcEngine
 		ImGui::End();
 	}
 
-	ImRect SceneHierarchyPanel::DrawEntityNode(Entity entity, bool skipChildren = false)
+	ImRect SceneHierarchyPanel::DrawEntityNode(Entity entity, bool skipChildren)
 	{
 		m_CurrentlyVisibleEntities++;
 
