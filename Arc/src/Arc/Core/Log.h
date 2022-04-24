@@ -10,6 +10,17 @@
 
 namespace ArcEngine
 {
+	enum class LogLevel : int8_t
+	{
+		Trace,
+		Debug,
+		Info,
+		Warn,
+		Error,
+		Critical,
+		Off, // Display nothing
+	};
+
 	class Log
 	{
 	public:

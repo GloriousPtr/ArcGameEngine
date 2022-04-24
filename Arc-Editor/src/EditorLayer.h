@@ -2,10 +2,11 @@
 
 #include <ArcEngine.h>
 
+#include "Panels/PropertiesPanel.h"
+#include "Panels/SceneViewport.h"
 #include "Panels/BasePanel.h"
 #include "Panels/SceneHierarchyPanel.h"
-#include "Panels/SceneViewport.h"
-#include "Panels/PropertiesPanel.h"
+#include "Panels/ConsolePanel.h"
 
 namespace ArcEngine
 {
@@ -35,6 +36,7 @@ namespace ArcEngine
 		
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
+		ConsolePanel m_ConsolePanel;
 
 		std::vector<Scope<BasePanel>> m_Panels;
 		std::vector<Scope<SceneViewport>> m_Viewports;
@@ -42,5 +44,6 @@ namespace ArcEngine
 
 		bool m_ShowSceneHierarchyPanel = true;
 		bool m_ShowConsole = true;
+		bool m_ShowDemoWindow = false;
 	};
 }

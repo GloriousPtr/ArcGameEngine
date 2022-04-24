@@ -3,6 +3,8 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
+#include "../Utils/EditorTheme.h"
+
 namespace ArcEngine
 {
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
@@ -47,7 +49,7 @@ namespace ArcEngine
 		float item_offset_y = -item_spacing_y * 0.5f;
 		float line_height = ImGui::GetTextLineHeight() + item_spacing_y;
 		
-		DrawRowsBackground(m_CurrentlyVisibleEntities, line_height, x1, x2, item_offset_y, 0, ImGui::GetColorU32(ImVec4(0.20f, 0.20f, 0.20f, 1.0f)));
+		DrawRowsBackground(m_CurrentlyVisibleEntities, line_height, x1, x2, item_offset_y, 0, ImGui::GetColorU32(EditorTheme::WindowBgAlternativeColor));
 		m_CurrentlyVisibleEntities = 0;
 		
 		auto view = m_Context->m_Registry.view<IDComponent>();
@@ -130,7 +132,17 @@ namespace ArcEngine
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 		flags |= childrenSize == 0 ? ImGuiTreeNodeFlags_Bullet : 0;
 
+		bool needPopColors = false;
+		if (m_SelectionContext == entity)
+		{
+			needPopColors = true;
+			ImGui::PushStyleColor(ImGuiCol_Header, EditorTheme::HeaderSelectedColor);
+		}
+
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity.GetUUID(), flags, tag.c_str());
+
+		if (needPopColors)
+			ImGui::PopStyleColor();
 
 		if(ImGui::IsItemClicked())
 			m_SelectionContext = entity;

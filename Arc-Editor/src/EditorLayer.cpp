@@ -1,13 +1,15 @@
 #include "EditorLayer.h"
 
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
 
-#include "Arc/ImGui/Modules/ImGuiConsole.h"
+#include "Utils/EditorTheme.h"
+
 #include "Arc/Scene/SceneSerializer.h"
 #include "Arc/Utils/PlatformUtils.h"
 #include "Arc/Math/Math.h"
 
-#include "Panels/SceneHierarchyPanel.h"
 #include "Panels/RendererSettingsPanel.h"
 #include "Panels/StatsPanel.h"
 
@@ -21,6 +23,10 @@ namespace ArcEngine
 	void EditorLayer::OnAttach()
 	{
 		ARC_PROFILE_FUNCTION();
+
+		EditorTheme::SetFont();
+		EditorTheme::SetStyle();
+		EditorTheme::ApplyTheme();
 
 		m_Application = &Application::Get();
 		m_ActiveScene = CreateRef<Scene>();
@@ -50,6 +56,26 @@ namespace ArcEngine
 
 		Renderer2D::ResetStats();
 		Renderer3D::ResetStats();
+
+		// Remove unused scene viewports
+		for (auto it = m_Viewports.begin(); it != m_Viewports.end(); it++)
+		{
+			if (!it->get()->IsShowing())
+			{
+				m_Viewports.erase(it);
+				break;
+			}
+		}
+
+		// Remove unused properties panels
+		for (auto it = m_Properties.begin(); it != m_Properties.end(); it++)
+		{
+			if (!it->get()->IsShowing())
+			{
+				m_Properties.erase(it);
+				break;
+			}
+		}
 
 		for (size_t i = 0; i < m_Viewports.size(); i++)
 		{
@@ -107,127 +133,179 @@ namespace ArcEngine
 			ImGui::PopStyleVar(2);
 
 		// DockSpace
+		float menuBarHeight = ImGui::GetFrameHeight();
+		uint32_t topMenuBarCount = 2;
+		uint32_t bottomMenuBarCount = 1;
+		float dockSpaceOffsetY = ImGui::GetCursorPosY() + (topMenuBarCount - 1) * menuBarHeight;
+
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImVec2 dockSpaceSize = ImVec2(viewport->Size.x, viewport->Size.y - (topMenuBarCount + bottomMenuBarCount) * menuBarHeight);
+
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuiStyle& style = ImGui::GetStyle();
 		float minWinSizeX = style.WindowMinSize.x;
+		float minWinSizeY = style.WindowMinSize.y;
 		style.WindowMinSize.x = 370.0f;
+		style.WindowMinSize.y = 50.0f;
 		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
+			ImGui::SetCursorPosY(dockSpaceOffsetY);
 			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+			ImGui::DockSpace(dockspace_id, dockSpaceSize, dockspace_flags);
 		}
 
 		style.WindowMinSize.x = minWinSizeX;
+		style.WindowMinSize.y = minWinSizeY;
+		{
+			ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
+			ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
+
+			//////////////////////////////////////////////////////////////////////////
+			// PRIMARY TOP MENU BAR //////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+			if (ImGui::BeginViewportSideBar("##PrimaryMenuBar", viewport, ImGuiDir_Up, menuBarHeight, window_flags))
+			{
+				if (ImGui::BeginMenuBar())
+				{
+					if (ImGui::BeginMenu("File"))
+					{
+						// Disabling fullscreen would allow the window to be moved to the front of other windows, 
+						// which we can't undo at the moment without finer window depth/z control.
+						//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
+
+						if (ImGui::MenuItem("New", "Ctrl+N"))
+						{
+							NewScene();
+						}
+
+						if (ImGui::MenuItem("Open..", "Ctrl+O"))
+						{
+							OpenScene();
+						}
+
+						if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+						{
+							SaveSceneAs();
+						}
+
+						if (ImGui::MenuItem("Exit"))
+						{
+							m_Application->Close();
+						}
+
+						ImGui::EndMenu();
+					}
+
+					if (ImGui::BeginMenu("Window"))
+					{
+						if (ImGui::BeginMenu("Add"))
+						{
+							if (ImGui::MenuItem("Viewport"))
+							{
+								size_t index = m_Viewports.size();
+								m_Viewports.push_back(CreateScope<SceneViewport>());
+								m_Viewports[index]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
+							}
+
+							if (ImGui::MenuItem("Properties"))
+							{
+								m_Properties.push_back(CreateScope<PropertiesPanel>());
+							}
+
+							ImGui::EndMenu();
+						}
+						ImGui::MenuItem("Hierarchy", nullptr, &m_ShowSceneHierarchyPanel);
+						ImGui::MenuItem("Console", nullptr, &m_ShowConsole);
+
+						for (size_t i = 0; i < m_Panels.size(); i++)
+						{
+							BasePanel* panel = m_Panels[i].get();
+							bool showing = panel->IsShowing();
+							if (ImGui::MenuItem(panel->GetName(), nullptr, &showing))
+								panel->SetShowing(showing);
+						}
+
+						ImGui::MenuItem("ImGui Demo Window", nullptr, &m_ShowDemoWindow);
+
+						ImGui::EndMenu();
+					}
+
+					if (ImGui::BeginMenu("Shaders"))
+					{
+						if (ImGui::MenuItem("Reload Shaders"))
+						{
+							Renderer3D::GetShaderLibrary().ReloadAll();
+							Renderer3D::Init();
+						}
+
+						ImGui::EndMenu();
+					}
+					ImGui::EndMenuBar();
+				}
+				ImGui::End();
+			}
+
+			//////////////////////////////////////////////////////////////////////////
+			// SECONDARY TOP BAR /////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+			if (ImGui::BeginViewportSideBar("##SecondaryMenuBar", viewport, ImGuiDir_Up, menuBarHeight, window_flags))
+			{
+				if (ImGui::BeginMenuBar())
+				{
+					ImVec2 region = ImGui::GetContentRegionAvail();
+					ImGui::SetCursorPosX(region.x * 0.5f);
+					ImGui::Button(ICON_MDI_PLAY);
+					ImGui::Button(ICON_MDI_PAUSE);
+					ImGui::Button(ICON_MDI_STEP_FORWARD);
+					ImGui::EndMenuBar();
+				}
+				ImGui::End();
+			}
+
+			//////////////////////////////////////////////////////////////////////////
+			// BOTTOM MENU BAR ///////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+			if (ImGui::BeginViewportSideBar("##StatusBar", viewport, ImGuiDir_Down, menuBarHeight, window_flags))
+			{
+				if(ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+					m_ConsolePanel.SetFocus();
+
+				if (ImGui::BeginMenuBar())
+				{
+					const ConsolePanel::Message* message = m_ConsolePanel.GetRecentMessage();
+					if (message != nullptr)
+					{
+						glm::vec4 color = ConsolePanel::Message::GetRenderColor(message->Level);
+						ImGui::PushStyleColor(ImGuiCol_Text, { color.r, color.g, color.b, color.a });
+						ImGui::TextUnformatted(message->Buffer.c_str());
+						ImGui::PopStyleColor();
+					}
+					ImGui::EndMenuBar();
+				}
+
+				ImGui::End();
+			}
+		}
 		
-		if (ImGui::BeginMenuBar())
-		{
-			if (ImGui::BeginMenu("File"))
-			{
-				// Disabling fullscreen would allow the window to be moved to the front of other windows, 
-				// which we can't undo at the moment without finer window depth/z control.
-				//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
-
-				if (ImGui::MenuItem("New", "Ctrl+N"))
-				{
-					NewScene();
-				}
-
-				if (ImGui::MenuItem("Open..", "Ctrl+O"))
-				{
-					OpenScene();
-				}
-
-				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
-				{
-					SaveSceneAs();
-				}
-
-				if (ImGui::MenuItem("Exit"))
-				{
-					m_Application->Close();
-				}
-
-				ImGui::EndMenu();
-			}
-
-			if (ImGui::BeginMenu("Window"))
-			{
-				if (ImGui::BeginMenu("Add"))
-				{
-					if (ImGui::MenuItem("Viewport"))
-					{
-						size_t index = m_Viewports.size();
-						m_Viewports.push_back(CreateScope<SceneViewport>());
-						m_Viewports[index]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
-					}
-
-					if (ImGui::MenuItem("Properties"))
-					{
-						m_Properties.push_back(CreateScope<PropertiesPanel>());
-					}
-
-					ImGui::EndMenu();
-				}
-				ImGui::MenuItem("Hierarchy", nullptr, &m_ShowSceneHierarchyPanel);
-				ImGui::MenuItem("Console", nullptr, &m_ShowConsole);
-
-				for (size_t i = 0; i < m_Panels.size(); i++)
-				{
-					BasePanel* panel = m_Panels[i].get();
-					bool showing = panel->IsShowing();
-					if (ImGui::MenuItem(panel->GetName(), nullptr, &showing))
-						panel->SetShowing(showing);
-				}
-
-				ImGui::EndMenu();
-			}
-
-			if (ImGui::BeginMenu("Shaders"))
-			{
-				if (ImGui::MenuItem("Reload Shaders"))
-				{
-					Renderer3D::GetShaderLibrary().ReloadAll();
-					Renderer3D::Init();
-				}
-
-				ImGui::EndMenu();
-			}
-
-			ImGui::EndMenuBar();
-		}
-
-		// Remove unused scene viewports
-		for (auto it = m_Viewports.begin(); it != m_Viewports.end(); it++)
-		{
-			if (!it->get()->IsShowing())
-			{
-				m_Viewports.erase(it);
-				break;
-			}
-		}
-
-		// Remove unused properties panels
-		for (auto it = m_Properties.begin(); it != m_Properties.end(); it++)
-		{
-			if (!it->get()->IsShowing())
-			{
-				m_Properties.erase(it);
-				break;
-			}
-		}
-
+		//////////////////////////////////////////////////////////////////////////
+		// HEIRARCHY /////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////
 		if (m_ShowSceneHierarchyPanel)
 			m_SceneHierarchyPanel.OnImGuiRender();
 		Entity selectedContext = m_SceneHierarchyPanel.GetSelectedEntity();
 
-		// Show viewports
+		//////////////////////////////////////////////////////////////////////////
+		// SCENE VIEWPORTS ///////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////
 		for (size_t i = 0; i < m_Viewports.size(); i++)
 		{
 			if (m_Viewports[i]->IsShowing())
 				m_Viewports[i]->OnImGuiRender();
 		}
 
-		// Show properties panel
+		//////////////////////////////////////////////////////////////////////////
+		// PROPERTY PANELS ///////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////
 		for (size_t i = 0; i < m_Properties.size(); i++)
 		{
 			if (m_Properties[i]->IsShowing())
@@ -237,7 +315,9 @@ namespace ArcEngine
 			}
 		}
 
-		// Show panels
+		//////////////////////////////////////////////////////////////////////////
+		// OTHER PANELS //////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////
 		for (size_t i = 0; i < m_Panels.size(); i++)
 		{
 			if (m_Panels[i]->IsShowing())
@@ -245,7 +325,10 @@ namespace ArcEngine
 		}
 
 		if (m_ShowConsole)
-			ImGuiConsole::OnImGuiRender(&m_ShowConsole);
+			m_ConsolePanel.OnImGuiRender();
+
+		if (m_ShowDemoWindow)
+			ImGui::ShowDemoWindow(&m_ShowDemoWindow);
 
 		m_Application->GetImGuiLayer()->SetBlockEvents(false);
 		

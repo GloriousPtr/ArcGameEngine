@@ -4,7 +4,7 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 
-#include "Arc/ImGui/Modules/ImGuiConsoleSink.h"
+#include "Arc/ImGui/Modules/ExternalConsoleSink.h"
 
 namespace ArcEngine
 {
@@ -15,7 +15,7 @@ namespace ArcEngine
 	{
 		std::vector<spdlog::sink_ptr> logSinks;
 		logSinks.emplace_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
-		logSinks.emplace_back(std::make_shared<ImGuiConsoleSink_mt>(true));
+		logSinks.emplace_back(std::make_shared<ExternalConsoleSink_mt>(true));
 		logSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("ArcEngine.log", true));
 
 		logSinks[0]->set_pattern("%^[%T] %n: %v%$");
