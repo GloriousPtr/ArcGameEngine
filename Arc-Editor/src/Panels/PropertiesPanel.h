@@ -3,6 +3,7 @@
 #include <ArcEngine.h>
 
 #include "BasePanel.h"
+#include "../Utils/IconsMaterialDesignIcons.h"
 
 namespace ArcEngine
 {
@@ -10,7 +11,7 @@ namespace ArcEngine
 	{
 	public:
 		PropertiesPanel()
-			: BasePanel("Properties")
+			: BasePanel(ICON_MDI_INFORMATION " Properties")
 		{
 			m_ID = "###" + std::to_string(s_ID);
 			m_ID = m_Name + m_ID + m_Name;
@@ -21,6 +22,7 @@ namespace ArcEngine
 			: BasePanel(name)
 		{
 			m_ID = "###" + std::to_string(s_ID);
+			m_ID = ICON_MDI_INFORMATION + m_Name + m_ID + m_Name;
 			s_ID++;
 		}
 

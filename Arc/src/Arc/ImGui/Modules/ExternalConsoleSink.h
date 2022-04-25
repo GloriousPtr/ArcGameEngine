@@ -69,7 +69,6 @@ namespace ArcEngine
 				case spdlog::level::level_enum::warn:			return LogLevel::Warn;
 				case spdlog::level::level_enum::err:			return LogLevel::Error;
 				case spdlog::level::level_enum::critical:		return LogLevel::Critical;
-				case spdlog::level::level_enum::off:			return LogLevel::Off;
 			}
 			return LogLevel::Trace;
 		}

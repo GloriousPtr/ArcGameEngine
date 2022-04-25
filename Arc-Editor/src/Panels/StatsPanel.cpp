@@ -24,7 +24,7 @@ namespace ArcEngine
 		avg /= size;
 
 		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
-		ImGui::Begin("Stats", &m_Showing, ImGuiWindowFlags_NoCollapse);
+		ImGui::Begin(m_Name.c_str(), &m_Showing, ImGuiWindowFlags_NoCollapse);
 
 		{
 			const auto stats = Renderer2D::GetStats();

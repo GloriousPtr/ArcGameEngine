@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ArcEngine.h>
+#include <imgui/imgui.h>
 
 #include "BasePanel.h"
 
@@ -17,11 +18,9 @@ namespace ArcEngine
 			Message(const std::string message = "", LogLevel level = LogLevel::Trace);
 			void OnImGuiRender();
 
-			static LogLevel GetLowerLevel(LogLevel level);
-			static LogLevel GetHigherLevel(LogLevel level);
 			static const char* GetLevelName(LogLevel level);
 			static glm::vec4 GetRenderColor(LogLevel level);
-			static std::vector<LogLevel> Levels;
+			static const char* GetLevelIcon(LogLevel level);
 		};
 
 	public:
@@ -45,9 +44,10 @@ namespace ArcEngine
 		uint16_t m_Capacity = 200;
 		uint16_t m_BufferSize = 0;
 		uint16_t m_BufferBegin = 0;
-		LogLevel m_Filter = LogLevel::Trace;
+		uint32_t s_MessageBufferRenderFilter = LogLevel::Trace;
 		bool m_AllowScrollingToBottom = true;
 		bool m_RequestScrollToBottom = false;
 		std::vector<Ref<Message>> m_MessageBuffer;
+		ImGuiTextFilter m_Filter;
 	};
 }

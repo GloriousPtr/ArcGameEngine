@@ -13,16 +13,16 @@ namespace ArcEngine
 		ImGuiIO& io = ImGui::GetIO();
 
 		static const ImWchar icons_ranges[] = { ICON_MIN_MDI, ICON_MAX_MDI, 0 };
-		ImFontConfig icons_config;
+		ImFontConfig iconsConfig;
 		// merge in icons from Font Awesome
-		icons_config.MergeMode = true;
-		icons_config.PixelSnapH = true;
-		icons_config.GlyphOffset.y = 1.0f;
-		icons_config.OversampleH = icons_config.OversampleV = 1;
-		icons_config.GlyphMinAdvanceX = 4.0f;
-		icons_config.SizePixels = 12.0f;
+		iconsConfig.MergeMode = true;
+		iconsConfig.PixelSnapH = true;
+		iconsConfig.GlyphOffset.y = 1.0f;
+		iconsConfig.OversampleH = iconsConfig.OversampleV = 1;
+		iconsConfig.GlyphMinAdvanceX = 4.0f;
+		iconsConfig.SizePixels = 12.0f;
 
-		io.Fonts->AddFontFromMemoryCompressedTTF(MaterialDesign_compressed_data, MaterialDesign_compressed_size, fontSize, &icons_config, icons_ranges);
+		io.Fonts->AddFontFromMemoryCompressedTTF(MaterialDesign_compressed_data, MaterialDesign_compressed_size, fontSize, &iconsConfig, icons_ranges);
 	}
 
 
@@ -31,10 +31,25 @@ namespace ArcEngine
 		ImGuiIO& io = ImGui::GetIO();
 		float fontSize = 18.0f;
 		
-		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Regular.ttf", fontSize);
+		ImFontConfig iconsConfig;
+        iconsConfig.MergeMode = false;
+        iconsConfig.PixelSnapH = true;
+        iconsConfig.OversampleH = iconsConfig.OversampleV = 1;
+        iconsConfig.GlyphMinAdvanceX = 4.0f;
+        iconsConfig.SizePixels = 12.0f;
+		
+		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Regular.ttf", fontSize, &iconsConfig);
 		AddIconFont(fontSize);
-		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Bold.ttf", fontSize);
+
+		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Bold.ttf", fontSize, &iconsConfig);
 		AddIconFont(fontSize);
+
+		io.Fonts->TexGlyphPadding = 1;
+        for(int n = 0; n < io.Fonts->ConfigData.Size; n++)
+        {
+            ImFontConfig* fontConfig = (ImFontConfig*)&io.Fonts->ConfigData[n];
+            fontConfig->RasterizerMultiply = 1.0f;
+        }
 
 		io.Fonts->Build();
 	}

@@ -3,6 +3,7 @@
 #include <ArcEngine.h>
 
 #include "BasePanel.h"
+#include "../Utils/IconsMaterialDesignIcons.h"
 
 namespace ArcEngine
 {
@@ -10,11 +11,7 @@ namespace ArcEngine
 	{
 	public:
 		StatsPanel()
-			: BasePanel("Stats Panel")
-		{}
-
-		StatsPanel(const char* name)
-			: BasePanel(name)
+			: BasePanel(ICON_MDI_INFORMATION_VARIANT " Stats")
 		{}
 
 		virtual void OnImGuiRender() override;

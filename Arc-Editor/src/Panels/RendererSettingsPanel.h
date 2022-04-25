@@ -2,6 +2,7 @@
 #include <ArcEngine.h>
 
 #include "BasePanel.h"
+#include "../Utils/IconsMaterialDesignIcons.h"
 
 namespace ArcEngine
 {
@@ -9,11 +10,7 @@ namespace ArcEngine
 	{
 	public:
 		RendererSettingsPanel()
-			: BasePanel("Render Settings Panel")
-		{}
-
-		RendererSettingsPanel(const char* name)
-			: BasePanel(name)
+			: BasePanel(ICON_MDI_GPU " Render Settings")
 		{}
 
 		virtual ~RendererSettingsPanel() override = default;

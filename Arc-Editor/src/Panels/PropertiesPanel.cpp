@@ -9,6 +9,7 @@
 
 #include "Arc/Utils/PlatformUtils.h"
 #include "../Utils/UI.h"
+#include "../Utils/EditorTheme.h"
 
 namespace ArcEngine
 {
@@ -45,8 +46,8 @@ namespace ArcEngine
 			bool removeComponent = false;
 			if(removable)
 			{
-				ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
-				if(ImGui::Button("V", ImVec2{ lineHeight, lineHeight }))
+				ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.75f);
+				if(ImGui::Button(ICON_MDI_SETTINGS, ImVec2{ lineHeight, lineHeight }))
 					ImGui::OpenPopup("ComponentSettings");
 
 				if(ImGui::BeginPopup("ComponentSettings"))
@@ -467,70 +468,24 @@ namespace ArcEngine
 		}
 
 		ImGui::SameLine();
-		ImGui::PushItemWidth(-1);
-
-		if (ImGui::Button(m_Locked ? "Unlock" : "Lock"))
-			m_Locked = !m_Locked;
-
-		ImGui::SameLine();
-		ImGui::PushItemWidth(-1);
-
-		if (ImGui::Button("Add Component"))
-			ImGui::OpenPopup("Add Component");
-
-		if (ImGui::BeginPopup("Add Component"))
 		{
-			if (ImGui::MenuItem("Camera"))
-			{
-				if (!entity.HasComponent<CameraComponent>())
-					entity.AddComponent<CameraComponent>();
-				else
-					ARC_CORE_WARN("This entity already has the Camera Component!");
-				ImGui::CloseCurrentPopup();
-			}
-			
-			if (ImGui::MenuItem("Sprite Renderer"))
-			{
-				if (!entity.HasComponent<SpriteRendererComponent>())
-					entity.AddComponent<SpriteRendererComponent>();
-				else
-					ARC_CORE_WARN("This entity already has the Sprite Renderer Component!");
-				ImGui::CloseCurrentPopup();
-			}
+			float frameHeight = ImGui::GetFrameHeight();
+			ImVec2 region = ImGui::GetContentRegionMax();
+			ImVec2 lockButtonSize = ImVec2(frameHeight * 1.5f, frameHeight);
+			ImGui::SetCursorPosX(region.x - lockButtonSize.x);
 
-			if (ImGui::MenuItem("Mesh"))
-			{
-				if (!entity.HasComponent<MeshComponent>())
-					entity.AddComponent<MeshComponent>();
-				else
-					ARC_CORE_WARN("This entity already has the Mesh Component!");
-				ImGui::CloseCurrentPopup();
-			}
+			bool highlight = m_Locked;
+			if (highlight)
+				ImGui::PushStyleColor(ImGuiCol_Button, EditorTheme::HeaderSelectedColor);
 
-			if (ImGui::MenuItem("Sky Light"))
-			{
-				if (!entity.HasComponent<SkyLightComponent>())
-					entity.AddComponent<SkyLightComponent>();
-				else
-					ARC_CORE_WARN("This entity already has the Sky Light Component!");
-				ImGui::CloseCurrentPopup();
-			}
+			if (ImGui::Button(m_Locked ? ICON_MDI_LOCK : ICON_MDI_LOCK_OPEN_OUTLINE, lockButtonSize))
+				m_Locked = !m_Locked;
 
-			if (ImGui::MenuItem("Light"))
-			{
-				if (!entity.HasComponent<LightComponent>())
-					entity.AddComponent<LightComponent>();
-				else
-					ARC_CORE_WARN("This entity already has the Light Component!");
-				ImGui::CloseCurrentPopup();
-			}
-			
-			ImGui::EndPopup();
+			if (highlight)
+				ImGui::PopStyleColor();
 		}
 
-		ImGui::PopItemWidth();
-		
-		DrawComponent<TransformComponent>("Transform", entity, [](TransformComponent& component)
+		DrawComponent<TransformComponent>(ICON_MDI_VECTOR_LINE " Transform", entity, [](TransformComponent& component)
 		{
 			DrawVec3Control("Translation", component.Translation);
 			
@@ -541,7 +496,7 @@ namespace ArcEngine
 			DrawVec3Control("Scale", component.Scale, 1.0f);
 		}, false);
 
-		DrawComponent<CameraComponent>("Camera", entity, [](CameraComponent& component)
+		DrawComponent<CameraComponent>(ICON_MDI_CAMERA " Camera", entity, [](CameraComponent& component)
 		{
 			auto& camera = component.Camera;
 
@@ -600,7 +555,7 @@ namespace ArcEngine
 			}
 		});
 		
-		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](SpriteRendererComponent& component)
+		DrawComponent<SpriteRendererComponent>(ICON_MDI_IMAGE_SIZE_SELECT_ACTUAL " Sprite Renderer", entity, [](SpriteRendererComponent& component)
 		{
 			ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
 
@@ -611,7 +566,7 @@ namespace ArcEngine
 			DrawFloatControl("Tiling Factor", &component.TilingFactor, 200);
 		});
 
-		DrawComponent<MeshComponent>("Mesh", entity, [&](MeshComponent& component)
+		DrawComponent<MeshComponent>(ICON_MDI_VECTOR_POLYGON " Mesh", entity, [&](MeshComponent& component)
 		{
 			ImGui::Text("Mesh");
 			const ImVec2 buttonSize = { 60, 20 };
@@ -673,9 +628,9 @@ namespace ArcEngine
 			ImGui::Checkbox("##UseEmissiveMap", &component.UseEmissiveMap);
 			DrawTexture2DButton("EmissiveMap", component.EmissiveMap);
 			
-		}, false);
+		});
 
-		DrawComponent<SkyLightComponent>("Sky Light", entity, [](SkyLightComponent& component)
+		DrawComponent<SkyLightComponent>(ICON_MDI_EARTH " Sky Light", entity, [](SkyLightComponent& component)
 		{
 			DrawFloatControl("Intensity", &component.Intensity);
 			
@@ -689,7 +644,7 @@ namespace ArcEngine
 			ImGui::Spacing();
 		});
 
-		DrawComponent<LightComponent>("Light", entity, [](LightComponent& component)
+		DrawComponent<LightComponent>(ICON_MDI_LIGHTBULB " Light", entity, [](LightComponent& component)
 		{
 			UI::PushID();
 
@@ -786,5 +741,71 @@ namespace ArcEngine
 
 			UI::PopID();
 		});
+
+		ImGui::Separator();
+
+		/////////////////////////////////////////////////////////////
+		//ADD COMPONENT//////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////
+		ImVec2 addComponentButtonSize = ImVec2(150.0f, 30.0f);
+		{
+			ImVec2 pos = ImGui::GetCursorPos();
+			ImVec2 available = ImGui::GetContentRegionAvail();
+			pos = ImVec2(available.x * 0.5f - addComponentButtonSize.x * 0.5f, pos.y + ImGui::GetFrameHeight());
+			ImGui::SetCursorPos(pos);
+		}
+
+		if (ImGui::Button("Add Component", addComponentButtonSize))
+			ImGui::OpenPopup("Add Component");
+
+		if (ImGui::BeginPopup("Add Component"))
+		{
+			if (ImGui::MenuItem("Camera"))
+			{
+				if (!entity.HasComponent<CameraComponent>())
+					entity.AddComponent<CameraComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Camera Component!");
+				ImGui::CloseCurrentPopup();
+			}
+			
+			if (ImGui::MenuItem("Sprite Renderer"))
+			{
+				if (!entity.HasComponent<SpriteRendererComponent>())
+					entity.AddComponent<SpriteRendererComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Sprite Renderer Component!");
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Mesh"))
+			{
+				if (!entity.HasComponent<MeshComponent>())
+					entity.AddComponent<MeshComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Mesh Component!");
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Sky Light"))
+			{
+				if (!entity.HasComponent<SkyLightComponent>())
+					entity.AddComponent<SkyLightComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Sky Light Component!");
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Light"))
+			{
+				if (!entity.HasComponent<LightComponent>())
+					entity.AddComponent<LightComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Light Component!");
+				ImGui::CloseCurrentPopup();
+			}
+			
+			ImGui::EndPopup();
+		}
 	}
 }

@@ -114,7 +114,7 @@ namespace ArcEngine
 
 			HeaderSelectedColor = Darken(colors[ImGuiCol_HeaderHovered], 0.1);
 			WindowBgColor = colors[ImGuiCol_WindowBg];
-			WindowBgAlternativeColor = Lighten(WindowBgColor, 0.05f);
+			WindowBgAlternativeColor = Lighten(WindowBgColor, 0.04f);
 		}
 
 		static void SetStyle()
@@ -123,14 +123,14 @@ namespace ArcEngine
 
 			style->WindowPadding = ImVec2(4.0f, 3.0f);
 			style->FramePadding = ImVec2(4.0f, 4.0f);
-			style->ItemSpacing = ImVec2(4.0f, 3.0f);
+			style->ItemSpacing = ImVec2(6.0f, 3.0f);
 			style->IndentSpacing = 12;
 			style->ScrollbarSize = 12;
 			style->GrabMinSize = 9;
 
 			style->WindowBorderSize = 1.0f;
 			style->ChildBorderSize = 1.0f;
-			style->PopupBorderSize = 1.0f;
+			style->PopupBorderSize = 3.0f;
 			style->FrameBorderSize = 1.0f;
 			style->TabBorderSize = 1.0f;
 			style->WindowRounding = 6.0f;

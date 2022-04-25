@@ -4,6 +4,7 @@
 #include <imgui/imgui_internal.h>
 
 #include "../Utils/EditorTheme.h"
+#include "../Utils/IconsMaterialDesignIcons.h"
 
 namespace ArcEngine
 {
@@ -41,7 +42,7 @@ namespace ArcEngine
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
 		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
-		ImGui::Begin("Scene Hierarchy");
+		ImGui::Begin(ICON_MDI_VIEW_LIST " Hierarchy");
 
 		float x1 = ImGui::GetCurrentWindow()->WorkRect.Min.x;
 		float x2 = ImGui::GetCurrentWindow()->WorkRect.Max.x;
@@ -55,7 +56,11 @@ namespace ArcEngine
 		auto view = m_Context->m_Registry.view<IDComponent>();
 		for (auto it = view.rbegin(); it != view.rend(); it++)
 		{
-			Entity entity = { *it, m_Context.get() };
+			entt::entity e = *it;
+			if (!view.contains(e))
+				break;
+
+			Entity entity = { e, m_Context.get() };
 			if (!entity.GetParent())
 				DrawEntityNode(entity);
 		}
@@ -128,20 +133,19 @@ namespace ArcEngine
 		auto& transform = entity.GetTransform();
 		uint32_t childrenSize = transform.Children.size();
 
-		ImGuiTreeNodeFlags flags = (m_SelectionContext == entity ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+		ImGuiTreeNodeFlags flags = (m_SelectionContext == entity ? ImGuiTreeNodeFlags_Selected : 0);
+		flags |= ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 		flags |= childrenSize == 0 ? ImGuiTreeNodeFlags_Bullet : 0;
 
-		bool needPopColors = false;
-		if (m_SelectionContext == entity)
-		{
-			needPopColors = true;
+		bool highlight = m_SelectionContext == entity;
+		if (highlight)
 			ImGui::PushStyleColor(ImGuiCol_Header, EditorTheme::HeaderSelectedColor);
-		}
 
-		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity.GetUUID(), flags, tag.c_str());
+		std::string displayName = (ICON_MDI_CUBE_OUTLINE + std::string(" ") + tag);
+		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity.GetUUID(), flags, displayName.c_str());
 
-		if (needPopColors)
+		if (highlight)
 			ImGui::PopStyleColor();
 
 		if(ImGui::IsItemClicked())
@@ -177,15 +181,12 @@ namespace ArcEngine
 		if(opened && !skipChildren && !entityDeleted)
 		{
 			const ImColor TreeLineColor = ImGui::GetColorU32(ImGuiCol_Text);
-			const float indentSize = 1.0f;
-			const float SmallOffsetX = - (6.0f + indentSize);
 			ImDrawList* drawList = ImGui::GetWindowDrawList();
 
 			ImVec2 verticalLineStart = ImGui::GetCursorScreenPos();
-			verticalLineStart.x += SmallOffsetX; //to nicely line up with the arrow symbol
 			ImVec2 verticalLineEnd = verticalLineStart;
 
-			ImGui::Indent(indentSize);
+			ImGui::Indent();
 			for (size_t i = 0; i < childrenSize; i++)
 			{
 				UUID childId = entity.GetTransform().Children[i];
@@ -195,7 +196,7 @@ namespace ArcEngine
 			    drawList->AddLine(ImVec2(verticalLineStart.x, midpoint), ImVec2(verticalLineStart.x + HorizontalTreeLineSize, midpoint), TreeLineColor);
 				verticalLineEnd.y = midpoint;
 			}
-			ImGui::Unindent(indentSize);
+			ImGui::Unindent();
 
 			drawList->AddLine(verticalLineStart, verticalLineEnd, TreeLineColor);
 		}

@@ -9,7 +9,7 @@ namespace ArcEngine
 	void RendererSettingsPanel::OnImGuiRender()
 	{
 		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
-		ImGui::Begin("Renderer Settings", &m_Showing);
+		ImGui::Begin(m_Name.c_str(), &m_Showing);
 
 		UI::PushID();
 

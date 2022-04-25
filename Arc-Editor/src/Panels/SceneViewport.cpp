@@ -1,18 +1,18 @@
 #include "SceneViewport.h"
 
-#include "Arc/Renderer/Framebuffer.h"
-#include "Arc/Math/Math.h"
-
 #include <imgui/imgui.h>
 #include <ImGuizmo.h>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "Arc/Math/Math.h"
+#include "../Utils/IconsMaterialDesignIcons.h"
 
 namespace ArcEngine
 {
 	static int s_ID = 0;
 	
 	SceneViewport::SceneViewport()
-		: BasePanel("Viewport")
+		: BasePanel(" Viewport")
 	{
 		OnInit();
 	}
@@ -69,7 +69,7 @@ namespace ArcEngine
 		m_EditorCamera.SetViewportSize(1280, 720);
 
 		m_ID = "###" + std::to_string(s_ID);
-		m_ID = m_Name + m_ID + m_Name;
+		m_ID = ICON_MDI_POUND + m_Name + m_ID + m_Name;
 		s_ID++;
 	}
 
