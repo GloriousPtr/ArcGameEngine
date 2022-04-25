@@ -9,22 +9,26 @@
 
 namespace ArcEngine
 {
-	ConsolePanel::ConsolePanel()
-		: BasePanel(ICON_MDI_CONSOLE " Console")
+	ConsolePanel::ConsolePanel(const char* name)
+		: BasePanel(name, ICON_MDI_CONSOLE)
 	{
-        s_MessageBufferRenderFilter |= LogLevel::Trace;
-		s_MessageBufferRenderFilter |= LogLevel::Info;
-		s_MessageBufferRenderFilter |= LogLevel::Debug;
-		s_MessageBufferRenderFilter |= LogLevel::Warn;
-		s_MessageBufferRenderFilter |= LogLevel::Error;
-		s_MessageBufferRenderFilter |= LogLevel::Critical;
+		OPTICK_EVENT();
 
-		ExternalConsoleSink<std::mutex>::SetConsoleSink_HandleFlush([&](std::string message, LogLevel level){ AddMessage(message, level); });
+        s_MessageBufferRenderFilter |= Log::Level::Trace;
+		s_MessageBufferRenderFilter |= Log::Level::Info;
+		s_MessageBufferRenderFilter |= Log::Level::Debug;
+		s_MessageBufferRenderFilter |= Log::Level::Warn;
+		s_MessageBufferRenderFilter |= Log::Level::Error;
+		s_MessageBufferRenderFilter |= Log::Level::Critical;
+
+		ExternalConsoleSink<std::mutex>::SetConsoleSink_HandleFlush([&](std::string message, Log::Level level){ AddMessage(message, level); });
 		m_MessageBuffer = std::vector<Ref<ConsolePanel::Message>>(m_Capacity);
 	}
 
-	void ConsolePanel::AddMessage(std::string message, LogLevel level)
+	void ConsolePanel::AddMessage(std::string message, Log::Level level)
 	{
+		OPTICK_EVENT();
+
 		*(m_MessageBuffer.begin() + m_BufferBegin) = CreateRef<Message>(message, level);
 		if (++m_BufferBegin == m_Capacity)
 			m_BufferBegin = 0;
@@ -37,6 +41,8 @@ namespace ArcEngine
 
 	const ConsolePanel::Message* ConsolePanel::GetRecentMessage()
 	{
+		OPTICK_EVENT();
+
 		if (m_BufferBegin == 0)
 			return nullptr;
 		
@@ -45,6 +51,8 @@ namespace ArcEngine
 
 	void ConsolePanel::Clear()
 	{
+		OPTICK_EVENT();
+
 		for (auto message = m_MessageBuffer.begin(); message != m_MessageBuffer.end(); message++)
 			(*message) = nullptr;
 
@@ -53,8 +61,10 @@ namespace ArcEngine
 
 	void ConsolePanel::OnImGuiRender()
 	{
+		OPTICK_EVENT();
+
 		ImGui::SetNextWindowSize(ImVec2(640, 480), ImGuiCond_FirstUseEver);
-		ImGui::Begin(m_Name.c_str(), &m_Showing);
+		ImGui::Begin(m_ID.c_str(), &m_Showing);
 		{
 			ImGuiRenderHeader();
 			ImGui::Separator();
@@ -67,12 +77,14 @@ namespace ArcEngine
 
 	void ConsolePanel::SetFocus()
 	{
+		OPTICK_EVENT();
+
 		ImGui::SetWindowFocus(m_Name.c_str());
 	}
 
 	void ConsolePanel::ImGuiRenderHeader()
 	{
-		ImGuiStyle& style = ImGui::GetStyle();
+		OPTICK_EVENT();
 
 		if (ImGui::Button(ICON_MDI_COGS))
 			ImGui::OpenPopup("SettingsPopup");
@@ -88,7 +100,7 @@ namespace ArcEngine
 
 		float spacing = ImGui::GetStyle().ItemSpacing.x;
         ImGui::GetStyle().ItemSpacing.x = 2;
-        float levelButtonWidth = (ImGui::CalcTextSize(Message::GetLevelIcon(LogLevel(1))) + ImGui::GetStyle().FramePadding * 2.0f).x;
+        float levelButtonWidth = (ImGui::CalcTextSize(Message::GetLevelIcon(Log::Level(1))) + ImGui::GetStyle().FramePadding * 2.0f).x;
         float levelButtonWidths = (levelButtonWidth + ImGui::GetStyle().ItemSpacing.x) * 7;
 
 		{
@@ -105,7 +117,7 @@ namespace ArcEngine
 		{
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 			ImGui::SameLine();
-			auto level = LogLevel(glm::pow(2, i));
+			auto level = Log::Level(glm::pow(2, i));
 
 			bool levelEnabled = s_MessageBufferRenderFilter & level;
 			glm::vec4 c = Message::GetRenderColor(level);
@@ -147,6 +159,8 @@ namespace ArcEngine
 
 	void ConsolePanel::ImGuiRenderSettings()
 	{
+		OPTICK_EVENT();
+
 		const float maxWidth = ImGui::CalcTextSize("Scroll to bottom").x * 1.1f;
 		const float spacing = ImGui::GetStyle().ItemInnerSpacing.x + ImGui::CalcTextSize(" ").x;
 
@@ -167,6 +181,8 @@ namespace ArcEngine
 
 	void ConsolePanel::ImGuiRenderMessages()
 	{
+		OPTICK_EVENT();
+
 		ImGui::BeginChild("ScrollRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
 		{
 			ImGui::SetWindowFontScale(m_DisplayScale);
@@ -224,13 +240,17 @@ namespace ArcEngine
 		ImGui::EndChild();
 	}
 
-	ConsolePanel::Message::Message(const std::string message, LogLevel level)
+	ConsolePanel::Message::Message(const std::string message, Log::Level level)
 		: Buffer(message), Level(level)
 	{
+		OPTICK_EVENT();
+
 	}
 
 	void ConsolePanel::Message::OnImGuiRender()
 	{
+		OPTICK_EVENT();
+
 		glm::vec4 c = GetRenderColor(Level);
 		ImGui::PushStyleColor(ImGuiCol_Text, { c.r, c.g, c.b, c.a });
 		auto levelIcon = GetLevelIcon(Level);
@@ -253,44 +273,44 @@ namespace ArcEngine
 		}
 	}
 
-	const char* ConsolePanel::Message::GetLevelName(LogLevel level)
+	const char* ConsolePanel::Message::GetLevelName(Log::Level level)
 	{
 		switch (level)
 		{
-			case LogLevel::Trace:			return "Trace";
-			case LogLevel::Info:			return "Info";
-			case LogLevel::Debug:			return "Debug";
-			case LogLevel::Warn:			return "Warning";
-			case LogLevel::Error:			return "Error";
-			case LogLevel::Critical:		return "Critical";
+			case Log::Level::Trace:			return "Trace";
+			case Log::Level::Info:			return "Info";
+			case Log::Level::Debug:			return "Debug";
+			case Log::Level::Warn:			return "Warning";
+			case Log::Level::Error:			return "Error";
+			case Log::Level::Critical:		return "Critical";
 		}
 		return "Unknown name";
 	}
 
-	glm::vec4 ConsolePanel::Message::GetRenderColor(LogLevel level)
+	glm::vec4 ConsolePanel::Message::GetRenderColor(Log::Level level)
 	{
 		switch (level)
 		{
-			case LogLevel::Trace:			return { 0.75f, 0.75f, 0.75f, 1.00f }; // White-ish gray
-			case LogLevel::Info:			return { 0.20f, 0.80f, 0.20f, 1.00f }; // Green
-			case LogLevel::Debug:			return { 0.00f, 0.50f, 0.50f, 1.00f }; // Cyan
-			case LogLevel::Warn:			return { 0.80f, 0.80f, 0.20f, 1.00f }; // Yellow
-			case LogLevel::Error:			return { 0.90f, 0.25f, 0.25f, 1.00f }; // Red
-			case LogLevel::Critical:		return { 0.60f, 0.20f, 0.80f, 1.00f }; // Purple
+			case Log::Level::Trace:			return { 0.75f, 0.75f, 0.75f, 1.00f }; // White-ish gray
+			case Log::Level::Info:			return { 0.20f, 0.80f, 0.20f, 1.00f }; // Green
+			case Log::Level::Debug:			return { 0.00f, 0.50f, 0.50f, 1.00f }; // Cyan
+			case Log::Level::Warn:			return { 0.80f, 0.80f, 0.20f, 1.00f }; // Yellow
+			case Log::Level::Error:			return { 0.90f, 0.25f, 0.25f, 1.00f }; // Red
+			case Log::Level::Critical:		return { 0.60f, 0.20f, 0.80f, 1.00f }; // Purple
 		}
 		return { 1.00f, 1.00f, 1.00f, 1.00f };
 	}
 
-	const char* ConsolePanel::Message::GetLevelIcon(LogLevel level)
+	const char* ConsolePanel::Message::GetLevelIcon(Log::Level level)
     {
         switch(level)
         {
-        case LogLevel::Trace:				return ICON_MDI_MESSAGE_TEXT;
-        case LogLevel::Info:				return ICON_MDI_INFORMATION;
-        case LogLevel::Debug:				return ICON_MDI_BUG;
-        case LogLevel::Warn:				return ICON_MDI_ALERT;
-        case LogLevel::Error:				return ICON_MDI_CLOSE_OCTAGON;
-        case LogLevel::Critical:			return ICON_MDI_ALERT_OCTAGRAM;
+        case Log::Level::Trace:				return ICON_MDI_MESSAGE_TEXT;
+        case Log::Level::Info:				return ICON_MDI_INFORMATION;
+        case Log::Level::Debug:				return ICON_MDI_BUG;
+        case Log::Level::Warn:				return ICON_MDI_ALERT;
+        case Log::Level::Error:				return ICON_MDI_CLOSE_OCTAGON;
+        case Log::Level::Critical:			return ICON_MDI_ALERT_OCTAGRAM;
         default:
             return "Unknown name";
         }

@@ -86,7 +86,7 @@ namespace ArcEngine
 			colors[ImGuiCol_Header] = ImVec4(0.22f, 0.23f, 0.25f, 1.00f);
 			colors[ImGuiCol_HeaderHovered] = ImVec4(0.84f, 0.34f, 0.17f, 1.00f);
 			colors[ImGuiCol_HeaderActive] = ImVec4(0.59f, 0.24f, 0.12f, 1.00f);
-			colors[ImGuiCol_Separator] = ImVec4(0.17f, 0.18f, 0.20f, 1.00f);
+			colors[ImGuiCol_Separator] = ImVec4(0.2f, 0.21f, 0.23f, 1.00f);
 			colors[ImGuiCol_SeparatorHovered] = ImVec4(0.75f, 0.30f, 0.15f, 1.00f);
 			colors[ImGuiCol_SeparatorActive] = ImVec4(0.59f, 0.24f, 0.12f, 1.00f);
 			colors[ImGuiCol_ResizeGrip] = ImVec4(0.84f, 0.34f, 0.17f, 0.14f);
@@ -115,6 +115,7 @@ namespace ArcEngine
 			HeaderSelectedColor = Darken(colors[ImGuiCol_HeaderHovered], 0.1);
 			WindowBgColor = colors[ImGuiCol_WindowBg];
 			WindowBgAlternativeColor = Lighten(WindowBgColor, 0.04f);
+			AssetIconColor = Lighten(colors[ImGuiCol_HeaderHovered], 0.9f);
 		}
 
 		static void SetStyle()
@@ -149,5 +150,6 @@ namespace ArcEngine
 		static ImVec4 HeaderSelectedColor;
 		static ImVec4 WindowBgColor;
 		static ImVec4 WindowBgAlternativeColor;
+		static ImVec4 AssetIconColor;
 	};
 }

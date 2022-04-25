@@ -8,8 +8,10 @@ namespace ArcEngine
 {
 	void RendererSettingsPanel::OnImGuiRender()
 	{
+		OPTICK_EVENT();
+
 		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
-		ImGui::Begin(m_Name.c_str(), &m_Showing);
+		ImGui::Begin(m_ID.c_str(), &m_Showing);
 
 		UI::PushID();
 

@@ -10,9 +10,9 @@ namespace ArcEngine
 		struct Message
 		{
 			std::string Buffer;
-			LogLevel Level;
+			Log::Level Level;
 
-			Message(std::string& message, LogLevel level)
+			Message(std::string& message, Log::Level level)
 				: Buffer(message), Level(level)
 			{
 			}
@@ -26,7 +26,7 @@ namespace ArcEngine
 		ExternalConsoleSink& operator=(const ExternalConsoleSink&) = delete;
 		virtual ~ExternalConsoleSink() = default;
 
-		static void SetConsoleSink_HandleFlush(std::function<void(std::string, LogLevel)> func)
+		static void SetConsoleSink_HandleFlush(std::function<void(std::string, Log::Level)> func)
 		{
 			OnFlush = func;
 		}
@@ -59,25 +59,25 @@ namespace ArcEngine
 			m_MessagesBuffered = 0;
 		}
 	private:
-		static LogLevel GetMessageLevel(const spdlog::level::level_enum level)
+		static Log::Level GetMessageLevel(const spdlog::level::level_enum level)
 		{
 			switch (level)
 			{
-				case spdlog::level::level_enum::trace:			return LogLevel::Trace;
-				case spdlog::level::level_enum::debug:			return LogLevel::Debug;
-				case spdlog::level::level_enum::info:			return LogLevel::Info;
-				case spdlog::level::level_enum::warn:			return LogLevel::Warn;
-				case spdlog::level::level_enum::err:			return LogLevel::Error;
-				case spdlog::level::level_enum::critical:		return LogLevel::Critical;
+				case spdlog::level::level_enum::trace:			return Log::Level::Trace;
+				case spdlog::level::level_enum::debug:			return Log::Level::Debug;
+				case spdlog::level::level_enum::info:			return Log::Level::Info;
+				case spdlog::level::level_enum::warn:			return Log::Level::Warn;
+				case spdlog::level::level_enum::err:			return Log::Level::Error;
+				case spdlog::level::level_enum::critical:		return Log::Level::Critical;
 			}
-			return LogLevel::Trace;
+			return Log::Level::Trace;
 		}
 	private:
 		uint8_t m_MessagesBuffered = 0;
 		uint8_t m_MessageBufferCapacity;
 		std::vector<Ref<Message>> m_MessageBuffer;
 
-		static std::function<void(std::string, LogLevel)> OnFlush;
+		static std::function<void(std::string, Log::Level)> OnFlush;
 	};
 }
 

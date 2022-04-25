@@ -13,10 +13,10 @@
 
 namespace ArcEngine
 {
-	uint32_t PropertiesPanel::s_ID = 0;
-	
 	void PropertiesPanel::OnImGuiRender()
 	{
+		OPTICK_EVENT();
+
 		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
 		ImGui::Begin(m_ID.c_str(), &m_Showing);
 
@@ -29,6 +29,8 @@ namespace ArcEngine
 	template<typename T, typename UIFunction>
 	static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction, const bool removable = true)
 	{
+		OPTICK_EVENT();
+
 		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed
 			| ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_FramePadding;
 		
@@ -60,6 +62,8 @@ namespace ArcEngine
 			}
 			if(open)
 			{
+				OPTICK_EVENT("UI Function");
+
 				uiFunction(component);
 				ImGui::TreePop();
 			}
@@ -69,8 +73,10 @@ namespace ArcEngine
 		}
 	}
 	
-		static void DrawFloatControl(const std::string& label, float* value, float columnWidth = 100.0f)
+	static void DrawFloatControl(const std::string& label, float* value, float columnWidth = 100.0f)
 	{
+		OPTICK_EVENT();
+
 		ImGui::PushID(label.c_str());
 		
 		ImGui::Columns(2);
@@ -86,6 +92,8 @@ namespace ArcEngine
 
 	static void DrawTextureCubemapButton(const std::string& label, Ref<TextureCubemap>& texture, uint32_t overrideTextureID = 0)
 	{
+		OPTICK_EVENT();
+
 		ImGui::PushID(label.c_str());
 
 		uint32_t id = overrideTextureID;
@@ -126,6 +134,8 @@ namespace ArcEngine
 
 	static void DrawTexture2DButton(const std::string& label, Ref<Texture2D>& texture, uint32_t overrideTextureID = 0)
 	{
+		OPTICK_EVENT();
+
 		ImGui::PushID(label.c_str());
 
 		uint32_t id = overrideTextureID;
@@ -166,6 +176,8 @@ namespace ArcEngine
 
 	static void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
 	{
+		OPTICK_EVENT();
+
 		ImGuiIO& io = ImGui::GetIO();
 		auto boldFont = io.Fonts->Fonts[1];
 		
@@ -233,6 +245,8 @@ namespace ArcEngine
 	static std::vector<Ref<Texture2D>> s_TextureCache;
 	std::vector<Ref<Texture2D>> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const char* filepath)
     {
+		OPTICK_EVENT();
+
 		std::string path = std::string(filepath);
 		std::string dir = path.substr(0, path.find_last_of('\\'));
         std::vector<Ref<Texture2D>> textures;
@@ -264,6 +278,8 @@ namespace ArcEngine
 
 	static void ProcessMesh(aiMesh *mesh, const aiScene *scene, Entity e, const char* filepath)
 	{
+		OPTICK_EVENT();
+
 		std::vector<float> vertices;
 		size_t count = mesh->mNumVertices * 14;
 		vertices.reserve(count);
@@ -410,6 +426,8 @@ namespace ArcEngine
 
 	static void ProcessNode(aiNode *node, const aiScene *scene, Entity entity, const char* filepath)
 	{
+		OPTICK_EVENT();
+
 		for(unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
@@ -431,6 +449,8 @@ namespace ArcEngine
 	
 	static void LoadMesh(const char* filepath, Entity rootEntity)
 	{
+		OPTICK_EVENT();
+
 		Assimp::Importer importer;
 		importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 80.0f);
 		const uint32_t meshImportFlags =
@@ -456,6 +476,8 @@ namespace ArcEngine
 
 	void PropertiesPanel::DrawComponents(Entity entity)
 	{
+		OPTICK_EVENT();
+
 		if(entity.HasComponent<TagComponent>())
 		{
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
@@ -566,7 +588,7 @@ namespace ArcEngine
 			DrawFloatControl("Tiling Factor", &component.TilingFactor, 200);
 		});
 
-		DrawComponent<MeshComponent>(ICON_MDI_VECTOR_POLYGON " Mesh", entity, [&](MeshComponent& component)
+		DrawComponent<MeshComponent>(ICON_MDI_VECTOR_SQUARE " Mesh", entity, [&](MeshComponent& component)
 		{
 			ImGui::Text("Mesh");
 			const ImVec2 buttonSize = { 60, 20 };

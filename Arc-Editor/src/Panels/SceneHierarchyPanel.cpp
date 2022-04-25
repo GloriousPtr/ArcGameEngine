@@ -3,6 +3,7 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
+#include "../Utils/UI.h"
 #include "../Utils/EditorTheme.h"
 #include "../Utils/IconsMaterialDesignIcons.h"
 
@@ -10,37 +11,24 @@ namespace ArcEngine
 {
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
 	{
+		OPTICK_EVENT();
+
 		SetContext(context);
 	}
 
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
 	{
+		OPTICK_EVENT();
+
 		m_Context = context;
 		m_SelectionContext = {};
 		m_CurrentlyVisibleEntities = 0;
 	}
 
-	static void DrawRowsBackground(int row_count, float line_height, float x1, float x2, float y_offset, ImU32 col_even, ImU32 col_odd)
-	{
-		ImDrawList* draw_list = ImGui::GetWindowDrawList();
-		float y0 = ImGui::GetCursorScreenPos().y + (float)(int)y_offset;
-
-		int row_display_start;
-		int row_display_end;
-		ImGui::CalcListClipping(row_count, line_height, &row_display_start, &row_display_end);
-		for (int row_n = row_display_start; row_n < row_display_end; row_n++)
-		{
-			ImU32 col = (row_n & 1) ? col_odd : col_even;
-			if ((col & IM_COL32_A_MASK) == 0)
-				continue;
-			float y1 = y0 + (line_height * row_n);
-			float y2 = y1 + line_height;
-			draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), col);
-		}
-	}
-
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
+		OPTICK_EVENT();
+
 		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
 		ImGui::Begin(ICON_MDI_VIEW_LIST " Hierarchy");
 
@@ -49,8 +37,7 @@ namespace ArcEngine
 		float item_spacing_y = ImGui::GetStyle().ItemSpacing.y;
 		float item_offset_y = -item_spacing_y * 0.5f;
 		float line_height = ImGui::GetTextLineHeight() + item_spacing_y;
-		
-		DrawRowsBackground(m_CurrentlyVisibleEntities, line_height, x1, x2, item_offset_y, 0, ImGui::GetColorU32(EditorTheme::WindowBgAlternativeColor));
+		UI::DrawRowsBackground(m_CurrentlyVisibleEntities, line_height, x1, x2, item_offset_y, 0, ImGui::GetColorU32(EditorTheme::WindowBgAlternativeColor));
 		m_CurrentlyVisibleEntities = 0;
 		
 		auto view = m_Context->m_Registry.view<IDComponent>();
@@ -126,6 +113,8 @@ namespace ArcEngine
 
 	ImRect SceneHierarchyPanel::DrawEntityNode(Entity entity, bool skipChildren)
 	{
+		OPTICK_EVENT();
+
 		m_CurrentlyVisibleEntities++;
 
 		auto& tagComponent = entity.GetComponent<TagComponent>();
@@ -136,7 +125,11 @@ namespace ArcEngine
 		ImGuiTreeNodeFlags flags = (m_SelectionContext == entity ? ImGuiTreeNodeFlags_Selected : 0);
 		flags |= ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-		flags |= childrenSize == 0 ? ImGuiTreeNodeFlags_Bullet : 0;
+
+		if (childrenSize == 0)
+		{
+			flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+		}
 
 		bool highlight = m_SelectionContext == entity;
 		if (highlight)
@@ -148,7 +141,7 @@ namespace ArcEngine
 		if (highlight)
 			ImGui::PopStyleColor();
 
-		if(ImGui::IsItemClicked())
+		if(ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
 			m_SelectionContext = entity;
 
 		bool entityDeleted = false;
@@ -180,28 +173,27 @@ namespace ArcEngine
 		const ImRect nodeRect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
 		if(opened && !skipChildren && !entityDeleted)
 		{
-			const ImColor TreeLineColor = ImGui::GetColorU32(ImGuiCol_Text);
+			const ImColor TreeLineColor = ImColor(128, 128, 128, 128);
 			ImDrawList* drawList = ImGui::GetWindowDrawList();
 
 			ImVec2 verticalLineStart = ImGui::GetCursorScreenPos();
 			ImVec2 verticalLineEnd = verticalLineStart;
 
-			ImGui::Indent();
 			for (size_t i = 0; i < childrenSize; i++)
 			{
 				UUID childId = entity.GetTransform().Children[i];
-				const float HorizontalTreeLineSize = 8.0f; //chosen arbitrarily
-	            const ImRect childRect = DrawEntityNode(m_Context->GetEntity(childId), createChild);
+				Entity child = m_Context->GetEntity(childId);
+				const float HorizontalTreeLineSize = child.GetTransform().Children.size() == 0 ? 18.0f : 10.0f; //chosen arbitrarily
+	            const ImRect childRect = DrawEntityNode(child, createChild);
 				const float midpoint = (childRect.Min.y + childRect.Max.y) / 2.0f;
-			    drawList->AddLine(ImVec2(verticalLineStart.x, midpoint), ImVec2(verticalLineStart.x + HorizontalTreeLineSize, midpoint), TreeLineColor);
+			    drawList->AddLine(ImVec2(verticalLineStart.x, midpoint), ImVec2(verticalLineStart.x + HorizontalTreeLineSize, midpoint), TreeLineColor, 0.25f);
 				verticalLineEnd.y = midpoint;
 			}
-			ImGui::Unindent();
 
 			drawList->AddLine(verticalLineStart, verticalLineEnd, TreeLineColor);
 		}
 
-		if (opened)
+		if (opened && childrenSize > 0)
 			ImGui::TreePop();
 
 		if (createChild)

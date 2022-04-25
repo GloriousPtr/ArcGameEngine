@@ -10,8 +10,8 @@ namespace ArcEngine
 	class StatsPanel : public BasePanel
 	{
 	public:
-		StatsPanel()
-			: BasePanel(ICON_MDI_INFORMATION_VARIANT " Stats")
+		StatsPanel(const char* name = "Stats")
+			: BasePanel(name, ICON_MDI_INFORMATION_VARIANT)
 		{}
 
 		virtual void OnImGuiRender() override;

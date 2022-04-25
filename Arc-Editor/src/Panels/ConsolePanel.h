@@ -13,21 +13,21 @@ namespace ArcEngine
 		struct Message
 		{
 			std::string Buffer;
-			LogLevel Level;
+			Log::Level Level;
 
-			Message(const std::string message = "", LogLevel level = LogLevel::Trace);
+			Message(const std::string message = "", Log::Level level = Log::Level::Trace);
 			void OnImGuiRender();
 
-			static const char* GetLevelName(LogLevel level);
-			static glm::vec4 GetRenderColor(LogLevel level);
-			static const char* GetLevelIcon(LogLevel level);
+			static const char* GetLevelName(Log::Level level);
+			static glm::vec4 GetRenderColor(Log::Level level);
+			static const char* GetLevelIcon(Log::Level level);
 		};
 
 	public:
-		ConsolePanel();
+		ConsolePanel(const char* name = "Console");
 		virtual ~ConsolePanel() override = default;
 
-		void AddMessage(std::string message, LogLevel level);
+		void AddMessage(std::string message, Log::Level level);
 		const Message* GetRecentMessage();
 		void Clear();
 		void SetFocus();
@@ -44,7 +44,7 @@ namespace ArcEngine
 		uint16_t m_Capacity = 200;
 		uint16_t m_BufferSize = 0;
 		uint16_t m_BufferBegin = 0;
-		uint32_t s_MessageBufferRenderFilter = LogLevel::Trace;
+		uint32_t s_MessageBufferRenderFilter = Log::Level::Trace;
 		bool m_AllowScrollingToBottom = true;
 		bool m_RequestScrollToBottom = false;
 		std::vector<Ref<Message>> m_MessageBuffer;

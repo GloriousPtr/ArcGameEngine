@@ -21,6 +21,8 @@ namespace ArcEngine
 		static bool Property(const char* label, glm::vec2& value, float delta = 0.1f);
 		static bool Property(const char* label, bool& flag);
 		static void EndPropertyGrid();
+
+		static void DrawRowsBackground(int row_count, float line_height, float x1, float x2, float y_offset, uint32_t col_even, uint32_t col_odd);
 	};
 }
 

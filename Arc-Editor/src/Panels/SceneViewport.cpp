@@ -11,20 +11,16 @@ namespace ArcEngine
 {
 	static int s_ID = 0;
 	
-	SceneViewport::SceneViewport()
-		: BasePanel(" Viewport")
-	{
-		OnInit();
-	}
-
 	SceneViewport::SceneViewport(const char* name)
-		: BasePanel(name)
+		: BasePanel(name, ICON_MDI_POUND)
 	{
 		OnInit();
 	}
 
 	void SceneViewport::OnInit()
 	{
+		OPTICK_EVENT();
+
 		m_RenderGraphData = CreateRef<RenderGraphData>();
 
 		uint32_t width = 1280;
@@ -67,10 +63,6 @@ namespace ArcEngine
 		}
 
 		m_EditorCamera.SetViewportSize(1280, 720);
-
-		m_ID = "###" + std::to_string(s_ID);
-		m_ID = ICON_MDI_POUND + m_Name + m_ID + m_Name;
-		s_ID++;
 	}
 
 	void SceneViewport::OnUpdate(Ref<Scene>& scene, Timestep timestep)

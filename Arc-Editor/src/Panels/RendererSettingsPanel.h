@@ -9,8 +9,8 @@ namespace ArcEngine
 	class RendererSettingsPanel : public BasePanel
 	{
 	public:
-		RendererSettingsPanel()
-			: BasePanel(ICON_MDI_GPU " Render Settings")
+		RendererSettingsPanel(const char* name = "Render Settings")
+			: BasePanel(name, ICON_MDI_GPU)
 		{}
 
 		virtual ~RendererSettingsPanel() override = default;

@@ -9,8 +9,7 @@ namespace ArcEngine
 	class SceneViewport : public BasePanel
 	{
 	public:
-		SceneViewport();
-		SceneViewport(const char* name);
+		SceneViewport(const char* name = "Viewport");
 		virtual ~SceneViewport() override = default;
 
 		virtual void OnUpdate(Ref<Scene>& scene, Timestep timestep);
@@ -25,7 +24,6 @@ namespace ArcEngine
 		void OnInit();
 
 	private:
-		std::string m_ID;
 		Ref<RenderGraphData> m_RenderGraphData;
 		EditorCamera m_EditorCamera;
 

@@ -22,6 +22,8 @@ namespace ArcEngine
 
 	void EditorLayer::OnAttach()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 
 		EditorTheme::SetFont();
@@ -37,6 +39,7 @@ namespace ArcEngine
 		m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
 		
 		m_Properties.push_back(CreateScope<PropertiesPanel>());
+		m_AssetPanels.push_back(CreateScope<AssetPanel>());
 
 		m_Panels.push_back(CreateScope<RendererSettingsPanel>());
 		m_Panels.push_back(CreateScope<StatsPanel>());
@@ -44,13 +47,15 @@ namespace ArcEngine
 
 	void EditorLayer::OnDetach()
 	{
+		OPTICK_EVENT();
+
 		ARC_PROFILE_FUNCTION();
 		
 	}
 
 	void EditorLayer::OnUpdate(Timestep ts)
 	{
-		OPTICK_EVENT("EditorUpdate");
+		OPTICK_EVENT();
 
 		ARC_PROFILE_FUNCTION();
 
@@ -92,7 +97,7 @@ namespace ArcEngine
 
 	void EditorLayer::OnImGuiRender()
 	{
-		OPTICK_EVENT("EditorRender");
+		OPTICK_EVENT();
 
 		ARC_PROFILE_FUNCTION();
 
@@ -206,17 +211,23 @@ namespace ArcEngine
 								m_Viewports.push_back(CreateScope<SceneViewport>());
 								m_Viewports[index]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
 							}
-
 							if (ImGui::MenuItem("Properties"))
 							{
 								m_Properties.push_back(CreateScope<PropertiesPanel>());
 							}
-
+							if (ImGui::MenuItem("Assets"))
+							{
+								m_AssetPanels.push_back(CreateScope<AssetPanel>());
+							}
 							ImGui::EndMenu();
 						}
 						ImGui::MenuItem("Hierarchy", nullptr, &m_ShowSceneHierarchyPanel);
-						ImGui::MenuItem("Console", nullptr, &m_ShowConsole);
 
+						{
+							bool showing = m_ConsolePanel.IsShowing();
+							if (ImGui::MenuItem(m_ConsolePanel.GetName(), nullptr, &showing))
+								m_ConsolePanel.SetShowing(showing);
+						}
 						for (size_t i = 0; i < m_Panels.size(); i++)
 						{
 							BasePanel* panel = m_Panels[i].get();
@@ -316,6 +327,15 @@ namespace ArcEngine
 		}
 
 		//////////////////////////////////////////////////////////////////////////
+		// ASSETS PANELS /////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////
+		for (size_t i = 0; i < m_AssetPanels.size(); i++)
+		{
+			if (m_AssetPanels[i]->IsShowing())
+				m_AssetPanels[i]->OnImGuiRender();
+		}
+
+		//////////////////////////////////////////////////////////////////////////
 		// OTHER PANELS //////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////
 		for (size_t i = 0; i < m_Panels.size(); i++)
@@ -324,7 +344,7 @@ namespace ArcEngine
 				m_Panels[i]->OnImGuiRender();
 		}
 
-		if (m_ShowConsole)
+		if (m_ConsolePanel.IsShowing())
 			m_ConsolePanel.OnImGuiRender();
 
 		if (m_ShowDemoWindow)
@@ -337,6 +357,8 @@ namespace ArcEngine
 
 	void EditorLayer::OnEvent(Event& e)
 	{
+		OPTICK_EVENT();
+
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(ARC_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
 		dispatcher.Dispatch<MouseButtonPressedEvent>(ARC_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
@@ -344,6 +366,8 @@ namespace ArcEngine
 
 	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
 	{
+		OPTICK_EVENT();
+
 		// Shortcuts
 		if (e.GetRepeatCount() > 0)
 			return false;
