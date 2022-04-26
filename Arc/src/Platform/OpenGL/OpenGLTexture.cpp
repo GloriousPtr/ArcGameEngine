@@ -31,7 +31,7 @@ namespace ArcEngine
 		OPTICK_EVENT();
 
 		ARC_PROFILE_FUNCTION();
-		
+		stbi_set_flip_vertically_on_load(1);
 		int width, height, channels;
 		stbi_uc* data = nullptr;
 		{

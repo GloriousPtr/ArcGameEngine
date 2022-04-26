@@ -82,42 +82,56 @@ namespace ArcEngine
 			scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
-		m_EditorCamera.OnUpdate(timestep);
-
 		if (m_ViewportHovered)
 		{
 			m_MousePosition = *((glm::vec2*) &(ImGui::GetMousePos()));
+			const glm::vec3& position = m_EditorCamera.GetPosition();
+			float yaw = m_EditorCamera.GetYaw();
+			float pitch = m_EditorCamera.GetPitch();
+
+			bool moved = false;
 			if (ImGui::IsMouseDown(ImGuiMouseButton_Right))
 			{
-				glm::vec3 position = m_EditorCamera.GetPosition();
-				const glm::vec3 forward = m_EditorCamera.GetForward();
-				const glm::vec3 right = m_EditorCamera.GetRight();
-
-				float yaw = m_EditorCamera.GetYaw();
-				float pitch = m_EditorCamera.GetPitch();
-
 				const glm::vec2 change = (m_MousePosition - m_LastMousePosition) * m_MouseSensitivity;
-
 				yaw += change.x;
 				pitch = glm::clamp(pitch - change.y, -89.9f, 89.9f);
 
-				float movementSpeed = m_MovementSpeed * (ImGui::IsKeyDown(Key::LeftShift) ? 3.0f : 1.0f);
-
 				if (ImGui::IsKeyDown(Key::W))
-					position += forward * movementSpeed * timestep.GetSeconds();
+				{
+					moved = true;
+					m_MoveDirection = m_EditorCamera.GetForward() * timestep.GetSeconds();
+				}
 				else if (ImGui::IsKeyDown(Key::S))
-					position -= forward * movementSpeed * timestep.GetSeconds();
+				{
+					moved = true;
+					m_MoveDirection = -m_EditorCamera.GetForward() * timestep.GetSeconds();
+				}
 				if (ImGui::IsKeyDown(Key::D))
-					position += right * movementSpeed * timestep.GetSeconds();
+				{
+					moved = true;
+					m_MoveDirection = m_EditorCamera.GetRight() * timestep.GetSeconds();
+				}
 				else if (ImGui::IsKeyDown(Key::A))
-					position -= right * movementSpeed * timestep.GetSeconds();
-
-				m_EditorCamera.SetYaw(yaw);
-				m_EditorCamera.SetPitch(pitch);
-				m_EditorCamera.SetPosition(position);
+				{
+					moved = true;
+					m_MoveDirection = -m_EditorCamera.GetRight() * timestep.GetSeconds();
+				}
 			}
+
+			m_MoveVelocity += (moved ? 1.0f : -1.0f) * timestep;
+			m_MoveVelocity *= glm::pow(m_MoveDampeningFactor, timestep);
+			if (m_MoveVelocity > 0.0f)
+			{
+				float maxMoveSpeed = m_MaxMoveSpeed * (ImGui::IsKeyDown(Key::LeftShift) ? 3.0f : 1.0f);
+				m_EditorCamera.SetPosition(position + (m_MoveDirection * m_MoveVelocity * maxMoveSpeed));
+			}
+
+			m_EditorCamera.SetYaw(yaw);
+			m_EditorCamera.SetPitch(pitch);
 			m_LastMousePosition = m_MousePosition;
 		}
+		
+		m_EditorCamera.OnUpdate(timestep);
 
 		// Update scene
 		m_RenderGraphData->RenderPassTarget->Bind();
@@ -154,7 +168,6 @@ namespace ArcEngine
 				m_EditorCamera.SetPitch(0);
 			}
 		}
-
 
 		if (ImGui::IsMouseClicked(0) && m_ViewportHovered && !ImGuizmo::IsUsing() && !ImGuizmo::IsOver())
 		{
