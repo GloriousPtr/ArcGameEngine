@@ -456,6 +456,7 @@ namespace ArcEngine
 		const uint32_t meshImportFlags =
 			aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
+			aiProcess_PreTransformVertices |
 			aiProcess_SortByPType |
 			aiProcess_GenNormals |
 			aiProcess_GenUVCoords |
@@ -466,7 +467,7 @@ namespace ArcEngine
 	        aiProcess_ValidateDataStructure;
 
 		const aiScene *scene = importer.ReadFile(filepath, meshImportFlags);
- 
+
 		ARC_CORE_ASSERT(scene, importer.GetErrorString());
 
 		if (rootEntity.HasComponent<MeshComponent>())

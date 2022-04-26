@@ -13,12 +13,12 @@
 [submodule "Arc/vendor/ImGuizmo"]
 	path = Arc/vendor/ImGuizmo
 	url = https://github.com/TheCherno/ImGuizmo.git
-[submodule "Arc/vendor/assimp"]
-	path = Arc/vendor/assimp
-	url = https://github.com/MohitSethi99/assimp.git
 [submodule "Arc/vendor/optick"]
 	path = Arc/vendor/optick
 	url = https://github.com/MohitSethi99/optick.git
 [submodule "Arc/vendor/imgui"]
 	path = Arc/vendor/imgui
 	url = https://github.com/MohitSethi99/imgui.git
+[submodule "Arc/vendor/assimp"]
+	path = Arc/vendor/assimp
+	url = https://github.com/MohitSethi99/assimp.git

@@ -33,7 +33,6 @@ namespace ArcEngine
 		ARC_PROFILE_FUNCTION();
 		
 		int width, height, channels;
-		stbi_set_flip_vertically_on_load(1);
 		stbi_uc* data = nullptr;
 		{
 			OPTICK_EVENT("stbi_load Texture");
