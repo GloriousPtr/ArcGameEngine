@@ -115,14 +115,9 @@ namespace ArcEngine
 		CullModeType CullMode = CullModeType::Back;
 
 		glm::vec4 AlbedoColor = glm::vec4(1.0f);
-		float Metallic = 0.0f;
-		float Roughness = 1.0f;
+		glm::vec4 MR = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
 		glm::vec4 EmissiveParams = glm::vec4(0.0f);
-
-		bool UseAlbedoMap = false;
-		bool UseNormalMap = false;
-		bool UseMRAMap = false;
-		bool UseEmissiveMap = false;
+		glm::vec4 UseMaps = glm::vec4(0.0f);
 
 		Ref<Texture2D> AlbedoMap = nullptr;
 		Ref<Texture2D> NormalMap = nullptr;

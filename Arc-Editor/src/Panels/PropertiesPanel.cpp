@@ -403,24 +403,24 @@ namespace ArcEngine
 		if (diffuseMaps.size() > 0)
 		{
 			meshComponent.AlbedoMap = diffuseMaps[0];
-			meshComponent.UseAlbedoMap = true;
+			meshComponent.UseMaps.x = 1.0f;
 		}
 
 		if (normalMaps.size() > 0)
 		{
 			meshComponent.NormalMap = normalMaps[0];
-			meshComponent.UseNormalMap = true;
+			meshComponent.UseMaps.y = 1.0f;
 		}
 		else if (heightMaps.size() > 0)
 		{
 			meshComponent.NormalMap = heightMaps[0];
-			meshComponent.UseNormalMap = true;
+			meshComponent.UseMaps.y = 1.0f;
 		}
 
 		if (emissiveMaps.size() > 0)
 		{
 			meshComponent.EmissiveMap = emissiveMaps[0];
-			meshComponent.UseEmissiveMap = true;
+			meshComponent.UseMaps.w = 1.0f;
 		}
 	}
 
@@ -637,20 +637,30 @@ namespace ArcEngine
 			}
 
 			ImGui::ColorEdit4("Albedo Color", glm::value_ptr(component.AlbedoColor));
-			ImGui::SliderFloat("Metallic", &component.Metallic, 0.0f, 1.0f);
-			ImGui::SliderFloat("Roughness", &component.Roughness, 0.0f, 1.0f);
+			ImGui::SliderFloat("Metallic", &component.MR.x, 0.0f, 1.0f);
+			ImGui::SliderFloat("Roughness", &component.MR.y, 0.0f, 1.0f);
 			ImGui::ColorEdit3("Emissive Color", glm::value_ptr(component.EmissiveParams));
 			ImGui::DragFloat("Emissive Intensity", &component.EmissiveParams.w);
 			
-			ImGui::Checkbox("##UseAlbedoMap", &component.UseAlbedoMap);
+			bool usingMap = component.UseMaps.x;
+			if (ImGui::Checkbox("##UseAlbedoMap", &usingMap))
+				component.UseMaps.x = usingMap ? 1.0f : 0.0f;
 			DrawTexture2DButton("AlbedoMap", component.AlbedoMap);
-			ImGui::Checkbox("##UseNormalMap", &component.UseNormalMap);
+
+			usingMap = component.UseMaps.y;
+			if (ImGui::Checkbox("##UseNormalMap", &usingMap))
+				component.UseMaps.y = usingMap ? 1.0f : 0.0f;
 			DrawTexture2DButton("NormalMap", component.NormalMap);
-			ImGui::Checkbox("##UseMetallicMap", &component.UseMRAMap);
-			DrawTexture2DButton("MetallicMap", component.MRAMap);
-			ImGui::Checkbox("##UseEmissiveMap", &component.UseEmissiveMap);
-			DrawTexture2DButton("EmissiveMap", component.EmissiveMap);
 			
+			usingMap = component.UseMaps.z;
+			if (ImGui::Checkbox("##UseMetallicMap", &usingMap))
+				component.UseMaps.z = usingMap ? 1.0f : 0.0f;
+			DrawTexture2DButton("MetallicMap", component.MRAMap);
+			
+			usingMap = component.UseMaps.w;
+			if (ImGui::Checkbox("##UseEmissiveMap", &usingMap))
+				component.UseMaps.w = usingMap ? 1.0f : 0.0f;
+			DrawTexture2DButton("EmissiveMap", component.EmissiveMap);
 		});
 
 		DrawComponent<SkyLightComponent>(ICON_MDI_EARTH " Sky Light", entity, [](SkyLightComponent& component)

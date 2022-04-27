@@ -11,20 +11,17 @@ namespace ArcEngine
 {
 	struct MeshData
 	{
+		/*
+		* Properties[0] = AlbedoColor: r, g, b, a;
+		* Properties[1] = Metallic, Roughness, unused, unused
+		* Properties[2] = EmissiveParams: r, g, b, intensity
+		* Properties[4] = UseAlbedMap, UseNormalMap, UseMRAMap, UseEmissiveMap
+		*/
+		glm::mat4 Properties = glm::mat4(0.0f);
 		glm::mat4 Transform = glm::mat4(1.0f);
 		Ref<VertexArray> VertexArray = nullptr;
 		
 		MeshComponent::CullModeType CullMode;
-
-		glm::vec4 AlbedoColor = glm::vec4(1.0f);
-		float Metallic = 0.0f;
-		float Roughness = 1.0f;
-		glm::vec4 EmissiveParams = glm::vec4(0.0f);
-
-		bool UseAlbedoMap = false;
-		bool UseNormalMap = false;
-		bool UseMRAMap = false;
-		bool UseEmissiveMap = false;
 
 		Ref<Texture2D> AlbedoMap = nullptr;
 		Ref<Texture2D> NormalMap = nullptr;
@@ -249,25 +246,21 @@ namespace ArcEngine
 		ARC_PROFILE_FUNCTION();
 
 		MeshData mesh;
+
+		mesh.Properties = glm::mat4(
+			meshComponent.AlbedoColor,
+			meshComponent.MR,
+			meshComponent.EmissiveParams,
+			meshComponent.UseMaps);
+
 		mesh.VertexArray = meshComponent.VertexArray;
 		mesh.Transform = transform;
-
 		mesh.CullMode = meshComponent.CullMode;
-
-		mesh.AlbedoColor = meshComponent.AlbedoColor;
-		mesh.Metallic = meshComponent.Metallic;
-		mesh.Roughness = meshComponent.Roughness;
-		mesh.EmissiveParams = meshComponent.EmissiveParams;
-
-		mesh.UseAlbedoMap = meshComponent.UseAlbedoMap;
-		mesh.UseNormalMap = meshComponent.UseNormalMap;
-		mesh.UseMRAMap = meshComponent.UseMRAMap;
-		mesh.UseEmissiveMap = meshComponent.UseEmissiveMap;
 
 		mesh.AlbedoMap = meshComponent.AlbedoMap;
 		mesh.NormalMap = meshComponent.NormalMap;
 		mesh.MRAMap = meshComponent.MRAMap;
-		mesh.UseEmissiveMap = meshComponent.UseEmissiveMap;
+		mesh.EmissiveMap = meshComponent.EmissiveMap;
 		
 		meshes.push_back(mesh);
 	}
@@ -533,15 +526,7 @@ namespace ArcEngine
 			{
 				MeshData* meshData = &(*it);
 
-				shader->SetFloat4("u_Albedo", meshData->AlbedoColor);
-				shader->SetFloat("u_Metallic", meshData->Metallic);
-				shader->SetFloat("u_Roughness", meshData->Roughness);
-				shader->SetFloat4("u_EmissiveParams", meshData->EmissiveParams);
-
-				shader->SetInt("u_UseAlbedoMap", static_cast<int>(meshData->UseAlbedoMap));
-				shader->SetInt("u_UseNormalMap", static_cast<int>(meshData->UseNormalMap));
-				shader->SetInt("u_UseMRAMap", static_cast<int>(meshData->UseMRAMap));
-				shader->SetInt("u_UseEmissiveMap", static_cast<int>(meshData->UseEmissiveMap));
+				shader->SetMat4("u_Properties", meshData->Properties);
 
 				if (meshData->AlbedoMap)
 					meshData->AlbedoMap->Bind(4);

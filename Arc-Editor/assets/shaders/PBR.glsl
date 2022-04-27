@@ -94,15 +94,13 @@ layout (std140, binding = 1) uniform LightBuffer
 uniform float u_IrradianceIntensity;
 uniform float u_EnvironmentRotation;
 
-uniform vec4  u_Albedo;
-uniform float u_Metallic;
-uniform float u_Roughness;
-uniform vec4 u_EmissiveParams;
-
-uniform bool u_UseAlbedoMap;
-uniform bool u_UseNormalMap;
-uniform bool u_UseMRAMap;
-uniform bool u_UseEmissiveMap;
+/*
+* u_Properties[0] = AlbedoColor: r, g, b, a;
+* u_Properties[1] = Metallic, Roughness, unused, unused
+* u_Properties[2] = EmissiveParams: r, g, b, intensity
+* u_Properties[4] = UseAlbedMap, UseNormalMap, UseMRAMap, UseEmissiveMap
+*/
+uniform mat4 u_Properties;
 
 uniform samplerCube u_IrradianceMap;
 uniform samplerCube u_RadianceMap;
@@ -243,20 +241,30 @@ vec3 IBL(vec3 F0)
 // =========================================
 void main()
 {
-    vec4 albedoWithAlpha = u_UseAlbedoMap ? pow(texture(u_AlbedoMap, Input.TexCoord) * u_Albedo, vec4(2.2, 2.2, 2.2, 1.0)) : u_Albedo;
+	vec4  albedo = u_Properties[0];
+	float metalic = u_Properties[1].r;
+	float roughness = u_Properties[1].g;
+	vec4 emissiveParams = u_Properties[2];
+
+	bool useAlbedoMap = u_Properties[3].x <= 0.5f ? false : true;
+	bool useNormalMap = u_Properties[3].y <= 0.5f ? false : true;
+	bool useMRAMap = u_Properties[3].z <= 0.5f ? false : true;
+	bool useEmissiveMap = u_Properties[3].w <= 0.5f ? false : true;
+
+    vec4 albedoWithAlpha = useAlbedoMap ? pow(texture(u_AlbedoMap, Input.TexCoord) * albedo, vec4(2.2, 2.2, 2.2, 1.0)) : albedo;
 	if (albedoWithAlpha.a < 0.1)
 		discard;
 
     m_Params.Albedo	= albedoWithAlpha.rgb;
-    m_Params.Roughness = u_UseMRAMap ? texture(u_MRAMap, Input.TexCoord).g * u_Roughness : u_Roughness;
+    m_Params.Roughness = useMRAMap ? texture(u_MRAMap, Input.TexCoord).g * roughness : roughness;
 	m_Params.Roughness = max(m_Params.Roughness, 0.05); // Minimum roughness of 0.05 to keep specular highlight
-    m_Params.Metalness = u_UseMRAMap ? texture(u_MRAMap, Input.TexCoord).r * u_Metallic : u_Metallic;
+    m_Params.Metalness = useMRAMap ? texture(u_MRAMap, Input.TexCoord).r * metalic : metalic;
 
-    float ao = u_UseMRAMap ? texture(u_MRAMap, Input.TexCoord).b : 1.0;
+    float ao = useMRAMap ? texture(u_MRAMap, Input.TexCoord).b : 1.0;
 
-    vec3 emission = u_EmissiveParams.w * (u_UseEmissiveMap ? texture(u_EmissiveMap, Input.TexCoord).rgb : u_EmissiveParams.rgb);
+    vec3 emission = emissiveParams.w * (useEmissiveMap ? texture(u_EmissiveMap, Input.TexCoord).rgb : emissiveParams.rgb);
 
-    m_Params.Normal = u_UseNormalMap ? GetNormalFromMap() : normalize(Input.Normal);
+    m_Params.Normal = useNormalMap ? GetNormalFromMap() : normalize(Input.Normal);
 
     m_Params.View = normalize(Input.CameraPosition - Input.WorldPosition);
 	m_Params.NdotV = max(dot(m_Params.Normal, m_Params.View), 0.0);
