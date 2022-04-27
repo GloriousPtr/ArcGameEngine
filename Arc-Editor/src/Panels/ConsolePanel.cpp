@@ -79,7 +79,7 @@ namespace ArcEngine
 	{
 		OPTICK_EVENT();
 
-		ImGui::SetWindowFocus(m_Name.c_str());
+		ImGui::SetWindowFocus(m_ID.c_str());
 	}
 
 	void ConsolePanel::ImGuiRenderHeader()

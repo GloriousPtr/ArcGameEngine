@@ -79,7 +79,7 @@ namespace ArcEngine
 		ARC_PROFILE_FUNCTION();
 
 		if (m_EntityMap.find(uuid) != m_EntityMap.end())
-			return { m_EntityMap[uuid], this };
+			return { m_EntityMap.at(uuid), this };
 
 		return {};
 	}
@@ -119,13 +119,11 @@ namespace ArcEngine
 		Renderer3D::BeginScene(camera, skylight, lights);
 		// Meshes
 		{
-			OPTICK_EVENT("SubmitMeshData");
+			OPTICK_EVENT("Submit Mesh Data");
 
 			auto view = m_Registry.view<IDComponent, MeshComponent>();
 			for (auto entity : view)
 			{
-				OPTICK_EVENT("Looping Mesh");
-
 				auto [id, mesh] = view.get<IDComponent, MeshComponent>(entity);
 				if (mesh.VertexArray != nullptr)
 					Renderer3D::SubmitMesh(mesh, Entity(entity, this).GetWorldTransform());
@@ -135,11 +133,13 @@ namespace ArcEngine
 		
 		Renderer2D::BeginScene(camera);
 		{
+			OPTICK_EVENT("Submit 2D Data");
+
 			auto view = m_Registry.view<IDComponent, SpriteRendererComponent>();
 			for (auto entity : view)
 			{
 				auto [id, sprite] = view.get<IDComponent, SpriteRendererComponent>(entity);
-				Renderer2D::DrawQuad(GetEntity(id.ID).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+				Renderer2D::DrawQuad(Entity(entity, this).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
 			}
 		}
 		Renderer2D::EndScene(renderGraphData);

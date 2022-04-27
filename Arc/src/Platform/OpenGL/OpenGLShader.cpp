@@ -194,10 +194,10 @@ namespace ArcEngine
 		OPTICK_EVENT();
 
 		if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
-			return m_UniformLocationCache[name];
+			return m_UniformLocationCache.at(name);
 
 		int location = glGetUniformLocation(m_RendererID, name.c_str());
-		m_UniformLocationCache[name] = location;
+		m_UniformLocationCache.emplace(name, location);
 		return location;
 	}
 

@@ -187,7 +187,10 @@ namespace ArcEngine
 						{
 							OpenScene();
 						}
-
+						if (ImGui::MenuItem("Save...", "Ctrl+S"))
+						{
+							SaveScene();
+						}
 						if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
 						{
 							SaveSceneAs();
@@ -380,21 +383,20 @@ namespace ArcEngine
 			{
 				if (control)
 					NewScene();
-
 				break;
 			}
 			case Key::O:
 			{
 				if (control)
 					OpenScene();
-
 				break;
 			}
 			case Key::S:
 			{
 				if (control && shift)
 					SaveSceneAs();
-
+				else if (control)
+					SaveScene();
 				break;
 			}
 		}
@@ -413,6 +415,7 @@ namespace ArcEngine
 		m_ActiveScene = CreateRef<Scene>();
 		m_ActiveScene->MarkViewportDirty();
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_ScenePath = "";
 	}
 
 	void EditorLayer::OpenScene()
@@ -429,6 +432,20 @@ namespace ArcEngine
 
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Deserialize(filepath);
+			m_ScenePath = filepath;
+		}
+	}
+	
+	void EditorLayer::SaveScene()
+	{
+		if (!m_ScenePath.empty())
+		{
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Serialize(m_ScenePath.string());
+		}
+		else
+		{
+			SaveSceneAs();
 		}
 	}
 
@@ -439,7 +456,7 @@ namespace ArcEngine
 		{
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Serialize(filepath);
+			m_ScenePath = filepath;
 		}
 	}
-
 }

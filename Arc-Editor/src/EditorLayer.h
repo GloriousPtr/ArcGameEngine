@@ -29,12 +29,14 @@ namespace ArcEngine
 
 		void NewScene();
 		void OpenScene();
+		void SaveScene();
 		void SaveSceneAs();
 	private:
 
 		Application* m_Application;
 		Ref<Scene> m_ActiveScene;
-		
+		std::filesystem::path m_ScenePath = std::filesystem::path();
+
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		ConsolePanel m_ConsolePanel;
