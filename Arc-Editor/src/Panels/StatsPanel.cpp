@@ -67,10 +67,8 @@ namespace ArcEngine
 		ImGui::Text("Frame time (ms): %f", fps);
 
 		bool vSync = Application::Get().GetWindow().IsVSync();
-		UI::BeginPropertyGrid();
 		if (UI::Property("VSync Enabled", vSync))
 			Application::Get().GetWindow().SetVSync(vSync);
-		UI::EndPropertyGrid();
 		ImGui::End();
 	}
 }

@@ -68,6 +68,7 @@ namespace ArcEngine
 	{
 		bool modified = false;
 
+		BeginPropertyGrid();
 		ImGui::PushID(label);
 		ImGui::Text(label);
 		ImGui::NextColumn();
@@ -89,12 +90,14 @@ namespace ArcEngine
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
 		ImGui::PopID();
+		EndPropertyGrid();
 
 		return modified;
 	}
 
 	void UI::Property(const char* label, const char* value)
 	{
+		BeginPropertyGrid();
 		ImGui::PushID(label);
 		ImGui::Text(label);
 		ImGui::NextColumn();
@@ -109,12 +112,14 @@ namespace ArcEngine
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
 		ImGui::PopID();
+		EndPropertyGrid();
 	}
 
 	bool UI::Property(const char* label, int& value)
 	{
 		bool modified = false;
 
+		BeginPropertyGrid();
 		ImGui::PushID(label);
 		ImGui::Text(label);
 		ImGui::NextColumn();
@@ -130,6 +135,7 @@ namespace ArcEngine
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
 		ImGui::PopID();
+		EndPropertyGrid();
 
 		return modified;
 	}
@@ -138,6 +144,7 @@ namespace ArcEngine
 	{
 		bool modified = false;
 
+		BeginPropertyGrid();
 		ImGui::PushID(label);
 		ImGui::Text(label);
 		ImGui::NextColumn();
@@ -153,6 +160,7 @@ namespace ArcEngine
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
 		ImGui::PopID();
+		EndPropertyGrid();
 
 		return modified;
 	}
@@ -161,6 +169,7 @@ namespace ArcEngine
 	{
 		bool modified = false;
 
+		BeginPropertyGrid();
 		ImGui::PushID(label);
 		ImGui::Text(label);
 		ImGui::NextColumn();
@@ -176,6 +185,7 @@ namespace ArcEngine
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
 		ImGui::PopID();
+		EndPropertyGrid();
 
 		return modified;
 	}
@@ -184,6 +194,7 @@ namespace ArcEngine
 	{
 		bool modified = false;
 
+		BeginPropertyGrid();
 		ImGui::PushID(label);
 		ImGui::Text(label);
 		ImGui::NextColumn();
@@ -199,6 +210,32 @@ namespace ArcEngine
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
 		ImGui::PopID();
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, float& value, float delta, float min, float max, const char* fmt)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid();
+		ImGui::PushID(label);
+		ImGui::Text(label);
+		ImGui::NextColumn();
+		ImGui::PushItemWidth(-1);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::DragFloat(s_IDBuffer, &value, delta, min, max, fmt))
+			modified = true;
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		ImGui::PopID();
+		EndPropertyGrid();
 
 		return modified;
 	}
@@ -207,6 +244,7 @@ namespace ArcEngine
 	{
 		bool modified = false;
 
+		BeginPropertyGrid();
 		ImGui::PushID(label);
 		ImGui::Text(label);
 		ImGui::NextColumn();
@@ -222,6 +260,7 @@ namespace ArcEngine
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
 		ImGui::PopID();
+		EndPropertyGrid();
 
 		return modified;
 	}
@@ -230,6 +269,7 @@ namespace ArcEngine
 	{
 		bool modified = false;
 
+		BeginPropertyGrid();
 		ImGui::PushID(label);
 		ImGui::Text(label);
 		ImGui::NextColumn();
@@ -245,6 +285,49 @@ namespace ArcEngine
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
 		ImGui::PopID();
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, int& value, const char** dropdownStrings, size_t count)
+	{
+		bool modified = false;
+
+		const char* current = dropdownStrings[(int)value];
+		
+		UI::BeginPropertyGrid();
+		ImGui::PushID(label);
+		ImGui::Text(label);
+		ImGui::NextColumn();
+		ImGui::PushItemWidth(-1);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+
+		if(ImGui::BeginCombo(s_IDBuffer, current))
+		{
+			for (int i = 0; i < count; i++)
+			{
+				bool isSelected = current == dropdownStrings[i];
+				if(ImGui::Selectable(dropdownStrings[i], isSelected))
+				{
+					current = dropdownStrings[i];
+					value = i;
+					modified = true;
+				}
+
+				if(isSelected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		ImGui::PopID();
+		UI::EndPropertyGrid();
 
 		return modified;
 	}
@@ -253,6 +336,81 @@ namespace ArcEngine
 	{
 		ImGui::Columns(1);
 		PopID();
+	}
+
+	bool UI::PropertyColor3(const char* label, glm::vec3& color)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid();
+		ImGui::PushID(label);
+		ImGui::Text(label);
+		ImGui::NextColumn();
+		ImGui::PushItemWidth(-1);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::ColorEdit3(s_IDBuffer, glm::value_ptr(color)))
+			modified = true;
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		ImGui::PopID();
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::PropertyColor4(const char* label, glm::vec4& color)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid();
+		ImGui::PushID(label);
+		ImGui::Text(label);
+		ImGui::NextColumn();
+		ImGui::PushItemWidth(-1);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::ColorEdit4(s_IDBuffer, glm::value_ptr(color)))
+			modified = true;
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		ImGui::PopID();
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::PropertyColor4as3(const char* label, glm::vec4& color)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid();
+		ImGui::PushID(label);
+		ImGui::Text(label);
+		ImGui::NextColumn();
+		ImGui::PushItemWidth(-1);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::ColorEdit3(s_IDBuffer, glm::value_ptr(color)))
+			modified = true;
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		ImGui::PopID();
+		EndPropertyGrid();
+
+		return modified;
 	}
 
 	void UI::DrawRowsBackground(int row_count, float line_height, float x1, float x2, float y_offset, uint32_t col_even, uint32_t col_odd)

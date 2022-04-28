@@ -96,26 +96,30 @@ namespace ArcEngine
 				yaw += change.x;
 				pitch = glm::clamp(pitch - change.y, -89.9f, 89.9f);
 
+				glm::vec3 moveDirection = glm::vec3(0.0f);
 				if (ImGui::IsKeyDown(Key::W))
 				{
 					moved = true;
-					m_MoveDirection = m_EditorCamera.GetForward() * timestep.GetSeconds();
+					moveDirection += m_EditorCamera.GetForward() * timestep.GetSeconds();
 				}
 				else if (ImGui::IsKeyDown(Key::S))
 				{
 					moved = true;
-					m_MoveDirection = -m_EditorCamera.GetForward() * timestep.GetSeconds();
+					moveDirection -= m_EditorCamera.GetForward() * timestep.GetSeconds();
 				}
 				if (ImGui::IsKeyDown(Key::D))
 				{
 					moved = true;
-					m_MoveDirection = m_EditorCamera.GetRight() * timestep.GetSeconds();
+					moveDirection += m_EditorCamera.GetRight() * timestep.GetSeconds();
 				}
 				else if (ImGui::IsKeyDown(Key::A))
 				{
 					moved = true;
-					m_MoveDirection = -m_EditorCamera.GetRight() * timestep.GetSeconds();
+					moveDirection -= m_EditorCamera.GetRight() * timestep.GetSeconds();
 				}
+
+				if (glm::length2(moveDirection) > 0.0001f)
+					m_MoveDirection = glm::normalize(moveDirection);
 			}
 
 			m_MoveVelocity += (moved ? 1.0f : -1.0f) * timestep;
@@ -130,14 +134,20 @@ namespace ArcEngine
 			m_EditorCamera.SetPitch(pitch);
 			m_LastMousePosition = m_MousePosition;
 		}
-		
-		m_EditorCamera.OnUpdate(timestep);
+
+		if (!m_SimulationRunning)
+			m_EditorCamera.OnUpdate(timestep);
 
 		// Update scene
 		m_RenderGraphData->RenderPassTarget->Bind();
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		RenderCommand::Clear();
-		scene->OnUpdateEditor(timestep, m_EditorCamera, m_RenderGraphData);
+
+		if (m_SimulationRunning)
+			scene->OnUpdateRuntime(timestep, m_RenderGraphData);
+		else
+			scene->OnUpdateEditor(timestep, m_EditorCamera, m_RenderGraphData);
+
 		m_RenderGraphData->RenderPassTarget->Unbind();
 
 		if (!ImGuizmo::IsUsing() && !ImGui::IsMouseDown(ImGuiMouseButton_Right))

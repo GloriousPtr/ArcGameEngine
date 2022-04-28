@@ -45,6 +45,7 @@ namespace ArcEngine
 
 	static glm::mat4 cameraView;
 	static glm::mat4 cameraProjection;
+	static glm::vec3 cameraPosition;
 	static Entity skylight;
 	static std::vector<Entity> sceneLights;
 	glm::mat4 dirLightView;
@@ -192,12 +193,21 @@ namespace ArcEngine
 
 	}
 
-	void Renderer3D::BeginScene(const Camera& camera, const glm::mat4& transform)
+	void Renderer3D::BeginScene(const Camera& camera, const glm::mat4& transform, Entity cubemap, std::vector<Entity>& lights)
 	{
 		OPTICK_EVENT();
 
 		ARC_PROFILE_FUNCTION();
+		
+		cameraView = glm::inverse(transform);
+		cameraProjection = camera.GetProjection();
+		cameraPosition = transform[0];
 
+		skylight = cubemap;
+		sceneLights = lights;
+
+		SetupCameraData();
+		SetupLightsData();
 	}
 
 	void Renderer3D::BeginScene(const EditorCamera& camera, Entity cubemap, std::vector<Entity>& lights)
@@ -208,11 +218,12 @@ namespace ArcEngine
 		
 		cameraView = camera.GetViewMatrix();
 		cameraProjection = camera.GetProjection();
+		cameraPosition = camera.GetPosition();
 
 		skylight = cubemap;
 		sceneLights = lights;
 
-		SetupCameraData(camera);
+		SetupCameraData();
 		SetupLightsData();
 	}
 
@@ -288,7 +299,7 @@ namespace ArcEngine
 		return s_Stats;
 	}
 
-	void Renderer3D::SetupCameraData(const EditorCamera& camera)
+	void Renderer3D::SetupCameraData()
 	{
 		OPTICK_EVENT();
 
@@ -296,16 +307,16 @@ namespace ArcEngine
 
 		uint32_t offset = 0;
 
-		ubCamera->SetData((void*)glm::value_ptr(camera.GetViewMatrix()), offset, sizeof(glm::mat4));
+		ubCamera->SetData((void*)glm::value_ptr(cameraView), offset, sizeof(glm::mat4));
 		offset += sizeof(glm::mat4);
 
-		ubCamera->SetData((void*)glm::value_ptr(camera.GetProjection()), offset, sizeof(glm::mat4));
+		ubCamera->SetData((void*)glm::value_ptr(cameraProjection), offset, sizeof(glm::mat4));
 		offset += sizeof(glm::mat4);
 
-		ubCamera->SetData((void*)glm::value_ptr(camera.GetViewProjection()), offset, sizeof(glm::mat4));
+		ubCamera->SetData((void*)glm::value_ptr(cameraProjection * cameraView), offset, sizeof(glm::mat4));
 		offset += sizeof(glm::mat4);
 		
-		ubCamera->SetData((void*)glm::value_ptr(camera.GetPosition()), offset, sizeof(glm::vec4));
+		ubCamera->SetData((void*)glm::value_ptr(cameraPosition), offset, sizeof(glm::vec4));
 		offset += sizeof(glm::vec4);
 	}
 
@@ -519,7 +530,14 @@ namespace ArcEngine
 			OPTICK_EVENT("Draw Meshes");
 
 			for (size_t i = 0; i < sceneLights.size(); i++)
-				sceneLights[i].GetComponent<LightComponent>().ShadowMapFramebuffer->BindDepthAttachment(i + 3);
+			{
+				LightComponent& light = sceneLights[i].GetComponent<LightComponent>();
+				if (light.Type == LightComponent::LightType::Directional)
+				{
+					light.ShadowMapFramebuffer->BindDepthAttachment(3);
+					break;
+				}
+			}
 
 			MeshComponent::CullModeType currentCullMode = MeshComponent::CullModeType::Unknown;
 			for (auto it = meshes.rbegin(); it != meshes.rend(); it++)

@@ -150,7 +150,7 @@ namespace ArcEngine
 	{
 		enum class LightType { Directional = 0, Point, Spot };
 
-		LightType Type = LightType::Directional;
+		LightType Type = LightType::Point;
 		bool UseColorTempratureMode = true;
 		glm::vec3 Color = glm::vec3(1.0f);
 		float Intensity = 20.0f;
@@ -173,8 +173,16 @@ namespace ArcEngine
 				SetTemprature(m_Temprature);
 		}
 
-		LightComponent(const LightComponent&)
+		LightComponent(const LightComponent& other)
 		{
+			Type = other.Type;
+			UseColorTempratureMode = other.UseColorTempratureMode;
+			Color = other.Color;
+			Intensity = other.Intensity;
+			Range = other.Range;
+			CutOffAngle = other.CutOffAngle;
+			OuterCutOffAngle = other.OuterCutOffAngle;
+
 			FramebufferSpecification spec;
 			spec.Attachments = { FramebufferTextureFormat::Depth };
 			spec.Width = 4096;
@@ -207,5 +215,40 @@ namespace ArcEngine
 
 	private:
 		uint32_t m_Temprature = 6570;
+	};
+
+	struct Rigidbody2DComponent
+	{
+		enum class BodyType { Static = 0, Kinematic, Dynamic };
+
+		BodyType Type = BodyType::Dynamic;
+		float LinearDamping = 0.0f;
+		float AngularDamping = 0.05f;
+		bool AllowSleep = true;
+		bool Awake = true;
+		bool Continuous = false;
+		bool FreezeRotation = false;
+		float GravityScale = 1.0f;
+
+		void* RuntimeBody = nullptr;
+
+		Rigidbody2DComponent() = default;
+		Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
+	};
+
+	struct BoxCollider2DComponent
+	{
+		glm::vec2 Size = { 0.5f, 0.5f };
+		glm::vec2 Offset = { 0.0f, 0.0f };
+
+		float Density = 1.0f;
+		float Friction = 0.5f;
+		float Restitution = 0.0f;
+		float RestitutionThreshold = 0.5f;
+
+		void* RuntimeFixture = nullptr;
+
+		BoxCollider2DComponent() = default;
+		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
 	};
 }

@@ -21,7 +21,7 @@ namespace ArcEngine
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene(const Camera& camera, const glm::mat4& transform);
+		static void BeginScene(const Camera& camera,const glm::mat4& transform, Entity cubemap, std::vector<Entity>& lights);
 		static void BeginScene(const EditorCamera& camera, Entity cubemap, std::vector<Entity>& lights);
 		static void EndScene(Ref<RenderGraphData>& renderTarget);
 
@@ -41,7 +41,7 @@ namespace ArcEngine
 		static Statistics GetStats();
 
 	private:
-		static void SetupCameraData(const EditorCamera& camera);
+		static void SetupCameraData();
 		static void SetupLightsData();
 		static void Flush(Ref<RenderGraphData> renderGraphData);
 		static void CompositePass(Ref<RenderGraphData> renderGraphData);

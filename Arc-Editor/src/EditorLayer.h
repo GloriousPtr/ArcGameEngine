@@ -31,10 +31,18 @@ namespace ArcEngine
 		void OpenScene();
 		void SaveScene();
 		void SaveSceneAs();
+
+		void OnScenePlay();
+		void OnSceneStop();
+		void OnScenePause();
 	private:
 
 		Application* m_Application;
 		Ref<Scene> m_ActiveScene;
+		Ref<Scene> m_EditorScene;
+		Ref<Scene> m_RuntimeScene;
+		enum class SceneState { Edit, Play, Pause };
+		SceneState m_SceneState = SceneState::Edit;
 		std::filesystem::path m_ScenePath = std::filesystem::path();
 
 		// Panels

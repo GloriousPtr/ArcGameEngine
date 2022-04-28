@@ -19,6 +19,8 @@ namespace ArcEngine
 
 		bool IsHovered() { return m_ViewportHovered; }
 		bool IsFocused() { return m_ViewportFocused; }
+		
+		void SetSimulation(const bool value) { m_SimulationRunning = value; }
 
 	private:
 		void OnInit();
@@ -40,9 +42,11 @@ namespace ArcEngine
 		glm::vec2 m_LastMousePosition = glm::vec2(0.0f);
 		float m_MouseSensitivity = 0.1f;
 
-		float m_MaxMoveSpeed = 50.0f;
+		float m_MaxMoveSpeed = 1.0f;
 		float m_MoveDampeningFactor = 0.01f;
 		glm::vec3 m_MoveDirection = glm::vec3(0.0f);
 		float m_MoveVelocity = 0.0f;
+
+		bool m_SimulationRunning = false;
 	};
 }

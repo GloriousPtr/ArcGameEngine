@@ -4,6 +4,7 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
@@ -71,23 +72,6 @@ namespace ArcEngine
 			if(removeComponent)
 				entity.RemoveComponent<T>();
 		}
-	}
-	
-	static void DrawFloatControl(const std::string& label, float* value, float columnWidth = 100.0f)
-	{
-		OPTICK_EVENT();
-
-		ImGui::PushID(label.c_str());
-		
-		ImGui::Columns(2);
-		ImGui::SetColumnWidth(0, columnWidth);
-		ImGui::Text(label.c_str());
-		ImGui::NextColumn();
-
-		ImGui::DragFloat("##value", value, 0.1f);
-
-		ImGui::Columns(1);
-		ImGui::PopID();
 	}
 
 	static void DrawTextureCubemapButton(const std::string& label, Ref<TextureCubemap>& texture, uint32_t overrideTextureID = 0)
@@ -453,6 +437,46 @@ namespace ArcEngine
 
 		Assimp::Importer importer;
 		importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 80.0f);
+		uint32_t meshImportFlags = 0;
+		
+		std::string filePath = std::string(filepath);
+		auto lastDot = filePath.find_last_of(".");
+		std::string name = filePath.substr(lastDot + 1, filePath.size() - lastDot);
+		if (name != "assbin")
+		{
+			meshImportFlags |=
+				aiProcess_CalcTangentSpace |
+				aiProcess_Triangulate |
+				aiProcess_PreTransformVertices |
+				aiProcess_SortByPType |
+				aiProcess_GenNormals |
+				aiProcess_GenUVCoords |
+				aiProcess_OptimizeMeshes |
+				aiProcess_JoinIdenticalVertices |
+				aiProcess_GlobalScale |
+				aiProcess_ImproveCacheLocality |
+				aiProcess_ValidateDataStructure;
+		}
+
+		const aiScene *scene = importer.ReadFile(filepath, meshImportFlags);
+
+		if (!scene)
+		{
+			ARC_CORE_ERROR("Could not import the file: {0}. Error: {1}", filepath, importer.GetErrorString());
+			return;
+		}
+
+		if (rootEntity.HasComponent<MeshComponent>())
+			rootEntity.RemoveComponent<MeshComponent>();
+		ProcessNode(scene->mRootNode, scene, rootEntity, filepath);
+	}
+
+	static void WriteMesh(const std::string& filepath)
+	{
+		OPTICK_EVENT();
+
+		Assimp::Importer importer;
+		importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 80.0f);
 		const uint32_t meshImportFlags =
 			aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
@@ -467,12 +491,22 @@ namespace ArcEngine
 	        aiProcess_ValidateDataStructure;
 
 		const aiScene *scene = importer.ReadFile(filepath, meshImportFlags);
+		if (!scene)
+		{
+			ARC_CORE_ERROR("Could not import the file: {0}. Error: {1}", filepath, importer.GetErrorString());
+			return;
+		}
 
-		ARC_CORE_ASSERT(scene, importer.GetErrorString());
-
-		if (rootEntity.HasComponent<MeshComponent>())
-			rootEntity.RemoveComponent<MeshComponent>();
-		ProcessNode(scene->mRootNode, scene, rootEntity, filepath);
+		Assimp::Exporter exporter;
+		const aiExportFormatDesc* format = exporter.GetExportFormatDescription(0);
+		auto lastDot = filepath.find_last_of(".");
+		std::string path = filepath.substr(0, lastDot) + ".assbin";
+		aiReturn ret = exporter.Export(scene, format->id, path.c_str(), meshImportFlags);
+		if (ret != aiReturn_SUCCESS)
+		{
+			ARC_CORE_ERROR("Could not import the file: {0}. Error: {1}", filepath, exporter.GetErrorString());
+			return;
+		}
 	}
 
 	void PropertiesPanel::DrawComponents(Entity entity)
@@ -523,154 +557,120 @@ namespace ArcEngine
 		{
 			auto& camera = component.Camera;
 
-			ImGui::Checkbox("Primary", &component.Primary);
+			UI::Property("Primary", component.Primary);
 
 			const char* projectionTypeStrings[] = { "Perspective", "Orthographic" };
-			const char* currentProjectionTypeString = projectionTypeStrings[(int)camera.GetProjectionType()];
-			if(ImGui::BeginCombo("Projection", currentProjectionTypeString))
-			{
-				for (int i = 0; i < 2; i++)
-				{
-					bool isSelected = currentProjectionTypeString == projectionTypeStrings[i];
-					if(ImGui::Selectable(projectionTypeStrings[i], isSelected))
-					{
-						currentProjectionTypeString = projectionTypeStrings[i];
-						camera.SetProjectionType((SceneCamera::ProjectionType)i);
-					}
-
-					if(isSelected)
-						ImGui::SetItemDefaultFocus();
-				}
-				
-				ImGui::EndCombo();
-			}
+			int projectionType = (int) camera.GetProjectionType();
+			if (UI::Property("Projection", projectionType, projectionTypeStrings, 2))
+				camera.SetProjectionType((SceneCamera::ProjectionType) projectionType);
 
 			if(camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 			{
 				float verticalFov = glm::degrees(camera.GetPerspectiveVerticalFOV());
-				if(ImGui::DragFloat("Vertical FOV", &verticalFov, 0.1f))
+				if(UI::Property("Vertical FOV", verticalFov, 0.1f))
 					camera.SetPerspectiveVerticalFOV(glm::radians(verticalFov));
 
 				float perspectiveNear = camera.GetPerspectiveNearClip();
-				if(ImGui::DragFloat("Near Clip", &perspectiveNear, 0.1f))
+				if(UI::Property("Near Clip", perspectiveNear, 0.1f))
 					camera.SetPerspectiveNearClip(perspectiveNear);
 				
 				float perspectiveFar = camera.GetPerspectiveFarClip();
-				if(ImGui::DragFloat("Far Clip", &perspectiveFar, 0.1f))
+				if(UI::Property("Far Clip", perspectiveFar, 0.1f))
 					camera.SetPerspectiveFarClip(perspectiveFar);
 			}
 
 			if(camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
 			{
 				float orthoSize = camera.GetOrthographicSize();
-				if(ImGui::DragFloat("Size", &orthoSize, 0.1f))
+				if(UI::Property("Size", orthoSize, 0.1f))
 					camera.SetOrthographicSize(orthoSize);
 
 				float orthoNear = camera.GetOrthographicNearClip();
-				if(ImGui::DragFloat("Near Clip", &orthoNear, 0.1f))
+				if(UI::Property("Near Clip", orthoNear, 0.1f))
 					camera.SetOrthographicNearClip(orthoNear);
 				
 				float orthoFar = camera.GetOrthographicFarClip();
-				if(ImGui::DragFloat("Far Clip", &orthoFar, 0.1f))
+				if(UI::Property("Far Clip", orthoFar, 0.1f))
 					camera.SetOrthographicFarClip(orthoFar);
 
-				ImGui::Checkbox("Fixed Aspect Ratio", &component.FixedAspectRatio);
+				UI::Property("Fixed Aspect Ratio", component.FixedAspectRatio);
 			}
 		});
 		
 		DrawComponent<SpriteRendererComponent>(ICON_MDI_IMAGE_SIZE_SELECT_ACTUAL " Sprite Renderer", entity, [](SpriteRendererComponent& component)
 		{
-			ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+			UI::PropertyColor4("Color", component.Color);
 
 			DrawTexture2DButton("Texture", component.Texture);
 
 			ImGui::Spacing();
 			
-			DrawFloatControl("Tiling Factor", &component.TilingFactor, 200);
+			UI::Property("Tiling Factor", component.TilingFactor, 200);
 		});
 
 		DrawComponent<MeshComponent>(ICON_MDI_VECTOR_SQUARE " Mesh", entity, [&](MeshComponent& component)
 		{
 			ImGui::Text("Mesh");
-			const ImVec2 buttonSize = { 60, 20 };
 
-			ImGui::Text(component.Filepath.c_str());
-
-			ImGui::SameLine(ImGui::GetWindowWidth() - buttonSize.x - 10);
-
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
-			if(ImGui::Button("...", buttonSize))
+			if(ImGui::Button("Import"))
 			{
-				std::string filepath = FileDialogs::OpenFile("Mesh (*.obj)\0*.obj\0(*.fbx)\0*.fbx\0(*.gltf)\0*.gltf\0");
+				std::string filepath = FileDialogs::OpenFile("Mesh (*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
+				if (!filepath.empty())
+				{
+					component.Filepath = filepath;
+					WriteMesh(filepath.c_str());
+					return;
+				}
+			}
+			if(ImGui::Button("Load"))
+			{
+				std::string filepath = FileDialogs::OpenFile("Mesh (*.assbin)\0*.assbin\0(*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
 				if (!filepath.empty())
 				{
 					component.Filepath = filepath;
 					LoadMesh(filepath.c_str(), entity);
-					
-					// TEMP
-					ImGui::PopStyleColor(3);
 					return;
 				}
 			}
-			ImGui::PopStyleColor(3);
+
+			ImGui::Text(component.Filepath.c_str());
 
 			const char* cullModeTypeStrings[] = { "Front", "Back", "Double Sided" };
-			const char* currentCullModeTypeStrings = cullModeTypeStrings[(int)component.CullMode];
-			if(ImGui::BeginCombo("Cull Mode", currentCullModeTypeStrings))
-			{
-				for (int i = 0; i < 3; i++)
-				{
-					bool isSelected = currentCullModeTypeStrings == cullModeTypeStrings[i];
-					if(ImGui::Selectable(cullModeTypeStrings[i], isSelected))
-					{
-						currentCullModeTypeStrings = cullModeTypeStrings[i];
-						component.CullMode = (MeshComponent::CullModeType)i;
-					}
+			int cullMode = (int) component.CullMode;
+			if (UI::Property("Cull Mode", cullMode, cullModeTypeStrings, 3))
+				component.CullMode = (MeshComponent::CullModeType) cullMode;
 
-					if(isSelected)
-						ImGui::SetItemDefaultFocus();
-				}
-				
-				ImGui::EndCombo();
-			}
-
-			ImGui::ColorEdit4("Albedo Color", glm::value_ptr(component.AlbedoColor));
-			ImGui::SliderFloat("Metallic", &component.MR.x, 0.0f, 1.0f);
-			ImGui::SliderFloat("Roughness", &component.MR.y, 0.0f, 1.0f);
-			ImGui::ColorEdit3("Emissive Color", glm::value_ptr(component.EmissiveParams));
-			ImGui::DragFloat("Emissive Intensity", &component.EmissiveParams.w);
+			UI::PropertyColor4("Albedo Color", component.AlbedoColor);
+			UI::Property("Metallic", component.MR.x, 0.0f, 1.0f);
+			UI::Property("Roughness", component.MR.y, 0.0f, 1.0f);
+			UI::PropertyColor4as3("Emissive Color", component.EmissiveParams);
+			UI::Property("Emissive Intensity", component.EmissiveParams.w);
 			
 			bool usingMap = component.UseMaps.x;
-			if (ImGui::Checkbox("##UseAlbedoMap", &usingMap))
+			if (UI::Property("Use Albedo Map", usingMap))
 				component.UseMaps.x = usingMap ? 1.0f : 0.0f;
-			DrawTexture2DButton("AlbedoMap", component.AlbedoMap);
+			DrawTexture2DButton("Albedo Map", component.AlbedoMap);
 
 			usingMap = component.UseMaps.y;
-			if (ImGui::Checkbox("##UseNormalMap", &usingMap))
+			if (UI::Property("UseNormalMap", usingMap))
 				component.UseMaps.y = usingMap ? 1.0f : 0.0f;
-			DrawTexture2DButton("NormalMap", component.NormalMap);
+			DrawTexture2DButton("Normal Map", component.NormalMap);
 			
 			usingMap = component.UseMaps.z;
-			if (ImGui::Checkbox("##UseMetallicMap", &usingMap))
+			if (UI::Property("Use Metallic Map", usingMap))
 				component.UseMaps.z = usingMap ? 1.0f : 0.0f;
-			DrawTexture2DButton("MetallicMap", component.MRAMap);
+			DrawTexture2DButton("Metallic Map", component.MRAMap);
 			
 			usingMap = component.UseMaps.w;
-			if (ImGui::Checkbox("##UseEmissiveMap", &usingMap))
+			if (UI::Property("Use Emissive Map", usingMap))
 				component.UseMaps.w = usingMap ? 1.0f : 0.0f;
-			DrawTexture2DButton("EmissiveMap", component.EmissiveMap);
+			DrawTexture2DButton("Emissive Map", component.EmissiveMap);
 		});
 
 		DrawComponent<SkyLightComponent>(ICON_MDI_EARTH " Sky Light", entity, [](SkyLightComponent& component)
 		{
-			DrawFloatControl("Intensity", &component.Intensity);
-			
-			UI::BeginPropertyGrid();
+			UI::Property("Intensity", component.Intensity);
 			UI::Property("Rotation", component.Rotation, 0.0f, 360.0f);
-			UI::EndPropertyGrid();
-
 			const uint32_t id = component.Texture == nullptr ? 0 : component.Texture->GetHRDRendererID();
 			DrawTextureCubemapButton("Texture", component.Texture, id);
 
@@ -679,100 +679,88 @@ namespace ArcEngine
 
 		DrawComponent<LightComponent>(ICON_MDI_LIGHTBULB " Light", entity, [](LightComponent& component)
 		{
-			UI::PushID();
-
 			const char* lightTypeStrings[] = { "Directional", "Point", "Spot" };
-			const char* currentLightTypeString = lightTypeStrings[(int)component.Type];
-			UI::BeginPropertyGrid();
-			UI::Property("LightType");
-			ImGui::NextColumn();
-			if(ImGui::BeginCombo("##LightType", currentLightTypeString))
-			{
-				for (int i = 0; i < 3; i++)
-				{
-					bool isSelected = currentLightTypeString == lightTypeStrings[i];
-					if(ImGui::Selectable(lightTypeStrings[i], isSelected))
-					{
-						currentLightTypeString = lightTypeStrings[i];
-						component.Type = (LightComponent::LightType)i;
-					}
+			int lightType = (int) component.Type;
+			if (UI::Property("Light Type", lightType, lightTypeStrings, 3))
+				component.Type = (LightComponent::LightType) lightType;
 
-					if(isSelected)
-						ImGui::SetItemDefaultFocus();
-				}
-				
-				ImGui::EndCombo();
-			}
-			UI::EndPropertyGrid();
-
-			UI::BeginPropertyGrid();
 			if (UI::Property("Use color temprature mode", component.UseColorTempratureMode))
 			{
 				if (component.UseColorTempratureMode)
 					component.SetTemprature(component.GetTemprature());
 			}
-			UI::EndPropertyGrid();
 
 			if (component.UseColorTempratureMode)
 			{
-				UI::BeginPropertyGrid();
 				int temp = component.GetTemprature();
 				if (UI::Property("Tempratur (K)", temp, 1000, 40000))
 					component.SetTemprature(temp);
-				UI::EndPropertyGrid();
 			}
 			else
 			{
-				UI::BeginPropertyGrid();
-				UI::Property("Color");
-				ImGui::NextColumn();
-				ImGui::ColorEdit3("##Color", glm::value_ptr(component.Color));
-				UI::EndPropertyGrid();
+				UI::PropertyColor3("Color", component.Color);
 			}
 
-			UI::BeginPropertyGrid();
 			if (UI::Property("Intensity", component.Intensity))
 			{
 				if (component.Intensity < 0.0f)
 					component.Intensity = 0.0f;
 			}
-			UI::EndPropertyGrid();
 
 			ImGui::Spacing();
 
 			if (component.Type == LightComponent::LightType::Point)
 			{
-				UI::BeginPropertyGrid();
 				UI::Property("Range", component.Range);
-				UI::EndPropertyGrid();
 			}
 			else if (component.Type == LightComponent::LightType::Spot)
 			{
-				UI::BeginPropertyGrid();
 				UI::Property("Range", component.Range);
 				if (component.Range < 0.1f)
 					component.Range = 0.1f;
-				UI::EndPropertyGrid();
 
-				UI::BeginPropertyGrid();
 				UI::Property("Outer Cut-Off Angle", component.OuterCutOffAngle, 1.0f, 90.0f);
 				if (component.OuterCutOffAngle < component.CutOffAngle)
 					component.CutOffAngle = component.OuterCutOffAngle;
-				UI::EndPropertyGrid();
 
-				UI::BeginPropertyGrid();
 				UI::Property("Cut-Off Angle", component.CutOffAngle, 1.0f, 90.0f);
 				if (component.CutOffAngle > component.OuterCutOffAngle)
 					component.OuterCutOffAngle = component.CutOffAngle;
-				UI::EndPropertyGrid();
 			}
 			else
 			{
 				uint32_t textureID = component.ShadowMapFramebuffer->GetDepthAttachmentRendererID();
 				ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ 256, 256 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 			}
+		});
 
-			UI::PopID();
+		DrawComponent<Rigidbody2DComponent>(ICON_MDI_BOX " Rigidbody 2D", entity, [](Rigidbody2DComponent& component)
+		{
+			const char* bodyTypeStrings[] = { "Static", "Kinematic", "Dynamic" };
+			int bodyType = (int) component.Type;
+			if (UI::Property("Body Type", bodyType, bodyTypeStrings, 3))
+				component.Type = (Rigidbody2DComponent::BodyType)bodyType;
+
+			if (component.Type == Rigidbody2DComponent::BodyType::Dynamic)
+			{
+				UI::Property("Linear Damping", component.LinearDamping);
+				UI::Property("Angular Damping", component.AngularDamping);
+				UI::Property("Gravity Scale", component.GravityScale);
+				UI::Property("Allow Sleep", component.AllowSleep);
+				UI::Property("Awake", component.Awake);
+				UI::Property("Continuous", component.Continuous);
+				UI::Property("Freeze Rotation", component.FreezeRotation);
+			}
+		});
+
+		DrawComponent<BoxCollider2DComponent>(ICON_MDI_BOX " Box Collider 2D", entity, [](BoxCollider2DComponent& component)
+		{
+			UI::Property("Size", component.Size);
+			UI::Property("Offset", component.Offset);
+			UI::Property("Density", component.Density);
+			UI::Property("Friction", component.Friction);
+			UI::Property("Restitution", component.Restitution);
+			UI::Property("Restitution Threshold", component.RestitutionThreshold);
 		});
 
 		ImGui::Separator();
@@ -835,6 +823,24 @@ namespace ArcEngine
 					entity.AddComponent<LightComponent>();
 				else
 					ARC_CORE_WARN("This entity already has the Light Component!");
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Rigidbody 2D"))
+			{
+				if (!entity.HasComponent<Rigidbody2DComponent>())
+					entity.AddComponent<Rigidbody2DComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Rigidbody 2D Component!");
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Box Collider 2D"))
+			{
+				if (!entity.HasComponent<BoxCollider2DComponent>())
+					entity.AddComponent<BoxCollider2DComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Box Collider 2D Component!");
 				ImGui::CloseCurrentPopup();
 			}
 			

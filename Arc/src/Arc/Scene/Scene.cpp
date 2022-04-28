@@ -8,6 +8,7 @@
 
 #include <glm/glm.hpp>
 #include <glad/glad.h>
+#include <box2d/box2d.h>
 
 #include "Entity.h"
 
@@ -44,8 +45,6 @@ namespace ArcEngine
 
 		return entity;
 	}
-
-
 
 	void Scene::DestroyEntity(Entity entity)
 	{
@@ -84,6 +83,56 @@ namespace ArcEngine
 		return {};
 	}
 
+	void Scene::OnRuntimeStart()
+	{
+		m_PhysicsWorld2D = new b2World({ 0.0f, -9.8f });
+		auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
+		for (auto e : view)
+		{
+			auto [transform, body] = view.get<TransformComponent, Rigidbody2DComponent>(e);
+			
+			b2BodyDef def;
+			def.type = (b2BodyType)body.Type;
+			def.linearDamping = body.LinearDamping;
+			def.angularDamping = body.AngularDamping;
+			def.allowSleep = body.AllowSleep;
+			def.awake = body.Awake;
+			def.fixedRotation = body.FreezeRotation;
+			def.bullet = body.Continuous;
+			def.gravityScale = body.GravityScale;
+
+			def.position.Set(transform.Translation.x, transform.Translation.y);
+			def.angle = transform.Rotation.z;
+
+			b2Body* rb = m_PhysicsWorld2D->CreateBody(&def);
+			body.RuntimeBody = rb;
+
+			Entity entity = { e, this };
+			if (entity.HasComponent<BoxCollider2DComponent>())
+			{
+				auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
+
+				b2PolygonShape boxShape;
+				boxShape.SetAsBox(bc2d.Size.x * transform.Scale.x, bc2d.Size.y * transform.Scale.y);
+
+				b2FixtureDef fixtureDef;
+				fixtureDef.shape = &boxShape;
+				fixtureDef.density = bc2d.Density;
+				fixtureDef.friction = bc2d.Friction;
+				fixtureDef.restitution = bc2d.Restitution;
+				fixtureDef.restitutionThreshold = bc2d.RestitutionThreshold;
+
+				bc2d.RuntimeFixture = rb->CreateFixture(&fixtureDef);
+			}
+		}
+	}
+
+	void Scene::OnRuntimeStop()
+	{
+		delete m_PhysicsWorld2D;
+		m_PhysicsWorld2D = nullptr;
+	}
+
 	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera, Ref<RenderGraphData>& renderGraphData)
 	{
 		OPTICK_EVENT();
@@ -113,6 +162,7 @@ namespace ArcEngine
 			{
 				auto [id, light] = view.get<IDComponent, SkyLightComponent>(entity);
 				skylight = Entity(entity, this);
+				break;
 			}
 		}
 
@@ -151,7 +201,9 @@ namespace ArcEngine
 
 		ARC_PROFILE_FUNCTION();
 
-		// Update Scripts
+		/////////////////////////////////////////////////////////////////////
+		// Scripting ////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////
 		{
 			m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
 			{
@@ -167,7 +219,24 @@ namespace ArcEngine
 			});
 		}
 		
-		// Render 2D
+		/////////////////////////////////////////////////////////////////////
+		// Physics //////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////
+		m_PhysicsWorld2D->Step(ts, VelocityIterations, PositionIterations);
+		auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
+		for (auto e : view)
+		{
+			auto [transform, body] = view.get<TransformComponent, Rigidbody2DComponent>(e);
+			b2Body* rb = (b2Body*)body.RuntimeBody;
+			b2Vec2 position = rb->GetPosition();
+			transform.Translation.x = position.x;
+			transform.Translation.y = position.y;
+			transform.Rotation.z = rb->GetAngle();
+		}
+
+		/////////////////////////////////////////////////////////////////////
+		// Rendering ////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////
 		Camera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
 		{
@@ -187,16 +256,59 @@ namespace ArcEngine
 
 		if(mainCamera)
 		{
-			Renderer2D::BeginScene(*mainCamera, cameraTransform);
-			
-			auto view = m_Registry.view<IDComponent, SpriteRendererComponent>();
-			for (auto entity : view)
+			std::vector<Entity> lights;
+			lights.reserve(25);
 			{
-				auto [id, sprite] = view.get<IDComponent, SpriteRendererComponent>(entity);
-				
-				Renderer2D::DrawQuad(GetEntity(id.ID).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+				OPTICK_EVENT("Prepare Light Data");
+
+				auto view = m_Registry.view<IDComponent, LightComponent>();
+				lights.reserve(view.size());
+				for (auto entity : view)
+				{
+					auto [id, light] = view.get<IDComponent, LightComponent>(entity);
+					lights.push_back(Entity(entity, this));
+				}
+			}
+			Entity skylight = {};
+			{
+				OPTICK_EVENT("Prepare Skylight Data");
+
+				auto view = m_Registry.view<IDComponent, SkyLightComponent>();
+				for (auto entity : view)
+				{
+					auto [id, light] = view.get<IDComponent, SkyLightComponent>(entity);
+					skylight = Entity(entity, this);
+					break;
+				}
 			}
 
+			Renderer3D::BeginScene(*mainCamera, cameraTransform, skylight, lights);
+			// Meshes
+			{
+				OPTICK_EVENT("Submit Mesh Data");
+
+				auto view = m_Registry.view<IDComponent, MeshComponent>();
+				for (auto entity : view)
+				{
+					auto [id, mesh] = view.get<IDComponent, MeshComponent>(entity);
+					if (mesh.VertexArray != nullptr)
+						Renderer3D::SubmitMesh(mesh, Entity(entity, this).GetWorldTransform());
+				}
+			}
+			Renderer3D::EndScene(renderGraphData);
+
+			Renderer2D::BeginScene(*mainCamera, cameraTransform);
+			{
+				OPTICK_EVENT("Submit 2D Data");
+
+				auto view = m_Registry.view<IDComponent, SpriteRendererComponent>();
+				for (auto entity : view)
+				{
+					auto [id, sprite] = view.get<IDComponent, SpriteRendererComponent>(entity);
+				
+					Renderer2D::DrawQuad(GetEntity(id.ID).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+				}
+			}
 			Renderer2D::EndScene(renderGraphData);
 		}
 	}
@@ -283,6 +395,16 @@ namespace ArcEngine
 
 	template<>
 	void Scene::OnComponentAdded<LightComponent>(Entity entity, LightComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
 	{
 	}
 }

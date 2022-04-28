@@ -32,6 +32,7 @@ namespace ArcEngine
 
 		m_Application = &Application::Get();
 		m_ActiveScene = CreateRef<Scene>();
+		m_EditorScene = m_ActiveScene;
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
@@ -268,9 +269,24 @@ namespace ArcEngine
 				{
 					ImVec2 region = ImGui::GetContentRegionAvail();
 					ImGui::SetCursorPosX(region.x * 0.5f);
-					ImGui::Button(ICON_MDI_PLAY);
-					ImGui::Button(ICON_MDI_PAUSE);
-					ImGui::Button(ICON_MDI_STEP_FORWARD);
+					if (ImGui::Button(m_SceneState == SceneState::Edit ? ICON_MDI_PLAY : ICON_MDI_STOP))
+					{
+						if (m_SceneState == SceneState::Edit)
+							OnScenePlay();
+						else
+							OnSceneStop();
+					}
+
+					ImGui::PushItemFlag(ImGuiItemFlags_Disabled, m_SceneState == SceneState::Edit);
+					if (ImGui::Button(ICON_MDI_PAUSE))
+					{
+						OnScenePause();
+					}
+					if (ImGui::Button(ICON_MDI_STEP_FORWARD))
+					{
+					}
+					ImGui::PopItemFlag();
+
 					ImGui::EndMenuBar();
 				}
 				ImGui::End();
@@ -414,6 +430,8 @@ namespace ArcEngine
 
 		m_ActiveScene = CreateRef<Scene>();
 		m_ActiveScene->MarkViewportDirty();
+		m_EditorScene = m_ActiveScene;
+
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		m_ScenePath = "";
 	}
@@ -428,6 +446,8 @@ namespace ArcEngine
 
 			m_ActiveScene = CreateRef<Scene>();
 			m_ActiveScene->MarkViewportDirty();
+			m_EditorScene = m_ActiveScene;
+
 			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
 			SceneSerializer serializer(m_ActiveScene);
@@ -458,5 +478,40 @@ namespace ArcEngine
 			serializer.Serialize(filepath);
 			m_ScenePath = filepath;
 		}
+	}
+
+	void ArcEngine::EditorLayer::OnScenePlay()
+	{
+//		m_EditorScene = m_ActiveScene;
+//		m_ActiveScene = m_RuntimeScene;
+		m_SceneState = SceneState::Play;
+		m_ActiveScene->OnRuntimeStart();
+
+		if (m_Viewports.size() < 0)
+		{
+			m_Viewports.push_back(CreateScope<SceneViewport>());
+			m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
+		}
+
+		m_Viewports[0]->SetSimulation(true);
+	}
+
+	void ArcEngine::EditorLayer::OnSceneStop()
+	{
+		m_ActiveScene->OnRuntimeStop();
+		m_SceneState = SceneState::Edit;
+		m_RuntimeScene = nullptr;
+		m_ActiveScene = m_EditorScene;
+
+		if (m_Viewports.size() > 0)
+			m_Viewports[0]->SetSimulation(false);
+	}
+
+	void ArcEngine::EditorLayer::OnScenePause()
+	{
+		m_SceneState = SceneState::Pause;
+
+		if (m_Viewports.size() > 0)
+			m_Viewports[0]->SetSimulation(false);
 	}
 }

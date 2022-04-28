@@ -44,7 +44,8 @@ project "Arc"
 		"%{IncludeDir.assimp}",
 		"%{IncludeDir.assimp_config}",
 		"%{IncludeDir.assimp_config_assimp}",
-		"%{IncludeDir.optick}"
+		"%{IncludeDir.optick}",
+		"%{IncludeDir.box2d}"
 	}
 
 	links
@@ -55,6 +56,7 @@ project "Arc"
 		"yaml-cpp",
 		"assimp",
 		"optick",
+		"box2d",
 		"opengl32.lib"
 	}
 

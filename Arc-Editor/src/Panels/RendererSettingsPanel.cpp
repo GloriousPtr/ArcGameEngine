@@ -13,69 +13,39 @@ namespace ArcEngine
 		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
 		ImGui::Begin(m_ID.c_str(), &m_Showing);
 
-		UI::PushID();
-
-		UI::BeginPropertyGrid();
 		UI::Property("Exposure", Renderer3D::Exposure);
-		UI::EndPropertyGrid();
 
-		UI::Property("Tonemapping");
 		const char* tonemapTypeStrings[] = { "None", "ACES", "Filmic", "Uncharted" };
-		const char* currentTonemapTypeString = tonemapTypeStrings[(int)Renderer3D::Tonemapping];
-		if(ImGui::BeginCombo("##Tonemapping", currentTonemapTypeString))
+		int index = (int)Renderer3D::Tonemapping;
+		if (UI::Property("Tonemapping", index, tonemapTypeStrings, 4))
 		{
-			for (int i = 0; i < 4; i++)
-			{
-				bool isSelected = currentTonemapTypeString == tonemapTypeStrings[i];
-				if(ImGui::Selectable(tonemapTypeStrings[i], isSelected))
-				{
-					currentTonemapTypeString = tonemapTypeStrings[i];
-					Renderer3D::Tonemapping = (Renderer3D::TonemappingType)i;
-				}
-
-				if(isSelected)
-					ImGui::SetItemDefaultFocus();
-			}
-			
-			ImGui::EndCombo();
+			Renderer3D::Tonemapping = (Renderer3D::TonemappingType)index;
 		}
 
 		if (ImGui::TreeNode("Bloom"))
 		{
-			UI::BeginPropertyGrid();
 			UI::Property("Use Bloom", Renderer3D::UseBloom);
-			UI::EndPropertyGrid();
-
-			UI::BeginPropertyGrid();
+			
 			float bloomStrength = Renderer3D::BloomStrength;
 			if (UI::Property("Bloom Strength", bloomStrength, 0.01f))
 			{
 				if (bloomStrength > 0.001f)
 					Renderer3D::BloomStrength = bloomStrength;
 			}
-			UI::EndPropertyGrid();
 
-			UI::BeginPropertyGrid();
 			float bloomThreshold = Renderer3D::BloomThreshold;
 			if (UI::Property("Bloom Threshold", bloomThreshold, 0.1f))
 			{
 				if (bloomThreshold > 0.001f)
 					Renderer3D::BloomThreshold = bloomThreshold;
 			}
-			UI::EndPropertyGrid();
 
-			UI::BeginPropertyGrid();
 			UI::Property("Bloom Knee", Renderer3D::BloomKnee, 0.0f, 1.0f);
-			UI::EndPropertyGrid();
 
-			UI::BeginPropertyGrid();
 			float bloomClamp = Renderer3D::BloomClamp;
 			if (UI::Property("Bloom Clamp", bloomClamp, 1.0f))
-			{
 				if (bloomClamp > 0.01f)
 					Renderer3D::BloomClamp = bloomClamp;
-			}
-			UI::EndPropertyGrid();
 
 			/*
 			int sampleCount = Renderer3D::blurSamples;
@@ -91,7 +61,6 @@ namespace ArcEngine
 				*/
 			ImGui::TreePop();
 		}
-		UI::PopID();
 
 		ImGui::End();
 	}

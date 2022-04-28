@@ -37,6 +37,7 @@ IncludeDir["assimp"] = "%{wks.location}/Arc/vendor/assimp/assimp/include"
 IncludeDir["assimp_config"] = "%{wks.location}/Arc/vendor/assimp/_config_headers"
 IncludeDir["assimp_config_assimp"] = "%{wks.location}/Arc/vendor/assimp/_config_headers/assimp"
 IncludeDir["optick"] = "%{wks.location}/Arc/vendor/optick/src"
+IncludeDir["box2d"] = "%{wks.location}/Arc/vendor/box2d/include"
 
 group "Dependencies"
 	include "vendor/premake"
@@ -46,6 +47,7 @@ group "Dependencies"
 	include "Arc/vendor/yaml-cpp"
 	include "Arc/vendor/assimp"
 	include "Arc/vendor/optick"
+	include "Arc/vendor/box2d"
 
 group ""
 

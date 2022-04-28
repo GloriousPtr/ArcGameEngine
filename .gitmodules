@@ -22,3 +22,6 @@
 [submodule "Arc/vendor/assimp"]
 	path = Arc/vendor/assimp
 	url = https://github.com/MohitSethi99/assimp.git
+[submodule "Arc/vendor/box2d"]
+	path = Arc/vendor/box2d
+	url = https://github.com/MohitSethi99/box2d.git

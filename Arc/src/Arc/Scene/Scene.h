@@ -7,6 +7,8 @@
 
 #include "entt.hpp"
 
+class b2World;
+
 namespace ArcEngine
 {
 	class Entity;
@@ -25,6 +27,9 @@ namespace ArcEngine
 
 		void OnUpdateEditor(Timestep ts, EditorCamera& camera, Ref<RenderGraphData>& renderGraphData);
 		void OnUpdateRuntime(Timestep ts, Ref<RenderGraphData>& renderGraphData);
+		void OnRuntimeStart();
+		void OnRuntimeStop();
+
 		void OnViewportResize(uint32_t width, uint32_t height);
 		void MarkViewportDirty() { m_ViewportDirty = true; }
 
@@ -36,11 +41,16 @@ namespace ArcEngine
 	private:
 		entt::registry m_Registry;
 		std::unordered_map<UUID, entt::entity> m_EntityMap;
+		b2World* m_PhysicsWorld2D;
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 		bool m_ViewportDirty = true;
 		
 		friend class Entity;
 		friend class SceneSerializer;
 		friend class SceneHierarchyPanel;
+
+	public:
+		uint32_t VelocityIterations = 8;
+		uint32_t PositionIterations = 3;
 	};
 }

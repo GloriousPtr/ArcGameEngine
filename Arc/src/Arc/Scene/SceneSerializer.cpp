@@ -11,6 +11,28 @@
 namespace YAML {
 
 	template<>
+	struct convert<glm::vec2>
+	{
+		static Node encode(const glm::vec2& rhs)
+		{
+			Node node;
+			node.push_back(rhs.x);
+			node.push_back(rhs.y);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::vec2& rhs)
+		{
+			if (!node.IsSequence() || node.size() != 2)
+				return false;
+
+			rhs.x = node[0].as<float>();
+			rhs.y = node[1].as<float>();
+			return true;
+		}
+	};
+
+	template<>
 	struct convert<glm::vec3>
 	{
 		static Node encode(const glm::vec3& rhs)
@@ -64,6 +86,13 @@ namespace YAML {
 
 namespace ArcEngine
 {
+	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& v)
+	{
+		out << YAML::Flow;
+		out << YAML::BeginSeq << v.x << v.y << YAML::EndSeq;
+		return out;
+	}
+
 	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec3& v)
 	{
 		out << YAML::Flow;
@@ -186,6 +215,40 @@ namespace ArcEngine
 			out << YAML::Key << "OuterCutOffAngle" << YAML::Value << lightComponent.OuterCutOffAngle;
 
 			out << YAML::EndMap; // LightComponent
+		}
+
+		if (entity.HasComponent<Rigidbody2DComponent>())
+		{
+			out << YAML::Key << "Rigidbody2DComponent";
+			out << YAML::BeginMap; // Rigidbody2DComponent
+
+			auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			out << YAML::Key << "Type" << YAML::Value << (int) rb2d.Type;
+			out << YAML::Key << "LinearDamping" << YAML::Value << rb2d.LinearDamping;
+			out << YAML::Key << "AngularDamping" << YAML::Value << rb2d.AngularDamping;
+			out << YAML::Key << "AllowSleep" << YAML::Value << rb2d.AllowSleep;
+			out << YAML::Key << "Awake" << YAML::Value << rb2d.Awake;
+			out << YAML::Key << "Continuous" << YAML::Value << rb2d.Continuous;
+			out << YAML::Key << "FreezeRotation" << YAML::Value << rb2d.FreezeRotation;
+			out << YAML::Key << "GravityScale" << YAML::Value << rb2d.GravityScale;
+
+			out << YAML::EndMap; // Rigidbody2DComponent
+		}
+
+		if (entity.HasComponent<BoxCollider2DComponent>())
+		{
+			out << YAML::Key << "BoxCollider2DComponent";
+			out << YAML::BeginMap; // BoxCollider2DComponent
+
+			auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
+			out << YAML::Key << "Size" << YAML::Value << bc2d.Size;
+			out << YAML::Key << "Offset" << YAML::Value << bc2d.Offset;
+			out << YAML::Key << "Density" << YAML::Value << bc2d.Density;
+			out << YAML::Key << "Friction" << YAML::Value << bc2d.Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << bc2d.Restitution;
+			out << YAML::Key << "RestitutionThreshold" << YAML::Value << bc2d.RestitutionThreshold;
+
+			out << YAML::EndMap; // BoxCollider2DComponent
 		}
 
 		out << YAML::EndMap; // Entity
@@ -320,6 +383,32 @@ namespace ArcEngine
 					src.Range = lightComponent["Radius"].as<float>();
 					src.CutOffAngle = lightComponent["CutOffAngle"].as<float>();
 					src.OuterCutOffAngle = lightComponent["OuterCutOffAngle"].as<float>();
+				}
+
+				auto rb2dCpmponent = entity["Rigidbody2DComponent"];
+				if (rb2dCpmponent)
+				{
+					auto& src = deserializedEntity.AddComponent<Rigidbody2DComponent>();
+					src.Type = (Rigidbody2DComponent::BodyType) rb2dCpmponent["Type"].as<int>();
+					src.LinearDamping = rb2dCpmponent["LinearDamping"].as<float>();
+					src.AngularDamping = rb2dCpmponent["AngularDamping"].as<float>();
+					src.AllowSleep = rb2dCpmponent["AllowSleep"].as<bool>();
+					src.Awake = rb2dCpmponent["Awake"].as<bool>();
+					src.Continuous = rb2dCpmponent["Continuous"].as<bool>();
+					src.FreezeRotation = rb2dCpmponent["FreezeRotation"].as<bool>();
+					src.GravityScale = rb2dCpmponent["GravityScale"].as<float>();
+				}
+
+				auto bc2dCpmponent = entity["BoxCollider2DComponent"];
+				if (bc2dCpmponent)
+				{
+					auto& src = deserializedEntity.AddComponent<BoxCollider2DComponent>();
+					src.Size = bc2dCpmponent["Size"].as<glm::vec2>();
+					src.Offset = bc2dCpmponent["Offset"].as<glm::vec2>();
+					src.Density = bc2dCpmponent["Density"].as<float>();
+					src.Friction = bc2dCpmponent["Friction"].as<float>();
+					src.Restitution = bc2dCpmponent["Restitution"].as<float>();
+					src.RestitutionThreshold = bc2dCpmponent["RestitutionThreshold"].as<float>();
 				}
 			}
 		}
