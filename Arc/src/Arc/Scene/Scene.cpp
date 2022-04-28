@@ -22,6 +22,61 @@ namespace ArcEngine
 	{
 	}
 
+	template<typename Component>
+	static void CopyComponent(entt::registry& dst, entt::registry& src, std::unordered_map<UUID, entt::entity> enttMap)
+	{
+		auto view = src.view<Component>();
+		for (auto e : view)
+		{
+			UUID uuid = src.get<IDComponent>(e).ID;
+			entt::entity dstEnttID = enttMap.at(uuid);
+			auto& component = src.get<Component>(e);
+			dst.emplace_or_replace<Component>(dstEnttID, component);
+		}
+	}
+
+	Ref<Scene> Scene::CopyTo(Ref<Scene> other)
+	{
+		Ref<Scene> newScene = CreateRef<Scene>();
+
+		newScene->m_ViewportWidth = other->m_ViewportWidth;
+		newScene->m_ViewportHeight = other->m_ViewportHeight;
+
+		auto& srcRegistry = other->m_Registry;
+		auto& dstRegistry = newScene->m_Registry;
+		auto view = other->m_Registry.view<IDComponent, TagComponent>();
+		for (auto e : view)
+		{
+			auto [id, tag] = view.get<IDComponent, TagComponent>(e);
+			newScene->CreateEntityWithUUID(id.ID, tag.Tag);
+		}
+
+		for (auto e : view)
+		{
+			auto id = view.get<IDComponent>(e).ID;
+			Entity src = { e, other.get() };
+			Entity dst = newScene->GetEntity(id);
+			Entity srcParent = src.GetParent();
+			if (srcParent)
+			{
+				Entity dstParent = newScene->GetEntity(srcParent.GetUUID());
+				dst.SetParent(dstParent);
+			}
+		}
+
+		CopyComponent<TransformComponent>(dstRegistry, srcRegistry, newScene->m_EntityMap);
+		CopyComponent<SpriteRendererComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
+		CopyComponent<CameraComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
+		CopyComponent<NativeScriptComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
+		CopyComponent<MeshComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
+		CopyComponent<SkyLightComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
+		CopyComponent<LightComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
+		CopyComponent<Rigidbody2DComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
+		CopyComponent<BoxCollider2DComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
+
+		return newScene;
+	}
+
 	Entity Scene::CreateEntity(const std::string& name)
 	{
 		return CreateEntityWithUUID(UUID(), name);

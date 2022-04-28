@@ -482,17 +482,18 @@ namespace ArcEngine
 
 	void ArcEngine::EditorLayer::OnScenePlay()
 	{
-//		m_EditorScene = m_ActiveScene;
-//		m_ActiveScene = m_RuntimeScene;
+		m_EditorScene = m_ActiveScene;
+		m_RuntimeScene = Scene::CopyTo(m_EditorScene);
+		
+		m_ActiveScene = m_RuntimeScene;
 		m_SceneState = SceneState::Play;
 		m_ActiveScene->OnRuntimeStart();
 
 		if (m_Viewports.size() < 0)
-		{
 			m_Viewports.push_back(CreateScope<SceneViewport>());
-			m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
-		}
 
+		m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		m_Viewports[0]->SetSimulation(true);
 	}
 
@@ -500,11 +501,16 @@ namespace ArcEngine
 	{
 		m_ActiveScene->OnRuntimeStop();
 		m_SceneState = SceneState::Edit;
+
 		m_RuntimeScene = nullptr;
+		m_ActiveScene = nullptr;
 		m_ActiveScene = m_EditorScene;
 
 		if (m_Viewports.size() > 0)
 			m_Viewports[0]->SetSimulation(false);
+
+		m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void ArcEngine::EditorLayer::OnScenePause()

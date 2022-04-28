@@ -225,7 +225,7 @@ namespace ArcEngine
 		ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 		// Gizmos
-		if (m_SceneHierarchyPanel && m_GizmoType != -1)
+		if (m_ViewportHovered && m_SceneHierarchyPanel && m_GizmoType != -1 && !m_SimulationRunning)
 		{
 			Entity selectedEntity = m_SceneHierarchyPanel->GetSelectedEntity();
 			if(selectedEntity)
