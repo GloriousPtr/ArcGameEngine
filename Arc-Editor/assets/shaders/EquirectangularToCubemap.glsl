@@ -38,6 +38,7 @@ void main()
 {
 	vec2 uv = SampleSphericalMap(normalize(v_Position));
     vec3 color = texture(u_EquirectangularMap, uv).rgb;
+	color = vec3(1.0) - exp(-color);
 
 	o_Color = vec4(color, 1.0);
 }

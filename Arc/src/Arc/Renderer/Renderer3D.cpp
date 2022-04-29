@@ -81,7 +81,7 @@ namespace ArcEngine
 			{ ShaderDataType::Float4, "u_Intensity" },
 		}, 1, 26);													// 25 is max number of lights
 
-		s_BRDFLutTexture = Texture2D::Create("Resources/Renderer/BRDF_LUT.tga");
+		s_BRDFLutTexture = Texture2D::Create("Resources/Renderer/BRDF_LUT.jpg");
 
 		s_ShaderLibrary = ShaderLibrary();
 		shadowMapShader = s_ShaderLibrary.Load("assets/shaders/DepthShader.glsl");

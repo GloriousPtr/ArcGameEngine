@@ -148,7 +148,7 @@ struct PBRParameters
 
 PBRParameters m_Params;
 
-// N: Normal, H: Halfway, a2: pow(roughness, 4)
+// N: Normal, H: Halfway, a2: pow(roughness, 2)
 float DistributionGGX(const vec3 N, const vec3 H, const float a2)
 {
     float NdotH = max(dot(N, H), 0.0);
@@ -163,6 +163,11 @@ float GeometrySmith(const float NdotL, const float NdotV, const float k)
     float ggx2 = NdotL / (NdotL * (1.0 - k) + k);
 
     return ggx1 * ggx2;
+}
+
+vec3 Fresnel(float cosTheta, vec3 F0)
+{
+	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
 vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
@@ -228,11 +233,11 @@ vec3 IBL(vec3 F0)
 	vec3 irradiance = texture(u_IrradianceMap, RotateVectorAboutY(u_EnvironmentRotation, m_Params.Normal)).rgb;
 	vec3 diffuseIBL = m_Params.Albedo * irradiance;
 
-	int envRadianceTexLevels = textureQueryLevels(u_RadianceMap);
+	int envRadianceTexLevels = textureQueryLevels(u_RadianceMap) - 5;
 	vec3 Lr = 2.0 * m_Params.NdotV * m_Params.Normal - m_Params.View;
 	vec3 specularIrradiance = textureLod(u_RadianceMap, RotateVectorAboutY(u_EnvironmentRotation, Lr), m_Params.Roughness * envRadianceTexLevels).rgb;
 
-	vec2 specularBRDF = texture(u_BRDFLutMap, vec2(m_Params.NdotV, 1.0 - m_Params.Roughness)).rg;
+	vec2 specularBRDF = texture(u_BRDFLutMap, vec2(1.0 - m_Params.NdotV, 1.0 - m_Params.Roughness)).rg;
 	vec3 specularIBL = specularIrradiance * (F0 * specularBRDF.x + specularBRDF.y);
 	
 	return (kd * diffuseIBL + specularIBL) * u_IrradianceIntensity;
@@ -272,8 +277,7 @@ void main()
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, m_Params.Albedo, m_Params.Metalness);
 
-	float a	= m_Params.Roughness * m_Params.Roughness;
-	float a2 = a * a;
+	float a2 = m_Params.Roughness * m_Params.Roughness;
 	float r = m_Params.Roughness + 1.0;
 	float k = (r * r) / 8.0;
 
@@ -345,11 +349,11 @@ void main()
         vec3 F = FresnelSchlickRoughness(clamp(dot(H, m_Params.View), 0.0, 1.0), F0, m_Params.Roughness);
 
         vec3 numerator = NDF * G * F;
-        float denom = 4.0 * m_Params.NdotV * NdotL + 0.0001;
+        float denom = max(4.0 * m_Params.NdotV * NdotL, 0.0001);
         vec3 specular = numerator / denom;
 
         vec3 kD = (1.0 - F) * (1.0 - m_Params.Metalness);
-        Lo += (kD * m_Params.Albedo / PI + specular) * radiance * NdotL;
+        Lo += (kD * (m_Params.Albedo / PI) + specular) * radiance * NdotL;
     }
 	
 	vec3 ambient = IBL(F0) * ao;

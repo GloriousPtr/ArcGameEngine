@@ -27,11 +27,6 @@ const float PI = 3.14159265359;
 
 void main()
 {
-	// vec3 envColor = texture(u_EnvironmentMap, v_TexCoords).rgb;
-	
-	// envColor = envColor / (envColor + vec3(1.0));
-	// envColor = pow(envColor, vec3(1.0/2.2));
-
 	vec3 normal = normalize(v_TexCoords);
 
 	vec3 irradiance = vec3(0.0);
@@ -48,7 +43,7 @@ void main()
 		{
 			vec3 tangentSample = vec3(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
 			vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal;
-
+			
 			irradiance += textureLod(u_EnvironmentMap, sampleVec, 0).rgb * cos(theta) * sin(theta);
 			nrSamples++;
 		}
