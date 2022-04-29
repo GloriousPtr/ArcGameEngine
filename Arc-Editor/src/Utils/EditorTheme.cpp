@@ -39,10 +39,10 @@ namespace ArcEngine
         iconsConfig.GlyphMinAdvanceX = 4.0f;
         iconsConfig.SizePixels = 12.0f;
 		
-		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Regular.ttf", fontSize, &iconsConfig);
+		io.Fonts->AddFontFromFileTTF("Resources/Fonts/opensans/OpenSans-Regular.ttf", fontSize, &iconsConfig);
 		AddIconFont(fontSize);
 
-		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Bold.ttf", fontSize, &iconsConfig);
+		io.Fonts->AddFontFromFileTTF("Resources/Fonts/opensans/OpenSans-Bold.ttf", fontSize, &iconsConfig);
 		AddIconFont(fontSize);
 
 		io.Fonts->TexGlyphPadding = 1;
