@@ -1,9 +1,6 @@
 [submodule "Arc/vendor/spdlog"]
 	path = Arc/vendor/spdlog
 	url = https://github.com/gabime/spdlog.git
-[submodule "Arc/vendor/GLFW"]
-	path = Arc/vendor/GLFW
-	url = https://github.com/TheCherno/glfw
 [submodule "Arc/vendor/glm"]
 	path = Arc/vendor/glm
 	url = https://github.com/g-truc/glm.git
@@ -16,12 +13,15 @@
 [submodule "Arc/vendor/optick"]
 	path = Arc/vendor/optick
 	url = https://github.com/MohitSethi99/optick.git
-[submodule "Arc/vendor/imgui"]
-	path = Arc/vendor/imgui
-	url = https://github.com/MohitSethi99/imgui.git
 [submodule "Arc/vendor/assimp"]
 	path = Arc/vendor/assimp
 	url = https://github.com/MohitSethi99/assimp.git
 [submodule "Arc/vendor/box2d"]
 	path = Arc/vendor/box2d
 	url = https://github.com/MohitSethi99/box2d.git
+[submodule "Arc/vendor/imgui"]
+	path = Arc/vendor/imgui
+	url = https://github.com/MohitSethi99/imgui.git
+[submodule "Arc/vendor/GLFW"]
+	path = Arc/vendor/GLFW
+	url = https://github.com/MohitSethi99/glfw.git
