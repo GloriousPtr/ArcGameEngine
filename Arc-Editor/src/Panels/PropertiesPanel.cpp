@@ -11,6 +11,7 @@
 #include "Arc/Utils/PlatformUtils.h"
 #include "../Utils/UI.h"
 #include "../Utils/EditorTheme.h"
+#include "../EditorLayer.h"
 
 namespace ArcEngine
 {
@@ -99,8 +100,17 @@ namespace ArcEngine
 			std::string filepath = FileDialogs::OpenFile("Texture (*.hdr)\0*.hdr\0");
 			if (!filepath.empty())
 			{
-				texture = TextureCubemap::Create(filepath);
+				texture = AssetManager::GetTextureCubemap(filepath);
 			}
+		}
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				const char* path = (const char*)payload->Data;
+				texture = AssetManager::GetTextureCubemap(path);
+			}
+			ImGui::EndDragDropTarget();
 		}
 		ImGui::PopStyleColor(3);
 
@@ -141,8 +151,17 @@ namespace ArcEngine
 			std::string filepath = FileDialogs::OpenFile("Texture (*.png)\0*.png\0(*.jpg)\0*.jpg\0");
 			if (!filepath.empty())
 			{
-				texture = Texture2D::Create(filepath);
+				texture = AssetManager::GetTexture2D(filepath);
 			}
+		}
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				const char* path = (const char*)payload->Data;
+				texture = AssetManager::GetTexture2D(path);
+			}
+			ImGui::EndDragDropTarget();
 		}
 		ImGui::PopStyleColor(3);
 
@@ -632,6 +651,18 @@ namespace ArcEngine
 					return;
 				}
 			}
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+				{
+					const char* path = (const char*)payload->Data;
+					LoadMesh(path, entity);
+
+					ImGui::EndDragDropTarget();
+					return;
+				}
+				ImGui::EndDragDropTarget();
+			}
 
 			ImGui::Text(component.Filepath.c_str());
 
@@ -734,7 +765,7 @@ namespace ArcEngine
 			}
 		});
 
-		DrawComponent<Rigidbody2DComponent>(ICON_MDI_BOX " Rigidbody 2D", entity, [](Rigidbody2DComponent& component)
+		DrawComponent<Rigidbody2DComponent>(ICON_MDI_SOCCER " Rigidbody 2D", entity, [](Rigidbody2DComponent& component)
 		{
 			const char* bodyTypeStrings[] = { "Static", "Kinematic", "Dynamic" };
 			int bodyType = (int) component.Type;
@@ -753,7 +784,7 @@ namespace ArcEngine
 			}
 		});
 
-		DrawComponent<BoxCollider2DComponent>(ICON_MDI_BOX " Box Collider 2D", entity, [](BoxCollider2DComponent& component)
+		DrawComponent<BoxCollider2DComponent>(ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider 2D", entity, [](BoxCollider2DComponent& component)
 		{
 			UI::Property("Size", component.Size);
 			UI::Property("Offset", component.Offset);
@@ -761,6 +792,15 @@ namespace ArcEngine
 			UI::Property("Friction", component.Friction);
 			UI::Property("Restitution", component.Restitution);
 			UI::Property("Restitution Threshold", component.RestitutionThreshold);
+		});
+
+		DrawComponent<ScriptComponent>(ICON_MDI_POUND_BOX " Script", entity, [](ScriptComponent& component)
+		{
+			static bool found = false;
+			ImGui::PushStyleColor(ImGuiCol_Text, { found ? 0.2f : 0.8f, found ? 0.8f : 0.2f, 0.2f, 1.0f});
+			if (UI::Property("Name", component.ClassName))
+				found = ScriptingEngine::HasClass(component.ClassName.c_str());
+			ImGui::PopStyleColor();
 		});
 
 		ImGui::Separator();
@@ -776,72 +816,81 @@ namespace ArcEngine
 			ImGui::SetCursorPos(pos);
 		}
 
-		if (ImGui::Button("Add Component", addComponentButtonSize))
+		if (ImGui::Button(ICON_MDI_PLUS "Add Component", addComponentButtonSize))
 			ImGui::OpenPopup("Add Component");
 
 		if (ImGui::BeginPopup("Add Component"))
 		{
-			if (ImGui::MenuItem("Camera"))
+			if (!entity.HasComponent<CameraComponent>())
 			{
-				if (!entity.HasComponent<CameraComponent>())
+				if (ImGui::MenuItem(ICON_MDI_CAMERA " Camera"))
+				{
 					entity.AddComponent<CameraComponent>();
-				else
-					ARC_CORE_WARN("This entity already has the Camera Component!");
-				ImGui::CloseCurrentPopup();
+					ImGui::CloseCurrentPopup();
+				}
 			}
-			
-			if (ImGui::MenuItem("Sprite Renderer"))
+
+			if (!entity.HasComponent<SpriteRendererComponent>())
 			{
-				if (!entity.HasComponent<SpriteRendererComponent>())
+				if (ImGui::MenuItem(ICON_MDI_IMAGE_SIZE_SELECT_ACTUAL " Sprite Renderer"))
+				{
 					entity.AddComponent<SpriteRendererComponent>();
-				else
-					ARC_CORE_WARN("This entity already has the Sprite Renderer Component!");
-				ImGui::CloseCurrentPopup();
+					ImGui::CloseCurrentPopup();
+				}
 			}
 
-			if (ImGui::MenuItem("Mesh"))
+			if (!entity.HasComponent<MeshComponent>())
 			{
-				if (!entity.HasComponent<MeshComponent>())
+				if (ImGui::MenuItem(ICON_MDI_VECTOR_SQUARE " Mesh"))
+				{
 					entity.AddComponent<MeshComponent>();
-				else
-					ARC_CORE_WARN("This entity already has the Mesh Component!");
-				ImGui::CloseCurrentPopup();
+					ImGui::CloseCurrentPopup();
+				}
 			}
 
-			if (ImGui::MenuItem("Sky Light"))
+			if (!entity.HasComponent<SkyLightComponent>())
 			{
-				if (!entity.HasComponent<SkyLightComponent>())
+				if (ImGui::MenuItem(ICON_MDI_EARTH " Sky Light"))
+				{
 					entity.AddComponent<SkyLightComponent>();
-				else
-					ARC_CORE_WARN("This entity already has the Sky Light Component!");
-				ImGui::CloseCurrentPopup();
+					ImGui::CloseCurrentPopup();
+				}
 			}
 
-			if (ImGui::MenuItem("Light"))
+			if (!entity.HasComponent<LightComponent>())
 			{
-				if (!entity.HasComponent<LightComponent>())
+				if (ImGui::MenuItem(ICON_MDI_LIGHTBULB " Light"))
+				{
 					entity.AddComponent<LightComponent>();
-				else
-					ARC_CORE_WARN("This entity already has the Light Component!");
-				ImGui::CloseCurrentPopup();
+					ImGui::CloseCurrentPopup();
+				}
 			}
 
-			if (ImGui::MenuItem("Rigidbody 2D"))
+			if (!entity.HasComponent<Rigidbody2DComponent>())
 			{
-				if (!entity.HasComponent<Rigidbody2DComponent>())
+				if (ImGui::MenuItem(ICON_MDI_SOCCER " Rigidbody 2D"))
+				{
 					entity.AddComponent<Rigidbody2DComponent>();
-				else
-					ARC_CORE_WARN("This entity already has the Rigidbody 2D Component!");
-				ImGui::CloseCurrentPopup();
+					ImGui::CloseCurrentPopup();
+				}
 			}
 
-			if (ImGui::MenuItem("Box Collider 2D"))
+			if (!entity.HasComponent<BoxCollider2DComponent>())
 			{
-				if (!entity.HasComponent<BoxCollider2DComponent>())
+				if (ImGui::MenuItem(ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider 2D"))
+				{
 					entity.AddComponent<BoxCollider2DComponent>();
-				else
-					ARC_CORE_WARN("This entity already has the Box Collider 2D Component!");
-				ImGui::CloseCurrentPopup();
+					ImGui::CloseCurrentPopup();
+				}
+			}
+
+			if (!entity.HasComponent<ScriptComponent>())
+			{
+				if (ImGui::MenuItem(ICON_MDI_POUND_BOX " Script"))
+				{
+					entity.AddComponent<ScriptComponent>();
+					ImGui::CloseCurrentPopup();
+				}
 			}
 			
 			ImGui::EndPopup();

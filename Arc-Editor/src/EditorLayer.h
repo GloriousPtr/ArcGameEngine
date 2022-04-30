@@ -8,6 +8,7 @@
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/ConsolePanel.h"
 #include "Panels/AssetPanel.h"
+#include "Panels/ProjectSettingsPanel.h"
 
 namespace ArcEngine
 {
@@ -15,7 +16,7 @@ namespace ArcEngine
 	{
 	public:
 		EditorLayer();
-		virtual ~EditorLayer() = default;
+		virtual ~EditorLayer();
 		
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
@@ -23,9 +24,14 @@ namespace ArcEngine
 		virtual void OnUpdate(Timestep ts) override;
 		virtual void OnImGuiRender() override;
 		virtual void OnEvent(Event& e) override;
+		void OpenScene(const char* filepath);
+
+		static EditorLayer* GetInstance() { return s_Instance; }
+
 	private:
 		bool OnKeyPressed(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
+		bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
 
 		void NewScene();
 		void OpenScene();
@@ -48,6 +54,7 @@ namespace ArcEngine
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		ConsolePanel m_ConsolePanel;
+		ProjectSettingsPanel m_ProjectSettingsPanel;
 
 		std::vector<Scope<BasePanel>> m_Panels;
 		std::vector<Scope<SceneViewport>> m_Viewports;
@@ -56,5 +63,7 @@ namespace ArcEngine
 
 		bool m_ShowSceneHierarchyPanel = true;
 		bool m_ShowDemoWindow = false;
+
+		static EditorLayer* s_Instance;
 	};
 }

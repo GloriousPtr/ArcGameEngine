@@ -38,6 +38,13 @@ IncludeDir["assimp_config"] = "%{wks.location}/Arc/vendor/assimp/_config_headers
 IncludeDir["assimp_config_assimp"] = "%{wks.location}/Arc/vendor/assimp/_config_headers/assimp"
 IncludeDir["optick"] = "%{wks.location}/Arc/vendor/optick/src"
 IncludeDir["box2d"] = "%{wks.location}/Arc/vendor/box2d/include"
+IncludeDir["mono"] = "%{wks.location}/Arc/vendor/mono/include"
+
+LibDir = {}
+LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/%{cfg.buildcfg}"
+
+Lib = {}
+Lib["mono"] = "%{LibDir.Mono}/mono-2.0-sgen.lib"
 
 group "Dependencies"
 	include "vendor/premake"
@@ -53,3 +60,4 @@ group ""
 
 include "Arc"
 include "Arc-Editor"
+include "Arc-ScriptCore"

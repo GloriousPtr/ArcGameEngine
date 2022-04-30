@@ -2,6 +2,7 @@
 #include "Arc/Core/Application.h"
 
 #include "Arc/Renderer/Renderer.h"
+#include "Arc/Scripting/ScriptingEngine.h"
 
 #include <GLFW/glfw3.h>
 #include <optick.config.h>
@@ -23,6 +24,7 @@ namespace ArcEngine
 		m_Window->SetEventCallBack(ARC_BIND_EVENT_FN(Application::OnEvent));
 
 		Renderer::Init();
+		ScriptingEngine::Init("Resources/Scripts/Arc-ScriptCore.dll");
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
@@ -34,7 +36,8 @@ namespace ArcEngine
 			OPTICK_EVENT();
 
 			ARC_PROFILE_FUNCTION();
-		
+
+			ScriptingEngine::Shutdown();
 			Renderer::Shutdown();
 		}
 

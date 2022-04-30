@@ -299,14 +299,38 @@ namespace ArcEngine
 		flags |= ImGuiTableFlags_SizingStretchSame;
 		flags |= ImGuiTableFlags_NoClip;
 
+		uint32_t i = 0;
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0, 0 });
 		if (ImGui::BeginTable("BodyTable", columnCount, flags))
 		{
 			for (auto& file : m_DirectoryEntries)
 			{
-				ImGui::TableNextColumn();
+				ImGui::PushID(i++);
+
 				uint32_t textureId = m_DirectoryIcon->GetRendererID();
+				if (!file.DirectoryEntry.is_directory())
+				{
+					auto lastDot = file.Name.find_last_of(".");
+					std::string ext = file.Name.substr(lastDot + 1, file.Name.size() - lastDot);
+					if (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp")
+					{
+						std::string path = file.DirectoryEntry.path().string();
+						textureId = AssetManager::GetTexture2D(path.c_str())->GetRendererID();
+					}
+				}
+
+				ImGui::TableNextColumn();
+				ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
 				ImGui::ImageButton((ImTextureID)textureId, { m_ThumbnailSize, m_ThumbnailSize }, { 0, 1 }, { 1, 0 }, padding);
+				
+				if (ImGui::BeginDragDropSource())
+				{
+					std::string itemPath = file.DirectoryEntry.path().string();
+					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath.c_str(), (strlen(itemPath.c_str()) + 1) * sizeof(char));
+					ImGui::EndDragDropSource();
+				}
+				
+				ImGui::PopStyleColor();
 				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 				{
 					if (file.DirectoryEntry.is_directory())
@@ -320,6 +344,8 @@ namespace ArcEngine
 				const char* fileName = file.Name.c_str();
 				ImGui::SetCursorPosX(posX - ImGui::CalcTextSize(fileName).x * 0.5f);
 				ImGui::TextUnformatted(fileName);
+
+				ImGui::PopID();
 			}
 			ImGui::EndTable();
 		}

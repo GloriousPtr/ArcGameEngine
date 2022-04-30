@@ -29,7 +29,7 @@ project "Arc-Editor"
 
 	links
 	{
-		"Arc"
+		"Arc",
 	}
 
 	filter "system:windows"
@@ -39,13 +39,25 @@ project "Arc-Editor"
 		defines "ARC_DEBUG"
 		runtime "Debug"
 		symbols "on"
+		postbuildcommands
+		{
+			'{COPY} "../Arc/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+		}
 
 	filter "configurations:Release"
 		defines "ARC_RELEASE"
 		runtime "Release"
 		optimize "on"
+		postbuildcommands
+		{
+			'{COPY} "../Arc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+		}
 
 	filter "configurations:Dist"
 		defines "ARC_DIST"
 		runtime "Release"
         optimize "on"
+		postbuildcommands
+		{
+			'{COPY} "../Arc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+		}

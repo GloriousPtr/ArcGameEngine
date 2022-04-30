@@ -6,6 +6,7 @@
 
 #include "Arc/Math/Math.h"
 #include "../Utils/IconsMaterialDesignIcons.h"
+#include "../EditorLayer.h"
 
 namespace ArcEngine
 {
@@ -220,6 +221,16 @@ namespace ArcEngine
 
 		const uint64_t textureID = m_RenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
 		ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				const char* path = (const char*)payload->Data;
+				EditorLayer::GetInstance()->OpenScene(path);
+			}
+			ImGui::EndDragDropTarget();
+		}
 
 		// Gizmos
 		if (m_ViewportHovered && m_SceneHierarchyPanel && m_GizmoType != -1 && !m_SimulationRunning)

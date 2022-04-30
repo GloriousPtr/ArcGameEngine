@@ -3,6 +3,7 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
+#include <ArcEngine.h>
 
 #include "Utils/EditorTheme.h"
 
@@ -15,8 +16,17 @@
 
 namespace ArcEngine
 {
+	EditorLayer* EditorLayer::s_Instance = nullptr;
+
 	EditorLayer::EditorLayer()
 		: Layer("Sandbox2D")
+	{
+		ARC_CORE_ASSERT(!s_Instance, "Editor Layer already exists!");
+
+		s_Instance = this;
+	}
+
+	EditorLayer::~EditorLayer()
 	{
 	}
 
@@ -334,18 +344,6 @@ namespace ArcEngine
 		}
 
 		//////////////////////////////////////////////////////////////////////////
-		// PROPERTY PANELS ///////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////////////////
-		for (size_t i = 0; i < m_Properties.size(); i++)
-		{
-			if (m_Properties[i]->IsShowing())
-			{
-				m_Properties[i]->SetContext(selectedContext);
-				m_Properties[i]->OnImGuiRender();
-			}
-		}
-
-		//////////////////////////////////////////////////////////////////////////
 		// ASSETS PANELS /////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////
 		for (size_t i = 0; i < m_AssetPanels.size(); i++)
@@ -363,8 +361,23 @@ namespace ArcEngine
 				m_Panels[i]->OnImGuiRender();
 		}
 
+		//////////////////////////////////////////////////////////////////////////
+		// PROPERTY PANELS ///////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////
+		for (size_t i = 0; i < m_Properties.size(); i++)
+		{
+			if (m_Properties[i]->IsShowing())
+			{
+				m_Properties[i]->SetContext(selectedContext);
+				m_Properties[i]->OnImGuiRender();
+			}
+		}
+
 		if (m_ConsolePanel.IsShowing())
 			m_ConsolePanel.OnImGuiRender();
+
+		if (m_ProjectSettingsPanel.IsShowing())
+			m_ProjectSettingsPanel.OnImGuiRender();
 
 		if (m_ShowDemoWindow)
 			ImGui::ShowDemoWindow(&m_ShowDemoWindow);
@@ -381,6 +394,7 @@ namespace ArcEngine
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(ARC_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
 		dispatcher.Dispatch<MouseButtonPressedEvent>(ARC_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
+		dispatcher.Dispatch<MouseButtonReleasedEvent>(ARC_BIND_EVENT_FN(EditorLayer::OnMouseButtonReleased));
 	}
 
 	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
@@ -457,23 +471,29 @@ namespace ArcEngine
 		m_ScenePath = "";
 	}
 
+	void EditorLayer::OpenScene(const char* filepath)
+	{
+		for (size_t i = 0; i < m_Properties.size(); i++)
+			m_Properties[i]->ForceSetContext({ entt::null , nullptr });
+
+		m_ActiveScene = CreateRef<Scene>();
+		m_ActiveScene->OnViewportResize(1, 1);
+		m_ActiveScene->MarkViewportDirty();
+		m_EditorScene = m_ActiveScene;
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+		SceneSerializer serializer(m_ActiveScene);
+		serializer.Deserialize(filepath);
+		m_ScenePath = filepath;
+	}
+
 	void EditorLayer::OpenScene()
 	{
 		std::string filepath = FileDialogs::OpenFile("Arc Scene (*.arc)\0*.arc\0");
 		if (!filepath.empty())
 		{
-			for (size_t i = 0; i < m_Properties.size(); i++)
-				m_Properties[i]->ForceSetContext({});
-
-			m_ActiveScene = CreateRef<Scene>();
-			m_ActiveScene->MarkViewportDirty();
-			m_EditorScene = m_ActiveScene;
-
-			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Deserialize(filepath);
-			m_ScenePath = filepath;
+			OpenScene(filepath.c_str());
 		}
 	}
 	

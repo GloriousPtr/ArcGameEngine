@@ -45,7 +45,8 @@ project "Arc"
 		"%{IncludeDir.assimp_config}",
 		"%{IncludeDir.assimp_config_assimp}",
 		"%{IncludeDir.optick}",
-		"%{IncludeDir.box2d}"
+		"%{IncludeDir.box2d}",
+		"%{IncludeDir.mono}"
 	}
 
 	links
@@ -57,7 +58,9 @@ project "Arc"
 		"assimp",
 		"optick",
 		"box2d",
-		"opengl32.lib"
+		"opengl32.lib",
+
+		"%{Lib.mono}"
 	}
 
 	filter "files:vendor/ImGuizmo/**.cpp"
@@ -75,8 +78,16 @@ project "Arc"
 		defines "ARC_RELEASE"
 		runtime "Release"
 		optimize "on"
+		postbuildcommands
+		{
+			'{COPY} "../Arc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+		}
 
 	filter "configurations:Dist"
 		defines "ARC_DIST"
 		runtime "Release"
 		optimize "on"
+		postbuildcommands
+		{
+			'{COPY} "../Arc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
+		}

@@ -5,6 +5,7 @@
 #include "Arc/Scene/ScriptableEntity.h"
 #include "Arc/Renderer/Renderer2D.h"
 #include "Arc/Renderer/Renderer3D.h"
+#include "Arc/Scripting/ScriptingEngine.h"
 
 #include <glm/glm.hpp>
 #include <glad/glad.h>
@@ -73,6 +74,7 @@ namespace ArcEngine
 		CopyComponent<LightComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
 		CopyComponent<Rigidbody2DComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
 		CopyComponent<BoxCollider2DComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
+		CopyComponent<ScriptComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
 
 		return newScene;
 	}
@@ -180,10 +182,40 @@ namespace ArcEngine
 				bc2d.RuntimeFixture = rb->CreateFixture(&fixtureDef);
 			}
 		}
+
+		auto scriptView = m_Registry.view<ScriptComponent>();
+		constexpr char* onCreateDesc = "OnCreate()";
+		constexpr char* onUpdateDesc = "OnUpdate(single)";
+		constexpr char* onDestroyDesc = "OnDestroy()";
+		for (auto e : scriptView)
+		{
+			ScriptComponent& script = scriptView.get<ScriptComponent>(e);
+			const char* className = script.ClassName.c_str();
+
+			script.RuntimeInstance = ScriptingEngine::MakeInstance(className);
+			
+			ScriptingEngine::CacheMethodIfAvailable(className, onCreateDesc);
+			ScriptingEngine::CacheMethodIfAvailable(className, onUpdateDesc);
+			ScriptingEngine::CacheMethodIfAvailable(className, onDestroyDesc);
+
+			if (ScriptingEngine::GetCachedMethodIfAvailable(className, onCreateDesc))
+				ScriptingEngine::Call(script.RuntimeInstance, className, onCreateDesc, nullptr);
+		}
 	}
 
 	void Scene::OnRuntimeStop()
 	{
+		auto scriptView = m_Registry.view<ScriptComponent>();
+		constexpr char* onDestroyDesc = "OnDestroy()";
+		for (auto e : scriptView)
+		{
+			ScriptComponent& script = scriptView.get<ScriptComponent>(e);
+			const char* className = script.ClassName.c_str();
+
+			if (ScriptingEngine::GetCachedMethodIfAvailable(className, onDestroyDesc))
+				ScriptingEngine::Call(script.RuntimeInstance, className, onDestroyDesc, nullptr);
+		}
+
 		delete m_PhysicsWorld2D;
 		m_PhysicsWorld2D = nullptr;
 	}
@@ -259,6 +291,22 @@ namespace ArcEngine
 		/////////////////////////////////////////////////////////////////////
 		// Scripting ////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
+		{
+			void* args[1];
+			float timestep = ts;
+			args[0] = &timestep;
+			constexpr char* onUpdateDesc = "OnUpdate(single)";
+			auto scriptView = m_Registry.view<ScriptComponent>();
+			for (auto e : scriptView)
+			{
+				ScriptComponent& script = scriptView.get<ScriptComponent>(e);
+				const char* className = script.ClassName.c_str();
+				
+				if (ScriptingEngine::GetCachedMethodIfAvailable(className, onUpdateDesc))
+					ScriptingEngine::Call(script.RuntimeInstance, className, onUpdateDesc, args);
+			}
+		}
+
 		{
 			m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
 			{
@@ -460,6 +508,11 @@ namespace ArcEngine
 
 	template<>
 	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<ScriptComponent>(Entity entity, ScriptComponent& component)
 	{
 	}
 }

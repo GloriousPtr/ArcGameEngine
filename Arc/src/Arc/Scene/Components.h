@@ -251,4 +251,14 @@ namespace ArcEngine
 		BoxCollider2DComponent() = default;
 		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
 	};
+
+	struct ScriptComponent
+	{
+		std::string ClassName;
+		
+		void* RuntimeInstance = nullptr;
+
+		ScriptComponent() = default;
+		ScriptComponent(const ScriptComponent&) = default;
+	};
 }
