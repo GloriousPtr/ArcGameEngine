@@ -15,6 +15,8 @@ namespace ArcEngine
 		virtual void OnUpdate(Ref<Scene>& scene, Timestep timestep);
 		virtual void OnImGuiRender() override;
 
+		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
+		bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
 		void SetSceneHierarchyPanel(SceneHierarchyPanel& sceneHierarchyPanel) { m_SceneHierarchyPanel = &sceneHierarchyPanel; }
 
 		bool IsHovered() { return m_ViewportHovered; }
@@ -43,10 +45,11 @@ namespace ArcEngine
 		float m_MouseSensitivity = 0.1f;
 
 		float m_MaxMoveSpeed = 1.0f;
-		float m_MoveDampeningFactor = 0.01f;
+		float m_MoveDampeningFactor = 0.02f;
 		glm::vec3 m_MoveDirection = glm::vec3(0.0f);
 		float m_MoveVelocity = 0.0f;
 
 		bool m_SimulationRunning = false;
+		bool m_CursorLocked = false;
 	};
 }

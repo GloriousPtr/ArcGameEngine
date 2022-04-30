@@ -82,58 +82,55 @@ namespace ArcEngine
 			scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
-		if (m_ViewportHovered)
+		m_MousePosition = *((glm::vec2*) &(ImGui::GetMousePos()));
+		const glm::vec3& position = m_EditorCamera.GetPosition();
+		float yaw = m_EditorCamera.GetYaw();
+		float pitch = m_EditorCamera.GetPitch();
+
+		bool moved = false;
+		if (m_CursorLocked)
 		{
-			m_MousePosition = *((glm::vec2*) &(ImGui::GetMousePos()));
-			const glm::vec3& position = m_EditorCamera.GetPosition();
-			float yaw = m_EditorCamera.GetYaw();
-			float pitch = m_EditorCamera.GetPitch();
+			const glm::vec2 change = (m_MousePosition - m_LastMousePosition) * m_MouseSensitivity;
+			yaw += change.x;
+			pitch = glm::clamp(pitch - change.y, -89.9f, 89.9f);
 
-			bool moved = false;
-			if (ImGui::IsMouseDown(ImGuiMouseButton_Right))
+			glm::vec3 moveDirection = glm::vec3(0.0f);
+			if (ImGui::IsKeyDown(Key::W))
 			{
-				const glm::vec2 change = (m_MousePosition - m_LastMousePosition) * m_MouseSensitivity;
-				yaw += change.x;
-				pitch = glm::clamp(pitch - change.y, -89.9f, 89.9f);
-
-				glm::vec3 moveDirection = glm::vec3(0.0f);
-				if (ImGui::IsKeyDown(Key::W))
-				{
-					moved = true;
-					moveDirection += m_EditorCamera.GetForward() * timestep.GetSeconds();
-				}
-				else if (ImGui::IsKeyDown(Key::S))
-				{
-					moved = true;
-					moveDirection -= m_EditorCamera.GetForward() * timestep.GetSeconds();
-				}
-				if (ImGui::IsKeyDown(Key::D))
-				{
-					moved = true;
-					moveDirection += m_EditorCamera.GetRight() * timestep.GetSeconds();
-				}
-				else if (ImGui::IsKeyDown(Key::A))
-				{
-					moved = true;
-					moveDirection -= m_EditorCamera.GetRight() * timestep.GetSeconds();
-				}
-
-				if (glm::length2(moveDirection) > 0.0001f)
-					m_MoveDirection = glm::normalize(moveDirection);
+				moved = true;
+				moveDirection += m_EditorCamera.GetForward() * timestep.GetSeconds();
+			}
+			else if (ImGui::IsKeyDown(Key::S))
+			{
+				moved = true;
+				moveDirection -= m_EditorCamera.GetForward() * timestep.GetSeconds();
+			}
+			if (ImGui::IsKeyDown(Key::D))
+			{
+				moved = true;
+				moveDirection += m_EditorCamera.GetRight() * timestep.GetSeconds();
+			}
+			else if (ImGui::IsKeyDown(Key::A))
+			{
+				moved = true;
+				moveDirection -= m_EditorCamera.GetRight() * timestep.GetSeconds();
 			}
 
-			m_MoveVelocity += (moved ? 1.0f : -1.0f) * timestep;
-			m_MoveVelocity *= glm::pow(m_MoveDampeningFactor, timestep);
-			if (m_MoveVelocity > 0.0f)
-			{
-				float maxMoveSpeed = m_MaxMoveSpeed * (ImGui::IsKeyDown(Key::LeftShift) ? 3.0f : 1.0f);
-				m_EditorCamera.SetPosition(position + (m_MoveDirection * m_MoveVelocity * maxMoveSpeed));
-			}
-
-			m_EditorCamera.SetYaw(yaw);
-			m_EditorCamera.SetPitch(pitch);
-			m_LastMousePosition = m_MousePosition;
+			if (glm::length2(moveDirection) > 0.0001f)
+				m_MoveDirection = glm::normalize(moveDirection);
 		}
+
+		m_MoveVelocity += (moved ? 1.0f : -1.0f) * timestep;
+		m_MoveVelocity *= glm::pow(m_MoveDampeningFactor, timestep);
+		if (m_MoveVelocity > 0.0f)
+		{
+			float maxMoveSpeed = m_MaxMoveSpeed * (ImGui::IsKeyDown(Key::LeftShift) ? 3.0f : 1.0f);
+			m_EditorCamera.SetPosition(position + (m_MoveDirection * m_MoveVelocity * maxMoveSpeed));
+		}
+
+		m_EditorCamera.SetYaw(yaw);
+		m_EditorCamera.SetPitch(pitch);
+		m_LastMousePosition = m_MousePosition;
 
 		if (!m_SimulationRunning)
 			m_EditorCamera.OnUpdate(timestep);
@@ -267,5 +264,32 @@ namespace ArcEngine
 
 		ImGui::End();
 		ImGui::PopStyleVar();
+	}
+
+	bool SceneViewport::OnMouseButtonPressed(MouseButtonPressedEvent& e)
+	{
+		if (e.GetMouseButton() == Mouse::Button1 && m_ViewportHovered && !m_SimulationRunning)
+		{
+			Application::Get().GetWindow().HideCursor();
+			m_CursorLocked = true;
+			return true;
+		}
+
+		return false;
+	}
+
+	bool SceneViewport::OnMouseButtonReleased(MouseButtonReleasedEvent& e)
+	{
+		if (m_CursorLocked == true)
+		{
+			Application::Get().GetWindow().ShowCursor();
+			m_CursorLocked = false;
+			m_MoveVelocity = 0;
+			m_MoveDirection = glm::vec3(0.0f);
+
+			return true;
+		}
+
+		return false;
 	}
 }

@@ -205,4 +205,14 @@ namespace ArcEngine
 	{
 		return m_Data.VSync;
 	}
+
+	void WindowsWindow::ShowCursor()
+	{
+		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
+	void WindowsWindow::HideCursor()
+	{
+		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
 }
