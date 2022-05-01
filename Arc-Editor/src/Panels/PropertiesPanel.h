@@ -11,7 +11,7 @@ namespace ArcEngine
 	{
 	public:
 		PropertiesPanel(const char* name = "Properties")
-			: BasePanel(name, ICON_MDI_INFORMATION)
+			: BasePanel(name, ICON_MDI_INFORMATION, true)
 		{
 		}
 

@@ -16,5 +16,11 @@ namespace ArcEngine
 		virtual ~ProjectSettingsPanel() override = default;
 
 		virtual void OnImGuiRender() override;
+
+		static void LoadAssemblies();
+
+	private:
+		static std::string s_ScriptCoreAssemblyPath;
+		static std::string s_ScriptClientAssemblyPath;
 	};
 }

@@ -11,7 +11,7 @@ namespace ArcEngine
 	{
 	public:
 		StatsPanel(const char* name = "Stats")
-			: BasePanel(name, ICON_MDI_INFORMATION_VARIANT)
+			: BasePanel(name, ICON_MDI_INFORMATION_VARIANT, true)
 		{}
 
 		virtual void OnImGuiRender() override;

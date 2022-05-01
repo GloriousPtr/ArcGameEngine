@@ -236,12 +236,15 @@ namespace ArcEngine
 							ImGui::EndMenu();
 						}
 						ImGui::MenuItem("Hierarchy", nullptr, &m_ShowSceneHierarchyPanel);
+						
+						bool showing = m_ProjectSettingsPanel.IsShowing();
+						if (ImGui::MenuItem(m_ProjectSettingsPanel.GetName(), nullptr, &showing))
+							m_ProjectSettingsPanel.SetShowing(showing);
 
-						{
-							bool showing = m_ConsolePanel.IsShowing();
-							if (ImGui::MenuItem(m_ConsolePanel.GetName(), nullptr, &showing))
-								m_ConsolePanel.SetShowing(showing);
-						}
+						showing = m_ConsolePanel.IsShowing();
+						if (ImGui::MenuItem(m_ConsolePanel.GetName(), nullptr, &showing))
+							m_ConsolePanel.SetShowing(showing);
+
 						for (size_t i = 0; i < m_Panels.size(); i++)
 						{
 							BasePanel* panel = m_Panels[i].get();
@@ -261,6 +264,16 @@ namespace ArcEngine
 						{
 							Renderer3D::GetShaderLibrary().ReloadAll();
 							Renderer3D::Init();
+						}
+
+						ImGui::EndMenu();
+					}
+
+					if (ImGui::BeginMenu("Scripting"))
+					{
+						if (ImGui::MenuItem("Reload Assemblies"))
+						{
+							ProjectSettingsPanel::LoadAssemblies();
 						}
 
 						ImGui::EndMenu();

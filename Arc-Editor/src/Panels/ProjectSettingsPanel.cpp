@@ -3,33 +3,33 @@
 #include <ArcEngine.h>
 #include <imgui/imgui.h>
 
+#include "../Utils/UI.h"
+
 namespace ArcEngine
 {
+	std::string ProjectSettingsPanel::s_ScriptCoreAssemblyPath = "../Sandbox/Assemblies/Arc-ScriptCore.dll";
+	std::string ProjectSettingsPanel::s_ScriptClientAssemblyPath = "../Sandbox/Assemblies/Sandbox.dll";
+
 	void ProjectSettingsPanel::OnImGuiRender()
 	{
 		ImGui::Begin(m_ID.c_str(), &m_Showing);
 
-		static void* instance = nullptr;
-		if (ImGui::Button("Make Instance!"))
-		{
-			instance = ScriptEngine::MakeInstance("Test");
-		}
+		UI::Property("Core Assembly Path", s_ScriptCoreAssemblyPath);
+		UI::Property("Project Assembly Path", s_ScriptClientAssemblyPath);
 
-		if (ImGui::Button("Test Call 1"))
-		{
-			ScriptEngine::Call(instance, "Test", "DoSomething()", nullptr);
-		}
+		static constexpr char* btnTitle = "Reload Assemblies";
+		static const int padding = ImGui::GetStyle().WindowPadding.x;
+		ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(btnTitle).x - padding);
 
-		static int times = 0;
-		if (ImGui::Button("Test Call 2"))
-		{
-			times++;
-
-			void* args[1];
-			args[0] = &times;
-			ScriptEngine::Call(instance, "Test", "DoSomething(int)", args);
-		}
+		if (ImGui::Button(btnTitle))
+			LoadAssemblies();
 
 		ImGui::End();
+	}
+
+	void ProjectSettingsPanel::LoadAssemblies()
+	{
+		ScriptEngine::LoadCoreAssembly(s_ScriptCoreAssemblyPath.c_str());
+		ScriptEngine::LoadClientAssembly(s_ScriptClientAssemblyPath.c_str());
 	}
 }

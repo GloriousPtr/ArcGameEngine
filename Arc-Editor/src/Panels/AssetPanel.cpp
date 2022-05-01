@@ -111,7 +111,7 @@ namespace ArcEngine
 	}
 
 	AssetPanel::AssetPanel(const char* name)
-		: BasePanel(name, ICON_MDI_FOLDER_STAR), m_CurrentDirectory(s_AssetPath)
+		: BasePanel(name, ICON_MDI_FOLDER_STAR, true), m_CurrentDirectory(s_AssetPath)
 	{
 		OPTICK_EVENT();
 

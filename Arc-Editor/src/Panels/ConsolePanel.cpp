@@ -10,7 +10,7 @@
 namespace ArcEngine
 {
 	ConsolePanel::ConsolePanel(const char* name)
-		: BasePanel(name, ICON_MDI_CONSOLE)
+		: BasePanel(name, ICON_MDI_CONSOLE, true)
 	{
 		OPTICK_EVENT();
 

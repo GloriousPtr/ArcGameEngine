@@ -15,14 +15,16 @@ namespace ArcEngine
 {
 	MonoDomain* ScriptEngine::s_MonoDomain;
 	MonoAssembly* ScriptEngine::s_ScriptCoreAssembly;
+	MonoAssembly* ScriptEngine::s_ScriptClientAssembly;
 	MonoImage* ScriptEngine::s_ScriptCoreImage;
+	MonoImage* ScriptEngine::s_ScriptClientImage;
 
 	std::unordered_map<std::string, MonoClass*> ScriptEngine::s_ClassMap;
 	std::unordered_map<std::string, MonoMethod*> ScriptEngine::s_MethodMap;
 	std::unordered_map<std::string, MonoProperty*> ScriptEngine::s_PropertyMap;
 	Scene* ScriptEngine::s_CurrentScene = nullptr;
 
-	void ScriptEngine::Init(const char* assemblyPath)
+	void ScriptEngine::Init(const char* coreAssemblyPath)
 	{
 		mono_set_dirs("C:/Program Files/Mono/lib",
         "C:/Program Files/Mono/etc");
@@ -30,21 +32,7 @@ namespace ArcEngine
 		s_MonoDomain = mono_jit_init("ScriptEngine");
 		ARC_CORE_ASSERT(s_MonoDomain, "Could not initialize domain");
 
-		s_ScriptCoreAssembly = mono_domain_assembly_open(s_MonoDomain, assemblyPath);
-		if (!s_ScriptCoreAssembly)
-		{
-			ARC_CORE_ERROR("Could not open assembly: {0}", assemblyPath);
-			return;
-		}
-
-		s_ScriptCoreImage = mono_assembly_get_image(s_ScriptCoreAssembly);
-		if (!s_ScriptCoreImage)
-		{
-			ARC_CORE_ERROR("Could not get image from assembly: {0}", assemblyPath);
-			return;
-		}
-
-		ScriptEngineRegistry::RegisterAll();
+		LoadCoreAssembly(coreAssemblyPath);
 	}
 
 	void ScriptEngine::Shutdown()
@@ -55,6 +43,42 @@ namespace ArcEngine
 		delete s_ScriptCoreImage;
 		delete s_ScriptCoreAssembly;
 		delete s_MonoDomain;
+	}
+
+	void ScriptEngine::LoadCoreAssembly(const char* path)
+	{
+		s_ScriptCoreAssembly = mono_domain_assembly_open(s_MonoDomain, path);
+		if (!s_ScriptCoreAssembly)
+		{
+			ARC_CORE_ERROR("Could not open assembly: {0}", path);
+			return;
+		}
+
+		s_ScriptCoreImage = mono_assembly_get_image(s_ScriptCoreAssembly);
+		if (!s_ScriptCoreImage)
+		{
+			ARC_CORE_ERROR("Could not get image from assembly: {0}", path);
+			return;
+		}
+
+		ScriptEngineRegistry::RegisterAll();
+	}
+
+	void ScriptEngine::LoadClientAssembly(const char* path)
+	{
+		s_ScriptClientAssembly = mono_domain_assembly_open(s_MonoDomain, path);
+		if (!s_ScriptClientAssembly)
+		{
+			ARC_CORE_ERROR("Could not open assembly: {0}", path);
+			return;
+		}
+
+		s_ScriptClientImage = mono_assembly_get_image(s_ScriptClientAssembly);
+		if (!s_ScriptClientImage)
+		{
+			ARC_CORE_ERROR("Could not get image from assembly: {0}", path);
+			return;
+		}
 	}
 
 	void* ScriptEngine::MakeInstance(const char* className)
@@ -121,7 +145,14 @@ namespace ArcEngine
 		std::string clazzName = name.substr(lastColon + 1, length - lastColon);
 
 		if (MonoClass* clazz = mono_class_from_name(s_ScriptCoreImage, namespaceName.c_str(), clazzName.c_str()))
+		{
 			s_ClassMap.emplace(className, clazz);
+		}
+		else if (s_ScriptClientImage)
+		{
+			if (MonoClass* clazz = mono_class_from_name(s_ScriptClientImage, namespaceName.c_str(), clazzName.c_str()))
+				s_ClassMap.emplace(className, clazz);
+		}
 	}
 
 	MonoMethod* ScriptEngine::GetCachedMethodIfAvailable(const char* className, const char* methodSignature)
@@ -179,6 +210,9 @@ namespace ArcEngine
 		std::string clazzName = name.substr(lastColon + 1, length - lastColon);
 
 		MonoClass* clazz = mono_class_from_name(s_ScriptCoreImage, namespaceName.c_str(), clazzName.c_str());
+		if (!clazz && s_ScriptClientImage)
+			clazz = mono_class_from_name(s_ScriptClientImage, namespaceName.c_str(), clazzName.c_str());
+
 		return clazz != nullptr;
 	}
 
@@ -201,9 +235,16 @@ namespace ArcEngine
 
 		MonoClass* clazz = mono_class_from_name(s_ScriptCoreImage, namespaceName.c_str(), clazzName.c_str());
 		if (clazz)
+		{
 			s_ClassMap.emplace(className, clazz);
-		else
-			ARC_CORE_ERROR("Class not found: {0}", className);
+		}
+		else if (s_ScriptClientImage)
+		{
+			if (clazz = mono_class_from_name(s_ScriptClientImage, namespaceName.c_str(), clazzName.c_str()))
+				s_ClassMap.emplace(className, clazz);
+		}
+
+		ARC_CORE_ERROR("Class not found: {0}", className);
 
 		return clazz;
 	}

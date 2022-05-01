@@ -19,3 +19,5 @@ bin-int/
 
 !/Arc-Editor/imgui.ini
 *.csproj
+*.user
+**/Assemblies

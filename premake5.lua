@@ -61,3 +61,5 @@ group ""
 include "Arc"
 include "Arc-Editor"
 include "Arc-ScriptCore"
+
+include "Sandbox"

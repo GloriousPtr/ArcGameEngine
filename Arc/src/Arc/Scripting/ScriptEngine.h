@@ -15,8 +15,10 @@ namespace ArcEngine
 	class ScriptEngine
 	{
 	public:
-		static void Init(const char* assemblyPath);
+		static void Init(const char* coreAssemblyPath);
 		static void Shutdown();
+		static void LoadCoreAssembly(const char* path);
+		static void LoadClientAssembly(const char* path);
 
 		static bool HasClass(const char* className);
 		static void* MakeInstance(const char* className);
@@ -42,7 +44,9 @@ namespace ArcEngine
 
 		static MonoDomain* s_MonoDomain;
 		static MonoAssembly* s_ScriptCoreAssembly;
+		static MonoAssembly* s_ScriptClientAssembly;
 		static MonoImage* s_ScriptCoreImage;
+		static MonoImage* s_ScriptClientImage;
 
 		static std::unordered_map<std::string, MonoClass*> s_ClassMap;
 		static std::unordered_map<std::string, MonoMethod*> s_MethodMap;

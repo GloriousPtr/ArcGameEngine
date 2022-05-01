@@ -7,7 +7,7 @@ namespace ArcEngine
 	class BasePanel
 	{
 	public:
-		BasePanel(const char* name = "Unnamed Panel", const char* icon = "");
+		BasePanel(const char* name = "Unnamed Panel", const char* icon = "", bool defaultShow = false);
 
 		virtual ~BasePanel() = default;
 
@@ -20,9 +20,9 @@ namespace ArcEngine
 		const char* GetIcon() { return m_Icon; }
 
 	protected:
-		bool m_Showing = true;
 		std::string m_Name;
-		std::string m_ID;
 		const char* m_Icon;
+		bool m_Showing;
+		std::string m_ID;
 	};
 }
