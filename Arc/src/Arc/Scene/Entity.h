@@ -55,6 +55,7 @@ namespace ArcEngine
 
 		UUID GetUUID() { return GetComponent<IDComponent>(); }
 		TransformComponent& GetTransform() { return GetComponent<TransformComponent>(); }
+		RelationshipComponent& GetRelationship() { return GetComponent<RelationshipComponent>(); }
 		
 		Entity GetParent()
 		{
@@ -62,8 +63,8 @@ namespace ArcEngine
 
 			ARC_PROFILE_FUNCTION();
 
-			auto& transform = GetTransform();
-			return transform.Parent != 0 ? m_Scene->GetEntity(transform.Parent) : Entity {};
+			auto& rc = GetComponent<RelationshipComponent>();
+			return rc.Parent != 0 ? m_Scene->GetEntity(rc.Parent) : Entity {};
 		}
 
 		void SetParent(Entity parent)
@@ -75,9 +76,9 @@ namespace ArcEngine
 			ARC_ASSERT(m_Scene->m_EntityMap.find(parent.GetUUID()) != m_Scene->m_EntityMap.end(), "Parent is not in the same scene as entity");
 			Deparent();
 			
-			auto& transform = GetTransform();
-			transform.Parent = parent.GetUUID();
-			parent.GetTransform().Children.push_back(GetUUID());
+			auto& rc = GetComponent<RelationshipComponent>();
+			rc.Parent = parent.GetUUID();
+			parent.GetRelationship().Children.push_back(GetUUID());
 		}
 
 		void Deparent()
@@ -86,12 +87,12 @@ namespace ArcEngine
 
 			ARC_PROFILE_FUNCTION();
 
-			auto& transform = GetTransform();
+			auto& transform = GetRelationship();
 			if (transform.Parent == 0)
 				return;
 
 			UUID uuid = GetUUID();
-			auto& parent = GetParent().GetTransform();
+			auto& parent = GetParent().GetRelationship();
 			for (auto it = parent.Children.begin(); it != parent.Children.end(); it++)
 			{
 				if (*it == uuid)
@@ -111,9 +112,10 @@ namespace ArcEngine
 			ARC_PROFILE_FUNCTION();
 
 			auto& transform = GetTransform();
+			auto& rc = GetRelationship();
 			glm::mat4 parentTransform = glm::mat4(1.0f);
-			if (transform.Parent != 0)
-				parentTransform = m_Scene->GetEntity(transform.Parent).GetWorldTransform();
+			if (rc.Parent != 0)
+				parentTransform = m_Scene->GetEntity(rc.Parent).GetWorldTransform();
 
 			return parentTransform * glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);
 		}

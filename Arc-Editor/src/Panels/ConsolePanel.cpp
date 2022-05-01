@@ -250,7 +250,8 @@ namespace ArcEngine
 	void ConsolePanel::Message::OnImGuiRender()
 	{
 		OPTICK_EVENT();
-
+		static uint32_t id = 0;
+		
 		glm::vec4 c = GetRenderColor(Level);
 		ImGui::PushStyleColor(ImGuiCol_Text, { c.r, c.g, c.b, c.a });
 		auto levelIcon = GetLevelIcon(Level);

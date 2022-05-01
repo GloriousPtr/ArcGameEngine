@@ -119,8 +119,8 @@ namespace ArcEngine
 
 		auto& tagComponent = entity.GetComponent<TagComponent>();
 		auto& tag = tagComponent.Tag;
-		auto& transform = entity.GetTransform();
-		uint32_t childrenSize = transform.Children.size();
+		auto& rc = entity.GetRelationship();
+		uint32_t childrenSize = rc.Children.size();
 
 		ImGuiTreeNodeFlags flags = (m_SelectionContext == entity ? ImGuiTreeNodeFlags_Selected : 0);
 		flags |= ImGuiTreeNodeFlags_OpenOnArrow;
@@ -181,9 +181,9 @@ namespace ArcEngine
 
 			for (size_t i = 0; i < childrenSize; i++)
 			{
-				UUID childId = entity.GetTransform().Children[i];
+				UUID childId = entity.GetRelationship().Children[i];
 				Entity child = m_Context->GetEntity(childId);
-				const float HorizontalTreeLineSize = child.GetTransform().Children.size() == 0 ? 18.0f : 10.0f; //chosen arbitrarily
+				const float HorizontalTreeLineSize = child.GetRelationship().Children.size() == 0 ? 18.0f : 10.0f; //chosen arbitrarily
 	            const ImRect childRect = DrawEntityNode(child, createChild);
 				const float midpoint = (childRect.Min.y + childRect.Max.y) / 2.0f;
 			    drawList->AddLine(ImVec2(verticalLineStart.x, midpoint), ImVec2(verticalLineStart.x + HorizontalTreeLineSize, midpoint), TreeLineColor, 0.25f);

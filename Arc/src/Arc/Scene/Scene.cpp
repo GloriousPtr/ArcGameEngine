@@ -5,7 +5,7 @@
 #include "Arc/Scene/ScriptableEntity.h"
 #include "Arc/Renderer/Renderer2D.h"
 #include "Arc/Renderer/Renderer3D.h"
-#include "Arc/Scripting/ScriptingEngine.h"
+#include "Arc/Scripting/ScriptEngine.h"
 
 #include <glm/glm.hpp>
 #include <glad/glad.h>
@@ -66,6 +66,7 @@ namespace ArcEngine
 		}
 
 		CopyComponent<TransformComponent>(dstRegistry, srcRegistry, newScene->m_EntityMap);
+		CopyComponent<RelationshipComponent>(dstRegistry, srcRegistry, newScene->m_EntityMap);
 		CopyComponent<SpriteRendererComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
 		CopyComponent<CameraComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
 		CopyComponent<NativeScriptComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
@@ -95,6 +96,7 @@ namespace ArcEngine
 
 		entity.AddComponent<IDComponent>(uuid);
 
+		entity.AddComponent<RelationshipComponent>();
 		entity.AddComponent<TransformComponent>();
 
 		auto& tag = entity.AddComponent<TagComponent>();
@@ -110,7 +112,7 @@ namespace ArcEngine
 		ARC_PROFILE_FUNCTION();
 
 		entity.Deparent();
-		auto children = entity.GetTransform().Children;
+		auto children = entity.GetComponent<RelationshipComponent>().Children;
 
 		for (size_t i = 0; i < children.size(); i++)
 			DestroyEntity(GetEntity(children[i]));
@@ -183,23 +185,30 @@ namespace ArcEngine
 			}
 		}
 
-		auto scriptView = m_Registry.view<ScriptComponent>();
+		ScriptEngine::SetScene(this);
+
+		auto scriptView = m_Registry.view<IDComponent, ScriptComponent>();
+		constexpr char* setUUIDDesc = "SetUUID(ulong)";
 		constexpr char* onCreateDesc = "OnCreate()";
 		constexpr char* onUpdateDesc = "OnUpdate(single)";
 		constexpr char* onDestroyDesc = "OnDestroy()";
 		for (auto e : scriptView)
 		{
-			ScriptComponent& script = scriptView.get<ScriptComponent>(e);
+			auto& [id, script] = scriptView.get<IDComponent, ScriptComponent>(e);
 			const char* className = script.ClassName.c_str();
 
-			script.RuntimeInstance = ScriptingEngine::MakeInstance(className);
-			
-			ScriptingEngine::CacheMethodIfAvailable(className, onCreateDesc);
-			ScriptingEngine::CacheMethodIfAvailable(className, onUpdateDesc);
-			ScriptingEngine::CacheMethodIfAvailable(className, onDestroyDesc);
+			script.RuntimeInstance = ScriptEngine::MakeInstance(className);
 
-			if (ScriptingEngine::GetCachedMethodIfAvailable(className, onCreateDesc))
-				ScriptingEngine::Call(script.RuntimeInstance, className, onCreateDesc, nullptr);
+			void* args[] { &id.ID };
+			void* property = ScriptEngine::GetProperty(className, "ID");
+			ScriptEngine::SetProperty(script.RuntimeInstance, property, args);
+			
+			ScriptEngine::CacheMethodIfAvailable(className, onCreateDesc);
+			ScriptEngine::CacheMethodIfAvailable(className, onUpdateDesc);
+			ScriptEngine::CacheMethodIfAvailable(className, onDestroyDesc);
+
+			if (ScriptEngine::GetCachedMethodIfAvailable(className, onCreateDesc))
+				ScriptEngine::Call(script.RuntimeInstance, className, onCreateDesc, nullptr);
 		}
 	}
 
@@ -212,9 +221,11 @@ namespace ArcEngine
 			ScriptComponent& script = scriptView.get<ScriptComponent>(e);
 			const char* className = script.ClassName.c_str();
 
-			if (ScriptingEngine::GetCachedMethodIfAvailable(className, onDestroyDesc))
-				ScriptingEngine::Call(script.RuntimeInstance, className, onDestroyDesc, nullptr);
+			if (ScriptEngine::GetCachedMethodIfAvailable(className, onDestroyDesc))
+				ScriptEngine::Call(script.RuntimeInstance, className, onDestroyDesc, nullptr);
 		}
+
+		ScriptEngine::SetScene(nullptr);
 
 		delete m_PhysicsWorld2D;
 		m_PhysicsWorld2D = nullptr;
@@ -302,8 +313,8 @@ namespace ArcEngine
 				ScriptComponent& script = scriptView.get<ScriptComponent>(e);
 				const char* className = script.ClassName.c_str();
 				
-				if (ScriptingEngine::GetCachedMethodIfAvailable(className, onUpdateDesc))
-					ScriptingEngine::Call(script.RuntimeInstance, className, onUpdateDesc, args);
+				if (ScriptEngine::GetCachedMethodIfAvailable(className, onUpdateDesc))
+					ScriptEngine::Call(script.RuntimeInstance, className, onUpdateDesc, args);
 			}
 		}
 
@@ -462,6 +473,11 @@ namespace ArcEngine
 
 	template<>
 	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<RelationshipComponent>(Entity entity, RelationshipComponent& component)
 	{
 	}
 

@@ -1,14 +1,18 @@
 #pragma once
 
+#include "Arc/Scene/Entity.h"
+#include "Arc/Scene/Scene.h"
+
 typedef struct _MonoDomain MonoDomain;
 typedef struct _MonoAssembly MonoAssembly;
 typedef struct _MonoImage MonoImage;
 typedef struct _MonoClass MonoClass;
 typedef struct _MonoMethod MonoMethod;
+typedef struct _MonoProperty MonoProperty;
 
 namespace ArcEngine
 {
-	class ScriptingEngine
+	class ScriptEngine
 	{
 	public:
 		static void Init(const char* assemblyPath);
@@ -17,6 +21,7 @@ namespace ArcEngine
 		static bool HasClass(const char* className);
 		static void* MakeInstance(const char* className);
 		static void Call(void* instance, const char* className, const char* methodSignature, void** args);
+		static void SetProperty(void* instance, void* property, void** params);
 		
 		static void CacheMethodIfAvailable(const char* className, const char* methodSignature);
 		static void CacheClassIfAvailable(const char* className);
@@ -26,6 +31,12 @@ namespace ArcEngine
 
 		static MonoMethod* GetMethod(const char* className, const char* methodSignature);
 		static MonoClass* GetClass(const char* className);
+		static MonoProperty* GetProperty(const char* className, const char* propertyName);
+
+		static void SetScene(Scene* scene) { s_CurrentScene = scene; }
+		static Scene* GetScene() { return s_CurrentScene; }
+
+		static MonoImage* GetCoreAssemblyImage() { return s_ScriptCoreImage; }
 
 	private:
 
@@ -35,5 +46,8 @@ namespace ArcEngine
 
 		static std::unordered_map<std::string, MonoClass*> s_ClassMap;
 		static std::unordered_map<std::string, MonoMethod*> s_MethodMap;
+		static std::unordered_map<std::string, MonoProperty*> s_PropertyMap;
+
+		static Scene* s_CurrentScene;
 	};
 }

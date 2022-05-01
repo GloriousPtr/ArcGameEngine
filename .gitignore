@@ -18,3 +18,4 @@ bin-int/
 *.json
 
 !/Arc-Editor/imgui.ini
+*.csproj

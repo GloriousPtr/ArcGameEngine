@@ -247,6 +247,7 @@ namespace ArcEngine
 				const glm::mat4& cameraView = m_EditorCamera.GetViewMatrix();
 				// Entity Transform
 				auto& tc = selectedEntity.GetComponent<TransformComponent>();
+				auto& rc = selectedEntity.GetComponent<RelationshipComponent>();
 				glm::mat4 transform = selectedEntity.GetWorldTransform();
 
 				// Snapping
@@ -261,7 +262,7 @@ namespace ArcEngine
 
 				if (m_ViewportHovered && ImGuizmo::IsUsing())
 				{
-					glm::mat4& parentWorldTransform = tc.Parent != 0 ? selectedEntity.GetParent().GetWorldTransform() : glm::mat4(1.0f);
+					glm::mat4& parentWorldTransform = rc.Parent != 0 ? selectedEntity.GetParent().GetWorldTransform() : glm::mat4(1.0f);
 					glm::vec3 translation, rotation, scale;
 					Math::DecomposeTransform(glm::inverse(parentWorldTransform) * transform, translation, rotation, scale);
 					

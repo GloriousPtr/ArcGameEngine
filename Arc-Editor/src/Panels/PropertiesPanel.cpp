@@ -799,7 +799,7 @@ namespace ArcEngine
 			static bool found = false;
 			ImGui::PushStyleColor(ImGuiCol_Text, { found ? 0.2f : 0.8f, found ? 0.8f : 0.2f, 0.2f, 1.0f});
 			if (UI::Property("Name", component.ClassName))
-				found = ScriptingEngine::HasClass(component.ClassName.c_str());
+				found = ScriptEngine::HasClass(component.ClassName.c_str());
 			ImGui::PopStyleColor();
 		});
 

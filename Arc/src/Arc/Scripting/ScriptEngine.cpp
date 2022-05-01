@@ -1,23 +1,28 @@
 #include "arcpch.h"
-#include "ScriptingEngine.h"
+#include "ScriptEngine.h"
 
 #include <mono/jit/jit.h>
 #include <mono/metadata/assembly.h>
+#include <mono/metadata/object.h>
 
 #ifdef ARC_DEBUG
 #include <mono/metadata/debug-helpers.h>
 #endif // ARC_DEBUG
 
+#include "ScriptEngineRegistry.h"
+
 namespace ArcEngine
 {
-	MonoDomain* ScriptingEngine::s_MonoDomain;
-	MonoAssembly* ScriptingEngine::s_ScriptCoreAssembly;
-	MonoImage* ScriptingEngine::s_ScriptCoreImage;
+	MonoDomain* ScriptEngine::s_MonoDomain;
+	MonoAssembly* ScriptEngine::s_ScriptCoreAssembly;
+	MonoImage* ScriptEngine::s_ScriptCoreImage;
 
-	std::unordered_map<std::string, MonoClass*> ScriptingEngine::s_ClassMap;
-	std::unordered_map<std::string, MonoMethod*> ScriptingEngine::s_MethodMap;
+	std::unordered_map<std::string, MonoClass*> ScriptEngine::s_ClassMap;
+	std::unordered_map<std::string, MonoMethod*> ScriptEngine::s_MethodMap;
+	std::unordered_map<std::string, MonoProperty*> ScriptEngine::s_PropertyMap;
+	Scene* ScriptEngine::s_CurrentScene = nullptr;
 
-	void ScriptingEngine::Init(const char* assemblyPath)
+	void ScriptEngine::Init(const char* assemblyPath)
 	{
 		mono_set_dirs("C:/Program Files/Mono/lib",
         "C:/Program Files/Mono/etc");
@@ -38,9 +43,11 @@ namespace ArcEngine
 			ARC_CORE_ERROR("Could not get image from assembly: {0}", assemblyPath);
 			return;
 		}
+
+		ScriptEngineRegistry::RegisterAll();
 	}
 
-	void ScriptingEngine::Shutdown()
+	void ScriptEngine::Shutdown()
 	{
 		s_MethodMap.clear();
 		s_ClassMap.clear();
@@ -50,7 +57,7 @@ namespace ArcEngine
 		delete s_MonoDomain;
 	}
 
-	void* ScriptingEngine::MakeInstance(const char* className)
+	void* ScriptEngine::MakeInstance(const char* className)
 	{
 		if (!s_MonoDomain)
 		{
@@ -69,7 +76,7 @@ namespace ArcEngine
 		return object;
 	}
 
-	void ScriptingEngine::Call(void* instance, const char* className, const char* methodSignature, void** args)
+	void ScriptEngine::Call(void* instance, const char* className, const char* methodSignature, void** args)
 	{
 		MonoMethod* method = GetMethod(className, methodSignature);
 		if (!method)
@@ -78,7 +85,13 @@ namespace ArcEngine
 		mono_runtime_invoke(method, instance, args, nullptr);
 	}
 
-	void ScriptingEngine::CacheMethodIfAvailable(const char* className, const char* methodSignature)
+	void ScriptEngine::SetProperty(void* instance, void* property, void** params)
+	{
+		MonoMethod* method = mono_property_get_set_method((MonoProperty*)property);
+		mono_runtime_invoke(method, instance, params, nullptr);
+	}
+
+	void ScriptEngine::CacheMethodIfAvailable(const char* className, const char* methodSignature)
 	{
 		std::string desc = std::string(className) + ":" + (methodSignature);
 		if (s_MethodMap.find(desc) != s_MethodMap.end())
@@ -93,7 +106,7 @@ namespace ArcEngine
 			s_MethodMap.emplace(desc, method);
 	}
 
-	void ScriptingEngine::CacheClassIfAvailable(const char* className)
+	void ScriptEngine::CacheClassIfAvailable(const char* className)
 	{
 		if (!s_ScriptCoreImage)
 			return;
@@ -103,7 +116,7 @@ namespace ArcEngine
 
 		std::string name(className);
 		int length = name.size();
-		int lastColon = name.find_last_of(':');
+		int lastColon = name.find_last_of('.');
 		std::string namespaceName = name.substr(0, lastColon);
 		std::string clazzName = name.substr(lastColon + 1, length - lastColon);
 
@@ -111,7 +124,7 @@ namespace ArcEngine
 			s_ClassMap.emplace(className, clazz);
 	}
 
-	MonoMethod* ScriptingEngine::GetCachedMethodIfAvailable(const char* className, const char* methodSignature)
+	MonoMethod* ScriptEngine::GetCachedMethodIfAvailable(const char* className, const char* methodSignature)
 	{
 		std::string desc = std::string(className) + ":" + (methodSignature);
 		if (s_MethodMap.find(desc) != s_MethodMap.end())
@@ -120,7 +133,7 @@ namespace ArcEngine
 			return nullptr;
 	}
 
-	MonoClass* ScriptingEngine::GetCachedClassIfAvailable(const char* className)
+	MonoClass* ScriptEngine::GetCachedClassIfAvailable(const char* className)
 	{
 		if (s_ClassMap.find(className) != s_ClassMap.end())
 			return s_ClassMap.at(className);
@@ -128,7 +141,7 @@ namespace ArcEngine
 			return nullptr;
 	}
 
-	MonoMethod* ScriptingEngine::GetMethod(const char* className, const char* methodSignature)
+	MonoMethod* ScriptEngine::GetMethod(const char* className, const char* methodSignature)
 	{
 		std::string desc = std::string(className) + ":" + (methodSignature);
 		if (s_MethodMap.find(desc) != s_MethodMap.end())
@@ -148,7 +161,7 @@ namespace ArcEngine
 		return method;
 	}
 
-	bool ScriptingEngine::HasClass(const char* className)
+	bool ScriptEngine::HasClass(const char* className)
 	{
 		if (!s_ScriptCoreImage)
 		{
@@ -161,7 +174,7 @@ namespace ArcEngine
 
 		std::string name(className);
 		int length = name.size();
-		int lastColon = name.find_last_of(':');
+		int lastColon = name.find_last_of('.');
 		std::string namespaceName = name.substr(0, lastColon);
 		std::string clazzName = name.substr(lastColon + 1, length - lastColon);
 
@@ -169,7 +182,7 @@ namespace ArcEngine
 		return clazz != nullptr;
 	}
 
-	MonoClass* ScriptingEngine::GetClass(const char* className)
+	MonoClass* ScriptEngine::GetClass(const char* className)
 	{
 		if (!s_ScriptCoreImage)
 		{
@@ -182,7 +195,7 @@ namespace ArcEngine
 
 		std::string name(className);
 		int length = name.size();
-		int lastColon = name.find_last_of(':');
+		int lastColon = name.find_last_of('.');
 		std::string namespaceName = name.substr(0, lastColon);
 		std::string clazzName = name.substr(lastColon + 1, length - lastColon);
 
@@ -193,5 +206,24 @@ namespace ArcEngine
 			ARC_CORE_ERROR("Class not found: {0}", className);
 
 		return clazz;
+	}
+
+	MonoProperty* ScriptEngine::GetProperty(const char* className, const char* propertyName)
+	{
+		std::string key = std::string(className) + propertyName;
+		if (s_PropertyMap.find(key) != s_PropertyMap.end())
+			return s_PropertyMap.at(key);
+
+		MonoClass* clazz = GetClass(className);
+		if (!clazz)
+			return nullptr;
+
+		MonoProperty* property = mono_class_get_property_from_name(clazz, propertyName);
+		if (property)
+			s_PropertyMap.emplace(key, property);
+		else
+			ARC_CORE_ERROR("Property: {0} not found in class {1}", propertyName, className);
+
+		return property;
 	}
 }

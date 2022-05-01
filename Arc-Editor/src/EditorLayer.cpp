@@ -527,8 +527,8 @@ namespace ArcEngine
 		m_RuntimeScene = Scene::CopyTo(m_EditorScene);
 		
 		m_ActiveScene = m_RuntimeScene;
-		m_SceneState = SceneState::Play;
 		m_ActiveScene->OnRuntimeStart();
+		m_SceneState = SceneState::Play;
 
 		if (m_Viewports.size() < 0)
 			m_Viewports.push_back(CreateScope<SceneViewport>());

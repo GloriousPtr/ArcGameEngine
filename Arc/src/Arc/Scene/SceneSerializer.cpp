@@ -139,6 +139,16 @@ namespace ArcEngine
 			out << YAML::Key << "Translation" << YAML::Value << tc.Translation;
 			out << YAML::Key << "Rotation" << YAML::Value << tc.Rotation;
 			out << YAML::Key << "Scale" << YAML::Value << tc.Scale;
+
+			out << YAML::EndMap; // TransformComponent
+		}
+
+		if (entity.HasComponent<RelationshipComponent>())
+		{
+			out << YAML::Key << "RelationshipComponent";
+			out << YAML::BeginMap; // RelationshipComponent
+
+			auto& tc = entity.GetComponent<RelationshipComponent>();
 			out << YAML::Key << "Parent" << YAML::Value << tc.Parent;
 
 			out << YAML::Key << "ChildrenCount" << YAML::Value << tc.Children.size();
@@ -148,7 +158,7 @@ namespace ArcEngine
 					out << YAML::Key << i << YAML::Value << tc.Children[i];
 				out << YAML::EndMap; // Children
 
-			out << YAML::EndMap; // TransformComponent
+			out << YAML::EndMap; // RelationshipComponent
 		}
 
 		if (entity.HasComponent<CameraComponent>())
@@ -318,12 +328,19 @@ namespace ArcEngine
 					tc.Translation = transformComponent["Translation"].as<glm::vec3>();
 					tc.Rotation = transformComponent["Rotation"].as<glm::vec3>();
 					tc.Scale = transformComponent["Scale"].as<glm::vec3>();
-					tc.Parent = transformComponent["Parent"].as<uint64_t>();
+				}
 
-					size_t childCount = transformComponent["ChildrenCount"].as<size_t>();
+				auto relationshipComponent = entity["RelationshipComponent"];
+				if (relationshipComponent)
+				{
+					// Entities always have transforms
+					auto& tc = deserializedEntity.GetComponent<RelationshipComponent>();
+					tc.Parent = relationshipComponent["Parent"].as<uint64_t>();
+
+					size_t childCount = relationshipComponent["ChildrenCount"].as<size_t>();
 					tc.Children.clear();
 					tc.Children.reserve(childCount);
-					auto children = transformComponent["Children"];
+					auto children = relationshipComponent["Children"];
 					if (children && childCount > 0)
 					{
 						for (size_t i = 0; i < childCount; i++)

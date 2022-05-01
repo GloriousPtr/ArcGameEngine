@@ -12,12 +12,12 @@ namespace ArcEngine
 		static void* instance = nullptr;
 		if (ImGui::Button("Make Instance!"))
 		{
-			instance = ScriptingEngine::MakeInstance("Test");
+			instance = ScriptEngine::MakeInstance("Test");
 		}
 
 		if (ImGui::Button("Test Call 1"))
 		{
-			ScriptingEngine::Call(instance, "Test", "DoSomething()", nullptr);
+			ScriptEngine::Call(instance, "Test", "DoSomething()", nullptr);
 		}
 
 		static int times = 0;
@@ -27,7 +27,7 @@ namespace ArcEngine
 
 			void* args[1];
 			args[0] = &times;
-			ScriptingEngine::Call(instance, "Test", "DoSomething(int)", args);
+			ScriptEngine::Call(instance, "Test", "DoSomething(int)", args);
 		}
 
 		ImGui::End();

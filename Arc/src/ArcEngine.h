@@ -40,6 +40,6 @@
 #include "Arc/Renderer/OrthographicCamera.h"
 //------------------------------------------------
 
-#include "Arc/Scripting/ScriptingEngine.h"
+#include "Arc/Scripting/ScriptEngine.h"
 
 #include <optick.h>
