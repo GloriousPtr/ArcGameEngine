@@ -187,17 +187,24 @@ namespace ArcEngine
 
 		ScriptEngine::SetScene(this);
 
-		auto scriptView = m_Registry.view<IDComponent, ScriptComponent>();
+		auto scriptView = m_Registry.view<IDComponent, TagComponent, ScriptComponent>();
 		constexpr char* setUUIDDesc = "SetUUID(ulong)";
 		constexpr char* onCreateDesc = "OnCreate()";
 		constexpr char* onUpdateDesc = "OnUpdate(single)";
 		constexpr char* onDestroyDesc = "OnDestroy()";
 		for (auto e : scriptView)
 		{
-			auto& [id, script] = scriptView.get<IDComponent, ScriptComponent>(e);
+			auto& [id, tag, script] = scriptView.get<IDComponent, TagComponent, ScriptComponent>(e);
 			const char* className = script.ClassName.c_str();
 
-			script.RuntimeInstance = ScriptEngine::MakeInstance(className);
+			if (!ScriptEngine::HasClass(className))
+			{
+				ARC_CORE_ERROR("{0} class not found but is attached to entity: {1}({2})", className, tag.Tag, id.ID);
+				continue;
+			}
+
+			if (!script.RuntimeInstance)
+				script.RuntimeInstance = ScriptEngine::MakeInstance(className);
 
 			void* args[] { &id.ID };
 			void* property = ScriptEngine::GetProperty(className, "ID");

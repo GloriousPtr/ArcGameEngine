@@ -245,6 +245,79 @@ namespace ArcEngine
 		ImGui::PopID();
 	}
 
+	static void DrawFields(ScriptComponent& component)
+	{
+		// Public Fields
+		std::unordered_map<std::string, Field>* fieldMap = ScriptEngine::GetFields(component.ClassName.c_str());
+		if (fieldMap)
+		{
+			for (auto& [name, field] : *fieldMap)
+			{
+				switch (field.Type)
+				{
+					case Field::FieldType::Bool:
+					{
+						bool value = field.GetValue<bool>(component.RuntimeInstance);
+						if (UI::Property(field.Name.c_str(), value))
+							field.SetValue(component.RuntimeInstance, value);
+						break;
+					}
+					case Field::FieldType::Float:
+					{
+						float value = field.GetValue<float>(component.RuntimeInstance);
+						if (UI::Property(field.Name.c_str(), value))
+							field.SetValue(component.RuntimeInstance, value);
+						break;
+					}
+					case Field::FieldType::Int:
+					{
+						int32_t value = field.GetValue<int32_t>(component.RuntimeInstance);
+						if (UI::Property(field.Name.c_str(), value))
+							field.SetValue(component.RuntimeInstance, value);
+						break;
+					}
+					case Field::FieldType::UnsignedInt:
+					{
+						uint32_t value = field.GetValue<uint32_t>(component.RuntimeInstance);
+						if (UI::Property(field.Name.c_str(), value))
+							field.SetValue(component.RuntimeInstance, value);
+						break;
+					}
+					/*
+					case Field::FieldType::String:
+					{
+						std::string& value = field.GetValue<std::string>(component.RuntimeInstance);
+						if (UI::Property(field.Name.c_str(), value))
+							field.SetValue(component.RuntimeInstance, value);
+						break;
+					}
+					*/
+					case Field::FieldType::Vec2:
+					{
+						glm::vec2 value = field.GetValue<glm::vec2>(component.RuntimeInstance);
+						if (UI::Property(field.Name.c_str(), value))
+							field.SetValue(component.RuntimeInstance, value);
+						break;
+					}
+					case Field::FieldType::Vec3:
+					{
+						glm::vec3 value = field.GetValue<glm::vec3>(component.RuntimeInstance);
+						if (UI::Property(field.Name.c_str(), value))
+							field.SetValue(component.RuntimeInstance, value);
+						break;
+					}
+					case Field::FieldType::Vec4:
+					{
+						glm::vec4 value = field.GetValue<glm::vec4>(component.RuntimeInstance);
+						if (UI::Property(field.Name.c_str(), value))
+							field.SetValue(component.RuntimeInstance, value);
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	static std::vector<Ref<Texture2D>> s_TextureCache;
 	std::vector<Ref<Texture2D>> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const char* filepath)
     {
@@ -796,11 +869,22 @@ namespace ArcEngine
 
 		DrawComponent<ScriptComponent>(ICON_MDI_POUND_BOX " Script", entity, [](ScriptComponent& component)
 		{
-			static bool found = false;
+			bool found = ScriptEngine::HasClass(component.ClassName.c_str());
 			ImGui::PushStyleColor(ImGuiCol_Text, { found ? 0.2f : 0.8f, found ? 0.8f : 0.2f, 0.2f, 1.0f});
-			if (UI::Property("Name", component.ClassName))
-				found = ScriptEngine::HasClass(component.ClassName.c_str());
+			UI::Property("Name", component.ClassName);
 			ImGui::PopStyleColor();
+
+			if (found)
+			{
+				if (!component.RuntimeInstance)
+					component.RuntimeInstance = ScriptEngine::MakeInstance(component.ClassName.c_str());
+
+				DrawFields(component);
+			}
+			else if (component.RuntimeInstance)
+			{
+				// Delete runtime instance
+			}
 		});
 
 		ImGui::Separator();

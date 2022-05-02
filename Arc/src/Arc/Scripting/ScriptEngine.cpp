@@ -4,6 +4,7 @@
 #include <mono/jit/jit.h>
 #include <mono/metadata/assembly.h>
 #include <mono/metadata/object.h>
+#include <mono/metadata/attrdefs.h>
 
 #ifdef ARC_DEBUG
 #include <mono/metadata/debug-helpers.h>
@@ -22,6 +23,7 @@ namespace ArcEngine
 	std::unordered_map<std::string, MonoClass*> ScriptEngine::s_ClassMap;
 	std::unordered_map<std::string, MonoMethod*> ScriptEngine::s_MethodMap;
 	std::unordered_map<std::string, MonoProperty*> ScriptEngine::s_PropertyMap;
+	std::unordered_map<std::string, std::unordered_map<std::string, Field>> ScriptEngine::s_FieldMap;
 	Scene* ScriptEngine::s_CurrentScene = nullptr;
 
 	void ScriptEngine::Init(const char* coreAssemblyPath)
@@ -130,6 +132,33 @@ namespace ArcEngine
 			s_MethodMap.emplace(desc, method);
 	}
 
+	MonoClass* ScriptEngine::CreateClass(MonoImage* image, const char* namespaceName, const char* className, const char* fullName)
+	{
+		MonoClass* clazz = mono_class_from_name(image, namespaceName, className);
+		if (!clazz)
+			return nullptr;
+
+		// Public fields
+		{
+			MonoClassField* iter;
+			void* ptr = 0;
+			while ((iter = mono_class_get_fields(clazz, &ptr)) != NULL)
+			{
+				const char* name = mono_field_get_name(iter);
+				uint32_t flags = mono_field_get_flags(iter);
+				if ((flags & MONO_FIELD_ATTR_PUBLIC) == 0)
+					continue;
+
+				MonoType* fieldType = mono_field_get_type(iter);
+				Field::FieldType type = Field::GetFieldType(fieldType);
+				MonoCustomAttrInfo* attr = mono_custom_attrs_from_field(clazz, iter);
+				s_FieldMap[fullName].emplace(name, Field(name, type, iter));
+			}
+		}
+
+		return clazz;
+	}
+
 	void ScriptEngine::CacheClassIfAvailable(const char* className)
 	{
 		if (!s_ScriptCoreImage)
@@ -144,13 +173,13 @@ namespace ArcEngine
 		std::string namespaceName = name.substr(0, lastColon);
 		std::string clazzName = name.substr(lastColon + 1, length - lastColon);
 
-		if (MonoClass* clazz = mono_class_from_name(s_ScriptCoreImage, namespaceName.c_str(), clazzName.c_str()))
+		if (MonoClass* clazz = CreateClass(s_ScriptCoreImage, namespaceName.c_str(), clazzName.c_str(), className))
 		{
 			s_ClassMap.emplace(className, clazz);
 		}
 		else if (s_ScriptClientImage)
 		{
-			if (MonoClass* clazz = mono_class_from_name(s_ScriptClientImage, namespaceName.c_str(), clazzName.c_str()))
+			if (MonoClass* clazz = CreateClass(s_ScriptClientImage, namespaceName.c_str(), clazzName.c_str(), className))
 				s_ClassMap.emplace(className, clazz);
 		}
 	}
@@ -209,9 +238,9 @@ namespace ArcEngine
 		std::string namespaceName = name.substr(0, lastColon);
 		std::string clazzName = name.substr(lastColon + 1, length - lastColon);
 
-		MonoClass* clazz = mono_class_from_name(s_ScriptCoreImage, namespaceName.c_str(), clazzName.c_str());
+		MonoClass* clazz = CreateClass(s_ScriptCoreImage, namespaceName.c_str(), clazzName.c_str(), className);
 		if (!clazz && s_ScriptClientImage)
-			clazz = mono_class_from_name(s_ScriptClientImage, namespaceName.c_str(), clazzName.c_str());
+			clazz = CreateClass(s_ScriptClientImage, namespaceName.c_str(), clazzName.c_str(), className);
 
 		return clazz != nullptr;
 	}
@@ -233,14 +262,14 @@ namespace ArcEngine
 		std::string namespaceName = name.substr(0, lastColon);
 		std::string clazzName = name.substr(lastColon + 1, length - lastColon);
 
-		MonoClass* clazz = mono_class_from_name(s_ScriptCoreImage, namespaceName.c_str(), clazzName.c_str());
+		MonoClass* clazz = CreateClass(s_ScriptCoreImage, namespaceName.c_str(), clazzName.c_str(), className);
 		if (clazz)
 		{
 			s_ClassMap.emplace(className, clazz);
 		}
 		else if (s_ScriptClientImage)
 		{
-			if (clazz = mono_class_from_name(s_ScriptClientImage, namespaceName.c_str(), clazzName.c_str()))
+			if (clazz = CreateClass(s_ScriptClientImage, namespaceName.c_str(), clazzName.c_str(), className))
 				s_ClassMap.emplace(className, clazz);
 		}
 
@@ -266,5 +295,13 @@ namespace ArcEngine
 			ARC_CORE_ERROR("Property: {0} not found in class {1}", propertyName, className);
 
 		return property;
+	}
+
+	std::unordered_map<std::string, Field>* ScriptEngine::GetFields(const char* className)
+	{
+		if (s_FieldMap.find(className) != s_FieldMap.end())
+			return &(s_FieldMap.at(className));
+
+		return nullptr;
 	}
 }

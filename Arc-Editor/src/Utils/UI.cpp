@@ -115,7 +115,7 @@ namespace ArcEngine
 		EndPropertyGrid();
 	}
 
-	bool UI::Property(const char* label, int& value)
+	bool UI::Property(const char* label, int32_t& value)
 	{
 		bool modified = false;
 
@@ -130,6 +130,31 @@ namespace ArcEngine
 		memset(s_IDBuffer + 2, 0, 14);
 		itoa(s_Counter++, s_IDBuffer + 2, 16);
 		if (ImGui::DragInt(s_IDBuffer, &value))
+			modified = true;
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		ImGui::PopID();
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, uint32_t& value)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid();
+		ImGui::PushID(label);
+		ImGui::Text(label);
+		ImGui::NextColumn();
+		ImGui::PushItemWidth(-1);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::DragInt(s_IDBuffer, (int*)&value))
 			modified = true;
 
 		ImGui::PopItemWidth();
@@ -255,6 +280,56 @@ namespace ArcEngine
 		memset(s_IDBuffer + 2, 0, 14);
 		itoa(s_Counter++, s_IDBuffer + 2, 16);
 		if (ImGui::DragFloat2(s_IDBuffer, glm::value_ptr(value), delta))
+			modified = true;
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		ImGui::PopID();
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, glm::vec3& value, float delta)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid();
+		ImGui::PushID(label);
+		ImGui::Text(label);
+		ImGui::NextColumn();
+		ImGui::PushItemWidth(-1);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::DragFloat3(s_IDBuffer, glm::value_ptr(value), delta))
+			modified = true;
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		ImGui::PopID();
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, glm::vec4& value, float delta)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid();
+		ImGui::PushID(label);
+		ImGui::Text(label);
+		ImGui::NextColumn();
+		ImGui::PushItemWidth(-1);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::DragFloat4(s_IDBuffer, glm::value_ptr(value), delta))
 			modified = true;
 
 		ImGui::PopItemWidth();

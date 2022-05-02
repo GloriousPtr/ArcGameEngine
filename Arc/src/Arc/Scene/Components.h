@@ -7,6 +7,7 @@
 #include "Arc/Renderer/VertexArray.h"
 #include "Arc/Renderer/Framebuffer.h"
 #include "Arc/Utils/AABB.h"
+#include "Arc/Scripting/Field.h"
 
 #include <glm/glm.hpp>
 

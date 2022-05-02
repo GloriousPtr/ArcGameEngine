@@ -41,5 +41,6 @@
 //------------------------------------------------
 
 #include "Arc/Scripting/ScriptEngine.h"
+#include "Arc/Scripting/Field.h"
 
 #include <optick.h>
