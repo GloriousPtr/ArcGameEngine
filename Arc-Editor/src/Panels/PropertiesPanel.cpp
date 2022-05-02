@@ -257,60 +257,58 @@ namespace ArcEngine
 				{
 					case Field::FieldType::Bool:
 					{
-						bool value = field.GetValue<bool>(component.RuntimeInstance);
+						bool value = field.GetValue<bool>(component.Handle);
 						if (UI::Property(field.Name.c_str(), value))
-							field.SetValue(component.RuntimeInstance, value);
+							field.SetValue(component.Handle, value);
 						break;
 					}
 					case Field::FieldType::Float:
 					{
-						float value = field.GetValue<float>(component.RuntimeInstance);
+						float value = field.GetValue<float>(component.Handle);
 						if (UI::Property(field.Name.c_str(), value))
-							field.SetValue(component.RuntimeInstance, value);
+							field.SetValue(component.Handle, value);
 						break;
 					}
 					case Field::FieldType::Int:
 					{
-						int32_t value = field.GetValue<int32_t>(component.RuntimeInstance);
+						int32_t value = field.GetValue<int32_t>(component.Handle);
 						if (UI::Property(field.Name.c_str(), value))
-							field.SetValue(component.RuntimeInstance, value);
+							field.SetValue(component.Handle, value);
 						break;
 					}
 					case Field::FieldType::UnsignedInt:
 					{
-						uint32_t value = field.GetValue<uint32_t>(component.RuntimeInstance);
+						uint32_t value = field.GetValue<uint32_t>(component.Handle);
 						if (UI::Property(field.Name.c_str(), value))
-							field.SetValue(component.RuntimeInstance, value);
+							field.SetValue(component.Handle, value);
 						break;
 					}
-					/*
 					case Field::FieldType::String:
 					{
-						std::string& value = field.GetValue<std::string>(component.RuntimeInstance);
+						std::string& value = field.GetValueString(component.Handle);
 						if (UI::Property(field.Name.c_str(), value))
-							field.SetValue(component.RuntimeInstance, value);
+							field.SetValueString(component.Handle, value);
 						break;
 					}
-					*/
 					case Field::FieldType::Vec2:
 					{
-						glm::vec2 value = field.GetValue<glm::vec2>(component.RuntimeInstance);
+						glm::vec2 value = field.GetValue<glm::vec2>(component.Handle);
 						if (UI::Property(field.Name.c_str(), value))
-							field.SetValue(component.RuntimeInstance, value);
+							field.SetValue(component.Handle, value);
 						break;
 					}
 					case Field::FieldType::Vec3:
 					{
-						glm::vec3 value = field.GetValue<glm::vec3>(component.RuntimeInstance);
+						glm::vec3 value = field.GetValue<glm::vec3>(component.Handle);
 						if (UI::Property(field.Name.c_str(), value))
-							field.SetValue(component.RuntimeInstance, value);
+							field.SetValue(component.Handle, value);
 						break;
 					}
 					case Field::FieldType::Vec4:
 					{
-						glm::vec4 value = field.GetValue<glm::vec4>(component.RuntimeInstance);
+						glm::vec4 value = field.GetValue<glm::vec4>(component.Handle);
 						if (UI::Property(field.Name.c_str(), value))
-							field.SetValue(component.RuntimeInstance, value);
+							field.SetValue(component.Handle, value);
 						break;
 					}
 				}
@@ -876,14 +874,17 @@ namespace ArcEngine
 
 			if (found)
 			{
-				if (!component.RuntimeInstance)
-					component.RuntimeInstance = ScriptEngine::MakeInstance(component.ClassName.c_str());
+				if (!component.Handle)
+					component.Handle = ScriptEngine::MakeReference(component.ClassName.c_str());
 
+				ImGui::PushID(component.Handle);
 				DrawFields(component);
+				ImGui::PopID();
 			}
-			else if (component.RuntimeInstance)
+			else if (component.Handle)
 			{
-				// Delete runtime instance
+				ScriptEngine::ReleaseObjectReference(component.Handle);
+				component.Handle = nullptr;
 			}
 		});
 

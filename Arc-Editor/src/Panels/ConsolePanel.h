@@ -25,7 +25,7 @@ namespace ArcEngine
 
 	public:
 		ConsolePanel(const char* name = "Console");
-		virtual ~ConsolePanel() override = default;
+		virtual ~ConsolePanel() override;
 
 		void AddMessage(std::string message, Log::Level level);
 		const Message* GetRecentMessage();

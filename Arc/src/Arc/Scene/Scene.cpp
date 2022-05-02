@@ -21,6 +21,19 @@ namespace ArcEngine
 
 	Scene::~Scene()
 	{
+		// Scripting
+		{
+			auto scriptView = m_Registry.view<ScriptComponent>();
+			for (auto e : scriptView)
+			{
+				ScriptComponent& script = scriptView.get<ScriptComponent>(e);
+				if (!script.Handle)
+					continue;
+
+				ScriptEngine::ReleaseObjectReference(script.Handle);
+				script.Handle = nullptr;
+			}
+		}
 	}
 
 	template<typename Component>
@@ -203,19 +216,21 @@ namespace ArcEngine
 				continue;
 			}
 
-			if (!script.RuntimeInstance)
-				script.RuntimeInstance = ScriptEngine::MakeInstance(className);
+			if (!script.Handle)
+				continue;
+
+			script.Handle = ScriptEngine::CopyStrongReference(script.Handle);
 
 			void* args[] { &id.ID };
 			void* property = ScriptEngine::GetProperty(className, "ID");
-			ScriptEngine::SetProperty(script.RuntimeInstance, property, args);
+			ScriptEngine::SetProperty(script.Handle, property, args);
 			
 			ScriptEngine::CacheMethodIfAvailable(className, onCreateDesc);
 			ScriptEngine::CacheMethodIfAvailable(className, onUpdateDesc);
 			ScriptEngine::CacheMethodIfAvailable(className, onDestroyDesc);
 
 			if (ScriptEngine::GetCachedMethodIfAvailable(className, onCreateDesc))
-				ScriptEngine::Call(script.RuntimeInstance, className, onCreateDesc, nullptr);
+				ScriptEngine::Call(script.Handle, className, onCreateDesc, nullptr);
 		}
 	}
 
@@ -229,7 +244,10 @@ namespace ArcEngine
 			const char* className = script.ClassName.c_str();
 
 			if (ScriptEngine::GetCachedMethodIfAvailable(className, onDestroyDesc))
-				ScriptEngine::Call(script.RuntimeInstance, className, onDestroyDesc, nullptr);
+				ScriptEngine::Call(script.Handle, className, onDestroyDesc, nullptr);
+
+			ScriptEngine::ReleaseObjectReference(script.Handle);
+			script.Handle = nullptr;
 		}
 
 		ScriptEngine::SetScene(nullptr);
@@ -321,7 +339,7 @@ namespace ArcEngine
 				const char* className = script.ClassName.c_str();
 				
 				if (ScriptEngine::GetCachedMethodIfAvailable(className, onUpdateDesc))
-					ScriptEngine::Call(script.RuntimeInstance, className, onUpdateDesc, args);
+					ScriptEngine::Call(script.Handle, className, onUpdateDesc, args);
 			}
 		}
 

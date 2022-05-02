@@ -6,11 +6,6 @@ namespace ArcEngine
 	{
 		internal ulong ID { get; private set; }
 
-		~Entity()
-		{
-			Log.Trace($"Destructor called for Entity Instance: {ID}");
-		}
-
 		public bool HasComponent<T>() where T : Component, new() => InternalCalls.Entity_HasComponent(ID, typeof(T));
 
 		public T AddComponent<T>() where T : Component, new()

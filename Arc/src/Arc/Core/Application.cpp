@@ -26,6 +26,7 @@ namespace ArcEngine
 		Renderer::Init();
 		ScriptEngine::Init("Resources/Scripts/Arc-ScriptCore.dll");
 
+		m_LayerStack = new LayerStack();
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
 	}
@@ -36,6 +37,8 @@ namespace ArcEngine
 			OPTICK_EVENT();
 
 			ARC_PROFILE_FUNCTION();
+
+			delete m_LayerStack;
 
 			ScriptEngine::Shutdown();
 			Renderer::Shutdown();
@@ -50,7 +53,7 @@ namespace ArcEngine
 
 		ARC_PROFILE_FUNCTION();
 		
-		m_LayerStack.PushLayer(layer);
+		m_LayerStack->PushLayer(layer);
 		layer->OnAttach();
 	}
 
@@ -60,7 +63,7 @@ namespace ArcEngine
 
 		ARC_PROFILE_FUNCTION();
 		
-		m_LayerStack.PushOverlay(layer);
+		m_LayerStack->PushOverlay(layer);
 		layer->OnAttach();
 	}
 	
@@ -79,7 +82,7 @@ namespace ArcEngine
 		dispatcher.Dispatch<WindowCloseEvent>(ARC_BIND_EVENT_FN(Application::OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(ARC_BIND_EVENT_FN(Application::OnWindowResize));
 
-		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
+		for (auto it = m_LayerStack->rbegin(); it != m_LayerStack->rend(); ++it)
 		{
 			if (e.Handled)
 				break;
@@ -109,7 +112,7 @@ namespace ArcEngine
 
 					ARC_PROFILE_SCOPE("LayerStack OnUpdate");
 					
-					for (Layer* layer : m_LayerStack)
+					for (Layer* layer : *m_LayerStack)
 						layer->OnUpdate(timestep);	
 				}
 
@@ -119,7 +122,7 @@ namespace ArcEngine
 
 					ARC_PROFILE_SCOPE("LayerStack OnImGuiRender");
 				
-					for (Layer* layer : m_LayerStack)
+					for (Layer* layer : *m_LayerStack)
 						layer->OnImGuiRender();
 				}
 				m_ImGuiLayer->End();

@@ -5,6 +5,8 @@ typedef struct _MonoClassField MonoClassField;
 
 namespace ArcEngine
 {
+	using GCHandle = void*;
+
 	struct Field
 	{
 		enum class FieldType
@@ -29,24 +31,27 @@ namespace ArcEngine
 		}
 
 		template<typename T>
-		T GetValue(void* instance) const
+		T GetValue(GCHandle handle) const
 		{
 			T value;
-			GetValue_Impl(instance, &value);
+			GetValue_Impl(handle, &value);
 			return value;
 		}
 
 		template<typename T>
-		void SetValue(void* instance, T value) const
+		void SetValue(GCHandle handle, T value) const
 		{
-			SetValue_Impl(instance, &value);
+			SetValue_Impl(handle, &value);
 		}
+
+		std::string GetValueString(GCHandle handle);
+		void SetValueString(GCHandle handle, std::string& str);
 
 		static FieldType GetFieldType(MonoType* monoType);
 
 	private:
-		void GetValue_Impl(void* instance, void* outValue) const;
-		void SetValue_Impl(void* instance, void* value) const;
+		void GetValue_Impl(GCHandle handle, void* outValue) const;
+		void SetValue_Impl(GCHandle handle, void* value) const;
 
 		static FieldType GetFieldTypeFromValueType(MonoType* monoType);
 

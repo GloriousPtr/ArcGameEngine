@@ -13,6 +13,8 @@ typedef struct _MonoClassField MonoClassField;
 
 namespace ArcEngine
 {
+	using GCHandle = void*;
+
 	class ScriptEngine
 	{
 	public:
@@ -22,9 +24,11 @@ namespace ArcEngine
 		static void LoadClientAssembly(const char* path);
 
 		static bool HasClass(const char* className);
-		static void* MakeInstance(const char* className);
-		static void Call(void* instance, const char* className, const char* methodSignature, void** args);
-		static void SetProperty(void* instance, void* property, void** params);
+		static GCHandle MakeReference(const char* className);
+		static GCHandle CopyStrongReference(GCHandle className);
+		static void ReleaseObjectReference(const GCHandle handle);
+		static void Call(GCHandle handle, const char* className, const char* methodSignature, void** args);
+		static void SetProperty(GCHandle handle, void* property, void** params);
 		
 		static void CacheMethodIfAvailable(const char* className, const char* methodSignature);
 		static void CacheClassIfAvailable(const char* className);
@@ -41,6 +45,7 @@ namespace ArcEngine
 		static Scene* GetScene() { return s_CurrentScene; }
 
 		static MonoImage* GetCoreAssemblyImage() { return s_ScriptCoreImage; }
+		static MonoDomain* GetDomain() { return s_MonoDomain; }
 
 	private:
 		static MonoClass* CreateClass(MonoImage* image, const char* namespaceName, const char* className, const char* fullName);

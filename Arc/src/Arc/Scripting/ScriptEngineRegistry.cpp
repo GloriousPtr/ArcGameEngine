@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "ScriptEngine.h"
+#include "MonoUtils.h";
 #include "Arc/Core/Input.h"
 #include "Arc/Math/Math.h"
 
@@ -26,87 +27,97 @@ namespace ArcEngine
 
 	void ScriptEngineRegistry::InitComponentTypes()
 	{
+		OPTICK_EVENT();
+
 		COMPONENT_REGISTER(TagComponent);
 		COMPONENT_REGISTER(TransformComponent);
 	}
 
-	std::string FromMonoString(MonoString* str)
-	{
-		mono_unichar2* ch = mono_string_chars(str);
-		size_t length = mono_string_length(str);
-		std::string out("");
-		for (size_t i = 0; i < length; i++)
-			out += ch[i];
-		return out;
-	}
-
 	void LogMessage(Log::Level level, MonoString* formattedMessage)
 	{
+		OPTICK_EVENT();
+
 		switch (level)
 		{
-			case Log::Level::Trace:		ARC_TRACE(FromMonoString(formattedMessage));
+			case Log::Level::Trace:		ARC_TRACE(MonoUtils::MonoStringToUTF8(formattedMessage));
 										break;
-			case Log::Level::Debug:		ARC_DEBUG(FromMonoString(formattedMessage));
+			case Log::Level::Debug:		ARC_DEBUG(MonoUtils::MonoStringToUTF8(formattedMessage));
 										break;
-			case Log::Level::Info:		ARC_INFO(FromMonoString(formattedMessage));
+			case Log::Level::Info:		ARC_INFO(MonoUtils::MonoStringToUTF8(formattedMessage));
 										break;
-			case Log::Level::Warn:		ARC_WARN(FromMonoString(formattedMessage));
+			case Log::Level::Warn:		ARC_WARN(MonoUtils::MonoStringToUTF8(formattedMessage));
 										break;
-			case Log::Level::Error:		ARC_ERROR(FromMonoString(formattedMessage));
+			case Log::Level::Error:		ARC_ERROR(MonoUtils::MonoStringToUTF8(formattedMessage));
 										break;
-			case Log::Level::Critical:	ARC_CRITICAL(FromMonoString(formattedMessage));
+			case Log::Level::Critical:	ARC_CRITICAL(MonoUtils::MonoStringToUTF8(formattedMessage));
 										break;
-			default:
-				break;
 		}
 	}
 
 	Entity GetEntity(uint64_t entityID)
 	{
+		OPTICK_EVENT();
+
 		ARC_CORE_ASSERT(ScriptEngine::GetScene(), "Active scene is null");
 		return ScriptEngine::GetScene()->GetEntity(entityID);
 	}
 
 	void GetTransform(uint64_t entityID, TransformComponent* outTransform)
 	{
+		OPTICK_EVENT();
+
 		*outTransform = GetEntity(entityID).GetComponent<TransformComponent>();
 	}
 	
 	void SetTransform(uint64_t entityID, TransformComponent* inTransform)
 	{
+		OPTICK_EVENT();
+
 		GetEntity(entityID).GetComponent<TransformComponent>() = *inTransform;
 	}
 
 	void GetMousePosition(glm::vec2* outMousePosition)
 	{
+		OPTICK_EVENT();
+
 		*outMousePosition = Input::GetMousePosition();
 	}
 
 	MonoString* GetTag(uint64_t entityID)
 	{
+		OPTICK_EVENT();
+
 		auto& tag = GetEntity(entityID).GetComponent<TagComponent>();
 		return mono_string_new(mono_domain_get(), tag.Tag.c_str());
 	}
 
 	void SetTag(uint64_t entityID, MonoString* tag)
 	{
-		GetEntity(entityID).GetComponent<TagComponent>().Tag = FromMonoString(tag);
+		OPTICK_EVENT();
+
+		GetEntity(entityID).GetComponent<TagComponent>().Tag = MonoUtils::MonoStringToUTF8(tag);
 	}
 
 	void ScriptEngineRegistry::AddComponent(uint64_t entityID, void* type)
 	{
+		OPTICK_EVENT();
+
 		MonoType* monoType = mono_reflection_type_get_type((MonoReflectionType*)type);
 		s_AddComponentFuncs.at(monoType)(GetEntity(entityID));
 	}
 
 	bool ScriptEngineRegistry::HasComponent(uint64_t entityID, void* type)
 	{
+		OPTICK_EVENT();
+
 		MonoType* monoType = mono_reflection_type_get_type((MonoReflectionType*)type);
 		return s_HasComponentFuncs.at(monoType)(GetEntity(entityID));
 	}
 
 	void ScriptEngineRegistry::RegisterAll()
 	{
+		OPTICK_EVENT();
+
 		InitComponentTypes();
 
 		///////////////////////////////////////////////////////////////

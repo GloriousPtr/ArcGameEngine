@@ -11,7 +11,7 @@ namespace Sandbox
 		public void OnCreate()
 		{
 			m_TransformComponent = GetComponent<TransformComponent>();
-			Log.Info($"Created entity: {0}", GetComponent<TagComponent>().Tag);
+			Log.Info("Created entity: {0}", GetComponent<TagComponent>().Tag);
 		}
 
 		public void OnUpdate(float timestep)
@@ -33,7 +33,7 @@ namespace Sandbox
 
 		public void OnDestroy()
 		{
-			Log.Info($"Destroyed entity: {0}", GetComponent<TagComponent>().Tag);
+			Log.Info("Destroyed entity: {0}", GetComponent<TagComponent>().Tag);
 		}
 	}
 }

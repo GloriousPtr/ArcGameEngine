@@ -25,6 +25,11 @@ namespace ArcEngine
 		m_MessageBuffer = std::vector<Ref<ConsolePanel::Message>>(m_Capacity);
 	}
 
+	ConsolePanel::~ConsolePanel()
+	{
+		ExternalConsoleSink<std::mutex>::SetConsoleSink_HandleFlush(nullptr);
+	}
+
 	void ConsolePanel::AddMessage(std::string message, Log::Level level)
 	{
 		OPTICK_EVENT();

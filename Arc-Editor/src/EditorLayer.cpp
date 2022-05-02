@@ -61,7 +61,6 @@ namespace ArcEngine
 		OPTICK_EVENT();
 
 		ARC_PROFILE_FUNCTION();
-		
 	}
 
 	void EditorLayer::OnUpdate(Timestep ts)

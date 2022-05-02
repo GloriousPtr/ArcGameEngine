@@ -263,7 +263,7 @@ namespace ArcEngine
 	{
 		std::string ClassName;
 		
-		void* RuntimeInstance = nullptr;
+		GCHandle Handle = nullptr;
 
 		ScriptComponent() = default;
 		ScriptComponent(const ScriptComponent&) = default;

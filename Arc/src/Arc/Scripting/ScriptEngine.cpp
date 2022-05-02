@@ -5,11 +5,14 @@
 #include <mono/metadata/assembly.h>
 #include <mono/metadata/object.h>
 #include <mono/metadata/attrdefs.h>
+#include <mono/metadata/threads.h>
+#include <mono/metadata/mono-debug.h>
 
 #ifdef ARC_DEBUG
 #include <mono/metadata/debug-helpers.h>
 #endif // ARC_DEBUG
 
+#include "GCManager.h"
 #include "ScriptEngineRegistry.h"
 
 namespace ArcEngine
@@ -28,27 +31,50 @@ namespace ArcEngine
 
 	void ScriptEngine::Init(const char* coreAssemblyPath)
 	{
+		OPTICK_EVENT();
+
 		mono_set_dirs("C:/Program Files/Mono/lib",
         "C:/Program Files/Mono/etc");
 
+		std::string portString = std::to_string(2550);
+		std::string debuggerAgentArguments = "--debugger-agent=transport=dt_socket,address=127.0.0.1:" + portString + ",server=y,suspend=n,loglevel=3,logfile=logs/MonoDebugger.log";
+		
+		// Enable mono soft debugger
+		const char* options[2] = {
+			debuggerAgentArguments.c_str(),
+			"--soft-breakpoints"
+		};
+
+		mono_jit_parse_options(2, (char**)options);
+		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
+
 		s_MonoDomain = mono_jit_init("ScriptEngine");
 		ARC_CORE_ASSERT(s_MonoDomain, "Could not initialize domain");
+
+		mono_debug_domain_create(s_MonoDomain);
+		mono_thread_set_main(mono_thread_current());
+
+		GCManager::Init();
 
 		LoadCoreAssembly(coreAssemblyPath);
 	}
 
 	void ScriptEngine::Shutdown()
 	{
+		OPTICK_EVENT();
+
+		GCManager::Shutdown();
+
 		s_MethodMap.clear();
 		s_ClassMap.clear();
 
-		delete s_ScriptCoreImage;
-		delete s_ScriptCoreAssembly;
-		delete s_MonoDomain;
+		mono_jit_cleanup(s_MonoDomain);
 	}
 
 	void ScriptEngine::LoadCoreAssembly(const char* path)
 	{
+		OPTICK_EVENT();
+
 		s_ScriptCoreAssembly = mono_domain_assembly_open(s_MonoDomain, path);
 		if (!s_ScriptCoreAssembly)
 		{
@@ -63,11 +89,14 @@ namespace ArcEngine
 			return;
 		}
 
+		GCManager::CollectGarbage();
 		ScriptEngineRegistry::RegisterAll();
 	}
 
 	void ScriptEngine::LoadClientAssembly(const char* path)
 	{
+		OPTICK_EVENT();
+
 		s_ScriptClientAssembly = mono_domain_assembly_open(s_MonoDomain, path);
 		if (!s_ScriptClientAssembly)
 		{
@@ -81,10 +110,14 @@ namespace ArcEngine
 			ARC_CORE_ERROR("Could not get image from assembly: {0}", path);
 			return;
 		}
+
+		GCManager::CollectGarbage();
 	}
 
-	void* ScriptEngine::MakeInstance(const char* className)
+	GCHandle ScriptEngine::MakeReference(const char* className)
 	{
+		OPTICK_EVENT();
+
 		if (!s_MonoDomain)
 		{
 			ARC_CORE_ERROR("Domain not found");
@@ -97,28 +130,56 @@ namespace ArcEngine
 
 		MonoObject* object = mono_object_new(s_MonoDomain, clazz);
 		if (object)
+		{
 			mono_runtime_object_init(object);
+			return GCManager::CreateObjectReference(object, false);
+		}
 		
-		return object;
+		return nullptr;
 	}
 
-	void ScriptEngine::Call(void* instance, const char* className, const char* methodSignature, void** args)
+	GCHandle ScriptEngine::CopyStrongReference(GCHandle srcHandle)
 	{
+		OPTICK_EVENT();
+
+		MonoObject* copy = mono_object_clone(GCManager::GetReferencedObject(srcHandle));
+		return GCManager::CreateObjectReference(copy, false);
+	}
+
+	void ScriptEngine::ReleaseObjectReference(const GCHandle handle)
+	{
+		OPTICK_EVENT();
+
+		GCManager::ReleaseObjectReference(handle);
+	}
+
+	void ScriptEngine::Call(GCHandle handle, const char* className, const char* methodSignature, void** args)
+	{
+		OPTICK_EVENT();
+
 		MonoMethod* method = GetMethod(className, methodSignature);
 		if (!method)
 			return;
 
-		mono_runtime_invoke(method, instance, args, nullptr);
+		MonoObject* reference = GCManager::GetReferencedObject(handle);
+		if (reference)
+			mono_runtime_invoke(method, reference, args, nullptr);
 	}
 
-	void ScriptEngine::SetProperty(void* instance, void* property, void** params)
+	void ScriptEngine::SetProperty(GCHandle handle, void* property, void** params)
 	{
+		OPTICK_EVENT();
+
 		MonoMethod* method = mono_property_get_set_method((MonoProperty*)property);
-		mono_runtime_invoke(method, instance, params, nullptr);
+		MonoObject* reference = GCManager::GetReferencedObject(handle);
+		if (reference)
+			mono_runtime_invoke(method, reference, params, nullptr);
 	}
 
 	void ScriptEngine::CacheMethodIfAvailable(const char* className, const char* methodSignature)
 	{
+		OPTICK_EVENT();
+
 		std::string desc = std::string(className) + ":" + (methodSignature);
 		if (s_MethodMap.find(desc) != s_MethodMap.end())
 			return;
@@ -134,6 +195,8 @@ namespace ArcEngine
 
 	MonoClass* ScriptEngine::CreateClass(MonoImage* image, const char* namespaceName, const char* className, const char* fullName)
 	{
+		OPTICK_EVENT();
+
 		MonoClass* clazz = mono_class_from_name(image, namespaceName, className);
 		if (!clazz)
 			return nullptr;
@@ -161,6 +224,8 @@ namespace ArcEngine
 
 	void ScriptEngine::CacheClassIfAvailable(const char* className)
 	{
+		OPTICK_EVENT();
+
 		if (!s_ScriptCoreImage)
 			return;
 
@@ -186,6 +251,8 @@ namespace ArcEngine
 
 	MonoMethod* ScriptEngine::GetCachedMethodIfAvailable(const char* className, const char* methodSignature)
 	{
+		OPTICK_EVENT();
+
 		std::string desc = std::string(className) + ":" + (methodSignature);
 		if (s_MethodMap.find(desc) != s_MethodMap.end())
 			return s_MethodMap.at(desc);
@@ -195,6 +262,8 @@ namespace ArcEngine
 
 	MonoClass* ScriptEngine::GetCachedClassIfAvailable(const char* className)
 	{
+		OPTICK_EVENT();
+
 		if (s_ClassMap.find(className) != s_ClassMap.end())
 			return s_ClassMap.at(className);
 		else
@@ -203,6 +272,8 @@ namespace ArcEngine
 
 	MonoMethod* ScriptEngine::GetMethod(const char* className, const char* methodSignature)
 	{
+		OPTICK_EVENT();
+
 		std::string desc = std::string(className) + ":" + (methodSignature);
 		if (s_MethodMap.find(desc) != s_MethodMap.end())
 			return s_MethodMap.at(desc);
@@ -223,6 +294,8 @@ namespace ArcEngine
 
 	bool ScriptEngine::HasClass(const char* className)
 	{
+		OPTICK_EVENT();
+
 		if (!s_ScriptCoreImage)
 		{
 			ARC_CORE_ERROR("ScriptCore Image not found!");
@@ -247,6 +320,8 @@ namespace ArcEngine
 
 	MonoClass* ScriptEngine::GetClass(const char* className)
 	{
+		OPTICK_EVENT();
+
 		if (!s_ScriptCoreImage)
 		{
 			ARC_CORE_ERROR("ScriptCore Image not found!");
@@ -273,13 +348,16 @@ namespace ArcEngine
 				s_ClassMap.emplace(className, clazz);
 		}
 
-		ARC_CORE_ERROR("Class not found: {0}", className);
+		if (!clazz)
+			ARC_CORE_ERROR("Class not found: {0}", className);
 
 		return clazz;
 	}
 
 	MonoProperty* ScriptEngine::GetProperty(const char* className, const char* propertyName)
 	{
+		OPTICK_EVENT();
+
 		std::string key = std::string(className) + propertyName;
 		if (s_PropertyMap.find(key) != s_PropertyMap.end())
 			return s_PropertyMap.at(key);
@@ -299,6 +377,8 @@ namespace ArcEngine
 
 	std::unordered_map<std::string, Field>* ScriptEngine::GetFields(const char* className)
 	{
+		OPTICK_EVENT();
+
 		if (s_FieldMap.find(className) != s_FieldMap.end())
 			return &(s_FieldMap.at(className));
 
