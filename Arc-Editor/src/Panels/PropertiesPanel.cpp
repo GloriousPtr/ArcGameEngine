@@ -845,8 +845,11 @@ namespace ArcEngine
 
 			if (component.Type == Rigidbody2DComponent::BodyType::Dynamic)
 			{
-				UI::Property("Linear Damping", component.LinearDamping);
-				UI::Property("Angular Damping", component.AngularDamping);
+				UI::Property("Auto Mass", component.AutoMass);
+				if (!component.AutoMass)
+					UI::Property("Mass", component.Mass, 0.1f, 0.01f, 100.0f);
+				UI::Property("Linear Drag", component.LinearDrag);
+				UI::Property("Angular Drag", component.AngularDrag);
 				UI::Property("Gravity Scale", component.GravityScale);
 				UI::Property("Allow Sleep", component.AllowSleep);
 				UI::Property("Awake", component.Awake);

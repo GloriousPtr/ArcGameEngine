@@ -234,8 +234,10 @@ namespace ArcEngine
 
 			auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 			out << YAML::Key << "Type" << YAML::Value << (int) rb2d.Type;
-			out << YAML::Key << "LinearDamping" << YAML::Value << rb2d.LinearDamping;
-			out << YAML::Key << "AngularDamping" << YAML::Value << rb2d.AngularDamping;
+			out << YAML::Key << "AutoMass" << YAML::Value << rb2d.AutoMass;
+			out << YAML::Key << "Mass" << YAML::Value << rb2d.Mass;
+			out << YAML::Key << "LinearDrag" << YAML::Value << rb2d.LinearDrag;
+			out << YAML::Key << "AngularDrag" << YAML::Value << rb2d.AngularDrag;
 			out << YAML::Key << "AllowSleep" << YAML::Value << rb2d.AllowSleep;
 			out << YAML::Key << "Awake" << YAML::Value << rb2d.Awake;
 			out << YAML::Key << "Continuous" << YAML::Value << rb2d.Continuous;
@@ -290,6 +292,8 @@ namespace ArcEngine
 		// Not implemented
 		ARC_CORE_ASSERT(false);
 	}
+
+#define TryGet(x, outType, defValue) ((x) ? x.as<outType>() : defValue)
 
 	bool SceneSerializer::Deserialize(const std::string& filepath)
 	{
@@ -355,77 +359,79 @@ namespace ArcEngine
 
 					auto& cameraProps = cameraComponent["Camera"];
 					cc.Camera.SetViewportSize(1, 1);
-					cc.Camera.SetProjectionType((SceneCamera::ProjectionType)cameraProps["ProjectionType"].as<int>());
+					cc.Camera.SetProjectionType((SceneCamera::ProjectionType)TryGet(cameraProps["ProjectionType"], int, 0));
 
-					cc.Camera.SetPerspectiveVerticalFOV(cameraProps["PerspectiveFOV"].as<float>());
-					cc.Camera.SetPerspectiveNearClip(cameraProps["PerspectiveNear"].as<float>());
-					cc.Camera.SetPerspectiveFarClip(cameraProps["PerspectiveFar"].as<float>());
+					cc.Camera.SetPerspectiveVerticalFOV(TryGet(cameraProps["PerspectiveFOV"], float, 45.0f));
+					cc.Camera.SetPerspectiveNearClip(TryGet(cameraProps["PerspectiveNear"], float, 0.03f));
+					cc.Camera.SetPerspectiveFarClip(TryGet(cameraProps["PerspectiveFar"], float, 1000.0f));
 
-					cc.Camera.SetOrthographicSize(cameraProps["OrthographicSize"].as<float>());
-					cc.Camera.SetOrthographicNearClip(cameraProps["OrthographicNear"].as<float>());
-					cc.Camera.SetOrthographicFarClip(cameraProps["OrthographicFar"].as<float>());
+					cc.Camera.SetOrthographicSize(TryGet(cameraProps["OrthographicSize"], float, 10.0f));
+					cc.Camera.SetOrthographicNearClip(TryGet(cameraProps["OrthographicNear"], float, -1.0f));
+					cc.Camera.SetOrthographicFarClip(TryGet(cameraProps["OrthographicFar"], float, 1.0f));
 
-					cc.Primary = cameraComponent["Primary"].as<bool>();
-					cc.FixedAspectRatio = cameraComponent["FixedAspectRatio"].as<bool>();
+					cc.Primary = TryGet(cameraComponent["Primary"], bool, true);
+					cc.FixedAspectRatio = TryGet(cameraComponent["FixedAspectRatio"], bool, false);
 				}
 
 				auto spriteRendererComponent = entity["SpriteRendererComponent"];
 				if (spriteRendererComponent)
 				{
 					auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
-					src.Color = spriteRendererComponent["Color"].as<glm::vec4>();
-					std::string textureFilepath = spriteRendererComponent["TextureFilepath"].as<std::string>();
+					src.Color = TryGet(spriteRendererComponent["Color"], glm::vec4, glm::vec4(1.0f));
+					std::string textureFilepath = TryGet(spriteRendererComponent["TextureFilepath"], std::string, "");
 					if(!textureFilepath.empty())
 						src.SetTexture(textureFilepath);
-					src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
+					src.TilingFactor = TryGet(spriteRendererComponent["TilingFactor"], float, 1.0f);
 				}
 
 				auto skyLightComponent = entity["SkyLightComponent"];
 				if (skyLightComponent)
 				{
 					auto& src = deserializedEntity.AddComponent<SkyLightComponent>();
-					std::string textureFilepath = skyLightComponent["TextureFilepath"].as<std::string>();
+					std::string textureFilepath = TryGet(skyLightComponent["TextureFilepath"], std::string, "");
 					if(!textureFilepath.empty())
 						src.SetTexture(textureFilepath);
-					src.Intensity = skyLightComponent["Intensity"].as<float>();
+					src.Intensity = TryGet(skyLightComponent["Intensity"], float, 1.0f);
 				}
 
 				auto lightComponent = entity["LightComponent"];
 				if (lightComponent)
 				{
 					auto& src = deserializedEntity.AddComponent<LightComponent>();
-					src.Type = (LightComponent::LightType) lightComponent["Type"].as<int>();
-					src.Color = lightComponent["Color"].as<glm::vec3>();
-					src.Intensity = lightComponent["Intensity"].as<float>();
-					src.Range = lightComponent["Radius"].as<float>();
-					src.CutOffAngle = lightComponent["CutOffAngle"].as<float>();
-					src.OuterCutOffAngle = lightComponent["OuterCutOffAngle"].as<float>();
+					src.Type = (LightComponent::LightType) TryGet(lightComponent["Type"], int, 1);
+					src.Color = TryGet(lightComponent["Color"], glm::vec3, glm::vec3(1.0f));
+					src.Intensity = TryGet(lightComponent["Intensity"], float, 10.0f);
+					src.Range = TryGet(lightComponent["Radius"], float, 1.0f);
+					src.CutOffAngle = TryGet(lightComponent["CutOffAngle"], float, 12.5f);
+					src.OuterCutOffAngle = TryGet(lightComponent["OuterCutOffAngle"], float, 17.5f);
 				}
 
 				auto rb2dCpmponent = entity["Rigidbody2DComponent"];
 				if (rb2dCpmponent)
 				{
 					auto& src = deserializedEntity.AddComponent<Rigidbody2DComponent>();
-					src.Type = (Rigidbody2DComponent::BodyType) rb2dCpmponent["Type"].as<int>();
-					src.LinearDamping = rb2dCpmponent["LinearDamping"].as<float>();
-					src.AngularDamping = rb2dCpmponent["AngularDamping"].as<float>();
-					src.AllowSleep = rb2dCpmponent["AllowSleep"].as<bool>();
-					src.Awake = rb2dCpmponent["Awake"].as<bool>();
-					src.Continuous = rb2dCpmponent["Continuous"].as<bool>();
-					src.FreezeRotation = rb2dCpmponent["FreezeRotation"].as<bool>();
-					src.GravityScale = rb2dCpmponent["GravityScale"].as<float>();
+					src.Type = (Rigidbody2DComponent::BodyType) TryGet(rb2dCpmponent["Type"], int, 0);
+					src.AutoMass = TryGet(rb2dCpmponent["AutoMass"], bool, true);
+					src.Mass = TryGet(rb2dCpmponent["Mass"], float, 1.0f);
+					src.LinearDrag = TryGet(rb2dCpmponent["LinearDrag"], float, 0.0f);
+					src.AngularDrag = TryGet(rb2dCpmponent["AngularDrag"], float, 0.05f);
+					src.AllowSleep = TryGet(rb2dCpmponent["AllowSleep"], bool, true);
+					src.Awake = TryGet(rb2dCpmponent["Awake"], bool, true);
+					src.Continuous = TryGet(rb2dCpmponent["Continuous"], bool, false);
+					src.FreezeRotation = TryGet(rb2dCpmponent["FreezeRotation"], bool, false);
+					src.GravityScale = TryGet(rb2dCpmponent["GravityScale"], float, 1.0f);
 				}
 
 				auto bc2dCpmponent = entity["BoxCollider2DComponent"];
 				if (bc2dCpmponent)
 				{
 					auto& src = deserializedEntity.AddComponent<BoxCollider2DComponent>();
-					src.Size = bc2dCpmponent["Size"].as<glm::vec2>();
-					src.Offset = bc2dCpmponent["Offset"].as<glm::vec2>();
-					src.Density = bc2dCpmponent["Density"].as<float>();
-					src.Friction = bc2dCpmponent["Friction"].as<float>();
-					src.Restitution = bc2dCpmponent["Restitution"].as<float>();
-					src.RestitutionThreshold = bc2dCpmponent["RestitutionThreshold"].as<float>();
+					src.Size = TryGet(bc2dCpmponent["Size"], glm::vec2, glm::vec2(0.5f));
+					src.Offset = TryGet(bc2dCpmponent["Offset"], glm::vec2, glm::vec2(0.0f));
+					src.Density = TryGet(bc2dCpmponent["Density"], float, 1.0f);
+					src.Friction = TryGet(bc2dCpmponent["Friction"], float, 0.5f);
+					src.Restitution = TryGet(bc2dCpmponent["Restitution"], float, 0.0f);
+					src.RestitutionThreshold = TryGet(bc2dCpmponent["RestitutionThreshold"], float, 0.5f);
 				}
 			}
 		}

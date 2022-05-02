@@ -165,8 +165,8 @@ namespace ArcEngine
 			
 			b2BodyDef def;
 			def.type = (b2BodyType)body.Type;
-			def.linearDamping = body.LinearDamping;
-			def.angularDamping = body.AngularDamping;
+			def.linearDamping = body.LinearDrag;
+			def.angularDamping = body.AngularDrag;
 			def.allowSleep = body.AllowSleep;
 			def.awake = body.Awake;
 			def.fixedRotation = body.FreezeRotation;
@@ -195,6 +195,13 @@ namespace ArcEngine
 				fixtureDef.restitutionThreshold = bc2d.RestitutionThreshold;
 
 				bc2d.RuntimeFixture = rb->CreateFixture(&fixtureDef);
+			}
+
+			if (!body.AutoMass && body.Mass > 0.01f)
+			{
+				b2MassData massData = rb->GetMassData();
+				massData.mass = body.Mass;
+				rb->SetMassData(&massData);
 			}
 		}
 
@@ -324,55 +331,70 @@ namespace ArcEngine
 
 		ARC_PROFILE_FUNCTION();
 
-		/////////////////////////////////////////////////////////////////////
-		// Scripting ////////////////////////////////////////////////////////
-		/////////////////////////////////////////////////////////////////////
 		{
-			void* args[1];
-			float timestep = ts;
-			args[0] = &timestep;
-			constexpr char* onUpdateDesc = "OnUpdate(single)";
-			auto scriptView = m_Registry.view<ScriptComponent>();
-			for (auto e : scriptView)
-			{
-				ScriptComponent& script = scriptView.get<ScriptComponent>(e);
-				const char* className = script.ClassName.c_str();
-				
-				if (ScriptEngine::GetCachedMethodIfAvailable(className, onUpdateDesc))
-					ScriptEngine::Call(script.Handle, className, onUpdateDesc, args);
-			}
-		}
+			OPTICK_EVENT("Update");
 
-		{
-			m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
+			/////////////////////////////////////////////////////////////////////
+			// Scripting ////////////////////////////////////////////////////////
+			/////////////////////////////////////////////////////////////////////
 			{
-				if(!nsc.Instance)
+				void* args[1];
+				float timestep = ts;
+				args[0] = &timestep;
+				constexpr char* onUpdateDesc = "OnUpdate(single)";
+				auto scriptView = m_Registry.view<ScriptComponent>();
+				for (auto e : scriptView)
 				{
-					nsc.Instance = nsc.InstantiateScript();
-					nsc.Instance->m_Entity = { entity, this };
-					
-					nsc.Instance->OnCreate();
+					ScriptComponent& script = scriptView.get<ScriptComponent>(e);
+					const char* className = script.ClassName.c_str();
+				
+					if (ScriptEngine::GetCachedMethodIfAvailable(className, onUpdateDesc))
+						ScriptEngine::Call(script.Handle, className, onUpdateDesc, args);
 				}
+			}
 
-				nsc.Instance->OnUpdate(ts);
-			});
+			{
+				m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
+				{
+					if(!nsc.Instance)
+					{
+						nsc.Instance = nsc.InstantiateScript();
+						nsc.Instance->m_Entity = { entity, this };
+					
+						nsc.Instance->OnCreate();
+					}
+
+					nsc.Instance->OnUpdate(ts);
+				});
+			}
 		}
 		
 		/////////////////////////////////////////////////////////////////////
 		// Physics //////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
-		m_PhysicsWorld2D->Step(ts, VelocityIterations, PositionIterations);
-		auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
-		for (auto e : view)
 		{
-			auto [transform, body] = view.get<TransformComponent, Rigidbody2DComponent>(e);
-			b2Body* rb = (b2Body*)body.RuntimeBody;
-			b2Vec2 position = rb->GetPosition();
-			transform.Translation.x = position.x;
-			transform.Translation.y = position.y;
-			transform.Rotation.z = rb->GetAngle();
-		}
+			OPTICK_EVENT("Physics 2D");
 
+			auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
+			for (auto e : view)
+			{
+				auto [tc, body] = view.get<TransformComponent, Rigidbody2DComponent>(e);
+				b2Body* rb = (b2Body*)body.RuntimeBody;
+				rb->SetTransform(b2Vec2(tc.Translation.x, tc.Translation.y), tc.Rotation.z);
+			}
+
+			m_PhysicsWorld2D->Step(ts, VelocityIterations, PositionIterations);
+		
+			for (auto e : view)
+			{
+				auto [transform, body] = view.get<TransformComponent, Rigidbody2DComponent>(e);
+				b2Body* rb = (b2Body*)body.RuntimeBody;
+				b2Vec2 position = rb->GetPosition();
+				transform.Translation.x = position.x;
+				transform.Translation.y = position.y;
+				transform.Rotation.z = rb->GetAngle();
+			}
+		}
 		/////////////////////////////////////////////////////////////////////
 		// Rendering ////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////

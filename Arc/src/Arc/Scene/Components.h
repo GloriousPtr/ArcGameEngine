@@ -229,8 +229,10 @@ namespace ArcEngine
 		enum class BodyType { Static = 0, Kinematic, Dynamic };
 
 		BodyType Type = BodyType::Dynamic;
-		float LinearDamping = 0.0f;
-		float AngularDamping = 0.05f;
+		bool AutoMass = true;
+		float Mass = 1.0f;
+		float LinearDrag = 0.0f;
+		float AngularDrag = 0.05f;
 		bool AllowSleep = true;
 		bool Awake = true;
 		bool Continuous = false;

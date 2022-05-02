@@ -7,18 +7,21 @@ Entities:
       Translation: [-0.540859818, 1.45595407, 0]
       Rotation: [0, 0, 0.431065738]
       Scale: [1, 1, 1]
+    RelationshipComponent:
       Parent: 0
       ChildrenCount: 0
       Children:
         {}
     SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
+      Color: [0.800000012, 0.200000003, 0.200000003, 1]
       TextureFilepath: ""
       TilingFactor: 1
     Rigidbody2DComponent:
       Type: 2
-      LinearDamping: 0
-      AngularDamping: 0.0500000007
+      AutoMass: true
+      Mass: 1
+      LinearDrag: 0
+      AngularDrag: 0.0500000007
       AllowSleep: false
       Awake: true
       Continuous: false
@@ -38,6 +41,7 @@ Entities:
       Translation: [0, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
+    RelationshipComponent:
       Parent: 0
       ChildrenCount: 0
       Children:
@@ -60,6 +64,7 @@ Entities:
       Translation: [0, -2.02967358, 0]
       Rotation: [0, 0, 0]
       Scale: [6.34841347, 1, 1]
+    RelationshipComponent:
       Parent: 0
       ChildrenCount: 0
       Children:
@@ -70,8 +75,10 @@ Entities:
       TilingFactor: 1
     Rigidbody2DComponent:
       Type: 0
-      LinearDamping: 0
-      AngularDamping: 0.0500000007
+      AutoMass: true
+      Mass: 1
+      LinearDrag: 0
+      AngularDrag: 0.0500000007
       AllowSleep: true
       Awake: true
       Continuous: false
@@ -91,6 +98,7 @@ Entities:
       Translation: [1.20071387, 1.70085049, 0]
       Rotation: [0, 0, 0.92857939]
       Scale: [0.999999881, 0.999999881, 1]
+    RelationshipComponent:
       Parent: 0
       ChildrenCount: 0
       Children:
@@ -101,8 +109,10 @@ Entities:
       TilingFactor: 1
     Rigidbody2DComponent:
       Type: 2
-      LinearDamping: 0
-      AngularDamping: 0.0500000007
+      AutoMass: false
+      Mass: 3
+      LinearDrag: 0
+      AngularDrag: 0.0500000007
       AllowSleep: false
       Awake: true
       Continuous: false
@@ -113,5 +123,5 @@ Entities:
       Offset: [0, 0]
       Density: 1
       Friction: 0.5
-      Restitution: 0.5
+      Restitution: 0.699999988
       RestitutionThreshold: 0.5
