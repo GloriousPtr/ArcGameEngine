@@ -88,6 +88,7 @@ namespace ArcEngine
 		CopyComponent<LightComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
 		CopyComponent<Rigidbody2DComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
 		CopyComponent<BoxCollider2DComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
+		CopyComponent<CircleCollider2DComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
 		CopyComponent<ScriptComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
 
 		return newScene;
@@ -195,6 +196,23 @@ namespace ArcEngine
 				fixtureDef.restitutionThreshold = bc2d.RestitutionThreshold;
 
 				bc2d.RuntimeFixture = rb->CreateFixture(&fixtureDef);
+			}
+
+			if (entity.HasComponent<CircleCollider2DComponent>())
+			{
+				auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
+
+				b2CircleShape circleShape;
+				circleShape.m_radius = cc2d.Radius * glm::max(transform.Scale.x, transform.Scale.y);
+
+				b2FixtureDef fixtureDef;
+				fixtureDef.shape = &circleShape;
+				fixtureDef.density = cc2d.Density;
+				fixtureDef.friction = cc2d.Friction;
+				fixtureDef.restitution = cc2d.Restitution;
+				fixtureDef.restitutionThreshold = cc2d.RestitutionThreshold;
+
+				cc2d.RuntimeFixture = rb->CreateFixture(&fixtureDef);
 			}
 
 			if (!body.AutoMass && body.Mass > 0.01f)
@@ -571,6 +589,11 @@ namespace ArcEngine
 
 	template<>
 	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
+	{
+	}
+	
+	template<>
+	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component)
 	{
 	}
 

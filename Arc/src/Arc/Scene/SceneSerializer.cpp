@@ -263,6 +263,22 @@ namespace ArcEngine
 			out << YAML::EndMap; // BoxCollider2DComponent
 		}
 
+		if (entity.HasComponent<CircleCollider2DComponent>())
+		{
+			out << YAML::Key << "CircleCollider2DComponent";
+			out << YAML::BeginMap; // CircleCollider2DComponent
+
+			auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
+			out << YAML::Key << "Radius" << YAML::Value << cc2d.Radius;
+			out << YAML::Key << "Offset" << YAML::Value << cc2d.Offset;
+			out << YAML::Key << "Density" << YAML::Value << cc2d.Density;
+			out << YAML::Key << "Friction" << YAML::Value << cc2d.Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << cc2d.Restitution;
+			out << YAML::Key << "RestitutionThreshold" << YAML::Value << cc2d.RestitutionThreshold;
+
+			out << YAML::EndMap; // CircleCollider2DComponent
+		}
+
 		out << YAML::EndMap; // Entity
 	}
 
@@ -432,6 +448,18 @@ namespace ArcEngine
 					src.Friction = TryGet(bc2dCpmponent["Friction"], float, 0.5f);
 					src.Restitution = TryGet(bc2dCpmponent["Restitution"], float, 0.0f);
 					src.RestitutionThreshold = TryGet(bc2dCpmponent["RestitutionThreshold"], float, 0.5f);
+				}
+
+				auto cc2dCpmponent = entity["CircleCollider2DComponent"];
+				if (cc2dCpmponent)
+				{
+					auto& src = deserializedEntity.AddComponent<CircleCollider2DComponent>();
+					src.Radius = TryGet(cc2dCpmponent["Radius"], float, 0.5f);
+					src.Offset = TryGet(cc2dCpmponent["Offset"], glm::vec2, glm::vec2(0.0f));
+					src.Density = TryGet(cc2dCpmponent["Density"], float, 1.0f);
+					src.Friction = TryGet(cc2dCpmponent["Friction"], float, 0.5f);
+					src.Restitution = TryGet(cc2dCpmponent["Restitution"], float, 0.0f);
+					src.RestitutionThreshold = TryGet(cc2dCpmponent["RestitutionThreshold"], float, 0.5f);
 				}
 			}
 		}

@@ -868,6 +868,16 @@ namespace ArcEngine
 			UI::Property("Restitution Threshold", component.RestitutionThreshold);
 		});
 
+		DrawComponent<CircleCollider2DComponent>(ICON_MDI_CIRCLE_OUTLINE " Circle Collider 2D", entity, [](CircleCollider2DComponent& component)
+		{
+			UI::Property("Radius", component.Radius);
+			UI::Property("Offset", component.Offset);
+			UI::Property("Density", component.Density);
+			UI::Property("Friction", component.Friction);
+			UI::Property("Restitution", component.Restitution);
+			UI::Property("Restitution Threshold", component.RestitutionThreshold);
+		});
+
 		DrawComponent<ScriptComponent>(ICON_MDI_POUND_BOX " Script", entity, [](ScriptComponent& component)
 		{
 			bool found = ScriptEngine::HasClass(component.ClassName.c_str());
@@ -968,6 +978,15 @@ namespace ArcEngine
 				if (ImGui::MenuItem(ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider 2D"))
 				{
 					entity.AddComponent<BoxCollider2DComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+			}
+
+			if (!entity.HasComponent<CircleCollider2DComponent>())
+			{
+				if (ImGui::MenuItem(ICON_MDI_CIRCLE_OUTLINE " Circle Collider 2D"))
+				{
+					entity.AddComponent<CircleCollider2DComponent>();
 					ImGui::CloseCurrentPopup();
 				}
 			}
