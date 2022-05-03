@@ -45,7 +45,7 @@ namespace ArcEngine
 		float m_MouseSensitivity = 0.1f;
 
 		float m_MaxMoveSpeed = 1.0f;
-		float m_MoveDampeningFactor = 0.02f;
+		float m_MoveDampeningFactor = 0.000001f;
 		glm::vec3 m_MoveDirection = glm::vec3(0.0f);
 		float m_MoveVelocity = 0.0f;
 

@@ -33,6 +33,7 @@ namespace ArcEngine
 	static std::vector<MeshData> meshes;
 	static Ref<Texture2D> s_BRDFLutTexture;
 	static Ref<Shader> shader;
+	static Ref<Shader> lightingShader;
 	static Ref<Shader> shadowMapShader;
 	static Ref<Shader> cubemapShader;
 	static Ref<Shader> gaussianBlurShader;
@@ -90,10 +91,14 @@ namespace ArcEngine
 		hdrShader = s_ShaderLibrary.Load("assets/shaders/HDR.glsl");
 		bloomShader = s_ShaderLibrary.Load("assets/shaders/Bloom.glsl");
 		shader = s_ShaderLibrary.Load("assets/shaders/PBR.glsl");
+		lightingShader = s_ShaderLibrary.Load("assets/shaders/LightingPass.glsl");
 
 		shader->Bind();
 		shader->SetUniformBlock("Camera", 0);
-		shader->SetUniformBlock("LightBuffer", 1);
+
+		lightingShader->Bind();
+		lightingShader->SetUniformBlock("Camera", 0);
+		lightingShader->SetUniformBlock("LightBuffer", 1);
 
 		// Cubemap
 		{
@@ -284,6 +289,7 @@ namespace ArcEngine
 		
 		ShadowMapPass();
 		RenderPass(renderGraphData->RenderPassTarget);
+		LightingPass(renderGraphData);
 		BloomPass(renderGraphData);
 		CompositePass(renderGraphData);
 		meshes.clear();
@@ -380,7 +386,7 @@ namespace ArcEngine
 		hdrShader->SetFloat("u_BloomStrength", UseBloom ? BloomStrength : 0.0f);
 		hdrShader->SetInt("u_Texture", 0);
 		hdrShader->SetInt("u_BloomTexture", 1);
-		renderGraphData->RenderPassTarget->BindColorAttachment(0, 0);
+		renderGraphData->LightingPassTarget->BindColorAttachment(0, 0);
 		renderGraphData->UpsampledFramebuffers[0]->BindColorAttachment(0, 1);
 		DrawQuad();
 	}
@@ -403,7 +409,7 @@ namespace ArcEngine
 			bloomShader->SetFloat4("u_Threshold", threshold);
 			bloomShader->SetFloat4("u_Params", params);
 			bloomShader->SetInt("u_Texture", 0);
-			renderGraphData->RenderPassTarget->BindColorAttachment(0, 0);
+			renderGraphData->LightingPassTarget->BindColorAttachment(0, 0);
 			DrawQuad();
 		}
 
@@ -466,6 +472,26 @@ namespace ArcEngine
 		}
 	}
 
+	void Renderer3D::LightingPass(Ref<RenderGraphData> renderGraphData)
+	{
+		OPTICK_EVENT();
+
+		renderGraphData->LightingPassTarget->Bind();
+		lightingShader->Bind();
+		
+		lightingShader->SetInt("u_FragColor", 0);
+		lightingShader->SetInt("u_Albedo", 1);
+		lightingShader->SetInt("u_Position", 2);
+		lightingShader->SetInt("u_Normal", 3);
+		lightingShader->SetInt("u_DirectionalShadowMap", 4);
+
+		renderGraphData->RenderPassTarget->BindColorAttachment(0, 0);
+		renderGraphData->RenderPassTarget->BindColorAttachment(1, 1);
+		renderGraphData->RenderPassTarget->BindColorAttachment(2, 2);
+		renderGraphData->RenderPassTarget->BindColorAttachment(3, 3);
+		DrawQuad();
+	}
+
 	void Renderer3D::RenderPass(Ref<Framebuffer> renderTarget)
 	{
 		OPTICK_EVENT();
@@ -516,11 +542,10 @@ namespace ArcEngine
 			shader->SetInt("u_IrradianceMap", 0);
 			shader->SetInt("u_RadianceMap", 1);
 			shader->SetInt("u_BRDFLutMap", 2);
-			shader->SetInt("u_DirectionalShadowMap", 3);
-			shader->SetInt("u_AlbedoMap", 4);
-			shader->SetInt("u_NormalMap", 5);
-			shader->SetInt("u_MRAMap", 6);
-			shader->SetInt("u_EmissiveMap", 7);
+			shader->SetInt("u_AlbedoMap", 3);
+			shader->SetInt("u_NormalMap", 4);
+			shader->SetInt("u_MRAMap", 5);
+			shader->SetInt("u_EmissiveMap", 6);
 
 			shader->SetMat4("u_DirLightView", dirLightView);
 			shader->SetMat4("u_DirLightViewProj", dirLightViewProj);
@@ -547,13 +572,13 @@ namespace ArcEngine
 				shader->SetMat4("u_Properties", meshData->Properties);
 
 				if (meshData->AlbedoMap)
-					meshData->AlbedoMap->Bind(4);
+					meshData->AlbedoMap->Bind(3);
 				if (meshData->NormalMap)
-					meshData->NormalMap->Bind(5);
+					meshData->NormalMap->Bind(4);
 				if (meshData->MRAMap)
-					meshData->MRAMap->Bind(6);
+					meshData->MRAMap->Bind(5);
 				if (meshData->EmissiveMap)
-					meshData->EmissiveMap->Bind(7);
+					meshData->EmissiveMap->Bind(6);
 			
 				shader->SetMat4("u_Model", meshData->Transform);
 

@@ -7,6 +7,7 @@
 #include "Arc/Math/Math.h"
 #include "../Utils/IconsMaterialDesignIcons.h"
 #include "../EditorLayer.h"
+#include "../Utils/UI.h"
 
 namespace ArcEngine
 {
@@ -36,10 +37,24 @@ namespace ArcEngine
 
 		{
 			FramebufferSpecification spec;
-			spec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::Depth };
+			spec.Attachments = {
+				FramebufferTextureFormat::RGBA16F,				// FragColor
+				FramebufferTextureFormat::RGBA8,				// Albedo, Roughness
+				FramebufferTextureFormat::RGBA32F,				// Position
+				FramebufferTextureFormat::RGBA16F,				// Normal, Metallic
+				FramebufferTextureFormat::Depth
+			};
 			spec.Width = width;
 			spec.Height = height;
 			m_RenderGraphData->RenderPassTarget = Framebuffer::Create(spec);
+		}
+
+		{
+			FramebufferSpecification spec;
+			spec.Attachments = { FramebufferTextureFormat::RGBA16F };
+			spec.Width = width;
+			spec.Height = height;
+			m_RenderGraphData->LightingPassTarget = Framebuffer::Create(spec);
 		}
 
 		width /= 2;
@@ -83,58 +98,60 @@ namespace ArcEngine
 			scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
-		m_MousePosition = *((glm::vec2*) &(ImGui::GetMousePos()));
-		const glm::vec3& position = m_EditorCamera.GetPosition();
-		float yaw = m_EditorCamera.GetYaw();
-		float pitch = m_EditorCamera.GetPitch();
-
-		bool moved = false;
-		if (m_CursorLocked)
-		{
-			const glm::vec2 change = (m_MousePosition - m_LastMousePosition) * m_MouseSensitivity;
-			yaw += change.x;
-			pitch = glm::clamp(pitch - change.y, -89.9f, 89.9f);
-
-			glm::vec3 moveDirection = glm::vec3(0.0f);
-			if (ImGui::IsKeyDown(Key::W))
-			{
-				moved = true;
-				moveDirection += m_EditorCamera.GetForward() * timestep.GetSeconds();
-			}
-			else if (ImGui::IsKeyDown(Key::S))
-			{
-				moved = true;
-				moveDirection -= m_EditorCamera.GetForward() * timestep.GetSeconds();
-			}
-			if (ImGui::IsKeyDown(Key::D))
-			{
-				moved = true;
-				moveDirection += m_EditorCamera.GetRight() * timestep.GetSeconds();
-			}
-			else if (ImGui::IsKeyDown(Key::A))
-			{
-				moved = true;
-				moveDirection -= m_EditorCamera.GetRight() * timestep.GetSeconds();
-			}
-
-			if (glm::length2(moveDirection) > 0.0001f)
-				m_MoveDirection = glm::normalize(moveDirection);
-		}
-
-		m_MoveVelocity += (moved ? 1.0f : -1.0f) * timestep;
-		m_MoveVelocity *= glm::pow(m_MoveDampeningFactor, timestep);
-		if (m_MoveVelocity > 0.0f)
-		{
-			float maxMoveSpeed = m_MaxMoveSpeed * (ImGui::IsKeyDown(Key::LeftShift) ? 3.0f : 1.0f);
-			m_EditorCamera.SetPosition(position + (m_MoveDirection * m_MoveVelocity * maxMoveSpeed));
-		}
-
-		m_EditorCamera.SetYaw(yaw);
-		m_EditorCamera.SetPitch(pitch);
-		m_LastMousePosition = m_MousePosition;
-
 		if (!m_SimulationRunning)
+		{
+			m_MousePosition = *((glm::vec2*) &(ImGui::GetMousePos()));
+			const glm::vec3& position = m_EditorCamera.GetPosition();
+			float yaw = m_EditorCamera.GetYaw();
+			float pitch = m_EditorCamera.GetPitch();
+
+			bool moved = false;
+			if (m_CursorLocked)
+			{
+				const glm::vec2 change = (m_MousePosition - m_LastMousePosition) * m_MouseSensitivity;
+				yaw += change.x;
+				pitch = glm::clamp(pitch - change.y, -89.9f, 89.9f);
+
+				glm::vec3 moveDirection = glm::vec3(0.0f);
+				if (ImGui::IsKeyDown(Key::W))
+				{
+					moved = true;
+					moveDirection += m_EditorCamera.GetForward() * timestep.GetSeconds();
+				}
+				else if (ImGui::IsKeyDown(Key::S))
+				{
+					moved = true;
+					moveDirection -= m_EditorCamera.GetForward() * timestep.GetSeconds();
+				}
+				if (ImGui::IsKeyDown(Key::D))
+				{
+					moved = true;
+					moveDirection += m_EditorCamera.GetRight() * timestep.GetSeconds();
+				}
+				else if (ImGui::IsKeyDown(Key::A))
+				{
+					moved = true;
+					moveDirection -= m_EditorCamera.GetRight() * timestep.GetSeconds();
+				}
+
+				if (glm::length2(moveDirection) > Math::EPSILON)
+					m_MoveDirection = glm::normalize(moveDirection);
+			}
+
+			m_MoveVelocity += (moved ? 1.0f : -1.0f) * timestep;
+			m_MoveVelocity *= glm::pow(m_MoveDampeningFactor, timestep);
+			if (m_MoveVelocity > 0.0f)
+			{
+				float maxMoveSpeed = m_MaxMoveSpeed * (ImGui::IsKeyDown(Key::LeftShift) ? 3.0f : 1.0f);
+				m_EditorCamera.SetPosition(position + (m_MoveDirection * m_MoveVelocity * maxMoveSpeed));
+			}
+
+			m_EditorCamera.SetYaw(yaw);
+			m_EditorCamera.SetPitch(pitch);
+			m_LastMousePosition = m_MousePosition;
+
 			m_EditorCamera.OnUpdate(timestep);
+		}
 
 		// Update scene
 		m_RenderGraphData->RenderPassTarget->Bind();
@@ -207,6 +224,11 @@ namespace ArcEngine
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin(m_ID.c_str(), &m_Showing);
 		
+		static int renderTargetIndex = 0;
+		const char* drawModes[] = { "Composite", "Frag", "Albedo", "Position", "Normal" };
+		UI::Property("Draw Mode", renderTargetIndex, drawModes, 5);
+		ImGui::SetItemAllowOverlap();
+
 		const auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
 		const auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
 		const auto viewportOffset = ImGui::GetWindowPos();
@@ -219,7 +241,9 @@ namespace ArcEngine
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
-		const uint64_t textureID = m_RenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
+		uint64_t textureID = m_RenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
+		if (renderTargetIndex != 0)
+			textureID = m_RenderGraphData->RenderPassTarget->GetColorAttachmentRendererID(renderTargetIndex - 1);
 		ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 		if (ImGui::BeginDragDropTarget())

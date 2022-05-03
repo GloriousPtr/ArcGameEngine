@@ -8,6 +8,7 @@ namespace ArcEngine
 	{
 		Ref<Framebuffer> CompositePassTarget;
 		Ref<Framebuffer> RenderPassTarget;
+		Ref<Framebuffer> LightingPassTarget;
 
 		static const size_t BlurSamples = 6;
 		Ref<Framebuffer> PrefilteredFramebuffer;

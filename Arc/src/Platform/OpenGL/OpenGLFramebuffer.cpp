@@ -163,6 +163,9 @@ namespace ArcEngine
 						case FramebufferTextureFormat::RGBA16F:
 							Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_RGBA16F, GL_RGBA, m_Specification.Width, m_Specification.Height, i);
 							break;
+						case FramebufferTextureFormat::RGBA32F:
+							Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_RGBA32F, GL_RGBA, m_Specification.Width, m_Specification.Height, i);
+							break;
 						case FramebufferTextureFormat::R11G11B10:
 							Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_R11F_G11F_B10F, GL_RGB, m_Specification.Width, m_Specification.Height, i);
 							break;

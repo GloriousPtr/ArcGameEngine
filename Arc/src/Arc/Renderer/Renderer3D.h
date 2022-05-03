@@ -46,6 +46,7 @@ namespace ArcEngine
 		static void Flush(Ref<RenderGraphData> renderGraphData);
 		static void CompositePass(Ref<RenderGraphData> renderGraphData);
 		static void BloomPass(Ref<RenderGraphData> renderGraphData);
+		static void LightingPass(Ref<RenderGraphData> renderGraphData);
 		static void RenderPass(Ref<Framebuffer> renderTarget);
 		static void ShadowMapPass();
 

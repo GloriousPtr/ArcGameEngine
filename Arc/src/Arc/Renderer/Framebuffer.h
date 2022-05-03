@@ -11,6 +11,7 @@ namespace ArcEngine
 		// Color
 		RGBA8,
 		RGBA16F,
+		RGBA32F,
 		R11G11B10,
 		R32I,
 
