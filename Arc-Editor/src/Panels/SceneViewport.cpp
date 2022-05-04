@@ -38,10 +38,11 @@ namespace ArcEngine
 		{
 			FramebufferSpecification spec;
 			spec.Attachments = {
-				FramebufferTextureFormat::RGBA16F,				// FragColor
-				FramebufferTextureFormat::RGBA8,				// Albedo, Roughness
-				FramebufferTextureFormat::RGBA32F,				// Position
-				FramebufferTextureFormat::RGBA16F,				// Normal, Metallic
+				FramebufferTextureFormat::RGBA8,				// Albedo
+				FramebufferTextureFormat::RGBA16F,				// Position
+				FramebufferTextureFormat::RGBA16F,				// Normal
+				FramebufferTextureFormat::RGBA8,				// Metallic, Roughness, AO
+				FramebufferTextureFormat::RGBA8,				// Emission
 				FramebufferTextureFormat::Depth
 			};
 			spec.Width = width;
@@ -225,8 +226,8 @@ namespace ArcEngine
 		ImGui::Begin(m_ID.c_str(), &m_Showing);
 		
 		static int renderTargetIndex = 0;
-		const char* drawModes[] = { "Composite", "Frag", "Albedo", "Position", "Normal" };
-		UI::Property("Draw Mode", renderTargetIndex, drawModes, 5);
+		const char* drawModes[] = { "Composite", "Albedo", "Position", "Normal", "MRAO", "Emission" };
+		UI::Property("Draw Mode", renderTargetIndex, drawModes, 6);
 		ImGui::SetItemAllowOverlap();
 
 		const auto viewportMinRegion = ImGui::GetWindowContentRegionMin();

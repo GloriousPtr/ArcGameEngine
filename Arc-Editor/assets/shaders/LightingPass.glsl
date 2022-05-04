@@ -68,11 +68,34 @@ layout (std140, binding = 1) uniform LightBuffer
     uint u_NumLights;
 };
 
-uniform sampler2D u_FragColor;
 uniform sampler2D u_Albedo;
 uniform sampler2D u_Position;
 uniform sampler2D u_Normal;
+uniform sampler2D u_MetallicRoughnessAO;
+uniform sampler2D u_Emission;
+
+uniform samplerCube u_IrradianceMap;
+uniform samplerCube u_RadianceMap;
+uniform sampler2D u_BRDFLutMap;
+
+uniform float u_IrradianceIntensity;
+uniform float u_EnvironmentRotation;
+
 //uniform sampler2D u_DirectionalShadowMap;
+
+struct PBRParameters
+{
+	vec3 Albedo;
+	float Roughness;
+	float Metalness;
+
+	vec3 WorldPos;
+	vec3 Normal;
+	vec3 View;
+	float NdotV;
+};
+
+PBRParameters m_Params;
 
 // N: Normal, H: Halfway, a2: pow(roughness, 2)
 float DistributionGGX(const vec3 N, const vec3 H, const float a2)
@@ -137,23 +160,61 @@ float LengthSq(const vec3 v)
 	return dot(v, v);
 }
 
+vec3 RotateVectorAboutY(float angle, vec3 vec)
+{
+	angle = radians(angle);
+	mat3x3 rotationMatrix = { vec3(cos(angle),0.0,sin(angle)),
+							vec3(0.0,1.0,0.0),
+							vec3(-sin(angle),0.0,cos(angle)) };
+	return rotationMatrix * vec;
+}
+
+vec3 IBL(vec3 F0)
+{
+	float NoV = clamp(m_Params.NdotV, 0.0, 1.0);
+	vec3 F = FresnelSchlickRoughness(NoV, F0, m_Params.Roughness);
+	vec3 kd = (1.0 - F) * (1.0 - m_Params.Metalness);
+
+	vec3 irradiance = texture(u_IrradianceMap, RotateVectorAboutY(u_EnvironmentRotation, m_Params.Normal)).rgb;
+	vec3 diffuseIBL = m_Params.Albedo * irradiance;
+
+	int envRadianceTexLevels = textureQueryLevels(u_RadianceMap) - 5;
+	vec3 Lr = 2.0 * m_Params.NdotV * m_Params.Normal - m_Params.View;
+	vec3 specularIrradiance = textureLod(u_RadianceMap, RotateVectorAboutY(u_EnvironmentRotation, Lr), m_Params.Roughness * envRadianceTexLevels).rgb;
+
+	vec2 specularBRDF = texture(u_BRDFLutMap, vec2(1.0 - m_Params.NdotV, 1.0 - m_Params.Roughness)).rg;
+	vec3 specularIBL = specularIrradiance * (F0 * specularBRDF.x + specularBRDF.y);
+	
+	return (kd * diffuseIBL + specularIBL) * u_IrradianceIntensity;
+}
+
 void main()
 {
-	vec3 fragCol = texture(u_FragColor, v_TexCoord).rgb;
-	vec3 albedo = texture(u_Albedo, v_TexCoord).rgb;
-	vec3 fragPos = texture(u_Position, v_TexCoord).rgb;
-	vec3 normal = texture(u_Normal, v_TexCoord).rgb;
-	float roughness = texture(u_Albedo, v_TexCoord).a;
-	float metalness = texture(u_Normal, v_TexCoord).a;
+	vec4 albedo = texture(u_Albedo, v_TexCoord);
+	m_Params.Albedo = albedo.rgb;
 
-	vec3 view = normalize(v_CameraPosition - fragPos);//121
-	float NdotV = max(dot(normal, view), 0.0);
+	if (albedo.x == albedo.y
+		&& albedo.y == albedo.z
+		&& albedo.z == albedo.a
+		&& albedo.a <= EPSILON)
+		discard;
+
+	m_Params.WorldPos = texture(u_Position, v_TexCoord).rgb;
+	m_Params.Normal = texture(u_Normal, v_TexCoord).rgb;
+
+	m_Params.Metalness = texture(u_MetallicRoughnessAO, v_TexCoord).r;
+	m_Params.Roughness = texture(u_MetallicRoughnessAO, v_TexCoord).g;
+	float ao = texture(u_MetallicRoughnessAO, v_TexCoord).b;
+	vec4 emission = texture(u_Emission, v_TexCoord);
+
+	m_Params.View = normalize(v_CameraPosition - m_Params.WorldPos);
+	m_Params.NdotV = max(dot(m_Params.Normal, m_Params.View), 0.0);
 
     vec3 F0 = vec3(0.04);
-    F0 = mix(F0, albedo, metalness);
+    F0 = mix(F0, m_Params.Albedo, m_Params.Metalness);
 
-	float a2 = roughness * roughness;
-	float r = roughness + 1.0;
+	float a2 = m_Params.Roughness * m_Params.Roughness;
+	float r = m_Params.Roughness + 1.0;
 	float k = (r * r) / 8.0;
 
     // reflectance equation
@@ -172,17 +233,17 @@ void main()
 			case 0:
 			{
 				L = -1.0 * normalize(light.u_LightDir.xyz);
-				NdotL = max(dot(normal, L), 0.0);
+				NdotL = max(dot(m_Params.Normal, L), 0.0);
 //				shadow = (1.0 - CalcDirectionalShadowFactor(light, NdotL));
 				break;
 			}
 
 			case 1:
 			{
-				L = normalize(light.u_Position.rgb - fragPos);
-				NdotL = max(dot(normal, L), 0.0);
+				L = normalize(light.u_Position.rgb - m_Params.WorldPos);
+				NdotL = max(dot(m_Params.Normal, L), 0.0);
 				vec4 attenFactor = light.u_AttenFactors;
-				float lightDistance2 = LengthSq(light.u_Position.xyz - fragPos);
+				float lightDistance2 = LengthSq(light.u_Position.xyz - m_Params.WorldPos);
 				float lightRadius2 = attenFactor.x * attenFactor.x;
 				attenuation = clamp(1 - ((lightDistance2 * lightDistance2) / (lightRadius2 * lightRadius2)), 0.0, 1.0);
 				attenuation = (attenuation * attenuation) / (lightDistance2 + 1.0);
@@ -191,10 +252,10 @@ void main()
 			
 			case 2:
 			{
-				L = normalize(light.u_Position.rgb - fragPos);
-				NdotL = max(dot(normal, L), 0.0);
+				L = normalize(light.u_Position.rgb - m_Params.WorldPos);
+				NdotL = max(dot(m_Params.Normal, L), 0.0);
 				vec4 attenFactor = light.u_AttenFactors;
-				float lightDistance2 = LengthSq(light.u_Position.xyz - fragPos);
+				float lightDistance2 = LengthSq(light.u_Position.xyz - m_Params.WorldPos);
 				float lightRadius2 = attenFactor.x * attenFactor.x;
 				if (lightRadius2 > lightDistance2)
 				{
@@ -217,19 +278,20 @@ void main()
         vec3 radiance = shadow * light.u_Color.rgb * light.u_Color.a * attenuation;
 
         // Cook-Torrance BRDF
-        vec3 H = normalize(L + view);
-        float NDF = DistributionGGX(normal, H, a2);
-        float G = GeometrySmith(NdotL, clamp(NdotV, 0.0, 1.0), k);
-        vec3 F = FresnelSchlickRoughness(clamp(dot(H, view), 0.0, 1.0), F0, roughness);
+        vec3 H = normalize(L + m_Params.View);
+        float NDF = DistributionGGX(m_Params.Normal, H, a2);
+        float G = GeometrySmith(NdotL, clamp(m_Params.NdotV, 0.0, 1.0), k);
+        vec3 F = FresnelSchlickRoughness(clamp(dot(H, m_Params.View), 0.0, 1.0), F0, m_Params.Roughness);
 
         vec3 numerator = NDF * G * F;
-        float denom = max(4.0 * NdotV * NdotL, 0.0001);
+        float denom = max(4.0 * m_Params.NdotV * NdotL, 0.0001);
         vec3 specular = numerator / denom;
 
-        vec3 kD = (1.0 - F) * (1.0 - metalness);
-        Lo += (kD * (albedo / PI) + specular) * radiance * NdotL;
+        vec3 kD = (1.0 - F) * (1.0 - m_Params.Metalness);
+        Lo += (kD * (m_Params.Albedo / PI) + specular) * radiance * NdotL;
     }
 
-	vec3 result = fragCol + Lo;
-    o_FragColor = vec4(vec3(result), 1.0);
+	vec3 ambient = IBL(F0) * ao;
+	vec3 result = Lo + ambient + (emission.rgb * emission.a * 255);
+	o_FragColor = vec4(result, 1.0);
 }

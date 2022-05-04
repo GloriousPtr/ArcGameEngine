@@ -477,34 +477,15 @@ namespace ArcEngine
 		OPTICK_EVENT();
 
 		renderGraphData->LightingPassTarget->Bind();
-		lightingShader->Bind();
-		
-		lightingShader->SetInt("u_FragColor", 0);
-		lightingShader->SetInt("u_Albedo", 1);
-		lightingShader->SetInt("u_Position", 2);
-		lightingShader->SetInt("u_Normal", 3);
-		lightingShader->SetInt("u_DirectionalShadowMap", 4);
-
-		renderGraphData->RenderPassTarget->BindColorAttachment(0, 0);
-		renderGraphData->RenderPassTarget->BindColorAttachment(1, 1);
-		renderGraphData->RenderPassTarget->BindColorAttachment(2, 2);
-		renderGraphData->RenderPassTarget->BindColorAttachment(3, 3);
-		DrawQuad();
-	}
-
-	void Renderer3D::RenderPass(Ref<Framebuffer> renderTarget)
-	{
-		OPTICK_EVENT();
-
-		renderTarget->Bind();
+		RenderCommand::SetClearColor(glm::vec4(0.0f));
 		RenderCommand::Clear();
 
+		SkyLightComponent* skylightComponent = nullptr;
 		float skylightIntensity = 0.0f;
 		float skylightRotation = 0.0f;
 		{
 			OPTICK_EVENT("Skylight");
 
-			SkyLightComponent* skylightComponent = nullptr;
 			if (skylight)
 			{
 				skylightComponent = &(skylight.GetComponent<SkyLightComponent>());
@@ -521,39 +502,75 @@ namespace ArcEngine
 					cubemapShader->SetMat4("u_Projection", cameraProjection);
 					cubemapShader->SetFloat("u_Intensity", skylightIntensity);
 					cubemapShader->SetFloat("u_Rotation", skylightRotation);
+
 					DrawCube();
 
 					RenderCommand::SetDepthMask(true);
-
-					skylightComponent->Texture->BindIrradianceMap(0);
-					skylightComponent->Texture->BindRadianceMap(1);
-					s_BRDFLutTexture->Bind(2);
 				}
 			}
 		}
+
+
+		lightingShader->Bind();
+
+		lightingShader->SetInt("u_Albedo", 0);
+		lightingShader->SetInt("u_Position", 1);
+		lightingShader->SetInt("u_Normal", 2);
+		lightingShader->SetInt("u_MetallicRoughnessAO", 3);
+		lightingShader->SetInt("u_Emission", 4);
+
+		lightingShader->SetInt("u_IrradianceMap", 5);
+		lightingShader->SetInt("u_RadianceMap", 6);
+		lightingShader->SetInt("u_BRDFLutMap", 7);
+
+		//lightingShader->SetInt("u_DirectionalShadowMap", 4);
+
+		renderGraphData->RenderPassTarget->BindColorAttachment(0, 0);
+		renderGraphData->RenderPassTarget->BindColorAttachment(1, 1);
+		renderGraphData->RenderPassTarget->BindColorAttachment(2, 2);
+		renderGraphData->RenderPassTarget->BindColorAttachment(3, 3);
+		renderGraphData->RenderPassTarget->BindColorAttachment(4, 4);
+		
+		if (skylight)
+		{
+			SkyLightComponent& skylightComponent = skylight.GetComponent<SkyLightComponent>();
+			if (skylightComponent.Texture)
+			{
+				lightingShader->SetFloat("u_IrradianceIntensity", skylightComponent.Intensity);
+				lightingShader->SetFloat("u_EnvironmentRotation", skylightComponent.Rotation);
+				skylightComponent.Texture->BindIrradianceMap(5);
+				skylightComponent.Texture->BindRadianceMap(7);
+			}
+		}
+		s_BRDFLutTexture->Bind(7);
+		
+		DrawQuad();
+	}
+
+	void Renderer3D::RenderPass(Ref<Framebuffer> renderTarget)
+	{
+		OPTICK_EVENT();
+
+		renderTarget->Bind();
+		RenderCommand::SetClearColor(glm::vec4(0.0f));
+		RenderCommand::Clear();
 
 		if (meshes.size() > 0)
 		{
 			OPTICK_EVENT("Shader Binding");
 
 			shader->Bind();
-			shader->SetFloat("u_IrradianceIntensity", skylightIntensity);
-			shader->SetFloat("u_EnvironmentRotation", skylightRotation);
-			shader->SetInt("u_IrradianceMap", 0);
-			shader->SetInt("u_RadianceMap", 1);
-			shader->SetInt("u_BRDFLutMap", 2);
-			shader->SetInt("u_AlbedoMap", 3);
-			shader->SetInt("u_NormalMap", 4);
-			shader->SetInt("u_MRAMap", 5);
-			shader->SetInt("u_EmissiveMap", 6);
-
-			shader->SetMat4("u_DirLightView", dirLightView);
-			shader->SetMat4("u_DirLightViewProj", dirLightViewProj);
+			
+			shader->SetInt("u_AlbedoMap", 0);
+			shader->SetInt("u_NormalMap", 1);
+			shader->SetInt("u_MRAMap", 2);
+			shader->SetInt("u_EmissiveMap", 3);
 		}
 
 		{
 			OPTICK_EVENT("Draw Meshes");
 
+			/*
 			for (size_t i = 0; i < sceneLights.size(); i++)
 			{
 				LightComponent& light = sceneLights[i].GetComponent<LightComponent>();
@@ -562,7 +579,7 @@ namespace ArcEngine
 					light.ShadowMapFramebuffer->BindDepthAttachment(3);
 					break;
 				}
-			}
+			}*/
 
 			MeshComponent::CullModeType currentCullMode = MeshComponent::CullModeType::Unknown;
 			for (auto it = meshes.rbegin(); it != meshes.rend(); it++)
@@ -572,14 +589,14 @@ namespace ArcEngine
 				shader->SetMat4("u_Properties", meshData->Properties);
 
 				if (meshData->AlbedoMap)
-					meshData->AlbedoMap->Bind(3);
+					meshData->AlbedoMap->Bind(0);
 				if (meshData->NormalMap)
-					meshData->NormalMap->Bind(4);
+					meshData->NormalMap->Bind(1);
 				if (meshData->MRAMap)
-					meshData->MRAMap->Bind(5);
+					meshData->MRAMap->Bind(2);
 				if (meshData->EmissiveMap)
-					meshData->EmissiveMap->Bind(6);
-			
+					meshData->EmissiveMap->Bind(3);
+
 				shader->SetMat4("u_Model", meshData->Transform);
 
 				if (currentCullMode != meshData->CullMode)
