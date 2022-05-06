@@ -49,18 +49,23 @@ void main()
 const float PI = 3.141592653589793;
 const float EPSILON = 0.000000000000001;
 
-/*
-* u_Properties[0] = AlbedoColor: r, g, b, a;
-* u_Properties[1] = Metallic, Roughness, unused, unused
-* u_Properties[2] = EmissiveParams: r, g, b, intensity
-* u_Properties[4] = UseAlbedMap, UseNormalMap, UseMRAMap, UseEmissiveMap
-*/
-uniform mat4 u_Properties;
+struct Properties
+{
+	vec4 AlbedoColor;
+	float Roughness01;
+	float Metalness01;
+	vec3 EmissiveColor;
+	float EmissiveIntensity;
+	
+	sampler2D AlbedoMap;
+	sampler2D NormalMap;
+	sampler2D MRAMap;
+	sampler2D EmissiveMap;
 
-uniform sampler2D u_AlbedoMap;
-uniform sampler2D u_NormalMap;
-uniform sampler2D u_MRAMap;
-uniform sampler2D u_EmissiveMap;
+	bool UseNormalMap;
+};
+
+uniform Properties u_Material;
 
 struct VertexOutput
 {
@@ -83,38 +88,30 @@ layout(location = 4) out vec4 o_Emission;
 
 vec3 GetNormalFromMap()
 {
-    vec3 tangentNormal = texture(u_NormalMap, Input.TexCoord).rgb * 2.0 - 1.0;
+    vec3 tangentNormal = texture(u_Material.NormalMap, Input.TexCoord).rgb * 2.0 - 1.0;
     return normalize(Input.WorldNormals * tangentNormal);
 }
 
 // =========================================
 void main()
 {
-	vec4  albedo = u_Properties[0];
-	float metalic = u_Properties[1].r;
-	float roughness = u_Properties[1].g;
-	vec4 emissiveParams = u_Properties[2];
-
-	bool useAlbedoMap = u_Properties[3].x <= 0.5f ? false : true;
-	bool useNormalMap = u_Properties[3].y <= 0.5f ? false : true;
-	bool useMRAMap = u_Properties[3].z <= 0.5f ? false : true;
-	bool useEmissiveMap = u_Properties[3].w <= 0.5f ? false : true;
-
-    vec4 albedoWithAlpha = useAlbedoMap ? pow(texture(u_AlbedoMap, Input.TexCoord) * albedo, vec4(2.2, 2.2, 2.2, 1.0)) : albedo;
-	if (albedoWithAlpha.a < 0.1)
+    vec4 albedoWithAlpha = pow(texture(u_Material.AlbedoMap, Input.TexCoord) * u_Material.AlbedoColor, vec4(2.2, 2.2, 2.2, 1.0));
+	if (albedoWithAlpha.a < 0.01)
 		discard;
 
     vec3 outAlbedo	= albedoWithAlpha.rgb;
-    float outRoughness = useMRAMap ? texture(u_MRAMap, Input.TexCoord).g * roughness : roughness;
+    vec3 outNormal = u_Material.UseNormalMap ? GetNormalFromMap() : normalize(Input.Normal);
+    vec3 outEmission = texture(u_Material.EmissiveMap, Input.TexCoord).rgb * u_Material.EmissiveColor;
+
+	float outRoughness = u_Material.Roughness01 * texture(u_Material.MRAMap, Input.TexCoord).g;
 	outRoughness = max(outRoughness, 0.05); // Minimum roughness of 0.05 to keep specular highlight
-    float outMetalness = useMRAMap ? texture(u_MRAMap, Input.TexCoord).r * metalic : metalic;
-    float outAO = useMRAMap ? texture(u_MRAMap, Input.TexCoord).b : 1.0;
-    vec4 outEmission = useEmissiveMap ? texture(u_EmissiveMap, Input.TexCoord) : emissiveParams;
-    vec3 outNormal = useNormalMap ? GetNormalFromMap() : normalize(Input.Normal);
+	
+	float outMetalness = u_Material.Metalness01 * texture(u_Material.MRAMap, Input.TexCoord).r;
+	float outAO = texture(u_Material.MRAMap, Input.TexCoord).b;
 
     o_Albedo = vec4(outAlbedo, 1.0);
 	o_Position = vec4(Input.WorldPosition, 1.0);
 	o_Normal = vec4(normalize(outNormal), 1.0);
 	o_MetallicRoughnessAO = vec4(outMetalness, outRoughness, outAO, 1.0);
-	o_Emission = vec4(outEmission.rgb, outEmission.a / 255);
+	o_Emission = vec4(outEmission, u_Material.EmissiveIntensity / 255);
 }

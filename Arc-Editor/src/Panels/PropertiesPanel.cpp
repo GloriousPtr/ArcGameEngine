@@ -75,9 +75,11 @@ namespace ArcEngine
 		}
 	}
 
-	static void DrawTextureCubemapButton(const std::string& label, Ref<TextureCubemap>& texture, uint32_t overrideTextureID = 0)
+	static bool DrawTextureCubemapButton(const std::string& label, Ref<TextureCubemap>& texture, uint32_t overrideTextureID = 0)
 	{
 		OPTICK_EVENT();
+
+		bool changed = false;
 
 		ImGui::PushID(label.c_str());
 
@@ -86,12 +88,13 @@ namespace ArcEngine
 		if (id == 0)
 			id = texture == nullptr ? 0 : texture->GetHRDRendererID();
 
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
-		
 		ImGui::Text(label.c_str());
-		const ImVec2 buttonSize = { 80, 80 };
-		ImGui::SameLine(ImGui::GetWindowWidth() - buttonSize.x - 30);
+		ImGui::SameLine();
 
+		const ImVec2 buttonSize = { 80, 80 };
+		const ImVec2 xButtonSize = { buttonSize.x / 4.0f, 80 };
+		ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - buttonSize.x - xButtonSize.x - ImGui::GetStyle().WindowPadding.x);
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
@@ -101,6 +104,7 @@ namespace ArcEngine
 			if (!filepath.empty())
 			{
 				texture = AssetManager::GetTextureCubemap(filepath);
+				changed = true;
 			}
 		}
 		if (ImGui::BeginDragDropTarget())
@@ -109,6 +113,7 @@ namespace ArcEngine
 			{
 				const char* path = (const char*)payload->Data;
 				texture = AssetManager::GetTextureCubemap(path);
+				changed = true;
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -118,17 +123,24 @@ namespace ArcEngine
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.3f, 0.3f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
-		if(ImGui::Button("x", { buttonSize.x / 4, buttonSize.y } ))
+		if(ImGui::Button("x", xButtonSize))
+		{
 			texture = nullptr;
+			changed = true;
+		}
 		ImGui::PopStyleColor(3);
 		ImGui::PopStyleVar();
 
 		ImGui::PopID();
+
+		return changed;
 	}
 
-	static void DrawTexture2DButton(const std::string& label, Ref<Texture2D>& texture, uint32_t overrideTextureID = 0)
+	static bool DrawTexture2DButton(const std::string& label, Ref<Texture2D>& texture, uint32_t overrideTextureID = 0)
 	{
 		OPTICK_EVENT();
+
+		bool changed = false;
 
 		ImGui::PushID(label.c_str());
 
@@ -137,12 +149,14 @@ namespace ArcEngine
 		if (id == 0)
 			id = texture == nullptr ? 0 : texture->GetRendererID();
 
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 		
 		ImGui::Text(label.c_str());
-		const ImVec2 buttonSize = { 80, 80 };
-		ImGui::SameLine(ImGui::GetWindowWidth() - buttonSize.x - 30);
+		ImGui::SameLine();
 
+		const ImVec2 buttonSize = { 80, 80 };
+		const ImVec2 xButtonSize = { buttonSize.x / 4.0f, 80 };
+		ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - buttonSize.x - xButtonSize.x - ImGui::GetStyle().WindowPadding.x);
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
@@ -152,6 +166,7 @@ namespace ArcEngine
 			if (!filepath.empty())
 			{
 				texture = AssetManager::GetTexture2D(filepath);
+				changed = true;
 			}
 		}
 		if (ImGui::BeginDragDropTarget())
@@ -160,6 +175,7 @@ namespace ArcEngine
 			{
 				const char* path = (const char*)payload->Data;
 				texture = AssetManager::GetTexture2D(path);
+				changed = true;
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -169,12 +185,17 @@ namespace ArcEngine
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.3f, 0.3f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
-		if(ImGui::Button("x", { buttonSize.x / 4, buttonSize.y } ))
+		if(ImGui::Button("x", xButtonSize ))
+		{
 			texture = nullptr;
+			changed = true;
+		}
 		ImGui::PopStyleColor(3);
 		ImGui::PopStyleVar();
 
 		ImGui::PopID();
+
+		return changed;
 	}
 
 	static void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
@@ -474,27 +495,45 @@ namespace ArcEngine
 		meshComponent.VertexArray = vertexArray;
 		meshComponent.BoundingBox = boundingBox;
 
-		if (diffuseMaps.size() > 0)
+		auto& materialProperties = meshComponent.Mat->GetShader()->GetMaterialProperties();
+		for (auto& [name, property] : materialProperties)
 		{
-			meshComponent.AlbedoMap = diffuseMaps[0];
-			meshComponent.UseMaps.x = 1.0f;
-		}
+			if (property.Type == MaterialPropertyType::Bool &&
+				(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
+				name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
+			{
+				meshComponent.Mat->SetData(name.c_str(), 1);
+			}
 
-		if (normalMaps.size() > 0)
-		{
-			meshComponent.NormalMap = normalMaps[0];
-			meshComponent.UseMaps.y = 1.0f;
-		}
-		else if (heightMaps.size() > 0)
-		{
-			meshComponent.NormalMap = heightMaps[0];
-			meshComponent.UseMaps.y = 1.0f;
-		}
+			if (property.Type != MaterialPropertyType::Sampler2D)
+				continue;
 
-		if (emissiveMaps.size() > 0)
-		{
-			meshComponent.EmissiveMap = emissiveMaps[0];
-			meshComponent.UseMaps.w = 1.0f;
+			uint32_t slot = meshComponent.Mat->GetData<uint32_t>(name.c_str());
+
+			if (diffuseMaps.size() > 0 && 
+				(name.find("albedo") != std::string::npos || name.find("Albedo") != std::string::npos ||
+				name.find("diff") != std::string::npos || name.find("Diff") != std::string::npos))
+			{
+				meshComponent.Mat->SetTexture(slot, diffuseMaps[0]);
+			}
+
+			if (normalMaps.size() > 0 && 
+				(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
+				name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
+			{
+				meshComponent.Mat->SetTexture(slot, normalMaps[0]);
+			}
+			else if (heightMaps.size() > 0 && 
+				(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
+				name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
+			{
+				meshComponent.Mat->SetTexture(slot, heightMaps[0]);
+			}
+
+			if (emissiveMaps.size() > 0 && 	(name.find("emissi") != std::string::npos || name.find("Emissi") != std::string::npos))
+			{
+				meshComponent.Mat->SetTexture(slot, emissiveMaps[0]);
+			}
 		}
 	}
 
@@ -742,31 +781,99 @@ namespace ArcEngine
 			if (UI::Property("Cull Mode", cullMode, cullModeTypeStrings, 3))
 				component.CullMode = (MeshComponent::CullModeType) cullMode;
 
-			UI::PropertyColor4("Albedo Color", component.AlbedoColor);
-			UI::Property("Metallic", component.MR.x, 0.0f, 1.0f);
-			UI::Property("Roughness", component.MR.y, 0.0f, 1.0f);
-			UI::PropertyColor4as3("Emissive Color", component.EmissiveParams);
-			UI::Property("Emissive Intensity", component.EmissiveParams.w);
-			
-			bool usingMap = component.UseMaps.x;
-			if (UI::Property("Use Albedo Map", usingMap))
-				component.UseMaps.x = usingMap ? 1.0f : 0.0f;
-			DrawTexture2DButton("Albedo Map", component.AlbedoMap);
-
-			usingMap = component.UseMaps.y;
-			if (UI::Property("UseNormalMap", usingMap))
-				component.UseMaps.y = usingMap ? 1.0f : 0.0f;
-			DrawTexture2DButton("Normal Map", component.NormalMap);
-			
-			usingMap = component.UseMaps.z;
-			if (UI::Property("Use Metallic Map", usingMap))
-				component.UseMaps.z = usingMap ? 1.0f : 0.0f;
-			DrawTexture2DButton("Metallic Map", component.MRAMap);
-			
-			usingMap = component.UseMaps.w;
-			if (UI::Property("Use Emissive Map", usingMap))
-				component.UseMaps.w = usingMap ? 1.0f : 0.0f;
-			DrawTexture2DButton("Emissive Map", component.EmissiveMap);
+			auto& materialProperties = component.Mat->GetShader()->GetMaterialProperties();
+			for (auto& [n, property] : materialProperties)
+			{
+				const char* name = n.c_str();
+				const char* displayName = n.c_str() + 11;
+				
+				switch (property.Type)
+				{
+					case MaterialPropertyType::None: break;
+					case MaterialPropertyType::Sampler2D:
+					{
+						uint32_t slot = component.Mat->GetData<uint32_t>(name);
+						uint32_t tex = component.Mat->GetTexture(slot) ? component.Mat->GetTexture(slot)->GetRendererID() : 0;
+						Ref<Texture2D> tmp = component.Mat->GetTexture(slot);
+						if (DrawTexture2DButton(displayName, tmp, tex))
+						{
+							component.Mat->SetTexture(slot, tmp);
+						}
+						break;
+					}
+					case MaterialPropertyType::Bool:
+					{
+						bool v = component.Mat->GetData<int32_t>(name) == 0 ? false : true;
+						if (UI::Property(displayName, v))
+							component.Mat->SetData(name, v ? 1 : 0);
+						break;
+					}
+					case MaterialPropertyType::Int:
+					{
+						int32_t v = component.Mat->GetData<int32_t>(name);
+						if (UI::Property(displayName, v))
+							component.Mat->SetData(name, v);
+						break;
+					}
+					case MaterialPropertyType::Float:
+					{
+						bool isSlider01 = n.find("01") != std::string::npos;
+						float v = component.Mat->GetData<float>(name);
+						if (isSlider01)
+						{
+							std::string displayName2 = displayName;
+							displayName2[displayName2.size() - 2] = '\0';
+							if (UI::Property(displayName2.c_str(), v, 0.0f, 1.0f))
+								component.Mat->SetData(name, v);
+						}
+						else
+						{
+							if (UI::Property(displayName, v))
+								component.Mat->SetData(name, v);
+						}
+						break;
+					}
+					case MaterialPropertyType::Float2:
+					{
+						glm::vec2 v = component.Mat->GetData<glm::vec2>(name);
+						if (UI::Property(displayName, v))
+							component.Mat->SetData(name, v);
+						break;
+					}
+					case MaterialPropertyType::Float3:
+					{
+						bool isColor = n.find("color") != std::string::npos || n.find("Color") != std::string::npos;
+						glm::vec3 v = component.Mat->GetData<glm::vec3>(name);
+						if (isColor)
+						{
+							if (UI::PropertyColor3(displayName, v))
+								component.Mat->SetData(name, v);
+						}
+						else
+						{
+							if (UI::Property(displayName, v))
+								component.Mat->SetData(name, v);
+						}
+						break;
+					}
+					case MaterialPropertyType::Float4:
+					{
+						bool isColor = n.find("color") != std::string::npos || n.find("Color") != std::string::npos;
+						glm::vec4 v = component.Mat->GetData<glm::vec4>(name);
+						if (isColor)
+						{
+							if (UI::PropertyColor4(displayName, v))
+								component.Mat->SetData(name, v);
+						}
+						else
+						{
+							if (UI::Property(displayName, v))
+								component.Mat->SetData(name, v);
+						}
+						break;
+					}
+				}
+			}
 		});
 
 		DrawComponent<SkyLightComponent>(ICON_MDI_EARTH " Sky Light", entity, [](SkyLightComponent& component)

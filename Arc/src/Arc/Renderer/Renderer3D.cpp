@@ -3,6 +3,7 @@
 
 #include "Renderer.h"
 #include "Framebuffer.h"
+#include "Arc/Renderer/Material.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -11,22 +12,11 @@ namespace ArcEngine
 {
 	struct MeshData
 	{
-		/*
-		* Properties[0] = AlbedoColor: r, g, b, a;
-		* Properties[1] = Metallic, Roughness, unused, unused
-		* Properties[2] = EmissiveParams: r, g, b, intensity
-		* Properties[4] = UseAlbedMap, UseNormalMap, UseMRAMap, UseEmissiveMap
-		*/
-		glm::mat4 Properties = glm::mat4(0.0f);
 		glm::mat4 Transform = glm::mat4(1.0f);
 		Ref<VertexArray> VertexArray = nullptr;
+		Ref<Material> Mat;
 		
 		MeshComponent::CullModeType CullMode;
-
-		Ref<Texture2D> AlbedoMap = nullptr;
-		Ref<Texture2D> NormalMap = nullptr;
-		Ref<Texture2D> MRAMap = nullptr;
-		Ref<Texture2D> EmissiveMap = nullptr;
 	};
 
 	Renderer3D::Statistics s_Stats;
@@ -263,21 +253,11 @@ namespace ArcEngine
 
 		MeshData mesh;
 
-		mesh.Properties = glm::mat4(
-			meshComponent.AlbedoColor,
-			meshComponent.MR,
-			meshComponent.EmissiveParams,
-			meshComponent.UseMaps);
-
 		mesh.VertexArray = meshComponent.VertexArray;
+		mesh.Mat = meshComponent.Mat;
 		mesh.Transform = transform;
 		mesh.CullMode = meshComponent.CullMode;
 
-		mesh.AlbedoMap = meshComponent.AlbedoMap;
-		mesh.NormalMap = meshComponent.NormalMap;
-		mesh.MRAMap = meshComponent.MRAMap;
-		mesh.EmissiveMap = meshComponent.EmissiveMap;
-		
 		meshes.push_back(mesh);
 	}
 
@@ -555,18 +535,6 @@ namespace ArcEngine
 		RenderCommand::SetClearColor(glm::vec4(0.0f));
 		RenderCommand::Clear();
 
-		if (meshes.size() > 0)
-		{
-			OPTICK_EVENT("Shader Binding");
-
-			shader->Bind();
-			
-			shader->SetInt("u_AlbedoMap", 0);
-			shader->SetInt("u_NormalMap", 1);
-			shader->SetInt("u_MRAMap", 2);
-			shader->SetInt("u_EmissiveMap", 3);
-		}
-
 		{
 			OPTICK_EVENT("Draw Meshes");
 
@@ -585,20 +553,9 @@ namespace ArcEngine
 			for (auto it = meshes.rbegin(); it != meshes.rend(); it++)
 			{
 				MeshData* meshData = &(*it);
-
-				shader->SetMat4("u_Properties", meshData->Properties);
-
-				if (meshData->AlbedoMap)
-					meshData->AlbedoMap->Bind(0);
-				if (meshData->NormalMap)
-					meshData->NormalMap->Bind(1);
-				if (meshData->MRAMap)
-					meshData->MRAMap->Bind(2);
-				if (meshData->EmissiveMap)
-					meshData->EmissiveMap->Bind(3);
-
+				meshData->Mat->Bind();
 				shader->SetMat4("u_Model", meshData->Transform);
-
+				
 				if (currentCullMode != meshData->CullMode)
 				{
 					currentCullMode = meshData->CullMode;

@@ -4,6 +4,7 @@
 #include "Arc/Renderer/Texture.h"
 #include "Arc/Scene/SceneCamera.h"
 #include "Arc/Renderer/Buffer.h"
+#include "Arc/Renderer/Material.h"
 #include "Arc/Renderer/VertexArray.h"
 #include "Arc/Renderer/Framebuffer.h"
 #include "Arc/Utils/AABB.h"
@@ -121,15 +122,7 @@ namespace ArcEngine
 
 		CullModeType CullMode = CullModeType::Back;
 
-		glm::vec4 AlbedoColor = glm::vec4(1.0f);
-		glm::vec4 MR = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
-		glm::vec4 EmissiveParams = glm::vec4(0.0f);
-		glm::vec4 UseMaps = glm::vec4(0.0f);
-
-		Ref<Texture2D> AlbedoMap = nullptr;
-		Ref<Texture2D> NormalMap = nullptr;
-		Ref<Texture2D> MRAMap = nullptr;
-		Ref<Texture2D> EmissiveMap = nullptr;
+		Ref<Material> Mat = CreateRef<Material>();
 
 		MeshComponent() = default;
 		MeshComponent(const MeshComponent&) = default;

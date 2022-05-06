@@ -117,6 +117,15 @@ namespace ArcEngine
 		UploadUniformFloat(name, value);
 	}
 
+	void OpenGLShader::SetFloat2(const std::string& name, const glm::vec2& value)
+	{
+		OPTICK_EVENT();
+
+		ARC_PROFILE_FUNCTION();
+		
+		UploadUniformFloat2(name, value);
+	}
+
 	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
 	{
 		OPTICK_EVENT();
@@ -133,6 +142,15 @@ namespace ArcEngine
 		ARC_PROFILE_FUNCTION();
 		
 		UploadUniformFloat4(name, value);
+	}
+
+	void OpenGLShader::SetMat3(const std::string& name, const glm::mat3& value)
+	{
+		OPTICK_EVENT();
+
+		ARC_PROFILE_FUNCTION();
+		
+		UploadUniformMat3(name, value);
 	}
 
 	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
@@ -259,6 +277,22 @@ namespace ArcEngine
 		return shaderSources;
 	}
 
+	static MaterialPropertyType GetMaterialPropertyType(GLenum property)
+	{
+		switch (property)
+		{
+			case GL_SAMPLER_2D:		return MaterialPropertyType::Sampler2D;
+			case GL_BOOL:			return MaterialPropertyType::Bool;
+			case GL_INT:			return MaterialPropertyType::Int;
+			case GL_FLOAT:			return MaterialPropertyType::Float;
+			case GL_FLOAT_VEC2:		return MaterialPropertyType::Float2;
+			case GL_FLOAT_VEC3:		return MaterialPropertyType::Float3;
+			case GL_FLOAT_VEC4:		return MaterialPropertyType::Float4;
+		}
+
+		return MaterialPropertyType::None;
+	}
+
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
 		OPTICK_EVENT();
@@ -328,5 +362,31 @@ namespace ArcEngine
 			glDetachShader(program, id);
 
 		m_RendererID = program;
+
+		// Get material properties from the shader
+		m_MaterialProperties.clear();
+		int maxLength;
+		glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxLength);
+
+		int uniformCount;
+		glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &uniformCount);
+
+		size_t offset = 0;
+		for (size_t i = 0; i < uniformCount; i++)
+		{
+			char name[128];
+			int size;
+			GLenum type;
+			glGetActiveUniform(program, i, maxLength, nullptr, &size, &type, &name[0]);
+
+			static const char* prefix = "u_Material.";
+			if (strncmp(name, prefix, strlen(prefix)) == 0)
+			{
+				MaterialPropertyType propertyType = GetMaterialPropertyType(type);
+				size_t sizeInBytes = GetSizeInBytes(propertyType);
+				m_MaterialProperties.emplace(name, MaterialProperty{ propertyType, sizeInBytes, offset });
+				offset += sizeInBytes;
+			}
+		}
 	}
 }
