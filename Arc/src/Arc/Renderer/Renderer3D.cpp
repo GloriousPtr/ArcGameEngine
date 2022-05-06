@@ -539,7 +539,7 @@ namespace ArcEngine
 				lightingShader->SetFloat("u_IrradianceIntensity", skylightComponent.Intensity);
 				lightingShader->SetFloat("u_EnvironmentRotation", skylightComponent.Rotation);
 				skylightComponent.Texture->BindIrradianceMap(5);
-				skylightComponent.Texture->BindRadianceMap(7);
+				skylightComponent.Texture->BindRadianceMap(6);
 			}
 		}
 		s_BRDFLutTexture->Bind(7);
