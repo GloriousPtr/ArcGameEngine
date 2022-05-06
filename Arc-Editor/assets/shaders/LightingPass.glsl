@@ -15,16 +15,11 @@ layout (std140, binding = 0) uniform Camera
 
 layout(location = 0) out vec2 v_TexCoord;
 layout(location = 1) out vec3 v_CameraPosition;
-//layout(location = 1) out vec4 v_DirLightViewProj;
-
-//uniform mat4 u_DirLightViewProj;
 
 void main()
 {
 	v_TexCoord = a_TexCoord;
     v_CameraPosition = u_CameraPosition.xyz;
-
-	//v_DirLightViewProj = u_DirLightViewProj * u_Model * vec4(a_Position, 1.0);
 	gl_Position = vec4(a_Position, 1.0);
 }
 
@@ -33,21 +28,21 @@ void main()
 
 layout(location = 0) in vec2 v_TexCoord;
 layout(location = 1) in vec3 v_CameraPosition;
-//layout(location = 1) in vec4 v_DirLightViewProj;
 
 layout(location = 0) out vec4 o_FragColor;
 
 const float PI = 3.141592653589793;
-const float EPSILON = 0.000000000000001;
+const float EPSILON = 1.17549435E-38;
 
-const int MAX_NUM_LIGHTS = 25;
+const int MAX_NUM_LIGHTS = 200;
+const int MAX_NUM_DIR_LIGHTS = 3;
 
-struct Light
+struct PointLight
 {
     vec4 u_Position;
 
 	/*
-	a: intensity
+	* rgb: color, a: intensity
 	*/
     vec4 u_Color;
     
@@ -62,10 +57,31 @@ struct Light
     vec4 u_LightDir;
 };
 
-layout (std140, binding = 1) uniform LightBuffer
+layout (std140, binding = 1) uniform PointLightBuffer
 {
-    Light u_Lights[MAX_NUM_LIGHTS];
-    uint u_NumLights;
+    PointLight u_PointLights[MAX_NUM_LIGHTS];
+    uint u_NumPointLights;
+};
+
+struct DirectionalLight
+{
+    vec4 u_Position;
+
+	/*
+	* rgb: color, a: intensity
+	*/
+    vec4 u_Color;
+    
+    // Used for directional and spot lights
+    vec4 u_LightDir;
+	
+	mat4 u_DirLightViewProj;
+};
+
+layout (std140, binding = 1) uniform DirectionalLightBuffer
+{
+    DirectionalLight u_DirectionalLights[MAX_NUM_DIR_LIGHTS];
+    uint u_NumDirectionalLights;
 };
 
 uniform sampler2D u_Albedo;
@@ -77,11 +93,10 @@ uniform sampler2D u_Emission;
 uniform samplerCube u_IrradianceMap;
 uniform samplerCube u_RadianceMap;
 uniform sampler2D u_BRDFLutMap;
+uniform sampler2D u_DirectionalShadowMap[MAX_NUM_DIR_LIGHTS];
 
 uniform float u_IrradianceIntensity;
 uniform float u_EnvironmentRotation;
-
-//uniform sampler2D u_DirectionalShadowMap;
 
 struct PBRParameters
 {
@@ -124,10 +139,10 @@ vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 	return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
-/*
-float CalcDirectionalShadowFactor(Light directionalLight, const float NdotL)
+float CalcDirectionalShadowFactor(DirectionalLight directionalLight, const float NdotL, int shadowmapIndex)
 {
-	vec3 projCoords = Input.DirLightViewProj.xyz / Input.DirLightViewProj.w;
+	vec4 dirLightViewProj = directionalLight.u_DirLightViewProj * vec4(m_Params.WorldPos, 1);
+	vec3 projCoords = dirLightViewProj.xyz / dirLightViewProj.w;
 	projCoords = (projCoords * 0.5) + 0.5;
 
 	float currentDepth = projCoords.z;
@@ -135,13 +150,13 @@ float CalcDirectionalShadowFactor(Light directionalLight, const float NdotL)
 	float bias = max(0.0008 * (1.0 - NdotL), 0.0008);
 
 	float shadow = 0.0;
-	vec2 texelSize = 1.0 / textureSize(u_DirectionalShadowMap, 0);
+	vec2 texelSize = 1.0 / textureSize(u_DirectionalShadowMap[shadowmapIndex], 0);
 	int sampleCount = 3;
 	for(int x = -sampleCount; x <= sampleCount; ++x)
 	{
 		for(int y = -sampleCount; y <= sampleCount; ++y)
 		{
-			float pcfDepth = texture(u_DirectionalShadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+			float pcfDepth = texture(u_DirectionalShadowMap[shadowmapIndex], projCoords.xy + vec2(x, y) * texelSize).r;
 			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
 		}
 	}
@@ -153,7 +168,6 @@ float CalcDirectionalShadowFactor(Light directionalLight, const float NdotL)
 
 	return shadow;
 }
-*/
 
 float LengthSq(const vec3 v)
 {
@@ -219,9 +233,36 @@ void main()
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
-    for (int i = 0; i < u_NumLights; ++i)
+
+	for (int i = 0; i < u_NumDirectionalLights; ++i)
+	{
+		DirectionalLight light = u_DirectionalLights[i];
+		vec3 L = -1.0 * normalize(light.u_LightDir.xyz);
+		float NdotL = max(dot(m_Params.Normal, L), 0.0);
+		float shadow = (1.0 - CalcDirectionalShadowFactor(light, NdotL, i));
+
+		if (shadow <= EPSILON)
+			continue;
+
+        vec3 radiance = shadow * light.u_Color.rgb * light.u_Color.a;
+
+        // Cook-Torrance BRDF
+        vec3 H = normalize(L + m_Params.View);
+        float NDF = DistributionGGX(m_Params.Normal, H, a2);
+        float G = GeometrySmith(NdotL, clamp(m_Params.NdotV, 0.0, 1.0), k);
+        vec3 F = FresnelSchlickRoughness(clamp(dot(H, m_Params.View), 0.0, 1.0), F0, m_Params.Roughness);
+
+        vec3 numerator = NDF * G * F;
+        float denom = max(4.0 * m_Params.NdotV * NdotL, 0.0001);
+        vec3 specular = numerator / denom;
+
+        vec3 kD = (1.0 - F) * (1.0 - m_Params.Metalness);
+        Lo += (kD * (m_Params.Albedo / PI) + specular) * radiance * NdotL;
+	}
+
+    for (int i = 0; i < u_NumPointLights; ++i)
     {
-		Light light = u_Lights[i];
+		PointLight light = u_PointLights[i];
         uint type = uint(round(light.u_AttenFactors.w));
 
         vec3 L;
@@ -230,14 +271,7 @@ void main()
         float attenuation = 1.0;
         switch (type)
         {
-			case 0:
-			{
-				L = -1.0 * normalize(light.u_LightDir.xyz);
-				NdotL = max(dot(m_Params.Normal, L), 0.0);
-//				shadow = (1.0 - CalcDirectionalShadowFactor(light, NdotL));
-				break;
-			}
-
+			// Point Light
 			case 1:
 			{
 				L = normalize(light.u_Position.rgb - m_Params.WorldPos);
@@ -250,6 +284,7 @@ void main()
 				break;
 			}
 			
+			// Spot Light
 			case 2:
 			{
 				L = normalize(light.u_Position.rgb - m_Params.WorldPos);

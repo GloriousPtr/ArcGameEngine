@@ -10,6 +10,9 @@
 
 namespace ArcEngine
 {
+	const static uint32_t MAX_NUM_LIGHTS = 200;
+	const static uint32_t MAX_NUM_DIR_LIGHTS = 3;
+
 	struct MeshData
 	{
 		glm::mat4 Transform = glm::mat4(1.0f);
@@ -32,15 +35,14 @@ namespace ArcEngine
 	static Ref<VertexArray> quadVertexArray;
 	static Ref<VertexArray> cubeVertexArray;
 	static Ref<UniformBuffer> ubCamera;
-	static Ref<UniformBuffer> ubLights;
+	static Ref<UniformBuffer> ubPointLights;
+	static Ref<UniformBuffer> ubDirectionalLights;
 
 	static glm::mat4 cameraView;
 	static glm::mat4 cameraProjection;
 	static glm::vec3 cameraPosition;
 	static Entity skylight;
 	static std::vector<Entity> sceneLights;
-	glm::mat4 dirLightView;
-	glm::mat4 dirLightViewProj;
 
 	ShaderLibrary Renderer3D::s_ShaderLibrary;
 	Renderer3D::TonemappingType Renderer3D::Tonemapping = Renderer3D::TonemappingType::ACES;
@@ -63,14 +65,21 @@ namespace ArcEngine
 			{ ShaderDataType::Float4, "u_CameraPosition" }
 		}, 0);
 
-		ubLights = UniformBuffer::Create();
-		ubLights->SetLayout({
+		ubPointLights = UniformBuffer::Create();
+		ubPointLights->SetLayout({
 			{ ShaderDataType::Float4, "u_Position" },
 			{ ShaderDataType::Float4, "u_Color" },
 			{ ShaderDataType::Float4, "u_AttenFactors" },
 			{ ShaderDataType::Float4, "u_LightDir" },
-			{ ShaderDataType::Float4, "u_Intensity" },
-		}, 1, 26);													// 25 is max number of lights
+		}, 1, MAX_NUM_LIGHTS + 1);
+
+		ubDirectionalLights = UniformBuffer::Create();
+		ubDirectionalLights->SetLayout({
+			{ ShaderDataType::Float4, "u_Position" },
+			{ ShaderDataType::Float4, "u_Color" },
+			{ ShaderDataType::Float4, "u_LightDir" },
+			{ ShaderDataType::Mat4, "u_DirLightViewProj" },
+		}, 2, MAX_NUM_DIR_LIGHTS + 1);
 
 		s_BRDFLutTexture = Texture2D::Create("Resources/Renderer/BRDF_LUT.jpg");
 
@@ -88,7 +97,8 @@ namespace ArcEngine
 
 		lightingShader->Bind();
 		lightingShader->SetUniformBlock("Camera", 0);
-		lightingShader->SetUniformBlock("LightBuffer", 1);
+		lightingShader->SetUniformBlock("PointLightBuffer", 1);
+		lightingShader->SetUniformBlock("DirectionalLightBuffer", 2);
 
 		// Cubemap
 		{
@@ -310,49 +320,125 @@ namespace ArcEngine
 	{
 		OPTICK_EVENT();
 
-		struct LightData
 		{
-			glm::vec4 Position;
-			glm::vec4 Color;
-			glm::vec4 AttenFactors;
-			glm::vec4 LightDir;
-		};
-
-		uint32_t numLights = 0;
-		const uint32_t size = sizeof(LightData);
-
-		ubLights->Bind();
-
-		for (Entity e : sceneLights)
-		{
-			TransformComponent transformComponent = e.GetComponent<TransformComponent>();
-			LightComponent& lightComponent = e.GetComponent<LightComponent>();
-			glm::mat4& worldTransform = e.GetWorldTransform();
-			
-			glm::vec4 attenFactors = glm::vec4(
-				lightComponent.Range,
-				glm::cos(glm::radians(lightComponent.CutOffAngle)),
-				glm::cos(glm::radians(lightComponent.OuterCutOffAngle)),
-				static_cast<uint32_t>(lightComponent.Type));
-			// Based off of +Z direction
-			glm::vec4 zDir = worldTransform * glm::vec4(0, 0, 1, 0);
-
-			LightData lightData = 
+			struct PointLightData
 			{
-				worldTransform[3],
-				glm::vec4(lightComponent.Color, lightComponent.Intensity),
-				attenFactors,
-				zDir
+				glm::vec4 Position;
+				glm::vec4 Color;
+				glm::vec4 AttenFactors;
+				glm::vec4 LightDir;
 			};
 
-			ubLights->SetData((void*)(&lightData), size * numLights, size);
+			uint32_t numLights = 0;
+			const uint32_t size = sizeof(PointLightData);
 
-			numLights++;
+			ubPointLights->Bind();
+
+			for (Entity e : sceneLights)
+			{
+				LightComponent& lightComponent = e.GetComponent<LightComponent>();
+				if (lightComponent.Type == LightComponent::LightType::Directional)
+					continue;
+				TransformComponent transformComponent = e.GetComponent<TransformComponent>();
+				glm::mat4& worldTransform = e.GetWorldTransform();
+			
+				glm::vec4 attenFactors = glm::vec4(
+					lightComponent.Range,
+					glm::cos(glm::radians(lightComponent.CutOffAngle)),
+					glm::cos(glm::radians(lightComponent.OuterCutOffAngle)),
+					static_cast<uint32_t>(lightComponent.Type));
+				// Based off of +Z direction
+				glm::vec4 zDir = worldTransform * glm::vec4(0, 0, 1, 0);
+
+				float near_plane = -100.0f, far_plane = 100.0f;
+				glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
+				glm::mat4 inverted = glm::inverse(worldTransform);
+				glm::vec3 pos = worldTransform[3];
+				glm::vec3 dir = glm::normalize(glm::vec3(inverted[2]));
+				dir.z *= -1;
+				glm::vec3 lookAt = pos - dir;
+				glm::mat4 dirLightView = glm::lookAt(pos, lookAt, glm::vec3(0, 1 ,0));
+				glm::mat4 dirLightViewProj = lightProjection * dirLightView;
+
+				PointLightData pointLightData = 
+				{
+					worldTransform[3],
+					glm::vec4(lightComponent.Color, lightComponent.Intensity),
+					attenFactors,
+					zDir
+				};
+
+				ubPointLights->SetData((void*)(&pointLightData), size * numLights, size);
+
+				numLights++;
+			}
+
+			// Pass number of lights within the scene
+			ubPointLights->SetData(&numLights, MAX_NUM_LIGHTS * size, sizeof(uint32_t));
 		}
 
-		// Pass number of lights within the scene
-		// 25 is max number of lights
-		ubLights->SetData(&numLights, 25 * size, sizeof(uint32_t));
+
+
+
+
+
+
+
+
+
+
+		{
+			struct DirectionalLightData
+			{
+				glm::vec4 Position;
+				glm::vec4 Color;
+				glm::vec4 LightDir;
+				glm::mat4 DirLightViewProj;
+			};
+
+			uint32_t numLights = 0;
+			const uint32_t size = sizeof(DirectionalLightData);
+
+			ubDirectionalLights->Bind();
+
+			for (Entity e : sceneLights)
+			{
+				LightComponent& lightComponent = e.GetComponent<LightComponent>();
+				if (lightComponent.Type != LightComponent::LightType::Directional)
+					continue;
+
+				TransformComponent transformComponent = e.GetComponent<TransformComponent>();
+				glm::mat4& worldTransform = e.GetWorldTransform();
+			
+				// Based off of +Z direction
+				glm::vec4 zDir = worldTransform * glm::vec4(0, 0, 1, 0);
+
+				float near_plane = -100.0f, far_plane = 100.0f;
+				glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
+				glm::mat4 inverted = glm::inverse(worldTransform);
+				glm::vec3 pos = worldTransform[3];
+				glm::vec3 dir = glm::normalize(glm::vec3(inverted[2]));
+				dir.z *= -1;
+				glm::vec3 lookAt = pos - dir;
+				glm::mat4 dirLightView = glm::lookAt(pos, lookAt, glm::vec3(0, 1 ,0));
+				glm::mat4 dirLightViewProj = lightProjection * dirLightView;
+
+				DirectionalLightData dirLightData = 
+				{
+					worldTransform[3],
+					glm::vec4(lightComponent.Color, lightComponent.Intensity),
+					zDir,
+					dirLightViewProj
+				};
+
+				ubDirectionalLights->SetData((void*)(&dirLightData), size * numLights, size);
+
+				numLights++;
+			}
+
+			// Pass number of lights within the scene
+			ubDirectionalLights->SetData(&numLights, MAX_NUM_DIR_LIGHTS * size, sizeof(uint32_t));
+		}
 	}
 
 	void Renderer3D::CompositePass(Ref<RenderGraphData> renderGraphData)
@@ -490,7 +576,6 @@ namespace ArcEngine
 			}
 		}
 
-
 		lightingShader->Bind();
 
 		lightingShader->SetInt("u_Albedo", 0);
@@ -503,7 +588,10 @@ namespace ArcEngine
 		lightingShader->SetInt("u_RadianceMap", 6);
 		lightingShader->SetInt("u_BRDFLutMap", 7);
 
-		//lightingShader->SetInt("u_DirectionalShadowMap", 4);
+		int32_t samplers[MAX_NUM_DIR_LIGHTS];
+		for (uint32_t i = 0; i < MAX_NUM_DIR_LIGHTS; i++)
+			samplers[i] = i + 8;
+		lightingShader->SetIntArray("u_DirectionalShadowMap", samplers, MAX_NUM_DIR_LIGHTS);
 
 		renderGraphData->RenderPassTarget->BindColorAttachment(0, 0);
 		renderGraphData->RenderPassTarget->BindColorAttachment(1, 1);
@@ -524,6 +612,24 @@ namespace ArcEngine
 		}
 		s_BRDFLutTexture->Bind(7);
 		
+		uint32_t dirLightIndex = 0;
+		for (size_t i = 0; i < sceneLights.size(); i++)
+		{
+			LightComponent& light = sceneLights[i].GetComponent<LightComponent>();
+			if (light.Type == LightComponent::LightType::Directional)
+			{
+				if (dirLightIndex < MAX_NUM_DIR_LIGHTS)
+				{
+					light.ShadowMapFramebuffer->BindDepthAttachment(8 + dirLightIndex);
+					dirLightIndex++;
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		
 		DrawQuad();
 	}
 
@@ -537,17 +643,6 @@ namespace ArcEngine
 
 		{
 			OPTICK_EVENT("Draw Meshes");
-
-			/*
-			for (size_t i = 0; i < sceneLights.size(); i++)
-			{
-				LightComponent& light = sceneLights[i].GetComponent<LightComponent>();
-				if (light.Type == LightComponent::LightType::Directional)
-				{
-					light.ShadowMapFramebuffer->BindDepthAttachment(3);
-					break;
-				}
-			}*/
 
 			MeshComponent::CullModeType currentCullMode = MeshComponent::CullModeType::Unknown;
 			for (auto it = meshes.rbegin(); it != meshes.rend(); it++)
@@ -609,9 +704,8 @@ namespace ArcEngine
 			glm::vec3 dir = glm::normalize(glm::vec3(inverted[2]));
 			dir.z *= -1;
 			glm::vec3 lookAt = pos - dir;
-			dirLightView = glm::lookAt(pos, lookAt, glm::vec3(0, 1 ,0));
-
-			dirLightViewProj = lightProjection * dirLightView;
+			glm::mat4 dirLightView = glm::lookAt(pos, lookAt, glm::vec3(0, 1 ,0));
+			glm::mat4 dirLightViewProj = lightProjection * dirLightView;
 
 			shadowMapShader->Bind();
 			shadowMapShader->SetMat4("u_ViewProjection", dirLightViewProj);
@@ -623,8 +717,6 @@ namespace ArcEngine
 				shadowMapShader->SetMat4("u_Model", meshData->Transform);
 				RenderCommand::DrawIndexed(meshData->VertexArray);
 			}
-			
-			break;
 		}
 //		RenderCommand::BackCull();
 	}
