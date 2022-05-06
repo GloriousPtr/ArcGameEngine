@@ -81,10 +81,9 @@ layout(location = 0) in VertexOutput Input;
 
 // =========================================
 layout(location = 0) out vec4 o_Albedo;
-layout(location = 1) out vec4 o_Position;
-layout(location = 2) out vec4 o_Normal;
-layout(location = 3) out vec4 o_MetallicRoughnessAO;
-layout(location = 4) out vec4 o_Emission;
+layout(location = 1) out vec4 o_Normal;
+layout(location = 2) out vec4 o_MetallicRoughnessAO;
+layout(location = 3) out vec4 o_Emission;
 
 vec3 GetNormalFromMap()
 {
@@ -110,8 +109,7 @@ void main()
 	float outAO = texture(u_Material.MRAMap, Input.TexCoord).b;
 
     o_Albedo = vec4(outAlbedo, 1.0);
-	o_Position = vec4(Input.WorldPosition, 1.0);
-	o_Normal = vec4(normalize(outNormal), 1.0);
+	o_Normal = vec4(outNormal, 1.0);
 	o_MetallicRoughnessAO = vec4(outMetalness, outRoughness, outAO, 1.0);
 	o_Emission = vec4(outEmission, u_Material.EmissiveIntensity / 255);
 }

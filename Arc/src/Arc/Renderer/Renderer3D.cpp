@@ -579,10 +579,10 @@ namespace ArcEngine
 		lightingShader->Bind();
 
 		lightingShader->SetInt("u_Albedo", 0);
-		lightingShader->SetInt("u_Position", 1);
-		lightingShader->SetInt("u_Normal", 2);
-		lightingShader->SetInt("u_MetallicRoughnessAO", 3);
-		lightingShader->SetInt("u_Emission", 4);
+		lightingShader->SetInt("u_Normal", 1);
+		lightingShader->SetInt("u_MetallicRoughnessAO", 2);
+		lightingShader->SetInt("u_Emission", 3);
+		lightingShader->SetInt("u_Depth", 4);
 
 		lightingShader->SetInt("u_IrradianceMap", 5);
 		lightingShader->SetInt("u_RadianceMap", 6);
@@ -597,7 +597,7 @@ namespace ArcEngine
 		renderGraphData->RenderPassTarget->BindColorAttachment(1, 1);
 		renderGraphData->RenderPassTarget->BindColorAttachment(2, 2);
 		renderGraphData->RenderPassTarget->BindColorAttachment(3, 3);
-		renderGraphData->RenderPassTarget->BindColorAttachment(4, 4);
+		renderGraphData->RenderPassTarget->BindDepthAttachment(4);
 		
 		if (skylight)
 		{

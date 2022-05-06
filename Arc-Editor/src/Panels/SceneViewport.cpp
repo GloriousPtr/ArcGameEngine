@@ -29,7 +29,7 @@ namespace ArcEngine
 		uint32_t height = 720;
 		{
 			FramebufferSpecification spec;
-			spec.Attachments = { FramebufferTextureFormat::RGBA16F };
+			spec.Attachments = { FramebufferTextureFormat::R11G11B10 };
 			spec.Width = width;
 			spec.Height = height;
 			m_RenderGraphData->CompositePassTarget = Framebuffer::Create(spec);
@@ -39,10 +39,9 @@ namespace ArcEngine
 			FramebufferSpecification spec;
 			spec.Attachments = {
 				FramebufferTextureFormat::RGBA8,				// Albedo
-				FramebufferTextureFormat::RGBA16F,				// Position
 				FramebufferTextureFormat::RGBA16F,				// Normal
 				FramebufferTextureFormat::RGBA8,				// Metallic, Roughness, AO
-				FramebufferTextureFormat::RGBA8,				// Emission
+				FramebufferTextureFormat::RGBA8,				// rgb: EmissionColor, a: intensity
 				FramebufferTextureFormat::Depth
 			};
 			spec.Width = width;
@@ -52,7 +51,7 @@ namespace ArcEngine
 
 		{
 			FramebufferSpecification spec;
-			spec.Attachments = { FramebufferTextureFormat::RGBA16F };
+			spec.Attachments = { FramebufferTextureFormat::R11G11B10 };
 			spec.Width = width;
 			spec.Height = height;
 			m_RenderGraphData->LightingPassTarget = Framebuffer::Create(spec);

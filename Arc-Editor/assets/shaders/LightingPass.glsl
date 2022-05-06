@@ -37,6 +37,15 @@ const float EPSILON = 1.17549435E-38;
 const int MAX_NUM_LIGHTS = 200;
 const int MAX_NUM_DIR_LIGHTS = 3;
 
+layout (std140, binding = 0) uniform Camera
+{
+    mat4 u_View;
+    mat4 u_Projection;
+    mat4 u_ViewProjection;
+
+    vec4 u_CameraPosition;
+};
+
 struct PointLight
 {
     vec4 u_Position;
@@ -85,10 +94,10 @@ layout (std140, binding = 1) uniform DirectionalLightBuffer
 };
 
 uniform sampler2D u_Albedo;
-uniform sampler2D u_Position;
 uniform sampler2D u_Normal;
 uniform sampler2D u_MetallicRoughnessAO;
 uniform sampler2D u_Emission;
+uniform sampler2D u_Depth;
 
 uniform samplerCube u_IrradianceMap;
 uniform samplerCube u_RadianceMap;
@@ -202,6 +211,16 @@ vec3 IBL(vec3 F0)
 	return (kd * diffuseIBL + specularIBL) * u_IrradianceIntensity;
 }
 
+vec3 WorldPosFromDepth(float depth)
+{
+	float z = depth * 2.0 - 1.0;
+	vec4 clipSpace = vec4(v_TexCoord * 2.0 - 1.0, z, 1.0);
+	vec4 viewSpace = inverse(u_Projection) * clipSpace;
+	viewSpace /= viewSpace.w;
+	vec4 worldSpace = inverse(u_View) * viewSpace;
+	return worldSpace.xyz;
+}
+
 void main()
 {
 	vec4 albedo = texture(u_Albedo, v_TexCoord);
@@ -213,7 +232,8 @@ void main()
 		&& albedo.a <= EPSILON)
 		discard;
 
-	m_Params.WorldPos = texture(u_Position, v_TexCoord).rgb;
+	vec4 depth = texture(u_Depth, v_TexCoord);
+	m_Params.WorldPos = WorldPosFromDepth(depth.r); //texture(u_Position, v_TexCoord).rgb;
 	m_Params.Normal = texture(u_Normal, v_TexCoord).rgb;
 
 	m_Params.Metalness = texture(u_MetallicRoughnessAO, v_TexCoord).r;
@@ -328,5 +348,6 @@ void main()
 
 	vec3 ambient = IBL(F0) * ao;
 	vec3 result = Lo + ambient + (emission.rgb * emission.a * 255);
-	o_FragColor = vec4(result, 1.0);
+
+	o_FragColor = vec4(result, 1);
 }
