@@ -496,43 +496,46 @@ namespace ArcEngine
 		meshComponent.BoundingBox = boundingBox;
 
 		auto& materialProperties = meshComponent.Mat->GetShader()->GetMaterialProperties();
+		bool normalMapApplied = false;
 		for (auto& [name, property] : materialProperties)
 		{
-			if (property.Type == MaterialPropertyType::Bool &&
+			if (property.Type == MaterialPropertyType::Sampler2D)
+			{
+				uint32_t slot = meshComponent.Mat->GetData<uint32_t>(name.c_str());
+
+				if (diffuseMaps.size() > 0 && 
+					(name.find("albedo") != std::string::npos || name.find("Albedo") != std::string::npos ||
+					name.find("diff") != std::string::npos || name.find("Diff") != std::string::npos))
+				{
+					meshComponent.Mat->SetTexture(slot, diffuseMaps[0]);
+				}
+
+				if (normalMaps.size() > 0 && 
+					(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
+					name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
+				{
+					meshComponent.Mat->SetTexture(slot, normalMaps[0]);
+					normalMapApplied = true;
+				}
+				else if (heightMaps.size() > 0 && 
+					(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
+					name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
+				{
+					meshComponent.Mat->SetTexture(slot, heightMaps[0]);
+					normalMapApplied = true;
+				}
+
+				if (emissiveMaps.size() > 0 && 	(name.find("emissi") != std::string::npos || name.find("Emissi") != std::string::npos))
+				{
+					meshComponent.Mat->SetTexture(slot, emissiveMaps[0]);
+				}
+			}
+
+			if (property.Type == MaterialPropertyType::Bool && normalMapApplied &&
 				(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
 				name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
 			{
 				meshComponent.Mat->SetData(name.c_str(), 1);
-			}
-
-			if (property.Type != MaterialPropertyType::Sampler2D)
-				continue;
-
-			uint32_t slot = meshComponent.Mat->GetData<uint32_t>(name.c_str());
-
-			if (diffuseMaps.size() > 0 && 
-				(name.find("albedo") != std::string::npos || name.find("Albedo") != std::string::npos ||
-				name.find("diff") != std::string::npos || name.find("Diff") != std::string::npos))
-			{
-				meshComponent.Mat->SetTexture(slot, diffuseMaps[0]);
-			}
-
-			if (normalMaps.size() > 0 && 
-				(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
-				name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
-			{
-				meshComponent.Mat->SetTexture(slot, normalMaps[0]);
-			}
-			else if (heightMaps.size() > 0 && 
-				(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
-				name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
-			{
-				meshComponent.Mat->SetTexture(slot, heightMaps[0]);
-			}
-
-			if (emissiveMaps.size() > 0 && 	(name.find("emissi") != std::string::npos || name.find("Emissi") != std::string::npos))
-			{
-				meshComponent.Mat->SetTexture(slot, emissiveMaps[0]);
 			}
 		}
 	}
