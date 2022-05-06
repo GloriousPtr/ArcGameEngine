@@ -36,18 +36,6 @@ namespace ArcEngine
 		mono_set_dirs("C:/Program Files/Mono/lib",
         "C:/Program Files/Mono/etc");
 
-		std::string portString = std::to_string(2550);
-		std::string debuggerAgentArguments = "--debugger-agent=transport=dt_socket,address=127.0.0.1:" + portString + ",server=y,suspend=n,loglevel=3,logfile=logs/MonoDebugger.log";
-		
-		// Enable mono soft debugger
-		const char* options[2] = {
-			debuggerAgentArguments.c_str(),
-			"--soft-breakpoints"
-		};
-
-		mono_jit_parse_options(2, (char**)options);
-		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
-
 		s_MonoDomain = mono_jit_init("ScriptEngine");
 		ARC_CORE_ASSERT(s_MonoDomain, "Could not initialize domain");
 
