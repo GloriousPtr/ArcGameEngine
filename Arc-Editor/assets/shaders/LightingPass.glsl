@@ -201,7 +201,7 @@ vec3 IBL(vec3 F0)
 	vec3 irradiance = texture(u_IrradianceMap, RotateVectorAboutY(u_EnvironmentRotation, m_Params.Normal)).rgb;
 	vec3 diffuseIBL = m_Params.Albedo * irradiance;
 
-	int envRadianceTexLevels = textureQueryLevels(u_RadianceMap) - 5;
+	int envRadianceTexLevels = textureQueryLevels(u_RadianceMap);
 	vec3 Lr = 2.0 * m_Params.NdotV * m_Params.Normal - m_Params.View;
 	vec3 specularIrradiance = textureLod(u_RadianceMap, RotateVectorAboutY(u_EnvironmentRotation, Lr), m_Params.Roughness * envRadianceTexLevels).rgb;
 

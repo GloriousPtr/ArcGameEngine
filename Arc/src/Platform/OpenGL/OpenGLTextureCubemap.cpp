@@ -182,7 +182,7 @@ namespace ArcEngine
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-		unsigned int maxMipLevels = 5;
+		unsigned int maxMipLevels = (int)glm::log2((float)radianceMapSize) + 1;
 		for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
 		{
 			// reisze framebuffer according to mip-level size.

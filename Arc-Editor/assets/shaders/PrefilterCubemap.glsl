@@ -97,7 +97,7 @@ void main()
 			float D = DistributionGGX(NdotH, u_Roughness);
 			float HdotV = max(dot(H, V), 0.0001);
 			float pdf = (D * NdotH / (4.0 * HdotV)) + 0.0001;
-			float resolution = 2048.0;
+			float resolution = 512.0;
 			float saTexel = 4.0 * PI / (6.0 * resolution * resolution);
 			float saSample = 1.0 / (float(SAMPLE_COUNT) * pdf + 0.0001);
 			float mipLevel = u_Roughness == 0.0 ? 0.0 : 0.5 * log2(saSample / saTexel);
