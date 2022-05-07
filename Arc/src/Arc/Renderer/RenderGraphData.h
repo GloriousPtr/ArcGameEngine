@@ -20,6 +20,7 @@ namespace ArcEngine
 		{
 			CompositePassTarget->Resize(width, height);
 			RenderPassTarget->Resize(width, height);
+			LightingPassTarget->Resize(width, height);
 
 			width /= 2;
 			height /= 2;
