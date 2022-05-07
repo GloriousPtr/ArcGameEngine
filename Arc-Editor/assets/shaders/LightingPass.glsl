@@ -211,6 +211,10 @@ vec3 IBL(vec3 F0)
 	return (kd * diffuseIBL + specularIBL) * u_IrradianceIntensity;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+///// Reconstruct position from depth and view/projection //////////////////////////////////////////
+//// https://gamedev.stackexchange.com/questions/108856/fast-position-reconstruction-from-depth ////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 vec3 WorldPosFromDepth(float depth)
 {
 	float z = depth * 2.0 - 1.0;
@@ -221,6 +225,27 @@ vec3 WorldPosFromDepth(float depth)
 	return worldSpace.xyz;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+///// Octahedron-normal vectors ////////////////////////////////////////////////////////////////////
+//// https://knarkowicz.wordpress.com/2014/04/16/octahedron-normal-vector-encoding/ ////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+vec2 signNotZero( vec2 v )
+{
+	return vec2((v.x >= 0.0) ? +1.0 : -1.0, (v.y >= 0.0) ? +1.0 : -1.0);
+}
+
+vec3 Decode( vec2 e )
+{
+	vec3 v = vec3(e.xy, 1.0 - abs(e.x) - abs(e.y));
+	if (v.z < 0)
+		v.xy = (1.0 - abs(v.yx)) * signNotZero(v.xy);
+
+	return normalize(v);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//// Entry Point ///////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 void main()
 {
 	vec4 albedo = texture(u_Albedo, v_TexCoord);
@@ -235,11 +260,12 @@ void main()
 
 	vec4 depth = texture(u_Depth, v_TexCoord);
 	m_Params.WorldPos = WorldPosFromDepth(depth.r);
-	m_Params.Normal = texture(u_Normal, v_TexCoord).rgb;
+	m_Params.Normal = Decode(texture(u_Normal, v_TexCoord).rg);
 
-	m_Params.Metalness = texture(u_MetallicRoughnessAO, v_TexCoord).r;
-	m_Params.Roughness = texture(u_MetallicRoughnessAO, v_TexCoord).g;
-	float ao = texture(u_MetallicRoughnessAO, v_TexCoord).b;
+	m_Params.Metalness = metallicRoughnessAO.r;
+	m_Params.Roughness = metallicRoughnessAO.g;
+	float ao = metallicRoughnessAO.b;
+
 	vec4 emission = texture(u_Emission, v_TexCoord);
 
 	m_Params.View = normalize(v_CameraPosition - m_Params.WorldPos);

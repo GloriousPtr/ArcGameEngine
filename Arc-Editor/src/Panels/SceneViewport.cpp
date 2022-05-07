@@ -39,7 +39,7 @@ namespace ArcEngine
 			FramebufferSpecification spec;
 			spec.Attachments = {
 				FramebufferTextureFormat::RGBA8,				// Albedo
-				FramebufferTextureFormat::RGBA16F,				// Normal
+				FramebufferTextureFormat::RG16F,				// Normal
 				FramebufferTextureFormat::RGBA8,				// Metallic, Roughness, AO
 				FramebufferTextureFormat::RGBA8,				// rgb: EmissionColor, a: intensity
 				FramebufferTextureFormat::Depth

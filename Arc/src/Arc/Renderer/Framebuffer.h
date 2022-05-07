@@ -13,6 +13,7 @@ namespace ArcEngine
 		RGBA16F,
 		RGBA32F,
 		R11G11B10,
+		RG16F,
 		R32I,
 
 		// Depth/Stencil

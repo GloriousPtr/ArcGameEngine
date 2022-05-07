@@ -81,7 +81,7 @@ layout(location = 0) in VertexOutput Input;
 
 // =========================================
 layout(location = 0) out vec4 o_Albedo;
-layout(location = 1) out vec4 o_Normal;
+layout(location = 1) out vec2 o_Normal;
 layout(location = 2) out vec4 o_MetallicRoughnessAO;
 layout(location = 3) out vec4 o_Emission;
 
@@ -91,7 +91,24 @@ vec3 GetNormalFromMap()
     return normalize(Input.WorldNormals * tangentNormal);
 }
 
-// =========================================
+//////////////////////////////////////////////////////////////////////////////////////////////
+///// Octahedron-normal vectors //////////////////////////////////////////////////////////////
+//// https://knarkowicz.wordpress.com/2014/04/16/octahedron-normal-vector-encoding/ //////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+vec2 signNotZero(vec2 v)
+{
+	return vec2((v.x >= 0.0) ? +1.0 : -1.0, (v.y >= 0.0) ? +1.0 : -1.0);
+}
+
+vec2 Encode(in vec3 v)
+{
+	vec2 p = v.xy * (1.0 / (abs(v.x) + abs(v.y) + abs(v.z)));
+	return (v.z <= 0.0) ? ((1.0 - abs(p.yx)) * signNotZero(p)) : p;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+//// Entry Point /////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
 void main()
 {
     vec4 albedoWithAlpha = pow(texture(u_Material.AlbedoMap, Input.TexCoord) * u_Material.AlbedoColor, vec4(2.2, 2.2, 2.2, 1.0));
@@ -109,7 +126,7 @@ void main()
 	float outAO = texture(u_Material.MRAMap, Input.TexCoord).b;
 
     o_Albedo = vec4(outAlbedo, 1.0);
-	o_Normal = vec4(outNormal, 1.0);
+	o_Normal = Encode(outNormal);
 	o_MetallicRoughnessAO = vec4(outMetalness, outRoughness, outAO, 1.0);
 	o_Emission = vec4(outEmission, u_Material.EmissiveIntensity / 255);
 }
