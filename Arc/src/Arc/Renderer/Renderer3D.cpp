@@ -543,38 +543,7 @@ namespace ArcEngine
 		OPTICK_EVENT();
 
 		renderGraphData->LightingPassTarget->Bind();
-		RenderCommand::SetClearColor(glm::vec4(0.0f));
 		RenderCommand::Clear();
-
-		SkyLightComponent* skylightComponent = nullptr;
-		float skylightIntensity = 0.0f;
-		float skylightRotation = 0.0f;
-		{
-			OPTICK_EVENT("Skylight");
-
-			if (skylight)
-			{
-				skylightComponent = &(skylight.GetComponent<SkyLightComponent>());
-				if (skylightComponent->Texture)
-				{
-					RenderCommand::SetDepthMask(false);
-
-					skylightIntensity = skylightComponent->Intensity;
-					skylightRotation = skylightComponent->Rotation;
-
-					skylightComponent->Texture->Bind(0);
-					cubemapShader->Bind();
-					cubemapShader->SetMat4("u_View", cameraView);
-					cubemapShader->SetMat4("u_Projection", cameraProjection);
-					cubemapShader->SetFloat("u_Intensity", skylightIntensity);
-					cubemapShader->SetFloat("u_Rotation", skylightRotation);
-
-					DrawCube();
-
-					RenderCommand::SetDepthMask(true);
-				}
-			}
-		}
 
 		lightingShader->Bind();
 
@@ -638,9 +607,39 @@ namespace ArcEngine
 		OPTICK_EVENT();
 
 		renderTarget->Bind();
-		RenderCommand::SetClearColor(glm::vec4(0.0f));
+		RenderCommand::SetBlendState(false);
 		RenderCommand::Clear();
 
+		SkyLightComponent* skylightComponent = nullptr;
+		float skylightIntensity = 0.0f;
+		float skylightRotation = 0.0f;
+		{
+			OPTICK_EVENT("Skylight");
+
+			if (skylight)
+			{
+				skylightComponent = &(skylight.GetComponent<SkyLightComponent>());
+				if (skylightComponent->Texture)
+				{
+					RenderCommand::SetDepthMask(false);
+
+					skylightIntensity = skylightComponent->Intensity;
+					skylightRotation = skylightComponent->Rotation;
+
+					skylightComponent->Texture->Bind(0);
+					cubemapShader->Bind();
+					cubemapShader->SetMat4("u_View", cameraView);
+					cubemapShader->SetMat4("u_Projection", cameraProjection);
+					cubemapShader->SetFloat("u_Intensity", skylightIntensity);
+					cubemapShader->SetFloat("u_Rotation", skylightRotation);
+
+					DrawCube();
+
+					RenderCommand::SetDepthMask(true);
+				}
+			}
+		}
+		
 		{
 			OPTICK_EVENT("Draw Meshes");
 

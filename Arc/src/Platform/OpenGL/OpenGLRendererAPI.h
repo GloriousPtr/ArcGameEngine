@@ -21,5 +21,6 @@ namespace ArcEngine
 		virtual void BackCull() override;
 		virtual void SetDepthMask(bool value) override;
 		virtual void SetDepthTest(bool value) override;
+		virtual void SetBlendState(bool value) override;
 	};
 }

@@ -226,14 +226,15 @@ void main()
 	vec4 albedo = texture(u_Albedo, v_TexCoord);
 	m_Params.Albedo = albedo.rgb;
 
-	if (albedo.x == albedo.y
-		&& albedo.y == albedo.z
-		&& albedo.z == albedo.a
-		&& albedo.a <= EPSILON)
-		discard;
+	vec4 metallicRoughnessAO = texture(u_MetallicRoughnessAO, v_TexCoord);
+	if (int(metallicRoughnessAO.a) == 0)
+	{
+		o_FragColor = albedo;
+		return;
+	}
 
 	vec4 depth = texture(u_Depth, v_TexCoord);
-	m_Params.WorldPos = WorldPosFromDepth(depth.r); //texture(u_Position, v_TexCoord).rgb;
+	m_Params.WorldPos = WorldPosFromDepth(depth.r);
 	m_Params.Normal = texture(u_Normal, v_TexCoord).rgb;
 
 	m_Params.Metalness = texture(u_MetallicRoughnessAO, v_TexCoord).r;

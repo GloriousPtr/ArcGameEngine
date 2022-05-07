@@ -136,4 +136,12 @@ namespace ArcEngine
 		else
 			glDisable(GL_DEPTH_TEST);
 	}
+
+	void OpenGLRendererAPI::SetBlendState(bool value)
+	{
+		if (value)
+			glEnable(GL_BLEND);
+		else
+			glDisable(GL_BLEND);
+	}
 }

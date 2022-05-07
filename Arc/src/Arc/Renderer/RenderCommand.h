@@ -70,6 +70,11 @@ namespace ArcEngine
 		{
 			s_RendererAPI->SetDepthTest(value);
 		}
+
+		inline static void SetBlendState(bool value)
+		{
+			s_RendererAPI->SetBlendState(value);
+		}
 	private:
 		static Scope<RendererAPI> s_RendererAPI;
 	};

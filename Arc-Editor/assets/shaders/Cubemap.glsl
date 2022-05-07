@@ -19,7 +19,10 @@ void main()
 #type fragment
 #version 450 core
 
-out vec4 o_Color;
+layout(location = 0) out vec4 o_Albedo;
+layout(location = 1) out vec4 o_Normal;
+layout(location = 2) out vec4 o_MetallicRoughnessAO;
+layout(location = 3) out vec4 o_Emission;
 
 in vec3 v_Position;
 
@@ -39,5 +42,8 @@ vec3 RotateVectorAboutY(float angle, vec3 vec)
 void main()
 {
 	vec3 color = textureLod(u_EnvironmentMap, RotateVectorAboutY(u_Rotation, v_Position), 0).rgb * u_Intensity;
-	o_Color = vec4(color, 1.0);
+	o_Albedo = vec4(color, 1.0);
+	o_Normal = vec4(0.0);
+	o_MetallicRoughnessAO = vec4(0.0);
+	o_Emission = vec4(0.0);
 }
