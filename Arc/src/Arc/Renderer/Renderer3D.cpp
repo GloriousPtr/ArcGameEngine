@@ -350,16 +350,6 @@ namespace ArcEngine
 				// Based off of +Z direction
 				glm::vec4 zDir = worldTransform * glm::vec4(0, 0, 1, 0);
 
-				float near_plane = -100.0f, far_plane = 100.0f;
-				glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
-				glm::mat4 inverted = glm::inverse(worldTransform);
-				glm::vec3 pos = worldTransform[3];
-				glm::vec3 dir = glm::normalize(glm::vec3(inverted[2]));
-				dir.z *= -1;
-				glm::vec3 lookAt = pos - dir;
-				glm::mat4 dirLightView = glm::lookAt(pos, lookAt, glm::vec3(0, 1 ,0));
-				glm::mat4 dirLightViewProj = lightProjection * dirLightView;
-
 				PointLightData pointLightData = 
 				{
 					worldTransform[3],
@@ -376,16 +366,6 @@ namespace ArcEngine
 			// Pass number of lights within the scene
 			ubPointLights->SetData(&numLights, MAX_NUM_LIGHTS * size, sizeof(uint32_t));
 		}
-
-
-
-
-
-
-
-
-
-
 
 		{
 			struct DirectionalLightData
@@ -412,14 +392,11 @@ namespace ArcEngine
 			
 				// Based off of +Z direction
 				glm::vec4 zDir = worldTransform * glm::vec4(0, 0, 1, 0);
-
 				float near_plane = -100.0f, far_plane = 100.0f;
 				glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
-				glm::mat4 inverted = glm::inverse(worldTransform);
 				glm::vec3 pos = worldTransform[3];
-				glm::vec3 dir = glm::normalize(glm::vec3(inverted[2]));
-				dir.z *= -1;
-				glm::vec3 lookAt = pos - dir;
+				glm::vec3 dir = glm::normalize(glm::vec3(zDir));
+				glm::vec3 lookAt = pos + dir;
 				glm::mat4 dirLightView = glm::lookAt(pos, lookAt, glm::vec3(0, 1 ,0));
 				glm::mat4 dirLightViewProj = lightProjection * dirLightView;
 
@@ -699,11 +676,11 @@ namespace ArcEngine
 			
 			glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
 			
-			glm::mat4 inverted = glm::inverse(transform);
+			glm::vec4 zDir = transform * glm::vec4(0, 0, 1, 0);
+
 			glm::vec3 pos = transform[3];
-			glm::vec3 dir = glm::normalize(glm::vec3(inverted[2]));
-			dir.z *= -1;
-			glm::vec3 lookAt = pos - dir;
+			glm::vec3 dir = glm::normalize(glm::vec3(zDir));
+			glm::vec3 lookAt = pos + dir;
 			glm::mat4 dirLightView = glm::lookAt(pos, lookAt, glm::vec3(0, 1 ,0));
 			glm::mat4 dirLightViewProj = lightProjection * dirLightView;
 
