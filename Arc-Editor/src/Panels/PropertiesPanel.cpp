@@ -769,7 +769,7 @@ namespace ArcEngine
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
 					const char* path = (const char*)payload->Data;
-					LoadMesh(path, entity);
+					component.MeshGeometry = CreateRef<Mesh>(path);
 
 					ImGui::EndDragDropTarget();
 					return;

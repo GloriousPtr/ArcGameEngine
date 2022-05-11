@@ -7,6 +7,7 @@
 #include "Arc/Renderer/Material.h"
 #include "Arc/Renderer/VertexArray.h"
 #include "Arc/Renderer/Framebuffer.h"
+#include "Arc/Renderer/Mesh.h"
 #include "Arc/Utils/AABB.h"
 #include "Arc/Scripting/Field.h"
 
@@ -117,6 +118,8 @@ namespace ArcEngine
 		std::string Filepath;
 		Ref<VertexArray> VertexArray;
 		AABB BoundingBox;
+		Ref<Mesh> MeshGeometry;
+		uint32_t SubmeshIndex = 0;
 
 		enum class CullModeType { Unknown = -1, Front, Back, DoubleSided };
 
