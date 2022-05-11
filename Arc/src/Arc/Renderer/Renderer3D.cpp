@@ -402,7 +402,7 @@ namespace ArcEngine
 
 				DirectionalLightData dirLightData = 
 				{
-					worldTransform[3],
+					glm::vec4(pos, (uint32_t) lightComponent.ShadowQuality),
 					glm::vec4(lightComponent.Color, lightComponent.Intensity),
 					zDir,
 					dirLightViewProj
