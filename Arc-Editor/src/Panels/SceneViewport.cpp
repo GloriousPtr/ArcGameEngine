@@ -3,6 +3,7 @@
 #include <imgui/imgui.h>
 #include <ImGuizmo.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <entt.hpp>
 
 #include "Arc/Math/Math.h"
 #include "../Utils/IconsMaterialDesignIcons.h"
@@ -159,9 +160,14 @@ namespace ArcEngine
 		RenderCommand::Clear();
 
 		if (m_SimulationRunning)
+		{
 			scene->OnUpdateRuntime(timestep, m_RenderGraphData);
+		}
 		else
+		{
 			scene->OnUpdateEditor(timestep, m_EditorCamera, m_RenderGraphData);
+			OnOverlayRender(scene);
+		}
 
 		m_RenderGraphData->RenderPassTarget->Unbind();
 
@@ -300,6 +306,63 @@ namespace ArcEngine
 
 		ImGui::End();
 		ImGui::PopStyleVar();
+	}
+
+	void SceneViewport::OnOverlayRender(Ref<Scene>& scene)
+	{
+		Renderer2D::BeginScene(m_EditorCamera);
+		{
+			auto view = scene->GetAllEntitiesWith<TransformComponent, CameraComponent>();
+			for (auto entity : view)
+			{
+				auto& [tc, cam] = view.get<TransformComponent, CameraComponent>(entity);
+				glm::mat4 transform = Entity(entity, scene.get()).GetWorldTransform();
+
+				const auto inv = glm::inverse(cam.Camera.GetProjection() * glm::inverse(transform));
+				std::vector<glm::vec3> frustumCorners;
+				for (unsigned int x = 0; x < 2; ++x)
+				{
+					for (unsigned int y = 0; y < 2; ++y)
+					{
+						for (unsigned int z = 0; z < 2; ++z)
+						{
+							const glm::vec4 pt = 
+							inv * glm::vec4(
+							2.0f * x - 1.0f,
+							2.0f * y - 1.0f,
+							2.0f * z - 1.0f,
+							1.0f);
+							frustumCorners.push_back(glm::vec3(pt) / pt.w);
+						}
+					}
+				}
+
+				glm::vec4 color = glm::vec4(1.0f);
+				Renderer2D::DrawLine(frustumCorners[0], frustumCorners[1], color);
+				Renderer2D::DrawLine(frustumCorners[0], frustumCorners[2], color);
+				Renderer2D::DrawLine(frustumCorners[0], frustumCorners[4], color);
+				Renderer2D::DrawLine(frustumCorners[1], frustumCorners[3], color);
+				Renderer2D::DrawLine(frustumCorners[1], frustumCorners[5], color);
+				Renderer2D::DrawLine(frustumCorners[2], frustumCorners[3], color);
+				Renderer2D::DrawLine(frustumCorners[2], frustumCorners[6], color);
+				Renderer2D::DrawLine(frustumCorners[3], frustumCorners[7], color);
+				Renderer2D::DrawLine(frustumCorners[4], frustumCorners[5], color);
+				Renderer2D::DrawLine(frustumCorners[4], frustumCorners[6], color);
+				Renderer2D::DrawLine(frustumCorners[5], frustumCorners[7], color);
+				Renderer2D::DrawLine(frustumCorners[6], frustumCorners[7], color);
+			}
+		}
+
+		{
+			auto view = scene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
+			for (auto entity : view)
+			{
+				auto& [tc, bc2d] = view.get<TransformComponent, BoxCollider2DComponent>(entity);
+				Renderer2D::DrawRect(Entity(entity, scene.get()).GetWorldTransform(), { 0.2f, 0.8f, 0.2f, 1.0f });
+			}
+		}
+
+		Renderer2D::EndScene(m_RenderGraphData);
 	}
 
 	bool SceneViewport::OnMouseButtonPressed(MouseButtonPressedEvent& e)

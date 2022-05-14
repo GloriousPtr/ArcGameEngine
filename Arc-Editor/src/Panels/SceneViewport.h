@@ -15,6 +15,8 @@ namespace ArcEngine
 		virtual void OnUpdate(Ref<Scene>& scene, Timestep timestep);
 		virtual void OnImGuiRender() override;
 
+		void OnOverlayRender(Ref<Scene>& scene);
+
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 		bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
 		void SetSceneHierarchyPanel(SceneHierarchyPanel& sceneHierarchyPanel) { m_SceneHierarchyPanel = &sceneHierarchyPanel; }
