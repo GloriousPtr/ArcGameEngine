@@ -206,7 +206,7 @@ namespace ArcEngine
 		
 		cameraView = glm::inverse(transform);
 		cameraProjection = camera.GetProjection();
-		cameraPosition = transform[0];
+		cameraPosition = transform[3];
 
 		skylight = cubemap;
 		sceneLights = lights;
