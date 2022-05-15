@@ -152,6 +152,7 @@ namespace ArcEngine
 	struct LightComponent
 	{
 		enum class LightType { Directional = 0, Point, Spot };
+		enum class ShadowQualityType { Hard = 0, Soft, UltraSoft };
 
 		LightType Type = LightType::Point;
 		bool UseColorTempratureMode = true;
@@ -162,6 +163,7 @@ namespace ArcEngine
 		float CutOffAngle = 12.5f;
 		float OuterCutOffAngle = 17.5f;
 		
+		ShadowQualityType ShadowQuality = ShadowQualityType::UltraSoft;
 		Ref<Framebuffer> ShadowMapFramebuffer;
 
 		LightComponent()
@@ -185,6 +187,7 @@ namespace ArcEngine
 			Range = other.Range;
 			CutOffAngle = other.CutOffAngle;
 			OuterCutOffAngle = other.OuterCutOffAngle;
+			ShadowQuality = other.ShadowQuality;
 
 			FramebufferSpecification spec;
 			spec.Attachments = { FramebufferTextureFormat::Depth };

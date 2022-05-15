@@ -206,7 +206,7 @@ namespace ArcEngine
 		
 		cameraView = glm::inverse(transform);
 		cameraProjection = camera.GetProjection();
-		cameraPosition = transform[0];
+		cameraPosition = transform[3];
 
 		skylight = cubemap;
 		sceneLights = lights;
@@ -402,7 +402,7 @@ namespace ArcEngine
 
 				DirectionalLightData dirLightData = 
 				{
-					worldTransform[3],
+					glm::vec4(pos, (uint32_t) lightComponent.ShadowQuality),
 					glm::vec4(lightComponent.Color, lightComponent.Intensity),
 					zDir,
 					dirLightViewProj

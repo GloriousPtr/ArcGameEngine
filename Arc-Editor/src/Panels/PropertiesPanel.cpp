@@ -941,6 +941,11 @@ namespace ArcEngine
 			}
 			else
 			{
+				const char* shadowQualityTypeStrings[] = { "Hard", "Soft", "Ultra Soft" };
+				int shadowQualityType = (int) component.ShadowQuality;
+				if (UI::Property("Shadow Quality Type", shadowQualityType, shadowQualityTypeStrings, 3))
+					component.ShadowQuality = (LightComponent::ShadowQualityType) shadowQualityType;
+
 				uint32_t textureID = component.ShadowMapFramebuffer->GetDepthAttachmentRendererID();
 				ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ 256, 256 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 			}

@@ -87,11 +87,80 @@ struct DirectionalLight
 	mat4 u_DirLightViewProj;
 };
 
-layout (std140, binding = 1) uniform DirectionalLightBuffer
+layout (std140, binding = 2) uniform DirectionalLightBuffer
 {
     DirectionalLight u_DirectionalLights[MAX_NUM_DIR_LIGHTS];
     uint u_NumDirectionalLights;
 };
+
+//Employ stochastic sampling
+const int PCF_SAMPLES = 64;
+const vec2 gPoissonDisk[64] = vec2[](
+	vec2(-0.884081, 0.124488),
+	vec2(-0.714377, 0.027940),
+	vec2(-0.747945, 0.227922),
+	vec2(-0.939609, 0.243634),
+	vec2(-0.985465, 0.045534),
+	vec2(-0.861367, -0.136222),
+	vec2(-0.881934, 0.396908),
+	vec2(-0.466938, 0.014526),
+	vec2(-0.558207, 0.212662),
+	vec2(-0.578447, -0.095822),
+	vec2(-0.740266, -0.095631),
+	vec2(-0.751681, 0.472604),
+	vec2(-0.553147, -0.243177),
+	vec2(-0.674762, -0.330730),
+	vec2(-0.402765, -0.122087),
+	vec2(-0.319776, -0.312166),
+	vec2(-0.413923, -0.439757),
+	vec2(-0.979153, -0.201245),
+	vec2(-0.865579, -0.288695),
+	vec2(-0.243704, -0.186378),
+	vec2(-0.294920, -0.055748),
+	vec2(-0.604452, -0.544251),
+	vec2(-0.418056, -0.587679),
+	vec2(-0.549156, -0.415877),
+	vec2(-0.238080, -0.611761),
+	vec2(-0.267004, -0.459702),
+	vec2(-0.100006, -0.229116),
+	vec2(-0.101928, -0.380382),
+	vec2(-0.681467, -0.700773),
+	vec2(-0.763488, -0.543386),
+	vec2(-0.549030, -0.750749),
+	vec2(-0.809045, -0.408738),
+	vec2(-0.388134, -0.773448),
+	vec2(-0.429392, -0.894892),
+	vec2(-0.131597, 0.065058),
+	vec2(-0.275002, 0.102922),
+	vec2(-0.106117, -0.068327),
+	vec2(-0.294586, -0.891515),
+	vec2(-0.629418, 0.379387),
+	vec2(-0.407257, 0.339748),
+	vec2(0.071650, -0.384284),
+	vec2(0.022018, -0.263793),
+	vec2(0.003879, -0.136073),
+	vec2(-0.137533, -0.767844),
+	vec2(-0.050874, -0.906068),
+	vec2(0.114133, -0.070053),
+	vec2(0.163314, -0.217231),
+	vec2(-0.100262, -0.587992),
+	vec2(-0.004942, 0.125368),
+	vec2(0.035302, -0.619310),
+	vec2(0.195646, -0.459022),
+	vec2(0.303969, -0.346362),
+	vec2(-0.678118, 0.685099),
+	vec2(-0.628418, 0.507978),
+	vec2(-0.508473, 0.458753),
+	vec2(0.032134, -0.782030),
+	vec2(0.122595, 0.280353),
+	vec2(-0.043643, 0.312119),
+	vec2(0.132993, 0.085170),
+	vec2(-0.192106, 0.285848),
+	vec2(0.183621, -0.713242),
+	vec2(0.265220, -0.596716),
+	vec2(-0.009628, -0.483058),
+	vec2(-0.018516, 0.435703)
+);
 
 uniform sampler2D u_Albedo;
 uniform sampler2D u_Normal;
@@ -148,34 +217,60 @@ vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 	return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
+float CalculateHardShadows(int shadowmapIndex, vec3 shadowCoords, float bias)
+{
+	float z = texture(u_DirectionalShadowMap[shadowmapIndex], shadowCoords.xy).r;
+	return shadowCoords.z - bias > z ? 0.0 : 1.0;
+}
+
+float CalculateSoftShadows(int shadowmapIndex, vec3 shadowCoords, float bias)
+{
+	vec2 texelSize = 1.0 / textureSize(u_DirectionalShadowMap[shadowmapIndex], 0);
+	int sampleCount = 1;
+	float shadow = 0.0;
+	for(int x = -sampleCount; x <= sampleCount; ++x)
+	{
+		for(int y = -sampleCount; y <= sampleCount; ++y)
+		{
+			float z = texture(u_DirectionalShadowMap[shadowmapIndex], shadowCoords.xy + vec2(x, y) * texelSize).r;
+			shadow += shadowCoords.z - bias > z ? 0.0 : 1.0;
+		}
+	}
+    float tmp = sampleCount * 2 + 1;
+	shadow /= (tmp * tmp);
+	return shadow;
+}
+
+float CalculatePCSS(int shadowmapIndex, vec3 shadowCoords, float bias)
+{
+	vec2 texelSizeMultiplier = 3.0 / textureSize(u_DirectionalShadowMap[shadowmapIndex], 0);
+	float shadow = 0.0;
+	for (int i = 0; i < PCF_SAMPLES; i++)
+	{
+		vec2 offset = gPoissonDisk[i] * texelSizeMultiplier;
+		float z = texture(u_DirectionalShadowMap[shadowmapIndex], shadowCoords.xy + offset).r;
+		shadow += shadowCoords.z - bias > z ? 0.0 : 1.0;
+	}
+	return shadow / float(PCF_SAMPLES);
+}
+
 float CalcDirectionalShadowFactor(DirectionalLight directionalLight, const float NdotL, int shadowmapIndex)
 {
 	vec4 dirLightViewProj = directionalLight.u_DirLightViewProj * vec4(m_Params.WorldPos, 1);
 	vec3 projCoords = dirLightViewProj.xyz / dirLightViewProj.w;
 	projCoords = (projCoords * 0.5) + 0.5;
-
-	float currentDepth = projCoords.z;
+	
+	if(projCoords.z > 1.0)
+        return 0.0;
 
 	float bias = max(0.0008 * (1.0 - NdotL), 0.0008);
-
-	float shadow = 0.0;
-	vec2 texelSize = 1.0 / textureSize(u_DirectionalShadowMap[shadowmapIndex], 0);
-	int sampleCount = 3;
-	for(int x = -sampleCount; x <= sampleCount; ++x)
+	int shadowQuality = int(directionalLight.u_Position.w);
+	switch (shadowQuality)
 	{
-		for(int y = -sampleCount; y <= sampleCount; ++y)
-		{
-			float pcfDepth = texture(u_DirectionalShadowMap[shadowmapIndex], projCoords.xy + vec2(x, y) * texelSize).r;
-			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
-		}
+		case 0: return CalculateHardShadows(shadowmapIndex, projCoords, bias);
+		case 1: return CalculateSoftShadows(shadowmapIndex, projCoords, bias);
+		case 2: return CalculatePCSS(shadowmapIndex, projCoords, bias);
 	}
-    float tmp = sampleCount * 2 + 1;
-	shadow /= (tmp * tmp);
-
-	if(projCoords.z > 1.0)
-        shadow = 0.0;
-
-	return shadow;
 }
 
 float LengthSq(const vec3 v)
@@ -286,7 +381,7 @@ void main()
 		DirectionalLight light = u_DirectionalLights[i];
 		vec3 L = -1.0 * normalize(light.u_LightDir.xyz);
 		float NdotL = max(dot(m_Params.Normal, L), 0.0);
-		float shadow = (1.0 - CalcDirectionalShadowFactor(light, NdotL, i));
+		float shadow = CalcDirectionalShadowFactor(light, NdotL, i);
 
 		if (shadow <= EPSILON)
 			continue;
