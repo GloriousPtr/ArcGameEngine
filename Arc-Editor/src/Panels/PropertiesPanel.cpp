@@ -43,14 +43,16 @@ namespace ArcEngine
 			
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
 			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-			ImGui::Spacing();
+			
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
+
 			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
 			ImGui::PopStyleVar();
 
 			bool removeComponent = false;
 			if(removable)
 			{
-				ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.75f);
+				ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
 				if(ImGui::Button(ICON_MDI_SETTINGS, ImVec2{ lineHeight, lineHeight }))
 					ImGui::OpenPopup("ComponentSettings");
 
@@ -610,7 +612,7 @@ namespace ArcEngine
 		{
 			ImVec2 pos = ImGui::GetCursorPos();
 			ImVec2 available = ImGui::GetContentRegionAvail();
-			pos = ImVec2(available.x * 0.5f - addComponentButtonSize.x * 0.5f, pos.y + ImGui::GetFrameHeight());
+			pos = ImVec2(available.x * 0.5f - addComponentButtonSize.x * 0.5f, pos.y + ImGui::GetFrameHeight() * 0.5f);
 			ImGui::SetCursorPos(pos);
 		}
 
