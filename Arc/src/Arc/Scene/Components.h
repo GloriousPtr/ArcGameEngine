@@ -116,16 +116,13 @@ namespace ArcEngine
 	struct MeshComponent
 	{
 		std::string Filepath;
-		Ref<VertexArray> VertexArray;
 		AABB BoundingBox;
-		Ref<Mesh> MeshGeometry;
+		Ref<Mesh> MeshGeometry = nullptr;
 		uint32_t SubmeshIndex = 0;
 
 		enum class CullModeType { Unknown = -1, Front, Back, DoubleSided };
 
 		CullModeType CullMode = CullModeType::Back;
-
-		Ref<Material> Mat = CreateRef<Material>();
 
 		MeshComponent() = default;
 		MeshComponent(const MeshComponent&) = default;

@@ -165,7 +165,7 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, int& value, int min, int max)
+	bool UI::Property(const char* label, int32_t& value, int32_t min, int32_t max)
 	{
 		bool modified = false;
 
@@ -180,6 +180,31 @@ namespace ArcEngine
 		memset(s_IDBuffer + 2, 0, 14);
 		itoa(s_Counter++, s_IDBuffer + 2, 16);
 		if (ImGui::SliderInt(s_IDBuffer, &value, min, max))
+			modified = true;
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		ImGui::PopID();
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, uint32_t& value, uint32_t min, uint32_t max)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid();
+		ImGui::PushID(label);
+		ImGui::Text(label);
+		ImGui::NextColumn();
+		ImGui::PushItemWidth(-1);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::SliderInt(s_IDBuffer, (int*)&value, min, max))
 			modified = true;
 
 		ImGui::PopItemWidth();

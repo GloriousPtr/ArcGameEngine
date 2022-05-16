@@ -17,7 +17,8 @@ namespace ArcEngine
 		static void Property(const char* label, const char* value);
 		static bool Property(const char* label, int32_t& value);
 		static bool Property(const char* label, uint32_t& value);
-		static bool Property(const char* label, int& value, int min, int max);
+		static bool Property(const char* label, int32_t& value, int32_t min, int32_t max);
+		static bool Property(const char* label, uint32_t& value, uint32_t min, uint32_t max);
 		static bool Property(const char* label, float& value, float delta = 0.1f);
 		static bool Property(const char* label, float& value, float min, float max, const char* fmt = "%.3f");
 		static bool Property(const char* label, float& value, float delta, float min, float max, const char* fmt = "%.3f");

@@ -323,7 +323,7 @@ namespace ArcEngine
 			for (auto entity : view)
 			{
 				auto [id, mesh] = view.get<IDComponent, MeshComponent>(entity);
-				if (mesh.VertexArray != nullptr)
+				if (mesh.MeshGeometry != nullptr)
 					Renderer3D::SubmitMesh(mesh, Entity(entity, this).GetWorldTransform());
 			}
 		}
@@ -470,7 +470,7 @@ namespace ArcEngine
 				for (auto entity : view)
 				{
 					auto [id, mesh] = view.get<IDComponent, MeshComponent>(entity);
-					if (mesh.VertexArray != nullptr)
+					if (mesh.MeshGeometry != nullptr)
 						Renderer3D::SubmitMesh(mesh, Entity(entity, this).GetWorldTransform());
 				}
 			}

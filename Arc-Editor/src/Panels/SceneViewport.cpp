@@ -86,6 +86,8 @@ namespace ArcEngine
 	{
 		OPTICK_EVENT(m_ID.c_str());
 
+		m_Scene = scene;
+
 		if (FramebufferSpecification spec = m_RenderGraphData->CompositePassTarget->GetSpecification();
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
 			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
@@ -257,7 +259,30 @@ namespace ArcEngine
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 			{
 				const char* path = (const char*)payload->Data;
-				EditorLayer::GetInstance()->OpenScene(path);
+				std::string ext = StringUtils::GetExtension(path);
+				
+				if (ext == "arc")
+				{
+					EditorLayer::GetInstance()->OpenScene(path);
+				}
+				if (ext == "assbin" || ext == "obj" || ext == "fbx")
+				{
+					Ref<Mesh> mesh = CreateRef<Mesh>(path);
+
+					Entity parent = m_Scene->CreateEntity(mesh->GetName());
+
+					uint32_t meshCount = mesh->GetSubmeshCount();
+					for (size_t i = 0; i < meshCount; i++)
+					{
+						auto& submesh = mesh->GetSubmesh(i);
+						Entity entity = m_Scene->CreateEntity(submesh.Name);
+						entity.SetParent(parent);
+						auto& meshComponent = entity.AddComponent<MeshComponent>();
+						meshComponent.Filepath = path;
+						meshComponent.MeshGeometry = mesh;
+						meshComponent.SubmeshIndex = i;
+					}
+				}
 			}
 			ImGui::EndDragDropTarget();
 		}

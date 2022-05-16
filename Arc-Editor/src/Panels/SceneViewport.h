@@ -32,6 +32,7 @@ namespace ArcEngine
 	private:
 		Ref<RenderGraphData> m_RenderGraphData;
 		EditorCamera m_EditorCamera;
+		Ref<Scene> m_Scene;
 
 		bool m_ViewportFocused = false;
 		bool m_ViewportHovered = false;

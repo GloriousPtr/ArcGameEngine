@@ -6,9 +6,82 @@
 #include <assimp/postprocess.h>
 
 #include "Arc/Core/AssetManager.h"
+#include "Arc/Utils/StringUtils.h"
 
 namespace ArcEngine
 {
+	Mesh::Mesh(const char* filepath)
+	{
+		OPTICK_EVENT();
+
+		Load(filepath);
+	}
+
+	void Mesh::Load(const char* filepath)
+	{
+		OPTICK_EVENT();
+
+		Assimp::Importer importer;
+		importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 80.0f);
+		uint32_t meshImportFlags = 0;
+		
+		std::string filePath = std::string(filepath);
+		auto lastDot = filePath.find_last_of(".");
+		std::string name = filePath.substr(lastDot + 1, filePath.size() - lastDot);
+		if (name != "assbin")
+		{
+			meshImportFlags |=
+				aiProcess_CalcTangentSpace |
+				aiProcess_Triangulate |
+				aiProcess_PreTransformVertices |
+				aiProcess_SortByPType |
+				aiProcess_GenNormals |
+				aiProcess_GenUVCoords |
+				aiProcess_OptimizeMeshes |
+				aiProcess_JoinIdenticalVertices |
+				aiProcess_GlobalScale |
+				aiProcess_ImproveCacheLocality |
+				aiProcess_ValidateDataStructure;
+		}
+
+		const aiScene *scene = importer.ReadFile(filepath, meshImportFlags);
+
+		if (!scene)
+		{
+			ARC_CORE_ERROR("Could not import the file: {0}. Error: {1}", filepath, importer.GetErrorString());
+			return;
+		}
+
+		ProcessNode(scene->mRootNode, scene, filepath);
+		m_Name = StringUtils::GetName(filepath);
+	}
+
+	Submesh& Mesh::GetSubmesh(uint32_t index)
+	{
+		OPTICK_EVENT();
+
+		ARC_CORE_ASSERT(index < m_Submeshes.size(), "Submesh index out of bounds");
+
+		return m_Submeshes[index];
+	}
+
+	void Mesh::ProcessNode(aiNode *node, const aiScene *scene, const char* filepath)
+	{
+		OPTICK_EVENT();
+
+		for(unsigned int i = 0; i < node->mNumMeshes; i++)
+		{
+			aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+			const char* nodeName = node->mName.C_Str();
+			ProcessMesh(mesh, scene, filepath, nodeName);
+		}
+
+		for(unsigned int i = 0; i < node->mNumChildren; i++)
+		{
+			ProcessNode(node->mChildren[i], scene, filepath);
+		}
+	}
+
 	std::vector<Ref<Texture2D>> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const char* filepath)
 	{
 		OPTICK_EVENT();
@@ -21,11 +94,12 @@ namespace ArcEngine
 			aiString str;
 			mat->GetTexture(type, i, &str);
 			Ref<Texture2D> texture = AssetManager::GetTexture2D(dir + '\\' + str.C_Str());
+			textures.push_back(texture);
 		}
 		return textures;
 	}
 
-	void Mesh::ProcessMesh(aiMesh *mesh, const aiScene *scene, const char* filepath)
+	void Mesh::ProcessMesh(aiMesh *mesh, const aiScene *scene, const char* filepath, const char* nodeName)
 	{
 		OPTICK_EVENT();
 
@@ -133,7 +207,7 @@ namespace ArcEngine
 		std::vector<Ref<Texture2D>> emissiveMaps = LoadMaterialTextures(material, aiTextureType_EMISSIVE, filepath);
 
 		uint32_t index = m_Submeshes.size();
-		m_Submeshes.push_back({ CreateRef<Material>(), vertexArray });
+		m_Submeshes.push_back({ nodeName, CreateRef<Material>(), vertexArray });
 		Submesh& submesh = m_Submeshes[index];
 
 		auto& materialProperties = submesh.Mat->GetShader()->GetMaterialProperties();
@@ -179,80 +253,5 @@ namespace ArcEngine
 				submesh.Mat->SetData(name.c_str(), 1);
 			}
 		}
-	}
-
-	void Mesh::ProcessNode(aiNode *node, const aiScene *scene, const char* filepath)
-	{
-		OPTICK_EVENT();
-
-		for(unsigned int i = 0; i < node->mNumMeshes; i++)
-		{
-			aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-			ProcessMesh(mesh, scene, filepath);
-		}
-
-		/*
-		for(unsigned int i = 0; i < node->mNumChildren; i++)
-		{
-			std::string name = node->mChildren[i]->mName.C_Str();
-
-			m_Submeshes.push_back(Submesh());
-			ProcessNode(node->mChildren[i], scene, filepath);
-		}
-		*/
-	}
-	
-	void Mesh::LoadMesh(const char* filepath)
-	{
-		OPTICK_EVENT();
-
-		Assimp::Importer importer;
-		importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 80.0f);
-		uint32_t meshImportFlags = 0;
-		
-		std::string filePath = std::string(filepath);
-		auto lastDot = filePath.find_last_of(".");
-		std::string name = filePath.substr(lastDot + 1, filePath.size() - lastDot);
-		if (name != "assbin")
-		{
-			meshImportFlags |=
-				aiProcess_CalcTangentSpace |
-				aiProcess_Triangulate |
-				aiProcess_PreTransformVertices |
-				aiProcess_SortByPType |
-				aiProcess_GenNormals |
-				aiProcess_GenUVCoords |
-				aiProcess_OptimizeMeshes |
-				aiProcess_JoinIdenticalVertices |
-				aiProcess_GlobalScale |
-				aiProcess_ImproveCacheLocality |
-				aiProcess_ValidateDataStructure;
-		}
-
-		const aiScene *scene = importer.ReadFile(filepath, meshImportFlags);
-
-		if (!scene)
-		{
-			ARC_CORE_ERROR("Could not import the file: {0}. Error: {1}", filepath, importer.GetErrorString());
-			return;
-		}
-
-		ProcessNode(scene->mRootNode, scene, filepath);
-	}
-
-	Mesh::Mesh(const char* filepath)
-	{
-		LoadMesh(filepath);
-	}
-
-	const Submesh& Mesh::GetSubmesh(uint32_t index) const
-	{
-		if (index >= m_Submeshes.size())
-		{
-			ARC_CORE_ERROR("Submesh at index {0} not found", index);
-			index = m_Submeshes.size() - 1;
-		}
-
-		return m_Submeshes[index];
 	}
 }

@@ -15,10 +15,8 @@ namespace ArcEngine
 
 	struct MeshData
 	{
-		glm::mat4 Transform = glm::mat4(1.0f);
-		Ref<VertexArray> VertexArray = nullptr;
-		Ref<Material> Mat;
-		
+		glm::mat4 Transform;
+		Submesh& Submesh;
 		MeshComponent::CullModeType CullMode;
 	};
 
@@ -261,14 +259,12 @@ namespace ArcEngine
 
 		ARC_PROFILE_FUNCTION();
 
-		MeshData mesh;
+		if (meshComponent.MeshGeometry->GetSubmeshCount() == 0)
+			return;
 
-		mesh.VertexArray = meshComponent.VertexArray;
-		mesh.Mat = meshComponent.Mat;
-		mesh.Transform = transform;
-		mesh.CullMode = meshComponent.CullMode;
+		ARC_CORE_ASSERT(meshComponent.MeshGeometry->GetSubmeshCount() > meshComponent.SubmeshIndex, "Trying to access submesh index that does not exist!");
 
-		meshes.push_back(mesh);
+		meshes.push_back({ transform, meshComponent.MeshGeometry->GetSubmesh(meshComponent.SubmeshIndex), meshComponent.CullMode });
 	}
 
 	void Renderer3D::Flush(Ref<RenderGraphData> renderGraphData)
@@ -625,7 +621,7 @@ namespace ArcEngine
 			for (auto it = meshes.rbegin(); it != meshes.rend(); it++)
 			{
 				MeshData* meshData = &(*it);
-				meshData->Mat->Bind();
+				meshData->Submesh.Mat->Bind();
 				shader->SetMat4("u_Model", meshData->Transform);
 				
 				if (currentCullMode != meshData->CullMode)
@@ -649,9 +645,9 @@ namespace ArcEngine
 					}
 				}
 
-				RenderCommand::DrawIndexed(meshData->VertexArray);
+				RenderCommand::DrawIndexed(meshData->Submesh.Geometry);
 				s_Stats.DrawCalls++;
-				s_Stats.IndexCount += meshData->VertexArray->GetIndexBuffer()->GetCount();
+				s_Stats.IndexCount += meshData->Submesh.Geometry->GetIndexBuffer()->GetCount();
 			}
 		}
 	}
@@ -692,7 +688,7 @@ namespace ArcEngine
 				MeshData* meshData = &(*it);
 
 				shadowMapShader->SetMat4("u_Model", meshData->Transform);
-				RenderCommand::DrawIndexed(meshData->VertexArray);
+				RenderCommand::DrawIndexed(meshData->Submesh.Geometry);
 			}
 		}
 //		RenderCommand::BackCull();

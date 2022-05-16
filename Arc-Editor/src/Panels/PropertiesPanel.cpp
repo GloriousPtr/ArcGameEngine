@@ -337,6 +337,7 @@ namespace ArcEngine
 		}
 	}
 
+	/*
 	static std::vector<Ref<Texture2D>> s_TextureCache;
 	std::vector<Ref<Texture2D>> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const char* filepath)
     {
@@ -602,7 +603,7 @@ namespace ArcEngine
 			rootEntity.RemoveComponent<MeshComponent>();
 		ProcessNode(scene->mRootNode, scene, rootEntity, filepath);
 	}
-
+	*/
 	static void WriteMesh(const std::string& filepath)
 	{
 		OPTICK_EVENT();
@@ -760,7 +761,8 @@ namespace ArcEngine
 				if (!filepath.empty())
 				{
 					component.Filepath = filepath;
-					LoadMesh(filepath.c_str(), entity);
+					component.MeshGeometry = CreateRef<Mesh>(filepath.c_str());
+
 					return;
 				}
 			}
@@ -769,6 +771,7 @@ namespace ArcEngine
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
 					const char* path = (const char*)payload->Data;
+					component.Filepath = path;
 					component.MeshGeometry = CreateRef<Mesh>(path);
 
 					ImGui::EndDragDropTarget();
@@ -779,101 +782,108 @@ namespace ArcEngine
 
 			ImGui::Text(component.Filepath.c_str());
 
+
 			const char* cullModeTypeStrings[] = { "Front", "Back", "Double Sided" };
 			int cullMode = (int) component.CullMode;
 			if (UI::Property("Cull Mode", cullMode, cullModeTypeStrings, 3))
 				component.CullMode = (MeshComponent::CullModeType) cullMode;
 
-			auto& materialProperties = component.Mat->GetShader()->GetMaterialProperties();
-			for (auto& [n, property] : materialProperties)
+			if (component.MeshGeometry)
 			{
-				const char* name = n.c_str();
-				const char* displayName = n.c_str() + 11;
-				
-				switch (property.Type)
+				UI::Property("Submesh Index", component.SubmeshIndex, 0, component.MeshGeometry->GetSubmeshCount() - 1);
+
+				auto& material = component.MeshGeometry->GetSubmesh(component.SubmeshIndex).Mat;
+				auto& materialProperties = material->GetShader()->GetMaterialProperties();
+				for (auto& [n, property] : materialProperties)
 				{
-					case MaterialPropertyType::None: break;
-					case MaterialPropertyType::Sampler2D:
+					const char* name = n.c_str();
+					const char* displayName = n.c_str() + 11;
+
+					switch (property.Type)
 					{
-						uint32_t slot = component.Mat->GetData<uint32_t>(name);
-						uint32_t tex = component.Mat->GetTexture(slot) ? component.Mat->GetTexture(slot)->GetRendererID() : 0;
-						Ref<Texture2D> tmp = component.Mat->GetTexture(slot);
-						if (DrawTexture2DButton(displayName, tmp, tex))
+						case MaterialPropertyType::None: break;
+						case MaterialPropertyType::Sampler2D:
 						{
-							component.Mat->SetTexture(slot, tmp);
+							uint32_t slot = material->GetData<uint32_t>(name);
+							uint32_t tex = material->GetTexture(slot) ? material->GetTexture(slot)->GetRendererID() : 0;
+							Ref<Texture2D> tmp = material->GetTexture(slot);
+							if (DrawTexture2DButton(displayName, tmp, tex))
+							{
+								material->SetTexture(slot, tmp);
+							}
+							break;
 						}
-						break;
-					}
-					case MaterialPropertyType::Bool:
-					{
-						bool v = component.Mat->GetData<int32_t>(name) == 0 ? false : true;
-						if (UI::Property(displayName, v))
-							component.Mat->SetData(name, v ? 1 : 0);
-						break;
-					}
-					case MaterialPropertyType::Int:
-					{
-						int32_t v = component.Mat->GetData<int32_t>(name);
-						if (UI::Property(displayName, v))
-							component.Mat->SetData(name, v);
-						break;
-					}
-					case MaterialPropertyType::Float:
-					{
-						bool isSlider01 = n.find("01") != std::string::npos;
-						float v = component.Mat->GetData<float>(name);
-						if (isSlider01)
+						case MaterialPropertyType::Bool:
 						{
-							std::string displayName2 = displayName;
-							displayName2[displayName2.size() - 2] = '\0';
-							if (UI::Property(displayName2.c_str(), v, 0.0f, 1.0f))
-								component.Mat->SetData(name, v);
-						}
-						else
-						{
+							bool v = material->GetData<int32_t>(name) == 0 ? false : true;
 							if (UI::Property(displayName, v))
-								component.Mat->SetData(name, v);
+								material->SetData(name, v ? 1 : 0);
+							break;
 						}
-						break;
-					}
-					case MaterialPropertyType::Float2:
-					{
-						glm::vec2 v = component.Mat->GetData<glm::vec2>(name);
-						if (UI::Property(displayName, v))
-							component.Mat->SetData(name, v);
-						break;
-					}
-					case MaterialPropertyType::Float3:
-					{
-						bool isColor = n.find("color") != std::string::npos || n.find("Color") != std::string::npos;
-						glm::vec3 v = component.Mat->GetData<glm::vec3>(name);
-						if (isColor)
+						case MaterialPropertyType::Int:
 						{
-							if (UI::PropertyColor3(displayName, v))
-								component.Mat->SetData(name, v);
-						}
-						else
-						{
+							int32_t v = material->GetData<int32_t>(name);
 							if (UI::Property(displayName, v))
-								component.Mat->SetData(name, v);
+								material->SetData(name, v);
+							break;
 						}
-						break;
-					}
-					case MaterialPropertyType::Float4:
-					{
-						bool isColor = n.find("color") != std::string::npos || n.find("Color") != std::string::npos;
-						glm::vec4 v = component.Mat->GetData<glm::vec4>(name);
-						if (isColor)
+						case MaterialPropertyType::Float:
 						{
-							if (UI::PropertyColor4(displayName, v))
-								component.Mat->SetData(name, v);
+							bool isSlider01 = n.find("01") != std::string::npos;
+							float v = material->GetData<float>(name);
+							if (isSlider01)
+							{
+								std::string displayName2 = displayName;
+								displayName2[displayName2.size() - 2] = '\0';
+								if (UI::Property(displayName2.c_str(), v, 0.0f, 1.0f))
+									material->SetData(name, v);
+							}
+							else
+							{
+								if (UI::Property(displayName, v))
+									material->SetData(name, v);
+							}
+							break;
 						}
-						else
+						case MaterialPropertyType::Float2:
 						{
+							glm::vec2 v = material->GetData<glm::vec2>(name);
 							if (UI::Property(displayName, v))
-								component.Mat->SetData(name, v);
+								material->SetData(name, v);
+							break;
 						}
-						break;
+						case MaterialPropertyType::Float3:
+						{
+							bool isColor = n.find("color") != std::string::npos || n.find("Color") != std::string::npos;
+							glm::vec3 v = material->GetData<glm::vec3>(name);
+							if (isColor)
+							{
+								if (UI::PropertyColor3(displayName, v))
+									material->SetData(name, v);
+							}
+							else
+							{
+								if (UI::Property(displayName, v))
+									material->SetData(name, v);
+							}
+							break;
+						}
+						case MaterialPropertyType::Float4:
+						{
+							bool isColor = n.find("color") != std::string::npos || n.find("Color") != std::string::npos;
+							glm::vec4 v = material->GetData<glm::vec4>(name);
+							if (isColor)
+							{
+								if (UI::PropertyColor4(displayName, v))
+									material->SetData(name, v);
+							}
+							else
+							{
+								if (UI::Property(displayName, v))
+									material->SetData(name, v);
+							}
+							break;
+						}
 					}
 				}
 			}
