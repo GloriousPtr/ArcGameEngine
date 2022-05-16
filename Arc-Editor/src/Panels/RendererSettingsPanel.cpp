@@ -13,17 +13,20 @@ namespace ArcEngine
 		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
 		ImGui::Begin(m_ID.c_str(), &m_Showing);
 
+		UI::BeginProperties();
 		UI::Property("Exposure", Renderer3D::Exposure);
-
 		const char* tonemapTypeStrings[] = { "None", "ACES", "Filmic", "Uncharted" };
 		int index = (int)Renderer3D::Tonemapping;
 		if (UI::Property("Tonemapping", index, tonemapTypeStrings, 4))
 		{
 			Renderer3D::Tonemapping = (Renderer3D::TonemappingType)index;
 		}
+		UI::EndProperties();
 
 		if (ImGui::TreeNode("Bloom"))
 		{
+			UI::BeginProperties();
+
 			UI::Property("Use Bloom", Renderer3D::UseBloom);
 			
 			float bloomStrength = Renderer3D::BloomStrength;
@@ -59,6 +62,8 @@ namespace ArcEngine
 			if (ImGui::SliderInt("Upsampled Prefilters", &selectedUpsampled, 0, sampleCount - 1))
 				textureID = Renderer3D::upsampledFramebuffers[selectedUpsampled]->GetColorAttachmentRendererID();
 				*/
+			UI::EndProperties();
+
 			ImGui::TreePop();
 		}
 

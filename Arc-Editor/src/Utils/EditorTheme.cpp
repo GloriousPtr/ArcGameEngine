@@ -26,7 +26,6 @@ namespace ArcEngine
 		io.Fonts->AddFontFromMemoryCompressedTTF(MaterialDesign_compressed_data, MaterialDesign_compressed_size, fontSize, &iconsConfig, icons_ranges);
 	}
 
-
 	void EditorTheme::SetFont()
 	{
 		ImGuiIO& io = ImGui::GetIO();

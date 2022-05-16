@@ -115,6 +115,10 @@ namespace ArcEngine
 	{
 		OPTICK_EVENT();
 
+		m_WhiteTexture = Texture2D::Create(1, 1);
+		uint32_t whiteTextureData = 0xffffffff;
+		m_WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
+
 		m_DirectoryIcon = Texture2D::Create("Resources/Icons/ContentBrowser/DirectoryIcon.png");
 
 		UpdateDirectoryEntries(s_AssetPath);
@@ -287,7 +291,7 @@ namespace ArcEngine
 		std::filesystem::path directoryToOpen;
 		bool directoryOpened = false;
 
-		float padding = 5.0f;
+		float padding = 4.0f;
 		float cellSize = m_ThumbnailSize + 2 * padding;
 
 		float panelWidth = ImGui::GetContentRegionAvail().x;
@@ -320,17 +324,21 @@ namespace ArcEngine
 				}
 
 				ImGui::TableNextColumn();
-				ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
-				ImGui::ImageButton((ImTextureID)textureId, { m_ThumbnailSize, m_ThumbnailSize }, { 0, 1 }, { 1, 0 }, padding);
+
+				const char* filename = file.Name.c_str();
+				ImVec2 textSize = ImGui::CalcTextSize(filename);
+				ImVec2 cursorPos = ImGui::GetCursorPos();
 				
+				ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
+				ImGui::Button(("##" + std::to_string(i)).c_str(), { m_ThumbnailSize + padding * 2, m_ThumbnailSize + textSize.y + padding * 4 });
 				if (ImGui::BeginDragDropSource())
 				{
 					std::string itemPath = file.DirectoryEntry.path().string();
 					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath.c_str(), (strlen(itemPath.c_str()) + 1) * sizeof(char));
 					ImGui::EndDragDropSource();
 				}
-				
 				ImGui::PopStyleColor();
+				
 				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 				{
 					if (file.DirectoryEntry.is_directory())
@@ -340,10 +348,39 @@ namespace ArcEngine
 					}
 				}
 
-				float posX = ImGui::GetCursorPosX() + cellSize * 0.5f;
-				const char* fileName = file.Name.c_str();
-				ImGui::SetCursorPosX(posX - ImGui::CalcTextSize(fileName).x * 0.5f);
-				ImGui::TextUnformatted(fileName);
+				uint32_t overlayPadding = m_ThumbnailSize / 64;
+				ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
+				ImGui::SetItemAllowOverlap();
+				ImGui::Image((ImTextureID)m_WhiteTexture->GetRendererID(), { m_ThumbnailSize, m_ThumbnailSize + textSize.y + 2 * padding }, { 0, 0 }, { 1, 1 }, EditorTheme::WindowBgAlternativeColor);
+				ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
+				ImGui::SetItemAllowOverlap();
+				ImGui::Image((ImTextureID)textureId, { m_ThumbnailSize, m_ThumbnailSize }, { 0, 1 }, { 1, 0 });
+
+				ImDrawList& windowDrawList = *ImGui::GetWindowDrawList();
+
+				ImVec2 rectMin = ImGui::GetItemRectMin();
+				ImVec2 rectSize = ImGui::GetItemRectSize();
+
+				if (textSize.x + padding * 2 <= rectSize.x)
+				{
+					float rectMin_x = rectMin.x - padding + (rectSize.x - textSize.x) / 2;
+					float rectMin_y = rectMin.y + rectSize.y;
+
+					float rectMax_x = rectMin_x + textSize.x + padding * 2;
+					float rectMax_y = rectMin_y + textSize.y + padding * 2;
+
+					windowDrawList.AddText({ rectMin_x + padding, rectMin_y + padding }, ImColor(1.0f, 1.0f, 1.0f), filename);
+				}
+				else
+				{
+					float rectMin_y = rectMin.y + rectSize.y;
+
+					float rectMax_x = rectMin.x + rectSize.x;
+					float rectMax_y = rectMin_y + textSize.y + padding * 2;
+
+					ImGui::RenderTextEllipsis(&windowDrawList, { rectMin.x + padding, rectMin_y + padding }, { rectMax_x, rectMax_y }, rectMax_x, rectMax_x, filename, nullptr, &textSize);
+				}
+				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + textSize.y + padding * 2);
 
 				ImGui::PopID();
 			}

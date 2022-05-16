@@ -37,6 +37,7 @@ namespace ArcEngine
 		float m_ThumbnailSize = 64.0f;
 		ImGuiTextFilter m_Filter;
 
+		Ref<Texture2D> m_WhiteTexture;
 		Ref<Texture2D> m_DirectoryIcon;
 	};
 }

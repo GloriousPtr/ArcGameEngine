@@ -58,17 +58,20 @@ namespace ArcEngine
 			ImGui::Text("Indices: %d", stats.IndexCount);
 		}
 
-		ImGui::Separator();
 
-		UI::Property("FPS");
+		UI::BeginProperties();
+		bool vSync = Application::Get().GetWindow().IsVSync();
+		if (UI::Property("VSync Enabled", vSync))
+			Application::Get().GetWindow().SetVSync(vSync);
+		UI::EndProperties();
+
+		ImGui::Text("FPS");
+		ImGui::Separator();
 		ImGui::PlotLines("#FPS", m_FpsValues, size);
 		ImGui::Text("FPS: %f", avg);
 		const float fps = (1.0f / avg) * 1000.0f;
 		ImGui::Text("Frame time (ms): %f", fps);
 
-		bool vSync = Application::Get().GetWindow().IsVSync();
-		if (UI::Property("VSync Enabled", vSync))
-			Application::Get().GetWindow().SetVSync(vSync);
 		ImGui::End();
 	}
 }

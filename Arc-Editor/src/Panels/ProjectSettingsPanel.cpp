@@ -14,8 +14,10 @@ namespace ArcEngine
 	{
 		ImGui::Begin(m_ID.c_str(), &m_Showing);
 
+		UI::BeginProperties();
 		UI::Property("Core Assembly Path", s_ScriptCoreAssemblyPath);
 		UI::Property("Project Assembly Path", s_ScriptClientAssemblyPath);
+		UI::EndProperties();
 
 		static constexpr char* btnTitle = "Reload Assemblies";
 		static const int padding = ImGui::GetStyle().WindowPadding.x;

@@ -232,11 +232,6 @@ namespace ArcEngine
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin(m_ID.c_str(), &m_Showing);
 		
-		static int renderTargetIndex = 0;
-		const char* drawModes[] = { "Composite", "Albedo", "Position", "Normal", "MRAO", "Emission" };
-		UI::Property("Draw Mode", renderTargetIndex, drawModes, 6);
-		ImGui::SetItemAllowOverlap();
-
 		const auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
 		const auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
 		const auto viewportOffset = ImGui::GetWindowPos();
@@ -250,8 +245,6 @@ namespace ArcEngine
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
 		uint64_t textureID = m_RenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
-		if (renderTargetIndex != 0)
-			textureID = m_RenderGraphData->RenderPassTarget->GetColorAttachmentRendererID(renderTargetIndex - 1);
 		ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 		if (ImGui::BeginDragDropTarget())
