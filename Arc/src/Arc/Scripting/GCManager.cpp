@@ -15,14 +15,14 @@ namespace ArcEngine
 	static GCState* s_GCState;
 	void GCManager::Init()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		s_GCState = new GCState();
 	}
 
 	void GCManager::Shutdown()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if (s_GCState->StrongRefMap.size() > 0)
 		{
@@ -53,7 +53,7 @@ namespace ArcEngine
 
 	void GCManager::CollectGarbage(bool blockUntilFinalized)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		mono_gc_collect(mono_gc_max_generation());
 		if (blockUntilFinalized)
@@ -64,7 +64,7 @@ namespace ArcEngine
 
 	GCHandle GCManager::CreateObjectReference(MonoObject* managedObject, bool weakReference, bool pinned, bool track)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		GCHandle handle = weakReference
 			? mono_gchandle_new_weakref_v2(managedObject, pinned)
@@ -85,7 +85,7 @@ namespace ArcEngine
 
 	MonoObject* GCManager::GetReferencedObject(GCHandle handle)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		MonoObject* obj = mono_gchandle_get_target_v2(handle);
 		if (obj == nullptr || mono_object_get_vtable(obj) == nullptr)
@@ -95,7 +95,7 @@ namespace ArcEngine
 
 	void GCManager::ReleaseObjectReference(GCHandle handle)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if (mono_gchandle_get_target_v2(handle) != nullptr)
 		{

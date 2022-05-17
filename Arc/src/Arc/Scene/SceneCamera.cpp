@@ -7,11 +7,15 @@ namespace ArcEngine
 {
 	SceneCamera::SceneCamera()
 	{
+		ARC_PROFILE_SCOPE();
+
 		RecalculateProjection();
 	}
 
 	void SceneCamera::SetPerspective(float verticalFov, float nearClip, float farClip)
 	{
+		ARC_PROFILE_SCOPE();
+
 		m_ProjectionType = ProjectionType::Perspective;
 		
 		m_PerspectiveFOV = verticalFov;
@@ -23,6 +27,8 @@ namespace ArcEngine
 
 	void SceneCamera::SetOrthographic(float size, float nearClip, float farClip)
 	{
+		ARC_PROFILE_SCOPE();
+
 		m_ProjectionType = ProjectionType::Orthographic;
 		
 		m_OrthographicSize = size;
@@ -34,12 +40,16 @@ namespace ArcEngine
 	
 	void SceneCamera::SetViewportSize(uint32_t width, uint32_t height)
 	{
+		ARC_PROFILE_SCOPE();
+
 		m_AspectRatio = (float)width / (float)height;
 		RecalculateProjection();
 	}
 
 	void SceneCamera::RecalculateProjection()
 	{
+		ARC_PROFILE_SCOPE();
+
 		if(m_ProjectionType == ProjectionType::Perspective)
 		{
 			m_Projection = glm::perspective(m_PerspectiveFOV, m_AspectRatio, m_PerspectiveNear, m_PerspectiveFar);

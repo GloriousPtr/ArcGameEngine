@@ -45,5 +45,3 @@
 #include "Arc/Scripting/Field.h"
 
 #include "Arc/Utils/StringUtils.h"
-
-#include <optick.h>

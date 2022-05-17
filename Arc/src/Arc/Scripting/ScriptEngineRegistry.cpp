@@ -27,7 +27,7 @@ namespace ArcEngine
 
 	void ScriptEngineRegistry::InitComponentTypes()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		COMPONENT_REGISTER(TagComponent);
 		COMPONENT_REGISTER(TransformComponent);
@@ -35,7 +35,7 @@ namespace ArcEngine
 
 	void LogMessage(Log::Level level, MonoString* formattedMessage)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		switch (level)
 		{
@@ -56,7 +56,7 @@ namespace ArcEngine
 
 	Entity GetEntity(uint64_t entityID)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		ARC_CORE_ASSERT(ScriptEngine::GetScene(), "Active scene is null");
 		return ScriptEngine::GetScene()->GetEntity(entityID);
@@ -64,28 +64,28 @@ namespace ArcEngine
 
 	void GetTransform(uint64_t entityID, TransformComponent* outTransform)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		*outTransform = GetEntity(entityID).GetComponent<TransformComponent>();
 	}
 	
 	void SetTransform(uint64_t entityID, TransformComponent* inTransform)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		GetEntity(entityID).GetComponent<TransformComponent>() = *inTransform;
 	}
 
 	void GetMousePosition(glm::vec2* outMousePosition)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		*outMousePosition = Input::GetMousePosition();
 	}
 
 	MonoString* GetTag(uint64_t entityID)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		auto& tag = GetEntity(entityID).GetComponent<TagComponent>();
 		return mono_string_new(mono_domain_get(), tag.Tag.c_str());
@@ -93,14 +93,14 @@ namespace ArcEngine
 
 	void SetTag(uint64_t entityID, MonoString* tag)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		GetEntity(entityID).GetComponent<TagComponent>().Tag = MonoUtils::MonoStringToUTF8(tag);
 	}
 
 	void ScriptEngineRegistry::AddComponent(uint64_t entityID, void* type)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		MonoType* monoType = mono_reflection_type_get_type((MonoReflectionType*)type);
 		s_AddComponentFuncs.at(monoType)(GetEntity(entityID));
@@ -108,7 +108,7 @@ namespace ArcEngine
 
 	bool ScriptEngineRegistry::HasComponent(uint64_t entityID, void* type)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		MonoType* monoType = mono_reflection_type_get_type((MonoReflectionType*)type);
 		return s_HasComponentFuncs.at(monoType)(GetEntity(entityID));
@@ -116,7 +116,7 @@ namespace ArcEngine
 
 	void ScriptEngineRegistry::RegisterAll()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		InitComponentTypes();
 

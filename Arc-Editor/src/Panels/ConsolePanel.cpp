@@ -12,7 +12,7 @@ namespace ArcEngine
 	ConsolePanel::ConsolePanel(const char* name)
 		: BasePanel(name, ICON_MDI_CONSOLE, true)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
         s_MessageBufferRenderFilter |= Log::Level::Trace;
 		s_MessageBufferRenderFilter |= Log::Level::Info;
@@ -32,7 +32,7 @@ namespace ArcEngine
 
 	void ConsolePanel::AddMessage(std::string message, Log::Level level)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		*(m_MessageBuffer.begin() + m_BufferBegin) = CreateRef<Message>(message, level);
 		if (++m_BufferBegin == m_Capacity)
@@ -46,7 +46,7 @@ namespace ArcEngine
 
 	const ConsolePanel::Message* ConsolePanel::GetRecentMessage()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if (m_BufferBegin == 0)
 			return nullptr;
@@ -56,7 +56,7 @@ namespace ArcEngine
 
 	void ConsolePanel::Clear()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		for (auto message = m_MessageBuffer.begin(); message != m_MessageBuffer.end(); message++)
 			(*message) = nullptr;
@@ -66,7 +66,7 @@ namespace ArcEngine
 
 	void ConsolePanel::OnImGuiRender()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		ImGui::SetNextWindowSize(ImVec2(640, 480), ImGuiCond_FirstUseEver);
 		ImGui::Begin(m_ID.c_str(), &m_Showing);
@@ -82,14 +82,14 @@ namespace ArcEngine
 
 	void ConsolePanel::SetFocus()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		ImGui::SetWindowFocus(m_ID.c_str());
 	}
 
 	void ConsolePanel::ImGuiRenderHeader()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if (ImGui::Button(ICON_MDI_COGS))
 			ImGui::OpenPopup("SettingsPopup");
@@ -164,7 +164,7 @@ namespace ArcEngine
 
 	void ConsolePanel::ImGuiRenderSettings()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		const float maxWidth = ImGui::CalcTextSize("Scroll to bottom").x * 1.1f;
 		const float spacing = ImGui::GetStyle().ItemInnerSpacing.x + ImGui::CalcTextSize(" ").x;
@@ -186,7 +186,7 @@ namespace ArcEngine
 
 	void ConsolePanel::ImGuiRenderMessages()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		ImGui::BeginChild("ScrollRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
 		{
@@ -248,13 +248,13 @@ namespace ArcEngine
 	ConsolePanel::Message::Message(const std::string message, Log::Level level)
 		: Buffer(message), Level(level)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 	}
 
 	void ConsolePanel::Message::OnImGuiRender()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 		static uint32_t id = 0;
 		
 		glm::vec4 c = GetRenderColor(Level);

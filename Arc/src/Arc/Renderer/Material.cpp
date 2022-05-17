@@ -11,7 +11,7 @@ namespace ArcEngine
 
 	Material::Material(const char* shaderPath)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if (!s_WhiteTexture)
 		{
@@ -38,14 +38,14 @@ namespace ArcEngine
 
 	Material::~Material()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		delete[m_BufferSizeInBytes] m_Buffer;
 	}
 
 	void Material::Invalidate()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		delete[m_BufferSizeInBytes] m_Buffer;
 
@@ -83,7 +83,7 @@ namespace ArcEngine
 
 	void Material::Bind()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		auto& materialProperties = m_Shader->GetMaterialProperties();
 
@@ -136,14 +136,14 @@ namespace ArcEngine
 
 	void Material::Unbind()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		m_Shader->Unbind();
 	}
 
 	void* Material::GetData_Internal(const char* name)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		auto& materialProperties = m_Shader->GetMaterialProperties();
 		for (auto& [n, property] : materialProperties)
@@ -155,7 +155,7 @@ namespace ArcEngine
 
 	void Material::SetData_Internal(const char* name, void* data)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		auto& materialProperties = m_Shader->GetMaterialProperties();
 		for (auto& [n, property] : materialProperties)

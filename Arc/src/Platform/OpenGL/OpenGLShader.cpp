@@ -23,9 +23,7 @@ namespace ArcEngine
 	
 	OpenGLShader::OpenGLShader(const std::string& filepath)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		std::string source = ReadFile(filepath);
 		auto shaderSources = PreProcess(source);
@@ -42,9 +40,7 @@ namespace ArcEngine
 	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
 		: m_Name(name)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		std::unordered_map<GLenum, std::string> sources;
 		sources[GL_VERTEX_SHADER] = vertexSrc;
@@ -54,16 +50,14 @@ namespace ArcEngine
 
 	OpenGLShader::~OpenGLShader()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		glDeleteProgram(m_RendererID);
 	}
 
 	void OpenGLShader::Recompile(const std::string& filepath)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		glDeleteProgram(m_RendererID);
 
@@ -74,96 +68,78 @@ namespace ArcEngine
 
 	void OpenGLShader::Bind() const
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		glUseProgram(m_RendererID);
 	}
 
 	void OpenGLShader::Unbind() const
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		glUseProgram(0);
 	}
 
 	void OpenGLShader::SetInt(const std::string& name, int value)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		UploadUniformInt(name, value);
 	}
 
 	void OpenGLShader::SetIntArray(const std::string& name, int* values, uint32_t count)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		UploadUniformIntArray(name, values, count);		
 	}
 
 	void OpenGLShader::SetFloat(const std::string& name, float value)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		UploadUniformFloat(name, value);
 	}
 
 	void OpenGLShader::SetFloat2(const std::string& name, const glm::vec2& value)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		UploadUniformFloat2(name, value);
 	}
 
 	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		UploadUniformFloat3(name, value);
 	}
 
 	void OpenGLShader::SetFloat4(const std::string& name, const glm::vec4& value)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		UploadUniformFloat4(name, value);
 	}
 
 	void OpenGLShader::SetMat3(const std::string& name, const glm::mat3& value)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		UploadUniformMat3(name, value);
 	}
 
 	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		UploadUniformMat4(name, value);
 	}
 
 	void OpenGLShader::SetUniformBlock(const std::string& name, uint32_t blockIndex)
 	{
+		ARC_PROFILE_SCOPE();
+
 		glUniformBlockBinding(m_RendererID, glGetUniformBlockIndex(m_RendererID, name.c_str()), blockIndex);
 	}
 
@@ -209,7 +185,7 @@ namespace ArcEngine
 
 	int OpenGLShader::GetLocation(const std::string& name)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
 			return m_UniformLocationCache.at(name);
@@ -221,9 +197,7 @@ namespace ArcEngine
 
 	std::string OpenGLShader::ReadFile(const std::string& filepath)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		std::string result;
 		std::ifstream in(filepath, std::ios::in | std::ios::binary); // ifstream closes itself due to RAII
@@ -252,9 +226,7 @@ namespace ArcEngine
 
 	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(const std::string& source)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		std::unordered_map<GLenum, std::string> shaderSources;
 
@@ -295,9 +267,7 @@ namespace ArcEngine
 
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		GLuint program = glCreateProgram();
 		ARC_CORE_ASSERT(shaderSources.size() <= 2, "We only support 2 shaders for now");

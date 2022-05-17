@@ -27,9 +27,7 @@ namespace ArcEngine
 	
 	void OpenGLRendererAPI::Init()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 
 		#ifdef ARC_DEBUG
 			glEnable(GL_DEBUG_OUTPUT);
@@ -48,28 +46,28 @@ namespace ArcEngine
 
 	void OpenGLRendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		glViewport(x, y, width, height);
 	}
 
 	void OpenGLRendererAPI::SetClearColor(const glm::vec4& color)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		glClearColor(color.r, color.g, color.b, color.a);
 	}
 
 	void OpenGLRendererAPI::Clear()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		vertexArray->Bind();
 		const uint32_t count = indexCount != 0 ? indexCount : vertexArray->GetIndexBuffer()->GetCount();
@@ -78,7 +76,7 @@ namespace ArcEngine
 
 	void OpenGLRendererAPI::Draw(const Ref<VertexArray>& vertexArray, uint32_t count)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		vertexArray->Bind();
 		glDrawArrays(GL_TRIANGLES, 0, count);
@@ -86,7 +84,7 @@ namespace ArcEngine
 
 	void OpenGLRendererAPI::DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		vertexArray->Bind();
 		glDrawArrays(GL_LINES, 0, vertexCount);
@@ -94,42 +92,42 @@ namespace ArcEngine
 
 	void OpenGLRendererAPI::EnableCulling()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		glEnable(GL_CULL_FACE);
 	}
 
 	void OpenGLRendererAPI::DisableCulling()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		glDisable(GL_CULL_FACE);
 	}
 
 	void OpenGLRendererAPI::FrontCull()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		glCullFace(GL_FRONT);
 	}
 
 	void OpenGLRendererAPI::BackCull()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		glCullFace(GL_BACK);
 	}
 
 	void OpenGLRendererAPI::SetDepthMask(bool value)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		glDepthMask(value);
 	}
 
 	void OpenGLRendererAPI::SetDepthTest(bool value)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if (value)
 			glEnable(GL_DEPTH_TEST);

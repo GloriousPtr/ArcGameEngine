@@ -21,6 +21,8 @@ namespace ArcEngine
 
 	Scene::~Scene()
 	{
+		ARC_PROFILE_SCOPE();
+
 		// Scripting
 		{
 			auto scriptView = m_Registry.view<ScriptComponent>();
@@ -51,6 +53,8 @@ namespace ArcEngine
 
 	Ref<Scene> Scene::CopyTo(Ref<Scene> other)
 	{
+		ARC_PROFILE_SCOPE();
+
 		Ref<Scene> newScene = CreateRef<Scene>();
 
 		newScene->m_ViewportWidth = other->m_ViewportWidth;
@@ -96,14 +100,14 @@ namespace ArcEngine
 
 	Entity Scene::CreateEntity(const std::string& name)
 	{
+		ARC_PROFILE_SCOPE();
+
 		return CreateEntityWithUUID(UUID(), name);
 	}
 
 	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 
 		Entity entity = { m_Registry.create(), this };
 		m_EntityMap.emplace(uuid, entity);
@@ -121,9 +125,7 @@ namespace ArcEngine
 
 	void Scene::DestroyEntity(Entity entity)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 
 		entity.Deparent();
 		auto children = entity.GetComponent<RelationshipComponent>().Children;
@@ -137,18 +139,14 @@ namespace ArcEngine
 
 	bool Scene::HasEntity(UUID uuid)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 
 		return m_EntityMap.find(uuid) != m_EntityMap.end();
 	}
 
 	Entity Scene::GetEntity(UUID uuid)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 
 		if (m_EntityMap.find(uuid) != m_EntityMap.end())
 			return { m_EntityMap.at(uuid), this };
@@ -158,6 +156,8 @@ namespace ArcEngine
 
 	void Scene::OnRuntimeStart()
 	{
+		ARC_PROFILE_SCOPE();
+
 		m_PhysicsWorld2D = new b2World({ 0.0f, -9.8f });
 		auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
 		for (auto e : view)
@@ -226,7 +226,6 @@ namespace ArcEngine
 		ScriptEngine::SetScene(this);
 
 		auto scriptView = m_Registry.view<IDComponent, TagComponent, ScriptComponent>();
-		constexpr char* setUUIDDesc = "SetUUID(ulong)";
 		constexpr char* onCreateDesc = "OnCreate()";
 		constexpr char* onUpdateDesc = "OnUpdate(single)";
 		constexpr char* onDestroyDesc = "OnDestroy()";
@@ -261,6 +260,8 @@ namespace ArcEngine
 
 	void Scene::OnRuntimeStop()
 	{
+		ARC_PROFILE_SCOPE();
+
 		auto scriptView = m_Registry.view<ScriptComponent>();
 		constexpr char* onDestroyDesc = "OnDestroy()";
 		for (auto e : scriptView)
@@ -283,15 +284,13 @@ namespace ArcEngine
 
 	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera, Ref<RenderGraphData>& renderGraphData)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		// Lights
 		std::vector<Entity> lights;
 		lights.reserve(25);
 		{
-			OPTICK_EVENT("PrepareLightData");
+			ARC_PROFILE_SCOPE("PrepareLightData");
 
 			auto view = m_Registry.view<IDComponent, LightComponent>();
 			lights.reserve(view.size());
@@ -303,7 +302,7 @@ namespace ArcEngine
 		}
 		Entity skylight = {};
 		{
-			OPTICK_EVENT("PrepareSkylightData");
+			ARC_PROFILE_SCOPE("PrepareSkylightData");
 
 			auto view = m_Registry.view<IDComponent, SkyLightComponent>();
 			for (auto entity : view)
@@ -317,7 +316,7 @@ namespace ArcEngine
 		Renderer3D::BeginScene(camera, skylight, lights);
 		// Meshes
 		{
-			OPTICK_EVENT("Submit Mesh Data");
+			ARC_PROFILE_SCOPE("Submit Mesh Data");
 
 			auto view = m_Registry.view<IDComponent, MeshComponent>();
 			for (auto entity : view)
@@ -331,7 +330,7 @@ namespace ArcEngine
 		
 		Renderer2D::BeginScene(camera);
 		{
-			OPTICK_EVENT("Submit 2D Data");
+			ARC_PROFILE_SCOPE("Submit 2D Data");
 
 			auto view = m_Registry.view<IDComponent, SpriteRendererComponent>();
 			for (auto entity : view)
@@ -345,12 +344,10 @@ namespace ArcEngine
 
 	void Scene::OnUpdateRuntime(Timestep ts, Ref<RenderGraphData>& renderGraphData)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 
 		{
-			OPTICK_EVENT("Update");
+			ARC_PROFILE_SCOPE("Update");
 
 			/////////////////////////////////////////////////////////////////////
 			// Scripting ////////////////////////////////////////////////////////
@@ -391,7 +388,7 @@ namespace ArcEngine
 		// Physics //////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
 		{
-			OPTICK_EVENT("Physics 2D");
+			ARC_PROFILE_SCOPE("Physics 2D");
 
 			auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
 			for (auto e : view)
@@ -438,7 +435,7 @@ namespace ArcEngine
 			std::vector<Entity> lights;
 			lights.reserve(25);
 			{
-				OPTICK_EVENT("Prepare Light Data");
+				ARC_PROFILE_SCOPE("Prepare Light Data");
 
 				auto view = m_Registry.view<IDComponent, LightComponent>();
 				lights.reserve(view.size());
@@ -450,7 +447,7 @@ namespace ArcEngine
 			}
 			Entity skylight = {};
 			{
-				OPTICK_EVENT("Prepare Skylight Data");
+				ARC_PROFILE_SCOPE("Prepare Skylight Data");
 
 				auto view = m_Registry.view<IDComponent, SkyLightComponent>();
 				for (auto entity : view)
@@ -464,7 +461,7 @@ namespace ArcEngine
 			Renderer3D::BeginScene(*mainCamera, cameraTransform, skylight, lights);
 			// Meshes
 			{
-				OPTICK_EVENT("Submit Mesh Data");
+				ARC_PROFILE_SCOPE("Submit Mesh Data");
 
 				auto view = m_Registry.view<IDComponent, MeshComponent>();
 				for (auto entity : view)
@@ -478,7 +475,7 @@ namespace ArcEngine
 
 			Renderer2D::BeginScene(*mainCamera, cameraTransform);
 			{
-				OPTICK_EVENT("Submit 2D Data");
+				ARC_PROFILE_SCOPE("Submit 2D Data");
 
 				auto view = m_Registry.view<IDComponent, SpriteRendererComponent>();
 				for (auto entity : view)
@@ -494,7 +491,7 @@ namespace ArcEngine
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		m_ViewportWidth = width;
 		m_ViewportHeight = height;
@@ -513,7 +510,7 @@ namespace ArcEngine
 
 	Entity Scene::GetPrimaryCameraEntity()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		auto view = m_Registry.view<CameraComponent>();
 		for (auto entity : view)

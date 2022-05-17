@@ -8,7 +8,7 @@ namespace ArcEngine
 {
 	void RendererSettingsPanel::OnImGuiRender()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
 		ImGui::Begin(m_ID.c_str(), &m_Showing);

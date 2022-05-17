@@ -60,9 +60,7 @@ namespace ArcEngine
 	
 	void Renderer2D::Init()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		s_Data.QuadVertexArray = VertexArray::Create();
 		
@@ -134,18 +132,14 @@ namespace ArcEngine
 
 	void Renderer2D::Shutdown()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 
 		delete[] s_Data.QuadVertexBufferBase;
 	}
 
 	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 
 		glm::mat4 viewProj = camera.GetProjection() * glm::inverse(transform);
 		
@@ -160,9 +154,7 @@ namespace ArcEngine
 
 	void Renderer2D::BeginScene(const EditorCamera& camera)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		s_Data.TextureShader->Bind();
 		s_Data.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjection());
@@ -175,9 +167,7 @@ namespace ArcEngine
 
 	void Renderer2D::BeginScene(const OrthographicCamera& camera)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		s_Data.TextureShader->Bind();
 		s_Data.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
@@ -187,9 +177,7 @@ namespace ArcEngine
 
 	void Renderer2D::EndScene(Ref<RenderGraphData>& renderGraphData)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		renderGraphData->CompositePassTarget->Bind();
 		RenderCommand::DisableCulling();
@@ -199,7 +187,7 @@ namespace ArcEngine
 
 	void Renderer2D::StartBatch()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		RenderCommand::SetBlendState(true);
 
@@ -214,7 +202,7 @@ namespace ArcEngine
 
 	void Renderer2D::Flush()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if(s_Data.QuadIndexCount)
 		{
@@ -242,6 +230,8 @@ namespace ArcEngine
 
 	void Renderer2D::NextBatch()
 	{
+		ARC_PROFILE_SCOPE();
+
 		Flush();
 		StartBatch();
 	}
@@ -253,7 +243,7 @@ namespace ArcEngine
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
 	{
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 								* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f })
@@ -264,9 +254,7 @@ namespace ArcEngine
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		constexpr size_t quadVertexCount = 4;
 		const float textureIndex = 0.0f; // White Texture
@@ -293,9 +281,7 @@ namespace ArcEngine
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		float textureIndex = 0.0f;
 
@@ -341,6 +327,8 @@ namespace ArcEngine
 
 	void Renderer2D::DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color)
 	{
+		ARC_PROFILE_SCOPE();
+
 		s_Data.LineVertexBufferPtr->Position = p0;
 		s_Data.LineVertexBufferPtr->Color = color;
 		s_Data.LineVertexBufferPtr++;
@@ -354,6 +342,8 @@ namespace ArcEngine
 
 	void Renderer2D::DrawRect(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
+		ARC_PROFILE_SCOPE();
+
 		glm::vec3 p0 = glm::vec3(position.x - size.x * 0.5f, position.y - size.y * 0.5f, position.z);
 		glm::vec3 p1 = glm::vec3(position.x + size.x * 0.5f, position.y - size.y * 0.5f, position.z);
 		glm::vec3 p2 = glm::vec3(position.x + size.x * 0.5f, position.y + size.y * 0.5f, position.z);
@@ -367,6 +357,8 @@ namespace ArcEngine
 
 	void Renderer2D::DrawRect(const glm::mat4& transform, const glm::vec4& color)
 	{
+		ARC_PROFILE_SCOPE();
+
 		glm::vec3 lineVertices[4];
 		for (size_t i = 0; i < 4; i++)
 			lineVertices[i] = transform * s_Data.QuadVertexPositions[i];
@@ -379,11 +371,15 @@ namespace ArcEngine
 
 	void Renderer2D::ResetStats()
 	{
+		ARC_PROFILE_SCOPE();
+
 		memset(&s_Data.Stats, 0, sizeof(Statistics));
 	}
 
 	Renderer2D::Statistics Renderer2D::GetStats()
 	{
+		ARC_PROFILE_SCOPE();
+
 		return s_Data.Stats;
 	}
 }

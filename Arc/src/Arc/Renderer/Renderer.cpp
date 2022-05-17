@@ -9,9 +9,7 @@ namespace ArcEngine
 
 	void Renderer::Init()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		RenderCommand::Init();
 		Renderer2D::Init();
@@ -20,7 +18,7 @@ namespace ArcEngine
 
 	void Renderer::Shutdown()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		Renderer2D::Shutdown();
 		Renderer3D::Shutdown();
@@ -28,22 +26,28 @@ namespace ArcEngine
 
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		RenderCommand::SetViewport(0, 0, width, height);
 	}
 
 	void Renderer::BeginScene(OrthographicCamera& camera)
 	{
+		ARC_PROFILE_SCOPE();
+
 		s_SceneData->ViewProjectionMatrix = camera.GetViewProjectionMatrix();
 	}
 
 	void Renderer::EndScene()
 	{
+		ARC_PROFILE_SCOPE();
+
 	}
 
 	void Renderer::Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const glm::mat4& transform)
 	{
+		ARC_PROFILE_SCOPE();
+
 		shader->Bind();
 		shader->SetMat4("u_ViewProjection", s_SceneData->ViewProjectionMatrix);
 		shader->SetMat4("u_Transform", transform);

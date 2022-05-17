@@ -81,7 +81,6 @@ namespace YAML {
 			return true;
 		}
 	};
-
 }
 
 namespace ArcEngine

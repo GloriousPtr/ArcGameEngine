@@ -12,14 +12,14 @@ namespace ArcEngine
 {
 	Mesh::Mesh(const char* filepath)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		Load(filepath);
 	}
 
 	void Mesh::Load(const char* filepath)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		Assimp::Importer importer;
 		importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 80.0f);
@@ -58,7 +58,7 @@ namespace ArcEngine
 
 	Submesh& Mesh::GetSubmesh(uint32_t index)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		ARC_CORE_ASSERT(index < m_Submeshes.size(), "Submesh index out of bounds");
 
@@ -67,7 +67,7 @@ namespace ArcEngine
 
 	void Mesh::ProcessNode(aiNode *node, const aiScene *scene, const char* filepath)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		for(unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
@@ -84,7 +84,7 @@ namespace ArcEngine
 
 	std::vector<Ref<Texture2D>> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const char* filepath)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		std::string path = std::string(filepath);
 		std::string dir = path.substr(0, path.find_last_of('\\'));
@@ -101,7 +101,7 @@ namespace ArcEngine
 
 	void Mesh::ProcessMesh(aiMesh *mesh, const aiScene *scene, const char* filepath, const char* nodeName)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		std::vector<float> vertices;
 		size_t count = mesh->mNumVertices * 14;

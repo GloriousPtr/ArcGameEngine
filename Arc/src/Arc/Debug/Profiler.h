@@ -1,0 +1,18 @@
+#pragma once
+
+#include <optick.h>
+
+#define ARC_ENABLE_CPU_PROFILING 1
+#if ARC_ENABLE_CPU_PROFILING
+	#define ARC_PROFILE_FRAME(...)				OPTICK_FRAME(__VA_ARGS__)
+	#define ARC_PROFILE_SCOPE(...)				OPTICK_EVENT(__VA_ARGS__)
+	#define ARC_PROFILE_TAG(NAME, ...)			OPTICK_TAG(NAME, __VA_ARGS__)
+	#define ARC_PROFILE_SCOPE_DYNAMIC(NAME)		OPTICK_EVENT_DYNAMIC(NAME)
+	#define ARC_PROFILE_THREAD(...)				OPTICK_THREAD(__VA_ARGS__)
+#else
+	#define ARC_PROFILE_FRAME(...)
+	#define ARC_PROFILE_SCOPE(...)
+	#define ARC_PROFILE_TAG(NAME, ...)
+	#define ARC_PROFILE_SCOPE_DYNAMIC(NAME)
+	#define ARC_PROFILE_THREAD(...)
+#endif

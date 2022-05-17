@@ -16,21 +16,21 @@ namespace ArcEngine
 
 		static void CreateTextures(bool multisampled, uint32_t* outID, uint32_t count)
 		{
-			OPTICK_EVENT();
+			ARC_PROFILE_SCOPE();
 
 			glCreateTextures(TextureTarget(multisampled), count, outID);
 		}
 
 		static void BindTexture(bool multisampled, uint32_t id)
 		{
-			OPTICK_EVENT();
+			ARC_PROFILE_SCOPE();
 
 			glBindTexture(TextureTarget(multisampled), id);
 		}
 
 		static void AttachColorTexture(uint32_t id, int samples, GLenum internalFormat, GLenum format, uint32_t width, uint32_t height, int index)
 		{
-			OPTICK_EVENT();
+			ARC_PROFILE_SCOPE();
 
 			bool multisampled = samples > 1;
 			if (multisampled)
@@ -53,7 +53,7 @@ namespace ArcEngine
 
 		static void AttachDepthTexture(uint32_t id, int samples, GLenum format, GLenum attachmentType, uint32_t width, uint32_t height)
 		{
-			OPTICK_EVENT();
+			ARC_PROFILE_SCOPE();
 
 			bool multisampled = samples > 1;
 			if (multisampled)
@@ -88,7 +88,7 @@ namespace ArcEngine
 	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferSpecification& spec)
 		: m_Specification(spec)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		for (auto& spec : m_Specification.Attachments.Attachments)
 		{
@@ -103,7 +103,7 @@ namespace ArcEngine
 
 	OpenGLFramebuffer::~OpenGLFramebuffer()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		glDeleteFramebuffers(1, &m_RendererID);
 		glDeleteTextures(m_ColorAttachments.size(), m_ColorAttachments.data());
@@ -112,38 +112,29 @@ namespace ArcEngine
 
 	void OpenGLFramebuffer::Invalidate()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if(m_RendererID)
 		{
-			{
-				OPTICK_EVENT("FramebufferDelete");
+			ARC_PROFILE_SCOPE("FramebufferDelete");
 
-				glDeleteFramebuffers(1, &m_RendererID);
-			}
-
-			{
-				OPTICK_EVENT("FramebufferAttachmentDelete");
-
-				OPTICK_TAG("ColorAttachmentsSize", m_ColorAttachments.size());
-
-				glDeleteTextures(m_ColorAttachments.size(), m_ColorAttachments.data());
-				glDeleteTextures(1, &m_DepthAttachment);
-			}
+			glDeleteFramebuffers(1, &m_RendererID);
+			glDeleteTextures(m_ColorAttachments.size(), m_ColorAttachments.data());
+			glDeleteTextures(1, &m_DepthAttachment);
 
 			m_ColorAttachments.clear();
 			m_DepthAttachment = 0;
 		}
 		
 		{
-			OPTICK_EVENT("FramebufferCreate");
+			ARC_PROFILE_SCOPE("FramebufferCreate");
 			
 			glCreateFramebuffers(1, &m_RendererID);
 			glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 		}
 
 		{
-			OPTICK_EVENT("FramebufferConfigureAttachments");
+			ARC_PROFILE_SCOPE("FramebufferConfigureAttachments");
 
 			bool multisample = m_Specification.Samples > 1;
 			// Attachments
@@ -211,7 +202,7 @@ namespace ArcEngine
 
 	void OpenGLFramebuffer::Bind()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 		glViewport(0, 0, m_Specification.Width, m_Specification.Height);
@@ -219,14 +210,14 @@ namespace ArcEngine
 
 	void OpenGLFramebuffer::Unbind()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void OpenGLFramebuffer::BindColorAttachment(uint32_t index, uint32_t slot)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		ARC_CORE_ASSERT(index < m_ColorAttachments.size());
 		glBindTextureUnit(slot, m_ColorAttachments[index]);
@@ -234,14 +225,14 @@ namespace ArcEngine
 
 	void OpenGLFramebuffer::BindDepthAttachment(uint32_t slot)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		glBindTextureUnit(slot, m_DepthAttachment);
 	}
 
 	void OpenGLFramebuffer::Resize(uint32_t width, uint32_t height)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if(width == 0 || height == 0 || width > s_MaxFramebufferSize || height > s_MaxFramebufferSize)
 		{

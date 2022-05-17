@@ -14,9 +14,7 @@ namespace ArcEngine
 
 	void OpenGLContext::Init()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		glfwMakeContextCurrent(m_WindowHandle);
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
@@ -32,9 +30,7 @@ namespace ArcEngine
 
 	void OpenGLContext::SwapBuffers()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		glfwSwapBuffers(m_WindowHandle);
 	}

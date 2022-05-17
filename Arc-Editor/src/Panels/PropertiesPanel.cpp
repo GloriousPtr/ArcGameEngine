@@ -17,7 +17,7 @@ namespace ArcEngine
 {
 	void PropertiesPanel::OnImGuiRender()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
 		ImGui::Begin(m_ID.c_str(), &m_Showing);
@@ -31,7 +31,7 @@ namespace ArcEngine
 	template<typename T, typename UIFunction>
 	static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction, const bool removable = true)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed
 			| ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_FramePadding;
@@ -66,7 +66,7 @@ namespace ArcEngine
 			}
 			if(open)
 			{
-				OPTICK_EVENT("UI Function");
+				ARC_PROFILE_SCOPE("UI Function");
 
 				uiFunction(component);
 				ImGui::TreePop();
@@ -255,7 +255,7 @@ namespace ArcEngine
 
 	static void WriteMesh(const std::string& filepath)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		Assimp::Importer importer;
 		importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 80.0f);
@@ -293,7 +293,7 @@ namespace ArcEngine
 
 	void PropertiesPanel::DrawComponents(Entity entity)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if(entity.HasComponent<TagComponent>())
 		{

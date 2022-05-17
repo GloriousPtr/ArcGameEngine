@@ -11,14 +11,14 @@ namespace ArcEngine
 {
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		SetContext(context);
 	}
 
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		m_Context = context;
 		m_SelectionContext = {};
@@ -27,7 +27,7 @@ namespace ArcEngine
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
 		ImGui::Begin(ICON_MDI_VIEW_LIST " Hierarchy");
@@ -113,7 +113,7 @@ namespace ArcEngine
 
 	ImRect SceneHierarchyPanel::DrawEntityNode(Entity entity, bool skipChildren)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		m_CurrentlyVisibleEntities++;
 

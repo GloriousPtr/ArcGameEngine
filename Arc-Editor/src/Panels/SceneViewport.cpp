@@ -22,7 +22,7 @@ namespace ArcEngine
 
 	void SceneViewport::OnInit()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		m_RenderGraphData = CreateRef<RenderGraphData>();
 
@@ -84,7 +84,7 @@ namespace ArcEngine
 
 	void SceneViewport::OnUpdate(Ref<Scene>& scene, Timestep timestep)
 	{
-		OPTICK_EVENT(m_ID.c_str());
+		ARC_PROFILE_SCOPE(m_ID.c_str());
 
 		m_Scene = scene;
 
@@ -226,7 +226,7 @@ namespace ArcEngine
 
 	void SceneViewport::OnImGuiRender()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		ImGui::SetNextWindowSize(ImVec2(640, 480), ImGuiCond_FirstUseEver);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });

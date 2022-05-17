@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Framebuffer.h"
+#include "Arc/Debug/Profiler.h"
 
 namespace ArcEngine
 {
@@ -18,6 +19,8 @@ namespace ArcEngine
 
 		void Resize(uint32_t width,  uint32_t height)
 		{
+			ARC_PROFILE_SCOPE();
+
 			CompositePassTarget->Resize(width, height);
 			RenderPassTarget->Resize(width, height);
 			LightingPassTarget->Resize(width, height);

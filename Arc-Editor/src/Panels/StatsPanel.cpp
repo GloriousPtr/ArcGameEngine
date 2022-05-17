@@ -8,7 +8,7 @@ namespace ArcEngine
 {
 	void StatsPanel::OnImGuiRender()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 		
 		float avg = 0.0f;
 

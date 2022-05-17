@@ -12,20 +12,17 @@ namespace ArcEngine
 {
 	static const std::filesystem::path s_AssetPath = "assets";
 
-	static const char* GetFileIcon(std::string& filename)
+	static const char* GetFileIcon(const char* ext)
 	{
-		auto lastDot = filename.find_last_of(".");
-		std::string name = filename.substr(lastDot + 1, filename.size() - lastDot);
-
-		if (name == "txt" || name == "md")
+		if (!(strcmp(ext, "txt") && strcmp(ext, "md")))
 			return ICON_MDI_FILE_DOCUMENT;
-		if (name == "png" || name == "jpg" || name == "jpeg" || name == "bmp" || name == "gif")
+		if (!(strcmp(ext, "png") && strcmp(ext, "jpg") && strcmp(ext, "jpeg") && strcmp(ext, "bmp") && strcmp(ext, "gif")))
 			return ICON_MDI_FILE_IMAGE;
-		if (name == "hdr" || name == "tga")
+		if (!(strcmp(ext, "hdr") && strcmp(ext, "tga")))
 			return ICON_MDI_IMAGE_FILTER_HDR;
-		if (name == "glsl")
+		if (!(strcmp(ext, "glsl")))
 			return ICON_MDI_IMAGE_FILTER_BLACK_WHITE;
-		if (name == "obj" || name == "fbx" || name == "gltf")
+		if (!(strcmp(ext, "obj") && strcmp(ext, "fbx") && strcmp(ext, "gltf")))
 			return ICON_MDI_VECTOR_POLYGON;
 
 		return ICON_MDI_FILE;
@@ -33,7 +30,7 @@ namespace ArcEngine
 	
 	std::pair<bool, uint32_t> AssetPanel::DirectoryTreeViewRecursive(const std::filesystem::path& path, uint32_t* count, int* selectionMask)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
 
@@ -48,12 +45,8 @@ namespace ArcEngine
 			if (selected)
 				nodeFlags |= ImGuiTreeNodeFlags_Selected;
 
-			std::string name = entry.path().string();
-
-			auto lastSlash = name.find_last_of("/\\");
-			lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
-			name = name.substr(lastSlash, name.size() - lastSlash);
-
+			std::string name = StringUtils::GetNameWithExtension(entry.path().string());
+			
 			bool entryIsFile = !std::filesystem::is_directory(entry.path());
 			if (entryIsFile)
 				nodeFlags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
@@ -70,7 +63,7 @@ namespace ArcEngine
 
 			const char* folderIcon;
 			if (entryIsFile)
-				folderIcon = GetFileIcon(name);
+				folderIcon = GetFileIcon(StringUtils::GetExtension((std::string&&)name).c_str());
 			else
 				folderIcon = open ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
 			
@@ -113,7 +106,7 @@ namespace ArcEngine
 	AssetPanel::AssetPanel(const char* name)
 		: BasePanel(name, ICON_MDI_FOLDER_STAR, true), m_CurrentDirectory(s_AssetPath)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		m_WhiteTexture = Texture2D::Create(1, 1);
 		uint32_t whiteTextureData = 0xffffffff;
@@ -126,7 +119,7 @@ namespace ArcEngine
 
 	void AssetPanel::OnImGuiRender()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		ImGui::Begin(m_ID.c_str(), &m_Showing);
 		{
@@ -164,7 +157,7 @@ namespace ArcEngine
 
 	void AssetPanel::RenderHeader()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if (ImGui::Button(ICON_MDI_COGS))
 			ImGui::OpenPopup("SettingsPopup");
@@ -231,7 +224,7 @@ namespace ArcEngine
 
 	void AssetPanel::RenderSideView()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		static int selectionMask = 0;
 
@@ -286,13 +279,17 @@ namespace ArcEngine
 
 	void AssetPanel::RenderBody()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		std::filesystem::path directoryToOpen;
 		bool directoryOpened = false;
 
 		float padding = 4.0f;
 		float cellSize = m_ThumbnailSize + 2 * padding;
+
+		float overlayPaddingY = 6.0f * padding;
+		float thumbnailPadding = overlayPaddingY * 0.5f;
+		float thumbnailSize = m_ThumbnailSize - thumbnailPadding;
 
 		float panelWidth = ImGui::GetContentRegionAvail().x;
 		int columnCount = (int) (panelWidth / cellSize);
@@ -312,15 +309,14 @@ namespace ArcEngine
 				ImGui::PushID(i++);
 
 				uint32_t textureId = m_DirectoryIcon->GetRendererID();
+				const char* fontIcon = nullptr;
 				if (!file.DirectoryEntry.is_directory())
 				{
-					auto lastDot = file.Name.find_last_of(".");
-					std::string ext = file.Name.substr(lastDot + 1, file.Name.size() - lastDot);
+					std::string ext = StringUtils::GetExtension((std::string&&)file.Name);
 					if (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp")
-					{
-						std::string path = file.DirectoryEntry.path().string();
-						textureId = AssetManager::GetTexture2D(path.c_str())->GetRendererID();
-					}
+						textureId = AssetManager::GetTexture2D(file.DirectoryEntry.path().string().c_str())->GetRendererID();
+					else
+						fontIcon = GetFileIcon(ext.c_str());
 				}
 
 				ImGui::TableNextColumn();
@@ -330,7 +326,7 @@ namespace ArcEngine
 				ImVec2 cursorPos = ImGui::GetCursorPos();
 				
 				ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
-				ImGui::Button(("##" + std::to_string(i)).c_str(), { m_ThumbnailSize + padding * 2, m_ThumbnailSize + textSize.y + padding * 4 });
+				ImGui::Button(("##" + std::to_string(i)).c_str(), { m_ThumbnailSize + padding * 2, m_ThumbnailSize + textSize.y + padding * 8 });
 				if (ImGui::BeginDragDropSource())
 				{
 					std::string itemPath = file.DirectoryEntry.path().string();
@@ -348,18 +344,36 @@ namespace ArcEngine
 					}
 				}
 
-				uint32_t overlayPadding = m_ThumbnailSize / 64;
 				ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
 				ImGui::SetItemAllowOverlap();
-				ImGui::Image((ImTextureID)m_WhiteTexture->GetRendererID(), { m_ThumbnailSize, m_ThumbnailSize + textSize.y + 2 * padding }, { 0, 0 }, { 1, 1 }, EditorTheme::WindowBgAlternativeColor);
-				ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
-				ImGui::SetItemAllowOverlap();
-				ImGui::Image((ImTextureID)textureId, { m_ThumbnailSize, m_ThumbnailSize }, { 0, 1 }, { 1, 0 });
+				ImGui::Image((ImTextureID)m_WhiteTexture->GetRendererID(), { m_ThumbnailSize, m_ThumbnailSize + textSize.y + overlayPaddingY }, { 0, 0 }, { 1, 1 }, EditorTheme::WindowBgAlternativeColor);
 
 				ImDrawList& windowDrawList = *ImGui::GetWindowDrawList();
 
 				ImVec2 rectMin = ImGui::GetItemRectMin();
 				ImVec2 rectSize = ImGui::GetItemRectSize();
+
+				ImGui::SetCursorPos({ cursorPos.x + thumbnailPadding * 0.75f, cursorPos.y + thumbnailPadding });
+				ImGui::SetItemAllowOverlap();
+				if (fontIcon)
+				{
+					/*
+					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
+					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
+					ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
+					ImGui::Button(fontIcon, { thumbnailSize, thumbnailSize });
+					ImGui::PopStyleColor(3);
+					*/
+					ImGui::InvisibleButton(fontIcon, { thumbnailSize, thumbnailSize });
+					windowDrawList.AddText({ rectMin.x + rectSize.x * 0.5f - ImGui::CalcTextSize(fontIcon).x * 0.5f, rectMin.y + rectSize.y * 0.5f}, ImColor(1.0f, 1.0f, 1.0f), fontIcon);
+				}
+				else
+				{
+					ImGui::Image((ImTextureID)textureId, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+				}
+
+				rectMin = ImGui::GetItemRectMin();
+				rectSize = ImGui::GetItemRectSize();
 
 				if (textSize.x + padding * 2 <= rectSize.x)
 				{
@@ -369,7 +383,7 @@ namespace ArcEngine
 					float rectMax_x = rectMin_x + textSize.x + padding * 2;
 					float rectMax_y = rectMin_y + textSize.y + padding * 2;
 
-					windowDrawList.AddText({ rectMin_x + padding, rectMin_y + padding }, ImColor(1.0f, 1.0f, 1.0f), filename);
+					windowDrawList.AddText({ rectMin_x + padding, rectMin_y + padding * 2 }, ImColor(1.0f, 1.0f, 1.0f), filename);
 				}
 				else
 				{
@@ -378,9 +392,9 @@ namespace ArcEngine
 					float rectMax_x = rectMin.x + rectSize.x;
 					float rectMax_y = rectMin_y + textSize.y + padding * 2;
 
-					ImGui::RenderTextEllipsis(&windowDrawList, { rectMin.x + padding, rectMin_y + padding }, { rectMax_x, rectMax_y }, rectMax_x, rectMax_x, filename, nullptr, &textSize);
+					ImGui::RenderTextEllipsis(&windowDrawList, { rectMin.x + padding, rectMin_y + padding * 2 }, { rectMax_x, rectMax_y }, rectMax_x, rectMax_x, filename, nullptr, &textSize);
 				}
-				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + textSize.y + padding * 2);
+				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + textSize.y + padding * 4);
 
 				ImGui::PopID();
 			}
@@ -394,7 +408,7 @@ namespace ArcEngine
 
 	void AssetPanel::UpdateDirectoryEntries(std::filesystem::path directory)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		m_CurrentDirectory = directory;
 		m_DirectoryEntries.clear();

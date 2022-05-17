@@ -20,27 +20,21 @@ namespace ArcEngine
 	
 	WindowsWindow::WindowsWindow(const WindowProps& props)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		Init(props);
 	}
 	
 	WindowsWindow::~WindowsWindow()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		Shutdown();
 	}
 
 	void WindowsWindow::Init(const WindowProps& props)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
@@ -166,9 +160,7 @@ namespace ArcEngine
 
 	void WindowsWindow::Shutdown()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		glfwDestroyWindow(m_Window);
 		--s_GLFWWindowCount;
@@ -179,9 +171,7 @@ namespace ArcEngine
 
 	void WindowsWindow::OnUpdate()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		glfwPollEvents();
 		m_Context->SwapBuffers();
@@ -189,9 +179,7 @@ namespace ArcEngine
 
 	void WindowsWindow::SetVSync(bool enabled)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		if (enabled)
 			glfwSwapInterval(1);

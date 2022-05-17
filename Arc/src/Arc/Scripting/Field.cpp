@@ -11,7 +11,7 @@ namespace ArcEngine
 {
 	Field::FieldType Field::GetFieldType(MonoType* monoType)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		int type = mono_type_get_type(monoType);
 		switch (type)
@@ -40,21 +40,21 @@ namespace ArcEngine
 
 	void Field::GetValue_Impl(GCHandle handle, void* outValue) const
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		mono_field_get_value(GCManager::GetReferencedObject(handle), m_Field, outValue);
 	}
 
 	void Field::SetValue_Impl(GCHandle handle, void* value) const
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		mono_field_set_value(GCManager::GetReferencedObject(handle), m_Field, value);
 	}
 
 	std::string Field::GetValueString(GCHandle handle)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		MonoObject* monoStr = mono_field_get_value_object(ScriptEngine::GetDomain(), m_Field, GCManager::GetReferencedObject(handle));
 		return MonoUtils::MonoStringToUTF8((MonoString*)monoStr);
@@ -62,7 +62,7 @@ namespace ArcEngine
 
 	void Field::SetValueString(GCHandle handle, std::string& str)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		MonoString* monoStr = MonoUtils::UTF8ToMonoString(str);
 		mono_field_set_value(GCManager::GetReferencedObject(handle), m_Field, monoStr);

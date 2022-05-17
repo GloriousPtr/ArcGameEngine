@@ -17,9 +17,7 @@ namespace ArcEngine
 	OpenGLTextureCubemap::OpenGLTextureCubemap(const std::string& path)
 		: m_Path(path)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 
 		const uint32_t cubemapSize = 2048;
 		const uint32_t irradianceMapSize = 32;
@@ -29,7 +27,7 @@ namespace ArcEngine
 		stbi_set_flip_vertically_on_load(1);
 		float* data = nullptr;
 		{
-			OPTICK_EVENT("stbi_load Texture");
+			ARC_PROFILE_SCOPE("stbi_load Texture");
 
 			ARC_PROFILE_SCOPE("stbi_load - OpenGLTexture2D::OpenGLTexture2D(const std::string&)");
 			
@@ -214,9 +212,7 @@ namespace ArcEngine
 
 	OpenGLTextureCubemap::~OpenGLTextureCubemap()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		glDeleteTextures(1, &m_HRDRendererID);
 		glDeleteTextures(1, &m_RendererID);
@@ -226,35 +222,27 @@ namespace ArcEngine
 
 	void OpenGLTextureCubemap::SetData(void* data, uint32_t size)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 	}
 
 	void OpenGLTextureCubemap::Bind(uint32_t slot) const
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		glBindTextureUnit(slot, m_RendererID);
 	}
 
 	void OpenGLTextureCubemap::BindIrradianceMap(uint32_t slot) const
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 
 		glBindTextureUnit(slot, m_IrradianceRendererID);
 	}
 
 	void OpenGLTextureCubemap::BindRadianceMap(uint32_t slot) const
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 
 		glBindTextureUnit(slot, m_RadianceRendererID);
 	}

@@ -28,9 +28,7 @@
 
 #include "Arc/Core/Log.h"
 
-#include "Arc/Debug/Instrumentor.h"
-
-#include <optick.h>
+#include "Arc/Debug/Profiler.h"
 
 #ifdef ARC_PLATFORM_WINDOWS
 	#include <Windows.h>

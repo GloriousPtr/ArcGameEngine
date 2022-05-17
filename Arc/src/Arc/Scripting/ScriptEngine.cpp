@@ -31,7 +31,7 @@ namespace ArcEngine
 
 	void ScriptEngine::Init(const char* coreAssemblyPath)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		mono_set_dirs("C:/Program Files/Mono/lib",
         "C:/Program Files/Mono/etc");
@@ -49,7 +49,7 @@ namespace ArcEngine
 
 	void ScriptEngine::Shutdown()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		GCManager::Shutdown();
 
@@ -61,7 +61,7 @@ namespace ArcEngine
 
 	void ScriptEngine::LoadCoreAssembly(const char* path)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		s_ScriptCoreAssembly = mono_domain_assembly_open(s_MonoDomain, path);
 		if (!s_ScriptCoreAssembly)
@@ -83,7 +83,7 @@ namespace ArcEngine
 
 	void ScriptEngine::LoadClientAssembly(const char* path)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		s_ScriptClientAssembly = mono_domain_assembly_open(s_MonoDomain, path);
 		if (!s_ScriptClientAssembly)
@@ -104,7 +104,7 @@ namespace ArcEngine
 
 	GCHandle ScriptEngine::MakeReference(const char* className)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if (!s_MonoDomain)
 		{
@@ -128,7 +128,7 @@ namespace ArcEngine
 
 	GCHandle ScriptEngine::CopyStrongReference(GCHandle srcHandle)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		MonoObject* copy = mono_object_clone(GCManager::GetReferencedObject(srcHandle));
 		return GCManager::CreateObjectReference(copy, false);
@@ -136,14 +136,14 @@ namespace ArcEngine
 
 	void ScriptEngine::ReleaseObjectReference(const GCHandle handle)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		GCManager::ReleaseObjectReference(handle);
 	}
 
 	void ScriptEngine::Call(GCHandle handle, const char* className, const char* methodSignature, void** args)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		MonoMethod* method = GetMethod(className, methodSignature);
 		if (!method)
@@ -156,7 +156,7 @@ namespace ArcEngine
 
 	void ScriptEngine::SetProperty(GCHandle handle, void* property, void** params)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		MonoMethod* method = mono_property_get_set_method((MonoProperty*)property);
 		MonoObject* reference = GCManager::GetReferencedObject(handle);
@@ -166,7 +166,7 @@ namespace ArcEngine
 
 	void ScriptEngine::CacheMethodIfAvailable(const char* className, const char* methodSignature)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		std::string desc = std::string(className) + ":" + (methodSignature);
 		if (s_MethodMap.find(desc) != s_MethodMap.end())
@@ -183,7 +183,7 @@ namespace ArcEngine
 
 	MonoClass* ScriptEngine::CreateClass(MonoImage* image, const char* namespaceName, const char* className, const char* fullName)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		MonoClass* clazz = mono_class_from_name(image, namespaceName, className);
 		if (!clazz)
@@ -212,7 +212,7 @@ namespace ArcEngine
 
 	void ScriptEngine::CacheClassIfAvailable(const char* className)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if (!s_ScriptCoreImage)
 			return;
@@ -239,7 +239,7 @@ namespace ArcEngine
 
 	MonoMethod* ScriptEngine::GetCachedMethodIfAvailable(const char* className, const char* methodSignature)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		std::string desc = std::string(className) + ":" + (methodSignature);
 		if (s_MethodMap.find(desc) != s_MethodMap.end())
@@ -250,7 +250,7 @@ namespace ArcEngine
 
 	MonoClass* ScriptEngine::GetCachedClassIfAvailable(const char* className)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if (s_ClassMap.find(className) != s_ClassMap.end())
 			return s_ClassMap.at(className);
@@ -260,7 +260,7 @@ namespace ArcEngine
 
 	MonoMethod* ScriptEngine::GetMethod(const char* className, const char* methodSignature)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		std::string desc = std::string(className) + ":" + (methodSignature);
 		if (s_MethodMap.find(desc) != s_MethodMap.end())
@@ -282,7 +282,7 @@ namespace ArcEngine
 
 	bool ScriptEngine::HasClass(const char* className)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if (!s_ScriptCoreImage)
 		{
@@ -308,7 +308,7 @@ namespace ArcEngine
 
 	MonoClass* ScriptEngine::GetClass(const char* className)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if (!s_ScriptCoreImage)
 		{
@@ -344,7 +344,7 @@ namespace ArcEngine
 
 	MonoProperty* ScriptEngine::GetProperty(const char* className, const char* propertyName)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		std::string key = std::string(className) + propertyName;
 		if (s_PropertyMap.find(key) != s_PropertyMap.end())
@@ -365,7 +365,7 @@ namespace ArcEngine
 
 	std::unordered_map<std::string, Field>* ScriptEngine::GetFields(const char* className)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if (s_FieldMap.find(className) != s_FieldMap.end())
 			return &(s_FieldMap.at(className));

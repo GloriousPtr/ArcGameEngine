@@ -53,7 +53,7 @@ namespace ArcEngine
 
 	void Renderer3D::Init()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		ubCamera = UniformBuffer::Create();
 		ubCamera->SetLayout({
@@ -192,15 +192,13 @@ namespace ArcEngine
 
 	void Renderer3D::Shutdown()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 	}
 
 	void Renderer3D::BeginScene(const Camera& camera, const glm::mat4& transform, Entity cubemap, std::vector<Entity>& lights)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		cameraView = glm::inverse(transform);
 		cameraProjection = camera.GetProjection();
@@ -215,9 +213,7 @@ namespace ArcEngine
 
 	void Renderer3D::BeginScene(const EditorCamera& camera, Entity cubemap, std::vector<Entity>& lights)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		cameraView = camera.GetViewMatrix();
 		cameraProjection = camera.GetProjection();
@@ -232,7 +228,7 @@ namespace ArcEngine
 
 	void Renderer3D::EndScene(Ref<RenderGraphData>& renderTarget)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		Flush(renderTarget);
 
@@ -241,23 +237,21 @@ namespace ArcEngine
 
 	void Renderer3D::DrawCube()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		RenderCommand::Draw(cubeVertexArray, 36);
 	}
 
 	void Renderer3D::DrawQuad()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		RenderCommand::DrawIndexed(quadVertexArray);
 	}
 
 	void Renderer3D::SubmitMesh(MeshComponent& meshComponent, const glm::mat4& transform)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 
 		if (meshComponent.MeshGeometry->GetSubmeshCount() == 0)
 			return;
@@ -269,9 +263,7 @@ namespace ArcEngine
 
 	void Renderer3D::Flush(Ref<RenderGraphData> renderGraphData)
 	{
-		OPTICK_EVENT();
-		
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		ShadowMapPass();
 		RenderPass(renderGraphData->RenderPassTarget);
@@ -283,17 +275,21 @@ namespace ArcEngine
 
 	void Renderer3D::ResetStats()
 	{
+		ARC_PROFILE_SCOPE();
+
 		memset(&s_Stats, 0, sizeof(Statistics));
 	}
 
 	Renderer3D::Statistics Renderer3D::GetStats()
 	{
+		ARC_PROFILE_SCOPE();
+
 		return s_Stats;
 	}
 
 	void Renderer3D::SetupCameraData()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		ubCamera->Bind();
 
@@ -314,7 +310,7 @@ namespace ArcEngine
 
 	void Renderer3D::SetupLightsData()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		{
 			struct PointLightData
@@ -416,7 +412,7 @@ namespace ArcEngine
 
 	void Renderer3D::CompositePass(Ref<RenderGraphData> renderGraphData)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		renderGraphData->CompositePassTarget->Bind();
 		hdrShader->Bind();
@@ -432,7 +428,7 @@ namespace ArcEngine
 
 	void Renderer3D::BloomPass(Ref<RenderGraphData> renderGraphData)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if (!UseBloom)
 			return;
@@ -441,7 +437,7 @@ namespace ArcEngine
 		glm::vec4 params = glm::vec4(BloomClamp, 2.0f, 0.0f, 0.0f);
 
 		{
-			OPTICK_EVENT("Prefilter");
+			ARC_PROFILE_SCOPE("Prefilter");
 
 			renderGraphData->PrefilteredFramebuffer->Bind();
 			bloomShader->Bind();
@@ -455,7 +451,7 @@ namespace ArcEngine
 		size_t blurSamples = renderGraphData->BlurSamples;
 		FramebufferSpecification spec = renderGraphData->PrefilteredFramebuffer->GetSpecification();
 		{
-			OPTICK_EVENT("Downsample");
+			ARC_PROFILE_SCOPE("Downsample");
 
 			gaussianBlurShader->Bind();
 			gaussianBlurShader->SetInt("u_Texture", 0);
@@ -477,7 +473,7 @@ namespace ArcEngine
 		}
 		
 		{
-			OPTICK_EVENT("Upsample");
+			ARC_PROFILE_SCOPE("Upsample");
 
 			bloomShader->Bind();
 			bloomShader->SetFloat4("u_Threshold", threshold);
@@ -513,7 +509,7 @@ namespace ArcEngine
 
 	void Renderer3D::LightingPass(Ref<RenderGraphData> renderGraphData)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		renderGraphData->LightingPassTarget->Bind();
 		RenderCommand::Clear();
@@ -577,7 +573,7 @@ namespace ArcEngine
 
 	void Renderer3D::RenderPass(Ref<Framebuffer> renderTarget)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		renderTarget->Bind();
 		RenderCommand::SetBlendState(false);
@@ -588,7 +584,7 @@ namespace ArcEngine
 		float skylightIntensity = 0.0f;
 		float skylightRotation = 0.0f;
 		{
-			OPTICK_EVENT("Skylight");
+			ARC_PROFILE_SCOPE("Skylight");
 
 			if (skylight)
 			{
@@ -615,7 +611,7 @@ namespace ArcEngine
 		}
 		
 		{
-			OPTICK_EVENT("Draw Meshes");
+			ARC_PROFILE_SCOPE("Draw Meshes");
 
 			MeshComponent::CullModeType currentCullMode = MeshComponent::CullModeType::Unknown;
 			for (auto it = meshes.rbegin(); it != meshes.rend(); it++)
@@ -654,7 +650,7 @@ namespace ArcEngine
 
 	void Renderer3D::ShadowMapPass()
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 //		RenderCommand::FrontCull();
 		for (size_t i = 0; i < sceneLights.size(); i++)

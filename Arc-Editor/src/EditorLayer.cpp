@@ -32,9 +32,7 @@ namespace ArcEngine
 
 	void EditorLayer::OnAttach()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 
 		EditorTheme::SetFont();
 		EditorTheme::SetStyle();
@@ -58,16 +56,12 @@ namespace ArcEngine
 
 	void EditorLayer::OnDetach()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 	}
 
 	void EditorLayer::OnUpdate(Timestep ts)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 
 		Renderer2D::ResetStats();
 		Renderer3D::ResetStats();
@@ -107,9 +101,7 @@ namespace ArcEngine
 
 	void EditorLayer::OnImGuiRender()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen_persistant = true;
@@ -401,7 +393,7 @@ namespace ArcEngine
 
 	void EditorLayer::OnEvent(Event& e)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(ARC_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
@@ -411,7 +403,7 @@ namespace ArcEngine
 
 	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		// Shortcuts
 		if (e.GetRepeatCount() > 0)

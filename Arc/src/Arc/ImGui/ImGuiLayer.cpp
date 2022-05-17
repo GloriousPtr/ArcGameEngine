@@ -22,9 +22,7 @@ namespace ArcEngine
 
 	void ImGuiLayer::OnAttach()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
@@ -104,9 +102,7 @@ namespace ArcEngine
 
 	void ImGuiLayer::OnDetach()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
@@ -125,9 +121,7 @@ namespace ArcEngine
 
 	void ImGuiLayer::Begin()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -137,16 +131,14 @@ namespace ArcEngine
 
 	void ImGuiLayer::End()
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		ImGuiIO& io = ImGui::GetIO();
 		Application& app = Application::Get();
 		io.DisplaySize = ImVec2((float)app.GetWindow().GetWidth(), (float)app.GetWindow().GetHeight());
 
 		{
-			OPTICK_EVENT("ImGui::End::Render");
+			ARC_PROFILE_SCOPE("ImGui::End::Render");
 			// Rendering
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

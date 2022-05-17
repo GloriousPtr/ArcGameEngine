@@ -401,8 +401,6 @@ namespace ArcEngine
 
 	bool UI::Property(const char* label, Ref<TextureCubemap>& texture, uint32_t overrideTextureID)
 	{
-		OPTICK_EVENT();
-
 		bool changed = false;
 
 		const ImVec2 buttonSize = { 80, 80 };
@@ -451,8 +449,6 @@ namespace ArcEngine
 
 	bool UI::Property(const char* label, Ref<Texture2D>& texture, uint32_t overrideTextureID)
 	{
-		OPTICK_EVENT();
-
 		bool changed = false;
 
 		const ImVec2 buttonSize = { 80, 80 };
@@ -501,8 +497,6 @@ namespace ArcEngine
 
 	void UI::DrawVec3Control(const char* label, glm::vec3& values, float resetValue, float columnWidth)
 	{
-		OPTICK_EVENT();
-
 		ImGuiIO& io = ImGui::GetIO();
 		auto boldFont = io.Fonts->Fonts[1];
 		

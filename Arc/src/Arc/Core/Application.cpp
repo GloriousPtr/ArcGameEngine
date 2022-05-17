@@ -13,9 +13,7 @@ namespace ArcEngine
 
 	Application::Application(const std::string& name)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		ARC_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
@@ -33,35 +31,27 @@ namespace ArcEngine
 
 	Application::~Application()
 	{
-		{
-			OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
+		
+		delete m_LayerStack;
 
-			ARC_PROFILE_FUNCTION();
-
-			delete m_LayerStack;
-
-			ScriptEngine::Shutdown();
-			Renderer::Shutdown();
-		}
+		ScriptEngine::Shutdown();
+		Renderer::Shutdown();
 
 		OPTICK_SHUTDOWN();
 	}
 
 	void Application::PushLayer(Layer* layer)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
-		ARC_PROFILE_FUNCTION();
-		
 		m_LayerStack->PushLayer(layer);
 		layer->OnAttach();
 	}
 
 	void Application::PushOverlay(Layer* layer)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		m_LayerStack->PushOverlay(layer);
 		layer->OnAttach();
@@ -69,14 +59,14 @@ namespace ArcEngine
 	
 	void Application::Close()
 	{
+		ARC_PROFILE_SCOPE();
+
 		m_Running = false;
 	}
 	
 	void Application::OnEvent(Event& e)
 	{
-		OPTICK_EVENT();
-
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(ARC_BIND_EVENT_FN(Application::OnWindowClose));
@@ -93,13 +83,9 @@ namespace ArcEngine
 
 	void Application::Run()
 	{
-		ARC_PROFILE_FUNCTION();
-		
 		while (m_Running)
 		{
-			OPTICK_FRAME("MainThread");
-
-			ARC_PROFILE_SCOPE("RunLoop");
+			ARC_PROFILE_FRAME("MainThread");
 			
 			float time = (float)glfwGetTime();
 			Timestep timestep = time - m_LastFrameTime;
@@ -108,20 +94,16 @@ namespace ArcEngine
 			if(!m_Minimized)
 			{
 				{
-					OPTICK_EVENT("LayerStack OnUpdate");
-
 					ARC_PROFILE_SCOPE("LayerStack OnUpdate");
-					
+
 					for (Layer* layer : *m_LayerStack)
 						layer->OnUpdate(timestep);	
 				}
 
 				m_ImGuiLayer->Begin();
 				{
-					OPTICK_EVENT("LayerStack OnImGuiRender");
-
 					ARC_PROFILE_SCOPE("LayerStack OnImGuiRender");
-				
+
 					for (Layer* layer : *m_LayerStack)
 						layer->OnImGuiRender();
 				}
@@ -134,13 +116,15 @@ namespace ArcEngine
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
+		ARC_PROFILE_SCOPE();
+
 		m_Running = false;
 		return true;
 	}
 
 	bool Application::OnWindowResize(WindowResizeEvent& e)
 	{
-		ARC_PROFILE_FUNCTION();
+		ARC_PROFILE_SCOPE();
 		
 		if(e.GetWidth() == 0 || e.GetHeight() == 0)
 		{

@@ -9,7 +9,7 @@ namespace ArcEngine
 {
 	bool MonoUtils::CheckMonoError(MonoError& error)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		bool hasError = !mono_error_ok(&error);
 
@@ -29,7 +29,7 @@ namespace ArcEngine
 
 	std::string MonoUtils::MonoStringToUTF8(MonoString* monoString)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		if (monoString == nullptr || mono_string_length(monoString) == 0)
 			return "";
@@ -46,7 +46,7 @@ namespace ArcEngine
 
 	MonoString* MonoUtils::UTF8ToMonoString(const std::string& str)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		return mono_string_new(ScriptEngine::GetDomain(), str.c_str());
 	}
