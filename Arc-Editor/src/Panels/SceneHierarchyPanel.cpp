@@ -135,7 +135,7 @@ namespace ArcEngine
 		if (highlight)
 			ImGui::PushStyleColor(ImGuiCol_Header, EditorTheme::HeaderSelectedColor);
 
-		std::string displayName = (ICON_MDI_CUBE_OUTLINE + std::string(" ") + tag);
+		eastl::string displayName = (ICON_MDI_CUBE_OUTLINE + eastl::string(" ") + tag);
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity.GetUUID(), flags, displayName.c_str());
 
 		if (highlight)
@@ -164,7 +164,7 @@ namespace ArcEngine
 			memset(buffer, 0, sizeof(buffer));
 			std::strncpy(buffer, tag.c_str(), sizeof(buffer));
 			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
-				tag = std::string(buffer);
+				tag = eastl::string(buffer);
 
 			if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
 				tagComponent.renaming = false;

@@ -20,7 +20,7 @@ namespace ArcEngine
 		static void LoadAssemblies();
 
 	private:
-		static std::string s_ScriptCoreAssemblyPath;
-		static std::string s_ScriptClientAssemblyPath;
+		static eastl::string s_ScriptCoreAssemblyPath;
+		static eastl::string s_ScriptClientAssemblyPath;
 	};
 }

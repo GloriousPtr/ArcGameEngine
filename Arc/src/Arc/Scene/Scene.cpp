@@ -39,7 +39,7 @@ namespace ArcEngine
 	}
 
 	template<typename Component>
-	static void CopyComponent(entt::registry& dst, entt::registry& src, std::unordered_map<UUID, entt::entity> enttMap)
+	static void CopyComponent(entt::registry& dst, entt::registry& src, eastl::unordered_map<UUID, entt::entity> enttMap)
 	{
 		auto view = src.view<Component>();
 		for (auto e : view)
@@ -98,14 +98,14 @@ namespace ArcEngine
 		return newScene;
 	}
 
-	Entity Scene::CreateEntity(const std::string& name)
+	Entity Scene::CreateEntity(const eastl::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 
 		return CreateEntityWithUUID(UUID(), name);
 	}
 
-	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
+	Entity Scene::CreateEntityWithUUID(UUID uuid, const eastl::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -287,7 +287,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 		
 		// Lights
-		std::vector<Entity> lights;
+		eastl::vector<Entity> lights;
 		lights.reserve(25);
 		{
 			ARC_PROFILE_SCOPE("PrepareLightData");
@@ -432,7 +432,7 @@ namespace ArcEngine
 
 		if(mainCamera)
 		{
-			std::vector<Entity> lights;
+			eastl::vector<Entity> lights;
 			lights.reserve(25);
 			{
 				ARC_PROFILE_SCOPE("Prepare Light Data");

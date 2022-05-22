@@ -21,8 +21,8 @@ namespace ArcEngine
 		s_MessageBufferRenderFilter |= Log::Level::Error;
 		s_MessageBufferRenderFilter |= Log::Level::Critical;
 
-		ExternalConsoleSink<std::mutex>::SetConsoleSink_HandleFlush([&](std::string message, Log::Level level){ AddMessage(message, level); });
-		m_MessageBuffer = std::vector<Ref<ConsolePanel::Message>>(m_Capacity);
+		ExternalConsoleSink<std::mutex>::SetConsoleSink_HandleFlush([&](eastl::string message, Log::Level level){ AddMessage(message, level); });
+		m_MessageBuffer = eastl::vector<Ref<ConsolePanel::Message>>(m_Capacity);
 	}
 
 	ConsolePanel::~ConsolePanel()
@@ -30,7 +30,7 @@ namespace ArcEngine
 		ExternalConsoleSink<std::mutex>::SetConsoleSink_HandleFlush(nullptr);
 	}
 
-	void ConsolePanel::AddMessage(std::string message, Log::Level level)
+	void ConsolePanel::AddMessage(eastl::string message, Log::Level level)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -245,7 +245,7 @@ namespace ArcEngine
 		ImGui::EndChild();
 	}
 
-	ConsolePanel::Message::Message(const std::string message, Log::Level level)
+	ConsolePanel::Message::Message(const eastl::string message, Log::Level level)
 		: Buffer(message), Level(level)
 	{
 		ARC_PROFILE_SCOPE();

@@ -21,7 +21,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE();
 
-			T& component = m_Scene->m_Registry.emplace_or_replace<T>(m_EntityHandle, std::forward<Args>(args)...);
+			T& component = m_Scene->m_Registry.emplace_or_replace<T>(m_EntityHandle, eastl::forward<Args>(args)...);
 			m_Scene->OnComponentAdded<T>(*this, component);
 			return component;
 		}
@@ -96,7 +96,6 @@ namespace ArcEngine
 			}
 			transform.Parent = 0;
 		}
-
 		
 		glm::mat4 GetWorldTransform()
 		{

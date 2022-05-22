@@ -11,6 +11,26 @@
 namespace YAML {
 
 	template<>
+	struct convert<eastl::string>
+	{
+		static Node encode(const eastl::string& rhs)
+		{
+			Node node;
+			node.push_back(rhs.c_str());
+			return node;
+		}
+
+		static bool decode(const Node& node, eastl::string& rhs)
+		{
+			if (!node.IsSequence() || node.size() != 2)
+				return false;
+
+			rhs = node[0].as<eastl::string>().c_str();
+			return true;
+		}
+	};
+
+	template<>
 	struct convert<glm::vec2>
 	{
 		static Node encode(const glm::vec2& rhs)
@@ -124,7 +144,7 @@ namespace ArcEngine
 			out << YAML::BeginMap; // TagComponent
 
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
-			out << YAML::Key << "Tag" << YAML::Value << tag;
+			out << YAML::Key << "Tag" << YAML::Value << tag.c_str();
 
 			out << YAML::EndMap; // TagComponent
 		}
@@ -192,7 +212,7 @@ namespace ArcEngine
 
 			auto& spriteRendererComponent = entity.GetComponent<SpriteRendererComponent>();
 			out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.Color;
-			out << YAML::Key << "TextureFilepath" << YAML::Value << spriteRendererComponent.TextureFilepath;
+			out << YAML::Key << "TextureFilepath" << YAML::Value << spriteRendererComponent.TextureFilepath.c_str();
 			out << YAML::Key << "TilingFactor" << YAML::Value << spriteRendererComponent.TilingFactor;
 
 			out << YAML::EndMap; // SpriteRendererComponent
@@ -204,7 +224,7 @@ namespace ArcEngine
 			out << YAML::BeginMap; // MeshComponent
 
 			auto& skyLightComponent = entity.GetComponent<SkyLightComponent>();
-			out << YAML::Key << "TextureFilepath" << YAML::Value << (skyLightComponent.Texture ? skyLightComponent.Texture->GetPath() : "");
+			out << YAML::Key << "TextureFilepath" << YAML::Value << (skyLightComponent.Texture ? skyLightComponent.Texture->GetPath().c_str() : "");
 			out << YAML::Key << "Intensity" << YAML::Value << skyLightComponent.Intensity;
 
 			out << YAML::EndMap; // SkyLightComponent
@@ -281,7 +301,7 @@ namespace ArcEngine
 		out << YAML::EndMap; // Entity
 	}
 
-	void SceneSerializer::Serialize(const std::string& filepath)
+	void SceneSerializer::Serialize(const eastl::string& filepath)
 	{
 		YAML::Emitter out;
 		out << YAML::BeginMap;
@@ -298,11 +318,11 @@ namespace ArcEngine
 		out << YAML::EndSeq;
 		out << YAML::EndMap;
 
-		std::ofstream fout(filepath);
+		std::ofstream fout(filepath.c_str());
 		fout << out.c_str();
 	}
 
-	void SceneSerializer::SerializeRuntime(const std::string& filepath)
+	void SceneSerializer::SerializeRuntime(const eastl::string& filepath)
 	{
 		// Not implemented
 		ARC_CORE_ASSERT(false);
@@ -310,9 +330,9 @@ namespace ArcEngine
 
 #define TryGet(x, outType, defValue) ((x) ? x.as<outType>() : defValue)
 
-	bool SceneSerializer::Deserialize(const std::string& filepath)
+	bool SceneSerializer::Deserialize(const eastl::string& filepath)
 	{
-		std::ifstream stream(filepath);
+		std::ifstream stream(filepath.c_str());
 		std::stringstream strStream;
 		strStream << stream.rdbuf();
 
@@ -320,7 +340,7 @@ namespace ArcEngine
 		if (!data["Scene"])
 			return false;
 
-		std::string sceneName = data["Scene"].as<std::string>();
+		eastl::string sceneName = data["Scene"].as<eastl::string>();
 		ARC_CORE_TRACE("Deserializing scene '{0}'", sceneName);
 
 		auto entities = data["Entities"];
@@ -330,10 +350,10 @@ namespace ArcEngine
 			{
 				uint64_t uuid = entity["Entity"].as<uint64_t>();
 
-				std::string name;
+				eastl::string name;
 				auto tagComponent = entity["TagComponent"];
 				if (tagComponent)
-					name = tagComponent["Tag"].as<std::string>();
+					name = tagComponent["Tag"].as<eastl::string>();
 
 				ARC_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
 
@@ -393,7 +413,7 @@ namespace ArcEngine
 				{
 					auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
 					src.Color = TryGet(spriteRendererComponent["Color"], glm::vec4, glm::vec4(1.0f));
-					std::string textureFilepath = TryGet(spriteRendererComponent["TextureFilepath"], std::string, "");
+					eastl::string textureFilepath = TryGet(spriteRendererComponent["TextureFilepath"], eastl::string, "");
 					if(!textureFilepath.empty())
 						src.SetTexture(textureFilepath);
 					src.TilingFactor = TryGet(spriteRendererComponent["TilingFactor"], float, 1.0f);
@@ -403,7 +423,7 @@ namespace ArcEngine
 				if (skyLightComponent)
 				{
 					auto& src = deserializedEntity.AddComponent<SkyLightComponent>();
-					std::string textureFilepath = TryGet(skyLightComponent["TextureFilepath"], std::string, "");
+					eastl::string textureFilepath = TryGet(skyLightComponent["TextureFilepath"], eastl::string, "");
 					if(!textureFilepath.empty())
 						src.SetTexture(textureFilepath);
 					src.Intensity = TryGet(skyLightComponent["Intensity"], float, 1.0f);
@@ -466,7 +486,7 @@ namespace ArcEngine
 		return true;
 	}
 
-	bool SceneSerializer::DeserializeRuntime(const std::string& filepath)
+	bool SceneSerializer::DeserializeRuntime(const eastl::string& filepath)
 	{
 		// Not implemented
 		ARC_CORE_ASSERT(false);

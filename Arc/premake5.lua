@@ -46,7 +46,9 @@ project "Arc"
 		"%{IncludeDir.assimp_config_assimp}",
 		"%{IncludeDir.optick}",
 		"%{IncludeDir.box2d}",
-		"%{IncludeDir.mono}"
+		"%{IncludeDir.mono}",
+		"%{IncludeDir.EABase}",
+		"%{IncludeDir.EASTL}",
 	}
 
 	links
@@ -58,6 +60,7 @@ project "Arc"
 		"assimp",
 		"optick",
 		"box2d",
+		"EASTL",
 		"opengl32.lib",
 
 		"%{Lib.mono}"

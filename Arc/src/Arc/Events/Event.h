@@ -1,7 +1,5 @@
 #pragma once
 
-#include <functional>
-
 #include "Arc/Core/Base.h"
 
 namespace ArcEngine

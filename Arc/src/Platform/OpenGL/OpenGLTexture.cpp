@@ -23,7 +23,7 @@ namespace ArcEngine
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
-	OpenGLTexture2D::OpenGLTexture2D(const std::string& path)
+	OpenGLTexture2D::OpenGLTexture2D(const eastl::string& path)
 		: m_Path(path)
 	{
 		ARC_PROFILE_SCOPE();
@@ -33,8 +33,6 @@ namespace ArcEngine
 		stbi_uc* data = nullptr;
 		{
 			ARC_PROFILE_SCOPE("stbi_load Texture");
-
-			ARC_PROFILE_SCOPE("stbi_load - OpenGLTexture2D::OpenGLTexture2D(const std::string&)");
 			
 			data = stbi_load(path.c_str(), &width, &height, &channels, 0);
 		}

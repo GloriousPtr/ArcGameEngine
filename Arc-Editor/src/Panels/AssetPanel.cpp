@@ -45,7 +45,7 @@ namespace ArcEngine
 			if (selected)
 				nodeFlags |= ImGuiTreeNodeFlags_Selected;
 
-			std::string name = StringUtils::GetNameWithExtension(entry.path().string());
+			eastl::string name = StringUtils::GetNameWithExtension(entry.path().string().c_str());
 			
 			bool entryIsFile = !std::filesystem::is_directory(entry.path());
 			if (entryIsFile)
@@ -63,7 +63,7 @@ namespace ArcEngine
 
 			const char* folderIcon;
 			if (entryIsFile)
-				folderIcon = GetFileIcon(StringUtils::GetExtension((std::string&&)name).c_str());
+				folderIcon = GetFileIcon(StringUtils::GetExtension((eastl::string&&)name).c_str());
 			else
 				folderIcon = open ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
 			
@@ -312,7 +312,7 @@ namespace ArcEngine
 				const char* fontIcon = nullptr;
 				if (!file.DirectoryEntry.is_directory())
 				{
-					std::string ext = StringUtils::GetExtension((std::string&&)file.Name);
+					eastl::string ext = StringUtils::GetExtension((eastl::string&&)file.Name);
 					if (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp")
 						textureId = AssetManager::GetTexture2D(file.DirectoryEntry.path().string().c_str())->GetRendererID();
 					else
@@ -329,7 +329,7 @@ namespace ArcEngine
 				ImGui::Button(("##" + std::to_string(i)).c_str(), { m_ThumbnailSize + padding * 2, m_ThumbnailSize + textSize.y + padding * 8 });
 				if (ImGui::BeginDragDropSource())
 				{
-					std::string itemPath = file.DirectoryEntry.path().string();
+					eastl::string itemPath = file.DirectoryEntry.path().string().c_str();
 					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath.c_str(), (strlen(itemPath.c_str()) + 1) * sizeof(char));
 					ImGui::EndDragDropSource();
 				}
@@ -416,7 +416,7 @@ namespace ArcEngine
 		{
 			const auto& path = directoryEntry.path();
 			auto relativePath = std::filesystem::relative(path, s_AssetPath);
-			std::string fileNameString = relativePath.filename().string();
+			eastl::string fileNameString = relativePath.filename().string().c_str();
 			m_DirectoryEntries.push_back({ fileNameString, directoryEntry });
 		}
 	}

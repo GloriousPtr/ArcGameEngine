@@ -39,6 +39,8 @@ IncludeDir["assimp_config_assimp"] = "%{wks.location}/Arc/vendor/assimp/_config_
 IncludeDir["optick"] = "%{wks.location}/Arc/vendor/optick/src"
 IncludeDir["box2d"] = "%{wks.location}/Arc/vendor/box2d/include"
 IncludeDir["mono"] = "%{wks.location}/Arc/vendor/mono/include"
+IncludeDir["EABase"] = "%{wks.location}/Arc/vendor/EABase/include/Common"
+IncludeDir["EASTL"] = "%{wks.location}/Arc/vendor/EASTL/include"
 
 LibDir = {}
 LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/%{cfg.buildcfg}"
@@ -55,6 +57,7 @@ group "Dependencies"
 	include "Arc/vendor/assimp"
 	include "Arc/vendor/optick"
 	include "Arc/vendor/box2d"
+	include "Arc/vendor/EASTL"
 
 group ""
 

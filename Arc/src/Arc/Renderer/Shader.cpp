@@ -6,7 +6,7 @@
 
 namespace ArcEngine
 {
-	Ref<Shader> Shader::Create(const std::string& filepath)
+	Ref<Shader> Shader::Create(const eastl::string& filepath)
 	{
 		switch (Renderer::GetAPI())
 		{
@@ -18,7 +18,7 @@ namespace ArcEngine
 		return nullptr;
 	}
 
-	Ref<Shader> Shader::Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
+	Ref<Shader> Shader::Create(const eastl::string& name, const eastl::string& vertexSrc, const eastl::string& fragmentSrc)
 	{
 		switch (Renderer::GetAPI())
 		{
@@ -30,7 +30,7 @@ namespace ArcEngine
 		return nullptr;
 	}
 
-	void ShaderLibrary::Add(const std::string& name, const Ref<Shader>& shader)
+	void ShaderLibrary::Add(const eastl::string& name, const Ref<Shader>& shader)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -46,7 +46,7 @@ namespace ArcEngine
 		Add(name, shader);
 	}
 
-	Ref<Shader> ShaderLibrary::Load(const std::string& filepath)
+	Ref<Shader> ShaderLibrary::Load(const eastl::string& filepath)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -56,7 +56,7 @@ namespace ArcEngine
 		return shader;
 	}
 
-	Ref<Shader> ShaderLibrary::Load(const std::string& name, const std::string& filepath)
+	Ref<Shader> ShaderLibrary::Load(const eastl::string& name, const eastl::string& filepath)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -70,7 +70,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		std::string shaderName;
+		eastl::string shaderName;
 		for (auto& it = m_Shaders.begin(); it != m_Shaders.end(); it++)
 		{
 			shaderName = it->first;
@@ -82,7 +82,7 @@ namespace ArcEngine
 		}
 	}
 
-	Ref<Shader> ShaderLibrary::Get(const std::string& name)
+	Ref<Shader> ShaderLibrary::Get(const eastl::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -90,7 +90,7 @@ namespace ArcEngine
 		return m_Shaders[name];
 	}
 
-	bool ShaderLibrary::Exists(const std::string& name) const
+	bool ShaderLibrary::Exists(const eastl::string& name) const
 	{
 		ARC_PROFILE_SCOPE();
 

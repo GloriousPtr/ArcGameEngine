@@ -1,5 +1,7 @@
 #pragma once
 
+#include <EASTL/unordered_map.h>
+
 #include "Arc/Renderer/Texture.h"
 
 namespace ArcEngine
@@ -10,11 +12,11 @@ namespace ArcEngine
 		static void Init();
 		static void Shutdown();
 
-		static Ref<Texture2D> GetTexture2D(std::string path);
-		static Ref<TextureCubemap> GetTextureCubemap(std::string path);
+		static Ref<Texture2D> GetTexture2D(eastl::string path);
+		static Ref<TextureCubemap> GetTextureCubemap(eastl::string path);
 
 	private:
-		static std::unordered_map<std::string, Ref<Texture2D>> m_Texture2DMap;
-		static std::unordered_map<std::string, Ref<TextureCubemap>> m_TextureCubeMap;
+		static eastl::unordered_map<eastl::string, Ref<Texture2D>> m_Texture2DMap;
+		static eastl::unordered_map<eastl::string, Ref<TextureCubemap>> m_TextureCubeMap;
 	};
 }

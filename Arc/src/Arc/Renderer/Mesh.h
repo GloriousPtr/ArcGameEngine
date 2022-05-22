@@ -12,7 +12,7 @@ namespace ArcEngine
 {
 	struct Submesh
 	{
-		std::string Name;
+		eastl::string Name;
 		Ref<Material> Mat;
 		Ref<VertexArray> Geometry;
 	};
@@ -35,7 +35,7 @@ namespace ArcEngine
 		void ProcessMesh(aiMesh *mesh, const aiScene *scene, const char* filepath, const char* nodeName);
 
 	private:
-		std::string m_Name;
-		std::vector<Submesh> m_Submeshes;
+		eastl::string m_Name;
+		eastl::vector<Submesh> m_Submeshes;
 	};
 }

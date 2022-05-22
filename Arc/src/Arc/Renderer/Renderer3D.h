@@ -21,8 +21,8 @@ namespace ArcEngine
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene(const Camera& camera,const glm::mat4& transform, Entity cubemap, std::vector<Entity>& lights);
-		static void BeginScene(const EditorCamera& camera, Entity cubemap, std::vector<Entity>& lights);
+		static void BeginScene(const Camera& camera,const glm::mat4& transform, Entity cubemap, eastl::vector<Entity>& lights);
+		static void BeginScene(const EditorCamera& camera, Entity cubemap, eastl::vector<Entity>& lights);
 		static void EndScene(Ref<RenderGraphData>& renderTarget);
 
 		static void DrawCube();

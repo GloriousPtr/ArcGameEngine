@@ -64,7 +64,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 		
 		m_ZoomLevel -= e.GetYOffset() * m_ZoomSpeedMultiplier * m_ZoomSpeed;
-		m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
+		m_ZoomLevel = glm::max(m_ZoomLevel, 0.25f);
 		m_Camera.SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
 
 		m_CameraTranslationSpeedMultiplier = m_ZoomLevel * m_CameraTranslationSpeed;

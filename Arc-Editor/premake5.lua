@@ -25,6 +25,8 @@ project "Arc-Editor"
 		"%{IncludeDir.assimp_config}",
 		"%{IncludeDir.assimp_config_assimp}",
 		"%{IncludeDir.optick}",
+		"%{IncludeDir.EABase}",
+		"%{IncludeDir.EASTL}",
 	}
 
 	links

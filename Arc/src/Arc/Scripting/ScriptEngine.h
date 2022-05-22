@@ -39,7 +39,7 @@ namespace ArcEngine
 		static MonoMethod* GetMethod(const char* className, const char* methodSignature);
 		static MonoClass* GetClass(const char* className);
 		static MonoProperty* GetProperty(const char* className, const char* propertyName);
-		static std::unordered_map<std::string, Field>* GetFields(const char* className);
+		static eastl::unordered_map<eastl::string, Field>* GetFields(const char* className);
 
 		static void SetScene(Scene* scene) { s_CurrentScene = scene; }
 		static Scene* GetScene() { return s_CurrentScene; }
@@ -58,10 +58,10 @@ namespace ArcEngine
 		static MonoImage* s_ScriptCoreImage;
 		static MonoImage* s_ScriptClientImage;
 
-		static std::unordered_map<std::string, MonoClass*> s_ClassMap;
-		static std::unordered_map<std::string, MonoMethod*> s_MethodMap;
-		static std::unordered_map<std::string, MonoProperty*> s_PropertyMap;
-		static std::unordered_map<std::string, std::unordered_map<std::string, Field>> s_FieldMap;
+		static eastl::unordered_map<eastl::string, MonoClass*> s_ClassMap;
+		static eastl::unordered_map<eastl::string, MonoMethod*> s_MethodMap;
+		static eastl::unordered_map<eastl::string, MonoProperty*> s_PropertyMap;
+		static eastl::unordered_map<eastl::string, eastl::unordered_map<eastl::string, Field>> s_FieldMap;
 
 		static Scene* s_CurrentScene;
 	};

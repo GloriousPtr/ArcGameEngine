@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Arc/Core/Base.h"
+#include "EASTL/string.h"
 
 // This ignores all warnings raised inside External headers
 #pragma warning(push, 0)
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
+#include <spdlog/fmt/bundled/format.h>
 #pragma warning(pop)
 
 namespace ArcEngine
@@ -26,14 +28,29 @@ namespace ArcEngine
 	public:
 		static void Init();
 		
-		static Ref<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
-		static Ref<spdlog::logger>& GetClientLogger() { return  s_ClientLogger; }
+		static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
+		static std::shared_ptr<spdlog::logger>& GetClientLogger() { return  s_ClientLogger; }
 
 	private:
-		static Ref<spdlog::logger> s_CoreLogger;
-		static Ref<spdlog::logger> s_ClientLogger;
+		static std::shared_ptr<spdlog::logger> s_CoreLogger;
+		static std::shared_ptr<spdlog::logger> s_ClientLogger;
 	};
 }
+
+template<>
+struct fmt::formatter<eastl::string>
+{
+	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())
+	{
+		return ctx.end();
+	}
+
+	template <typename FormatContext>
+	auto format(const eastl::string& input, FormatContext& ctx) -> decltype(ctx.out())
+	{
+		return format_to(ctx.out(), "{}", input.c_str());
+	}
+};
 
 #define ARC_CORE_TRACE(...)		::ArcEngine::Log::GetCoreLogger()->trace(__VA_ARGS__)
 #define ARC_CORE_INFO(...)		::ArcEngine::Log::GetCoreLogger()->info(__VA_ARGS__)

@@ -252,7 +252,7 @@ namespace ArcEngine
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 			{
 				const char* path = (const char*)payload->Data;
-				std::string ext = StringUtils::GetExtension(path);
+				eastl::string ext = StringUtils::GetExtension(path);
 				
 				if (ext == "arc")
 				{
@@ -337,7 +337,7 @@ namespace ArcEngine
 				glm::mat4 transform = Entity(entity, scene.get()).GetWorldTransform();
 
 				const auto inv = glm::inverse(cam.Camera.GetProjection() * glm::inverse(transform));
-				std::vector<glm::vec3> frustumCorners;
+				eastl::vector<glm::vec3> frustumCorners;
 				for (unsigned int x = 0; x < 2; ++x)
 				{
 					for (unsigned int y = 0; y < 2; ++y)

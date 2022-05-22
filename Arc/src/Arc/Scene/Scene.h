@@ -21,8 +21,8 @@ namespace ArcEngine
 
 		static Ref<Scene> CopyTo(Ref<Scene> other);
 
-		Entity CreateEntity(const std::string& name = std::string());
-		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
+		Entity CreateEntity(const eastl::string& name = eastl::string());
+		Entity CreateEntityWithUUID(UUID uuid, const eastl::string& name = eastl::string());
 		void DestroyEntity(Entity entity);
 		bool HasEntity(UUID uuid);
 		Entity GetEntity(UUID uuid);
@@ -50,7 +50,7 @@ namespace ArcEngine
 	
 	private:
 		entt::registry m_Registry;
-		std::unordered_map<UUID, entt::entity> m_EntityMap;
+		eastl::unordered_map<UUID, entt::entity> m_EntityMap;
 		b2World* m_PhysicsWorld2D;
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 		bool m_ViewportDirty = true;

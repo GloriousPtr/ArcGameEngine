@@ -9,8 +9,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		m_ID = "###" + std::to_string(s_ID);
-		m_ID = icon + std::string(" ") + m_Name + m_ID + m_Name;
+		std::string tmp = "###" + std::to_string(s_ID);
+		m_ID = icon + eastl::string(" ") + m_Name + tmp.c_str() + m_Name;
 		s_ID++;
 	}
 }

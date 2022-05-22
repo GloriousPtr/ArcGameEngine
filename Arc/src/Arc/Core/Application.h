@@ -17,7 +17,7 @@ namespace ArcEngine
 	class Application
 	{
 	public:
-		Application(const std::string& name = "Arc App");
+		Application(const eastl::string& name = "Arc App");
 		virtual ~Application();
 		
 		void OnEvent(Event& e);
@@ -38,7 +38,7 @@ namespace ArcEngine
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
 		
-		std::unique_ptr<Window> m_Window;
+		Scope<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer;
 		bool m_Running = true;
 		bool m_Minimized = false;

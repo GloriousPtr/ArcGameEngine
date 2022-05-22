@@ -23,10 +23,10 @@ namespace ArcEngine
 	MonoImage* ScriptEngine::s_ScriptCoreImage;
 	MonoImage* ScriptEngine::s_ScriptClientImage;
 
-	std::unordered_map<std::string, MonoClass*> ScriptEngine::s_ClassMap;
-	std::unordered_map<std::string, MonoMethod*> ScriptEngine::s_MethodMap;
-	std::unordered_map<std::string, MonoProperty*> ScriptEngine::s_PropertyMap;
-	std::unordered_map<std::string, std::unordered_map<std::string, Field>> ScriptEngine::s_FieldMap;
+	eastl::unordered_map<eastl::string, MonoClass*> ScriptEngine::s_ClassMap;
+	eastl::unordered_map<eastl::string, MonoMethod*> ScriptEngine::s_MethodMap;
+	eastl::unordered_map<eastl::string, MonoProperty*> ScriptEngine::s_PropertyMap;
+	eastl::unordered_map<eastl::string, eastl::unordered_map<eastl::string, Field>> ScriptEngine::s_FieldMap;
 	Scene* ScriptEngine::s_CurrentScene = nullptr;
 
 	void ScriptEngine::Init(const char* coreAssemblyPath)
@@ -168,7 +168,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		std::string desc = std::string(className) + ":" + (methodSignature);
+		eastl::string desc = eastl::string(className) + ":" + (methodSignature);
 		if (s_MethodMap.find(desc) != s_MethodMap.end())
 			return;
 		
@@ -220,11 +220,11 @@ namespace ArcEngine
 		if (s_ClassMap.find(className) != s_ClassMap.end())
 			return;
 
-		std::string name(className);
+		eastl::string name(className);
 		int length = name.size();
 		int lastColon = name.find_last_of('.');
-		std::string namespaceName = name.substr(0, lastColon);
-		std::string clazzName = name.substr(lastColon + 1, length - lastColon);
+		eastl::string namespaceName = name.substr(0, lastColon);
+		eastl::string clazzName = name.substr(lastColon + 1, length - lastColon);
 
 		if (MonoClass* clazz = CreateClass(s_ScriptCoreImage, namespaceName.c_str(), clazzName.c_str(), className))
 		{
@@ -241,7 +241,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		std::string desc = std::string(className) + ":" + (methodSignature);
+		eastl::string desc = eastl::string(className) + ":" + (methodSignature);
 		if (s_MethodMap.find(desc) != s_MethodMap.end())
 			return s_MethodMap.at(desc);
 		else
@@ -262,7 +262,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		std::string desc = std::string(className) + ":" + (methodSignature);
+		eastl::string desc = eastl::string(className) + ":" + (methodSignature);
 		if (s_MethodMap.find(desc) != s_MethodMap.end())
 			return s_MethodMap.at(desc);
 		
@@ -293,11 +293,11 @@ namespace ArcEngine
 		if (s_ClassMap.find(className) != s_ClassMap.end())
 			return true;
 
-		std::string name(className);
+		eastl::string name(className);
 		int length = name.size();
 		int lastColon = name.find_last_of('.');
-		std::string namespaceName = name.substr(0, lastColon);
-		std::string clazzName = name.substr(lastColon + 1, length - lastColon);
+		eastl::string namespaceName = name.substr(0, lastColon);
+		eastl::string clazzName = name.substr(lastColon + 1, length - lastColon);
 
 		MonoClass* clazz = CreateClass(s_ScriptCoreImage, namespaceName.c_str(), clazzName.c_str(), className);
 		if (!clazz && s_ScriptClientImage)
@@ -319,11 +319,11 @@ namespace ArcEngine
 		if (s_ClassMap.find(className) != s_ClassMap.end())
 			return s_ClassMap.at(className);
 
-		std::string name(className);
+		eastl::string name(className);
 		int length = name.size();
 		int lastColon = name.find_last_of('.');
-		std::string namespaceName = name.substr(0, lastColon);
-		std::string clazzName = name.substr(lastColon + 1, length - lastColon);
+		eastl::string namespaceName = name.substr(0, lastColon);
+		eastl::string clazzName = name.substr(lastColon + 1, length - lastColon);
 
 		MonoClass* clazz = CreateClass(s_ScriptCoreImage, namespaceName.c_str(), clazzName.c_str(), className);
 		if (clazz)
@@ -346,7 +346,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		std::string key = std::string(className) + propertyName;
+		eastl::string key = eastl::string(className) + propertyName;
 		if (s_PropertyMap.find(key) != s_PropertyMap.end())
 			return s_PropertyMap.at(key);
 
@@ -363,7 +363,7 @@ namespace ArcEngine
 		return property;
 	}
 
-	std::unordered_map<std::string, Field>* ScriptEngine::GetFields(const char* className)
+	eastl::unordered_map<eastl::string, Field>* ScriptEngine::GetFields(const char* className)
 	{
 		ARC_PROFILE_SCOPE();
 

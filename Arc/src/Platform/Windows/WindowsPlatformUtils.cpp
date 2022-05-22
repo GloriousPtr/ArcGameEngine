@@ -10,7 +10,7 @@
 
 namespace ArcEngine
 {
-	std::string FileDialogs::OpenFile(const char* filter)
+	eastl::string FileDialogs::OpenFile(const char* filter)
 	{
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
@@ -26,10 +26,10 @@ namespace ArcEngine
 		{
 			return ofn.lpstrFile;
 		}
-		return std::string();
+		return eastl::string();
 	}
 
-	std::string FileDialogs::SaveFile(const char* filter)
+	eastl::string FileDialogs::SaveFile(const char* filter)
 	{
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
@@ -45,7 +45,7 @@ namespace ArcEngine
 		{
 			return ofn.lpstrFile;
 		}
-		return std::string();
+		return eastl::string();
 	}
 
 }

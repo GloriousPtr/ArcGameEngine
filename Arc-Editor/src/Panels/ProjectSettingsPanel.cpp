@@ -7,8 +7,8 @@
 
 namespace ArcEngine
 {
-	std::string ProjectSettingsPanel::s_ScriptCoreAssemblyPath = "../Sandbox/Assemblies/Arc-ScriptCore.dll";
-	std::string ProjectSettingsPanel::s_ScriptClientAssemblyPath = "../Sandbox/Assemblies/Sandbox.dll";
+	eastl::string ProjectSettingsPanel::s_ScriptCoreAssemblyPath = "../Sandbox/Assemblies/Arc-ScriptCore.dll";
+	eastl::string ProjectSettingsPanel::s_ScriptClientAssemblyPath = "../Sandbox/Assemblies/Sandbox.dll";
 
 	void ProjectSettingsPanel::OnImGuiRender()
 	{

@@ -10,7 +10,7 @@ namespace ArcEngine
 		static void BeginProperties();
 		static void EndProperties();
 
-		static bool Property(const char* label, std::string& value);
+		static bool Property(const char* label, eastl::string& value);
 		static void Property(const char* label, const char* value);
 		static bool Property(const char* label, int32_t& value);
 		static bool Property(const char* label, uint32_t& value);

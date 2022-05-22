@@ -20,9 +20,9 @@ namespace ArcEngine
 		const char* GetIcon() { return m_Icon; }
 
 	protected:
-		std::string m_Name;
+		eastl::string m_Name;
 		const char* m_Icon;
 		bool m_Showing;
-		std::string m_ID;
+		eastl::string m_ID;
 	};
 }

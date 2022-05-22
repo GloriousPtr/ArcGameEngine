@@ -52,7 +52,7 @@ namespace ArcEngine
 		mono_field_set_value(GCManager::GetReferencedObject(handle), m_Field, value);
 	}
 
-	std::string Field::GetValueString(GCHandle handle)
+	eastl::string Field::GetValueString(GCHandle handle)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -60,7 +60,7 @@ namespace ArcEngine
 		return MonoUtils::MonoStringToUTF8((MonoString*)monoStr);
 	}
 
-	void Field::SetValueString(GCHandle handle, std::string& str)
+	void Field::SetValueString(GCHandle handle, eastl::string& str)
 	{
 		ARC_PROFILE_SCOPE();
 

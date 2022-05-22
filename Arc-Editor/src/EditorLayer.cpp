@@ -494,7 +494,7 @@ namespace ArcEngine
 
 	void EditorLayer::OpenScene()
 	{
-		std::string filepath = FileDialogs::OpenFile("Arc Scene (*.arc)\0*.arc\0");
+		eastl::string filepath = FileDialogs::OpenFile("Arc Scene (*.arc)\0*.arc\0");
 		if (!filepath.empty())
 		{
 			OpenScene(filepath.c_str());
@@ -506,7 +506,7 @@ namespace ArcEngine
 		if (!m_ScenePath.empty())
 		{
 			SceneSerializer serializer(m_ActiveScene);
-			serializer.Serialize(m_ScenePath.string());
+			serializer.Serialize(m_ScenePath.string().c_str());
 		}
 		else
 		{
@@ -516,12 +516,12 @@ namespace ArcEngine
 
 	void EditorLayer::SaveSceneAs()
 	{
-		std::string filepath = FileDialogs::SaveFile("Arc Scene (*.arc)\0*.arc\0");
+		eastl::string filepath = FileDialogs::SaveFile("Arc Scene (*.arc)\0*.arc\0");
 		if (!filepath.empty())
 		{
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Serialize(filepath);
-			m_ScenePath = filepath;
+			m_ScenePath = filepath.c_str();
 		}
 	}
 

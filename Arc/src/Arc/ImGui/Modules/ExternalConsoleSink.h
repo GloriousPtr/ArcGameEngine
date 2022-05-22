@@ -1,5 +1,6 @@
 #pragma once
-#include "spdlog/sinks/base_sink.h"
+#include <spdlog/sinks/base_sink.h>
+#include <EASTL/string.h>
 
 namespace ArcEngine
 {
@@ -9,24 +10,24 @@ namespace ArcEngine
 	public:
 		struct Message
 		{
-			std::string Buffer;
+			eastl::string Buffer;
 			Log::Level Level;
 
-			Message(std::string& message, Log::Level level)
+			Message(eastl::string& message, Log::Level level)
 				: Buffer(message), Level(level)
 			{
 			}
 		};
 
 		explicit ExternalConsoleSink(bool forceFlush = false, uint8_t bufferCapacity = 10)
-			: m_MessageBufferCapacity(forceFlush ? 1 : bufferCapacity), m_MessageBuffer(std::vector<Ref<Message>>(forceFlush ? 1 : bufferCapacity))
+			: m_MessageBufferCapacity(forceFlush ? 1 : bufferCapacity), m_MessageBuffer(eastl::vector<Ref<Message>>(forceFlush ? 1 : bufferCapacity))
 		{
 		}
 		ExternalConsoleSink(const ExternalConsoleSink&) = delete;
 		ExternalConsoleSink& operator=(const ExternalConsoleSink&) = delete;
 		virtual ~ExternalConsoleSink() = default;
 
-		static void SetConsoleSink_HandleFlush(std::function<void(std::string, Log::Level)> func)
+		static void SetConsoleSink_HandleFlush(eastl::function<void(eastl::string, Log::Level)> func)
 		{
 			OnFlush = func;
 		}
@@ -42,7 +43,7 @@ namespace ArcEngine
 
 			spdlog::memory_buf_t formatted;
 			base_sink<std::mutex>::formatter_->format(msg, formatted);
-			*(m_MessageBuffer.begin() + m_MessagesBuffered) = CreateRef<Message>(fmt::to_string(formatted), GetMessageLevel(msg.level));
+			*(m_MessageBuffer.begin() + m_MessagesBuffered) = CreateRef<Message>(eastl::string(fmt::to_string(formatted).c_str()), GetMessageLevel(msg.level));
 
 			if (++m_MessagesBuffered == m_MessageBufferCapacity)
 				flush_();
@@ -75,9 +76,9 @@ namespace ArcEngine
 	private:
 		uint8_t m_MessagesBuffered = 0;
 		uint8_t m_MessageBufferCapacity;
-		std::vector<Ref<Message>> m_MessageBuffer;
+		eastl::vector<Ref<Message>> m_MessageBuffer;
 
-		static std::function<void(std::string, Log::Level)> OnFlush;
+		static eastl::function<void(eastl::string, Log::Level)> OnFlush;
 	};
 }
 

@@ -1,6 +1,8 @@
 #pragma once
 
-#include <memory>
+#include <EASTL/memory.h>
+#include <EASTL/shared_ptr.h>
+#include <EASTL/unique_ptr.h>
 
 #include "Arc/Core/PlatformDetection.h"
 
@@ -23,7 +25,7 @@
 
 #define BIT(x) (1 << x)
 
-#define ARC_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
+#define ARC_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(eastl::forward<decltype(args)>(args)...); }
 
 // Resolve which function signature macro will be used. Note that this only
 // is resolved when the (pre)compiler starts, so the syntax highlighting
@@ -46,23 +48,22 @@
 	#define ARC_FUNC_SIG "ARC_FUNC_SIG unknown!"
 #endif
 
-
 namespace ArcEngine
 {
 	template<typename T>
-	using Scope = std::unique_ptr<T>;
+	using Scope = eastl::unique_ptr<T>;
 	template<typename T, typename ... Args>
 	constexpr Scope<T> CreateScope(Args&& ... args)
 	{
-		return std::make_unique<T>(std::forward<Args>(args)...);
+		return eastl::make_unique<T>(eastl::forward<Args>(args)...);
 	}
 
 	template<typename T>
-	using Ref = std::shared_ptr<T>;
+	using Ref = eastl::shared_ptr<T>;
 	template<typename T, typename ... Args>
 	constexpr Ref<T> CreateRef(Args&& ... args)
 	{
-		return std::make_shared<T>(std::forward<Args>(args)...);
+		return eastl::make_shared<T>(eastl::forward<Args>(args)...);
 	}
 }
 

@@ -25,9 +25,9 @@ namespace ArcEngine
 		importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 80.0f);
 		uint32_t meshImportFlags = 0;
 		
-		std::string filePath = std::string(filepath);
+		eastl::string filePath = eastl::string(filepath);
 		auto lastDot = filePath.find_last_of(".");
-		std::string name = filePath.substr(lastDot + 1, filePath.size() - lastDot);
+		eastl::string name = filePath.substr(lastDot + 1, filePath.size() - lastDot);
 		if (name != "assbin")
 		{
 			meshImportFlags |=
@@ -82,13 +82,13 @@ namespace ArcEngine
 		}
 	}
 
-	std::vector<Ref<Texture2D>> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const char* filepath)
+	eastl::vector<Ref<Texture2D>> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const char* filepath)
 	{
 		ARC_PROFILE_SCOPE();
 
-		std::string path = std::string(filepath);
-		std::string dir = path.substr(0, path.find_last_of('\\'));
-		std::vector<Ref<Texture2D>> textures;
+		eastl::string path = eastl::string(filepath);
+		eastl::string dir = path.substr(0, path.find_last_of('\\'));
+		eastl::vector<Ref<Texture2D>> textures;
 		for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
 		{
 			aiString str;
@@ -103,11 +103,11 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		std::vector<float> vertices;
+		eastl::vector<float> vertices;
 		size_t count = mesh->mNumVertices * 14;
 		vertices.reserve(count);
 
-		std::vector<uint32_t> indices;
+		eastl::vector<uint32_t> indices;
 		for(size_t i = 0; i < mesh->mNumVertices; i++)
 		{
 			auto& vertexPosition = mesh->mVertices[i];
@@ -201,10 +201,10 @@ namespace ArcEngine
 		vertexArray->SetIndexBuffer(indexBuffer);
 
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        std::vector<Ref<Texture2D>> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, filepath);
-		std::vector<Ref<Texture2D>> normalMaps = LoadMaterialTextures(material, aiTextureType_NORMALS, filepath);
-		std::vector<Ref<Texture2D>> heightMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, filepath);
-		std::vector<Ref<Texture2D>> emissiveMaps = LoadMaterialTextures(material, aiTextureType_EMISSIVE, filepath);
+        eastl::vector<Ref<Texture2D>> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, filepath);
+		eastl::vector<Ref<Texture2D>> normalMaps = LoadMaterialTextures(material, aiTextureType_NORMALS, filepath);
+		eastl::vector<Ref<Texture2D>> heightMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, filepath);
+		eastl::vector<Ref<Texture2D>> emissiveMaps = LoadMaterialTextures(material, aiTextureType_EMISSIVE, filepath);
 
 		uint32_t index = m_Submeshes.size();
 		m_Submeshes.push_back({ nodeName, CreateRef<Material>(), vertexArray });
@@ -219,36 +219,36 @@ namespace ArcEngine
 				uint32_t slot = submesh.Mat->GetData<uint32_t>(name.c_str());
 
 				if (diffuseMaps.size() > 0 && 
-					(name.find("albedo") != std::string::npos || name.find("Albedo") != std::string::npos ||
-					name.find("diff") != std::string::npos || name.find("Diff") != std::string::npos))
+					(name.find("albedo") != eastl::string::npos || name.find("Albedo") != eastl::string::npos ||
+					name.find("diff") != eastl::string::npos || name.find("Diff") != eastl::string::npos))
 				{
 					submesh.Mat->SetTexture(slot, diffuseMaps[0]);
 				}
 
 				if (normalMaps.size() > 0 && 
-					(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
-					name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
+					(name.find("norm") != eastl::string::npos || name.find("Norm") != eastl::string::npos ||
+					name.find("height") != eastl::string::npos || name.find("Height") != eastl::string::npos))
 				{
 					submesh.Mat->SetTexture(slot, normalMaps[0]);
 					normalMapApplied = true;
 				}
 				else if (heightMaps.size() > 0 && 
-					(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
-					name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
+					(name.find("norm") != eastl::string::npos || name.find("Norm") != eastl::string::npos ||
+					name.find("height") != eastl::string::npos || name.find("Height") != eastl::string::npos))
 				{
 					submesh.Mat->SetTexture(slot, heightMaps[0]);
 					normalMapApplied = true;
 				}
 
-				if (emissiveMaps.size() > 0 && 	(name.find("emissi") != std::string::npos || name.find("Emissi") != std::string::npos))
+				if (emissiveMaps.size() > 0 && 	(name.find("emissi") != eastl::string::npos || name.find("Emissi") != eastl::string::npos))
 				{
 					submesh.Mat->SetTexture(slot, emissiveMaps[0]);
 				}
 			}
 
 			if (property.Type == MaterialPropertyType::Bool && normalMapApplied &&
-				(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
-				name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
+				(name.find("norm") != eastl::string::npos || name.find("Norm") != eastl::string::npos ||
+				name.find("height") != eastl::string::npos || name.find("Height") != eastl::string::npos))
 			{
 				submesh.Mat->SetData(name.c_str(), 1);
 			}

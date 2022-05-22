@@ -29,7 +29,7 @@ namespace ArcEngine
 	}
 
 	template<typename T, typename UIFunction>
-	static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction, const bool removable = true)
+	static void DrawComponent(const eastl::string& name, Entity entity, UIFunction uiFunction, const bool removable = true)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -82,7 +82,7 @@ namespace ArcEngine
 		UI::BeginProperties();
 
 		// Public Fields
-		std::unordered_map<std::string, Field>* fieldMap = ScriptEngine::GetFields(component.ClassName.c_str());
+		eastl::unordered_map<eastl::string, Field>* fieldMap = ScriptEngine::GetFields(component.ClassName.c_str());
 		if (fieldMap)
 		{
 			for (auto& [name, field] : *fieldMap)
@@ -119,7 +119,7 @@ namespace ArcEngine
 					}
 					case Field::FieldType::String:
 					{
-						std::string& value = field.GetValueString(component.Handle);
+						eastl::string& value = field.GetValueString(component.Handle);
 						if (UI::Property(field.Name.c_str(), value))
 							field.SetValueString(component.Handle, value);
 						break;
@@ -192,11 +192,11 @@ namespace ArcEngine
 				}
 				case MaterialPropertyType::Float:
 				{
-					bool isSlider01 = n.find("01") != std::string::npos;
+					bool isSlider01 = n.find("01") != eastl::string::npos;
 					float v = material->GetData<float>(name);
 					if (isSlider01)
 					{
-						std::string displayName2 = displayName;
+						eastl::string displayName2 = displayName;
 						displayName2[displayName2.size() - 2] = '\0';
 						if (UI::Property(displayName2.c_str(), v, 0.0f, 1.0f))
 							material->SetData(name, v);
@@ -217,7 +217,7 @@ namespace ArcEngine
 				}
 				case MaterialPropertyType::Float3:
 				{
-					bool isColor = n.find("color") != std::string::npos || n.find("Color") != std::string::npos;
+					bool isColor = n.find("color") != eastl::string::npos || n.find("Color") != eastl::string::npos;
 					glm::vec3 v = material->GetData<glm::vec3>(name);
 					if (isColor)
 					{
@@ -233,7 +233,7 @@ namespace ArcEngine
 				}
 				case MaterialPropertyType::Float4:
 				{
-					bool isColor = n.find("color") != std::string::npos || n.find("Color") != std::string::npos;
+					bool isColor = n.find("color") != eastl::string::npos || n.find("Color") != eastl::string::npos;
 					glm::vec4 v = material->GetData<glm::vec4>(name);
 					if (isColor)
 					{
@@ -253,7 +253,7 @@ namespace ArcEngine
 		UI::EndProperties();
 	}
 
-	static void WriteMesh(const std::string& filepath)
+	static void WriteMesh(const eastl::string& filepath)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -272,7 +272,7 @@ namespace ArcEngine
 			aiProcess_ImproveCacheLocality |
 	        aiProcess_ValidateDataStructure;
 
-		const aiScene *scene = importer.ReadFile(filepath, meshImportFlags);
+		const aiScene *scene = importer.ReadFile(filepath.c_str(), meshImportFlags);
 		if (!scene)
 		{
 			ARC_CORE_ERROR("Could not import the file: {0}. Error: {1}", filepath, importer.GetErrorString());
@@ -282,7 +282,7 @@ namespace ArcEngine
 		Assimp::Exporter exporter;
 		const aiExportFormatDesc* format = exporter.GetExportFormatDescription(0);
 		auto lastDot = filepath.find_last_of(".");
-		std::string path = filepath.substr(0, lastDot) + ".assbin";
+		eastl::string path = filepath.substr(0, lastDot) + ".assbin";
 		aiReturn ret = exporter.Export(scene, format->id, path.c_str(), meshImportFlags);
 		if (ret != aiReturn_SUCCESS)
 		{
@@ -303,7 +303,7 @@ namespace ArcEngine
 			memset(buffer, 0, sizeof(buffer));
 			strcpy_s(buffer, tag.c_str());
 			if(ImGui::InputText("##Tag", buffer, sizeof(buffer)))
-				tag = std::string(buffer);
+				tag = eastl::string(buffer);
 		}
 
 		ImGui::SameLine();
@@ -400,7 +400,7 @@ namespace ArcEngine
 		{
 			if(ImGui::Button("Import"))
 			{
-				std::string filepath = FileDialogs::OpenFile("Mesh (*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
+				eastl::string filepath = FileDialogs::OpenFile("Mesh (*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
 				if (!filepath.empty())
 				{
 					component.Filepath = filepath;
@@ -411,7 +411,7 @@ namespace ArcEngine
 			
 			if(ImGui::Button(component.MeshGeometry ? component.MeshGeometry->GetName() : "null"))
 			{
-				std::string filepath = FileDialogs::OpenFile("Mesh (*.assbin)\0*.assbin\0(*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
+				eastl::string filepath = FileDialogs::OpenFile("Mesh (*.assbin)\0*.assbin\0(*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
 				if (!filepath.empty())
 				{
 					component.Filepath = filepath;

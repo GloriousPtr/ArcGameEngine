@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include "Arc/Renderer/Buffer.h"
 
 namespace ArcEngine
@@ -17,7 +15,7 @@ namespace ArcEngine
 		virtual void AddVertexBuffer(Ref<VertexBuffer>& vertexBuffer) = 0;
 		virtual void SetIndexBuffer(Ref<IndexBuffer>& indexBuffer) = 0;
 
-		virtual const std::vector<Ref<VertexBuffer>>& GetVertexBuffer() const = 0;
+		virtual const eastl::vector<Ref<VertexBuffer>>& GetVertexBuffer() const = 0;
 		virtual const Ref<IndexBuffer>& GetIndexBuffer() const = 0;
 		
 		static Ref<VertexArray> Create();

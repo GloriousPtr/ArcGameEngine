@@ -56,10 +56,10 @@ namespace ArcEngine
 		ConsolePanel m_ConsolePanel;
 		ProjectSettingsPanel m_ProjectSettingsPanel;
 
-		std::vector<Scope<BasePanel>> m_Panels;
-		std::vector<Scope<SceneViewport>> m_Viewports;
-		std::vector<Scope<PropertiesPanel>> m_Properties;
-		std::vector<Scope<AssetPanel>> m_AssetPanels;
+		eastl::vector<Scope<BasePanel>> m_Panels;
+		eastl::vector<Scope<SceneViewport>> m_Viewports;
+		eastl::vector<Scope<PropertiesPanel>> m_Properties;
+		eastl::vector<Scope<AssetPanel>> m_AssetPanels;
 
 		bool m_ShowSceneHierarchyPanel = true;
 		bool m_ShowDemoWindow = false;

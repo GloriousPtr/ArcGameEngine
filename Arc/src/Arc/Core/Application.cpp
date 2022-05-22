@@ -11,7 +11,7 @@ namespace ArcEngine
 {
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application(const std::string& name)
+	Application::Application(const eastl::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 		

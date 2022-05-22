@@ -12,10 +12,10 @@ namespace ArcEngine
 	public:
 		struct Message
 		{
-			std::string Buffer;
+			eastl::string Buffer;
 			Log::Level Level;
 
-			Message(const std::string message = "", Log::Level level = Log::Level::Trace);
+			Message(const eastl::string message = "", Log::Level level = Log::Level::Trace);
 			void OnImGuiRender();
 
 			static const char* GetLevelName(Log::Level level);
@@ -27,7 +27,7 @@ namespace ArcEngine
 		ConsolePanel(const char* name = "Console");
 		virtual ~ConsolePanel() override;
 
-		void AddMessage(std::string message, Log::Level level);
+		void AddMessage(eastl::string message, Log::Level level);
 		const Message* GetRecentMessage();
 		void Clear();
 		void SetFocus();
@@ -47,7 +47,7 @@ namespace ArcEngine
 		uint32_t s_MessageBufferRenderFilter = Log::Level::Trace;
 		bool m_AllowScrollingToBottom = true;
 		bool m_RequestScrollToBottom = false;
-		std::vector<Ref<Message>> m_MessageBuffer;
+		eastl::vector<Ref<Message>> m_MessageBuffer;
 		ImGuiTextFilter m_Filter;
 	};
 }

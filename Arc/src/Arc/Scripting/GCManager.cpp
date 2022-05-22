@@ -8,8 +8,8 @@ namespace ArcEngine
 {
 	struct GCState
 	{
-		std::unordered_map<GCHandle, MonoObject*> StrongRefMap;
-		std::unordered_map<GCHandle, MonoObject*> WeakRefMap;
+		eastl::unordered_map<GCHandle, MonoObject*> StrongRefMap;
+		eastl::unordered_map<GCHandle, MonoObject*> WeakRefMap;
 	};
 
 	static GCState* s_GCState;

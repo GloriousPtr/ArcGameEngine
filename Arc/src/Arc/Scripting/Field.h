@@ -22,10 +22,10 @@ namespace ArcEngine
 			Vec4
 		};
 
-		std::string Name;
+		eastl::string Name;
 		FieldType Type;
 
-		Field(const std::string& name, FieldType type, void* monoClassField)
+		Field(const eastl::string& name, FieldType type, void* monoClassField)
 			: Name(name), Type(type), m_Field((MonoClassField*)monoClassField)
 		{
 		}
@@ -44,8 +44,8 @@ namespace ArcEngine
 			SetValue_Impl(handle, &value);
 		}
 
-		std::string GetValueString(GCHandle handle);
-		void SetValueString(GCHandle handle, std::string& str);
+		eastl::string GetValueString(GCHandle handle);
+		void SetValueString(GCHandle handle, eastl::string& str);
 
 		static FieldType GetFieldType(MonoType* monoType);
 

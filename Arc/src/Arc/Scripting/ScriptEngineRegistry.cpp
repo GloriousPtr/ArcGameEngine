@@ -11,8 +11,8 @@
 
 namespace ArcEngine
 {
-	std::unordered_map<MonoType*, std::function<bool(Entity&)>> ScriptEngineRegistry::s_HasComponentFuncs;
-	std::unordered_map<MonoType*, std::function<void(Entity&)>> ScriptEngineRegistry::s_AddComponentFuncs;
+	eastl::unordered_map<MonoType*, eastl::function<bool(Entity&)>> ScriptEngineRegistry::s_HasComponentFuncs;
+	eastl::unordered_map<MonoType*, eastl::function<void(Entity&)>> ScriptEngineRegistry::s_AddComponentFuncs;
 	
 	#define COMPONENT_REGISTER(Type)\
 	{\

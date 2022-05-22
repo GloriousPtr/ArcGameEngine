@@ -74,7 +74,7 @@ namespace ArcEngine
 		ImGui::Separator();
 	}
 
-	bool UI::Property(const char* label, std::string& value)
+	bool UI::Property(const char* label, eastl::string& value)
 	{
 		bool modified = false;
 

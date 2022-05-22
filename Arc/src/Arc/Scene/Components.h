@@ -33,12 +33,12 @@ namespace ArcEngine
 
 	struct TagComponent
 	{
-		std::string Tag;
+		eastl::string Tag;
 		bool renaming = false;
 
 		TagComponent() = default;
 		TagComponent(const TagComponent&) = default;
-		TagComponent(const std::string& tag)
+		TagComponent(const eastl::string& tag)
 			: Tag(tag) {}
 	};
 	
@@ -58,7 +58,7 @@ namespace ArcEngine
 	struct RelationshipComponent
 	{
 		UUID Parent = 0;
-		std::vector<UUID> Children;
+		eastl::vector<UUID> Children;
 
 		RelationshipComponent() = default;
 		RelationshipComponent(const RelationshipComponent&) = default;
@@ -68,14 +68,14 @@ namespace ArcEngine
 	{
 		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
 		Ref<Texture2D> Texture = nullptr;
-		std::string TextureFilepath;
+		eastl::string TextureFilepath;
 		float TilingFactor = 1.0f;
 
 		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;
 		SpriteRendererComponent(const glm::vec4& color)
 			: Color(color) {}
-		void SetTexture(std::string& filepath)
+		void SetTexture(eastl::string& filepath)
 		{
 			Texture = Texture2D::Create(filepath);
 			TextureFilepath = filepath;
@@ -115,7 +115,7 @@ namespace ArcEngine
 
 	struct MeshComponent
 	{
-		std::string Filepath;
+		eastl::string Filepath;
 		AABB BoundingBox;
 		Ref<Mesh> MeshGeometry = nullptr;
 		uint32_t SubmeshIndex = 0;
@@ -136,7 +136,7 @@ namespace ArcEngine
 
 		SkyLightComponent() = default;
 		SkyLightComponent(const SkyLightComponent&) = default;
-		void SetTexture(std::string& filepath)
+		void SetTexture(eastl::string& filepath)
 		{
 			Texture = TextureCubemap::Create(filepath);
 		}
@@ -275,7 +275,7 @@ namespace ArcEngine
 
 	struct ScriptComponent
 	{
-		std::string ClassName;
+		eastl::string ClassName;
 		
 		GCHandle Handle = nullptr;
 

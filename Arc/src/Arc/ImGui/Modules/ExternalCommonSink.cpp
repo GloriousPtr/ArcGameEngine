@@ -3,5 +3,5 @@
 
 namespace ArcEngine
 {
-	std::function<void(std::string, Log::Level)> ExternalConsoleSink<std::mutex>::OnFlush = nullptr;
+	eastl::function<void(eastl::string, Log::Level)> ExternalConsoleSink<std::mutex>::OnFlush = nullptr;
 }

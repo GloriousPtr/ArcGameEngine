@@ -9,7 +9,7 @@ namespace ArcEngine
 	{
 	public:
 		static bool CheckMonoError(MonoError& error);
-		static std::string MonoStringToUTF8(MonoString* monoString);
-		static MonoString* UTF8ToMonoString(const std::string& monoString);
+		static eastl::string MonoStringToUTF8(MonoString* monoString);
+		static MonoString* UTF8ToMonoString(const eastl::string& monoString);
 	};
 }

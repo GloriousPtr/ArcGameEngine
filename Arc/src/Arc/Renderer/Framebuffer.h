@@ -1,5 +1,7 @@
 #pragma once
 
+#include <EASTL/vector.h>
+
 #include "Arc/Core/Base.h"
 
 namespace ArcEngine
@@ -39,7 +41,7 @@ namespace ArcEngine
 		FramebufferAttachmentSpecification(std::initializer_list<FramebufferTextureSpecification> attachments)
 			: Attachments(attachments) {}
 
-		std::vector<FramebufferTextureSpecification> Attachments;
+		eastl::vector<FramebufferTextureSpecification> Attachments;
 	};
 
 	struct FramebufferSpecification

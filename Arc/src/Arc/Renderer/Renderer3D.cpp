@@ -21,7 +21,7 @@ namespace ArcEngine
 	};
 
 	Renderer3D::Statistics s_Stats;
-	static std::vector<MeshData> meshes;
+	static eastl::vector<MeshData> meshes;
 	static Ref<Texture2D> s_BRDFLutTexture;
 	static Ref<Shader> shader;
 	static Ref<Shader> lightingShader;
@@ -40,7 +40,7 @@ namespace ArcEngine
 	static glm::mat4 cameraProjection;
 	static glm::vec3 cameraPosition;
 	static Entity skylight;
-	static std::vector<Entity> sceneLights;
+	static eastl::vector<Entity> sceneLights;
 
 	ShaderLibrary Renderer3D::s_ShaderLibrary;
 	Renderer3D::TonemappingType Renderer3D::Tonemapping = Renderer3D::TonemappingType::ACES;
@@ -196,7 +196,7 @@ namespace ArcEngine
 
 	}
 
-	void Renderer3D::BeginScene(const Camera& camera, const glm::mat4& transform, Entity cubemap, std::vector<Entity>& lights)
+	void Renderer3D::BeginScene(const Camera& camera, const glm::mat4& transform, Entity cubemap, eastl::vector<Entity>& lights)
 	{
 		ARC_PROFILE_SCOPE();
 		
@@ -211,7 +211,7 @@ namespace ArcEngine
 		SetupLightsData();
 	}
 
-	void Renderer3D::BeginScene(const EditorCamera& camera, Entity cubemap, std::vector<Entity>& lights)
+	void Renderer3D::BeginScene(const EditorCamera& camera, Entity cubemap, eastl::vector<Entity>& lights)
 	{
 		ARC_PROFILE_SCOPE();
 		

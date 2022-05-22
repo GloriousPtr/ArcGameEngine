@@ -26,12 +26,12 @@ namespace ArcEngine
 	private:
 		struct File
 		{
-			std::string Name;
+			eastl::string Name;
 			std::filesystem::directory_entry DirectoryEntry;
 		};
 
 		std::filesystem::path m_CurrentDirectory;
-		std::vector<File> m_DirectoryEntries;
+		eastl::vector<File> m_DirectoryEntries;
 		uint32_t m_CurrentlyVisibleItemsTreeView = 0;
 		float m_TreeViewColumnWidth = 256.0f;
 		float m_ThumbnailSize = 128.0f;

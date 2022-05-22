@@ -14,7 +14,7 @@ namespace ArcEngine
 	static Ref<Shader> s_IrradianceShader;
 	static Ref<Shader> s_RadianceShader;
 
-	OpenGLTextureCubemap::OpenGLTextureCubemap(const std::string& path)
+	OpenGLTextureCubemap::OpenGLTextureCubemap(const eastl::string& path)
 		: m_Path(path)
 	{
 		ARC_PROFILE_SCOPE();
@@ -28,8 +28,6 @@ namespace ArcEngine
 		float* data = nullptr;
 		{
 			ARC_PROFILE_SCOPE("stbi_load Texture");
-
-			ARC_PROFILE_SCOPE("stbi_load - OpenGLTexture2D::OpenGLTexture2D(const std::string&)");
 			
 			data = stbi_loadf(path.c_str(), &width, &height, &channels, 0);
 		}
@@ -184,8 +182,8 @@ namespace ArcEngine
 		for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
 		{
 			// reisze framebuffer according to mip-level size.
-			unsigned int mipWidth  = radianceMapSize * std::pow(0.5, mip);
-			unsigned int mipHeight = radianceMapSize * std::pow(0.5, mip);
+			unsigned int mipWidth  = radianceMapSize * glm::pow(0.5, mip);
+			unsigned int mipHeight = radianceMapSize * glm::pow(0.5, mip);
 			glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
 			glViewport(0, 0, mipWidth, mipHeight);
