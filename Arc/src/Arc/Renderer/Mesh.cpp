@@ -207,7 +207,7 @@ namespace ArcEngine
 		eastl::vector<Ref<Texture2D>> emissiveMaps = LoadMaterialTextures(material, aiTextureType_EMISSIVE, filepath);
 
 		uint32_t index = m_Submeshes.size();
-		m_Submeshes.push_back({ nodeName, CreateRef<Material>(), vertexArray });
+		m_Submeshes.emplace_back(nodeName, CreateRef<Material>(), vertexArray);
 		Submesh& submesh = m_Submeshes[index];
 
 		auto& materialProperties = submesh.Mat->GetShader()->GetMaterialProperties();

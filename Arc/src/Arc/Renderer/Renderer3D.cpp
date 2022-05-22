@@ -10,14 +10,16 @@
 
 namespace ArcEngine
 {
-	const static uint32_t MAX_NUM_LIGHTS = 200;
-	const static uint32_t MAX_NUM_DIR_LIGHTS = 3;
-
 	struct MeshData
 	{
 		glm::mat4 Transform;
-		Submesh& Submesh;
+		Submesh SubmeshGeometry;
 		MeshComponent::CullModeType CullMode;
+
+		MeshData(const glm::mat4& transform, const Submesh& submesh, const MeshComponent::CullModeType cullMode)
+			: Transform(transform), SubmeshGeometry(submesh), CullMode(cullMode)
+		{
+		}
 	};
 
 	Renderer3D::Statistics s_Stats;
@@ -249,6 +251,11 @@ namespace ArcEngine
 		RenderCommand::DrawIndexed(quadVertexArray);
 	}
 
+	void Renderer3D::ReserveMeshes(const uint32_t count)
+	{
+		meshes.reserve(count);
+	}
+
 	void Renderer3D::SubmitMesh(MeshComponent& meshComponent, const glm::mat4& transform)
 	{
 		ARC_PROFILE_SCOPE();
@@ -258,7 +265,7 @@ namespace ArcEngine
 
 		ARC_CORE_ASSERT(meshComponent.MeshGeometry->GetSubmeshCount() > meshComponent.SubmeshIndex, "Trying to access submesh index that does not exist!");
 
-		meshes.push_back({ transform, meshComponent.MeshGeometry->GetSubmesh(meshComponent.SubmeshIndex), meshComponent.CullMode });
+		meshes.emplace_back(transform, meshComponent.MeshGeometry->GetSubmesh(meshComponent.SubmeshIndex), meshComponent.CullMode);
 	}
 
 	void Renderer3D::Flush(Ref<RenderGraphData> renderGraphData)
@@ -617,7 +624,7 @@ namespace ArcEngine
 			for (auto it = meshes.rbegin(); it != meshes.rend(); it++)
 			{
 				MeshData* meshData = &(*it);
-				meshData->Submesh.Mat->Bind();
+				meshData->SubmeshGeometry.Mat->Bind();
 				shader->SetMat4("u_Model", meshData->Transform);
 				
 				if (currentCullMode != meshData->CullMode)
@@ -641,9 +648,9 @@ namespace ArcEngine
 					}
 				}
 
-				RenderCommand::DrawIndexed(meshData->Submesh.Geometry);
+				RenderCommand::DrawIndexed(meshData->SubmeshGeometry.Geometry);
 				s_Stats.DrawCalls++;
-				s_Stats.IndexCount += meshData->Submesh.Geometry->GetIndexBuffer()->GetCount();
+				s_Stats.IndexCount += meshData->SubmeshGeometry.Geometry->GetIndexBuffer()->GetCount();
 			}
 		}
 	}
@@ -684,7 +691,7 @@ namespace ArcEngine
 				MeshData* meshData = &(*it);
 
 				shadowMapShader->SetMat4("u_Model", meshData->Transform);
-				RenderCommand::DrawIndexed(meshData->Submesh.Geometry);
+				RenderCommand::DrawIndexed(meshData->SubmeshGeometry.Geometry);
 			}
 		}
 //		RenderCommand::BackCull();

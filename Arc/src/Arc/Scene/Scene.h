@@ -50,7 +50,7 @@ namespace ArcEngine
 	
 	private:
 		entt::registry m_Registry;
-		eastl::unordered_map<UUID, entt::entity> m_EntityMap;
+		eastl::hash_map<UUID, entt::entity> m_EntityMap;
 		b2World* m_PhysicsWorld2D;
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 		bool m_ViewportDirty = true;

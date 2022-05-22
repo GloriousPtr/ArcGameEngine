@@ -11,26 +11,6 @@
 namespace YAML {
 
 	template<>
-	struct convert<eastl::string>
-	{
-		static Node encode(const eastl::string& rhs)
-		{
-			Node node;
-			node.push_back(rhs.c_str());
-			return node;
-		}
-
-		static bool decode(const Node& node, eastl::string& rhs)
-		{
-			if (!node.IsSequence() || node.size() != 2)
-				return false;
-
-			rhs = node[0].as<eastl::string>().c_str();
-			return true;
-		}
-	};
-
-	template<>
 	struct convert<glm::vec2>
 	{
 		static Node encode(const glm::vec2& rhs)
@@ -340,7 +320,7 @@ namespace ArcEngine
 		if (!data["Scene"])
 			return false;
 
-		eastl::string sceneName = data["Scene"].as<eastl::string>();
+		eastl::string sceneName = data["Scene"].as<std::string>().c_str();
 		ARC_CORE_TRACE("Deserializing scene '{0}'", sceneName);
 
 		auto entities = data["Entities"];
@@ -353,7 +333,7 @@ namespace ArcEngine
 				eastl::string name;
 				auto tagComponent = entity["TagComponent"];
 				if (tagComponent)
-					name = tagComponent["Tag"].as<eastl::string>();
+					name = tagComponent["Tag"].as<std::string>().c_str();
 
 				ARC_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
 
@@ -413,7 +393,7 @@ namespace ArcEngine
 				{
 					auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
 					src.Color = TryGet(spriteRendererComponent["Color"], glm::vec4, glm::vec4(1.0f));
-					eastl::string textureFilepath = TryGet(spriteRendererComponent["TextureFilepath"], eastl::string, "");
+					eastl::string textureFilepath = TryGet(spriteRendererComponent["TextureFilepath"], std::string, "").c_str();
 					if(!textureFilepath.empty())
 						src.SetTexture(textureFilepath);
 					src.TilingFactor = TryGet(spriteRendererComponent["TilingFactor"], float, 1.0f);
@@ -423,7 +403,7 @@ namespace ArcEngine
 				if (skyLightComponent)
 				{
 					auto& src = deserializedEntity.AddComponent<SkyLightComponent>();
-					eastl::string textureFilepath = TryGet(skyLightComponent["TextureFilepath"], eastl::string, "");
+					eastl::string textureFilepath = TryGet(skyLightComponent["TextureFilepath"], std::string, "").c_str();
 					if(!textureFilepath.empty())
 						src.SetTexture(textureFilepath);
 					src.Intensity = TryGet(skyLightComponent["Intensity"], float, 1.0f);

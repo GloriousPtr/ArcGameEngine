@@ -13,7 +13,6 @@
 
 #include <EASTL/memory.h>
 #include <EASTL/utility.h>
-
 #include <EASTL/algorithm.h>
 #include <EASTL/functional.h>
 
@@ -21,8 +20,7 @@
 #include <EASTL/array.h>
 #include <EASTL/vector.h>
 #include <EASTL/map.h>
-#include <EASTL/unordered_map.h>
-#include <EASTL/unordered_set.h>
+#include <EASTL/hash_map.h>
 
 #include "Arc/Core/Base.h"
 

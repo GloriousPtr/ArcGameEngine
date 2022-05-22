@@ -18,6 +18,9 @@ namespace ArcEngine
 	class Renderer3D
 	{
 	public:
+		const static uint32_t MAX_NUM_LIGHTS = 200;
+		const static uint32_t MAX_NUM_DIR_LIGHTS = 3;
+
 		static void Init();
 		static void Shutdown();
 
@@ -27,6 +30,7 @@ namespace ArcEngine
 
 		static void DrawCube();
 		static void DrawQuad();
+		static void ReserveMeshes(uint32_t count);
 		static void SubmitMesh(MeshComponent& meshComponent, const glm::mat4& transform);
 
 		static ShaderLibrary& GetShaderLibrary() { return s_ShaderLibrary; }

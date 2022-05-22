@@ -23,10 +23,10 @@ namespace ArcEngine
 	MonoImage* ScriptEngine::s_ScriptCoreImage;
 	MonoImage* ScriptEngine::s_ScriptClientImage;
 
-	eastl::unordered_map<eastl::string, MonoClass*> ScriptEngine::s_ClassMap;
-	eastl::unordered_map<eastl::string, MonoMethod*> ScriptEngine::s_MethodMap;
-	eastl::unordered_map<eastl::string, MonoProperty*> ScriptEngine::s_PropertyMap;
-	eastl::unordered_map<eastl::string, eastl::unordered_map<eastl::string, Field>> ScriptEngine::s_FieldMap;
+	eastl::hash_map<eastl::string, MonoClass*> ScriptEngine::s_ClassMap;
+	eastl::hash_map<eastl::string, MonoMethod*> ScriptEngine::s_MethodMap;
+	eastl::hash_map<eastl::string, MonoProperty*> ScriptEngine::s_PropertyMap;
+	eastl::hash_map<eastl::string, eastl::hash_map<eastl::string, Field>> ScriptEngine::s_FieldMap;
 	Scene* ScriptEngine::s_CurrentScene = nullptr;
 
 	void ScriptEngine::Init(const char* coreAssemblyPath)
@@ -169,7 +169,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		eastl::string desc = eastl::string(className) + ":" + (methodSignature);
-		if (s_MethodMap.find(desc) != s_MethodMap.end())
+		if (s_MethodMap.find_as(desc) != s_MethodMap.end())
 			return;
 		
 		MonoMethodDesc* methodDesc = mono_method_desc_new(desc.c_str(), true);
@@ -217,7 +217,7 @@ namespace ArcEngine
 		if (!s_ScriptCoreImage)
 			return;
 
-		if (s_ClassMap.find(className) != s_ClassMap.end())
+		if (s_ClassMap.find_as(className) != s_ClassMap.end())
 			return;
 
 		eastl::string name(className);
@@ -242,7 +242,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		eastl::string desc = eastl::string(className) + ":" + (methodSignature);
-		if (s_MethodMap.find(desc) != s_MethodMap.end())
+		if (s_MethodMap.find_as(desc) != s_MethodMap.end())
 			return s_MethodMap.at(desc);
 		else
 			return nullptr;
@@ -252,7 +252,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (s_ClassMap.find(className) != s_ClassMap.end())
+		if (s_ClassMap.find_as(className) != s_ClassMap.end())
 			return s_ClassMap.at(className);
 		else
 			return nullptr;
@@ -263,7 +263,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		eastl::string desc = eastl::string(className) + ":" + (methodSignature);
-		if (s_MethodMap.find(desc) != s_MethodMap.end())
+		if (s_MethodMap.find_as(desc) != s_MethodMap.end())
 			return s_MethodMap.at(desc);
 		
 		MonoMethodDesc* methodDesc = mono_method_desc_new(desc.c_str(), true);
@@ -290,7 +290,7 @@ namespace ArcEngine
 			return false;
 		}
 
-		if (s_ClassMap.find(className) != s_ClassMap.end())
+		if (s_ClassMap.find_as(className) != s_ClassMap.end())
 			return true;
 
 		eastl::string name(className);
@@ -316,7 +316,7 @@ namespace ArcEngine
 			return nullptr;
 		}
 
-		if (s_ClassMap.find(className) != s_ClassMap.end())
+		if (s_ClassMap.find_as(className) != s_ClassMap.end())
 			return s_ClassMap.at(className);
 
 		eastl::string name(className);
@@ -347,7 +347,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		eastl::string key = eastl::string(className) + propertyName;
-		if (s_PropertyMap.find(key) != s_PropertyMap.end())
+		if (s_PropertyMap.find_as(key) != s_PropertyMap.end())
 			return s_PropertyMap.at(key);
 
 		MonoClass* clazz = GetClass(className);
@@ -367,7 +367,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (s_FieldMap.find(className) != s_FieldMap.end())
+		if (s_FieldMap.find_as(className) != s_FieldMap.end())
 			return &(s_FieldMap.at(className));
 
 		return nullptr;

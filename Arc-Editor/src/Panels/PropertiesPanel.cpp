@@ -82,7 +82,7 @@ namespace ArcEngine
 		UI::BeginProperties();
 
 		// Public Fields
-		eastl::unordered_map<eastl::string, Field>* fieldMap = ScriptEngine::GetFields(component.ClassName.c_str());
+		eastl::hash_map<eastl::string, Field>* fieldMap = ScriptEngine::GetFields(component.ClassName.c_str());
 		if (fieldMap)
 		{
 			for (auto& [name, field] : *fieldMap)

@@ -15,6 +15,11 @@ namespace ArcEngine
 		eastl::string Name;
 		Ref<Material> Mat;
 		Ref<VertexArray> Geometry;
+
+		Submesh(const char* name, Ref<Material>& material, Ref<VertexArray>& geometry)
+			: Name(name), Mat(material), Geometry(geometry)
+		{
+		}
 	};
 
 	class Mesh

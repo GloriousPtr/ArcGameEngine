@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EASTL/unordered_map.h>
+#include <EASTL/hash_map.h>
 
 #include "Arc/Renderer/Texture.h"
 
@@ -16,7 +16,7 @@ namespace ArcEngine
 		static Ref<TextureCubemap> GetTextureCubemap(eastl::string path);
 
 	private:
-		static eastl::unordered_map<eastl::string, Ref<Texture2D>> m_Texture2DMap;
-		static eastl::unordered_map<eastl::string, Ref<TextureCubemap>> m_TextureCubeMap;
+		static eastl::hash_map<eastl::string, Ref<Texture2D>> m_Texture2DMap;
+		static eastl::hash_map<eastl::string, Ref<TextureCubemap>> m_TextureCubeMap;
 	};
 }

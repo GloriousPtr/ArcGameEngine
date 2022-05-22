@@ -3,8 +3,8 @@
 
 namespace ArcEngine
 {
-	eastl::unordered_map<eastl::string, Ref<Texture2D>> AssetManager::m_Texture2DMap;
-	eastl::unordered_map<eastl::string, Ref<TextureCubemap>> AssetManager::m_TextureCubeMap;
+	eastl::hash_map<eastl::string, Ref<Texture2D>> AssetManager::m_Texture2DMap;
+	eastl::hash_map<eastl::string, Ref<TextureCubemap>> AssetManager::m_TextureCubeMap;
 
 	void AssetManager::Init()
 	{
@@ -18,7 +18,7 @@ namespace ArcEngine
 
 	Ref<Texture2D> AssetManager::GetTexture2D(eastl::string path)
 	{
-		if (m_Texture2DMap.find(path) != m_Texture2DMap.end())
+		if (m_Texture2DMap.find_as(path) != m_Texture2DMap.end())
 			return m_Texture2DMap.at(path);
 
 		Ref<Texture2D> texture = Texture2D::Create(path);
@@ -28,7 +28,7 @@ namespace ArcEngine
 
 	Ref<TextureCubemap> AssetManager::GetTextureCubemap(eastl::string path)
 	{
-		if (m_TextureCubeMap.find(path) != m_TextureCubeMap.end())
+		if (m_TextureCubeMap.find_as(path) != m_TextureCubeMap.end())
 			return m_TextureCubeMap.at(path);
 
 		Ref<TextureCubemap> texture = TextureCubemap::Create(path);

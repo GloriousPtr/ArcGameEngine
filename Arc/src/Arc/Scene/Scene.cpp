@@ -39,7 +39,7 @@ namespace ArcEngine
 	}
 
 	template<typename Component>
-	static void CopyComponent(entt::registry& dst, entt::registry& src, eastl::unordered_map<UUID, entt::entity> enttMap)
+	static void CopyComponent(entt::registry& dst, entt::registry& src, eastl::hash_map<UUID, entt::entity> enttMap)
 	{
 		auto view = src.view<Component>();
 		for (auto e : view)
@@ -288,7 +288,7 @@ namespace ArcEngine
 		
 		// Lights
 		eastl::vector<Entity> lights;
-		lights.reserve(25);
+		lights.reserve(Renderer3D::MAX_NUM_LIGHTS);
 		{
 			ARC_PROFILE_SCOPE("PrepareLightData");
 
@@ -297,7 +297,7 @@ namespace ArcEngine
 			for (auto entity : view)
 			{
 				auto [id, light] = view.get<IDComponent, LightComponent>(entity);
-				lights.push_back(Entity(entity, this));
+				lights.emplace_back(Entity(entity, this));
 			}
 		}
 		Entity skylight = {};
@@ -319,6 +319,7 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE("Submit Mesh Data");
 
 			auto view = m_Registry.view<IDComponent, MeshComponent>();
+			Renderer3D::ReserveMeshes(view.size());
 			for (auto entity : view)
 			{
 				auto [id, mesh] = view.get<IDComponent, MeshComponent>(entity);
@@ -433,7 +434,7 @@ namespace ArcEngine
 		if(mainCamera)
 		{
 			eastl::vector<Entity> lights;
-			lights.reserve(25);
+			lights.reserve(Renderer3D::MAX_NUM_LIGHTS);
 			{
 				ARC_PROFILE_SCOPE("Prepare Light Data");
 
@@ -442,7 +443,7 @@ namespace ArcEngine
 				for (auto entity : view)
 				{
 					auto [id, light] = view.get<IDComponent, LightComponent>(entity);
-					lights.push_back(Entity(entity, this));
+					lights.emplace_back(Entity(entity, this));
 				}
 			}
 			Entity skylight = {};
@@ -464,6 +465,7 @@ namespace ArcEngine
 				ARC_PROFILE_SCOPE("Submit Mesh Data");
 
 				auto view = m_Registry.view<IDComponent, MeshComponent>();
+				Renderer3D::ReserveMeshes(view.size());
 				for (auto entity : view)
 				{
 					auto [id, mesh] = view.get<IDComponent, MeshComponent>(entity);
@@ -599,4 +601,3 @@ namespace ArcEngine
 	{
 	}
 }
-
