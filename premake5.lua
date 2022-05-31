@@ -43,7 +43,12 @@ IncludeDir["EABase"] = "%{wks.location}/Arc/vendor/EABase/include/Common"
 IncludeDir["EASTL"] = "%{wks.location}/Arc/vendor/EASTL/include"
 
 LibDir = {}
-LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/%{cfg.buildcfg}"
+filter "configurations:Debug"
+	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Debug"
+filter "configurations:Release"
+	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Release"
+filter "configurations:Dist"
+	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Release"
 
 Lib = {}
 Lib["mono"] = "%{LibDir.Mono}/mono-2.0-sgen.lib"
