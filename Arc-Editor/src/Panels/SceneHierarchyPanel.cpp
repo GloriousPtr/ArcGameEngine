@@ -29,15 +29,15 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0, 0});
+
 		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
 		ImGui::Begin(ICON_MDI_VIEW_LIST " Hierarchy");
 
 		float x1 = ImGui::GetCurrentWindow()->WorkRect.Min.x;
 		float x2 = ImGui::GetCurrentWindow()->WorkRect.Max.x;
-		float item_spacing_y = ImGui::GetStyle().ItemSpacing.y;
-		float item_offset_y = -item_spacing_y * 0.5f;
-		float line_height = ImGui::GetTextLineHeight() + item_spacing_y;
-		UI::DrawRowsBackground(m_CurrentlyVisibleEntities, line_height, x1, x2, item_offset_y, 0, ImGui::GetColorU32(EditorTheme::WindowBgAlternativeColor));
+		float line_height = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2.0f;
+		UI::DrawRowsBackground(m_CurrentlyVisibleEntities, line_height, x1, x2, 0, 0, ImGui::GetColorU32(EditorTheme::WindowBgAlternativeColor));
 		m_CurrentlyVisibleEntities = 0;
 		
 		auto view = m_Context->m_Registry.view<IDComponent>();
@@ -109,6 +109,8 @@ namespace ArcEngine
 		}
 
 		ImGui::End();
+
+		ImGui::PopStyleVar();
 	}
 
 	ImRect SceneHierarchyPanel::DrawEntityNode(Entity entity, bool skipChildren)
@@ -125,6 +127,7 @@ namespace ArcEngine
 		ImGuiTreeNodeFlags flags = (m_SelectionContext == entity ? ImGuiTreeNodeFlags_Selected : 0);
 		flags |= ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
+		flags |= ImGuiTreeNodeFlags_FramePadding;
 
 		if (childrenSize == 0)
 		{
@@ -133,16 +136,24 @@ namespace ArcEngine
 
 		bool highlight = m_SelectionContext == entity;
 		if (highlight)
+		{
 			ImGui::PushStyleColor(ImGuiCol_Header, EditorTheme::HeaderSelectedColor);
+			ImGui::PushStyleColor(ImGuiCol_HeaderHovered, EditorTheme::HeaderSelectedColor);
+		}
 
 		eastl::string displayName = (ICON_MDI_CUBE_OUTLINE + eastl::string(" ") + tag);
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity.GetUUID(), flags, displayName.c_str());
 
 		if (highlight)
-			ImGui::PopStyleColor();
+		{
+			ImGui::PopStyleColor(2);
+		}
 
-		if(ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-			m_SelectionContext = entity;
+		if (ImGui::IsItemHovered())
+		{
+			if ((ImGui::IsMouseDown(0) || ImGui::IsMouseDown(1)) && !ImGui::IsItemToggledOpen())
+				m_SelectionContext = entity;
+		}
 
 		bool entityDeleted = false;
 		bool createChild = false;
