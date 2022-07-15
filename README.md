@@ -17,16 +17,13 @@ I develop it in my spare time as a personal project, so expect frequent periods 
 
 ## Set up
 
-You can clone Arc Game Engine using git. Make sure you do a ```--recursive``` clone!
-
+- Make sure to install [Mono](https://www.mono-project.com/download/stable/).
+- Clone Arc Game Engine using git. Make sure you do a ```--recursive``` clone!
 ```
 git clone --recursive https://github.com/MohitSethi99/ArcEngine.git
 ```
-
-Arc Game Engine is built in a Windows environment, using Visual Studio 2022.
-
-Execute the script `scripts/Win-GenProjects.bat`
-to generate the solution and project files.
+- Arc Game Engine is built in a Windows environment, using Visual Studio 2022.
+- Execute the script `scripts/Win-GenProjects.bat` to generate the solution and project files.
 
 ## Current Features
 
@@ -40,15 +37,15 @@ Right now, Arc Game Engine is very bare-bones. Its most remarkable features are:
 | **3D Renderer**       | Basic 3D renderer with lighting, IBL and PBR workflow supporting OpenGL. | Done ✔️ |
 | **ImGui support**     | Basic game editor and in-game debug UI using ImGui.                      | Done ✔️ |
 | **Shadow Support**    | Soft and Hard shadow support in OpenGL 3D Renderer.                      | Done ✔️ |
+| **2D Physics**        | Basic 2D Physics using Box2D                              							 | Done ✔️ |
 
 ## Planned Features
 
 | Feature               | Description                                               | Status   |
 | -------               | -----------                                               | ------   |
-| **2D Physics**        | Basic 2D Physics using Box2D                              | WIP 💻  |
+| **Scripting**         | Basic scripting in C# using mono.                         | WIP 💻  |
 | **3D Physics**        | Nvidia's Physx engine support for 3D physics.             | TODO 📋 |
 | **Asset manager**     | Basic asset handling API.                                 | TODO 📋 |
-| **Scripting**         | Basic scripting in C# using mono.                         | TODO 📋 |
 | **Audio**             | Sound API.                                                | TODO 📋 |
 | **Font**              | Extend the Renderer capabilities so it can draw text.     | TODO 📋 |
 | **Direct3D**          | Extend the Renderer to support D3D12.                     | TODO 📋 |
