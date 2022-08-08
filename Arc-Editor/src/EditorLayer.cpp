@@ -103,66 +103,9 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		static bool dockspaceOpen = true;
-		static bool opt_fullscreen_persistant = true;
-		bool opt_fullscreen = opt_fullscreen_persistant;
-		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+		m_MenuBarHeight = ImGui::GetFrameHeight();
 
-		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
-		// because it would be confusing to have two docking targets within each others.
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-		if (opt_fullscreen)
-		{
-			ImGuiViewport* viewport = ImGui::GetMainViewport();
-			ImGui::SetNextWindowPos(viewport->Pos);
-			ImGui::SetNextWindowSize(viewport->Size);
-			ImGui::SetNextWindowViewport(viewport->ID);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-			window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-		}
-
-		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background and handle the pass-thru hole, so we ask Begin() to not render a background.
-		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
-			window_flags |= ImGuiWindowFlags_NoBackground;
-
-		// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
-		// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive, 
-		// all active windows docked into it will lose their parent and become undocked.
-		// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise 
-		// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
-		ImGui::PopStyleVar();
-
-		if (opt_fullscreen)
-			ImGui::PopStyleVar(2);
-
-		// DockSpace
-		float menuBarHeight = ImGui::GetFrameHeight();
-		uint32_t topMenuBarCount = 2;
-		uint32_t bottomMenuBarCount = 1;
-		float dockSpaceOffsetY = ImGui::GetCursorPosY() + (topMenuBarCount - 1) * menuBarHeight;
-
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImVec2 dockSpaceSize = ImVec2(viewport->Size.x, viewport->Size.y - (topMenuBarCount + bottomMenuBarCount) * menuBarHeight);
-
-		ImGuiIO& io = ImGui::GetIO();
-		ImGuiStyle& style = ImGui::GetStyle();
-		float minWinSizeX = style.WindowMinSize.x;
-		float minWinSizeY = style.WindowMinSize.y;
-		style.WindowMinSize.x = 370.0f;
-		style.WindowMinSize.y = 50.0f;
-		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
-		{
-			ImGui::SetCursorPosY(dockSpaceOffsetY);
-			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-			ImGui::DockSpace(dockspace_id, dockSpaceSize, dockspace_flags);
-		}
-
-		style.WindowMinSize.x = minWinSizeX;
-		style.WindowMinSize.y = minWinSizeY;
+		BeginDockspace("Dockspace");
 		{
 			ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
 			ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
@@ -170,7 +113,7 @@ namespace ArcEngine
 			//////////////////////////////////////////////////////////////////////////
 			// PRIMARY TOP MENU BAR //////////////////////////////////////////////////
 			//////////////////////////////////////////////////////////////////////////
-			if (ImGui::BeginViewportSideBar("##PrimaryMenuBar", viewport, ImGuiDir_Up, menuBarHeight, window_flags))
+			if (ImGui::BeginViewportSideBar("##PrimaryMenuBar", viewport, ImGuiDir_Up, m_MenuBarHeight, window_flags))
 			{
 				if (ImGui::BeginMenuBar())
 				{
@@ -227,7 +170,7 @@ namespace ArcEngine
 							ImGui::EndMenu();
 						}
 						ImGui::MenuItem("Hierarchy", nullptr, &m_ShowSceneHierarchyPanel);
-						
+
 						ImGui::MenuItem(m_ProjectSettingsPanel.GetName(), nullptr, &m_ProjectSettingsPanel.Showing);
 						ImGui::MenuItem(m_ConsolePanel.GetName(), nullptr, &m_ConsolePanel.Showing);
 
@@ -270,7 +213,7 @@ namespace ArcEngine
 			//////////////////////////////////////////////////////////////////////////
 			// SECONDARY TOP BAR /////////////////////////////////////////////////////
 			//////////////////////////////////////////////////////////////////////////
-			if (ImGui::BeginViewportSideBar("##SecondaryMenuBar", viewport, ImGuiDir_Up, menuBarHeight, window_flags))
+			if (ImGui::BeginViewportSideBar("##SecondaryMenuBar", viewport, ImGuiDir_Up, m_MenuBarHeight, window_flags))
 			{
 				if (ImGui::BeginMenuBar())
 				{
@@ -302,9 +245,9 @@ namespace ArcEngine
 			//////////////////////////////////////////////////////////////////////////
 			// BOTTOM MENU BAR ///////////////////////////////////////////////////////
 			//////////////////////////////////////////////////////////////////////////
-			if (ImGui::BeginViewportSideBar("##StatusBar", viewport, ImGuiDir_Down, menuBarHeight, window_flags))
+			if (ImGui::BeginViewportSideBar("##StatusBar", viewport, ImGuiDir_Down, m_MenuBarHeight, window_flags))
 			{
-				if(ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+				if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 					m_ConsolePanel.SetFocus();
 
 				if (ImGui::BeginMenuBar())
@@ -322,66 +265,65 @@ namespace ArcEngine
 
 				ImGui::End();
 			}
-		}
-		
-		//////////////////////////////////////////////////////////////////////////
-		// HEIRARCHY /////////////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////////////////
-		if (m_ShowSceneHierarchyPanel)
-			m_SceneHierarchyPanel.OnImGuiRender();
-		Entity selectedContext = m_SceneHierarchyPanel.GetSelectedEntity();
 
-		//////////////////////////////////////////////////////////////////////////
-		// SCENE VIEWPORTS ///////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////////////////
-		for (size_t i = 0; i < m_Viewports.size(); i++)
-		{
-			if (m_Viewports[i]->Showing)
-				m_Viewports[i]->OnImGuiRender();
-		}
+			//////////////////////////////////////////////////////////////////////////
+			// HEIRARCHY /////////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+			if (m_ShowSceneHierarchyPanel)
+				m_SceneHierarchyPanel.OnImGuiRender();
+			Entity selectedContext = m_SceneHierarchyPanel.GetSelectedEntity();
 
-		//////////////////////////////////////////////////////////////////////////
-		// ASSETS PANELS /////////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////////////////
-		for (size_t i = 0; i < m_AssetPanels.size(); i++)
-		{
-			if (m_AssetPanels[i]->Showing)
-				m_AssetPanels[i]->OnImGuiRender();
-		}
-
-		//////////////////////////////////////////////////////////////////////////
-		// OTHER PANELS //////////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////////////////
-		for (size_t i = 0; i < m_Panels.size(); i++)
-		{
-			if (m_Panels[i]->Showing)
-				m_Panels[i]->OnImGuiRender();
-		}
-
-		//////////////////////////////////////////////////////////////////////////
-		// PROPERTY PANELS ///////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////////////////
-		for (size_t i = 0; i < m_Properties.size(); i++)
-		{
-			if (m_Properties[i]->Showing)
+			//////////////////////////////////////////////////////////////////////////
+			// SCENE VIEWPORTS ///////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+			for (size_t i = 0; i < m_Viewports.size(); i++)
 			{
-				m_Properties[i]->SetContext(selectedContext);
-				m_Properties[i]->OnImGuiRender();
+				if (m_Viewports[i]->Showing)
+					m_Viewports[i]->OnImGuiRender();
 			}
+
+			//////////////////////////////////////////////////////////////////////////
+			// ASSETS PANELS /////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+			for (size_t i = 0; i < m_AssetPanels.size(); i++)
+			{
+				if (m_AssetPanels[i]->Showing)
+					m_AssetPanels[i]->OnImGuiRender();
+			}
+
+			//////////////////////////////////////////////////////////////////////////
+			// OTHER PANELS //////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+			for (size_t i = 0; i < m_Panels.size(); i++)
+			{
+				if (m_Panels[i]->Showing)
+					m_Panels[i]->OnImGuiRender();
+			}
+
+			//////////////////////////////////////////////////////////////////////////
+			// PROPERTY PANELS ///////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+			for (size_t i = 0; i < m_Properties.size(); i++)
+			{
+				if (m_Properties[i]->Showing)
+				{
+					m_Properties[i]->SetContext(selectedContext);
+					m_Properties[i]->OnImGuiRender();
+				}
+			}
+
+			if (m_ConsolePanel.Showing)
+				m_ConsolePanel.OnImGuiRender();
+
+			if (m_ProjectSettingsPanel.Showing)
+				m_ProjectSettingsPanel.OnImGuiRender();
+
+			if (m_ShowDemoWindow)
+				ImGui::ShowDemoWindow(&m_ShowDemoWindow);
+
+			m_Application->GetImGuiLayer()->SetBlockEvents(false);
 		}
-
-		if (m_ConsolePanel.Showing)
-			m_ConsolePanel.OnImGuiRender();
-
-		if (m_ProjectSettingsPanel.Showing)
-			m_ProjectSettingsPanel.OnImGuiRender();
-
-		if (m_ShowDemoWindow)
-			ImGui::ShowDemoWindow(&m_ShowDemoWindow);
-
-		m_Application->GetImGuiLayer()->SetBlockEvents(false);
-		
-		ImGui::End();
+		EndDockspace();
 	}
 
 	void EditorLayer::OnEvent(Event& e)
@@ -392,6 +334,74 @@ namespace ArcEngine
 		dispatcher.Dispatch<KeyPressedEvent>(ARC_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
 		dispatcher.Dispatch<MouseButtonPressedEvent>(ARC_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
 		dispatcher.Dispatch<MouseButtonReleasedEvent>(ARC_BIND_EVENT_FN(EditorLayer::OnMouseButtonReleased));
+	}
+
+	void EditorLayer::BeginDockspace(const char* name)
+	{
+		static bool dockspaceOpen = true;
+		static bool opt_fullscreen_persistant = true;
+		bool opt_fullscreen = opt_fullscreen_persistant;
+		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoCloseButton;
+
+		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+		// because it would be confusing to have two docking targets within each others.
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+		if (opt_fullscreen)
+		{
+			ImGuiViewport* viewport = ImGui::GetMainViewport();
+			ImGui::SetNextWindowPos(viewport->Pos);
+			ImGui::SetNextWindowSize(viewport->Size);
+			ImGui::SetNextWindowViewport(viewport->ID);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+			window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		}
+
+		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background and handle the pass-thru hole, so we ask Begin() to not render a background.
+		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+			window_flags |= ImGuiWindowFlags_NoBackground;
+
+		// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
+		// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive, 
+		// all active windows docked into it will lose their parent and become undocked.
+		// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise 
+		// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
+		ImGui::PopStyleVar();
+
+		if (opt_fullscreen)
+			ImGui::PopStyleVar(2);
+
+		// DockSpace
+		uint32_t topMenuBarCount = 2;
+		uint32_t bottomMenuBarCount = 1;
+		float dockSpaceOffsetY = ImGui::GetCursorPosY() + (topMenuBarCount - 1) * m_MenuBarHeight;
+
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImVec2 dockSpaceSize = ImVec2(viewport->Size.x, viewport->Size.y - (topMenuBarCount + bottomMenuBarCount) * m_MenuBarHeight);
+
+		ImGuiIO& io = ImGui::GetIO();
+		ImGuiStyle& style = ImGui::GetStyle();
+		float minWinSizeX = style.WindowMinSize.x;
+		float minWinSizeY = style.WindowMinSize.y;
+		style.WindowMinSize.x = 370.0f;
+		style.WindowMinSize.y = 50.0f;
+		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+		{
+			ImGui::SetCursorPosY(dockSpaceOffsetY);
+			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+			ImGui::DockSpace(dockspace_id, dockSpaceSize, dockspace_flags);
+		}
+
+		style.WindowMinSize.x = minWinSizeX;
+		style.WindowMinSize.y = minWinSizeY;
+	}
+
+	void EditorLayer::EndDockspace()
+	{
+		ImGui::End();
 	}
 
 	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)

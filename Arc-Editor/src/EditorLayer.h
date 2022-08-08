@@ -29,6 +29,8 @@ namespace ArcEngine
 		static EditorLayer* GetInstance() { return s_Instance; }
 
 	private:
+		void BeginDockspace(const char* name);
+		void EndDockspace();
 		bool OnKeyPressed(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 		bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
@@ -60,6 +62,8 @@ namespace ArcEngine
 		eastl::vector<Scope<SceneViewport>> m_Viewports;
 		eastl::vector<Scope<PropertiesPanel>> m_Properties;
 		eastl::vector<Scope<AssetPanel>> m_AssetPanels;
+
+		float m_MenuBarHeight = 10.0f;
 
 		bool m_ShowSceneHierarchyPanel = true;
 		bool m_ShowDemoWindow = false;
