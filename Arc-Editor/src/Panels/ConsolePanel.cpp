@@ -68,16 +68,16 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		ImGui::SetNextWindowSize(ImVec2(640, 480), ImGuiCond_FirstUseEver);
-		ImGui::Begin(m_ID.c_str(), &m_Showing);
+		if (OnBegin())
 		{
 			ImGuiRenderHeader();
 			ImGui::Separator();
 			ImGui::Spacing();
 			ImGui::Spacing();
 			ImGuiRenderMessages();
+
+			OnEnd();
 		}
-		ImGui::End();
 	}
 
 	void ConsolePanel::SetFocus()

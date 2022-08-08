@@ -20,12 +20,13 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
-		ImGui::Begin(m_ID.c_str(), &m_Showing);
+		if (OnBegin())
+		{
+			if (m_Context && m_Context.GetScene())
+				DrawComponents(m_Context);
 
-		if(m_Context && m_Context.GetScene())
-			DrawComponents(m_Context);
-		
-		ImGui::End();
+			OnEnd();
+		}
 	}
 
 	template<typename T, typename UIFunction>

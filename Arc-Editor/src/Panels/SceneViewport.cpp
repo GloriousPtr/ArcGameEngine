@@ -230,99 +230,101 @@ namespace ArcEngine
 
 		ImGui::SetNextWindowSize(ImVec2(640, 480), ImGuiCond_FirstUseEver);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin(m_ID.c_str(), &m_Showing);
-		
-		const auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
-		const auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
-		const auto viewportOffset = ImGui::GetWindowPos();
-		m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
-		m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
-		
-		m_ViewportFocused = ImGui::IsWindowFocused();
-		m_ViewportHovered = ImGui::IsWindowHovered();
-
-		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
-
-		uint64_t textureID = m_RenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
-		ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
-
-		if (ImGui::BeginDragDropTarget())
+		if (OnBegin())
 		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			const auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
+			const auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
+			const auto viewportOffset = ImGui::GetWindowPos();
+			m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
+			m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
+
+			m_ViewportFocused = ImGui::IsWindowFocused();
+			m_ViewportHovered = ImGui::IsWindowHovered();
+
+			ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+			m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
+
+			uint64_t textureID = m_RenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
+			ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+
+			if (ImGui::BeginDragDropTarget())
 			{
-				const char* path = (const char*)payload->Data;
-				eastl::string ext = StringUtils::GetExtension(path);
-				
-				if (ext == "arc")
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
-					EditorLayer::GetInstance()->OpenScene(path);
-				}
-				if (ext == "assbin" || ext == "obj" || ext == "fbx")
-				{
-					Ref<Mesh> mesh = CreateRef<Mesh>(path);
+					const char* path = (const char*)payload->Data;
+					eastl::string ext = StringUtils::GetExtension(path);
 
-					Entity parent = m_Scene->CreateEntity(mesh->GetName());
-
-					uint32_t meshCount = mesh->GetSubmeshCount();
-					for (size_t i = 0; i < meshCount; i++)
+					if (ext == "arc")
 					{
-						auto& submesh = mesh->GetSubmesh(i);
-						Entity entity = m_Scene->CreateEntity(submesh.Name);
-						entity.SetParent(parent);
-						auto& meshComponent = entity.AddComponent<MeshComponent>();
-						meshComponent.Filepath = path;
-						meshComponent.MeshGeometry = mesh;
-						meshComponent.SubmeshIndex = i;
+						EditorLayer::GetInstance()->OpenScene(path);
+					}
+					if (ext == "assbin" || ext == "obj" || ext == "fbx")
+					{
+						Ref<Mesh> mesh = CreateRef<Mesh>(path);
+
+						Entity parent = m_Scene->CreateEntity(mesh->GetName());
+
+						uint32_t meshCount = mesh->GetSubmeshCount();
+						for (size_t i = 0; i < meshCount; i++)
+						{
+							auto& submesh = mesh->GetSubmesh(i);
+							Entity entity = m_Scene->CreateEntity(submesh.Name);
+							entity.SetParent(parent);
+							auto& meshComponent = entity.AddComponent<MeshComponent>();
+							meshComponent.Filepath = path;
+							meshComponent.MeshGeometry = mesh;
+							meshComponent.SubmeshIndex = i;
+						}
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+			// Gizmos
+			if (m_ViewportHovered && m_SceneHierarchyPanel && m_GizmoType != -1 && !m_SimulationRunning)
+			{
+				Entity selectedEntity = m_SceneHierarchyPanel->GetSelectedEntity();
+				if (selectedEntity)
+				{
+					ImGuizmo::SetOrthographic(false);
+					ImGuizmo::SetDrawlist();
+
+					ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
+
+					const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
+					const glm::mat4& cameraView = m_EditorCamera.GetViewMatrix();
+					// Entity Transform
+					auto& tc = selectedEntity.GetComponent<TransformComponent>();
+					auto& rc = selectedEntity.GetComponent<RelationshipComponent>();
+					glm::mat4 transform = selectedEntity.GetWorldTransform();
+
+					// Snapping
+					const bool snap = ImGui::IsKeyDown(Key::LeftControl);
+					float snapValue = 0.5f;
+					if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+						snapValue = 45.0f;
+
+					float snapValues[3] = { snapValue, snapValue, snapValue };
+
+					ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), (ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
+
+					if (m_ViewportHovered && ImGuizmo::IsUsing())
+					{
+						glm::mat4& parentWorldTransform = rc.Parent != 0 ? selectedEntity.GetParent().GetWorldTransform() : glm::mat4(1.0f);
+						glm::vec3 translation, rotation, scale;
+						Math::DecomposeTransform(glm::inverse(parentWorldTransform) * transform, translation, rotation, scale);
+
+						tc.Translation = translation;
+						const glm::vec3 deltaRotation = rotation - tc.Rotation;
+						tc.Rotation += deltaRotation;
+						tc.Scale = scale;
 					}
 				}
 			}
-			ImGui::EndDragDropTarget();
+
+			OnEnd();
 		}
 
-		// Gizmos
-		if (m_ViewportHovered && m_SceneHierarchyPanel && m_GizmoType != -1 && !m_SimulationRunning)
-		{
-			Entity selectedEntity = m_SceneHierarchyPanel->GetSelectedEntity();
-			if(selectedEntity)
-			{
-				ImGuizmo::SetOrthographic(false);
-				ImGuizmo::SetDrawlist();
-
-				ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
-
-				const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
-				const glm::mat4& cameraView = m_EditorCamera.GetViewMatrix();
-				// Entity Transform
-				auto& tc = selectedEntity.GetComponent<TransformComponent>();
-				auto& rc = selectedEntity.GetComponent<RelationshipComponent>();
-				glm::mat4 transform = selectedEntity.GetWorldTransform();
-
-				// Snapping
-				const bool snap = ImGui::IsKeyDown(Key::LeftControl);
-				float snapValue = 0.5f;
-				if(m_GizmoType == ImGuizmo::OPERATION::ROTATE)
-					snapValue = 45.0f;
-
-				float snapValues[3] = { snapValue, snapValue, snapValue };
-				
-				ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), (ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
-
-				if (m_ViewportHovered && ImGuizmo::IsUsing())
-				{
-					glm::mat4& parentWorldTransform = rc.Parent != 0 ? selectedEntity.GetParent().GetWorldTransform() : glm::mat4(1.0f);
-					glm::vec3 translation, rotation, scale;
-					Math::DecomposeTransform(glm::inverse(parentWorldTransform) * transform, translation, rotation, scale);
-					
-					tc.Translation = translation;
-					const glm::vec3 deltaRotation = rotation - tc.Rotation;
-					tc.Rotation += deltaRotation;
-					tc.Scale = scale;
-				}
-			}
-		}
-
-		ImGui::End();
 		ImGui::PopStyleVar();
 	}
 

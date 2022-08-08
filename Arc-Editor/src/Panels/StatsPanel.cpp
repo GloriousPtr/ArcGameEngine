@@ -26,52 +26,53 @@ namespace ArcEngine
 		avg /= size;
 
 		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
-		ImGui::Begin(m_ID.c_str(), &m_Showing, ImGuiWindowFlags_NoCollapse);
-
+		if (OnBegin())
 		{
-			const auto stats = Renderer2D::GetStats();
-			ImGui::Text("2D");
+			{
+				const auto stats = Renderer2D::GetStats();
+				ImGui::Text("2D");
 
-			ImGui::Text("Draw Calls: %d", stats.DrawCalls);
-			ImGui::SameLine();
-			ImGui::PushItemWidth(-1);
-			ImGui::Text("Quads: %d", stats.QuadCount);
-			ImGui::SameLine();
-			ImGui::PushItemWidth(-1);
-			ImGui::Text("Tris: %d", stats.GetTotalTriangleCount());
+				ImGui::Text("Draw Calls: %d", stats.DrawCalls);
+				ImGui::SameLine();
+				ImGui::PushItemWidth(-1);
+				ImGui::Text("Quads: %d", stats.QuadCount);
+				ImGui::SameLine();
+				ImGui::PushItemWidth(-1);
+				ImGui::Text("Tris: %d", stats.GetTotalTriangleCount());
 
-			ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
-			ImGui::SameLine();
-			ImGui::PushItemWidth(-1);
-			ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+				ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
+				ImGui::SameLine();
+				ImGui::PushItemWidth(-1);
+				ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+			}
+
+			ImGui::Separator();
+
+			{
+				const auto stats = Renderer3D::GetStats();
+				ImGui::Text("3D");
+
+				ImGui::Text("Draw Calls: %d", stats.DrawCalls);
+				ImGui::SameLine();
+				ImGui::PushItemWidth(-1);
+				ImGui::Text("Indices: %d", stats.IndexCount);
+			}
+
+
+			UI::BeginProperties();
+			bool vSync = Application::Get().GetWindow().IsVSync();
+			if (UI::Property("VSync Enabled", vSync))
+				Application::Get().GetWindow().SetVSync(vSync);
+			UI::EndProperties();
+
+			ImGui::Text("FPS");
+			ImGui::Separator();
+			ImGui::PlotLines("#FPS", m_FpsValues, size);
+			ImGui::Text("FPS: %f", avg);
+			const float fps = (1.0f / avg) * 1000.0f;
+			ImGui::Text("Frame time (ms): %f", fps);
+
+			OnEnd();
 		}
-
-		ImGui::Separator();
-
-		{
-			const auto stats = Renderer3D::GetStats();
-			ImGui::Text("3D");
-
-			ImGui::Text("Draw Calls: %d", stats.DrawCalls);
-			ImGui::SameLine();
-			ImGui::PushItemWidth(-1);
-			ImGui::Text("Indices: %d", stats.IndexCount);
-		}
-
-
-		UI::BeginProperties();
-		bool vSync = Application::Get().GetWindow().IsVSync();
-		if (UI::Property("VSync Enabled", vSync))
-			Application::Get().GetWindow().SetVSync(vSync);
-		UI::EndProperties();
-
-		ImGui::Text("FPS");
-		ImGui::Separator();
-		ImGui::PlotLines("#FPS", m_FpsValues, size);
-		ImGui::Text("FPS: %f", avg);
-		const float fps = (1.0f / avg) * 1000.0f;
-		ImGui::Text("Frame time (ms): %f", fps);
-
-		ImGui::End();
 	}
 }

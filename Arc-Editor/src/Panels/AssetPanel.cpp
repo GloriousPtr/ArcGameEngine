@@ -121,7 +121,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		ImGui::Begin(m_ID.c_str(), &m_Showing);
+		if (OnBegin())
 		{
 			RenderHeader();
 			ImGui::Separator();
@@ -151,8 +151,8 @@ namespace ArcEngine
 				ImGui::EndChild();
 			}
 			ImGui::Columns(1);
+			OnEnd();
 		}
-		ImGui::End();
 	}
 
 	void AssetPanel::RenderHeader()

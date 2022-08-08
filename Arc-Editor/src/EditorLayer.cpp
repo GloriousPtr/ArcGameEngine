@@ -69,7 +69,7 @@ namespace ArcEngine
 		// Remove unused scene viewports
 		for (auto it = m_Viewports.begin(); it != m_Viewports.end(); it++)
 		{
-			if (!it->get()->IsShowing())
+			if (!it->get()->Showing)
 			{
 				m_Viewports.erase(it);
 				break;
@@ -79,7 +79,7 @@ namespace ArcEngine
 		// Remove unused properties panels
 		for (auto it = m_Properties.begin(); it != m_Properties.end(); it++)
 		{
-			if (!it->get()->IsShowing())
+			if (!it->get()->Showing)
 			{
 				m_Properties.erase(it);
 				break;
@@ -88,13 +88,13 @@ namespace ArcEngine
 
 		for (size_t i = 0; i < m_Viewports.size(); i++)
 		{
-			if (m_Viewports[i]->IsShowing())
+			if (m_Viewports[i]->Showing)
 				m_Viewports[i]->OnUpdate(m_ActiveScene, ts);
 		}
 
 		for (size_t i = 0; i < m_Panels.size(); i++)
 		{
-			if (m_Panels[i]->IsShowing())
+			if (m_Panels[i]->Showing)
 				m_Panels[i]->OnUpdate(ts);
 		}
 	}
@@ -228,20 +228,13 @@ namespace ArcEngine
 						}
 						ImGui::MenuItem("Hierarchy", nullptr, &m_ShowSceneHierarchyPanel);
 						
-						bool showing = m_ProjectSettingsPanel.IsShowing();
-						if (ImGui::MenuItem(m_ProjectSettingsPanel.GetName(), nullptr, &showing))
-							m_ProjectSettingsPanel.SetShowing(showing);
-
-						showing = m_ConsolePanel.IsShowing();
-						if (ImGui::MenuItem(m_ConsolePanel.GetName(), nullptr, &showing))
-							m_ConsolePanel.SetShowing(showing);
+						ImGui::MenuItem(m_ProjectSettingsPanel.GetName(), nullptr, &m_ProjectSettingsPanel.Showing);
+						ImGui::MenuItem(m_ConsolePanel.GetName(), nullptr, &m_ConsolePanel.Showing);
 
 						for (size_t i = 0; i < m_Panels.size(); i++)
 						{
 							BasePanel* panel = m_Panels[i].get();
-							bool showing = panel->IsShowing();
-							if (ImGui::MenuItem(panel->GetName(), nullptr, &showing))
-								panel->SetShowing(showing);
+							ImGui::MenuItem(panel->GetName(), nullptr, &panel->Showing);
 						}
 
 						ImGui::MenuItem("ImGui Demo Window", nullptr, &m_ShowDemoWindow);
@@ -343,7 +336,7 @@ namespace ArcEngine
 		//////////////////////////////////////////////////////////////////////////
 		for (size_t i = 0; i < m_Viewports.size(); i++)
 		{
-			if (m_Viewports[i]->IsShowing())
+			if (m_Viewports[i]->Showing)
 				m_Viewports[i]->OnImGuiRender();
 		}
 
@@ -352,7 +345,7 @@ namespace ArcEngine
 		//////////////////////////////////////////////////////////////////////////
 		for (size_t i = 0; i < m_AssetPanels.size(); i++)
 		{
-			if (m_AssetPanels[i]->IsShowing())
+			if (m_AssetPanels[i]->Showing)
 				m_AssetPanels[i]->OnImGuiRender();
 		}
 
@@ -361,7 +354,7 @@ namespace ArcEngine
 		//////////////////////////////////////////////////////////////////////////
 		for (size_t i = 0; i < m_Panels.size(); i++)
 		{
-			if (m_Panels[i]->IsShowing())
+			if (m_Panels[i]->Showing)
 				m_Panels[i]->OnImGuiRender();
 		}
 
@@ -370,17 +363,17 @@ namespace ArcEngine
 		//////////////////////////////////////////////////////////////////////////
 		for (size_t i = 0; i < m_Properties.size(); i++)
 		{
-			if (m_Properties[i]->IsShowing())
+			if (m_Properties[i]->Showing)
 			{
 				m_Properties[i]->SetContext(selectedContext);
 				m_Properties[i]->OnImGuiRender();
 			}
 		}
 
-		if (m_ConsolePanel.IsShowing())
+		if (m_ConsolePanel.Showing)
 			m_ConsolePanel.OnImGuiRender();
 
-		if (m_ProjectSettingsPanel.IsShowing())
+		if (m_ProjectSettingsPanel.Showing)
 			m_ProjectSettingsPanel.OnImGuiRender();
 
 		if (m_ShowDemoWindow)
