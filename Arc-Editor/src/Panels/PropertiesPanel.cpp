@@ -392,7 +392,7 @@ namespace ArcEngine
 		{
 			UI::BeginProperties();
 			UI::PropertyColor4("Color", component.Color);
-			UI::Property("Tiling Factor", component.TilingFactor, 200);
+			UI::Property("Tiling Factor", component.TilingFactor, 0.1f);
 			UI::Property("Texture", component.Texture);
 			UI::EndProperties();
 		});
