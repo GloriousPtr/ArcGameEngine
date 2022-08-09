@@ -141,8 +141,26 @@ namespace ArcEngine
 
 		auto& tagComponent = entity.GetComponent<TagComponent>();
 		auto& tag = tagComponent.Tag;
+
 		auto& rc = entity.GetRelationship();
 		uint32_t childrenSize = rc.Children.size();
+
+		if (m_Filter.IsActive())
+		{
+			if (!m_Filter.PassFilter(tag.c_str()))
+			{
+				if (childrenSize > 0)
+				{
+					for (size_t i = 0; i < childrenSize; i++)
+					{
+						UUID childId = entity.GetRelationship().Children[i];
+						Entity child = m_Context->GetEntity(childId);
+						DrawEntityNode(child);
+					}
+				}
+				return { 0, 0, 0, 0 };
+			}
+		}
 
 		ImGuiTreeNodeFlags flags = (m_SelectionContext == entity ? ImGuiTreeNodeFlags_Selected : 0);
 		flags |= ImGuiTreeNodeFlags_OpenOnArrow;
