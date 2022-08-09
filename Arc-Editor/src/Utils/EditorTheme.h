@@ -158,6 +158,14 @@ namespace ArcEngine
 			style->DisplaySafeAreaPadding = ImVec2(8.0f, 8.0f);
 
 			UIFramePadding = ImVec2(4.0f, 3.0f);
+
+			ImGuiColorEditFlags colorEditFlags = ImGuiColorEditFlags_AlphaBar
+				| ImGuiColorEditFlags_AlphaPreviewHalf
+				| ImGuiColorEditFlags_DisplayRGB
+				| ImGuiColorEditFlags_InputRGB
+				| ImGuiColorEditFlags_PickerHueBar
+				| ImGuiColorEditFlags_Uint8;
+			ImGui::SetColorEditOptions(colorEditFlags);
 		}
 
 		static void SetFont();
