@@ -108,163 +108,174 @@ namespace ArcEngine
 		BeginDockspace("Dockspace");
 		{
 			ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
-			ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
+			ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar
+				| ImGuiWindowFlags_NoSavedSettings
+				| ImGuiWindowFlags_MenuBar
+				| ImGuiWindowFlags_NoNavFocus;
 
-			//////////////////////////////////////////////////////////////////////////
-			// PRIMARY TOP MENU BAR //////////////////////////////////////////////////
-			//////////////////////////////////////////////////////////////////////////
-			if (ImGui::BeginViewportSideBar("##PrimaryMenuBar", viewport, ImGuiDir_Up, m_MenuBarHeight, window_flags))
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 			{
-				if (ImGui::BeginMenuBar())
+				//////////////////////////////////////////////////////////////////////////
+				// PRIMARY TOP MENU BAR //////////////////////////////////////////////////
+				//////////////////////////////////////////////////////////////////////////
+				if (ImGui::BeginViewportSideBar("##PrimaryMenuBar", viewport, ImGuiDir_Up, m_MenuBarHeight, window_flags))
 				{
-					if (ImGui::BeginMenu("File"))
+					if (ImGui::BeginMenuBar())
 					{
-						// Disabling fullscreen would allow the window to be moved to the front of other windows, 
-						// which we can't undo at the moment without finer window depth/z control.
-						//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
+						if (ImGui::BeginMenu("File"))
+						{
+							// Disabling fullscreen would allow the window to be moved to the front of other windows, 
+							// which we can't undo at the moment without finer window depth/z control.
+							//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
 
-						if (ImGui::MenuItem("New", "Ctrl+N"))
-						{
-							NewScene();
-						}
-
-						if (ImGui::MenuItem("Open..", "Ctrl+O"))
-						{
-							OpenScene();
-						}
-						if (ImGui::MenuItem("Save...", "Ctrl+S"))
-						{
-							SaveScene();
-						}
-						if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
-						{
-							SaveSceneAs();
-						}
-
-						if (ImGui::MenuItem("Exit"))
-						{
-							m_Application->Close();
-						}
-
-						ImGui::EndMenu();
-					}
-
-					if (ImGui::BeginMenu("Window"))
-					{
-						if (ImGui::BeginMenu("Add"))
-						{
-							if (ImGui::MenuItem("Viewport"))
+							if (ImGui::MenuItem("New", "Ctrl+N"))
 							{
-								size_t index = m_Viewports.size();
-								m_Viewports.push_back(CreateScope<SceneViewport>());
-								m_Viewports[index]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
+								NewScene();
 							}
-							if (ImGui::MenuItem("Properties"))
+
+							if (ImGui::MenuItem("Open..", "Ctrl+O"))
 							{
-								m_Properties.push_back(CreateScope<PropertiesPanel>());
+								OpenScene();
 							}
-							if (ImGui::MenuItem("Assets"))
+							if (ImGui::MenuItem("Save...", "Ctrl+S"))
 							{
-								m_AssetPanels.push_back(CreateScope<AssetPanel>());
+								SaveScene();
 							}
+							if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+							{
+								SaveSceneAs();
+							}
+
+							if (ImGui::MenuItem("Exit"))
+							{
+								m_Application->Close();
+							}
+
 							ImGui::EndMenu();
 						}
-						ImGui::MenuItem("Hierarchy", nullptr, &m_ShowSceneHierarchyPanel);
 
-						ImGui::MenuItem(m_ProjectSettingsPanel.GetName(), nullptr, &m_ProjectSettingsPanel.Showing);
-						ImGui::MenuItem(m_ConsolePanel.GetName(), nullptr, &m_ConsolePanel.Showing);
-
-						for (size_t i = 0; i < m_Panels.size(); i++)
+						if (ImGui::BeginMenu("Window"))
 						{
-							BasePanel* panel = m_Panels[i].get();
-							ImGui::MenuItem(panel->GetName(), nullptr, &panel->Showing);
+							if (ImGui::BeginMenu("Add"))
+							{
+								if (ImGui::MenuItem("Viewport"))
+								{
+									size_t index = m_Viewports.size();
+									m_Viewports.push_back(CreateScope<SceneViewport>());
+									m_Viewports[index]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
+								}
+								if (ImGui::MenuItem("Properties"))
+								{
+									m_Properties.push_back(CreateScope<PropertiesPanel>());
+								}
+								if (ImGui::MenuItem("Assets"))
+								{
+									m_AssetPanels.push_back(CreateScope<AssetPanel>());
+								}
+								ImGui::EndMenu();
+							}
+							ImGui::MenuItem("Hierarchy", nullptr, &m_ShowSceneHierarchyPanel);
+
+							ImGui::MenuItem(m_ProjectSettingsPanel.GetName(), nullptr, &m_ProjectSettingsPanel.Showing);
+							ImGui::MenuItem(m_ConsolePanel.GetName(), nullptr, &m_ConsolePanel.Showing);
+
+							for (size_t i = 0; i < m_Panels.size(); i++)
+							{
+								BasePanel* panel = m_Panels[i].get();
+								ImGui::MenuItem(panel->GetName(), nullptr, &panel->Showing);
+							}
+
+							ImGui::MenuItem("ImGui Demo Window", nullptr, &m_ShowDemoWindow);
+
+							ImGui::EndMenu();
 						}
 
-						ImGui::MenuItem("ImGui Demo Window", nullptr, &m_ShowDemoWindow);
-
-						ImGui::EndMenu();
-					}
-
-					if (ImGui::BeginMenu("Shaders"))
-					{
-						if (ImGui::MenuItem("Reload Shaders"))
+						if (ImGui::BeginMenu("Shaders"))
 						{
-							Renderer3D::GetShaderLibrary().ReloadAll();
-							Renderer3D::Init();
+							if (ImGui::MenuItem("Reload Shaders"))
+							{
+								Renderer3D::GetShaderLibrary().ReloadAll();
+								Renderer3D::Init();
+							}
+
+							ImGui::EndMenu();
 						}
 
-						ImGui::EndMenu();
-					}
-
-					if (ImGui::BeginMenu("Scripting"))
-					{
-						if (ImGui::MenuItem("Reload Assemblies"))
+						if (ImGui::BeginMenu("Scripting"))
 						{
-							ProjectSettingsPanel::LoadAssemblies();
-						}
+							if (ImGui::MenuItem("Reload Assemblies"))
+							{
+								ProjectSettingsPanel::LoadAssemblies();
+							}
 
-						ImGui::EndMenu();
+							ImGui::EndMenu();
+						}
+						ImGui::EndMenuBar();
 					}
-					ImGui::EndMenuBar();
+					ImGui::End();
 				}
-				ImGui::End();
-			}
 
-			//////////////////////////////////////////////////////////////////////////
-			// SECONDARY TOP BAR /////////////////////////////////////////////////////
-			//////////////////////////////////////////////////////////////////////////
-			if (ImGui::BeginViewportSideBar("##SecondaryMenuBar", viewport, ImGuiDir_Up, m_MenuBarHeight, window_flags))
-			{
-				if (ImGui::BeginMenuBar())
+				//////////////////////////////////////////////////////////////////////////
+				// SECONDARY TOP BAR /////////////////////////////////////////////////////
+				//////////////////////////////////////////////////////////////////////////
+				if (ImGui::BeginViewportSideBar("##SecondaryMenuBar", viewport, ImGuiDir_Up, m_MenuBarHeight, window_flags))
 				{
-					ImVec2 region = ImGui::GetContentRegionAvail();
-					ImGui::SetCursorPosX(region.x * 0.5f);
-					if (ImGui::Button(m_SceneState == SceneState::Edit ? ICON_MDI_PLAY : ICON_MDI_STOP))
+					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 1, 1 });
+					if (ImGui::BeginMenuBar())
 					{
-						if (m_SceneState == SceneState::Edit)
-							OnScenePlay();
-						else
-							OnSceneStop();
-					}
+						ImVec2 region = ImGui::GetContentRegionAvail();
+						float frameHeight = ImGui::GetFrameHeight();
+						ImVec2 buttonSize = { frameHeight * 1.5f, frameHeight };
+						ImGui::SetCursorPosX(region.x * 0.5f - 3 * 0.5f * buttonSize.x);
+						if (ImGui::Button(m_SceneState == SceneState::Edit ? ICON_MDI_PLAY : ICON_MDI_STOP, buttonSize))
+						{
+							if (m_SceneState == SceneState::Edit)
+								OnScenePlay();
+							else
+								OnSceneStop();
+						}
 
-					ImGui::PushItemFlag(ImGuiItemFlags_Disabled, m_SceneState == SceneState::Edit);
-					if (ImGui::Button(ICON_MDI_PAUSE))
-					{
-						OnScenePause();
-					}
-					if (ImGui::Button(ICON_MDI_STEP_FORWARD))
-					{
-					}
-					ImGui::PopItemFlag();
+						ImGui::PushItemFlag(ImGuiItemFlags_Disabled, m_SceneState == SceneState::Edit);
+						if (ImGui::Button(ICON_MDI_PAUSE, buttonSize))
+						{
+							OnScenePause();
+						}
+						if (ImGui::Button(ICON_MDI_STEP_FORWARD, buttonSize))
+						{
+						}
+						ImGui::PopItemFlag();
 
-					ImGui::EndMenuBar();
+						ImGui::EndMenuBar();
+					}
+					ImGui::PopStyleVar();
+					ImGui::End();
 				}
-				ImGui::End();
-			}
 
-			//////////////////////////////////////////////////////////////////////////
-			// BOTTOM MENU BAR ///////////////////////////////////////////////////////
-			//////////////////////////////////////////////////////////////////////////
-			if (ImGui::BeginViewportSideBar("##StatusBar", viewport, ImGuiDir_Down, m_MenuBarHeight, window_flags))
-			{
-				if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-					m_ConsolePanel.SetFocus();
-
-				if (ImGui::BeginMenuBar())
+				//////////////////////////////////////////////////////////////////////////
+				// BOTTOM MENU BAR ///////////////////////////////////////////////////////
+				//////////////////////////////////////////////////////////////////////////
+				if (ImGui::BeginViewportSideBar("##StatusBar", viewport, ImGuiDir_Down, m_MenuBarHeight, window_flags))
 				{
-					const ConsolePanel::Message* message = m_ConsolePanel.GetRecentMessage();
-					if (message != nullptr)
-					{
-						glm::vec4 color = ConsolePanel::Message::GetRenderColor(message->Level);
-						ImGui::PushStyleColor(ImGuiCol_Text, { color.r, color.g, color.b, color.a });
-						ImGui::TextUnformatted(message->Buffer.c_str());
-						ImGui::PopStyleColor();
-					}
-					ImGui::EndMenuBar();
-				}
+					if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+						m_ConsolePanel.SetFocus();
 
-				ImGui::End();
+					if (ImGui::BeginMenuBar())
+					{
+						const ConsolePanel::Message* message = m_ConsolePanel.GetRecentMessage();
+						if (message != nullptr)
+						{
+							glm::vec4 color = ConsolePanel::Message::GetRenderColor(message->Level);
+							ImGui::PushStyleColor(ImGuiCol_Text, { color.r, color.g, color.b, color.a });
+							ImGui::TextUnformatted(message->Buffer.c_str());
+							ImGui::PopStyleColor();
+						}
+						ImGui::EndMenuBar();
+					}
+
+					ImGui::End();
+				}
 			}
+			ImGui::PopStyleVar();
 
 			//////////////////////////////////////////////////////////////////////////
 			// HEIRARCHY /////////////////////////////////////////////////////////////
