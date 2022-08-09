@@ -15,7 +15,7 @@ namespace ArcEngine
 	static int s_ID = 0;
 	
 	SceneViewport::SceneViewport(const char* name)
-		: BasePanel(name, ICON_MDI_POUND, true)
+		: BasePanel(name, ICON_MDI_TERRAIN, true)
 	{
 		OnInit();
 	}

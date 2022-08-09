@@ -14,33 +14,62 @@ namespace ArcEngine
 
 		m_Context = context;
 		m_SelectionContext = {};
-		m_CurrentlyVisibleEntities = 0;
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
 		ARC_PROFILE_SCOPE();
 
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0, 0});
+		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_RowBg
+			| ImGuiTableFlags_ContextMenuInBody
+			| ImGuiTableFlags_BordersInner;
+
+		ImVec2 cellPadding = ImGui::GetStyle().CellPadding;
+		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0, 0 });
 
 		if (OnBegin())
 		{
-			float x1 = ImGui::GetCurrentWindow()->WorkRect.Min.x;
-			float x2 = ImGui::GetCurrentWindow()->WorkRect.Max.x;
-			float line_height = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2.0f;
-			UI::DrawRowsBackground(m_CurrentlyVisibleEntities, line_height, x1, x2, 0, 0, ImGui::GetColorU32(EditorTheme::WindowBgAlternativeColor));
-			m_CurrentlyVisibleEntities = 0;
-
-			auto view = m_Context->m_Registry.view<IDComponent>();
-			for (auto it = view.rbegin(); it != view.rend(); it++)
+			const float cursorPosX = ImGui::GetCursorPosX();
+			m_Filter.Draw("###ConsoleFilter", ImGui::GetContentRegionAvail().x);
+			if (!m_Filter.IsActive())
 			{
-				entt::entity e = *it;
-				if (!view.contains(e))
-					break;
+				ImGui::SameLine();
+				ImGui::SetCursorPosX(cursorPosX + ImGui::GetFontSize() * 0.5f);
+				ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
+			}
 
-				Entity entity = { e, m_Context.get() };
-				if (!entity.GetParent())
-					DrawEntityNode(entity);
+			if (ImGui::BeginTable("HierarchyTable", 3, tableFlags))
+			{
+				float lineHeight = ImGui::GetTextLineHeight();
+				ImGui::TableSetupColumn("  Label", ImGuiTableColumnFlags_NoHide);
+				ImGui::TableSetupColumn("  Type", ImGuiTableColumnFlags_WidthFixed, lineHeight * 3.0f);
+				ImGui::TableSetupColumn("  " ICON_MDI_EYE_OUTLINE, ImGuiTableColumnFlags_WidthFixed, lineHeight * 2.0f);
+				
+				float paddingY = ImGui::GetStyle().FramePadding.y;
+				ImGui::TableNextRow(ImGuiTableRowFlags_Headers, ImGui::GetFrameHeight());
+				for (int column = 0; column < 3; ++column)
+				{
+					ImGui::TableSetColumnIndex(column);
+					const char* column_name = ImGui::TableGetColumnName(column);
+					ImGui::PushID(column);
+					ImGui::SetCursorPosY(ImGui::GetCursorPosY() + paddingY);
+					ImGui::TableHeader(column_name);
+					ImGui::PopID();
+				}
+
+				auto view = m_Context->m_Registry.view<IDComponent>();
+				for (auto it = view.rbegin(); it != view.rend(); it++)
+				{
+					entt::entity e = *it;
+					if (!view.contains(e))
+						break;
+
+					Entity entity = { e, m_Context.get() };
+					if (!entity.GetParent())
+						DrawEntityNode(entity);
+				}
+
+				ImGui::EndTable();
 			}
 
 			if (m_DeletedEntity)
@@ -103,11 +132,12 @@ namespace ArcEngine
 		ImGui::PopStyleVar();
 	}
 
-	ImRect SceneHierarchyPanel::DrawEntityNode(Entity entity, bool skipChildren)
+	ImRect SceneHierarchyPanel::DrawEntityNode(Entity entity, bool skipChildren, uint32_t depth)
 	{
 		ARC_PROFILE_SCOPE();
 
-		m_CurrentlyVisibleEntities++;
+		ImGui::TableNextRow();
+		ImGui::TableNextColumn();
 
 		auto& tagComponent = entity.GetComponent<TagComponent>();
 		auto& tag = tagComponent.Tag;
@@ -127,17 +157,15 @@ namespace ArcEngine
 		bool highlight = m_SelectionContext == entity;
 		if (highlight)
 		{
+			ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, ImGui::GetColorU32(EditorTheme::HeaderSelectedColor));
 			ImGui::PushStyleColor(ImGuiCol_Header, EditorTheme::HeaderSelectedColor);
 			ImGui::PushStyleColor(ImGuiCol_HeaderHovered, EditorTheme::HeaderSelectedColor);
 		}
 
 		eastl::string displayName = (ICON_MDI_CUBE_OUTLINE + eastl::string(" ") + tag);
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity.GetUUID(), flags, displayName.c_str());
-
 		if (highlight)
-		{
 			ImGui::PopStyleColor(2);
-		}
 
 		if (ImGui::IsItemHovered())
 		{
@@ -147,17 +175,25 @@ namespace ArcEngine
 
 		bool entityDeleted = false;
 		bool createChild = false;
-		if(ImGui::BeginPopupContextItem())
+		if (ImGui::BeginPopupContextItem())
 		{
 			if (ImGui::MenuItem("Create"))
 				createChild = true;
 			if (ImGui::MenuItem("Rename"))
 				tagComponent.renaming = true;
-			if(ImGui::MenuItem("Delete Entity"))
+			if (ImGui::MenuItem("Delete Entity"))
 				entityDeleted = true;
 
 			ImGui::EndPopup();
 		}
+		ImVec2 verticalLineStart = ImGui::GetCursorScreenPos();
+		verticalLineStart.y -= ImGui::GetFrameHeight() * 0.5f;
+
+		ImGui::TableNextColumn();
+		ImGui::TextUnformatted("  Entity");
+
+		ImGui::TableNextColumn();
+		ImGui::TextUnformatted("  " ICON_MDI_EYE_OUTLINE);
 
 		if (tagComponent.renaming)
 		{
@@ -174,24 +210,41 @@ namespace ArcEngine
 		const ImRect nodeRect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
 		if(opened && !skipChildren && !entityDeleted)
 		{
-			const ImColor TreeLineColor = ImColor(128, 128, 128, 128);
+			ImColor treeLineColor = ImColor(128, 128, 128, 128);
+
+			depth %= 4;
+			switch (depth)
+			{
+			case 0:
+				treeLineColor = ImColor(254, 112, 246);
+				break;
+			case 1:
+				treeLineColor = ImColor(142, 112, 254);
+				break;
+			case 2:
+				treeLineColor = ImColor(112, 180, 254);
+				break;
+			case 3:
+				treeLineColor = ImColor(48, 134, 198);
+				break;
+			}
+
 			ImDrawList* drawList = ImGui::GetWindowDrawList();
 
-			ImVec2 verticalLineStart = ImGui::GetCursorScreenPos();
 			ImVec2 verticalLineEnd = verticalLineStart;
 
 			for (size_t i = 0; i < childrenSize; i++)
 			{
 				UUID childId = entity.GetRelationship().Children[i];
 				Entity child = m_Context->GetEntity(childId);
-				const float HorizontalTreeLineSize = child.GetRelationship().Children.size() == 0 ? 18.0f : 10.0f; //chosen arbitrarily
-	            const ImRect childRect = DrawEntityNode(child, createChild);
+				const float HorizontalTreeLineSize = child.GetRelationship().Children.size() == 0 ? 18.0f : 9.0f; //chosen arbitrarily
+	            const ImRect childRect = DrawEntityNode(child, createChild, depth + 1);
 				const float midpoint = (childRect.Min.y + childRect.Max.y) / 2.0f;
-			    drawList->AddLine(ImVec2(verticalLineStart.x, midpoint), ImVec2(verticalLineStart.x + HorizontalTreeLineSize, midpoint), TreeLineColor, 0.25f);
+			    drawList->AddLine(ImVec2(verticalLineStart.x, midpoint), ImVec2(verticalLineStart.x + HorizontalTreeLineSize, midpoint), treeLineColor);
 				verticalLineEnd.y = midpoint;
 			}
 
-			drawList->AddLine(verticalLineStart, verticalLineEnd, TreeLineColor);
+			drawList->AddLine(verticalLineStart, verticalLineEnd, treeLineColor);
 		}
 
 		if (opened && childrenSize > 0)

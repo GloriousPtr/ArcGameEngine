@@ -32,6 +32,9 @@ namespace ArcEngine
 	private:
 		void DrawComponents(Entity entity);
 
+		template<typename Component>
+		void DrawAddComponent(Entity entity, const char* name);
+
 	private:
 		Entity m_Context;
 		bool m_Locked = false;

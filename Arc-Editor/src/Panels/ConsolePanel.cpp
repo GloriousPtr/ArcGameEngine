@@ -100,23 +100,14 @@ namespace ArcEngine
 		}
 
 		ImGui::SameLine();
-		ImGui::TextUnformatted(ICON_MDI_MAGNIFY);
-		ImGui::SameLine();
 
 		float spacing = ImGui::GetStyle().ItemSpacing.x;
         ImGui::GetStyle().ItemSpacing.x = 2;
         float levelButtonWidth = (ImGui::CalcTextSize(Message::GetLevelIcon(Log::Level(1))) + ImGui::GetStyle().FramePadding * 2.0f).x;
         float levelButtonWidths = (levelButtonWidth + ImGui::GetStyle().ItemSpacing.x) * 7;
 
-		{
-			ImGui::GetIO().FontDefault = ImGui::GetIO().Fonts->Fonts[1];
-			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
-			ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(0, 0, 0, 0));
-			m_Filter.Draw("###ConsoleFilter", ImGui::GetContentRegionAvail().x - (levelButtonWidths));
-			ImGui::PopStyleColor();
-			ImGui::PopStyleVar();
-			ImGui::GetIO().FontDefault = ImGui::GetIO().Fonts->Fonts[0];
-		}
+		const float cursorPosX = ImGui::GetCursorPosX();
+		m_Filter.Draw("###ConsoleFilter", ImGui::GetContentRegionAvail().x - (levelButtonWidths));
 
 		for(int i = 0; i < 6; i++)
 		{
@@ -150,15 +141,11 @@ namespace ArcEngine
 
 		ImGui::GetStyle().ItemSpacing.x = spacing;
 
-		if(!m_Filter.IsActive())
+		if (!m_Filter.IsActive())
 		{
 			ImGui::SameLine();
-			ImGui::GetIO().FontDefault = ImGui::GetIO().Fonts->Fonts[1];
-			ImGui::SetCursorPosX(ImGui::GetFontSize() * 4.0f);
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, ImGui::GetStyle().FramePadding.y));
-			ImGui::TextUnformatted("Search...");
-			ImGui::PopStyleVar();
-			ImGui::GetIO().FontDefault = ImGui::GetIO().Fonts->Fonts[0];
+			ImGui::SetCursorPosX(cursorPosX + ImGui::GetFontSize() * 0.5f);
+			ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
 		}
 	}
 

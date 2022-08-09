@@ -312,6 +312,31 @@ namespace ArcEngine
 		}
 
 		ImGui::SameLine();
+
+		// Add Button
+		{
+			if (ImGui::Button(ICON_MDI_PLUS " Add  "))
+				ImGui::OpenPopup("AddComponentPopup");
+
+			if (ImGui::BeginPopup("AddComponentPopup"))
+			{
+				DrawAddComponent<CameraComponent>(entity, ICON_MDI_CAMERA " Camera");
+				DrawAddComponent<SpriteRendererComponent>(entity, ICON_MDI_IMAGE_SIZE_SELECT_ACTUAL " Sprite Renderer");
+				DrawAddComponent<MeshComponent>(entity, ICON_MDI_VECTOR_SQUARE " Mesh");
+				DrawAddComponent<SkyLightComponent>(entity, ICON_MDI_EARTH " Sky Light");
+				DrawAddComponent<LightComponent>(entity, ICON_MDI_LIGHTBULB " Light");
+				DrawAddComponent<Rigidbody2DComponent>(entity, ICON_MDI_SOCCER " Rigidbody 2D");
+				DrawAddComponent<BoxCollider2DComponent>(entity, ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider 2D");
+				DrawAddComponent<CircleCollider2DComponent>(entity, ICON_MDI_CIRCLE_OUTLINE " Circle Collider 2D");
+				DrawAddComponent<ScriptComponent>(entity, ICON_MDI_POUND_BOX " Script");
+
+				ImGui::EndPopup();
+			}
+		}
+
+		ImGui::SameLine();
+
+		// Lock Button
 		{
 			float frameHeight = ImGui::GetFrameHeight();
 			ImVec2 region = ImGui::GetContentRegionMax();
@@ -320,13 +345,16 @@ namespace ArcEngine
 
 			bool highlight = m_Locked;
 			if (highlight)
+			{
 				ImGui::PushStyleColor(ImGuiCol_Button, EditorTheme::HeaderSelectedColor);
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, EditorTheme::HeaderSelectedColor);
+			}
 
 			if (ImGui::Button(m_Locked ? ICON_MDI_LOCK : ICON_MDI_LOCK_OPEN_OUTLINE, lockButtonSize))
 				m_Locked = !m_Locked;
 
 			if (highlight)
-				ImGui::PopStyleColor();
+				ImGui::PopStyleColor(2);
 		}
 
 		DrawComponent<TransformComponent>(ICON_MDI_VECTOR_LINE " Transform", entity, [](TransformComponent& component)
@@ -621,93 +649,19 @@ namespace ArcEngine
 			ImGui::SetCursorPos(pos);
 		}
 
-		if (ImGui::Button(ICON_MDI_PLUS "Add Component", addComponentButtonSize))
-			ImGui::OpenPopup("Add Component");
+		
+	}
 
-		if (ImGui::BeginPopup("Add Component"))
+	template<typename Component>
+	void PropertiesPanel::DrawAddComponent(Entity entity, const char* name)
+	{
+		if (!entity.HasComponent<Component>())
 		{
-			if (!entity.HasComponent<CameraComponent>())
+			if (ImGui::MenuItem(name))
 			{
-				if (ImGui::MenuItem(ICON_MDI_CAMERA " Camera"))
-				{
-					entity.AddComponent<CameraComponent>();
-					ImGui::CloseCurrentPopup();
-				}
+				entity.AddComponent<Component>();
+				ImGui::CloseCurrentPopup();
 			}
-
-			if (!entity.HasComponent<SpriteRendererComponent>())
-			{
-				if (ImGui::MenuItem(ICON_MDI_IMAGE_SIZE_SELECT_ACTUAL " Sprite Renderer"))
-				{
-					entity.AddComponent<SpriteRendererComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
-
-			if (!entity.HasComponent<MeshComponent>())
-			{
-				if (ImGui::MenuItem(ICON_MDI_VECTOR_SQUARE " Mesh"))
-				{
-					entity.AddComponent<MeshComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
-
-			if (!entity.HasComponent<SkyLightComponent>())
-			{
-				if (ImGui::MenuItem(ICON_MDI_EARTH " Sky Light"))
-				{
-					entity.AddComponent<SkyLightComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
-
-			if (!entity.HasComponent<LightComponent>())
-			{
-				if (ImGui::MenuItem(ICON_MDI_LIGHTBULB " Light"))
-				{
-					entity.AddComponent<LightComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
-
-			if (!entity.HasComponent<Rigidbody2DComponent>())
-			{
-				if (ImGui::MenuItem(ICON_MDI_SOCCER " Rigidbody 2D"))
-				{
-					entity.AddComponent<Rigidbody2DComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
-
-			if (!entity.HasComponent<BoxCollider2DComponent>())
-			{
-				if (ImGui::MenuItem(ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider 2D"))
-				{
-					entity.AddComponent<BoxCollider2DComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
-
-			if (!entity.HasComponent<CircleCollider2DComponent>())
-			{
-				if (ImGui::MenuItem(ICON_MDI_CIRCLE_OUTLINE " Circle Collider 2D"))
-				{
-					entity.AddComponent<CircleCollider2DComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
-
-			if (!entity.HasComponent<ScriptComponent>())
-			{
-				if (ImGui::MenuItem(ICON_MDI_POUND_BOX " Script"))
-				{
-					entity.AddComponent<ScriptComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
-			
-			ImGui::EndPopup();
 		}
 	}
 }

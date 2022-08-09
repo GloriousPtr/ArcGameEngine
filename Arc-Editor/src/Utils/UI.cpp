@@ -57,7 +57,7 @@ namespace ArcEngine
 		ImVec2 cellPadding = ImGui::GetStyle().CellPadding;
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { cellPadding.x * 4, cellPadding.y });
 
-		ImGuiTableFlags tableFlags = ImGuiTableFlags_Resizable
+		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_Resizable
 			| ImGuiTableFlags_BordersInner
 			| ImGuiTableFlags_BordersOuterH
 			| ImGuiTableFlags_PadOuterX

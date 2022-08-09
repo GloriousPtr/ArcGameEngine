@@ -33,7 +33,6 @@ namespace ArcEngine
 		std::filesystem::path m_CurrentDirectory;
 		eastl::vector<File> m_DirectoryEntries;
 		uint32_t m_CurrentlyVisibleItemsTreeView = 0;
-		float m_TreeViewColumnWidth = 256.0f;
 		float m_ThumbnailSize = 64.0f;
 		ImGuiTextFilter m_Filter;
 

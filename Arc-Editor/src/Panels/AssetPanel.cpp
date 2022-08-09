@@ -43,6 +43,9 @@ namespace ArcEngine
 			if (entryIsFile)
 				nodeFlags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
+			ImGui::TableNextRow();
+			ImGui::TableNextColumn();
+
 			const bool selected = (*selectionMask & BIT(*count)) != 0;
 			if (selected)
 			{
@@ -129,38 +132,28 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (OnBegin())
+		constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollWithMouse
+			| ImGuiWindowFlags_NoScrollbar;
+
+		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_Resizable
+			| ImGuiTableFlags_ContextMenuInBody;
+
+		if (OnBegin(windowFlags))
 		{
 			RenderHeader();
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
-			ImGui::Columns(2, nullptr, true);
+			ImGui::Separator();
+			ImVec2 availableRegion = ImGui::GetContentRegionAvail();
+			if (ImGui::BeginTable("MainViewTable", 2, tableFlags, availableRegion))
 			{
-				ImVec2 region = ImGui::GetContentRegionAvail();
-				static bool firstTime = true;
-				if (!firstTime)
-					m_TreeViewColumnWidth = ImGui::GetColumnWidth(0);
-				else
-					firstTime = false;
-				ImGui::SetColumnWidth(0, m_TreeViewColumnWidth);
+				ImGui::TableNextRow();
+				ImGui::TableNextColumn();
 
-				const float cursorPosY = ImGui::GetCursorPosY() + 10.0f;
-				ImGui::SetCursorPosY(cursorPosY);
-				ImGui::BeginChild("TreeView");
-				{
-					RenderSideView();
-				}
-				ImGui::EndChild();
-				ImGui::NextColumn();
-				ImGui::Separator();
-				ImGui::SetCursorPosY(cursorPosY);
-				ImGui::BeginChild("FolderView");
-				{
-					RenderBody();
-				}
-				ImGui::EndChild();
+				RenderSideView();
+				ImGui::TableNextColumn();
+				RenderBody();
+
+				ImGui::EndTable();
 			}
-			ImGui::PopStyleVar();
-			ImGui::Columns(1);
 			OnEnd();
 		}
 	}
@@ -178,33 +171,13 @@ namespace ArcEngine
 		}
 
 		ImGui::SameLine();
-		ImGui::TextUnformatted(ICON_MDI_MAGNIFY);
-		ImGui::SameLine();
-
-		float spacing = ImGui::GetStyle().ItemSpacing.x;
-        ImGui::GetStyle().ItemSpacing.x = 2;
-
-		{
-			ImGui::GetIO().FontDefault = ImGui::GetIO().Fonts->Fonts[1];
-			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
-			ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(0, 0, 0, 0));
-			m_Filter.Draw("###ConsoleFilter", ImGui::GetContentRegionAvail().x);
-			ImGui::PopStyleColor();
-			ImGui::PopStyleVar();
-			ImGui::GetIO().FontDefault = ImGui::GetIO().Fonts->Fonts[0];
-		}
-
-		ImGui::GetStyle().ItemSpacing.x = spacing;
-		
+		const float cursorPosX = ImGui::GetCursorPosX();
+		m_Filter.Draw("###ConsoleFilter", ImGui::GetContentRegionAvail().x);
 		if(!m_Filter.IsActive())
 		{
 			ImGui::SameLine();
-			ImGui::GetIO().FontDefault = ImGui::GetIO().Fonts->Fonts[1];
-			ImGui::SetCursorPosX(ImGui::GetFontSize() * 4.0f);
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, ImGui::GetStyle().FramePadding.y));
-			ImGui::TextUnformatted("Search...");
-			ImGui::PopStyleVar();
-			ImGui::GetIO().FontDefault = ImGui::GetIO().Fonts->Fonts[0];
+			ImGui::SetCursorPosX(cursorPosX + ImGui::GetFontSize() * 0.5f);
+			ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
 		}
 
 		// Back button
@@ -238,66 +211,75 @@ namespace ArcEngine
 
 		static int selectionMask = 0;
 
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow
+		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_RowBg
+			| ImGuiTableFlags_NoPadInnerX
+			| ImGuiTableFlags_NoPadOuterX
+			| ImGuiTableFlags_ContextMenuInBody
+			| ImGuiTableFlags_ScrollY;
+
+		constexpr ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_OpenOnArrow
 			| ImGuiTreeNodeFlags_FramePadding
 			| ImGuiTreeNodeFlags_SpanFullWidth;
 		
-		float x1 = ImGui::GetCurrentWindow()->WorkRect.Min.x;
-		float x2 = ImGui::GetCurrentWindow()->WorkRect.Max.x;
-		float line_height = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2.0f;
-		UI::DrawRowsBackground(m_CurrentlyVisibleItemsTreeView, line_height, x1, x2, 0, 0, ImGui::GetColorU32(EditorTheme::WindowBgAlternativeColor));
-		
-		m_CurrentlyVisibleItemsTreeView = 1;
-
-		ImGuiTreeNodeFlags nodeFlags = flags;
-		const bool selected = m_CurrentDirectory == s_AssetPath && selectionMask == 0;
-		if (selected)
+		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0, 0 });
+		if (ImGui::BeginTable("SideViewTable", 1, tableFlags))
 		{
-			nodeFlags |= ImGuiTreeNodeFlags_Selected;
-			ImGui::PushStyleColor(ImGuiCol_Header, EditorTheme::HeaderSelectedColor);
-			ImGui::PushStyleColor(ImGuiCol_HeaderHovered, EditorTheme::HeaderSelectedColor);
-		}
-		else
-		{
-			ImGui::PushStyleColor(ImGuiCol_HeaderHovered, EditorTheme::HeaderHoveredColor);
-		}
+			ImGui::TableNextRow();
+			ImGui::TableNextColumn();
 
-		bool opened = ImGui::TreeNodeEx((void*)("Assets"), nodeFlags, "");
-		ImGui::PopStyleColor(selected ? 2 : 1);
-
-		if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-		{
-			UpdateDirectoryEntries(s_AssetPath);
-			selectionMask = 0;
-		}
-		const char* folderIcon = open ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
-		ImGui::SameLine();
-		ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::AssetIconColor);
-		ImGui::TextUnformatted(folderIcon);
-		ImGui::PopStyleColor();
-		ImGui::SameLine();
-		float x = ImGui::GetContentRegionAvail().x;
-		ImGui::TextUnformatted("Assets");
-
-		if (opened)
-		{
-			uint32_t count = 0;
-			for (const auto& entry : std::filesystem::recursive_directory_iterator(s_AssetPath))
-				count++;
-
-			auto clickState = DirectoryTreeViewRecursive(s_AssetPath, &count, &selectionMask, flags);
-
-			if (clickState.first)
+			ImGuiTreeNodeFlags nodeFlags = treeNodeFlags;
+			const bool selected = m_CurrentDirectory == s_AssetPath && selectionMask == 0;
+			if (selected)
 			{
-				// (process outside of tree loop to avoid visual inconsistencies during the clicking frame)
-				if (ImGui::GetIO().KeyCtrl)
-					selectionMask ^= BIT(clickState.second);          // CTRL+click to toggle
-				else //if (!(selection_mask & (1 << clickState.second))) // Depending on selection behavior you want, may want to preserve selection when clicking on item that is part of the selection
-					selectionMask = BIT(clickState.second);           // Click to single-select
+				nodeFlags |= ImGuiTreeNodeFlags_Selected;
+				ImGui::PushStyleColor(ImGuiCol_Header, EditorTheme::HeaderSelectedColor);
+				ImGui::PushStyleColor(ImGuiCol_HeaderHovered, EditorTheme::HeaderSelectedColor);
+			}
+			else
+			{
+				ImGui::PushStyleColor(ImGuiCol_HeaderHovered, EditorTheme::HeaderHoveredColor);
 			}
 
-			ImGui::TreePop();
+			bool opened = ImGui::TreeNodeEx((void*)("Assets"), nodeFlags, "");
+			ImGui::PopStyleColor(selected ? 2 : 1);
+
+			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+			{
+				UpdateDirectoryEntries(s_AssetPath);
+				selectionMask = 0;
+			}
+			const char* folderIcon = open ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
+			ImGui::SameLine();
+			ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::AssetIconColor);
+			ImGui::TextUnformatted(folderIcon);
+			ImGui::PopStyleColor();
+			ImGui::SameLine();
+			float x = ImGui::GetContentRegionAvail().x;
+			ImGui::TextUnformatted("Assets");
+
+			if (opened)
+			{
+				uint32_t count = 0;
+				for (const auto& entry : std::filesystem::recursive_directory_iterator(s_AssetPath))
+					count++;
+
+				auto clickState = DirectoryTreeViewRecursive(s_AssetPath, &count, &selectionMask, treeNodeFlags);
+
+				if (clickState.first)
+				{
+					// (process outside of tree loop to avoid visual inconsistencies during the clicking frame)
+					if (ImGui::GetIO().KeyCtrl)
+						selectionMask ^= BIT(clickState.second);          // CTRL+click to toggle
+					else //if (!(selection_mask & (1 << clickState.second))) // Depending on selection behavior you want, may want to preserve selection when clicking on item that is part of the selection
+						selectionMask = BIT(clickState.second);           // Click to single-select
+				}
+
+				ImGui::TreePop();
+			}
+
+			ImGui::EndTable();
 		}
+		ImGui::PopStyleVar();
 	}
 
 	void AssetPanel::RenderBody()
@@ -320,12 +302,13 @@ namespace ArcEngine
 			columnCount = 1;
 
 		uint32_t flags = ImGuiTableFlags_ContextMenuInBody
-			| ImGuiTableFlags_SizingStretchSame
+			| ImGuiTableFlags_SizingFixedFit
 			| ImGuiTableFlags_PadOuterX
-			| ImGuiTableFlags_NoClip;
+			| ImGuiTableFlags_ScrollY;
 
 		uint32_t i = 0;
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0, 0 });
+
 		if (ImGui::BeginTable("BodyTable", columnCount, flags))
 		{
 			for (auto& file : m_DirectoryEntries)
@@ -381,13 +364,6 @@ namespace ArcEngine
 				ImGui::SetItemAllowOverlap();
 				if (fontIcon)
 				{
-					/*
-					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
-					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
-					ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
-					ImGui::Button(fontIcon, { thumbnailSize, thumbnailSize });
-					ImGui::PopStyleColor(3);
-					*/
 					ImGui::InvisibleButton(fontIcon, { thumbnailSize, thumbnailSize });
 					windowDrawList.AddText({ rectMin.x + rectSize.x * 0.5f - ImGui::CalcTextSize(fontIcon).x * 0.5f, rectMin.y + rectSize.y * 0.5f}, ImColor(1.0f, 1.0f, 1.0f), fontIcon);
 				}
@@ -425,7 +401,6 @@ namespace ArcEngine
 			ImGui::EndTable();
 		}
 		ImGui::PopStyleVar();
-
 		if (directoryOpened)
 			UpdateDirectoryEntries(directoryToOpen);
 	}
