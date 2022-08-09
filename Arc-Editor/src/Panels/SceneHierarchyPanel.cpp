@@ -5,17 +5,9 @@
 
 #include "../Utils/UI.h"
 #include "../Utils/EditorTheme.h"
-#include "../Utils/IconsMaterialDesignIcons.h"
 
 namespace ArcEngine
 {
-	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
-	{
-		ARC_PROFILE_SCOPE();
-
-		SetContext(context);
-	}
-
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
 	{
 		ARC_PROFILE_SCOPE();
@@ -31,85 +23,83 @@ namespace ArcEngine
 
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0, 0});
 
-		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
-		ImGui::Begin(ICON_MDI_VIEW_LIST " Hierarchy");
-
-		float x1 = ImGui::GetCurrentWindow()->WorkRect.Min.x;
-		float x2 = ImGui::GetCurrentWindow()->WorkRect.Max.x;
-		float line_height = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2.0f;
-		UI::DrawRowsBackground(m_CurrentlyVisibleEntities, line_height, x1, x2, 0, 0, ImGui::GetColorU32(EditorTheme::WindowBgAlternativeColor));
-		m_CurrentlyVisibleEntities = 0;
-		
-		auto view = m_Context->m_Registry.view<IDComponent>();
-		for (auto it = view.rbegin(); it != view.rend(); it++)
+		if (OnBegin())
 		{
-			entt::entity e = *it;
-			if (!view.contains(e))
-				break;
+			float x1 = ImGui::GetCurrentWindow()->WorkRect.Min.x;
+			float x2 = ImGui::GetCurrentWindow()->WorkRect.Max.x;
+			float line_height = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2.0f;
+			UI::DrawRowsBackground(m_CurrentlyVisibleEntities, line_height, x1, x2, 0, 0, ImGui::GetColorU32(EditorTheme::WindowBgAlternativeColor));
+			m_CurrentlyVisibleEntities = 0;
 
-			Entity entity = { e, m_Context.get() };
-			if (!entity.GetParent())
-				DrawEntityNode(entity);
-		}
+			auto view = m_Context->m_Registry.view<IDComponent>();
+			for (auto it = view.rbegin(); it != view.rend(); it++)
+			{
+				entt::entity e = *it;
+				if (!view.contains(e))
+					break;
 
-		if (m_DeletedEntity)
-		{
-			if(m_SelectionContext == m_DeletedEntity)
+				Entity entity = { e, m_Context.get() };
+				if (!entity.GetParent())
+					DrawEntityNode(entity);
+			}
+
+			if (m_DeletedEntity)
+			{
+				if (m_SelectionContext == m_DeletedEntity)
+					m_SelectionContext = {};
+
+				m_Context->DestroyEntity(m_DeletedEntity);
+				m_DeletedEntity = {};
+			}
+
+			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 				m_SelectionContext = {};
 
-			m_Context->DestroyEntity(m_DeletedEntity);
-			m_DeletedEntity = {};
-		}
-
-		if(ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-			m_SelectionContext = {};
-
-		if(ImGui::BeginPopupContextWindow(0, 1, false))
-		{
-			m_SelectionContext = {};
-			if (ImGui::BeginMenu("Create"))
+			if (ImGui::BeginPopupContextWindow(0, 1, false))
 			{
-				if(ImGui::MenuItem("Empty Entity"))
+				m_SelectionContext = {};
+				if (ImGui::BeginMenu("Create"))
 				{
-					m_SelectionContext = m_Context->CreateEntity("Empty Entity");
-				}
-				else if (ImGui::MenuItem("Camera"))
-				{
-					m_SelectionContext = m_Context->CreateEntity("Camera");
-					m_SelectionContext.AddComponent<CameraComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-				else if (ImGui::MenuItem("Sprite"))
-				{
-					m_SelectionContext = m_Context->CreateEntity("Sprite");
-					m_SelectionContext.AddComponent<SpriteRendererComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-				else if (ImGui::MenuItem("Mesh"))
-				{
-					m_SelectionContext = m_Context->CreateEntity("Mesh");
-					m_SelectionContext.AddComponent<MeshComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-				else if (ImGui::MenuItem("Sky Light"))
-				{
-					m_SelectionContext = m_Context->CreateEntity("Sky Light");
-					m_SelectionContext.AddComponent<SkyLightComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-				else if (ImGui::MenuItem("Light"))
-				{
-					m_SelectionContext = m_Context->CreateEntity("Light");
-					m_SelectionContext.AddComponent<LightComponent>();
-					ImGui::CloseCurrentPopup();
+					if (ImGui::MenuItem("Empty Entity"))
+					{
+						m_SelectionContext = m_Context->CreateEntity("Empty Entity");
+					}
+					else if (ImGui::MenuItem("Camera"))
+					{
+						m_SelectionContext = m_Context->CreateEntity("Camera");
+						m_SelectionContext.AddComponent<CameraComponent>();
+						ImGui::CloseCurrentPopup();
+					}
+					else if (ImGui::MenuItem("Sprite"))
+					{
+						m_SelectionContext = m_Context->CreateEntity("Sprite");
+						m_SelectionContext.AddComponent<SpriteRendererComponent>();
+						ImGui::CloseCurrentPopup();
+					}
+					else if (ImGui::MenuItem("Mesh"))
+					{
+						m_SelectionContext = m_Context->CreateEntity("Mesh");
+						m_SelectionContext.AddComponent<MeshComponent>();
+						ImGui::CloseCurrentPopup();
+					}
+					else if (ImGui::MenuItem("Sky Light"))
+					{
+						m_SelectionContext = m_Context->CreateEntity("Sky Light");
+						m_SelectionContext.AddComponent<SkyLightComponent>();
+						ImGui::CloseCurrentPopup();
+					}
+					else if (ImGui::MenuItem("Light"))
+					{
+						m_SelectionContext = m_Context->CreateEntity("Light");
+						m_SelectionContext.AddComponent<LightComponent>();
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::EndPopup();
 				}
 				ImGui::EndPopup();
 			}
-			ImGui::EndPopup();
+			OnEnd();
 		}
-
-		ImGui::End();
-
 		ImGui::PopStyleVar();
 	}
 
