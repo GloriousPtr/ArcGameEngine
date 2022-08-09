@@ -19,7 +19,6 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
 		if (OnBegin())
 		{
 			if (m_Context && m_Context.GetScene())
@@ -34,11 +33,14 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed
-			| ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_FramePadding;
-		
 		if(entity.HasComponent<T>())
 		{
+			static const ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen
+				| ImGuiTreeNodeFlags_SpanAvailWidth
+				| ImGuiTreeNodeFlags_AllowItemOverlap
+				| ImGuiTreeNodeFlags_Framed
+				| ImGuiTreeNodeFlags_FramePadding;
+
 			auto& component = entity.GetComponent<T>();
 			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 			
@@ -47,13 +49,12 @@ namespace ArcEngine
 			
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
 
-			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
-			ImGui::PopStyleVar();
+			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeFlags, name.c_str());
 
 			bool removeComponent = false;
 			if(removable)
 			{
-				ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
+				ImGui::SameLine(ImGui::GetContentRegionMax().x - lineHeight);
 				if(ImGui::Button(ICON_MDI_SETTINGS, ImVec2{ lineHeight, lineHeight }))
 					ImGui::OpenPopup("ComponentSettings");
 
@@ -65,10 +66,13 @@ namespace ArcEngine
 					ImGui::EndPopup();
 				}
 			}
+			ImGui::PopStyleVar();
+
 			if(open)
 			{
 				ARC_PROFILE_SCOPE("UI Function");
 
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().IndentSpacing / 2);
 				uiFunction(component);
 				ImGui::TreePop();
 			}

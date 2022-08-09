@@ -17,7 +17,7 @@ namespace ArcEngine
 		virtual void OnImGuiRender() override;
 
 	private:
-		std::pair<bool, uint32_t> DirectoryTreeViewRecursive(const std::filesystem::path& path, uint32_t* count, int* selection_mask);
+		std::pair<bool, uint32_t> DirectoryTreeViewRecursive(const std::filesystem::path& path, uint32_t* count, int* selection_mask, ImGuiTreeNodeFlags flags);
 		void RenderHeader();
 		void RenderSideView();
 		void RenderBody();
@@ -34,7 +34,7 @@ namespace ArcEngine
 		eastl::vector<File> m_DirectoryEntries;
 		uint32_t m_CurrentlyVisibleItemsTreeView = 0;
 		float m_TreeViewColumnWidth = 256.0f;
-		float m_ThumbnailSize = 128.0f;
+		float m_ThumbnailSize = 64.0f;
 		ImGuiTextFilter m_Filter;
 
 		Ref<Texture2D> m_WhiteTexture;

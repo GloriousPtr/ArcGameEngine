@@ -2,10 +2,11 @@
 
 #include <ArcEngine.h>
 
+#include <glm/gtc/type_ptr.hpp>
 #include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
 
-#include "glm/gtc/type_ptr.hpp"
-#include "imgui/imgui_internal.h"
+#include "EditorTheme.h"
 
 namespace ArcEngine
 {
@@ -25,26 +26,19 @@ namespace ArcEngine
 		s_UIContextID--;
 	}
 	
-	void UI::BeginPropertyGrid(const char* label, float rowHeight, bool rightAlignNextColumn)
+	void UI::BeginPropertyGrid(const char* label, bool rightAlignNextColumn)
 	{
 		PushID();
 		ImGui::TableNextRow();
         ImGui::TableNextColumn();
 
 		ImGui::PushID(label);
-		float padding = ImGui::GetStyle().FramePadding.y;
-		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + padding);
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
 		ImGui::Text(label);
-		float offset = rowHeight == 0.0f ? 0.0f : rowHeight - ImGui::CalcTextSize(label).y;
-		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + padding + offset);
-		ImGui::Separator();
-		float separatorSizeY = ImGui::GetItemRectSize().y;
 		ImGui::TableNextColumn();
 
 		if (rightAlignNextColumn)
 			ImGui::SetNextItemWidth(-FLT_MIN);
-
-		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + separatorSizeY * 2);
 	}
 	
 	void UI::EndPropertyGrid()
@@ -60,18 +54,21 @@ namespace ArcEngine
 		memset(s_IDBuffer + 2, 0, 14);
 		itoa(s_Counter++, s_IDBuffer + 2, 16);
 
-		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { ImGui::GetStyle().CellPadding.x, 0 });
-		ImGui::BeginTable(s_IDBuffer, 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingStretchSame);
-		ImGui::Spacing();
+		ImVec2 cellPadding = ImGui::GetStyle().CellPadding;
+		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { cellPadding.x * 4, cellPadding.y });
+
+		ImGuiTableFlags tableFlags = ImGuiTableFlags_Resizable
+			| ImGuiTableFlags_BordersInner
+			| ImGuiTableFlags_BordersOuterH
+			| ImGuiTableFlags_PadOuterX
+			| ImGuiTableFlags_SizingStretchSame;
+		ImGui::BeginTable(s_IDBuffer, 2, tableFlags);
 	}
 
 	void UI::EndProperties()
 	{
 		ImGui::EndTable();
 		ImGui::PopStyleVar();
-
-		ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y);
-		ImGui::Separator();
 	}
 
 	bool UI::Property(const char* label, eastl::string& value)
@@ -500,54 +497,74 @@ namespace ArcEngine
 		ImGuiIO& io = ImGui::GetIO();
 		auto boldFont = io.Fonts->Fonts[1];
 		
-		BeginPropertyGrid(label, 0.0f, false);
+		BeginPropertyGrid(label, false);
 
 		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 
 		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
 
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if(ImGui::Button("X", buttonSize))
-			values.x = resetValue;
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
+		ImVec2 innerItemSpacing = ImGui::GetStyle().ItemInnerSpacing;
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, innerItemSpacing);
+
+		// X
+		{
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+			ImGui::PushFont(boldFont);
+			if (ImGui::Button("X", buttonSize))
+				values.x = resetValue;
+			ImGui::PopFont();
+			ImGui::PopStyleColor(3);
+
+			ImGui::SameLine();
+			ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::PopItemWidth();
+			ImGui::PopStyleVar();
+		}
 
 		ImGui::SameLine();
-		ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::PopItemWidth();
-		ImGui::SameLine();
 
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if(ImGui::Button("Y", buttonSize))
-			values.y = resetValue;
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
+		// Y
+		{
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+			ImGui::PushFont(boldFont);
+			if (ImGui::Button("Y", buttonSize))
+				values.y = resetValue;
+			ImGui::PopFont();
 
-		ImGui::SameLine();
-		ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::PopItemWidth();
-		ImGui::SameLine();
+			ImGui::PopStyleColor(3);
 
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if(ImGui::Button("Z", buttonSize))
-			values.z = resetValue;
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
+			ImGui::SameLine();
+			ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::PopItemWidth();
+			ImGui::PopStyleVar();
+		}
 
 		ImGui::SameLine();
-		ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::PopItemWidth();
+
+		// Z
+		{
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+			ImGui::PushFont(boldFont);
+			if (ImGui::Button("Z", buttonSize))
+				values.z = resetValue;
+			ImGui::PopFont();
+			ImGui::PopStyleColor(3);
+
+			ImGui::SameLine();
+			ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::PopItemWidth();
+			ImGui::PopStyleVar();
+		}
 
 		ImGui::PopStyleVar();
 		

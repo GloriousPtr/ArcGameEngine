@@ -5,6 +5,7 @@
 namespace ArcEngine
 {
 	ImVec4 EditorTheme::HeaderSelectedColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	ImVec4 EditorTheme::HeaderHoveredColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 	ImVec4 EditorTheme::WindowBgColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 	ImVec4 EditorTheme::WindowBgAlternativeColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 	ImVec4 EditorTheme::AssetIconColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);

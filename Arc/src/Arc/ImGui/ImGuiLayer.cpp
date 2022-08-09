@@ -34,6 +34,8 @@ namespace ArcEngine
 		io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleViewports;
 
 		io.ConfigWindowsMoveFromTitleBarOnly = true;
+		io.ConfigDragClickToInputText = true;
+		io.ConfigDockingTransparentPayload = true;
 
 		/*
 		io.AddInputCharacter(GLFW_KEY_SPACE);
