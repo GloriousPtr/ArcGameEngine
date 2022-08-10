@@ -150,7 +150,7 @@ namespace ArcEngine
 
 				RenderSideView();
 				ImGui::TableNextColumn();
-				RenderBody();
+				RenderBody(m_ThumbnailSize >= 64.0f);
 
 				ImGui::EndTable();
 			}
@@ -167,7 +167,7 @@ namespace ArcEngine
 		if (ImGui::BeginPopup("SettingsPopup"))
 		{
 			UI::BeginProperties(ImGuiTableFlags_SizingStretchSame);
-			UI::Property("Thumbnail Size", m_ThumbnailSize, 64.0f, 128.0f, "");
+			UI::Property("Thumbnail Size", m_ThumbnailSize, 63.9f, 128.0f, "");
 			UI::EndProperties();
 			ImGui::EndPopup();
 		}
@@ -344,7 +344,7 @@ namespace ArcEngine
 		ImGui::PopStyleVar();
 	}
 
-	void AssetPanel::RenderBody()
+	void AssetPanel::RenderBody(bool grid)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -362,13 +362,27 @@ namespace ArcEngine
 		if (columnCount < 1)
 			columnCount = 1;
 
+		float lineHeight = ImGui::GetTextLineHeight();
+		ImVec2 framePadding = ImGui::GetStyle().FramePadding;
+
 		uint32_t flags = ImGuiTableFlags_ContextMenuInBody
-			| ImGuiTableFlags_SizingFixedFit
-			| ImGuiTableFlags_PadOuterX
+			| ImGuiTableFlags_SizingStretchSame
 			| ImGuiTableFlags_ScrollY;
 
 		uint32_t i = 0;
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0, 0 });
+
+		if (!grid)
+		{
+			columnCount = 1;
+			flags |= ImGuiTableFlags_RowBg;
+			flags |= ImGuiTableFlags_NoPadInnerX;
+			flags |= ImGuiTableFlags_NoPadOuterX;
+		}
+		else
+		{
+			flags |= ImGuiTableFlags_PadOuterX;
+		}
 
 		if (ImGui::BeginTable("BodyTable", columnCount, flags))
 		{
@@ -390,66 +404,93 @@ namespace ArcEngine
 				ImGui::TableNextColumn();
 
 				const char* filename = file.Name.c_str();
-				ImVec2 textSize = ImGui::CalcTextSize(filename);
-				ImVec2 cursorPos = ImGui::GetCursorPos();
-				
-				ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
-				ImGui::Button(("##" + std::to_string(i)).c_str(), { m_ThumbnailSize + padding * 2, m_ThumbnailSize + textSize.y + padding * 8 });
-				if (ImGui::BeginDragDropSource())
+
+				if (grid)
 				{
-					eastl::string itemPath = file.DirectoryEntry.path().string().c_str();
-					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath.c_str(), (strlen(itemPath.c_str()) + 1) * sizeof(char));
-					ImGui::EndDragDropSource();
-				}
-				ImGui::PopStyleColor();
-				
-				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && file.DirectoryEntry.is_directory())
-					directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
+					ImVec2 textSize = ImGui::CalcTextSize(filename);
+					ImVec2 cursorPos = ImGui::GetCursorPos();
 
-				ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
-				ImGui::SetItemAllowOverlap();
-				ImGui::Image((ImTextureID)m_WhiteTexture->GetRendererID(), { m_ThumbnailSize, m_ThumbnailSize + textSize.y + overlayPaddingY }, { 0, 0 }, { 1, 1 }, EditorTheme::WindowBgAlternativeColor);
+					ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
+					ImGui::Button(("##" + std::to_string(i)).c_str(), { m_ThumbnailSize + padding * 2, m_ThumbnailSize + textSize.y + padding * 8 });
+					if (ImGui::BeginDragDropSource())
+					{
+						eastl::string itemPath = file.DirectoryEntry.path().string().c_str();
+						ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath.c_str(), (strlen(itemPath.c_str()) + 1) * sizeof(char));
+						ImGui::EndDragDropSource();
+					}
+					ImGui::PopStyleColor();
 
-				ImDrawList& windowDrawList = *ImGui::GetWindowDrawList();
+					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && file.DirectoryEntry.is_directory())
+						directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
 
-				ImVec2 rectMin = ImGui::GetItemRectMin();
-				ImVec2 rectSize = ImGui::GetItemRectSize();
+					ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
+					ImGui::SetItemAllowOverlap();
+					ImGui::Image((ImTextureID)m_WhiteTexture->GetRendererID(), { m_ThumbnailSize, m_ThumbnailSize + textSize.y + overlayPaddingY }, { 0, 0 }, { 1, 1 }, EditorTheme::WindowBgAlternativeColor);
 
-				ImGui::SetCursorPos({ cursorPos.x + thumbnailPadding * 0.75f, cursorPos.y + thumbnailPadding });
-				ImGui::SetItemAllowOverlap();
-				if (fontIcon)
-				{
-					ImGui::InvisibleButton(fontIcon, { thumbnailSize, thumbnailSize });
-					windowDrawList.AddText({ rectMin.x + rectSize.x * 0.5f - ImGui::CalcTextSize(fontIcon).x * 0.5f, rectMin.y + rectSize.y * 0.5f}, ImColor(1.0f, 1.0f, 1.0f), fontIcon);
+					ImDrawList& windowDrawList = *ImGui::GetWindowDrawList();
+
+					ImVec2 rectMin = ImGui::GetItemRectMin();
+					ImVec2 rectSize = ImGui::GetItemRectSize();
+
+					ImGui::SetCursorPos({ cursorPos.x + thumbnailPadding * 0.75f, cursorPos.y + thumbnailPadding });
+					ImGui::SetItemAllowOverlap();
+					if (fontIcon)
+					{
+						ImGui::InvisibleButton(fontIcon, { thumbnailSize, thumbnailSize });
+						windowDrawList.AddText({ rectMin.x + rectSize.x * 0.5f - ImGui::CalcTextSize(fontIcon).x * 0.5f, rectMin.y + rectSize.y * 0.5f }, ImColor(1.0f, 1.0f, 1.0f), fontIcon);
+					}
+					else
+					{
+						ImGui::Image((ImTextureID)textureId, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+					}
+
+					rectMin = ImGui::GetItemRectMin();
+					rectSize = ImGui::GetItemRectSize();
+
+					if (textSize.x + padding * 2 <= rectSize.x)
+					{
+						float rectMin_x = rectMin.x - padding + (rectSize.x - textSize.x) / 2;
+						float rectMin_y = rectMin.y + rectSize.y;
+
+						float rectMax_x = rectMin_x + textSize.x + padding * 2;
+						float rectMax_y = rectMin_y + textSize.y + padding * 2;
+
+						windowDrawList.AddText({ rectMin_x + padding, rectMin_y + padding * 2 }, ImColor(1.0f, 1.0f, 1.0f), filename);
+					}
+					else
+					{
+						float rectMin_y = rectMin.y + rectSize.y;
+
+						float rectMax_x = rectMin.x + rectSize.x;
+						float rectMax_y = rectMin_y + textSize.y + padding * 2;
+
+						ImGui::RenderTextEllipsis(&windowDrawList, { rectMin.x + padding, rectMin_y + padding * 2 }, { rectMax_x, rectMax_y }, rectMax_x, rectMax_x, filename, nullptr, &textSize);
+					}
+					ImGui::SetCursorPosY(ImGui::GetCursorPosY() + textSize.y + padding * 4);
 				}
 				else
 				{
-					ImGui::Image((ImTextureID)textureId, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+					constexpr ImGuiTreeNodeFlags teeNodeFlags = ImGuiTreeNodeFlags_FramePadding
+						| ImGuiTreeNodeFlags_SpanFullWidth
+						| ImGuiTreeNodeFlags_Leaf;
+
+					bool opened = ImGui::TreeNodeEx(file.Name.c_str(), teeNodeFlags, "");
+
+					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && file.DirectoryEntry.is_directory())
+						directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
+
+					ImGui::SameLine();
+					ImGui::SetCursorPosX(ImGui::GetCursorPosX() - lineHeight);
+					if (fontIcon)
+						ImGui::TextUnformatted(fontIcon);
+					else
+						ImGui::Image((ImTextureID)textureId, { lineHeight, lineHeight }, { 0, 1 }, { 1, 0 });
+					ImGui::SameLine();
+					ImGui::TextUnformatted(filename);
+
+					if (opened)
+						ImGui::TreePop();
 				}
-
-				rectMin = ImGui::GetItemRectMin();
-				rectSize = ImGui::GetItemRectSize();
-
-				if (textSize.x + padding * 2 <= rectSize.x)
-				{
-					float rectMin_x = rectMin.x - padding + (rectSize.x - textSize.x) / 2;
-					float rectMin_y = rectMin.y + rectSize.y;
-
-					float rectMax_x = rectMin_x + textSize.x + padding * 2;
-					float rectMax_y = rectMin_y + textSize.y + padding * 2;
-
-					windowDrawList.AddText({ rectMin_x + padding, rectMin_y + padding * 2 }, ImColor(1.0f, 1.0f, 1.0f), filename);
-				}
-				else
-				{
-					float rectMin_y = rectMin.y + rectSize.y;
-
-					float rectMax_x = rectMin.x + rectSize.x;
-					float rectMax_y = rectMin_y + textSize.y + padding * 2;
-
-					ImGui::RenderTextEllipsis(&windowDrawList, { rectMin.x + padding, rectMin_y + padding * 2 }, { rectMax_x, rectMax_y }, rectMax_x, rectMax_x, filename, nullptr, &textSize);
-				}
-				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + textSize.y + padding * 4);
 
 				ImGui::PopID();
 			}

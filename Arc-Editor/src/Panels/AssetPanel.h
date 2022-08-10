@@ -21,7 +21,7 @@ namespace ArcEngine
 		std::pair<bool, uint32_t> DirectoryTreeViewRecursive(const std::filesystem::path& path, uint32_t* count, int* selection_mask, ImGuiTreeNodeFlags flags);
 		void RenderHeader();
 		void RenderSideView();
-		void RenderBody();
+		void RenderBody(bool grid);
 		void UpdateDirectoryEntries(std::filesystem::path directory);
 
 	private:

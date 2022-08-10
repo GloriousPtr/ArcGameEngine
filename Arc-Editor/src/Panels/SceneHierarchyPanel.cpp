@@ -39,9 +39,10 @@ namespace ArcEngine
 			addButtonSize.y = lineHeight + padding.y * 2.0f;
 
 			const float filterCursorPosX = ImGui::GetCursorPosX();
-			m_Filter.Draw("###ConsoleFilter", ImGui::GetContentRegionAvail().x - (addButtonSize.x + padding.x * 2.0f));
+			m_Filter.Draw("###HierarchyFilter", ImGui::GetContentRegionAvail().x - (addButtonSize.x + padding.x * 2.0f));
 			
 			ImGui::SameLine();
+
 			if (UI::IconButton("  " ICON_MDI_PLUS, "Add  ", { 0.537f, 0.753f, 0.286f, 1.0f }))
 				ImGui::OpenPopup("SceneHierarchyContextWindow");
 
