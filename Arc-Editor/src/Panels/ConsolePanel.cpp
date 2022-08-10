@@ -34,7 +34,10 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		*(m_MessageBuffer.begin() + m_BufferBegin) = CreateRef<Message>(message, level);
+		static uint64_t id = 0;
+
+		eastl::string strId = std::to_string(id).c_str();
+		*(m_MessageBuffer.begin() + m_BufferBegin) = CreateRef<Message>(strId, message, level);
 		if (++m_BufferBegin == m_Capacity)
 			m_BufferBegin = 0;
 		if (m_BufferSize < m_Capacity)
@@ -42,6 +45,8 @@ namespace ArcEngine
 
 		// Request to scroll to bottom of the list to view the new message
 		m_RequestScrollToBottom = m_AllowScrollingToBottom;
+
+		id++;
 	}
 
 	const ConsolePanel::Message* ConsolePanel::GetRecentMessage()
@@ -91,8 +96,11 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 		if (ImGui::Button(ICON_MDI_COGS))
 			ImGui::OpenPopup("SettingsPopup");
+		ImGui::PopStyleColor();
+
 		if (ImGui::BeginPopup("SettingsPopup"))
 		{
 			ImGuiRenderSettings();
@@ -109,9 +117,9 @@ namespace ArcEngine
 		const float cursorPosX = ImGui::GetCursorPosX();
 		m_Filter.Draw("###ConsoleFilter", ImGui::GetContentRegionAvail().x - (levelButtonWidths));
 
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 		for(int i = 0; i < 6; i++)
 		{
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 			ImGui::SameLine();
 			auto level = Log::Level(glm::pow(2, i));
 
@@ -131,13 +139,15 @@ namespace ArcEngine
 			{
 				ImGui::SetTooltip("%s", Message::GetLevelName(level));
 			}
-			ImGui::PopStyleColor(2);
+			ImGui::PopStyleColor();
 		}
 
 		ImGui::SameLine();
 
 		if (ImGui::Button(ICON_MDI_NOTIFICATION_CLEAR_ALL))
 			Clear();
+
+		ImGui::PopStyleColor();
 
 		ImGui::GetStyle().ItemSpacing.x = spacing;
 
@@ -175,7 +185,12 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		ImGui::BeginChild("ScrollRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
+		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_RowBg
+			| ImGuiTableFlags_ContextMenuInBody
+			| ImGuiTableFlags_ScrollX
+			| ImGuiTableFlags_ScrollY;
+
+		if (ImGui::BeginTable("ScrollRegionTable", 1, tableFlags))
 		{
 			ImGui::SetWindowFontScale(m_DisplayScale);
 
@@ -228,12 +243,13 @@ namespace ArcEngine
 				ImGui::SetScrollY(ImGui::GetScrollMaxY());
 				m_RequestScrollToBottom = false;
 			}
+
+			ImGui::EndTable();
 		}
-		ImGui::EndChild();
 	}
 
-	ConsolePanel::Message::Message(const eastl::string message, Log::Level level)
-		: Buffer(message), Level(level)
+	ConsolePanel::Message::Message(const eastl::string id, const eastl::string message, Log::Level level)
+		: ID(id), Buffer(message), Level(level)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -242,8 +258,10 @@ namespace ArcEngine
 	void ConsolePanel::Message::OnImGuiRender()
 	{
 		ARC_PROFILE_SCOPE();
-		static uint32_t id = 0;
-		
+
+		ImGui::TableNextRow();
+		ImGui::TableNextColumn();
+
 		glm::vec4 c = GetRenderColor(Level);
 		ImGui::PushStyleColor(ImGuiCol_Text, { c.r, c.g, c.b, c.a });
 		auto levelIcon = GetLevelIcon(Level);
@@ -252,7 +270,7 @@ namespace ArcEngine
 		ImGui::TextUnformatted(Buffer.c_str());
 		ImGui::PopStyleColor();
 
-		if(ImGui::BeginPopupContextItem(Buffer.c_str()))
+		if(ImGui::BeginPopupContextItem(ID.c_str()))
 		{
 			if(ImGui::MenuItem("Copy"))
 				ImGui::SetClipboardText(Buffer.c_str());

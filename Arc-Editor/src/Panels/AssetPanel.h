@@ -1,5 +1,6 @@
 #pragma once
 
+#include <EASTL/stack.h>
 #include <imgui/imgui.h>
 
 #include "BasePanel.h"
@@ -31,6 +32,7 @@ namespace ArcEngine
 		};
 
 		std::filesystem::path m_CurrentDirectory;
+		eastl::stack<std::filesystem::path> m_BackStack;
 		eastl::vector<File> m_DirectoryEntries;
 		uint32_t m_CurrentlyVisibleItemsTreeView = 0;
 		float m_ThumbnailSize = 64.0f;

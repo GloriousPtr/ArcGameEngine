@@ -3,7 +3,6 @@
 #include <ArcEngine.h>
 
 #include <glm/gtc/type_ptr.hpp>
-#include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
 #include "EditorTheme.h"
@@ -47,7 +46,7 @@ namespace ArcEngine
 		PopID();
 	}
 
-	void UI::BeginProperties()
+	void UI::BeginProperties(ImGuiTableFlags flags)
 	{
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -57,12 +56,10 @@ namespace ArcEngine
 		ImVec2 cellPadding = ImGui::GetStyle().CellPadding;
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { cellPadding.x * 4, cellPadding.y });
 
-		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_Resizable
-			| ImGuiTableFlags_BordersInner
+		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_BordersInner
 			| ImGuiTableFlags_BordersOuterH
-			| ImGuiTableFlags_PadOuterX
-			| ImGuiTableFlags_SizingStretchSame;
-		ImGui::BeginTable(s_IDBuffer, 2, tableFlags);
+			| ImGuiTableFlags_PadOuterX;
+		ImGui::BeginTable(s_IDBuffer, 2, tableFlags | flags);
 	}
 
 	void UI::EndProperties()
@@ -588,5 +585,33 @@ namespace ArcEngine
 			float y2 = y1 + line_height;
 			draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), col);
 		}
+	}
+
+	bool UI::IconButton(const char* icon, const char* label, ImVec4 iconColor)
+	{
+		bool clicked = false;
+
+		float lineHeight = ImGui::GetTextLineHeight();
+		ImVec2 padding = ImGui::GetStyle().FramePadding;
+
+		float width = ImGui::CalcTextSize(icon).x;
+		width += ImGui::CalcTextSize(label).x;
+		width += padding.x * 2.0f;
+
+		ImVec2 buttonSize = { width, lineHeight + padding.y * 2.0f };
+
+		const float cursorPosX = ImGui::GetCursorPosX();
+		if (ImGui::Button((eastl::string("##") + label).c_str(), buttonSize))
+			clicked = true;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(cursorPosX);
+		ImGui::TextColored(iconColor, icon);
+		ImGui::SameLine();
+		ImGui::Text(label);
+		ImGui::PopStyleVar();
+
+		return clicked;
 	}
 }

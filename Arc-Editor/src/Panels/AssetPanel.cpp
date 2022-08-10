@@ -10,7 +10,7 @@
 
 namespace ArcEngine
 {
-	static const std::filesystem::path s_AssetPath = "assets";
+	static const std::filesystem::path s_AssetPath = "Assets";
 
 	static const char* GetFileIcon(const char* ext)
 	{
@@ -166,7 +166,9 @@ namespace ArcEngine
 			ImGui::OpenPopup("SettingsPopup");
 		if (ImGui::BeginPopup("SettingsPopup"))
 		{
-			ImGui::SliderFloat("Thumbnail Size", &m_ThumbnailSize, 64.0f, 128.0f);
+			UI::BeginProperties(ImGuiTableFlags_SizingStretchSame);
+			UI::Property("Thumbnail Size", m_ThumbnailSize, 64.0f, 128.0f, "");
+			UI::EndProperties();
 			ImGui::EndPopup();
 		}
 
@@ -180,6 +182,9 @@ namespace ArcEngine
 			ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
 		}
 
+		ImGui::Spacing();
+		ImGui::Spacing();
+
 		// Back button
 		{
 			bool disabledBackButton = false;
@@ -192,8 +197,11 @@ namespace ArcEngine
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-			if (ImGui::Button(ICON_MDI_ARROW_LEFT))
+			if (ImGui::Button(ICON_MDI_ARROW_LEFT_CIRCLE_OUTLINE))
+			{
+				m_BackStack.push(m_CurrentDirectory);
 				UpdateDirectoryEntries(m_CurrentDirectory.parent_path());
+			}
 
 			if (disabledBackButton)
 			{
@@ -201,8 +209,62 @@ namespace ArcEngine
 				ImGui::PopItemFlag();
 			}
 		}
+
 		ImGui::SameLine();
-		ImGui::Text(m_CurrentDirectory.string().c_str());
+
+		// Front button
+		{
+			bool disabledFrontButton = false;
+			if (m_BackStack.empty())
+				disabledFrontButton = true;
+
+			if (disabledFrontButton)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
+
+			if (ImGui::Button(ICON_MDI_ARROW_RIGHT_CIRCLE_OUTLINE))
+			{
+				auto& top = m_BackStack.top();
+				UpdateDirectoryEntries(top);
+				m_BackStack.pop();
+			}
+
+			if (disabledFrontButton)
+			{
+				ImGui::PopStyleVar();
+				ImGui::PopItemFlag();
+			}
+		}
+
+		ImGui::SameLine();
+
+		ImGui::Text(ICON_MDI_FOLDER);
+
+		std::filesystem::path current = "";
+		std::filesystem::path directoryToOpen = "";
+		for (auto& path : m_CurrentDirectory)
+		{
+			current /= path;
+
+			ImGui::SameLine();
+
+			const char* folderName = StringUtils::GetName(path.string().c_str()).c_str();
+			ImGui::Text(folderName);
+
+			if (ImGui::IsItemClicked() && ImGui::IsMouseDown(0))
+				directoryToOpen = current;
+
+			ImGui::SameLine();
+			float scale = ImGui::GetFont()->FontSize;
+			ImGui::GetFont()->FontSize = scale * 1.2f;
+			ImGui::Text(ICON_MDI_GREATER_THAN);
+			ImGui::GetFont()->FontSize = scale;
+		}
+
+		if (!directoryToOpen.empty())
+			UpdateDirectoryEntries(directoryToOpen);
 	}
 
 	void AssetPanel::RenderSideView()
@@ -240,7 +302,7 @@ namespace ArcEngine
 				ImGui::PushStyleColor(ImGuiCol_HeaderHovered, EditorTheme::HeaderHoveredColor);
 			}
 
-			bool opened = ImGui::TreeNodeEx((void*)("Assets"), nodeFlags, "");
+			bool opened = ImGui::TreeNodeEx(s_AssetPath.c_str(), nodeFlags, "");
 			ImGui::PopStyleColor(selected ? 2 : 1);
 
 			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
@@ -286,8 +348,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		std::filesystem::path directoryToOpen;
-		bool directoryOpened = false;
+		std::filesystem::path directoryToOpen = "";
 
 		float padding = 4.0f;
 		float cellSize = m_ThumbnailSize + 2 * padding;
@@ -296,7 +357,7 @@ namespace ArcEngine
 		float thumbnailPadding = overlayPaddingY * 0.5f;
 		float thumbnailSize = m_ThumbnailSize - thumbnailPadding;
 
-		float panelWidth = ImGui::GetContentRegionAvail().x;
+		float panelWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ScrollbarSize;
 		int columnCount = (int) (panelWidth / cellSize);
 		if (columnCount < 1)
 			columnCount = 1;
@@ -342,14 +403,8 @@ namespace ArcEngine
 				}
 				ImGui::PopStyleColor();
 				
-				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-				{
-					if (file.DirectoryEntry.is_directory())
-					{
-						directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
-						directoryOpened = true;
-					}
-				}
+				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && file.DirectoryEntry.is_directory())
+					directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
 
 				ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
 				ImGui::SetItemAllowOverlap();
@@ -401,7 +456,8 @@ namespace ArcEngine
 			ImGui::EndTable();
 		}
 		ImGui::PopStyleVar();
-		if (directoryOpened)
+
+		if (!directoryToOpen.empty())
 			UpdateDirectoryEntries(directoryToOpen);
 	}
 

@@ -315,7 +315,7 @@ namespace ArcEngine
 
 		// Add Button
 		{
-			if (ImGui::Button(ICON_MDI_PLUS " Add  "))
+			if (UI::IconButton("  " ICON_MDI_PLUS, "Add  ", { 0.537f, 0.753f, 0.286f, 1.0f }))
 				ImGui::OpenPopup("AddComponentPopup");
 
 			if (ImGui::BeginPopup("AddComponentPopup"))

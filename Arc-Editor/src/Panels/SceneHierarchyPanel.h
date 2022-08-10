@@ -26,12 +26,14 @@ namespace ArcEngine
 		void SetSelectedEntity(const Entity entity) { m_SelectionContext = entity; }
 
 	private:
-		ImRect DrawEntityNode(Entity entity, bool skipChildren = false, uint32_t depth = 0);
+		ImRect DrawEntityNode(Entity entity, bool skipChildren = false, uint32_t depth = 0, bool forceExpandTree = false);
 
 	private:
 		Ref<Scene> m_Context = nullptr;
 		Entity m_SelectionContext;
 		Entity m_DeletedEntity;
+		Entity m_DraggedEntity;
+		Entity m_DraggedEntityTarget;
 
 		ImGuiTextFilter m_Filter;
 	};
