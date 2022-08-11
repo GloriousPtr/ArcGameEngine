@@ -265,9 +265,7 @@ namespace ArcEngine
 		glm::vec4 c = GetRenderColor(Level);
 		ImGui::PushStyleColor(ImGuiCol_Text, { c.r, c.g, c.b, c.a });
 		auto levelIcon = GetLevelIcon(Level);
-		ImGui::TextUnformatted(levelIcon);
-		ImGui::SameLine();
-		ImGui::TextUnformatted(Buffer.c_str());
+		ImGui::Text("%s  %s", levelIcon, Buffer.c_str());
 		ImGui::PopStyleColor();
 
 		if(ImGui::BeginPopupContextItem(ID.c_str()))
@@ -276,11 +274,6 @@ namespace ArcEngine
 				ImGui::SetClipboardText(Buffer.c_str());
 
 			ImGui::EndPopup();
-		}
-
-		if(ImGui::IsItemHovered())
-		{
-			ImGui::SetTooltip("%s", Buffer.c_str());
 		}
 	}
 

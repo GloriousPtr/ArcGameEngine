@@ -200,8 +200,7 @@ namespace ArcEngine
 		if (forceExpandTree)
 			ImGui::SetNextItemOpen(true);
 		
-		eastl::string displayName = (ICON_MDI_CUBE_OUTLINE + eastl::string(" ") + tag);
-		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity.GetUUID(), flags, displayName.c_str());
+		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity.GetUUID(), flags, "%s %s", ICON_MDI_CUBE_OUTLINE, tag.c_str());
 
 		if (ImGui::IsItemToggledOpen() && (ImGui::IsKeyDown(ImGuiKey_LeftAlt) || ImGui::IsKeyDown(ImGuiKey_RightAlt)))
 			forceExpandTree = opened;
@@ -217,12 +216,13 @@ namespace ArcEngine
 
 		bool entityDeleted = false;
 		bool createChild = false;
+		static Entity renaming = {};
 		if (ImGui::BeginPopupContextItem())
 		{
 			if (ImGui::MenuItem("Create"))
 				createChild = true;
 			if (ImGui::MenuItem("Rename"))
-				tagComponent.renaming = true;
+				renaming = entity;
 			if (ImGui::MenuItem("Delete Entity"))
 				entityDeleted = true;
 
@@ -254,13 +254,7 @@ namespace ArcEngine
 			}
 		}
 
-		ImGui::TableNextColumn();
-		ImGui::TextUnformatted("  Entity");
-
-		ImGui::TableNextColumn();
-		ImGui::TextUnformatted("  " ICON_MDI_EYE_OUTLINE);
-
-		if (tagComponent.renaming)
+		if (entity == renaming)
 		{
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
@@ -269,7 +263,22 @@ namespace ArcEngine
 				tag = eastl::string(buffer);
 
 			if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
-				tagComponent.renaming = false;
+				renaming = {};
+		}
+
+		ImGui::TableNextColumn();
+		ImGui::TextUnformatted("  Entity");
+
+		ImGui::TableNextColumn();
+		ImGui::Text("  %s", tagComponent.Enabled ? ICON_MDI_EYE_OUTLINE : ICON_MDI_EYE_OFF_OUTLINE);
+
+		if (!ImGui::IsItemHovered())
+			tagComponent.handled = false;
+
+		if ((!tagComponent.handled && ImGui::IsItemHovered() && ImGui::IsMouseDragging(0)) || ImGui::IsItemClicked(0))
+		{
+			tagComponent.handled = true;
+			tagComponent.Enabled = !tagComponent.Enabled;
 		}
 
 		// Open

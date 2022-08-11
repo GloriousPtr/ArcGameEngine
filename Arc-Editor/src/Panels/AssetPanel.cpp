@@ -251,16 +251,10 @@ namespace ArcEngine
 			ImGui::SameLine();
 
 			const char* folderName = StringUtils::GetName(path.string().c_str()).c_str();
-			ImGui::Text(folderName);
+			ImGui::Text("%s %s", folderName, ICON_MDI_GREATER_THAN);
 
 			if (ImGui::IsItemClicked() && ImGui::IsMouseDown(0))
 				directoryToOpen = current;
-
-			ImGui::SameLine();
-			float scale = ImGui::GetFont()->FontSize;
-			ImGui::GetFont()->FontSize = scale * 1.2f;
-			ImGui::Text(ICON_MDI_GREATER_THAN);
-			ImGui::GetFont()->FontSize = scale;
 		}
 
 		if (!directoryToOpen.empty())
@@ -344,6 +338,16 @@ namespace ArcEngine
 		ImGui::PopStyleVar();
 	}
 
+	static void BeginDragDropFrom(const char* filepath)
+	{
+		if (ImGui::BeginDragDropSource())
+		{
+			ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", filepath, (strlen(filepath) + 1) * sizeof(char));
+			ImGui::Text(StringUtils::GetName(filepath).c_str());
+			ImGui::EndDragDropSource();
+		}
+	}
+
 	void AssetPanel::RenderBody(bool grid)
 	{
 		ARC_PROFILE_SCOPE();
@@ -366,7 +370,7 @@ namespace ArcEngine
 		ImVec2 framePadding = ImGui::GetStyle().FramePadding;
 
 		uint32_t flags = ImGuiTableFlags_ContextMenuInBody
-			| ImGuiTableFlags_SizingStretchSame
+			| ImGuiTableFlags_NoPadInnerX
 			| ImGuiTableFlags_ScrollY;
 
 		uint32_t i = 0;
@@ -375,13 +379,11 @@ namespace ArcEngine
 		if (!grid)
 		{
 			columnCount = 1;
-			flags |= ImGuiTableFlags_RowBg;
-			flags |= ImGuiTableFlags_NoPadInnerX;
-			flags |= ImGuiTableFlags_NoPadOuterX;
+			flags |= ImGuiTableFlags_RowBg | ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_SizingStretchSame;
 		}
 		else
 		{
-			flags |= ImGuiTableFlags_PadOuterX;
+			flags |= ImGuiTableFlags_PadOuterX | ImGuiTableFlags_SizingFixedFit;
 		}
 
 		if (ImGui::BeginTable("BodyTable", columnCount, flags))
@@ -412,12 +414,7 @@ namespace ArcEngine
 
 					ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
 					ImGui::Button(("##" + std::to_string(i)).c_str(), { m_ThumbnailSize + padding * 2, m_ThumbnailSize + textSize.y + padding * 8 });
-					if (ImGui::BeginDragDropSource())
-					{
-						eastl::string itemPath = file.DirectoryEntry.path().string().c_str();
-						ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath.c_str(), (strlen(itemPath.c_str()) + 1) * sizeof(char));
-						ImGui::EndDragDropSource();
-					}
+					BeginDragDropFrom(file.DirectoryEntry.path().string().c_str());
 					ImGui::PopStyleColor();
 
 					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && file.DirectoryEntry.is_directory())
@@ -478,6 +475,8 @@ namespace ArcEngine
 
 					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && file.DirectoryEntry.is_directory())
 						directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
+
+					BeginDragDropFrom(file.DirectoryEntry.path().string().c_str());
 
 					ImGui::SameLine();
 					ImGui::SetCursorPosX(ImGui::GetCursorPosX() - lineHeight);

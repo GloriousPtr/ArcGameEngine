@@ -29,7 +29,7 @@ namespace ArcEngine
 	}
 
 	template<typename T, typename UIFunction>
-	static void DrawComponent(const eastl::string& name, Entity entity, UIFunction uiFunction, const bool removable = true)
+	static void DrawComponent(const char* name, Entity entity, UIFunction uiFunction, const bool removable = true)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -49,7 +49,7 @@ namespace ArcEngine
 			
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
 
-			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeFlags, name.c_str());
+			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeFlags, name);
 
 			bool removeComponent = false;
 			if(removable)

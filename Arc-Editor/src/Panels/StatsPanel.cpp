@@ -65,9 +65,7 @@ namespace ArcEngine
 				Application::Get().GetWindow().SetVSync(vSync);
 			UI::EndProperties();
 
-			ImGui::Text("FPS");
-			ImGui::Separator();
-			ImGui::PlotLines("#FPS", m_FpsValues, size);
+			ImGui::PlotLines("##FPS", m_FpsValues, size);
 			ImGui::Text("FPS: %f", avg);
 			const float fps = (1.0f / avg) * 1000.0f;
 			ImGui::Text("Frame time (ms): %f", fps);

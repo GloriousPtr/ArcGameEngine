@@ -37,8 +37,6 @@ namespace ArcEngine
 
 		static void DrawVec3Control(const char* label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f);
 
-		static void DrawRowsBackground(int row_count, float line_height, float x1, float x2, float y_offset, uint32_t col_even, uint32_t col_odd);
-
 		static bool IconButton(const char* icon, const char* label, ImVec4 iconColor);
 
 	private:

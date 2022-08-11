@@ -34,7 +34,9 @@ namespace ArcEngine
 	struct TagComponent
 	{
 		eastl::string Tag;
-		bool renaming = false;
+		bool Enabled = true;
+
+		bool handled = true;
 
 		TagComponent() = default;
 		TagComponent(const TagComponent&) = default;
