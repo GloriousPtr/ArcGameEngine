@@ -1,6 +1,8 @@
 #include "AssetPanel.h"
 
 #include <ArcEngine.h>
+#include <Arc/Scene/EntitySerializer.h>
+
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 #include <filesystem>
@@ -28,6 +30,32 @@ namespace ArcEngine
 		return ICON_MDI_FILE;
 	}
 	
+	static void DragDropTarget(const char* dropPath)
+	{
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity"))
+			{
+				Entity entity = *((Entity*)payload->Data);
+				std::filesystem::path path(dropPath);
+				path /= eastl::string(entity.GetComponent<TagComponent>().Tag + ".prefab").c_str();
+				EntitySerializer::SerializeEntityAsPrefab(path.string().c_str(), entity);
+			}
+
+			ImGui::EndDragDropTarget();
+		}
+	}
+
+	static void DragDropFrom(const char* filepath)
+	{
+		if (ImGui::BeginDragDropSource())
+		{
+			ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", filepath, (strlen(filepath) + 1) * sizeof(char));
+			ImGui::Text(StringUtils::GetName(filepath).c_str());
+			ImGui::EndDragDropSource();
+		}
+	}
+
 	std::pair<bool, uint32_t> AssetPanel::DirectoryTreeViewRecursive(const std::filesystem::path& path, uint32_t* count, int* selectionMask, ImGuiTreeNodeFlags flags)
 	{
 		ARC_PROFILE_SCOPE();
@@ -39,7 +67,9 @@ namespace ArcEngine
 		{
 			ImGuiTreeNodeFlags nodeFlags = flags;
 
-			bool entryIsFile = !std::filesystem::is_directory(entry.path());
+			auto& entryPath = entry.path();
+
+			bool entryIsFile = !std::filesystem::is_directory(entryPath);
 			if (entryIsFile)
 				nodeFlags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
@@ -64,13 +94,19 @@ namespace ArcEngine
 			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
 			{
 				if (!entryIsFile)
-					UpdateDirectoryEntries(entry.path());
+					UpdateDirectoryEntries(entryPath);
 
 				nodeClicked = *count;
 				anyNodeClicked = true;
 			}
 
-			eastl::string name = StringUtils::GetNameWithExtension(entry.path().string().c_str());
+			const std::string filepath = entryPath.string();
+
+			if (!entryIsFile)
+				DragDropTarget(filepath.c_str());
+			DragDropFrom(filepath.c_str());
+
+			eastl::string name = StringUtils::GetNameWithExtension(filepath.c_str());
 			const char* folderIcon;
 			if (entryIsFile)
 				folderIcon = GetFileIcon(StringUtils::GetExtension((eastl::string&&)name).c_str());
@@ -92,7 +128,7 @@ namespace ArcEngine
 			{
 				if (open)
 				{
-					auto clickState = DirectoryTreeViewRecursive(entry.path(), count, selectionMask, flags);
+					auto clickState = DirectoryTreeViewRecursive(entryPath, count, selectionMask, flags);
 
 					if (!anyNodeClicked)
 					{
@@ -104,7 +140,7 @@ namespace ArcEngine
 				}
 				else
 				{
-					for (const auto& e : std::filesystem::recursive_directory_iterator(entry.path()))
+					for (const auto& e : std::filesystem::recursive_directory_iterator(entryPath))
 						(*count)--;
 				}
 			}
@@ -338,16 +374,6 @@ namespace ArcEngine
 		ImGui::PopStyleVar();
 	}
 
-	static void BeginDragDropFrom(const char* filepath)
-	{
-		if (ImGui::BeginDragDropSource())
-		{
-			ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", filepath, (strlen(filepath) + 1) * sizeof(char));
-			ImGui::Text(StringUtils::GetName(filepath).c_str());
-			ImGui::EndDragDropSource();
-		}
-	}
-
 	void AssetPanel::RenderBody(bool grid)
 	{
 		ARC_PROFILE_SCOPE();
@@ -392,20 +418,22 @@ namespace ArcEngine
 			{
 				ImGui::PushID(i++);
 
+				bool isDir = file.DirectoryEntry.is_directory();
+				std::string filepath = file.DirectoryEntry.path().string();
+				const char* filename = file.Name.c_str();
+
 				uint32_t textureId = m_DirectoryIcon->GetRendererID();
 				const char* fontIcon = nullptr;
-				if (!file.DirectoryEntry.is_directory())
+				if (!isDir)
 				{
 					eastl::string ext = StringUtils::GetExtension((eastl::string&&)file.Name);
 					if (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp")
-						textureId = AssetManager::GetTexture2D(file.DirectoryEntry.path().string().c_str())->GetRendererID();
+						textureId = AssetManager::GetTexture2D(filepath.c_str())->GetRendererID();
 					else
 						fontIcon = GetFileIcon(ext.c_str());
 				}
 
 				ImGui::TableNextColumn();
-
-				const char* filename = file.Name.c_str();
 
 				if (grid)
 				{
@@ -414,10 +442,14 @@ namespace ArcEngine
 
 					ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
 					ImGui::Button(("##" + std::to_string(i)).c_str(), { m_ThumbnailSize + padding * 2, m_ThumbnailSize + textSize.y + padding * 8 });
-					BeginDragDropFrom(file.DirectoryEntry.path().string().c_str());
+					
+					if (isDir)
+						DragDropTarget(filepath.c_str());
+
+					DragDropFrom(filepath.c_str());
 					ImGui::PopStyleColor();
 
-					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && file.DirectoryEntry.is_directory())
+					if (isDir && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 						directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
 
 					ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
@@ -476,7 +508,7 @@ namespace ArcEngine
 					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && file.DirectoryEntry.is_directory())
 						directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
 
-					BeginDragDropFrom(file.DirectoryEntry.path().string().c_str());
+					DragDropFrom(file.DirectoryEntry.path().string().c_str());
 
 					ImGui::SameLine();
 					ImGui::SetCursorPosX(ImGui::GetCursorPosX() - lineHeight);

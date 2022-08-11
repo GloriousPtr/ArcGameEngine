@@ -1,5 +1,7 @@
 ﻿#include "SceneHierarchyPanel.h"
 
+#include <Arc/Scene/EntitySerializer.h>
+
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
@@ -14,6 +16,32 @@ namespace ArcEngine
 
 		m_Context = context;
 		m_SelectionContext = {};
+	}
+
+	static void DragDropTarget(Scene& scene)
+	{
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				const char* path = (const char*)payload->Data;
+				eastl::string ext = StringUtils::GetExtension(path);
+				if (ext == "prefab")
+					EntitySerializer::DeserializeEntityAsPrefab(path, scene);
+			}
+
+			ImGui::EndDragDropTarget();
+		}
+	}
+
+	static void DragDropFrom(const char* filepath)
+	{
+		if (ImGui::BeginDragDropSource())
+		{
+			ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", filepath, (strlen(filepath) + 1) * sizeof(char));
+			ImGui::Text(StringUtils::GetName(filepath).c_str());
+			ImGui::EndDragDropSource();
+		}
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender()
@@ -52,6 +80,13 @@ namespace ArcEngine
 				ImGui::SetCursorPosX(filterCursorPosX + ImGui::GetFontSize() * 0.5f);
 				ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
 			}
+
+			ImVec2 cursorPos = ImGui::GetCursorPos();
+			ImVec2 region = ImGui::GetContentRegionAvail();
+			ImGui::InvisibleButton("##DragDropTargetBehindTable", region);
+			DragDropTarget(*m_Context);
+
+			ImGui::SetCursorPos(cursorPos);
 
 			if (ImGui::BeginTable("HierarchyTable", 3, tableFlags))
 			{
@@ -155,7 +190,7 @@ namespace ArcEngine
 		ImGui::PopStyleVar();
 	}
 
-	ImRect SceneHierarchyPanel::DrawEntityNode(Entity entity, bool skipChildren, uint32_t depth, bool forceExpandTree)
+	ImRect SceneHierarchyPanel::DrawEntityNode(Entity entity, bool skipChildren, uint32_t depth, bool forceExpandTree, bool isPartOfPrefab)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -200,6 +235,12 @@ namespace ArcEngine
 		if (forceExpandTree)
 			ImGui::SetNextItemOpen(true);
 		
+		if (!isPartOfPrefab)
+			isPartOfPrefab = entity.HasComponent<PrefabComponent>();
+		bool prefabColorApplied = isPartOfPrefab && entity != m_SelectionContext;
+		if (prefabColorApplied)
+			ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::HeaderSelectedColor);
+
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity.GetUUID(), flags, "%s %s", ICON_MDI_CUBE_OUTLINE, tag.c_str());
 
 		if (ImGui::IsItemToggledOpen() && (ImGui::IsKeyDown(ImGuiKey_LeftAlt) || ImGui::IsKeyDown(ImGuiKey_RightAlt)))
@@ -235,10 +276,10 @@ namespace ArcEngine
 		{
 			if (ImGui::BeginDragDropTarget())
 			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("EntityUUID"))
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity"))
 				{
-					UUID* uuid = (UUID*)payload->Data;
-					m_DraggedEntity = m_Context->GetEntity(*uuid);
+					Entity* e = (Entity*)payload->Data;
+					m_DraggedEntity = *e;
 					m_DraggedEntityTarget = entity;
 				}
 
@@ -247,8 +288,7 @@ namespace ArcEngine
 
 			if (ImGui::BeginDragDropSource())
 			{
-				UUID uuid = entity.GetUUID();
-				ImGui::SetDragDropPayload("EntityUUID", (void*)&uuid, sizeof(uuid));
+				ImGui::SetDragDropPayload("Entity", (void*)&entity, sizeof(entity));
 				ImGui::Text(tag.c_str());
 				ImGui::EndDragDropSource();
 			}
@@ -267,10 +307,13 @@ namespace ArcEngine
 		}
 
 		ImGui::TableNextColumn();
-		ImGui::TextUnformatted("  Entity");
+		ImGui::Text("  %s", isPartOfPrefab ? "Prefab" : "Entity");
 
 		ImGui::TableNextColumn();
 		ImGui::Text("  %s", tagComponent.Enabled ? ICON_MDI_EYE_OUTLINE : ICON_MDI_EYE_OFF_OUTLINE);
+
+		if (prefabColorApplied)
+			ImGui::PopStyleColor();
 
 		if (!ImGui::IsItemHovered())
 			tagComponent.handled = false;
@@ -314,7 +357,7 @@ namespace ArcEngine
 					UUID childId = entity.GetRelationship().Children[i];
 					Entity child = m_Context->GetEntity(childId);
 					const float HorizontalTreeLineSize = child.GetRelationship().Children.size() == 0 ? 18.0f : 9.0f; //chosen arbitrarily
-					const ImRect childRect = DrawEntityNode(child, createChild, depth + 1, forceExpandTree);
+					const ImRect childRect = DrawEntityNode(child, createChild, depth + 1, forceExpandTree, isPartOfPrefab);
 
 					const float midpoint = (childRect.Min.y + childRect.Max.y) / 2.0f;
 					drawList->AddLine(ImVec2(verticalLineStart.x, midpoint), ImVec2(verticalLineStart.x + HorizontalTreeLineSize, midpoint), treeLineColor);

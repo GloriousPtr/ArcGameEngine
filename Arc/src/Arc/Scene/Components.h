@@ -66,27 +66,24 @@ namespace ArcEngine
 		RelationshipComponent(const RelationshipComponent&) = default;
 	};
 
+	struct PrefabComponent
+	{
+		UUID ID;
+
+		PrefabComponent() = default;
+		PrefabComponent(const PrefabComponent&) = default;
+	};
+
 	struct SpriteRendererComponent
 	{
 		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
 		Ref<Texture2D> Texture = nullptr;
-		eastl::string TextureFilepath;
 		float TilingFactor = 1.0f;
 
 		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;
 		SpriteRendererComponent(const glm::vec4& color)
 			: Color(color) {}
-		void SetTexture(eastl::string& filepath)
-		{
-			Texture = Texture2D::Create(filepath);
-			TextureFilepath = filepath;
-		}
-		void RemoveTexture()
-		{
-			Texture = nullptr;
-			TextureFilepath = "";
-		}
 	};
 
 	struct CameraComponent
@@ -117,13 +114,12 @@ namespace ArcEngine
 
 	struct MeshComponent
 	{
+		enum class CullModeType { Unknown = -1, Front, Back, DoubleSided };
+
 		eastl::string Filepath;
 		AABB BoundingBox;
 		Ref<Mesh> MeshGeometry = nullptr;
 		uint32_t SubmeshIndex = 0;
-
-		enum class CullModeType { Unknown = -1, Front, Back, DoubleSided };
-
 		CullModeType CullMode = CullModeType::Back;
 
 		MeshComponent() = default;
@@ -138,14 +134,6 @@ namespace ArcEngine
 
 		SkyLightComponent() = default;
 		SkyLightComponent(const SkyLightComponent&) = default;
-		void SetTexture(eastl::string& filepath)
-		{
-			Texture = TextureCubemap::Create(filepath);
-		}
-		void RemoveTexture()
-		{
-			Texture = nullptr;
-		}
 	};
 
 	struct LightComponent
@@ -163,6 +151,7 @@ namespace ArcEngine
 		float OuterCutOffAngle = 17.5f;
 		
 		ShadowQualityType ShadowQuality = ShadowQualityType::UltraSoft;
+
 		Ref<Framebuffer> ShadowMapFramebuffer;
 
 		LightComponent()

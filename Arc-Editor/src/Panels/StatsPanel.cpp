@@ -58,7 +58,6 @@ namespace ArcEngine
 				ImGui::Text("Indices: %d", stats.IndexCount);
 			}
 
-
 			UI::BeginProperties();
 			bool vSync = Application::Get().GetWindow().IsVSync();
 			if (UI::Property("VSync Enabled", vSync))

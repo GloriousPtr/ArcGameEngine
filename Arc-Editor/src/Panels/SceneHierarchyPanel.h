@@ -26,7 +26,7 @@ namespace ArcEngine
 		void SetSelectedEntity(const Entity entity) { m_SelectionContext = entity; }
 
 	private:
-		ImRect DrawEntityNode(Entity entity, bool skipChildren = false, uint32_t depth = 0, bool forceExpandTree = false);
+		ImRect DrawEntityNode(Entity entity, bool skipChildren = false, uint32_t depth = 0, bool forceExpandTree = false, bool isPartOfPrefab = false);
 
 	private:
 		Ref<Scene> m_Context = nullptr;

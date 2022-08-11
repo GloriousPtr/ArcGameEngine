@@ -1,0 +1,60 @@
+Prefab: 17079664175190929040
+Entities:
+  - Entity: 11943829491107425112
+    TagComponent:
+      Tag: Sky Light
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 0
+      ChildrenCount: 2
+      Children:
+        0: 1915948797792870540
+        1: 3975782313366516989
+    SkyLightComponent:
+      TexturePath: Assets\textures\Cubemap.hdr
+      Intensity: 0.699999988
+  - Entity: 1915948797792870540
+    TagComponent:
+      Tag: DirLight
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [1.00530958, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 11943829491107425112
+      ChildrenCount: 0
+      Children:
+        {}
+    LightComponent:
+      Type: 0
+      ShadowQuality: 2
+      Color: [1, 0.996510088, 0.980556488]
+      UseColorTempratureMode: false
+      Intensity: 20
+      Radius: 1
+      CutOffAngle: 12.5
+      OuterCutOffAngle: 17.5
+  - Entity: 3975782313366516989
+    TagComponent:
+      Tag: PointLight
+    TransformComponent:
+      Translation: [0, 2, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 11943829491107425112
+      ChildrenCount: 0
+      Children:
+        {}
+    LightComponent:
+      Type: 1
+      ShadowQuality: 2
+      Color: [0, 1, 0.367815971]
+      UseColorTempratureMode: false
+      Intensity: 32.7999992
+      Radius: 3.9000001
+      CutOffAngle: 12.5
+      OuterCutOffAngle: 17.5

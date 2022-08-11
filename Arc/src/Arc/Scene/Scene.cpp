@@ -546,6 +546,11 @@ namespace ArcEngine
 	}
 
 	template<>
+	void Scene::OnComponentAdded<PrefabComponent>(Entity entity, PrefabComponent& component)
+	{
+	}
+
+	template<>
 	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
 	{
 		component.Camera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
