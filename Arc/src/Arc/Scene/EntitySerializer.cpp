@@ -488,7 +488,7 @@ namespace ArcEngine
 		fout << out.c_str();
 	}
 
-	bool EntitySerializer::DeserializeEntityAsPrefab(const char* filepath, Scene& scene)
+	Entity EntitySerializer::DeserializeEntityAsPrefab(const char* filepath, Scene& scene)
 	{
 		std::ifstream stream(filepath);
 		std::stringstream strStream;
@@ -496,16 +496,17 @@ namespace ArcEngine
 
 		YAML::Node data = YAML::Load(strStream.str());
 		if (!data["Prefab"])
-			return false;
+			return {};
 
 		uint64_t prefabID = data["Prefab"].as<uint64_t>();
 
 		auto entities = data["Entities"];
 		ARC_CORE_TRACE("Deserializing prefab : {0} ({1})", StringUtils::GetName(filepath).c_str(), prefabID);
 
+		Entity root = {};
+
 		if (entities)
 		{
-			bool first = true;
 			eastl::unordered_map<UUID, UUID> oldNewIdMap;
 			for (auto entity : entities)
 			{
@@ -513,12 +514,11 @@ namespace ArcEngine
 				UUID newUUID = EntitySerializer::DeserializeEntity(entity, scene, false);
 				oldNewIdMap.emplace(oldUUID, newUUID);
 				
-				if (first)
-				{
-					first = false;
-					scene.GetEntity(newUUID).AddComponent<PrefabComponent>().ID = prefabID;
-				}
+				if (!root)
+					root = scene.GetEntity(newUUID);
 			}
+
+			root.AddComponent<PrefabComponent>().ID = prefabID;
 
 			// Fix parent/children UUIDs
 			for (auto [oldId, newId] : oldNewIdMap)
@@ -541,6 +541,6 @@ namespace ArcEngine
 			ARC_CORE_ERROR("There are no entities in the prefab {0} ({1}) to deserialize!", StringUtils::GetName(filepath).c_str(), prefabID);
 		}
 
-		return true;
+		return root;
 	}
 }

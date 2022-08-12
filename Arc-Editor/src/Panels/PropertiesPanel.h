@@ -3,6 +3,7 @@
 #include <ArcEngine.h>
 
 #include "BasePanel.h"
+#include "EditorContext.h"
 #include "../Utils/IconsMaterialDesignIcons.h"
 
 namespace ArcEngine
@@ -19,24 +20,25 @@ namespace ArcEngine
 
 		virtual void OnImGuiRender() override;
 
-		void SetContext(const Entity entity)
+		void SetContext(const EditorContext context)
 		{
-			if (m_Locked && m_Context)
+			if (m_Locked && m_Context.Data)
 				return;
 
-			m_Context = entity;
+			m_Context = context;
 		}
 
-		void ForceSetContext(const Entity entity) { m_Context = entity; }
+		void ForceSetContext(const EditorContext context) { m_Context = context; }
 
 	private:
 		void DrawComponents(Entity entity);
+		void DrawFileProperties(const char* filepath);
 
 		template<typename Component>
 		void DrawAddComponent(Entity entity, const char* name);
 
 	private:
-		Entity m_Context;
+		EditorContext m_Context = {};
 		bool m_Locked = false;
 	};
 }

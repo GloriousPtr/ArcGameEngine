@@ -21,8 +21,27 @@ namespace ArcEngine
 
 		if (OnBegin())
 		{
-			if (m_Context && m_Context.GetScene())
-				DrawComponents(m_Context);
+			EditorContext context = EditorLayer::GetInstance()->GetContext();
+			switch (context.Type)
+			{
+				case EditorContextType::None:
+					break;
+				case EditorContextType::Entity:
+					if (m_Context.Data)
+					{
+						Entity selectedEntity = *((Entity*)m_Context.Data);
+						if (selectedEntity && selectedEntity.GetScene())
+							DrawComponents(selectedEntity);
+					}
+					break;
+				case EditorContextType::File:
+					if (m_Context.Data)
+					{
+						const char* selectedFile = (char*)m_Context.Data;
+						DrawFileProperties(selectedFile);
+					}
+					break;
+			}
 
 			OnEnd();
 		}
@@ -650,6 +669,14 @@ namespace ArcEngine
 		}
 
 		
+	}
+
+	void PropertiesPanel::DrawFileProperties(const char* filepath)
+	{
+		eastl::string name = StringUtils::GetNameWithExtension(filepath);
+		eastl::string& ext = StringUtils::GetExtension(name.c_str());
+
+		ImGui::Text(name.c_str());
 	}
 
 	template<typename Component>

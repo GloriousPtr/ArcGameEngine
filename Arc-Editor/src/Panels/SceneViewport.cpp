@@ -189,16 +189,20 @@ namespace ArcEngine
 
 		if (ImGui::IsKeyPressed(Key::F) && m_SceneHierarchyPanel)
 		{
-			Entity entity = m_SceneHierarchyPanel->GetSelectedEntity();
-			if (entity)
+			EditorContext context = EditorLayer::GetInstance()->GetContext();
+			if (context.Type == EditorContextType::Entity && context.Data)
 			{
-				auto& transform = entity.GetComponent<TransformComponent>();
-				glm::vec3 pos = transform.Translation;
-				pos.z -= 5.0f;
-				auto& view = glm::lookAt(pos, transform.Translation, m_EditorCamera.GetUp());
-				m_EditorCamera.SetPosition(view[3]);
-				m_EditorCamera.SetYaw(90);
-				m_EditorCamera.SetPitch(0);
+				Entity entity = *((Entity*)context.Data);
+				if (entity)
+				{
+					auto& transform = entity.GetComponent<TransformComponent>();
+					glm::vec3 pos = transform.Translation;
+					pos.z -= 5.0f;
+					auto& view = glm::lookAt(pos, transform.Translation, m_EditorCamera.GetUp());
+					m_EditorCamera.SetPosition(view[3]);
+					m_EditorCamera.SetYaw(90);
+					m_EditorCamera.SetPitch(0);
+				}
 			}
 		}
 
@@ -283,41 +287,45 @@ namespace ArcEngine
 			// Gizmos
 			if (m_ViewportHovered && m_SceneHierarchyPanel && m_GizmoType != -1 && !m_SimulationRunning)
 			{
-				Entity selectedEntity = m_SceneHierarchyPanel->GetSelectedEntity();
-				if (selectedEntity)
+				EditorContext context = EditorLayer::GetInstance()->GetContext();
+				if (context.Type == EditorContextType::Entity && context.Data)
 				{
-					ImGuizmo::SetOrthographic(false);
-					ImGuizmo::SetDrawlist();
-
-					ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
-
-					const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
-					const glm::mat4& cameraView = m_EditorCamera.GetViewMatrix();
-					// Entity Transform
-					auto& tc = selectedEntity.GetComponent<TransformComponent>();
-					auto& rc = selectedEntity.GetComponent<RelationshipComponent>();
-					glm::mat4 transform = selectedEntity.GetWorldTransform();
-
-					// Snapping
-					const bool snap = ImGui::IsKeyDown(Key::LeftControl);
-					float snapValue = 0.5f;
-					if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
-						snapValue = 45.0f;
-
-					float snapValues[3] = { snapValue, snapValue, snapValue };
-
-					ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), (ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
-
-					if (m_ViewportHovered && ImGuizmo::IsUsing())
+					Entity selectedEntity = *((Entity*)context.Data);
+					if (selectedEntity)
 					{
-						glm::mat4& parentWorldTransform = rc.Parent != 0 ? selectedEntity.GetParent().GetWorldTransform() : glm::mat4(1.0f);
-						glm::vec3 translation, rotation, scale;
-						Math::DecomposeTransform(glm::inverse(parentWorldTransform) * transform, translation, rotation, scale);
+						ImGuizmo::SetOrthographic(false);
+						ImGuizmo::SetDrawlist();
 
-						tc.Translation = translation;
-						const glm::vec3 deltaRotation = rotation - tc.Rotation;
-						tc.Rotation += deltaRotation;
-						tc.Scale = scale;
+						ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
+
+						const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
+						const glm::mat4& cameraView = m_EditorCamera.GetViewMatrix();
+						// Entity Transform
+						auto& tc = selectedEntity.GetComponent<TransformComponent>();
+						auto& rc = selectedEntity.GetComponent<RelationshipComponent>();
+						glm::mat4 transform = selectedEntity.GetWorldTransform();
+
+						// Snapping
+						const bool snap = ImGui::IsKeyDown(Key::LeftControl);
+						float snapValue = 0.5f;
+						if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+							snapValue = 45.0f;
+
+						float snapValues[3] = { snapValue, snapValue, snapValue };
+
+						ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), (ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
+
+						if (m_ViewportHovered && ImGuizmo::IsUsing())
+						{
+							glm::mat4& parentWorldTransform = rc.Parent != 0 ? selectedEntity.GetParent().GetWorldTransform() : glm::mat4(1.0f);
+							glm::vec3 translation, rotation, scale;
+							Math::DecomposeTransform(glm::inverse(parentWorldTransform) * transform, translation, rotation, scale);
+
+							tc.Translation = translation;
+							const glm::vec3 deltaRotation = rotation - tc.Rotation;
+							tc.Rotation += deltaRotation;
+							tc.Scale = scale;
+						}
 					}
 				}
 			}

@@ -7,6 +7,7 @@
 #include <imgui/imgui_internal.h>
 #include <filesystem>
 
+#include "../EditorLayer.h"
 #include "../Utils/UI.h"
 #include "../Utils/EditorTheme.h"
 
@@ -30,7 +31,7 @@ namespace ArcEngine
 		return ICON_MDI_FILE;
 	}
 	
-	static void DragDropTarget(const char* dropPath)
+	static bool DragDropTarget(const char* dropPath)
 	{
 		if (ImGui::BeginDragDropTarget())
 		{
@@ -40,10 +41,13 @@ namespace ArcEngine
 				std::filesystem::path path(dropPath);
 				path /= eastl::string(entity.GetComponent<TagComponent>().Tag + ".prefab").c_str();
 				EntitySerializer::SerializeEntityAsPrefab(path.string().c_str(), entity);
+				return true;
 			}
 
 			ImGui::EndDragDropTarget();
 		}
+
+		return false;
 	}
 
 	static void DragDropFrom(const char* filepath)
@@ -412,8 +416,18 @@ namespace ArcEngine
 			flags |= ImGuiTableFlags_PadOuterX | ImGuiTableFlags_SizingFixedFit;
 		}
 
+		ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImVec2 region = ImGui::GetContentRegionAvail();
+		ImGui::InvisibleButton("##DragDropTargetAssetPanelBody", region);
+		if (DragDropTarget(m_CurrentDirectory.string().c_str()))
+			UpdateDirectoryEntries(m_CurrentDirectory);
+		ImGui::SetCursorPos(cursorPos);
+
 		if (ImGui::BeginTable("BodyTable", columnCount, flags))
 		{
+			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+				EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
+
 			for (auto& file : m_DirectoryEntries)
 			{
 				ImGui::PushID(i++);
@@ -441,8 +455,25 @@ namespace ArcEngine
 					ImVec2 cursorPos = ImGui::GetCursorPos();
 
 					ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
+
+					bool highlight = false;
+					EditorContext context = EditorLayer::GetInstance()->GetContext();
+					if (context.Type == EditorContextType::File && (char*)context.Data)
+					{
+						const char* path = (char*)context.Data;
+						highlight = path == file.DirectoryEntry.path();
+					}
+					
+					if (highlight)
+					{
+						ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]);
+						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]);
+					}
 					ImGui::Button(("##" + std::to_string(i)).c_str(), { m_ThumbnailSize + padding * 2, m_ThumbnailSize + textSize.y + padding * 8 });
 					
+					if (highlight)
+						ImGui::PopStyleColor(2);
+
 					if (isDir)
 						DragDropTarget(filepath.c_str());
 
@@ -452,8 +483,19 @@ namespace ArcEngine
 					if (isDir && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 						directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
 
+					if (ImGui::IsItemHovered())
+					{
+						if ((ImGui::IsMouseDown(0) || ImGui::IsMouseDown(1)) && !ImGui::IsItemToggledOpen())
+						{
+							auto& path = m_CurrentDirectory / file.DirectoryEntry.path().filename();
+							std::string strPath = path.string();
+							EditorLayer::GetInstance()->SetContext(EditorContextType::File, (void*)strPath.c_str(), sizeof(char) * (strlen(strPath.c_str()) + 1));
+						}
+					}
+
 					ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
 					ImGui::SetItemAllowOverlap();
+
 					ImGui::Image((ImTextureID)m_WhiteTexture->GetRendererID(), { m_ThumbnailSize, m_ThumbnailSize + textSize.y + overlayPaddingY }, { 0, 0 }, { 1, 1 }, EditorTheme::WindowBgAlternativeColor);
 
 					ImDrawList& windowDrawList = *ImGui::GetWindowDrawList();
@@ -525,6 +567,7 @@ namespace ArcEngine
 
 				ImGui::PopID();
 			}
+
 			ImGui::EndTable();
 		}
 		ImGui::PopStyleVar();

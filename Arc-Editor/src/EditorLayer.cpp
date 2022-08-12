@@ -282,7 +282,6 @@ namespace ArcEngine
 			//////////////////////////////////////////////////////////////////////////
 			if (m_ShowSceneHierarchyPanel)
 				m_SceneHierarchyPanel.OnImGuiRender();
-			Entity selectedContext = m_SceneHierarchyPanel.GetSelectedEntity();
 
 			//////////////////////////////////////////////////////////////////////////
 			// SCENE VIEWPORTS ///////////////////////////////////////////////////////
@@ -318,7 +317,7 @@ namespace ArcEngine
 			{
 				if (m_Properties[i]->Showing)
 				{
-					m_Properties[i]->SetContext(selectedContext);
+					m_Properties[i]->SetContext(m_SelectedContext);
 					m_Properties[i]->OnImGuiRender();
 				}
 			}
@@ -492,7 +491,7 @@ namespace ArcEngine
 	void EditorLayer::OpenScene(const char* filepath)
 	{
 		for (size_t i = 0; i < m_Properties.size(); i++)
-			m_Properties[i]->ForceSetContext({ entt::null , nullptr });
+			m_Properties[i]->ForceSetContext({});
 
 		m_ActiveScene = CreateRef<Scene>();
 		m_ActiveScene->OnViewportResize(1, 1);

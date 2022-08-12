@@ -2,6 +2,7 @@
 
 #include <ArcEngine.h>
 
+#include "Panels/EditorContext.h"
 #include "Panels/PropertiesPanel.h"
 #include "Panels/SceneViewport.h"
 #include "Panels/BasePanel.h"
@@ -24,6 +25,9 @@ namespace ArcEngine
 		virtual void OnUpdate(Timestep ts) override;
 		virtual void OnImGuiRender() override;
 		virtual void OnEvent(Event& e) override;
+
+		void SetContext(EditorContextType type, void* data, size_t size) { m_SelectedContext.Set(type, data, size); }
+		const EditorContext& GetContext() { return m_SelectedContext; }
 		void OpenScene(const char* filepath);
 
 		static EditorLayer* GetInstance() { return s_Instance; }
@@ -52,6 +56,8 @@ namespace ArcEngine
 		enum class SceneState { Edit, Play, Pause };
 		SceneState m_SceneState = SceneState::Edit;
 		std::filesystem::path m_ScenePath = std::filesystem::path();
+
+		EditorContext m_SelectedContext = {};
 
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;

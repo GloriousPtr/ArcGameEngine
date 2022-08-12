@@ -5,6 +5,7 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
+#include "../EditorLayer.h"
 #include "../Utils/UI.h"
 #include "../Utils/EditorTheme.h"
 
@@ -15,7 +16,6 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		m_Context = context;
-		m_SelectionContext = {};
 	}
 
 	static void DragDropTarget(Scene& scene)
@@ -74,6 +74,8 @@ namespace ArcEngine
 			if (UI::IconButton("  " ICON_MDI_PLUS, "Add  ", { 0.537f, 0.753f, 0.286f, 1.0f }))
 				ImGui::OpenPopup("SceneHierarchyContextWindow");
 
+			DrawContextMenu();
+
 			if (!m_Filter.IsActive())
 			{
 				ImGui::SameLine();
@@ -119,52 +121,10 @@ namespace ArcEngine
 						DrawEntityNode(entity);
 				}
 
-				if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-					m_SelectionContext = {};
+				DrawContextMenu();
 
-				if (ImGui::BeginPopupContextWindow("SceneHierarchyContextWindow", 1, false))
-				{
-					m_SelectionContext = {};
-					if (ImGui::BeginMenu("Create"))
-					{
-						if (ImGui::MenuItem("Empty Entity"))
-						{
-							m_SelectionContext = m_Context->CreateEntity("Empty Entity");
-						}
-						else if (ImGui::MenuItem("Camera"))
-						{
-							m_SelectionContext = m_Context->CreateEntity("Camera");
-							m_SelectionContext.AddComponent<CameraComponent>();
-							ImGui::CloseCurrentPopup();
-						}
-						else if (ImGui::MenuItem("Sprite"))
-						{
-							m_SelectionContext = m_Context->CreateEntity("Sprite");
-							m_SelectionContext.AddComponent<SpriteRendererComponent>();
-							ImGui::CloseCurrentPopup();
-						}
-						else if (ImGui::MenuItem("Mesh"))
-						{
-							m_SelectionContext = m_Context->CreateEntity("Mesh");
-							m_SelectionContext.AddComponent<MeshComponent>();
-							ImGui::CloseCurrentPopup();
-						}
-						else if (ImGui::MenuItem("Sky Light"))
-						{
-							m_SelectionContext = m_Context->CreateEntity("Sky Light");
-							m_SelectionContext.AddComponent<SkyLightComponent>();
-							ImGui::CloseCurrentPopup();
-						}
-						else if (ImGui::MenuItem("Light"))
-						{
-							m_SelectionContext = m_Context->CreateEntity("Light");
-							m_SelectionContext.AddComponent<LightComponent>();
-							ImGui::CloseCurrentPopup();
-						}
-						ImGui::EndPopup();
-					}
-					ImGui::EndPopup();
-				}
+				if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+					EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
 
 				ImGui::EndTable();
 			}
@@ -178,8 +138,10 @@ namespace ArcEngine
 
 			if (m_DeletedEntity)
 			{
-				if (m_SelectionContext == m_DeletedEntity)
-					m_SelectionContext = {};
+				EditorContext context = EditorLayer::GetInstance()->GetContext();
+				Entity entityContext = *((Entity*)context.Data);
+				if (context.Type == EditorContextType::Entity && entityContext == m_DeletedEntity)
+					EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
 
 				m_Context->DestroyEntity(m_DeletedEntity);
 				m_DeletedEntity = {};
@@ -214,7 +176,10 @@ namespace ArcEngine
 			return { 0, 0, 0, 0 };
 		}
 
-		ImGuiTreeNodeFlags flags = (m_SelectionContext == entity ? ImGuiTreeNodeFlags_Selected : 0);
+		EditorContext context = EditorLayer::GetInstance()->GetContext();
+		Entity selectedEntity = (context.Type == EditorContextType::Entity ? *((Entity*)context.Data) : Entity({}));
+
+		ImGuiTreeNodeFlags flags = (selectedEntity == entity ? ImGuiTreeNodeFlags_Selected : 0);
 		flags |= ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanFullWidth;
 		flags |= ImGuiTreeNodeFlags_FramePadding;
@@ -224,7 +189,7 @@ namespace ArcEngine
 			flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 		}
 
-		bool highlight = m_SelectionContext == entity;
+		bool highlight = selectedEntity == entity;
 		if (highlight)
 		{
 			ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, ImGui::GetColorU32(EditorTheme::HeaderSelectedColor));
@@ -237,7 +202,7 @@ namespace ArcEngine
 		
 		if (!isPartOfPrefab)
 			isPartOfPrefab = entity.HasComponent<PrefabComponent>();
-		bool prefabColorApplied = isPartOfPrefab && entity != m_SelectionContext;
+		bool prefabColorApplied = isPartOfPrefab && entity != selectedEntity;
 		if (prefabColorApplied)
 			ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::HeaderSelectedColor);
 
@@ -249,7 +214,7 @@ namespace ArcEngine
 		if (ImGui::IsItemHovered())
 		{
 			if ((ImGui::IsMouseDown(0) || ImGui::IsMouseDown(1)) && !ImGui::IsItemToggledOpen())
-				m_SelectionContext = entity;
+				EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, &entity, sizeof(entity));
 		}
 
 		if (highlight)
@@ -281,6 +246,16 @@ namespace ArcEngine
 					Entity* e = (Entity*)payload->Data;
 					m_DraggedEntity = *e;
 					m_DraggedEntityTarget = entity;
+				}
+				else if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+				{
+					const char* path = (const char*)payload->Data;
+					eastl::string ext = StringUtils::GetExtension(path);
+					if (ext == "prefab")
+					{
+						m_DraggedEntity = EntitySerializer::DeserializeEntityAsPrefab(path, *m_Context);
+						m_DraggedEntity = entity;
+					}
 				}
 
 				ImGui::EndDragDropTarget();
@@ -384,5 +359,57 @@ namespace ArcEngine
 		}
 
 		return nodeRect;
+	}
+
+	void SceneHierarchyPanel::DrawContextMenu()
+	{
+		if (ImGui::BeginPopupContextWindow("SceneHierarchyContextWindow", 1, false))
+		{
+			EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
+			Entity toSelect = {};
+			if (ImGui::BeginMenu("Create"))
+			{
+				if (ImGui::MenuItem("Empty Entity"))
+				{
+					toSelect = m_Context->CreateEntity("Empty Entity");
+				}
+				else if (ImGui::MenuItem("Camera"))
+				{
+					toSelect = m_Context->CreateEntity("Camera");
+					toSelect.AddComponent<CameraComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				else if (ImGui::MenuItem("Sprite"))
+				{
+					toSelect = m_Context->CreateEntity("Sprite");
+					toSelect.AddComponent<SpriteRendererComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				else if (ImGui::MenuItem("Mesh"))
+				{
+					toSelect = m_Context->CreateEntity("Mesh");
+					toSelect.AddComponent<MeshComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				else if (ImGui::MenuItem("Sky Light"))
+				{
+					toSelect = m_Context->CreateEntity("Sky Light");
+					toSelect.AddComponent<SkyLightComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				else if (ImGui::MenuItem("Light"))
+				{
+					toSelect = m_Context->CreateEntity("Light");
+					toSelect.AddComponent<LightComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+
+			if (toSelect)
+				EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, &toSelect, sizeof(toSelect));
+
+			ImGui::EndPopup();
+		}
 	}
 }
