@@ -37,7 +37,8 @@ namespace ArcEngine
 
 		static void DrawVec3Control(const char* label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f);
 
-		static bool IconButton(const char* icon, const char* label, ImVec4 iconColor);
+		static bool IconButton(const char* icon, const char* label, ImVec4 iconColor = { 0.537f, 0.753f, 0.286f, 1.0f });
+		static bool UI::ToggleButton(const char* label, bool state, ImVec2 size = { 0, 0 }, float alpha = 1.0f, float pressedAlpha = 1.0f, ImGuiButtonFlags buttonFlags = ImGuiButtonFlags_None);
 
 	private:
 		static void PushID();

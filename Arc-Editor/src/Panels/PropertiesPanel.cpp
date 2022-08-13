@@ -334,7 +334,7 @@ namespace ArcEngine
 
 		// Add Button
 		{
-			if (UI::IconButton("  " ICON_MDI_PLUS, "Add  ", { 0.537f, 0.753f, 0.286f, 1.0f }))
+			if (UI::IconButton("  " ICON_MDI_PLUS, "Add  "))
 				ImGui::OpenPopup("AddComponentPopup");
 
 			if (ImGui::BeginPopup("AddComponentPopup"))
@@ -362,18 +362,9 @@ namespace ArcEngine
 			ImVec2 lockButtonSize = ImVec2(frameHeight * 1.5f, frameHeight);
 			ImGui::SetCursorPosX(region.x - lockButtonSize.x);
 
-			bool highlight = m_Locked;
-			if (highlight)
-			{
-				ImGui::PushStyleColor(ImGuiCol_Button, EditorTheme::HeaderSelectedColor);
-				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, EditorTheme::HeaderSelectedColor);
-			}
-
-			if (ImGui::Button(m_Locked ? ICON_MDI_LOCK : ICON_MDI_LOCK_OPEN_OUTLINE, lockButtonSize))
+			const char* icon = m_Locked ? ICON_MDI_LOCK : ICON_MDI_LOCK_OPEN_OUTLINE;
+			if (UI::ToggleButton(icon, m_Locked, lockButtonSize))
 				m_Locked = !m_Locked;
-
-			if (highlight)
-				ImGui::PopStyleColor(2);
 		}
 
 		DrawComponent<TransformComponent>(ICON_MDI_VECTOR_LINE " Transform", entity, [](TransformComponent& component)

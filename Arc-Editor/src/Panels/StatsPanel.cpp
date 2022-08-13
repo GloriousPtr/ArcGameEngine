@@ -25,7 +25,6 @@ namespace ArcEngine
 		
 		avg /= size;
 
-		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
 		if (OnBegin())
 		{
 			{

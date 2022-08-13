@@ -595,4 +595,34 @@ namespace ArcEngine
 
 		return clicked;
 	}
+
+	bool UI::ToggleButton(const char* label, bool state, ImVec2 size, float alpha, float pressedAlpha, ImGuiButtonFlags buttonFlags)
+	{
+		if (state)
+		{
+			ImVec4 color = ImGui::GetStyle().Colors[ImGuiCol_ButtonActive];
+
+			color.w = pressedAlpha;
+			ImGui::PushStyleColor(ImGuiCol_Button, color);
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, color);
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, color);
+		}
+		else
+		{
+			ImVec4 color = ImGui::GetStyle().Colors[ImGuiCol_Button];
+			ImVec4 hoveredColor = ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered];
+			color.w = alpha;
+			hoveredColor.w = pressedAlpha;
+			ImGui::PushStyleColor(ImGuiCol_Button, color);
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hoveredColor);
+			color.w = pressedAlpha;
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, color);
+		}
+
+		bool clicked = ImGui::ButtonEx(label, size, buttonFlags);
+
+		ImGui::PopStyleColor(3);
+
+		return clicked;
+	}
 }

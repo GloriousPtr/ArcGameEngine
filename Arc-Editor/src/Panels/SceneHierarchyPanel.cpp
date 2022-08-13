@@ -51,6 +51,7 @@ namespace ArcEngine
 		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_RowBg
 			| ImGuiTableFlags_ContextMenuInBody
 			| ImGuiTableFlags_BordersInner
+			| ImGuiTableFlags_NoClip
 			| ImGuiTableFlags_ScrollY;
 
 		ImVec2 cellPadding = ImGui::GetStyle().CellPadding;
@@ -71,7 +72,7 @@ namespace ArcEngine
 			
 			ImGui::SameLine();
 
-			if (UI::IconButton("  " ICON_MDI_PLUS, "Add  ", { 0.537f, 0.753f, 0.286f, 1.0f }))
+			if (UI::IconButton("  " ICON_MDI_PLUS, "Add  "))
 				ImGui::OpenPopup("SceneHierarchyContextWindow");
 
 			DrawContextMenu();
@@ -92,7 +93,7 @@ namespace ArcEngine
 
 			if (ImGui::BeginTable("HierarchyTable", 3, tableFlags))
 			{
-				ImGui::TableSetupColumn("  Label", ImGuiTableColumnFlags_NoHide);
+				ImGui::TableSetupColumn("  Label", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_NoClip);
 				ImGui::TableSetupColumn("  Type", ImGuiTableColumnFlags_WidthFixed, lineHeight * 3.0f);
 				ImGui::TableSetupColumn("  " ICON_MDI_EYE_OUTLINE, ImGuiTableColumnFlags_WidthFixed, lineHeight * 2.0f);
 
@@ -123,10 +124,10 @@ namespace ArcEngine
 
 				DrawContextMenu();
 
-				if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-					EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
-
 				ImGui::EndTable();
+
+				if (ImGui::IsItemClicked())
+					EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
 			}
 
 			if (m_DraggedEntity && m_DraggedEntityTarget)
@@ -189,7 +190,12 @@ namespace ArcEngine
 			flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 		}
 
+		ImVec2 startPos = ImGui::GetCursorPos();
+		float columnWidth = ImGui::GetContentRegionMax().x;
+		float columnHeight = ImGui::GetFrameHeight();
+
 		bool highlight = selectedEntity == entity;
+
 		if (highlight)
 		{
 			ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, ImGui::GetColorU32(EditorTheme::HeaderSelectedColor));
@@ -208,17 +214,16 @@ namespace ArcEngine
 
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity.GetUUID(), flags, "%s %s", ICON_MDI_CUBE_OUTLINE, tag.c_str());
 
-		if (ImGui::IsItemToggledOpen() && (ImGui::IsKeyDown(ImGuiKey_LeftAlt) || ImGui::IsKeyDown(ImGuiKey_RightAlt)))
-			forceExpandTree = opened;
-
-		if (ImGui::IsItemHovered())
-		{
-			if ((ImGui::IsMouseDown(0) || ImGui::IsMouseDown(1)) && !ImGui::IsItemToggledOpen())
-				EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, &entity, sizeof(entity));
-		}
-
 		if (highlight)
 			ImGui::PopStyleColor(2);
+
+		// Select
+		if (ImGui::IsItemDeactivated() && ImGui::IsItemHovered() && !ImGui::IsItemToggledOpen())
+			EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, &entity, sizeof(entity));
+
+		// Expand recursively
+		if (ImGui::IsItemToggledOpen() && (ImGui::IsKeyDown(ImGuiKey_LeftAlt) || ImGui::IsKeyDown(ImGuiKey_RightAlt)))
+			forceExpandTree = opened;
 
 		bool entityDeleted = false;
 		bool createChild = false;
@@ -282,22 +287,37 @@ namespace ArcEngine
 		}
 
 		ImGui::TableNextColumn();
-		ImGui::Text("  %s", isPartOfPrefab ? "Prefab" : "Entity");
+
+		ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0, 0, 0, 0 });
+
+		float buttonSizeX = ImGui::GetContentRegionAvail().x;
+		float frameHeight = ImGui::GetFrameHeight();
+		ImGui::Button(isPartOfPrefab ? "Prefab" : "Entity", { buttonSizeX, frameHeight });
+		// Select
+		if (ImGui::IsItemDeactivated() && ImGui::IsItemHovered() && !ImGui::IsItemToggledOpen())
+			EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, &entity, sizeof(entity));
 
 		ImGui::TableNextColumn();
-		ImGui::Text("  %s", tagComponent.Enabled ? ICON_MDI_EYE_OUTLINE : ICON_MDI_EYE_OFF_OUTLINE);
+		// Visibility Toggle
+		{
+			ImGui::Text("  %s", tagComponent.Enabled ? ICON_MDI_EYE_OUTLINE : ICON_MDI_EYE_OFF_OUTLINE);
+			
+			if (!ImGui::IsItemHovered())
+				tagComponent.handled = false;
+
+			if (ImGui::IsItemHovered() && ((!tagComponent.handled && ImGui::IsMouseDragging(0)) || ImGui::IsItemClicked()))
+			{
+				tagComponent.handled = true;
+				tagComponent.Enabled = !tagComponent.Enabled;
+			}
+		}
+
+		ImGui::PopStyleColor(3);
 
 		if (prefabColorApplied)
 			ImGui::PopStyleColor();
-
-		if (!ImGui::IsItemHovered())
-			tagComponent.handled = false;
-
-		if ((!tagComponent.handled && ImGui::IsItemHovered() && ImGui::IsMouseDragging(0)) || ImGui::IsItemClicked(0))
-		{
-			tagComponent.handled = true;
-			tagComponent.Enabled = !tagComponent.Enabled;
-		}
 
 		// Open
 		const ImRect nodeRect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
@@ -352,11 +372,8 @@ namespace ArcEngine
 			Entity e = m_Context->CreateEntity();
 			e.SetParent(entity);
 		}
-
 		if(entityDeleted)
-		{
 			m_DeletedEntity = entity;
-		}
 
 		return nodeRect;
 	}

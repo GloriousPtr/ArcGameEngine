@@ -15,6 +15,7 @@ namespace ArcEngine
 
 		virtual ~AssetPanel() override = default;
 
+		virtual void OnUpdate(Timestep ts) override;
 		virtual void OnImGuiRender() override;
 
 	private:
@@ -37,6 +38,7 @@ namespace ArcEngine
 		uint32_t m_CurrentlyVisibleItemsTreeView = 0;
 		float m_ThumbnailSize = 64.0f;
 		ImGuiTextFilter m_Filter;
+		float m_ElapsedTime = 0.0f;
 
 		Ref<Texture2D> m_WhiteTexture;
 		Ref<Texture2D> m_DirectoryIcon;

@@ -234,10 +234,13 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		ImGui::SetNextWindowSize(ImVec2(640, 480), ImGuiCond_FirstUseEver);
+		ImVec2 windowPadding = ImGui::GetStyle().WindowPadding;
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		if (OnBegin())
 		{
+			ImVec2 startCursorPos = ImGui::GetCursorPos();
+
 			const auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
 			const auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
 			const auto viewportOffset = ImGui::GetWindowPos();
@@ -331,6 +334,21 @@ namespace ArcEngine
 					}
 				}
 			}
+
+			// Buttons
+			ImGui::SetItemAllowOverlap();
+			ImGui::SetCursorPos({ startCursorPos.x + windowPadding.x, startCursorPos.y + windowPadding.y });
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 1, 1 });
+			constexpr float alpha = 0.6f;
+			if (UI::ToggleButton(ICON_MDI_ARROW_ALL, m_GizmoType == ImGuizmo::TRANSLATE, { 0, 0 }, alpha, alpha))
+				m_GizmoType = ImGuizmo::TRANSLATE;
+			ImGui::SameLine();
+			if (UI::ToggleButton(ICON_MDI_ROTATE_3D, m_GizmoType == ImGuizmo::ROTATE, { 0, 0 }, alpha, alpha))
+				m_GizmoType = ImGuizmo::ROTATE;
+			ImGui::SameLine();
+			if (UI::ToggleButton(ICON_MDI_ARROW_EXPAND_ALL, m_GizmoType == ImGuizmo::SCALE, { 0, 0 }, alpha, alpha))
+				m_GizmoType = ImGuizmo::SCALE;
+			ImGui::PopStyleVar();
 
 			OnEnd();
 		}

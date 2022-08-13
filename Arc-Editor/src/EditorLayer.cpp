@@ -3,13 +3,14 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
+
 #include <ArcEngine.h>
+#include <Arc/Scene/SceneSerializer.h>
+#include <Arc/Utils/PlatformUtils.h>
+#include <Arc/Math/Math.h>
 
 #include "Utils/EditorTheme.h"
-
-#include "Arc/Scene/SceneSerializer.h"
-#include "Arc/Utils/PlatformUtils.h"
-#include "Arc/Math/Math.h"
+#include "Utils/UI.h"
 
 #include "Panels/RendererSettingsPanel.h"
 #include "Panels/StatsPanel.h"
@@ -87,16 +88,22 @@ namespace ArcEngine
 		}
 
 		bool useEditorCamera = m_SceneState == SceneState::Edit || m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
-		for (size_t i = 0; i < m_Viewports.size(); i++)
+		for (auto& panel : m_Viewports)
 		{
-			if (m_Viewports[i]->Showing)
-				m_Viewports[i]->OnUpdate(m_ActiveScene, ts, useEditorCamera);
+			if (panel->Showing)
+				panel->OnUpdate(m_ActiveScene, ts, useEditorCamera);
+		}
+
+		for (auto& panel : m_AssetPanels)
+		{
+			if (panel->Showing)
+				panel->OnUpdate(ts);
 		}
 		
-		for (size_t i = 0; i < m_Panels.size(); i++)
+		for (auto& panel : m_Panels)
 		{
-			if (m_Panels[i]->Showing)
-				m_Panels[i]->OnUpdate(ts);
+			if (panel->Showing)
+				panel->OnUpdate(ts);
 		}
 	}
 
@@ -228,7 +235,13 @@ namespace ArcEngine
 						float frameHeight = ImGui::GetFrameHeight();
 						ImVec2 buttonSize = { frameHeight * 1.5f, frameHeight };
 						ImGui::SetCursorPosX(region.x * 0.5f - 3 * 0.5f * buttonSize.x);
-						if (ImGui::Button(m_SceneState == SceneState::Edit ? ICON_MDI_PLAY : ICON_MDI_STOP, buttonSize))
+
+						ImVec4 activeColor = ImGui::GetStyle().Colors[ImGuiCol_ButtonActive];
+
+						//Play Button
+						bool highlight = m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
+						const char* icon = m_SceneState == SceneState::Edit ? ICON_MDI_PLAY : ICON_MDI_STOP;
+						if (UI::ToggleButton(icon, highlight, buttonSize))
 						{
 							if (m_SceneState == SceneState::Edit)
 								OnScenePlay();
@@ -236,8 +249,10 @@ namespace ArcEngine
 								OnSceneStop();
 						}
 
+						//Pause Button
+						highlight = m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
 						ImGui::PushItemFlag(ImGuiItemFlags_Disabled, m_SceneState == SceneState::Edit);
-						if (ImGui::Button(ICON_MDI_PAUSE, buttonSize))
+						if (UI::ToggleButton(ICON_MDI_PAUSE, highlight, buttonSize))
 						{
 							if (m_SceneState == SceneState::Play)
 								OnScenePause();
@@ -245,10 +260,10 @@ namespace ArcEngine
 								OnSceneUnpause();
 						}
 
+						// Step Button
 						if (m_SceneState == SceneState::Step)
-						{
 							OnScenePause();
-						}
+						ImGui::PushItemFlag(ImGuiItemFlags_Disabled, m_SceneState != SceneState::Pause);
 						if (ImGui::Button(ICON_MDI_STEP_FORWARD, buttonSize))
 						{
 							if (m_SceneState == SceneState::Pause)
@@ -258,6 +273,7 @@ namespace ArcEngine
 							}
 						}
 
+						ImGui::PopItemFlag();
 						ImGui::PopItemFlag();
 
 						ImGui::EndMenuBar();

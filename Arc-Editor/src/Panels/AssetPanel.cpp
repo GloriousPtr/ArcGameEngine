@@ -168,6 +168,11 @@ namespace ArcEngine
 		UpdateDirectoryEntries(s_AssetPath);
 	}
 
+	void AssetPanel::OnUpdate(Timestep ts)
+	{
+		m_ElapsedTime += ts;
+	}
+
 	void AssetPanel::OnImGuiRender()
 	{
 		ARC_PROFILE_SCOPE();
@@ -374,7 +379,11 @@ namespace ArcEngine
 			}
 
 			ImGui::EndTable();
+
+			if (ImGui::IsItemClicked())
+				EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
 		}
+
 		ImGui::PopStyleVar();
 	}
 
@@ -419,14 +428,15 @@ namespace ArcEngine
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImVec2 region = ImGui::GetContentRegionAvail();
 		ImGui::InvisibleButton("##DragDropTargetAssetPanelBody", region);
+		
 		if (DragDropTarget(m_CurrentDirectory.string().c_str()))
 			UpdateDirectoryEntries(m_CurrentDirectory);
+		ImGui::SetItemAllowOverlap();
 		ImGui::SetCursorPos(cursorPos);
 
 		if (ImGui::BeginTable("BodyTable", columnCount, flags))
 		{
-			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-				EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
+//			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 
 			for (auto& file : m_DirectoryEntries)
 			{
@@ -454,8 +464,6 @@ namespace ArcEngine
 					ImVec2 textSize = ImGui::CalcTextSize(filename);
 					ImVec2 cursorPos = ImGui::GetCursorPos();
 
-					ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
-
 					bool highlight = false;
 					EditorContext context = EditorLayer::GetInstance()->GetContext();
 					if (context.Type == EditorContextType::File && (char*)context.Data)
@@ -463,34 +471,23 @@ namespace ArcEngine
 						const char* path = (char*)context.Data;
 						highlight = path == file.DirectoryEntry.path();
 					}
-					
-					if (highlight)
-					{
-						ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]);
-						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]);
-					}
-					ImGui::Button(("##" + std::to_string(i)).c_str(), { m_ThumbnailSize + padding * 2, m_ThumbnailSize + textSize.y + padding * 8 });
-					
-					if (highlight)
-						ImGui::PopStyleColor(2);
 
+					bool clicked = UI::ToggleButton(("##" + std::to_string(i)).c_str(), highlight, { m_ThumbnailSize + padding * 2, m_ThumbnailSize + textSize.y + padding * 8 }, 0.0f, 1.0f);
+					if (m_ElapsedTime > 0.25f && clicked)
+					{
+						auto& path = m_CurrentDirectory / file.DirectoryEntry.path().filename();
+						std::string strPath = path.string();
+						EditorLayer::GetInstance()->SetContext(EditorContextType::File, (void*)strPath.c_str(), sizeof(char) * (strlen(strPath.c_str()) + 1));
+					}
 					if (isDir)
 						DragDropTarget(filepath.c_str());
 
 					DragDropFrom(filepath.c_str());
-					ImGui::PopStyleColor();
 
 					if (isDir && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-						directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
-
-					if (ImGui::IsItemHovered())
 					{
-						if ((ImGui::IsMouseDown(0) || ImGui::IsMouseDown(1)) && !ImGui::IsItemToggledOpen())
-						{
-							auto& path = m_CurrentDirectory / file.DirectoryEntry.path().filename();
-							std::string strPath = path.string();
-							EditorLayer::GetInstance()->SetContext(EditorContextType::File, (void*)strPath.c_str(), sizeof(char) * (strlen(strPath.c_str()) + 1));
-						}
+						directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
+						EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
 					}
 
 					ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
@@ -569,6 +566,9 @@ namespace ArcEngine
 			}
 
 			ImGui::EndTable();
+
+			if (ImGui::IsItemClicked())
+				EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
 		}
 		ImGui::PopStyleVar();
 
@@ -589,5 +589,7 @@ namespace ArcEngine
 			eastl::string fileNameString = relativePath.filename().string().c_str();
 			m_DirectoryEntries.push_back({ fileNameString, directoryEntry });
 		}
+
+		m_ElapsedTime = 0.0f;
 	}
 }
