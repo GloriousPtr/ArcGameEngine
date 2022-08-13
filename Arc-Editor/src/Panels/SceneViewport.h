@@ -12,7 +12,7 @@ namespace ArcEngine
 		SceneViewport(const char* name = "Viewport");
 		virtual ~SceneViewport() override = default;
 
-		virtual void OnUpdate(Ref<Scene>& scene, Timestep timestep);
+		virtual void OnUpdate(Ref<Scene>& scene, Timestep timestep, bool useEditorCamera);
 		virtual void OnImGuiRender() override;
 
 		void OnOverlayRender(Ref<Scene>& scene);

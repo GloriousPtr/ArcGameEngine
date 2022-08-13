@@ -27,8 +27,8 @@ namespace ArcEngine
 		bool HasEntity(UUID uuid);
 		Entity GetEntity(UUID uuid);
 
-		void OnUpdateEditor(Timestep ts, EditorCamera& camera, Ref<RenderGraphData>& renderGraphData);
-		void OnUpdateRuntime(Timestep ts, Ref<RenderGraphData>& renderGraphData);
+		void OnUpdateEditor(Timestep ts, Ref<RenderGraphData>& renderGraphData, EditorCamera& camera);
+		void OnUpdateRuntime(Timestep ts, Ref<RenderGraphData>& renderGraphData, EditorCamera* overrideCamera = nullptr);
 		void OnRuntimeStart();
 		void OnRuntimeStop();
 

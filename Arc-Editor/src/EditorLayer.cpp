@@ -86,12 +86,13 @@ namespace ArcEngine
 			}
 		}
 
+		bool useEditorCamera = m_SceneState == SceneState::Edit || m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
 		for (size_t i = 0; i < m_Viewports.size(); i++)
 		{
 			if (m_Viewports[i]->Showing)
-				m_Viewports[i]->OnUpdate(m_ActiveScene, ts);
+				m_Viewports[i]->OnUpdate(m_ActiveScene, ts, useEditorCamera);
 		}
-
+		
 		for (size_t i = 0; i < m_Panels.size(); i++)
 		{
 			if (m_Panels[i]->Showing)
@@ -104,7 +105,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		m_MenuBarHeight = ImGui::GetFrameHeight();
-
+		
 		BeginDockspace("Dockspace");
 		{
 			ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
@@ -238,11 +239,25 @@ namespace ArcEngine
 						ImGui::PushItemFlag(ImGuiItemFlags_Disabled, m_SceneState == SceneState::Edit);
 						if (ImGui::Button(ICON_MDI_PAUSE, buttonSize))
 						{
+							if (m_SceneState == SceneState::Play)
+								OnScenePause();
+							else if (m_SceneState == SceneState::Pause)
+								OnSceneUnpause();
+						}
+
+						if (m_SceneState == SceneState::Step)
+						{
 							OnScenePause();
 						}
 						if (ImGui::Button(ICON_MDI_STEP_FORWARD, buttonSize))
 						{
+							if (m_SceneState == SceneState::Pause)
+							{
+								OnSceneUnpause();
+								m_SceneState = SceneState::Step;
+							}
 						}
+
 						ImGui::PopItemFlag();
 
 						ImGui::EndMenuBar();
@@ -577,5 +592,13 @@ namespace ArcEngine
 
 		if (m_Viewports.size() > 0)
 			m_Viewports[0]->SetSimulation(false);
+	}
+
+	void ArcEngine::EditorLayer::OnSceneUnpause()
+	{
+		m_SceneState = SceneState::Play;
+
+		if (m_Viewports.size() > 0)
+			m_Viewports[0]->SetSimulation(true);
 	}
 }

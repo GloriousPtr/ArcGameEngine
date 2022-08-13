@@ -282,7 +282,7 @@ namespace ArcEngine
 		m_PhysicsWorld2D = nullptr;
 	}
 
-	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera, Ref<RenderGraphData>& renderGraphData)
+	void Scene::OnUpdateEditor(Timestep ts, Ref<RenderGraphData>& renderGraphData, EditorCamera& camera)
 	{
 		ARC_PROFILE_SCOPE();
 		
@@ -343,7 +343,7 @@ namespace ArcEngine
 		Renderer2D::EndScene(renderGraphData);
 	}
 
-	void Scene::OnUpdateRuntime(Timestep ts, Ref<RenderGraphData>& renderGraphData)
+	void Scene::OnUpdateRuntime(Timestep ts, Ref<RenderGraphData>& renderGraphData, EditorCamera* overrideCamera)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -411,11 +411,14 @@ namespace ArcEngine
 				transform.Rotation.z = rb->GetAngle();
 			}
 		}
+
 		/////////////////////////////////////////////////////////////////////
 		// Rendering ////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
-		Camera* mainCamera = nullptr;
+
 		glm::mat4 cameraTransform;
+		Camera* mainCamera = nullptr;
+		if (!overrideCamera)
 		{
 			auto view = m_Registry.view<IDComponent, CameraComponent>();
 			for (auto entity : view)
@@ -429,6 +432,11 @@ namespace ArcEngine
 					break;
 				}
 			}
+		}
+		else
+		{
+			mainCamera = overrideCamera;
+			cameraTransform = glm::inverse(overrideCamera->GetViewMatrix());
 		}
 
 		if(mainCamera)

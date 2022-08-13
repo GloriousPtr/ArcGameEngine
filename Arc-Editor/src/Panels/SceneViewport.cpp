@@ -82,7 +82,7 @@ namespace ArcEngine
 		m_EditorCamera.SetViewportSize(1280, 720);
 	}
 
-	void SceneViewport::OnUpdate(Ref<Scene>& scene, Timestep timestep)
+	void SceneViewport::OnUpdate(Ref<Scene>& scene, Timestep timestep, bool useEditorCamera)
 	{
 		ARC_PROFILE_SCOPE(m_ID.c_str());
 
@@ -101,7 +101,7 @@ namespace ArcEngine
 			scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
-		if (!m_SimulationRunning)
+		if (!m_SimulationRunning && useEditorCamera)
 		{
 			m_MousePosition = *((glm::vec2*) &(ImGui::GetMousePos()));
 			const glm::vec3& position = m_EditorCamera.GetPosition();
@@ -163,11 +163,13 @@ namespace ArcEngine
 
 		if (m_SimulationRunning)
 		{
-			scene->OnUpdateRuntime(timestep, m_RenderGraphData);
+			scene->OnUpdateRuntime(timestep, m_RenderGraphData, useEditorCamera ? &m_EditorCamera : nullptr);
+			if (useEditorCamera)
+				OnOverlayRender(scene);
 		}
 		else
 		{
-			scene->OnUpdateEditor(timestep, m_EditorCamera, m_RenderGraphData);
+			scene->OnUpdateEditor(timestep, m_RenderGraphData, m_EditorCamera);
 			OnOverlayRender(scene);
 		}
 

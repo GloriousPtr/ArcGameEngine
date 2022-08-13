@@ -47,13 +47,14 @@ namespace ArcEngine
 		void OnScenePlay();
 		void OnSceneStop();
 		void OnScenePause();
+		void OnSceneUnpause();
 	private:
 
 		Application* m_Application;
 		Ref<Scene> m_ActiveScene;
 		Ref<Scene> m_EditorScene;
 		Ref<Scene> m_RuntimeScene;
-		enum class SceneState { Edit, Play, Pause };
+		enum class SceneState { Edit, Play, Pause, Step };
 		SceneState m_SceneState = SceneState::Edit;
 		std::filesystem::path m_ScenePath = std::filesystem::path();
 
