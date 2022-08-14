@@ -137,8 +137,9 @@ namespace ArcEngine
 			out << YAML::Key << "TagComponent";
 			out << YAML::BeginMap; // TagComponent
 
-			auto& tag = entity.GetComponent<TagComponent>().Tag;
-			out << YAML::Key << "Tag" << YAML::Value << tag.c_str();
+			auto& tc = entity.GetComponent<TagComponent>();
+			out << YAML::Key << "Tag" << YAML::Value << tc.Tag.c_str();
+			out << YAML::Key << "Enabled" << YAML::Value << tc.Enabled;
 
 			out << YAML::EndMap; // TagComponent
 		}
@@ -220,6 +221,7 @@ namespace ArcEngine
 			auto& skyLightComponent = entity.GetComponent<SkyLightComponent>();
 			out << YAML::Key << "TexturePath" << YAML::Value << (skyLightComponent.Texture ? skyLightComponent.Texture->GetPath().c_str() : "");
 			out << YAML::Key << "Intensity" << YAML::Value << skyLightComponent.Intensity;
+			out << YAML::Key << "Rotation" << YAML::Value << skyLightComponent.Rotation;
 
 			out << YAML::EndMap; // SkyLightComponent
 		}
@@ -231,13 +233,13 @@ namespace ArcEngine
 
 			auto& lightComponent = entity.GetComponent<LightComponent>();
 			out << YAML::Key << "Type" << YAML::Value << (int)lightComponent.Type;
-			out << YAML::Key << "ShadowQuality" << YAML::Value << (int)lightComponent.ShadowQuality;
-			out << YAML::Key << "Color" << YAML::Value << lightComponent.Color;
 			out << YAML::Key << "UseColorTempratureMode" << YAML::Value << lightComponent.UseColorTempratureMode;
+			out << YAML::Key << "Color" << YAML::Value << lightComponent.Color;
 			out << YAML::Key << "Intensity" << YAML::Value << lightComponent.Intensity;
-			out << YAML::Key << "Radius" << YAML::Value << lightComponent.Range;
+			out << YAML::Key << "Range" << YAML::Value << lightComponent.Range;
 			out << YAML::Key << "CutOffAngle" << YAML::Value << lightComponent.CutOffAngle;
 			out << YAML::Key << "OuterCutOffAngle" << YAML::Value << lightComponent.OuterCutOffAngle;
+			out << YAML::Key << "ShadowQuality" << YAML::Value << (int)lightComponent.ShadowQuality;
 
 			out << YAML::EndMap; // LightComponent
 		}
@@ -294,6 +296,19 @@ namespace ArcEngine
 			out << YAML::EndMap; // CircleCollider2DComponent
 		}
 
+		if (entity.HasComponent<MeshComponent>())
+		{
+			out << YAML::Key << "MeshComponent";
+			out << YAML::BeginMap; // MeshComponent
+			
+			auto& meshComponent = entity.GetComponent<MeshComponent>();
+			out << YAML::Key << "Filepath" << YAML::Value << meshComponent.Filepath.c_str();
+			out << YAML::Key << "SubmeshIndex" << YAML::Value << meshComponent.SubmeshIndex;
+			out << YAML::Key << "CullMode" << YAML::Value << (int)meshComponent.CullMode;
+			
+			out << YAML::EndMap; // MeshComponent
+		}
+
 		out << YAML::EndMap; // Entity
 	}
 
@@ -304,9 +319,13 @@ namespace ArcEngine
 		uint64_t uuid = entity["Entity"].as<uint64_t>();
 
 		eastl::string name;
+		bool enabled = true;
 		auto tagComponent = entity["TagComponent"];
 		if (tagComponent)
+		{
 			name = tagComponent["Tag"].as<std::string>().c_str();
+			enabled = TryGet(tagComponent["Enabled"], true);
+		}
 
 		Entity deserializedEntity;
 		if (preserveUUID)
@@ -318,6 +337,8 @@ namespace ArcEngine
 			ARC_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
 		else
 			ARC_CORE_TRACE("Deserialized entity with oldID = {0}, newID = {1}, name = {2}", uuid, (uint64_t)deserializedEntity.GetUUID(), name);
+
+		deserializedEntity.GetComponent<TagComponent>().Enabled = enabled;
 
 		auto transformComponent = entity["TransformComponent"];
 		if (transformComponent)
@@ -373,20 +394,23 @@ namespace ArcEngine
 		{
 			auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
 			src.Color = TryGet(spriteRenderer["Color"], glm::vec4(1.0f));
+			src.TilingFactor = TryGet(spriteRenderer["TilingFactor"], 1.0f);
+
 			eastl::string texturePath = TryGet(spriteRenderer["TexturePath"], eastl::string(""));
 			if (!texturePath.empty())
 				src.Texture = AssetManager::GetTexture2D(texturePath);
-			src.TilingFactor = TryGet(spriteRenderer["TilingFactor"], 1.0f);
 		}
 
 		auto skyLight = entity["SkyLightComponent"];
 		if (skyLight)
 		{
 			auto& src = deserializedEntity.AddComponent<SkyLightComponent>();
+			src.Intensity = TryGet(skyLight["Intensity"], 1.0f);
+			src.Rotation = TryGet(skyLight["Rotation"], 0.0f);
+
 			eastl::string texturePath = TryGet(skyLight["TexturePath"], eastl::string(""));
 			if (!texturePath.empty())
 				src.Texture = AssetManager::GetTextureCubemap(texturePath);
-			src.Intensity = TryGet(skyLight["Intensity"], 1.0f);
 		}
 
 		auto lightComponent = entity["LightComponent"];
@@ -394,13 +418,13 @@ namespace ArcEngine
 		{
 			auto& src = deserializedEntity.AddComponent<LightComponent>();
 			src.Type = TryGetEnum(lightComponent["Type"], LightComponent::LightType::Point);
-			src.ShadowQuality = TryGetEnum(lightComponent["ShadowQuality"], LightComponent::ShadowQualityType::UltraSoft);
 			src.Color = TryGet(lightComponent["Color"], glm::vec3(1.0f));
 			src.UseColorTempratureMode = TryGet(lightComponent["UseColorTempratureMode"], false);
 			src.Intensity = TryGet(lightComponent["Intensity"], 10.0f);
-			src.Range = TryGet(lightComponent["Radius"], 1.0f);
+			src.Range = TryGet(lightComponent["Range"], 1.0f);
 			src.CutOffAngle = TryGet(lightComponent["CutOffAngle"], 12.5f);
 			src.OuterCutOffAngle = TryGet(lightComponent["OuterCutOffAngle"], 17.5f);
+			src.ShadowQuality = TryGetEnum(lightComponent["ShadowQuality"], LightComponent::ShadowQualityType::UltraSoft);
 		}
 
 		auto rb2dCpmponent = entity["Rigidbody2DComponent"];
@@ -441,6 +465,18 @@ namespace ArcEngine
 			src.Friction = TryGet(cc2dCpmponent["Friction"], 0.5f);
 			src.Restitution = TryGet(cc2dCpmponent["Restitution"], 0.0f);
 			src.RestitutionThreshold = TryGet(cc2dCpmponent["RestitutionThreshold"], 0.5f);
+		}
+
+		auto meshComponent = entity["MeshComponent"];
+		if (meshComponent)
+		{
+			auto& src = deserializedEntity.AddComponent<MeshComponent>();
+			src.Filepath = TryGet(meshComponent["Filepath"], eastl::string(""));
+			src.SubmeshIndex = TryGet(meshComponent["SubmeshIndex"], 0);
+			src.CullMode = TryGetEnum(meshComponent["CullMode"], MeshComponent::CullModeType::Back);
+
+			if (!src.Filepath.empty())
+				src.MeshGeometry = CreateRef<Mesh>(src.Filepath.c_str());
 		}
 
 		return deserializedEntity.GetUUID();

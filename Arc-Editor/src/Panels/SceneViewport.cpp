@@ -256,38 +256,8 @@ namespace ArcEngine
 			uint64_t textureID = m_RenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
 			ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
-				{
-					const char* path = (const char*)payload->Data;
-					eastl::string ext = StringUtils::GetExtension(path);
-
-					if (ext == "arc")
-					{
-						EditorLayer::GetInstance()->OpenScene(path);
-					}
-					if (ext == "assbin" || ext == "obj" || ext == "fbx")
-					{
-						Ref<Mesh> mesh = CreateRef<Mesh>(path);
-
-						Entity parent = m_Scene->CreateEntity(mesh->GetName());
-
-						uint32_t meshCount = mesh->GetSubmeshCount();
-						for (size_t i = 0; i < meshCount; i++)
-						{
-							auto& submesh = mesh->GetSubmesh(i);
-							Entity entity = m_Scene->CreateEntity(submesh.Name);
-							entity.SetParent(parent);
-							auto& meshComponent = entity.AddComponent<MeshComponent>();
-							meshComponent.Filepath = path;
-							meshComponent.MeshGeometry = mesh;
-							meshComponent.SubmeshIndex = i;
-						}
-					}
-				}
-				ImGui::EndDragDropTarget();
-			}
+			if (m_SceneHierarchyPanel)
+				m_SceneHierarchyPanel->DragDropTarget();
 
 			// Gizmos
 			if (m_ViewportHovered && m_SceneHierarchyPanel && m_GizmoType != -1 && !m_SimulationRunning)

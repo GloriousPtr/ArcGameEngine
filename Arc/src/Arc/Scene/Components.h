@@ -117,7 +117,6 @@ namespace ArcEngine
 		enum class CullModeType { Unknown = -1, Front, Back, DoubleSided };
 
 		eastl::string Filepath;
-		AABB BoundingBox;
 		Ref<Mesh> MeshGeometry = nullptr;
 		uint32_t SubmeshIndex = 0;
 		CullModeType CullMode = CullModeType::Back;

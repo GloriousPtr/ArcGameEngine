@@ -25,6 +25,9 @@ namespace ArcEngine
 	private:
 		ImRect DrawEntityNode(Entity entity, bool skipChildren = false, uint32_t depth = 0, bool forceExpandTree = false, bool isPartOfPrefab = false);
 		void SceneHierarchyPanel::DrawContextMenu();
+		void DragDropTarget();
+
+		friend class SceneViewport;
 
 	private:
 		Ref<Scene> m_Context = nullptr;
