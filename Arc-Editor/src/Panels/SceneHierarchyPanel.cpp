@@ -28,6 +28,8 @@ namespace ArcEngine
 				eastl::string ext = StringUtils::GetExtension(path);
 				if (ext == "prefab")
 					EntitySerializer::DeserializeEntityAsPrefab(path, scene);
+				else if (ext == "arc")
+					EditorLayer::GetInstance()->OpenScene(path);
 			}
 
 			ImGui::EndDragDropTarget();

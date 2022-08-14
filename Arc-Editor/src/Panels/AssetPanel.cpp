@@ -434,10 +434,10 @@ namespace ArcEngine
 		ImGui::SetItemAllowOverlap();
 		ImGui::SetCursorPos(cursorPos);
 
+		bool anyItemHovered = false;
+
 		if (ImGui::BeginTable("BodyTable", columnCount, flags))
 		{
-//			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-
 			for (auto& file : m_DirectoryEntries)
 			{
 				ImGui::PushID(i++);
@@ -483,6 +483,9 @@ namespace ArcEngine
 						DragDropTarget(filepath.c_str());
 
 					DragDropFrom(filepath.c_str());
+
+					if (ImGui::IsItemHovered())
+						anyItemHovered = true;
 
 					if (isDir && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 					{
@@ -544,6 +547,9 @@ namespace ArcEngine
 
 					bool opened = ImGui::TreeNodeEx(file.Name.c_str(), teeNodeFlags, "");
 
+					if (ImGui::IsItemHovered())
+						anyItemHovered = true;
+
 					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && file.DirectoryEntry.is_directory())
 						directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
 
@@ -567,7 +573,7 @@ namespace ArcEngine
 
 			ImGui::EndTable();
 
-			if (ImGui::IsItemClicked())
+			if (!anyItemHovered && ImGui::IsItemClicked())
 				EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
 		}
 		ImGui::PopStyleVar();
