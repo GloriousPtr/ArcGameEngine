@@ -399,7 +399,8 @@ namespace ArcEngine
 
 		const ImVec2 buttonSize = { 80, 80 };
 		const ImVec2 xButtonSize = { buttonSize.x / 4.0f, 80 };
-		
+		const ImVec2 tooltipSize = { 300, 300 };
+
 		BeginPropertyGrid(label, buttonSize.y);
 
 		ImGui::SetCursorPos({ ImGui::GetContentRegionMax().x - buttonSize.x - xButtonSize.x, ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y });
@@ -412,6 +413,14 @@ namespace ArcEngine
 		if (id == 0)
 			id = texture == nullptr ? 0 : texture->GetHRDRendererID();
 		ImGui::ImageButton((ImTextureID)id, buttonSize, { 1, 1 }, { 0, 0 }, 0);
+		if (texture && ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::Text(texture->GetPath().c_str());
+			ImGui::Spacing();
+			ImGui::Image((ImTextureID)id, tooltipSize, { 1, 1 }, { 0, 0 });
+			ImGui::EndTooltip();
+		}
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
@@ -447,7 +456,8 @@ namespace ArcEngine
 
 		const ImVec2 buttonSize = { 80, 80 };
 		const ImVec2 xButtonSize = { buttonSize.x / 4.0f, 80 };
-		
+		const ImVec2 tooltipSize = { 300, 300 };
+
 		BeginPropertyGrid(label, buttonSize.y);
 
 		ImGui::SetCursorPos({ ImGui::GetContentRegionMax().x - buttonSize.x - xButtonSize.x, ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y });
@@ -460,6 +470,14 @@ namespace ArcEngine
 		if (id == 0)
 			id = texture == nullptr ? 0 : texture->GetRendererID();
 		ImGui::ImageButton((ImTextureID)id, buttonSize, { 1, 1 }, { 0, 0 }, 0);
+		if (texture && ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::Text(texture->GetPath().c_str());
+			ImGui::Spacing();
+			ImGui::Image((ImTextureID)id, tooltipSize, { 1, 1 }, { 0, 0 });
+			ImGui::EndTooltip();
+		}
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))

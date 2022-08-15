@@ -645,21 +645,6 @@ namespace ArcEngine
 				component.Handle = nullptr;
 			}
 		});
-
-		ImGui::Spacing();
-
-		/////////////////////////////////////////////////////////////
-		//ADD COMPONENT//////////////////////////////////////////////
-		/////////////////////////////////////////////////////////////
-		ImVec2 addComponentButtonSize = ImVec2(150.0f, 30.0f);
-		{
-			ImVec2 pos = ImGui::GetCursorPos();
-			ImVec2 available = ImGui::GetContentRegionAvail();
-			pos = ImVec2(available.x * 0.5f - addComponentButtonSize.x * 0.5f, pos.y + ImGui::GetFrameHeight() * 0.5f);
-			ImGui::SetCursorPos(pos);
-		}
-
-		
 	}
 
 	void PropertiesPanel::DrawFileProperties(const char* filepath)
