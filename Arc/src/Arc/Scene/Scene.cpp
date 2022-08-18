@@ -29,11 +29,15 @@ namespace ArcEngine
 			for (auto e : scriptView)
 			{
 				ScriptComponent& script = scriptView.get<ScriptComponent>(e);
-				if (!script.Handle)
-					continue;
 
-				ScriptEngine::ReleaseObjectReference(script.Handle);
-				script.Handle = nullptr;
+				for (auto [name, gcHandle] : script.Klasses)
+				{
+					if (!gcHandle)
+						continue;
+
+					ScriptEngine::ReleaseObjectReference(gcHandle);
+					gcHandle = nullptr;
+				}
 			}
 		}
 	}
@@ -232,29 +236,49 @@ namespace ArcEngine
 		for (auto e : scriptView)
 		{
 			auto& [id, tag, script] = scriptView.get<IDComponent, TagComponent, ScriptComponent>(e);
-			const char* className = script.ClassName.c_str();
 
-			if (!ScriptEngine::HasClass(className))
+			for (auto it = script.Klasses.begin(); it != script.Klasses.end(); it++)
 			{
-				ARC_CORE_ERROR("{0} class not found but is attached to entity: {1}({2})", className, tag.Tag, id.ID);
-				continue;
+				const char* className = it->first.c_str();
+
+				if (!ScriptEngine::HasClass(className))
+				{
+					ARC_CORE_ERROR("{0} class not found but is attached to entity: {1}({2})", className, tag.Tag, id.ID);
+					continue;
+				}
+
+				if (!it->second)
+					continue;
+
+				it->second = ScriptEngine::CopyStrongReference(it->second);
 			}
 
-			if (!script.Handle)
-				continue;
+			for (auto [name, gcHandle] : script.Klasses)
+			{
+				const char* className = name.c_str();
 
-			script.Handle = ScriptEngine::CopyStrongReference(script.Handle);
+				if (!ScriptEngine::HasClass(className))
+				{
+					ARC_CORE_ERROR("{0} class not found but is attached to entity: {1}({2})", className, tag.Tag, id.ID);
+					continue;
+				}
 
-			void* args[] { &id.ID };
-			void* property = ScriptEngine::GetProperty(className, "ID");
-			ScriptEngine::SetProperty(script.Handle, property, args);
-			
-			ScriptEngine::CacheMethodIfAvailable(className, onCreateDesc);
-			ScriptEngine::CacheMethodIfAvailable(className, onUpdateDesc);
-			ScriptEngine::CacheMethodIfAvailable(className, onDestroyDesc);
+				if (!gcHandle)
+					continue;
 
-			if (ScriptEngine::GetCachedMethodIfAvailable(className, onCreateDesc))
-				ScriptEngine::Call(script.Handle, className, onCreateDesc, nullptr);
+//				gcHandle = ScriptEngine::CopyStrongReference(gcHandle);
+
+				void* args[]{ &id.ID };
+				void* property = ScriptEngine::GetProperty(className, "ID");
+				ScriptEngine::SetProperty(gcHandle, property, args);
+
+				ScriptEngine::CacheMethodIfAvailable(className, onCreateDesc);
+				ScriptEngine::CacheMethodIfAvailable(className, onUpdateDesc);
+				ScriptEngine::CacheMethodIfAvailable(className, onDestroyDesc);
+
+				if (ScriptEngine::GetCachedMethodIfAvailable(className, onCreateDesc))
+					ScriptEngine::Call(gcHandle, className, onCreateDesc, nullptr);
+			}
 		}
 	}
 
@@ -267,13 +291,18 @@ namespace ArcEngine
 		for (auto e : scriptView)
 		{
 			ScriptComponent& script = scriptView.get<ScriptComponent>(e);
-			const char* className = script.ClassName.c_str();
 
-			if (ScriptEngine::GetCachedMethodIfAvailable(className, onDestroyDesc))
-				ScriptEngine::Call(script.Handle, className, onDestroyDesc, nullptr);
+			for (auto [name, gcHandle] : script.Klasses)
+			{
+				const char* className = name.c_str();
 
-			ScriptEngine::ReleaseObjectReference(script.Handle);
-			script.Handle = nullptr;
+				if (ScriptEngine::GetCachedMethodIfAvailable(className, onDestroyDesc))
+					ScriptEngine::Call(gcHandle, className, onDestroyDesc, nullptr);
+
+				ScriptEngine::ReleaseObjectReference(gcHandle);
+			}
+
+			script.Klasses.clear();
 		}
 
 		ScriptEngine::SetScene(nullptr);
@@ -362,10 +391,14 @@ namespace ArcEngine
 				for (auto e : scriptView)
 				{
 					ScriptComponent& script = scriptView.get<ScriptComponent>(e);
-					const char* className = script.ClassName.c_str();
-				
-					if (ScriptEngine::GetCachedMethodIfAvailable(className, onUpdateDesc))
-						ScriptEngine::Call(script.Handle, className, onUpdateDesc, args);
+
+					for (auto [name, gcHandle] : script.Klasses)
+					{
+						const char* className = name.c_str();
+
+						if (ScriptEngine::GetCachedMethodIfAvailable(className, onUpdateDesc))
+							ScriptEngine::Call(gcHandle, className, onUpdateDesc, args);
+					}
 				}
 			}
 

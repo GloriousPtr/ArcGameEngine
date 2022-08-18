@@ -266,8 +266,8 @@ namespace ArcEngine
 	struct ScriptComponent
 	{
 		eastl::string ClassName;
-		
-		GCHandle Handle = nullptr;
+
+		eastl::map<eastl::string, GCHandle> Klasses;
 
 		ScriptComponent() = default;
 		ScriptComponent(const ScriptComponent&) = default;

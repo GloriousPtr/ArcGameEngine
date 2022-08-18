@@ -517,6 +517,8 @@ namespace ArcEngine
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		m_ScenePath = "";
+
+		SetContext(EditorContextType::None, 0, 0);
 	}
 
 	void EditorLayer::OpenScene(const char* filepath)
@@ -584,6 +586,8 @@ namespace ArcEngine
 		m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		m_Viewports[0]->SetSimulation(true);
+
+		SetContext(EditorContextType::None, 0, 0);
 	}
 
 	void ArcEngine::EditorLayer::OnSceneStop()
@@ -600,6 +604,8 @@ namespace ArcEngine
 
 		m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+		SetContext(EditorContextType::None, 0, 0);
 	}
 
 	void ArcEngine::EditorLayer::OnScenePause()

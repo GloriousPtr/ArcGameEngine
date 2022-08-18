@@ -101,79 +101,97 @@ namespace ArcEngine
 		}
 	}
 
+	template<typename T>
+	static void DrawScriptField(Field& field, GCHandle& gcHandle)
+	{
+		T value = field.GetValue<T>(gcHandle);
+		if (UI::Property(field.Name.c_str(), value))
+			field.SetValue(gcHandle, value);
+	}
+
 	static void DrawFields(ScriptComponent& component)
 	{
-		UI::BeginProperties();
+		const char* toRemove = nullptr;
 
-		// Public Fields
-		eastl::hash_map<eastl::string, Field>* fieldMap = ScriptEngine::GetFields(component.ClassName.c_str());
-		if (fieldMap)
+		for (auto it = component.Klasses.begin(); it != component.Klasses.end(); it++)
 		{
-			for (auto& [name, field] : *fieldMap)
+			auto [name, gcHandle] = *it;
+
+			ImGui::PushID(gcHandle);
+
+			ImGui::Separator();
+
+			ImGui::Text(name.c_str());
+			ImGui::SameLine();
+			if (ImGui::Button(ICON_MDI_CLOSE))
+				toRemove = name.c_str();
+			
+			UI::BeginProperties();
+
+			// Public Fields
+			eastl::hash_map<eastl::string, Field>* fieldMap = ScriptEngine::GetFields(name.c_str());
+			if (fieldMap)
 			{
-				switch (field.Type)
+				for (auto& [name, field] : *fieldMap)
 				{
-					case Field::FieldType::Bool:
+					switch (field.Type)
 					{
-						bool value = field.GetValue<bool>(component.Handle);
-						if (UI::Property(field.Name.c_str(), value))
-							field.SetValue(component.Handle, value);
-						break;
-					}
-					case Field::FieldType::Float:
-					{
-						float value = field.GetValue<float>(component.Handle);
-						if (UI::Property(field.Name.c_str(), value))
-							field.SetValue(component.Handle, value);
-						break;
-					}
-					case Field::FieldType::Int:
-					{
-						int32_t value = field.GetValue<int32_t>(component.Handle);
-						if (UI::Property(field.Name.c_str(), value))
-							field.SetValue(component.Handle, value);
-						break;
-					}
-					case Field::FieldType::UnsignedInt:
-					{
-						uint32_t value = field.GetValue<uint32_t>(component.Handle);
-						if (UI::Property(field.Name.c_str(), value))
-							field.SetValue(component.Handle, value);
-						break;
-					}
-					case Field::FieldType::String:
-					{
-						eastl::string& value = field.GetValueString(component.Handle);
-						if (UI::Property(field.Name.c_str(), value))
-							field.SetValueString(component.Handle, value);
-						break;
-					}
-					case Field::FieldType::Vec2:
-					{
-						glm::vec2 value = field.GetValue<glm::vec2>(component.Handle);
-						if (UI::Property(field.Name.c_str(), value))
-							field.SetValue(component.Handle, value);
-						break;
-					}
-					case Field::FieldType::Vec3:
-					{
-						glm::vec3 value = field.GetValue<glm::vec3>(component.Handle);
-						if (UI::Property(field.Name.c_str(), value))
-							field.SetValue(component.Handle, value);
-						break;
-					}
-					case Field::FieldType::Vec4:
-					{
-						glm::vec4 value = field.GetValue<glm::vec4>(component.Handle);
-						if (UI::Property(field.Name.c_str(), value))
-							field.SetValue(component.Handle, value);
-						break;
+						case Field::FieldType::Bool:
+						{
+							DrawScriptField<bool>(field, gcHandle);
+							break;
+						}
+						case Field::FieldType::Float:
+						{
+							DrawScriptField<float>(field, gcHandle);
+							break;
+						}
+						case Field::FieldType::Int:
+						{
+							DrawScriptField<int32_t>(field, gcHandle);
+							break;
+						}
+						case Field::FieldType::UnsignedInt:
+						{
+							DrawScriptField<uint32_t>(field, gcHandle);
+							break;
+						}
+						case Field::FieldType::Vec2:
+						{
+							DrawScriptField<glm::vec2>(field, gcHandle);
+							break;
+						}
+						case Field::FieldType::Vec3:
+						{
+							DrawScriptField<glm::vec3>(field, gcHandle);
+							break;
+						}
+						case Field::FieldType::Vec4:
+						{
+							DrawScriptField<glm::vec4>(field, gcHandle);
+							break;
+						}
+						case Field::FieldType::String:
+						{
+							eastl::string& value = field.GetValueString(gcHandle);
+							if (UI::Property(field.Name.c_str(), value))
+								field.SetValueString(gcHandle, value);
+							break;
+						}
 					}
 				}
 			}
+
+			UI::EndProperties();
+
+			ImGui::PopID();
 		}
 
-		UI::EndProperties();
+		if (toRemove)
+		{
+			ScriptEngine::ReleaseObjectReference(component.Klasses.at(toRemove));
+			component.Klasses.erase(toRemove);
+		}
 	}
 
 	static void DrawMaterialProperties(Ref<Material>& material)
@@ -632,18 +650,14 @@ namespace ArcEngine
 
 			if (found)
 			{
-				if (!component.Handle)
-					component.Handle = ScriptEngine::MakeReference(component.ClassName.c_str());
+				if (ImGui::Button("Add"))
+				{
+					if (component.Klasses.find(component.ClassName) == component.Klasses.end())
+						component.Klasses.emplace(component.ClassName, ScriptEngine::MakeReference(component.ClassName.c_str()));
+				}
+			}
 
-				ImGui::PushID(component.Handle);
-				DrawFields(component);
-				ImGui::PopID();
-			}
-			else if (component.Handle)
-			{
-				ScriptEngine::ReleaseObjectReference(component.Handle);
-				component.Handle = nullptr;
-			}
+			DrawFields(component);
 		});
 	}
 
