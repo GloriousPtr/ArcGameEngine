@@ -5,6 +5,7 @@
 #include <fstream>
 
 #include "Arc/Core/AssetManager.h"
+#include "Arc/Scripting/ScriptEngine.h"
 #include "Arc/Utils/StringUtils.h"
 
 namespace YAML
@@ -309,6 +310,23 @@ namespace ArcEngine
 			out << YAML::EndMap; // MeshComponent
 		}
 
+		if (entity.HasComponent<ScriptComponent>())
+		{
+			out << YAML::Key << "ScriptComponent";
+			out << YAML::BeginMap; // ScriptComponent
+
+			auto& sc = entity.GetComponent<ScriptComponent>();
+
+			out << YAML::Key << "ScriptCount" << YAML::Value << sc.Klasses.size();
+			out << YAML::Key << "Scripts";
+			out << YAML::BeginSeq; // Scripts
+			for (auto [name, gcHandle] : sc.Klasses)
+				out << name.c_str();
+			out << YAML::EndSeq; // Scripts
+
+			out << YAML::EndMap; // ScriptComponent
+		}
+
 		out << YAML::EndMap; // Entity
 	}
 
@@ -477,6 +495,24 @@ namespace ArcEngine
 
 			if (!src.Filepath.empty())
 				src.MeshGeometry = CreateRef<Mesh>(src.Filepath.c_str());
+		}
+
+		auto scriptComponent = entity["ScriptComponent"];
+		if (scriptComponent)
+		{
+			auto& sc = deserializedEntity.AddComponent<ScriptComponent>();
+
+			size_t scriptCount = scriptComponent["ScriptCount"].as<size_t>();
+			sc.Klasses.clear();
+			auto scripts = scriptComponent["Scripts"];
+			if (scripts && scriptCount > 0)
+			{
+				for (size_t i = 0; i < scriptCount; i++)
+				{
+					std::string scriptName = scripts[i].as<std::string>();
+					sc.Klasses[scriptName.c_str()] = ScriptEngine::CreateInstance(deserializedEntity, scriptName.c_str());
+				}
+			}
 		}
 
 		return deserializedEntity.GetUUID();

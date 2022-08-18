@@ -129,55 +129,52 @@ namespace ArcEngine
 			UI::BeginProperties();
 
 			// Public Fields
-			eastl::hash_map<eastl::string, Field>* fieldMap = ScriptEngine::GetFields(name.c_str());
-			if (fieldMap)
+			auto& fieldMap = ScriptEngine::GetFields(name.c_str());
+			for (auto& [name, field] : fieldMap)
 			{
-				for (auto& [name, field] : *fieldMap)
+				switch (field.Type)
 				{
-					switch (field.Type)
+					case Field::FieldType::Bool:
 					{
-						case Field::FieldType::Bool:
-						{
-							DrawScriptField<bool>(field, gcHandle);
-							break;
-						}
-						case Field::FieldType::Float:
-						{
-							DrawScriptField<float>(field, gcHandle);
-							break;
-						}
-						case Field::FieldType::Int:
-						{
-							DrawScriptField<int32_t>(field, gcHandle);
-							break;
-						}
-						case Field::FieldType::UnsignedInt:
-						{
-							DrawScriptField<uint32_t>(field, gcHandle);
-							break;
-						}
-						case Field::FieldType::Vec2:
-						{
-							DrawScriptField<glm::vec2>(field, gcHandle);
-							break;
-						}
-						case Field::FieldType::Vec3:
-						{
-							DrawScriptField<glm::vec3>(field, gcHandle);
-							break;
-						}
-						case Field::FieldType::Vec4:
-						{
-							DrawScriptField<glm::vec4>(field, gcHandle);
-							break;
-						}
-						case Field::FieldType::String:
-						{
-							eastl::string& value = field.GetValueString(gcHandle);
-							if (UI::Property(field.Name.c_str(), value))
-								field.SetValueString(gcHandle, value);
-							break;
-						}
+						DrawScriptField<bool>(field, gcHandle);
+						break;
+					}
+					case Field::FieldType::Float:
+					{
+						DrawScriptField<float>(field, gcHandle);
+						break;
+					}
+					case Field::FieldType::Int:
+					{
+						DrawScriptField<int32_t>(field, gcHandle);
+						break;
+					}
+					case Field::FieldType::UnsignedInt:
+					{
+						DrawScriptField<uint32_t>(field, gcHandle);
+						break;
+					}
+					case Field::FieldType::Vec2:
+					{
+						DrawScriptField<glm::vec2>(field, gcHandle);
+						break;
+					}
+					case Field::FieldType::Vec3:
+					{
+						DrawScriptField<glm::vec3>(field, gcHandle);
+						break;
+					}
+					case Field::FieldType::Vec4:
+					{
+						DrawScriptField<glm::vec4>(field, gcHandle);
+						break;
+					}
+					case Field::FieldType::String:
+					{
+						eastl::string& value = field.GetValueString(gcHandle);
+						if (UI::Property(field.Name.c_str(), value))
+							field.SetValueString(gcHandle, value);
+						break;
 					}
 				}
 			}
@@ -639,24 +636,28 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<ScriptComponent>(ICON_MDI_POUND_BOX " Script", entity, [](ScriptComponent& component)
+		DrawComponent<ScriptComponent>(ICON_MDI_POUND_BOX " Script", entity, [&entity](ScriptComponent& component)
 		{
-			UI::BeginProperties();
-			bool found = ScriptEngine::HasClass(component.ClassName.c_str());
-			ImGui::PushStyleColor(ImGuiCol_Text, { found ? 0.2f : 0.8f, found ? 0.8f : 0.2f, 0.2f, 1.0f});
-			UI::Property("Name", component.ClassName);
-			ImGui::PopStyleColor();
-			UI::EndProperties();
+			auto& classes = ScriptEngine::GetClasses();
 
-			if (found)
+			if (ImGui::Button("Add"))
 			{
-				if (ImGui::Button("Add"))
-				{
-					if (component.Klasses.find(component.ClassName) == component.Klasses.end())
-						component.Klasses.emplace(component.ClassName, ScriptEngine::MakeReference(component.ClassName.c_str()));
-				}
+				ImGui::OpenPopup("ScriptAddPopup");
 			}
 
+			if (ImGui::BeginPopup("ScriptAddPopup"))
+			{
+				for (auto [name, scriptClass] : classes)
+				{
+					if (component.Klasses.find(name) == component.Klasses.end())
+					{
+						if (ImGui::MenuItem(name.c_str()))
+							component.Klasses.emplace(name, ScriptEngine::CreateInstance(entity, name));
+					}
+				}
+				ImGui::EndPopup();
+			}
+			
 			DrawFields(component);
 		});
 	}

@@ -230,54 +230,29 @@ namespace ArcEngine
 		ScriptEngine::SetScene(this);
 
 		auto scriptView = m_Registry.view<IDComponent, TagComponent, ScriptComponent>();
-		constexpr char* onCreateDesc = "OnCreate()";
-		constexpr char* onUpdateDesc = "OnUpdate(single)";
-		constexpr char* onDestroyDesc = "OnDestroy()";
 		for (auto e : scriptView)
 		{
 			auto& [id, tag, script] = scriptView.get<IDComponent, TagComponent, ScriptComponent>(e);
+			Entity entity = { e, this };
 
 			for (auto it = script.Klasses.begin(); it != script.Klasses.end(); it++)
 			{
 				const char* className = it->first.c_str();
 
-				if (!ScriptEngine::HasClass(className))
-				{
-					ARC_CORE_ERROR("{0} class not found but is attached to entity: {1}({2})", className, tag.Tag, id.ID);
-					continue;
-				}
-
 				if (!it->second)
 					continue;
 
-				it->second = ScriptEngine::CopyStrongReference(it->second);
+				it->second = ScriptEngine::CreateInstanceRuntime(entity, className);
 			}
 
 			for (auto [name, gcHandle] : script.Klasses)
 			{
 				const char* className = name.c_str();
 
-				if (!ScriptEngine::HasClass(className))
-				{
-					ARC_CORE_ERROR("{0} class not found but is attached to entity: {1}({2})", className, tag.Tag, id.ID);
-					continue;
-				}
-
 				if (!gcHandle)
 					continue;
 
-//				gcHandle = ScriptEngine::CopyStrongReference(gcHandle);
-
-				void* args[]{ &id.ID };
-				void* property = ScriptEngine::GetProperty(className, "ID");
-				ScriptEngine::SetProperty(gcHandle, property, args);
-
-				ScriptEngine::CacheMethodIfAvailable(className, onCreateDesc);
-				ScriptEngine::CacheMethodIfAvailable(className, onUpdateDesc);
-				ScriptEngine::CacheMethodIfAvailable(className, onDestroyDesc);
-
-				if (ScriptEngine::GetCachedMethodIfAvailable(className, onCreateDesc))
-					ScriptEngine::Call(gcHandle, className, onCreateDesc, nullptr);
+				ScriptEngine::GetInstanceRuntime(entity, name)->InvokeOnCreate();
 			}
 		}
 	}
@@ -287,18 +262,14 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		auto scriptView = m_Registry.view<ScriptComponent>();
-		constexpr char* onDestroyDesc = "OnDestroy()";
 		for (auto e : scriptView)
 		{
 			ScriptComponent& script = scriptView.get<ScriptComponent>(e);
+			Entity entity = { e, this };
 
 			for (auto [name, gcHandle] : script.Klasses)
 			{
-				const char* className = name.c_str();
-
-				if (ScriptEngine::GetCachedMethodIfAvailable(className, onDestroyDesc))
-					ScriptEngine::Call(gcHandle, className, onDestroyDesc, nullptr);
-
+				ScriptEngine::GetInstanceRuntime(entity, name)->InvokeOnDestroy();
 				ScriptEngine::ReleaseObjectReference(gcHandle);
 			}
 
@@ -383,22 +354,14 @@ namespace ArcEngine
 			// Scripting ////////////////////////////////////////////////////////
 			/////////////////////////////////////////////////////////////////////
 			{
-				void* args[1];
-				float timestep = ts;
-				args[0] = &timestep;
-				constexpr char* onUpdateDesc = "OnUpdate(single)";
 				auto scriptView = m_Registry.view<ScriptComponent>();
 				for (auto e : scriptView)
 				{
 					ScriptComponent& script = scriptView.get<ScriptComponent>(e);
+					Entity entity = { e, this };
 
 					for (auto [name, gcHandle] : script.Klasses)
-					{
-						const char* className = name.c_str();
-
-						if (ScriptEngine::GetCachedMethodIfAvailable(className, onUpdateDesc))
-							ScriptEngine::Call(gcHandle, className, onUpdateDesc, args);
-					}
+						ScriptEngine::GetInstanceRuntime(entity, name)->InvokeOnUpdate(ts);
 				}
 			}
 

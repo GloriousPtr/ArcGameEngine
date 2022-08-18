@@ -53,6 +53,8 @@ namespace ArcEngine
 
 		m_Panels.push_back(CreateScope<RendererSettingsPanel>());
 		m_Panels.push_back(CreateScope<StatsPanel>());
+
+		ProjectSettingsPanel::LoadAssemblies();
 	}
 
 	void EditorLayer::OnDetach()

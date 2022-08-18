@@ -4,6 +4,16 @@ namespace ArcEngine
 {
 	public class Entity
 	{
+		protected Entity()
+		{
+			ID = 0;
+		}
+
+		private Entity(ulong id)
+		{
+			ID = id;
+		}
+
 		internal ulong ID { get; private set; }
 
 		public bool HasComponent<T>() where T : Component, new() => InternalCalls.Entity_HasComponent(ID, typeof(T));
