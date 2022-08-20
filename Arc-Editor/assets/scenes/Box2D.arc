@@ -73,8 +73,14 @@ Entities:
     ScriptComponent:
       ScriptCount: 2
       Scripts:
-        - Sandbox.Enemy
-        - Sandbox.Player
+        0:
+          Name: Sandbox.Enemy
+          Fields:
+            Speed: 27.2000008
+        1:
+          Name: Sandbox.Player
+          Fields:
+            Speed: 1.39999998
   - Entity: 1324993968739374613
     TagComponent:
       Tag: Camera

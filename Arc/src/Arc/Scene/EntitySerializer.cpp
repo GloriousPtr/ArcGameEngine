@@ -6,6 +6,7 @@
 
 #include "Arc/Core/AssetManager.h"
 #include "Arc/Scripting/ScriptEngine.h"
+#include "Arc/Scripting/Field.h"
 #include "Arc/Utils/StringUtils.h"
 
 namespace YAML
@@ -318,11 +319,75 @@ namespace ArcEngine
 			auto& sc = entity.GetComponent<ScriptComponent>();
 
 			out << YAML::Key << "ScriptCount" << YAML::Value << sc.Klasses.size();
-			out << YAML::Key << "Scripts";
-			out << YAML::BeginSeq; // Scripts
+
+			out << YAML::Key << "Scripts" << YAML::BeginMap;
+			int i = 0;
 			for (auto [name, gcHandle] : sc.Klasses)
-				out << name.c_str();
-			out << YAML::EndSeq; // Scripts
+			{
+				out << YAML::Key << i << YAML::BeginMap;
+				++i;
+
+				out << YAML::Key << "Name" << YAML::Value << name.c_str();
+				out << YAML::Key << "Fields" << YAML::BeginMap;
+
+				auto& fields = ScriptEngine::GetFields(name.c_str());
+				for (auto [fieldName, field] : fields)
+				{
+					out << YAML::Key << fieldName.c_str() << YAML::Value;
+
+					switch (field.Type)
+					{
+						case Field::FieldType::Bool:
+						{
+							out << field.GetValue<bool>(gcHandle);
+							break;
+						}
+						case Field::FieldType::Float:
+						{
+							out << field.GetValue<float>(gcHandle);
+							break;
+						}
+						case Field::FieldType::Int:
+						{
+							out << field.GetValue<int32_t>(gcHandle);
+							break;
+						}
+						case Field::FieldType::UnsignedInt:
+						{
+							out << field.GetValue<uint32_t>(gcHandle);
+							break;
+						}
+						case Field::FieldType::Vec2:
+						{
+							out << field.GetValue<glm::vec2>(gcHandle);
+							break;
+						}
+						case Field::FieldType::Vec3:
+						{
+							out << field.GetValue<glm::vec3>(gcHandle);
+							break;
+						}
+						case Field::FieldType::Vec4:
+						{
+							out << field.GetValue<glm::vec4>(gcHandle);
+							break;
+						}
+						case Field::FieldType::String:
+						{
+							out << field.GetValueString(gcHandle).c_str();
+							break;
+						}
+						default:
+						{
+							ARC_CORE_ASSERT(false);
+						}
+					}
+				}
+				out << YAML::EndMap; // Fields
+
+				out << YAML::EndMap; // Fields
+			}
+			out << YAML::EndMap; // Scripts
 
 			out << YAML::EndMap; // ScriptComponent
 		}
@@ -509,8 +574,78 @@ namespace ArcEngine
 			{
 				for (size_t i = 0; i < scriptCount; i++)
 				{
-					std::string scriptName = scripts[i].as<std::string>();
-					sc.Klasses[scriptName.c_str()] = ScriptEngine::CreateInstance(deserializedEntity, scriptName.c_str());
+					auto& scriptNode = scripts[i];
+					
+					std::string scriptName = scriptNode["Name"].as<std::string>();
+					GCHandle gcHandle = ScriptEngine::CreateInstance(deserializedEntity, scriptName.c_str());
+					sc.Klasses[scriptName.c_str()] = gcHandle;
+
+					auto& fields = ScriptEngine::GetFields(scriptName.c_str());
+					{
+						for (auto [name, field] : fields)
+						{
+							auto& fieldNode = scriptNode["Fields"][name.c_str()];
+							ARC_CORE_ERROR("{0}", name.c_str());
+							if (fieldNode)
+							{
+								switch (field.Type)
+								{
+								case Field::FieldType::Bool:
+								{
+									bool value = fieldNode.as<bool>();
+									field.SetValue(gcHandle, value);
+									break;
+								}
+								case Field::FieldType::Float:
+								{
+									float value = fieldNode.as<float>();
+									field.SetValue(gcHandle, value);
+									break;
+								}
+								case Field::FieldType::Int:
+								{
+									int32_t value = fieldNode.as<int32_t>();
+									field.SetValue(gcHandle, value);
+									break;
+								}
+								case Field::FieldType::UnsignedInt:
+								{
+									uint32_t value = fieldNode.as<uint32_t>();
+									field.SetValue(gcHandle, value);
+									break;
+								}
+								case Field::FieldType::Vec2:
+								{
+									glm::vec2 value = fieldNode.as<glm::vec2>();
+									field.SetValue(gcHandle, value);
+									break;
+								}
+								case Field::FieldType::Vec3:
+								{
+									glm::vec3 value = fieldNode.as<glm::vec3>();
+									field.SetValue(gcHandle, value);
+									break;
+								}
+								case Field::FieldType::Vec4:
+								{
+									glm::vec4 value = fieldNode.as<glm::vec4>();
+									field.SetValue(gcHandle, value);
+									break;
+								}
+								case Field::FieldType::String:
+								{
+									eastl::string value = fieldNode.as<std::string>().c_str();
+									field.SetValueString(gcHandle, value);
+									break;
+								}
+								default:
+								{
+									ARC_CORE_ASSERT(false);
+								}
+								}
+							}
+						}
+					}
 				}
 			}
 		}
