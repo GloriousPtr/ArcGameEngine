@@ -510,6 +510,8 @@ namespace ArcEngine
 
 	void EditorLayer::NewScene()
 	{
+		SetContext(EditorContextType::None, 0, 0);
+
 		for (size_t i = 0; i < m_Properties.size(); i++)
 			m_Properties[i]->ForceSetContext({});
 
@@ -519,12 +521,12 @@ namespace ArcEngine
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		m_ScenePath = "";
-
-		SetContext(EditorContextType::None, 0, 0);
 	}
 
 	void EditorLayer::OpenScene(const char* filepath)
 	{
+		SetContext(EditorContextType::None, 0, 0);
+
 		for (size_t i = 0; i < m_Properties.size(); i++)
 			m_Properties[i]->ForceSetContext({});
 
@@ -575,6 +577,8 @@ namespace ArcEngine
 
 	void ArcEngine::EditorLayer::OnScenePlay()
 	{
+		SetContext(EditorContextType::None, 0, 0);
+
 		m_EditorScene = m_ActiveScene;
 		m_RuntimeScene = Scene::CopyTo(m_EditorScene);
 		
@@ -588,12 +592,12 @@ namespace ArcEngine
 		m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		m_Viewports[0]->SetSimulation(true);
-
-		SetContext(EditorContextType::None, 0, 0);
 	}
 
 	void ArcEngine::EditorLayer::OnSceneStop()
 	{
+		SetContext(EditorContextType::None, 0, 0);
+
 		m_ActiveScene->OnRuntimeStop();
 		m_SceneState = SceneState::Edit;
 
@@ -606,8 +610,6 @@ namespace ArcEngine
 
 		m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-
-		SetContext(EditorContextType::None, 0, 0);
 	}
 
 	void ArcEngine::EditorLayer::OnScenePause()
