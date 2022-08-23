@@ -49,8 +49,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		mono_set_dirs("C:/Program Files/Mono/lib",
-        "C:/Program Files/Mono/etc");
+		mono_set_assemblies_path("mono/lib");
 
 		s_Data = CreateRef<ScriptEngineData>();
 
