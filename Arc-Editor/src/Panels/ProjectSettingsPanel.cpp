@@ -7,17 +7,14 @@
 
 namespace ArcEngine
 {
-	eastl::string ProjectSettingsPanel::s_ScriptCoreAssemblyPath = "../Sandbox/Assemblies/Arc-ScriptCore.dll";
-	eastl::string ProjectSettingsPanel::s_ScriptClientAssemblyPath = "../Sandbox/Assemblies/Sandbox.dll";
-
 	void ProjectSettingsPanel::OnImGuiRender()
 	{
 		if (OnBegin())
 		{
-			UI::BeginProperties();
-			UI::Property("Core Assembly Path", s_ScriptCoreAssemblyPath);
-			UI::Property("Project Assembly Path", s_ScriptClientAssemblyPath);
-			UI::EndProperties();
+			//UI::BeginProperties();
+			//UI::Property("Core Assembly Path", s_ScriptCoreAssemblyPath);
+			//UI::Property("Project Assembly Path", s_ScriptClientAssemblyPath);
+			//UI::EndProperties();
 
 			static constexpr char* btnTitle = "Reload Assemblies";
 			static const int padding = ImGui::GetStyle().WindowPadding.x;
@@ -32,7 +29,6 @@ namespace ArcEngine
 
 	void ProjectSettingsPanel::LoadAssemblies()
 	{
-		ScriptEngine::LoadCoreAssembly(s_ScriptCoreAssemblyPath.c_str());
-		ScriptEngine::LoadClientAssembly(s_ScriptClientAssemblyPath.c_str());
+		ScriptEngine::ReloadAppDomain();
 	}
 }

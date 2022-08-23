@@ -18,9 +18,5 @@ namespace ArcEngine
 		virtual void OnImGuiRender() override;
 
 		static void LoadAssemblies();
-
-	private:
-		static eastl::string s_ScriptCoreAssemblyPath;
-		static eastl::string s_ScriptClientAssemblyPath;
 	};
 }

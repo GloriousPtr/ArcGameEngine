@@ -13,24 +13,42 @@ namespace ArcEngine
 {
 	eastl::hash_map<MonoType*, eastl::function<bool(Entity&)>> ScriptEngineRegistry::s_HasComponentFuncs;
 	eastl::hash_map<MonoType*, eastl::function<void(Entity&)>> ScriptEngineRegistry::s_AddComponentFuncs;
-	
-	#define COMPONENT_REGISTER(Type)\
-	{\
-		MonoType* type = mono_reflection_type_from_name("ArcEngine." #Type, ScriptEngine::GetCoreAssemblyImage());\
-		if (type)\
-		{\
-			uint32_t id = mono_type_get_type(type);\
-			s_HasComponentFuncs[type] = [](Entity& entity){ return entity.HasComponent<Type>(); };\
-			s_AddComponentFuncs[type] = [](Entity& entity){ entity.AddComponent<Type>(); };\
-		}\
+
+	template<typename... Component>
+	void ScriptEngineRegistry::RegisterComponent()
+	{
+		([]()
+		{
+			static int n = strlen("struct ArcEngine::");
+			const char* componentName = n + typeid(Component).name();
+			std::string name = std::string("ArcEngine.") + componentName;
+			MonoType* type = mono_reflection_type_from_name(&name[0], ScriptEngine::GetCoreAssemblyImage());
+			if (type)
+			{
+				uint32_t id = mono_type_get_type(type);
+				s_HasComponentFuncs[type] = [](Entity& entity) { return entity.HasComponent<Component>(); };
+				s_AddComponentFuncs[type] = [](Entity& entity) { entity.AddComponent<Component>(); };
+			}
+			else
+			{
+				ARC_CORE_ERROR("Component not found: {}", name.c_str());
+			}
+		}(), ...);
+	}
+
+	template<typename... Component>
+	void ScriptEngineRegistry::RegisterComponent(ComponentGroup<Component...>)
+	{
+		RegisterComponent<Component...>();
 	}
 
 	void ScriptEngineRegistry::InitComponentTypes()
 	{
 		ARC_PROFILE_SCOPE();
 
-		COMPONENT_REGISTER(TagComponent);
-		COMPONENT_REGISTER(TransformComponent);
+		RegisterComponent<TagComponent>();
+		RegisterComponent<TransformComponent>();
+		RegisterComponent(AllComponents{});
 	}
 
 	void LogMessage(Log::Level level, MonoString* formattedMessage)
@@ -103,6 +121,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		MonoType* monoType = mono_reflection_type_get_type((MonoReflectionType*)type);
+		ARC_CORE_ASSERT(s_AddComponentFuncs.find(monoType) != s_AddComponentFuncs.end(), mono_type_get_name(monoType));
 		s_AddComponentFuncs.at(monoType)(GetEntity(entityID));
 	}
 
@@ -111,6 +130,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		MonoType* monoType = mono_reflection_type_get_type((MonoReflectionType*)type);
+		ARC_CORE_ASSERT(s_HasComponentFuncs.find(monoType) != s_HasComponentFuncs.end(), mono_type_get_name(monoType));
 		return s_HasComponentFuncs.at(monoType)(GetEntity(entityID));
 	}
 

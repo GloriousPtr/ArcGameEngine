@@ -29,30 +29,33 @@ namespace ArcEngine
 			for (auto e : scriptView)
 			{
 				ScriptComponent& script = scriptView.get<ScriptComponent>(e);
-
-				for (auto [name, gcHandle] : script.Klasses)
-				{
-					if (!gcHandle)
-						continue;
-
-					ScriptEngine::ReleaseObjectReference(gcHandle);
-					gcHandle = nullptr;
-				}
+				Entity entity = { e, this };
+				for (auto& className : script.Classes)
+					ScriptEngine::RemoveInstance(entity, className);
 			}
 		}
 	}
 
-	template<typename Component>
+	template<typename... Component>
 	static void CopyComponent(entt::registry& dst, entt::registry& src, eastl::hash_map<UUID, entt::entity> enttMap)
 	{
-		auto view = src.view<Component>();
-		for (auto e : view)
+		([&]()
 		{
-			UUID uuid = src.get<IDComponent>(e).ID;
-			entt::entity dstEnttID = enttMap.at(uuid);
-			auto& component = src.get<Component>(e);
-			dst.emplace_or_replace<Component>(dstEnttID, component);
-		}
+			auto view = src.view<Component>();
+			for (auto e : view)
+			{
+				UUID uuid = src.get<IDComponent>(e).ID;
+				entt::entity dstEnttID = enttMap.at(uuid);
+				auto& component = src.get<Component>(e);
+				dst.emplace_or_replace<Component>(dstEnttID, component);
+			}
+		}(), ...);
+	}
+
+	template<typename... Component>
+	static void CopyComponent(ComponentGroup<Component...>, entt::registry& dst, entt::registry& src, eastl::hash_map<UUID, entt::entity> enttMap)
+	{
+		CopyComponent<Component...>(dst, src, enttMap);
 	}
 
 	Ref<Scene> Scene::CopyTo(Ref<Scene> other)
@@ -86,18 +89,7 @@ namespace ArcEngine
 			}
 		}
 
-		CopyComponent<TransformComponent>(dstRegistry, srcRegistry, newScene->m_EntityMap);
-		CopyComponent<RelationshipComponent>(dstRegistry, srcRegistry, newScene->m_EntityMap);
-		CopyComponent<SpriteRendererComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
-		CopyComponent<CameraComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
-		CopyComponent<NativeScriptComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
-		CopyComponent<MeshComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
-		CopyComponent<SkyLightComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
-		CopyComponent<LightComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
-		CopyComponent<Rigidbody2DComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
-		CopyComponent<BoxCollider2DComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
-		CopyComponent<CircleCollider2DComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
-		CopyComponent<ScriptComponent>(newScene->m_Registry, srcRegistry, newScene->m_EntityMap);
+		CopyComponent(AllComponents{}, dstRegistry, srcRegistry, newScene->m_EntityMap);
 
 		return newScene;
 	}
@@ -228,6 +220,7 @@ namespace ArcEngine
 		}
 
 		ScriptEngine::SetScene(this);
+		ScriptEngine::OnRuntimeBegin();
 
 		auto scriptView = m_Registry.view<IDComponent, TagComponent, ScriptComponent>();
 		for (auto e : scriptView)
@@ -235,25 +228,8 @@ namespace ArcEngine
 			auto& [id, tag, script] = scriptView.get<IDComponent, TagComponent, ScriptComponent>(e);
 			Entity entity = { e, this };
 
-			for (auto it = script.Klasses.begin(); it != script.Klasses.end(); it++)
-			{
-				const char* className = it->first.c_str();
-
-				if (!it->second)
-					continue;
-
-				it->second = ScriptEngine::CreateInstanceRuntime(entity, className);
-			}
-
-			for (auto [name, gcHandle] : script.Klasses)
-			{
-				const char* className = name.c_str();
-
-				if (!gcHandle)
-					continue;
-
-				ScriptEngine::GetInstanceRuntime(entity, name)->InvokeOnCreate();
-			}
+			for (auto& className : script.Classes)
+				ScriptEngine::GetInstance(entity, className)->InvokeOnCreate();
 		}
 	}
 
@@ -267,15 +243,16 @@ namespace ArcEngine
 			ScriptComponent& script = scriptView.get<ScriptComponent>(e);
 			Entity entity = { e, this };
 
-			for (auto [name, gcHandle] : script.Klasses)
+			for (auto& className : script.Classes)
 			{
-				ScriptEngine::GetInstanceRuntime(entity, name)->InvokeOnDestroy();
-				ScriptEngine::ReleaseObjectReference(gcHandle);
+				ScriptEngine::GetInstance(entity, className)->InvokeOnDestroy();
+				ScriptEngine::RemoveInstance(entity, className);
 			}
 
-			script.Klasses.clear();
+			script.Classes.clear();
 		}
 
+		ScriptEngine::OnRuntimeEnd();
 		ScriptEngine::SetScene(nullptr);
 
 		delete m_PhysicsWorld2D;
@@ -360,8 +337,8 @@ namespace ArcEngine
 					ScriptComponent& script = scriptView.get<ScriptComponent>(e);
 					Entity entity = { e, this };
 
-					for (auto [name, gcHandle] : script.Klasses)
-						ScriptEngine::GetInstanceRuntime(entity, name)->InvokeOnUpdate(ts);
+					for (auto& className : script.Classes)
+						ScriptEngine::GetInstance(entity, className)->InvokeOnUpdate(ts);
 				}
 			}
 

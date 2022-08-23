@@ -28,7 +28,7 @@ namespace ArcEngine
 		m_Window->SetEventCallBack(ARC_BIND_EVENT_FN(Application::OnEvent));
 
 		Renderer::Init();
-		ScriptEngine::Init("Resources/Scripts/Arc-ScriptCore.dll");
+		ScriptEngine::Init();
 
 		m_LayerStack = new LayerStack();
 		m_ImGuiLayer = new ImGuiLayer();

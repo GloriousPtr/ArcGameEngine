@@ -26,6 +26,8 @@ namespace ArcEngine
 		public static Vector2 operator *(in float scalar, in Vector2 right) { return new Vector2(scalar * right.X, scalar * right.Y); }
 		public static Vector2 operator /(in Vector2 left, in Vector2 right) { return new Vector2(left.X / right.X, left.Y / right.Y); }
 		public static Vector2 operator /(in Vector2 left, in float scalar ) { return new Vector2(left.X / scalar , left.Y / scalar ); }
+
+		public override string ToString() { return "Vector2(" + X + ", " + Y + ")"; }
 	}
 
 	[StructLayout(LayoutKind.Explicit)]
@@ -61,6 +63,8 @@ namespace ArcEngine
 		public static Vector3 operator *(in float scalar, in Vector3 right) { return new Vector3(scalar * right.X, scalar * right.Y, scalar * right.Z); }
 		public static Vector3 operator /(in Vector3 left, in Vector3 right) { return new Vector3(left.X / right.X, left.Y / right.Y, left.Z / right.Z); }
 		public static Vector3 operator /(in Vector3 left, in float scalar ) { return new Vector3(left.X / scalar , left.Y / scalar , left.Z / scalar ); }
+
+		public override string ToString() { return "Vector3(" + X + ", " + Y + ", " + Z + ")"; }
 	}
 
 	[StructLayout(LayoutKind.Explicit)]
@@ -107,5 +111,7 @@ namespace ArcEngine
 		public static Vector4 operator *(in float scalar, in Vector4 right) { return new Vector4(scalar * right.X, scalar * right.Y, scalar * right.Z, scalar * right.W); }
 		public static Vector4 operator /(in Vector4 left, in Vector4 right) { return new Vector4(left.X / right.X, left.Y / right.Y, left.Z / right.Z, left.W / right.W); }
 		public static Vector4 operator /(in Vector4 left, in float scalar ) { return new Vector4(left.X / scalar , left.Y / scalar , left.Z / scalar , left.W / scalar ); }
+
+		public override string ToString() { return "Vector4(" + X + ", " + Y + ", " + Z + ", " + W + ")"; }
 	}
 }

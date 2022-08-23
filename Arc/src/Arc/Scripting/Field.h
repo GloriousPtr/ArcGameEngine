@@ -17,6 +17,7 @@ namespace ArcEngine
 			Int,
 			UnsignedInt,
 			String,
+
 			Vec2,
 			Vec3,
 			Vec4
@@ -25,36 +26,47 @@ namespace ArcEngine
 		eastl::string Name;
 		FieldType Type;
 
-		Field(const eastl::string& name, FieldType type, void* monoClassField)
-			: Name(name), Type(type), m_Field((MonoClassField*)monoClassField)
+		Field(const eastl::string& name, FieldType type, void* monoClassField, GCHandle handle);
+		~Field();
+
+		void* GetUnmanagedValue()
 		{
+			return m_Data;
 		}
 
 		template<typename T>
-		T GetValue(GCHandle handle) const
+		T GetManagedValue() const
 		{
+			ARC_PROFILE_SCOPE();
+
 			T value;
-			GetValue_Impl(handle, &value);
+			GetManagedValueInternal(&value);
 			return value;
 		}
 
-		template<typename T>
-		void SetValue(GCHandle handle, T value) const
+		void SetValue(void* value) const
 		{
-			SetValue_Impl(handle, &value);
+			memcpy(m_Data, value, m_Size);
+			SetManagedValue(value);
 		}
 
-		eastl::string GetValueString(GCHandle handle);
-		void SetValueString(GCHandle handle, eastl::string& str);
+		eastl::string GetManagedValueString();
+		void SetValueString(eastl::string& str);
+		size_t GetSize() { return m_Size; }
 
 		static FieldType GetFieldType(MonoType* monoType);
 
 	private:
-		void GetValue_Impl(GCHandle handle, void* outValue) const;
-		void SetValue_Impl(GCHandle handle, void* value) const;
+
+		void GetManagedValueInternal(void* outValue) const;
+
+		void SetManagedValue(void* value) const;
 
 		static FieldType GetFieldTypeFromValueType(MonoType* monoType);
 
+		GCHandle m_Handle;
 		MonoClassField* m_Field;
+		void* m_Data;
+		size_t m_Size;
 	};
 }

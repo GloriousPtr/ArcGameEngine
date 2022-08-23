@@ -17,6 +17,7 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include <assimp/Importer.hpp>
+#include <EASTL/hash_set.h>
 
 namespace ArcEngine
 {
@@ -263,11 +264,34 @@ namespace ArcEngine
 		CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
 	};
 
+	class ScriptInstance;
+
 	struct ScriptComponent
 	{
-		eastl::map<eastl::string, GCHandle> Klasses;
+		eastl::vector<eastl::string> Classes;
 
 		ScriptComponent() = default;
 		ScriptComponent(const ScriptComponent&) = default;
 	};
+
+	template<typename... Component>
+	struct ComponentGroup
+	{
+	};
+
+	using AllComponents = ComponentGroup<
+		TransformComponent,
+		RelationshipComponent,
+		PrefabComponent,
+		SpriteRendererComponent,
+		CameraComponent,
+		NativeScriptComponent,
+		MeshComponent,
+		SkyLightComponent,
+		LightComponent,
+		Rigidbody2DComponent,
+		BoxCollider2DComponent,
+		CircleCollider2DComponent,
+		ScriptComponent
+	>;
 }

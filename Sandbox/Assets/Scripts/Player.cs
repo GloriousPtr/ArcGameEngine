@@ -5,13 +5,32 @@ namespace Sandbox
 	public class Player : Entity
 	{
 		public float Speed = 5.0f;
-
+		/*
+		public bool Bool = false;
+		public int Int = -10;
+		public uint UInt = 5;
+		public string String = "FU";
+		public Vector2 Vec2 = new Vector2(2.0f, 3.0f);
+		public Vector3 Vec3 = new Vector3(2.0f, 3.0f, 4.0f);
+		public Vector4 Vec4 = new Vector4(2.0f, 3.0f, 4.0f, 1.0f);
+		*/
 		private TransformComponent m_TransformComponent;
 
 		public void OnCreate()
 		{
 			m_TransformComponent = GetComponent<TransformComponent>();
 			Log.Info("Created entity: {0}", GetComponent<TagComponent>().Tag);
+
+			/*
+			Log.Info("Bool: {0}", Bool);
+			Log.Info("Speed: {0}", Speed);
+			Log.Info("Int: {0}", Int);
+			Log.Info("UInt: {0}", UInt);
+			Log.Info("String: {0}", String);
+			Log.Info("Vec2: {0}", Vec2);
+			Log.Info("Vec3: {0}", Vec3);
+			Log.Info("Vec4: {0}", Vec4);
+			*/
 		}
 
 		public void OnUpdate(float timestep)

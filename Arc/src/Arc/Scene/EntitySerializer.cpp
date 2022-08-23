@@ -318,63 +318,67 @@ namespace ArcEngine
 
 			auto& sc = entity.GetComponent<ScriptComponent>();
 
-			out << YAML::Key << "ScriptCount" << YAML::Value << sc.Klasses.size();
+			out << YAML::Key << "ScriptCount" << YAML::Value << sc.Classes.size();
 
 			out << YAML::Key << "Scripts" << YAML::BeginMap;
 			int i = 0;
-			for (auto [name, gcHandle] : sc.Klasses)
+			for (auto& className : sc.Classes)
 			{
 				out << YAML::Key << i << YAML::BeginMap;
 				++i;
 
-				out << YAML::Key << "Name" << YAML::Value << name.c_str();
+				out << YAML::Key << "Name" << YAML::Value << className.c_str();
 				out << YAML::Key << "Fields" << YAML::BeginMap;
 
-				auto& fields = ScriptEngine::GetFields(name.c_str());
+				auto& fields = ScriptEngine::GetFields(entity, className.c_str());
 				for (auto [fieldName, field] : fields)
 				{
+					if (field->Type == Field::FieldType::None)
+						continue;
+
+					GCHandle handle = ScriptEngine::GetInstance(entity, className)->GetHandle();
 					out << YAML::Key << fieldName.c_str() << YAML::Value;
 
-					switch (field.Type)
+					switch (field->Type)
 					{
 						case Field::FieldType::Bool:
 						{
-							out << field.GetValue<bool>(gcHandle);
+							out << field->GetManagedValue<bool>();
 							break;
 						}
 						case Field::FieldType::Float:
 						{
-							out << field.GetValue<float>(gcHandle);
+							out << field->GetManagedValue<float>();
 							break;
 						}
 						case Field::FieldType::Int:
 						{
-							out << field.GetValue<int32_t>(gcHandle);
+							out << field->GetManagedValue<int32_t>();
 							break;
 						}
 						case Field::FieldType::UnsignedInt:
 						{
-							out << field.GetValue<uint32_t>(gcHandle);
+							out << field->GetManagedValue<uint32_t>();
 							break;
 						}
 						case Field::FieldType::Vec2:
 						{
-							out << field.GetValue<glm::vec2>(gcHandle);
+							out << field->GetManagedValue<glm::vec2>();
 							break;
 						}
 						case Field::FieldType::Vec3:
 						{
-							out << field.GetValue<glm::vec3>(gcHandle);
+							out << field->GetManagedValue<glm::vec3>();
 							break;
 						}
 						case Field::FieldType::Vec4:
 						{
-							out << field.GetValue<glm::vec4>(gcHandle);
+							out << field->GetManagedValue<glm::vec4>();
 							break;
 						}
 						case Field::FieldType::String:
 						{
-							out << field.GetValueString(gcHandle).c_str();
+							out << field->GetManagedValueString().c_str();
 							break;
 						}
 						default:
@@ -568,7 +572,7 @@ namespace ArcEngine
 			auto& sc = deserializedEntity.AddComponent<ScriptComponent>();
 
 			size_t scriptCount = scriptComponent["ScriptCount"].as<size_t>();
-			sc.Klasses.clear();
+			sc.Classes.clear();
 			auto scripts = scriptComponent["Scripts"];
 			if (scripts && scriptCount > 0)
 			{
@@ -577,65 +581,70 @@ namespace ArcEngine
 					auto& scriptNode = scripts[i];
 					
 					std::string scriptName = scriptNode["Name"].as<std::string>();
-					GCHandle gcHandle = ScriptEngine::CreateInstance(deserializedEntity, scriptName.c_str());
-					sc.Klasses[scriptName.c_str()] = gcHandle;
+					if (!ScriptEngine::HasClass(scriptName.c_str()))
+					{
+						ARC_CORE_ERROR("Class not found with name: {}", scriptName.c_str());
+						continue;
+					}
 
-					auto& fields = ScriptEngine::GetFields(scriptName.c_str());
+					GCHandle handle = ScriptEngine::CreateInstance(deserializedEntity, scriptName.c_str())->GetHandle();
+					sc.Classes.emplace_back(scriptName.c_str());
+
+					auto& fields = ScriptEngine::GetFields(deserializedEntity, scriptName.c_str());
 					{
 						for (auto [name, field] : fields)
 						{
 							auto& fieldNode = scriptNode["Fields"][name.c_str()];
-							ARC_CORE_ERROR("{0}", name.c_str());
 							if (fieldNode)
 							{
-								switch (field.Type)
+								switch (field->Type)
 								{
 								case Field::FieldType::Bool:
 								{
 									bool value = fieldNode.as<bool>();
-									field.SetValue(gcHandle, value);
+									field->SetValue(&value);
 									break;
 								}
 								case Field::FieldType::Float:
 								{
 									float value = fieldNode.as<float>();
-									field.SetValue(gcHandle, value);
+									field->SetValue(&value);
 									break;
 								}
 								case Field::FieldType::Int:
 								{
 									int32_t value = fieldNode.as<int32_t>();
-									field.SetValue(gcHandle, value);
+									field->SetValue(&value);
 									break;
 								}
 								case Field::FieldType::UnsignedInt:
 								{
 									uint32_t value = fieldNode.as<uint32_t>();
-									field.SetValue(gcHandle, value);
+									field->SetValue(&value);
 									break;
 								}
 								case Field::FieldType::Vec2:
 								{
 									glm::vec2 value = fieldNode.as<glm::vec2>();
-									field.SetValue(gcHandle, value);
+									field->SetValue(&value);
 									break;
 								}
 								case Field::FieldType::Vec3:
 								{
 									glm::vec3 value = fieldNode.as<glm::vec3>();
-									field.SetValue(gcHandle, value);
+									field->SetValue(&value);
 									break;
 								}
 								case Field::FieldType::Vec4:
 								{
 									glm::vec4 value = fieldNode.as<glm::vec4>();
-									field.SetValue(gcHandle, value);
+									field->SetValue(&value);
 									break;
 								}
 								case Field::FieldType::String:
 								{
 									eastl::string value = fieldNode.as<std::string>().c_str();
-									field.SetValueString(gcHandle, value);
+									field->SetValueString(value);
 									break;
 								}
 								default:

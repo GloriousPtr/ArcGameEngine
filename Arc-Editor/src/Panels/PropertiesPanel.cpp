@@ -102,78 +102,84 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	static void DrawScriptField(Field& field, GCHandle& gcHandle)
+	static void DrawScriptField(Ref<Field>& field)
 	{
-		T value = field.GetValue<T>(gcHandle);
-		if (UI::Property(field.Name.c_str(), value))
-			field.SetValue(gcHandle, value);
+		T value = field->GetManagedValue<T>();
+		if (UI::Property(field->Name.c_str(), value))
+		{
+			field->SetValue(&value);
+		}
 	}
 
-	static void DrawFields(ScriptComponent& component)
+	static void DrawFields(Entity entity, ScriptComponent& component)
 	{
-		const char* toRemove = nullptr;
+		eastl::string* toRemove = nullptr;
 
-		for (auto it = component.Klasses.begin(); it != component.Klasses.end(); it++)
+		for (auto it = component.Classes.begin(); it != component.Classes.end(); ++it)
 		{
-			auto [name, gcHandle] = *it;
+			eastl::string& className = *it;
+			auto instance = ScriptEngine::GetInstance(entity, className);
+			GCHandle handle = instance->GetHandle();
 
-			ImGui::PushID(gcHandle);
+			ImGui::PushID(handle);
 
 			ImGui::Separator();
 
-			ImGui::Text(name.c_str());
+			ImGui::Text(className.c_str());
 			ImGui::SameLine();
 			if (ImGui::Button(ICON_MDI_CLOSE))
-				toRemove = name.c_str();
+				toRemove = it;
 			
 			UI::BeginProperties();
 
 			// Public Fields
-			auto& fieldMap = ScriptEngine::GetFields(name.c_str());
+			auto& fieldMap = ScriptEngine::GetFields(entity, className.c_str());
 			for (auto& [name, field] : fieldMap)
 			{
-				switch (field.Type)
+				switch (field->Type)
 				{
 					case Field::FieldType::Bool:
 					{
-						DrawScriptField<bool>(field, gcHandle);
+						DrawScriptField<bool>(field);
 						break;
 					}
 					case Field::FieldType::Float:
 					{
-						DrawScriptField<float>(field, gcHandle);
+						DrawScriptField<float>(field);
 						break;
 					}
 					case Field::FieldType::Int:
 					{
-						DrawScriptField<int32_t>(field, gcHandle);
+						DrawScriptField<int32_t>(field);
 						break;
 					}
 					case Field::FieldType::UnsignedInt:
 					{
-						DrawScriptField<uint32_t>(field, gcHandle);
+						DrawScriptField<uint32_t>(field);
 						break;
 					}
 					case Field::FieldType::Vec2:
 					{
-						DrawScriptField<glm::vec2>(field, gcHandle);
+						DrawScriptField<glm::vec2>(field);
 						break;
 					}
 					case Field::FieldType::Vec3:
 					{
-						DrawScriptField<glm::vec3>(field, gcHandle);
+						DrawScriptField<glm::vec3>(field);
 						break;
 					}
 					case Field::FieldType::Vec4:
 					{
-						DrawScriptField<glm::vec4>(field, gcHandle);
+						DrawScriptField<glm::vec4>(field);
 						break;
 					}
 					case Field::FieldType::String:
 					{
-						eastl::string& value = field.GetValueString(gcHandle);
-						if (UI::Property(field.Name.c_str(), value))
-							field.SetValueString(gcHandle, value);
+						eastl::string& value = field->GetManagedValueString();
+						if (UI::Property(field->Name.c_str(), value))
+						{
+							field->SetValueString(value);
+						}
 						break;
 					}
 				}
@@ -186,8 +192,8 @@ namespace ArcEngine
 
 		if (toRemove)
 		{
-			ScriptEngine::ReleaseObjectReference(component.Klasses.at(toRemove));
-			component.Klasses.erase(toRemove);
+			ScriptEngine::RemoveInstance(entity, *toRemove);
+			component.Classes.erase(toRemove);
 		}
 	}
 
@@ -649,16 +655,20 @@ namespace ArcEngine
 			{
 				for (auto [name, scriptClass] : classes)
 				{
-					if (component.Klasses.find(name) == component.Klasses.end())
+					bool notFound = (std::find(component.Classes.begin(), component.Classes.end(), name) == component.Classes.end());
+					if (notFound)
 					{
 						if (ImGui::MenuItem(name.c_str()))
-							component.Klasses.emplace(name, ScriptEngine::CreateInstance(entity, name));
+						{
+							ScriptEngine::CreateInstance(entity, name);
+							component.Classes.push_back(name);
+						}
 					}
 				}
 				ImGui::EndPopup();
 			}
 			
-			DrawFields(component);
+			DrawFields(entity, component);
 		});
 	}
 

@@ -1,5 +1,3 @@
-using System;
-
 namespace ArcEngine
 {
 	public class Entity
@@ -12,6 +10,7 @@ namespace ArcEngine
 		private Entity(ulong id)
 		{
 			ID = id;
+			Log.Info("Setting ID: {0}", id);
 		}
 
 		internal ulong ID { get; private set; }

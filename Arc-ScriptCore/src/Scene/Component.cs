@@ -1,10 +1,8 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace ArcEngine
+﻿namespace ArcEngine
 {
 	public abstract class Component
 	{
-		public Entity Entity { get; set; }
+		public Entity Entity { get; internal set; }
 	}
 
 	public class TagComponent : Component
