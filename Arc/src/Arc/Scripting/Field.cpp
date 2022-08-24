@@ -60,6 +60,7 @@ namespace ArcEngine
 	{
 		m_Size = GetSizeFromType(type);
 		m_Data = new char[m_Size];
+		GetManagedValueInternal(m_Data);
 	}
 
 	Field::~Field()
