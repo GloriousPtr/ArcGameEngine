@@ -113,8 +113,14 @@ namespace ArcEngine
 
 	static void DrawFields(Entity entity, ScriptComponent& component)
 	{
-		eastl::string* toRemove = nullptr;
+		static const ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen
+			| ImGuiTreeNodeFlags_SpanAvailWidth
+			| ImGuiTreeNodeFlags_AllowItemOverlap
+			| ImGuiTreeNodeFlags_Framed
+			| ImGuiTreeNodeFlags_FramePadding;
 
+		eastl::string* toRemove = nullptr;
+		
 		for (auto it = component.Classes.begin(); it != component.Classes.end(); ++it)
 		{
 			eastl::string& className = *it;
@@ -123,21 +129,43 @@ namespace ArcEngine
 
 			ImGui::PushID(handle);
 
-			ImGui::Separator();
+			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
-			ImGui::Text(className.c_str());
-			ImGui::SameLine();
-			if (ImGui::Button(ICON_MDI_CLOSE))
-				toRemove = it;
-			
-			UI::BeginProperties();
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 
-			// Public Fields
-			auto& fieldMap = ScriptEngine::GetFields(entity, className.c_str());
-			for (auto& [name, field] : fieldMap)
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
+
+			bool open = ImGui::TreeNodeEx((void*)handle, treeFlags, className.c_str());
+
 			{
-				switch (field->Type)
+				ImGui::SameLine(ImGui::GetContentRegionMax().x - lineHeight);
+				if (ImGui::Button(ICON_MDI_SETTINGS, ImVec2{ lineHeight, lineHeight }))
+					ImGui::OpenPopup("ComponentSettings");
+
+				if (ImGui::BeginPopup("ComponentSettings"))
 				{
+					if (ImGui::MenuItem("Remove"))
+						toRemove = it;
+
+					ImGui::EndPopup();
+				}
+			}
+			ImGui::PopStyleVar();
+
+			if (open)
+			{
+				ARC_PROFILE_SCOPE("UI Function");
+
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().IndentSpacing / 2);
+
+				// Public Fields
+				UI::BeginProperties();
+				auto& fieldMap = ScriptEngine::GetFields(entity, className.c_str());
+				for (auto& [name, field] : fieldMap)
+				{
+					switch (field->Type)
+					{
 					case Field::FieldType::Bool:
 					{
 						DrawScriptField<bool>(field);
@@ -182,10 +210,12 @@ namespace ArcEngine
 						}
 						break;
 					}
+					}
 				}
-			}
+				UI::EndProperties();
 
-			UI::EndProperties();
+				ImGui::TreePop();
+			}
 
 			ImGui::PopID();
 		}
@@ -642,26 +672,43 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<ScriptComponent>(ICON_MDI_POUND_BOX " Script", entity, [&entity](ScriptComponent& component)
+		DrawComponent<ScriptComponent>(ICON_MDI_POUND_BOX " Script", entity, [&](ScriptComponent& component)
 		{
-			auto& classes = ScriptEngine::GetClasses();
-
-			if (ImGui::Button("Add"))
+			float regionX = ImGui::GetContentRegionAvail().x;
+			float frameHeight = ImGui::GetFrameHeight();
+			if (ImGui::Button("Add", { regionX, frameHeight }))
 			{
 				ImGui::OpenPopup("ScriptAddPopup");
 			}
 
+			auto& classes = ScriptEngine::GetClasses();
 			if (ImGui::BeginPopup("ScriptAddPopup"))
 			{
+				if (classes.size() > 0)
+				{
+					const float filterCursorPosX = ImGui::GetCursorPosX();
+					m_Filter.Draw("###PropertiesFilter", ImGui::GetContentRegionAvail().x);
+
+					if (!m_Filter.IsActive())
+					{
+						ImGui::SameLine();
+						ImGui::SetCursorPosX(filterCursorPosX + ImGui::GetFontSize() * 0.5f);
+						ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
+					}
+				}
+
 				for (auto [name, scriptClass] : classes)
 				{
 					bool notFound = (std::find(component.Classes.begin(), component.Classes.end(), name) == component.Classes.end());
 					if (notFound)
 					{
-						if (ImGui::MenuItem(name.c_str()))
+						if (!m_Filter.IsActive() || (m_Filter.IsActive() && m_Filter.PassFilter(name.c_str())))
 						{
-							ScriptEngine::CreateInstance(entity, name);
-							component.Classes.push_back(name);
+							if (ImGui::MenuItem(name.c_str()))
+							{
+								ScriptEngine::CreateInstance(entity, name);
+								component.Classes.push_back(name);
+							}
 						}
 					}
 				}
