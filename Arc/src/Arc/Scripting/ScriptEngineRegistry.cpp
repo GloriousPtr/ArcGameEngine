@@ -5,14 +5,16 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "ScriptEngine.h"
+#include "GCManager.h"
 #include "MonoUtils.h";
 #include "Arc/Core/Input.h"
 #include "Arc/Math/Math.h"
 
 namespace ArcEngine
 {
-	eastl::hash_map<MonoType*, eastl::function<bool(Entity&)>> ScriptEngineRegistry::s_HasComponentFuncs;
-	eastl::hash_map<MonoType*, eastl::function<void(Entity&)>> ScriptEngineRegistry::s_AddComponentFuncs;
+	eastl::hash_map<MonoType*, eastl::function<bool(Entity&, MonoType*)>> ScriptEngineRegistry::s_HasComponentFuncs;
+	eastl::hash_map<MonoType*, eastl::function<void(Entity&, MonoType*)>> ScriptEngineRegistry::s_AddComponentFuncs;
+	eastl::hash_map<MonoType*, eastl::function<GCHandle(Entity&, MonoType*)>> ScriptEngineRegistry::s_GetComponentFuncs;
 
 	template<typename... Component>
 	void ScriptEngineRegistry::RegisterComponent()
@@ -25,13 +27,14 @@ namespace ArcEngine
 			MonoType* type = mono_reflection_type_from_name(&name[0], ScriptEngine::GetCoreAssemblyImage());
 			if (type)
 			{
+				ARC_CORE_TRACE("Registering {}", name.c_str());
 				uint32_t id = mono_type_get_type(type);
-				s_HasComponentFuncs[type] = [](Entity& entity) { return entity.HasComponent<Component>(); };
-				s_AddComponentFuncs[type] = [](Entity& entity) { entity.AddComponent<Component>(); };
+				s_HasComponentFuncs[type] = [](Entity& entity, MonoType* monoType) { return entity.HasComponent<Component>(); };
+				s_AddComponentFuncs[type] = [](Entity& entity, MonoType* monoType) { entity.AddComponent<Component>(); };
 			}
 			else
 			{
-				ARC_CORE_ERROR("Component not found: {}", name.c_str());
+				//ARC_CORE_ERROR("Component not found: {}", name.c_str());
 			}
 		}(), ...);
 	}
@@ -42,6 +45,20 @@ namespace ArcEngine
 		RegisterComponent<Component...>();
 	}
 
+	void ScriptEngineRegistry::RegisterScriptComponent(const eastl::string& className)
+	{
+		eastl::string name = className;
+		MonoType* type = mono_reflection_type_from_name(&name[0], ScriptEngine::GetAppAssemblyImage());
+		if (type)
+		{
+			ARC_CORE_TRACE("Registering {}", name.c_str());
+			uint32_t id = mono_type_get_type(type);
+			s_HasComponentFuncs[type] = [](Entity& entity, MonoType* monoType) { eastl::string className = mono_type_get_name(monoType); return ScriptEngine::HasInstance(entity, className); };
+			s_AddComponentFuncs[type] = [](Entity& entity, MonoType* monoType) { eastl::string className = mono_type_get_name(monoType); ScriptEngine::CreateInstance(entity, className); };
+			s_GetComponentFuncs[type] = [](Entity& entity, MonoType* monoType) { eastl::string className = mono_type_get_name(monoType); return ScriptEngine::GetInstance(entity, className)->GetHandle(); };
+		}
+	}
+
 	void ScriptEngineRegistry::InitComponentTypes()
 	{
 		ARC_PROFILE_SCOPE();
@@ -49,6 +66,13 @@ namespace ArcEngine
 		RegisterComponent<TagComponent>();
 		RegisterComponent<TransformComponent>();
 		RegisterComponent(AllComponents{});
+	}
+
+	void ScriptEngineRegistry::InitScriptComponentTypes()
+	{
+		auto& scripts = ScriptEngine::GetClasses();
+		for (auto [className, script] : scripts)
+			RegisterScriptComponent(className.c_str());
 	}
 
 	void LogMessage(Log::Level level, MonoString* formattedMessage)
@@ -122,7 +146,7 @@ namespace ArcEngine
 
 		MonoType* monoType = mono_reflection_type_get_type((MonoReflectionType*)type);
 		ARC_CORE_ASSERT(s_AddComponentFuncs.find(monoType) != s_AddComponentFuncs.end(), mono_type_get_name(monoType));
-		s_AddComponentFuncs.at(monoType)(GetEntity(entityID));
+		s_AddComponentFuncs.at(monoType)(GetEntity(entityID), monoType);
 	}
 
 	bool ScriptEngineRegistry::HasComponent(uint64_t entityID, void* type)
@@ -130,21 +154,46 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		MonoType* monoType = mono_reflection_type_get_type((MonoReflectionType*)type);
+		eastl::string n = mono_type_get_name(monoType);
+		ARC_CORE_ERROR(n.c_str());
 		ARC_CORE_ASSERT(s_HasComponentFuncs.find(monoType) != s_HasComponentFuncs.end(), mono_type_get_name(monoType));
-		return s_HasComponentFuncs.at(monoType)(GetEntity(entityID));
+		return s_HasComponentFuncs.at(monoType)(GetEntity(entityID), monoType);
 	}
 
-	void ScriptEngineRegistry::RegisterAll()
+	void ScriptEngineRegistry::GetComponent(uint64_t entityID, void* type, GCHandle* outHandle)
 	{
 		ARC_PROFILE_SCOPE();
 
+		MonoType* monoType = mono_reflection_type_get_type((MonoReflectionType*)type);
+		eastl::string n = mono_type_get_name(monoType);
+		ARC_CORE_ERROR(n.c_str());
+		ARC_CORE_ASSERT(s_GetComponentFuncs.find(monoType) != s_GetComponentFuncs.end(), mono_type_get_name(monoType));
+		*outHandle = s_GetComponentFuncs.at(monoType)(GetEntity(entityID), monoType);
+	}
+
+	void ScriptEngineRegistry::RegisterTypes()
+	{
 		InitComponentTypes();
+		InitScriptComponentTypes();
+	}
+
+	void ScriptEngineRegistry::ClearTypes()
+	{
+		s_HasComponentFuncs.clear();
+		s_GetComponentFuncs.clear();
+		s_AddComponentFuncs.clear();
+	}
+
+	void ScriptEngineRegistry::RegisterInternalCalls()
+	{
+		ARC_PROFILE_SCOPE();
 
 		///////////////////////////////////////////////////////////////
 		// Entity /////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////
 		mono_add_internal_call("ArcEngine.InternalCalls::Entity_AddComponent", ScriptEngineRegistry::AddComponent);
 		mono_add_internal_call("ArcEngine.InternalCalls::Entity_HasComponent", ScriptEngineRegistry::HasComponent);
+		mono_add_internal_call("ArcEngine.InternalCalls::Entity_GetComponent", ScriptEngineRegistry::GetComponent);
 
 		///////////////////////////////////////////////////////////////
 		// Tag ////////////////////////////////////////////////////////

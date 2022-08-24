@@ -1,6 +1,9 @@
+using System;
+using System.Runtime.InteropServices;
+
 namespace ArcEngine
 {
-	public class Entity
+	public abstract class Entity
 	{
 		protected Entity()
 		{
@@ -15,23 +18,35 @@ namespace ArcEngine
 
 		internal ulong ID { get; private set; }
 
-		public bool HasComponent<T>() where T : Component, new() => InternalCalls.Entity_HasComponent(ID, typeof(T));
+		public bool HasComponent<T>() where T : Entity, new()
+		{
+			return InternalCalls.Entity_HasComponent(ID, typeof(T));
+		}
 
-		public T AddComponent<T>() where T : Component, new()
+		public T AddComponent<T>() where T : Entity, new()
 		{
 			InternalCalls.Entity_AddComponent(ID, typeof(T));
 			T component = new T();
-			component.Entity = this;
+			component.ID = ID;
 			return component;
 		}
 
-		public T GetComponent<T>() where T : Component, new()
+		public T GetComponent<T>() where T : Entity, new()
 		{
 			if (HasComponent<T>())
 			{
-				T component = new T();
-				component.Entity = this;
-				return component;
+				if (typeof(T).BaseType == typeof(Component))
+				{
+					T component = new T();
+					component.ID = ID;
+					return component;
+				}
+				else
+				{
+					InternalCalls.Entity_GetComponent(ID, typeof(T), out IntPtr gcHandle);
+					GCHandle gch = GCHandle.FromIntPtr(gcHandle);
+					return (T)gch.Target;
+				}
 			}
 
 			return null;

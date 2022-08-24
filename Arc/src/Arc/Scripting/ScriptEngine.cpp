@@ -91,7 +91,6 @@ namespace ArcEngine
 		s_Data->EntityClass = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "Entity");
 
 		GCManager::CollectGarbage();
-		ScriptEngineRegistry::RegisterAll();
 	}
 
 	void ScriptEngine::LoadClientAssembly()
@@ -105,6 +104,10 @@ namespace ArcEngine
 
 		s_Data->EntityClasses.clear();
 		LoadAssemblyClasses(s_Data->AppAssembly);
+
+		ScriptEngineRegistry::ClearTypes();
+		ScriptEngineRegistry::RegisterInternalCalls();
+		ScriptEngineRegistry::RegisterTypes();
 	}
 
 	void ScriptEngine::ReloadAppDomain()
@@ -252,6 +255,11 @@ namespace ArcEngine
 		return s_Data->CoreImage;
 	}
 
+	MonoImage* ScriptEngine::GetAppAssemblyImage()
+	{
+		return s_Data->AppImage;
+	}
+
 	void ScriptEngine::OnRuntimeBegin()
 	{
 		s_Data->CurrentEntityInstanceMap = &s_Data->EntityRuntimeInstances;
@@ -284,6 +292,12 @@ namespace ArcEngine
 		ScriptInstance* instance = new ScriptInstance(scriptClass, entityID);
 		(*s_Data->CurrentEntityInstanceMap)[entityID][name] = instance;
 		return (*s_Data->CurrentEntityInstanceMap)[entityID][name];
+	}
+
+	bool ScriptEngine::HasInstance(Entity entity, const eastl::string& name)
+	{
+		UUID id = entity.GetUUID();
+		return (*s_Data->CurrentEntityInstanceMap)[id].find(name) != (*s_Data->CurrentEntityInstanceMap)[id].end();
 	}
 
 	ScriptInstance* ScriptEngine::GetInstance(Entity entity, const eastl::string& name)

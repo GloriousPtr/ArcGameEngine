@@ -90,11 +90,13 @@ namespace ArcEngine
 
 		static MonoDomain* GetDomain();
 		static MonoImage* GetCoreAssemblyImage();
+		static MonoImage* GetAppAssemblyImage();
 
 		static void OnRuntimeBegin();
 		static void OnRuntimeEnd();
 
 		static ScriptInstance* CreateInstance(Entity entity, const eastl::string& name);
+		static bool HasInstance(Entity entity, const eastl::string& name);
 		static ScriptInstance* GetInstance(Entity entity, const eastl::string& name);
 		static void RemoveInstance(Entity entity, const eastl::string& name);
 		

@@ -15,12 +15,13 @@ namespace Sandbox
 		public Vector4 Vec4 = new Vector4(2.0f, 3.0f, 4.0f, 1.0f);
 		*/
 		private TransformComponent m_TransformComponent;
+		private Enemy m_Enemy;
 
 		public void OnCreate()
 		{
 			m_TransformComponent = GetComponent<TransformComponent>();
 			Log.Info("Created entity: {0}", GetComponent<TagComponent>().Tag);
-
+			m_Enemy = GetComponent<Enemy>();
 			/*
 			Log.Info("Bool: {0}", Bool);
 			Log.Info("Speed: {0}", Speed);
@@ -48,6 +49,8 @@ namespace Sandbox
 				transform.Translation.X -= speed;
 
 			m_TransformComponent.Transform = transform;
+
+			Log.Info($"Enemy Speed: {m_Enemy.Speed}");
 		}
 
 		public void OnDestroy()
