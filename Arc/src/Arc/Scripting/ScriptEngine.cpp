@@ -125,9 +125,62 @@ namespace ArcEngine
 			s_Data->AppDomain = nullptr;
 		}
 
-		// Compile Sandbox
-		//std::string argument = "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/msbuild.exe -p:Configuration=Debug ../Sandbox/Sandbox.csproj";
-		//system(argument.c_str());
+		//Compile app assembly
+		{
+			const char* command = "dotnet msbuild ../Sandbox/Sandbox.sln"
+				" -nologo"																	// no microsoft branding in console
+				" -noconlog"																// no console logs
+				//" -t:rebuild"																// rebuild the project
+				" -m"																		// multiprocess build
+				" -flp1:Verbosity=minimal;logfile=AssemblyBuildErrors.log;errorsonly"		// dump errors in AssemblyBuildErrors.log file
+				" -flp2:Verbosity=minimal;logfile=AssemblyBuildWarnings.log;warningsonly";	// dump warnings in AssemblyBuildWarnings.log file
+
+			system(command);
+
+			// Errors
+			{
+				FILE* errors = fopen("AssemblyBuildErrors.log", "r");
+
+				char buffer[4096];
+				if (errors != nullptr)
+				{
+					while (fgets(buffer, sizeof(buffer), errors))
+					{
+						size_t newLine = strlen(buffer) - 1;
+						buffer[newLine] = '\0';
+						ARC_ERROR(buffer);
+					}
+				}
+				else
+				{
+					ARC_CORE_ERROR("AssemblyBuildErrors.log not found!");
+				}
+
+				fclose(errors);
+			}
+
+			// Warnings
+			{
+				FILE* warns = fopen("AssemblyBuildWarnings.log", "r");
+
+				char buffer[1024];
+				if (warns != nullptr)
+				{
+					while (fgets(buffer, sizeof(buffer), warns))
+					{
+						size_t newLine = strlen(buffer) - 1;
+						buffer[newLine] = '\0';
+						ARC_WARN(buffer);
+					}
+				}
+				else
+				{
+					ARC_CORE_ERROR("AssemblyBuildWarnings.log not found!");
+				}
+
+				fclose(warns);
+			}
+		}
 
 		s_Data->AppDomain = mono_domain_create_appdomain("ScriptRuntime", nullptr);
 		ARC_CORE_ASSERT(s_Data->AppDomain);
