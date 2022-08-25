@@ -1,7 +1,8 @@
 project "Arc-ScriptCore"
     kind "SharedLib"
     language "C#"
-    dotnetframework "4.7.2"
+    dotnetframework "4.8"
+    csversion "10.0"
     
 	targetdir ("%{wks.location}/Arc-Editor/Resources/Scripts")
 	objdir ("%{wks.location}/Arc-Editor/Resources/Scripts/Intermediates")

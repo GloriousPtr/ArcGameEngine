@@ -1,15 +1,26 @@
 ﻿namespace ArcEngine
 {
-	public abstract class Component : Entity
+	public interface IComponent
 	{
+		internal ulong GetEntityID();
+		internal void SetEntity(Entity e);
+	}
+
+	public abstract class Component : IComponent
+	{
+		internal Entity entity;
+
+		ulong IComponent.GetEntityID() => entity.ID;
+
+		void IComponent.SetEntity(Entity e) => entity = e;
 	}
 
 	public class TagComponent : Component
 	{
 		public string Tag
 		{
-			get => InternalCalls.TagComponent_GetTag(ID);
-			set => InternalCalls.TagComponent_SetTag(ID, value);
+			get => InternalCalls.TagComponent_GetTag(entity.ID);
+			set => InternalCalls.TagComponent_SetTag(entity.ID, value);
 		}
 	}
 
@@ -19,10 +30,10 @@
 		{
 			get
 			{
-				InternalCalls.TransformComponent_GetTransform(ID, out Transform result);
+				InternalCalls.TransformComponent_GetTransform(entity.ID, out Transform result);
 				return result;
 			}
-			set => InternalCalls.TransformComponent_SetTransform(ID, ref value);
+			set => InternalCalls.TransformComponent_SetTransform(entity.ID, ref value);
 		}
 	}
 }

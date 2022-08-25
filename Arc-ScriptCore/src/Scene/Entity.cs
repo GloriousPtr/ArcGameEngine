@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace ArcEngine
 {
-	public abstract class Entity
+	public abstract class Entity : IComponent
 	{
 		protected Entity()
 		{
@@ -18,27 +18,33 @@ namespace ArcEngine
 
 		internal ulong ID { get; private set; }
 
-		public bool HasComponent<T>() where T : Entity, new()
+		public bool HasComponent<T>() where T : IComponent, new()
 		{
 			return InternalCalls.Entity_HasComponent(ID, typeof(T));
 		}
 
-		public T AddComponent<T>() where T : Entity, new()
+		public T AddComponent<T>() where T : IComponent, new()
 		{
+			if (HasComponent<T>())
+			{
+				Log.Error($"{typeof(T).Name} already exists on Entity: {ID}");
+				return GetComponent<T>();
+			}
+
 			InternalCalls.Entity_AddComponent(ID, typeof(T));
 			T component = new T();
-			component.ID = ID;
+			component.SetEntity(this);
 			return component;
 		}
 
-		public T GetComponent<T>() where T : Entity, new()
+		public T GetComponent<T>() where T : IComponent, new()
 		{
 			if (HasComponent<T>())
 			{
 				if (typeof(T).BaseType == typeof(Component))
 				{
 					T component = new T();
-					component.ID = ID;
+					component.SetEntity(this);
 					return component;
 				}
 				else
@@ -49,7 +55,17 @@ namespace ArcEngine
 				}
 			}
 
-			return null;
+			return new T();
+		}
+
+		ulong IComponent.GetEntityID()
+		{
+			return ID;
+		}
+
+		void IComponent.SetEntity(Entity e)
+		{
+			ID = e.ID;
 		}
 	}
 }
