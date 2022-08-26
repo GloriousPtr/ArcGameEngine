@@ -27,7 +27,8 @@ namespace ArcEngine
 
 			Vec2,
 			Vec3,
-			Vec4
+			Vec4,
+			Color
 		};
 
 		eastl::string Name;

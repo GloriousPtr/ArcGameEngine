@@ -2,25 +2,25 @@
 
 namespace ArcEngine
 {
-	[StructLayout(LayoutKind.Explicit)]
+	[StructLayout(LayoutKind.Sequential)]
 	public struct Matrix4
 	{
-		[FieldOffset(00)] public float D00;
-		[FieldOffset(04)] public float D10;
-		[FieldOffset(08)] public float D20;
-		[FieldOffset(12)] public float D30;
-		[FieldOffset(16)] public float D01;
-		[FieldOffset(20)] public float D11;
-		[FieldOffset(24)] public float D21;
-		[FieldOffset(28)] public float D31;
-		[FieldOffset(32)] public float D02;
-		[FieldOffset(36)] public float D12;
-		[FieldOffset(40)] public float D22;
-		[FieldOffset(44)] public float D32;
-		[FieldOffset(48)] public float D03;
-		[FieldOffset(52)] public float D13;
-		[FieldOffset(56)] public float D23;
-		[FieldOffset(60)] public float D33;
+		public float D00;
+		public float D10;
+		public float D20;
+		public float D30;
+		public float D01;
+		public float D11;
+		public float D21;
+		public float D31;
+		public float D02;
+		public float D12;
+		public float D22;
+		public float D32;
+		public float D03;
+		public float D13;
+		public float D23;
+		public float D33;
 
 		public Matrix4(in float value)
 		{

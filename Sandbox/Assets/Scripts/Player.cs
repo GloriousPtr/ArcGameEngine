@@ -4,10 +4,9 @@ namespace Sandbox
 {
 	public class Player : Entity
 	{
-		[Range(3.0f, 12.0f)]
-		public float Speed = 5.0f;
-		[Range(5, 8)]
-		public int SpeedI = 5;
+		[Range(3.0f, 12.0f)] public float Speed = 5.0f;
+		[Range(5, 8)] public int SpeedI = 5;
+		public Color PlayerColor = Color.Magenta;
 
 		[HideInProperties] public float PublicField = 5.0f;
 
@@ -33,6 +32,7 @@ namespace Sandbox
 		{
 			m_TransformComponent = GetComponent<TransformComponent>();
 			Log.Info("Created entity: {0}", GetComponent<TagComponent>().Tag);
+			Log.Info("Player Color: {0}", PlayerColor);
 			m_Enemy = GetComponent<Enemy>();
 			/*
 			Log.Info("Bool: {0}", Bool);

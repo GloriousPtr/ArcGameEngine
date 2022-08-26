@@ -2,11 +2,11 @@
 
 namespace ArcEngine
 {
-	[StructLayout(LayoutKind.Explicit)]
+	[StructLayout(LayoutKind.Sequential)]
 	public struct Vector2
 	{
-		[FieldOffset(0)] public float X;
-		[FieldOffset(4)] public float Y;
+		public float X;
+		public float Y;
 
 		public Vector2(in float scalar)
 		{
@@ -30,12 +30,12 @@ namespace ArcEngine
 		public override string ToString() { return "Vector2(" + X + ", " + Y + ")"; }
 	}
 
-	[StructLayout(LayoutKind.Explicit)]
+	[StructLayout(LayoutKind.Sequential)]
 	public struct Vector3
 	{
-		[FieldOffset(0)] public float X;
-		[FieldOffset(4)] public float Y;
-		[FieldOffset(8)] public float Z;
+		public float X;
+		public float Y;
+		public float Z;
 
 		public Vector3(in float scalar)
 		{
@@ -67,13 +67,13 @@ namespace ArcEngine
 		public override string ToString() { return "Vector3(" + X + ", " + Y + ", " + Z + ")"; }
 	}
 
-	[StructLayout(LayoutKind.Explicit)]
+	[StructLayout(LayoutKind.Sequential)]
 	public struct Vector4
 	{
-		[FieldOffset(00)] public float X;
-		[FieldOffset(04)] public float Y;
-		[FieldOffset(08)] public float Z;
-		[FieldOffset(12)] public float W;
+		public float X;
+		public float Y;
+		public float Z;
+		public float W;
 
 		public Vector4(in float scalar)
 		{

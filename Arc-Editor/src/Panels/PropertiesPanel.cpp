@@ -258,10 +258,19 @@ namespace ArcEngine
 						DrawScriptField<glm::vec4>(field);
 						break;
 					}
+					case Field::FieldType::Color:
+					{
+						const char* tooltip = field->Tooltip.empty() ? nullptr : field->Tooltip.c_str();
+						glm::vec4 value = field->GetManagedValue<glm::vec4>();
+						if (UI::PropertyColor4(field->Name.c_str(), value, tooltip))
+							field->SetValue(&value);
+						break;
+					}
 					case Field::FieldType::String:
 					{
+						const char* tooltip = field->Tooltip.empty() ? nullptr : field->Tooltip.c_str();
 						eastl::string& value = field->GetManagedValueString();
-						if (UI::Property(field->Name.c_str(), value))
+						if (UI::Property(field->Name.c_str(), value, tooltip))
 						{
 							field->SetValueString(value);
 						}

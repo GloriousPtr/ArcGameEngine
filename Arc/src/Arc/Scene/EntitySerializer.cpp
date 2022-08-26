@@ -414,6 +414,11 @@ namespace ArcEngine
 							out << field->GetManagedValue<glm::vec4>();
 							break;
 						}
+						case Field::FieldType::Color:
+						{
+							out << field->GetManagedValue<glm::vec4>();
+							break;
+						}
 						case Field::FieldType::String:
 						{
 							out << field->GetManagedValueString().c_str();
@@ -722,6 +727,12 @@ namespace ArcEngine
 									break;
 								}
 								case Field::FieldType::Vec4:
+								{
+									glm::vec4 value = fieldNode.as<glm::vec4>();
+									field->SetValue(&value);
+									break;
+								}
+								case Field::FieldType::Color:
 								{
 									glm::vec4 value = fieldNode.as<glm::vec4>();
 									field->SetValue(&value);

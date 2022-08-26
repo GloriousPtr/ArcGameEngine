@@ -41,6 +41,7 @@ namespace ArcEngine
 		if (strcmp(name, "ArcEngine.Vector2") == 0) return FieldType::Vec2;
 		if (strcmp(name, "ArcEngine.Vector3") == 0) return FieldType::Vec3;
 		if (strcmp(name, "ArcEngine.Vector4") == 0) return FieldType::Vec4;
+		if (strcmp(name, "ArcEngine.Color") == 0) return FieldType::Color;
 
 		return FieldType::Unknown;
 	}
@@ -64,6 +65,7 @@ namespace ArcEngine
 		case Field::FieldType::Vec2:			return sizeof(glm::vec2);
 		case Field::FieldType::Vec3:			return sizeof(glm::vec3);
 		case Field::FieldType::Vec4:			return sizeof(glm::vec4);
+		case Field::FieldType::Color:			return sizeof(glm::vec4);
 		}
 
 		return 0;
