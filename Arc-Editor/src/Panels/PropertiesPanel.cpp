@@ -8,7 +8,9 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "Arc/Utils/PlatformUtils.h"
+#include <Arc/Utils/PlatformUtils.h>
+#include <Arc/Scene/EntitySerializer.h>
+
 #include "../Utils/UI.h"
 #include "../Utils/EditorTheme.h"
 #include "../EditorLayer.h"
@@ -102,13 +104,30 @@ namespace ArcEngine
 	}
 
 	template<typename T>
+	static void DrawScriptFieldScalar(Ref<Field>& field)
+	{
+		const char* tooltip = field->Tooltip.empty() ? nullptr : field->Tooltip.c_str();
+		T value = field->GetManagedValue<T>();
+		if (field->Min < field->Max)
+		{
+			if (UI::Property(field->Name.c_str(), value, field->Min, field->Max, tooltip))
+				field->SetValue(&value);
+		}
+		else
+		{
+			if (UI::Property(field->Name.c_str(), value, tooltip))
+				field->SetValue(&value);
+		}
+	}
+
+	template<typename T>
 	static void DrawScriptField(Ref<Field>& field)
 	{
+		const char* tooltip = field->Tooltip.empty() ? nullptr : field->Tooltip.c_str();
+		
 		T value = field->GetManagedValue<T>();
-		if (UI::Property(field->Name.c_str(), value))
-		{
+		if (UI::Property(field->Name.c_str(), value, tooltip))
 			field->SetValue(&value);
-		}
 	}
 
 	static void DrawFields(Entity entity, ScriptComponent& component)
@@ -164,6 +183,9 @@ namespace ArcEngine
 				auto& fieldMap = ScriptEngine::GetFields(entity, className.c_str());
 				for (auto& [name, field] : fieldMap)
 				{
+					if (field->Hidden)
+						continue;
+
 					switch (field->Type)
 					{
 					case Field::FieldType::Bool:
@@ -173,52 +195,52 @@ namespace ArcEngine
 					}
 					case Field::FieldType::Float:
 					{
-						DrawScriptField<float>(field);
+						DrawScriptFieldScalar<float>(field);
 						break;
 					}
 					case Field::FieldType::Double:
 					{
-						DrawScriptField<double>(field);
+						DrawScriptFieldScalar<double>(field);
 						break;
 					}
 					case Field::FieldType::SByte:
 					{
-						DrawScriptField<int8_t>(field);
+						DrawScriptFieldScalar<int8_t>(field);
 						break;
 					}
 					case Field::FieldType::Byte:
 					{
-						DrawScriptField<uint8_t>(field);
+						DrawScriptFieldScalar<uint8_t>(field);
 						break;
 					}
 					case Field::FieldType::Short:
 					{
-						DrawScriptField<int16_t>(field);
+						DrawScriptFieldScalar<int16_t>(field);
 						break;
 					}
 					case Field::FieldType::UShort:
 					{
-						DrawScriptField<uint16_t>(field);
+						DrawScriptFieldScalar<uint16_t>(field);
 						break;
 					}
 					case Field::FieldType::Int:
 					{
-						DrawScriptField<int32_t>(field);
+						DrawScriptFieldScalar<int32_t>(field);
 						break;
 					}
 					case Field::FieldType::UInt:
 					{
-						DrawScriptField<uint32_t>(field);
+						DrawScriptFieldScalar<uint32_t>(field);
 						break;
 					}
 					case Field::FieldType::Long:
 					{
-						DrawScriptField<int64_t>(field);
+						DrawScriptFieldScalar<int64_t>(field);
 						break;
 					}
 					case Field::FieldType::ULong:
 					{
-						DrawScriptField<uint64_t>(field);
+						DrawScriptFieldScalar<uint64_t>(field);
 						break;
 					}
 					case Field::FieldType::Vec2:
@@ -759,7 +781,26 @@ namespace ArcEngine
 		eastl::string name = StringUtils::GetNameWithExtension(filepath);
 		eastl::string& ext = StringUtils::GetExtension(name.c_str());
 
-		ImGui::Text(name.c_str());
+		if (ext == "prefab")
+		{
+			static Entity prefab;
+			if (m_Scene && prefab)
+			{
+				DrawComponents(prefab);
+			}
+			else
+			{
+				m_Scene = CreateRef<Scene>();
+				prefab = EntitySerializer::DeserializeEntityAsPrefab(filepath, *m_Scene);
+			}
+		}
+		else
+		{
+			if (m_Scene)
+				m_Scene = nullptr;
+
+			ImGui::Text(name.c_str());
+		}
 	}
 
 	template<typename Component>

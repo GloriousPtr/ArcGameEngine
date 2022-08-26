@@ -32,6 +32,11 @@ namespace ArcEngine
 
 		eastl::string Name;
 		FieldType Type;
+		bool Serializable;
+		bool Hidden;
+		eastl::string Tooltip;
+		float Min = 0.0f;
+		float Max = 0.0f;
 
 		Field(const eastl::string& name, FieldType type, void* monoClassField, GCHandle handle);
 		~Field();

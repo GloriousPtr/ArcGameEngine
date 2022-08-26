@@ -12,7 +12,7 @@ namespace ArcEngine
 	static int s_UIContextID = 0;
 	static uint32_t s_Counter = 0;
 	static char s_IDBuffer[16];
-
+	
 	void UI::PushID()
 	{
 		ImGui::PushID(s_UIContextID++);
@@ -25,7 +25,7 @@ namespace ArcEngine
 		s_UIContextID--;
 	}
 	
-	void UI::BeginPropertyGrid(const char* label, bool rightAlignNextColumn)
+	void UI::BeginPropertyGrid(const char* label, const char* tooltip, bool rightAlignNextColumn)
 	{
 		PushID();
 		ImGui::TableNextRow();
@@ -34,6 +34,13 @@ namespace ArcEngine
 		ImGui::PushID(label);
 		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
 		ImGui::Text(label);
+		if (tooltip && ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::Text(tooltip);
+			ImGui::EndTooltip();
+		}
+
 		ImGui::TableNextColumn();
 
 		if (rightAlignNextColumn)
@@ -72,11 +79,11 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// Strings //////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, eastl::string& value)
+	bool UI::Property(const char* label, eastl::string& value, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		// Small strings
 		if (value.size() < 255)
@@ -120,9 +127,9 @@ namespace ArcEngine
 		return modified;
 	}
 
-	void UI::Property(const char* label, const char* value)
+	void UI::Property(const char* label, const char* value, const char* tooltip)
 	{
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -137,11 +144,11 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// s/byte ///////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, int8_t& value)
+	bool UI::Property(const char* label, int8_t& value, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -155,11 +162,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, uint8_t& value)
+	bool UI::Property(const char* label, uint8_t& value, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -173,11 +180,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, int8_t& value, int8_t min, int8_t max)
+	bool UI::Property(const char* label, int8_t& value, int8_t min, int8_t max, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -191,11 +198,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, uint8_t& value, uint8_t min, uint8_t max)
+	bool UI::Property(const char* label, uint8_t& value, uint8_t min, uint8_t max, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -213,11 +220,11 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// u/short //////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, int16_t& value)
+	bool UI::Property(const char* label, int16_t& value, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -231,11 +238,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, uint16_t& value)
+	bool UI::Property(const char* label, uint16_t& value, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -249,11 +256,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, int16_t& value, int16_t min, int16_t max)
+	bool UI::Property(const char* label, int16_t& value, int16_t min, int16_t max, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -267,11 +274,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, uint16_t& value, uint16_t min, uint16_t max)
+	bool UI::Property(const char* label, uint16_t& value, uint16_t min, uint16_t max, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -289,11 +296,11 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// u/int ////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, int32_t& value)
+	bool UI::Property(const char* label, int32_t& value, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -307,11 +314,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, uint32_t& value)
+	bool UI::Property(const char* label, uint32_t& value, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -325,11 +332,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, int32_t& value, int32_t min, int32_t max)
+	bool UI::Property(const char* label, int32_t& value, int32_t min, int32_t max, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -343,11 +350,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, uint32_t& value, uint32_t min, uint32_t max)
+	bool UI::Property(const char* label, uint32_t& value, uint32_t min, uint32_t max, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -365,11 +372,11 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// u/long ///////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, int64_t& value)
+	bool UI::Property(const char* label, int64_t& value, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -383,11 +390,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, uint64_t& value)
+	bool UI::Property(const char* label, uint64_t& value, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -401,11 +408,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, int64_t& value, int64_t min, int64_t max)
+	bool UI::Property(const char* label, int64_t& value, int64_t min, int64_t max, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -419,11 +426,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, uint64_t& value, uint64_t min, uint64_t max)
+	bool UI::Property(const char* label, uint64_t& value, uint64_t min, uint64_t max, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -441,11 +448,17 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// Float ////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, float& value, float delta)
+	
+	bool UI::Property(const char* label, float& value, const char* tooltip)
+	{
+		return Property(label, value, 0.1f, tooltip);
+	}
+
+	bool UI::Property(const char* label, float& value, float delta, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -459,11 +472,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, float& value, float min, float max, const char* fmt)
+	bool UI::Property(const char* label, float& value, float min, float max, const char* fmt, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -477,11 +490,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, float& value, float delta, float min, float max, const char* fmt)
+	bool UI::Property(const char* label, float& value, float delta, float min, float max, const char* fmt, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -499,11 +512,17 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// Double ///////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, double& value, double delta)
+
+	bool UI::Property(const char* label, double& value, const char* tooltip)
+	{
+		return Property(label, value, 0.1, tooltip);
+	}
+
+	bool UI::Property(const char* label, double& value, float delta, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -517,11 +536,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, double& value, double min, double max, const char* fmt)
+	bool UI::Property(const char* label, double& value, float min, float max, const char* fmt, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -535,11 +554,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, double& value, double delta, double min, double max, const char* fmt)
+	bool UI::Property(const char* label, double& value, float delta, float min, float max, const char* fmt, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -557,11 +576,27 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// Vec2/3/4 /////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, glm::vec2& value, float delta)
+
+	bool UI::Property(const char* label, glm::vec2& value, const char* tooltip)
+	{
+		return Property(label, value, 0.1f, tooltip);
+	}
+
+	bool UI::Property(const char* label, glm::vec3& value, const char* tooltip)
+	{
+		return Property(label, value, 0.1f, tooltip);
+	}
+
+	bool UI::Property(const char* label, glm::vec4& value, const char* tooltip)
+	{
+		return Property(label, value, 0.1f, tooltip);
+	}
+
+	bool UI::Property(const char* label, glm::vec2& value, float delta, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -575,11 +610,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, glm::vec3& value, float delta)
+	bool UI::Property(const char* label, glm::vec3& value, float delta, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -593,11 +628,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, glm::vec4& value, float delta)
+	bool UI::Property(const char* label, glm::vec4& value, float delta, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -615,11 +650,11 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// Bool /////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, bool& flag)
+	bool UI::Property(const char* label, bool& flag, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -637,13 +672,13 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// Dropdown /////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, int& value, const char** dropdownStrings, size_t count)
+	bool UI::Property(const char* label, int& value, const char** dropdownStrings, size_t count, const char* tooltip)
 	{
 		bool modified = false;
 
 		const char* current = dropdownStrings[(int)value];
 		
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -677,11 +712,11 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// Colors ///////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::PropertyColor3(const char* label, glm::vec3& color)
+	bool UI::PropertyColor3(const char* label, glm::vec3& color, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -695,11 +730,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::PropertyColor4(const char* label, glm::vec4& color)
+	bool UI::PropertyColor4(const char* label, glm::vec4& color, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -713,11 +748,11 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::PropertyColor4as3(const char* label, glm::vec4& color)
+	bool UI::PropertyColor4as3(const char* label, glm::vec4& color, const char* tooltip)
 	{
 		bool modified = false;
 
-		BeginPropertyGrid(label);
+		BeginPropertyGrid(label, tooltip);
 
 		s_IDBuffer[0] = '#';
 		s_IDBuffer[1] = '#';
@@ -735,7 +770,7 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// 2D/3D Textures ///////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, Ref<TextureCubemap>& texture, uint32_t overrideTextureID)
+	bool UI::Property(const char* label, Ref<TextureCubemap>& texture, uint32_t overrideTextureID, const char* tooltip)
 	{
 		bool changed = false;
 
@@ -743,7 +778,7 @@ namespace ArcEngine
 		const ImVec2 xButtonSize = { buttonSize.x / 4.0f, 80 };
 		const ImVec2 tooltipSize = { 300, 300 };
 
-		BeginPropertyGrid(label, buttonSize.y);
+		BeginPropertyGrid(label, tooltip, buttonSize.y);
 
 		ImGui::SetCursorPos({ ImGui::GetContentRegionMax().x - buttonSize.x - xButtonSize.x, ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y });
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
@@ -792,7 +827,7 @@ namespace ArcEngine
 		return changed;
 	}
 
-	bool UI::Property(const char* label, Ref<Texture2D>& texture, uint32_t overrideTextureID)
+	bool UI::Property(const char* label, Ref<Texture2D>& texture, uint32_t overrideTextureID, const char* tooltip)
 	{
 		bool changed = false;
 
@@ -800,7 +835,7 @@ namespace ArcEngine
 		const ImVec2 xButtonSize = { buttonSize.x / 4.0f, 80 };
 		const ImVec2 tooltipSize = { 300, 300 };
 
-		BeginPropertyGrid(label, buttonSize.y);
+		BeginPropertyGrid(label, tooltip, buttonSize.y);
 
 		ImGui::SetCursorPos({ ImGui::GetContentRegionMax().x - buttonSize.x - xButtonSize.x, ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y });
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
@@ -853,12 +888,12 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// Vec3 with reset button ///////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	void UI::DrawVec3Control(const char* label, glm::vec3& values, float resetValue, float columnWidth)
+	void UI::DrawVec3Control(const char* label, glm::vec3& values, float resetValue, float columnWidth, const char* tooltip)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		auto boldFont = io.Fonts->Fonts[1];
 		
-		BeginPropertyGrid(label, false);
+		BeginPropertyGrid(label, tooltip, false);
 
 		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
 

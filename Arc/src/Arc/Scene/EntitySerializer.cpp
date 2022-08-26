@@ -336,6 +336,9 @@ namespace ArcEngine
 					if (field->Type == Field::FieldType::Unknown)
 						continue;
 
+					if (!field->Serializable)
+						continue;
+
 					GCHandle handle = ScriptEngine::GetInstance(entity, className)->GetHandle();
 					out << YAML::Key << fieldName.c_str() << YAML::Value;
 
@@ -629,6 +632,12 @@ namespace ArcEngine
 					{
 						for (auto [name, field] : fields)
 						{
+							if (field->Type == Field::FieldType::Unknown)
+								continue;
+
+							if (!field->Serializable)
+								continue;
+
 							auto& fieldNode = scriptNode["Fields"][name.c_str()];
 							if (fieldNode)
 							{

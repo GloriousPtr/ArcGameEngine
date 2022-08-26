@@ -4,7 +4,18 @@ namespace Sandbox
 {
 	public class Player : Entity
 	{
+		[Range(3.0f, 12.0f)]
 		public float Speed = 5.0f;
+		[Range(5, 8)]
+		public int SpeedI = 5;
+
+		[HideInProperties] public float PublicField = 5.0f;
+
+		[Tooltip("Tooltip for Private Field")] [SerializeField] private float PrivateField = 5.0f;
+		[Tooltip("Tooltip for Internal Field")] [ShowInProperties] internal float InternalField = 5.0f;
+
+		protected float ProtectedField = 5.0f;
+
 		/*
 		public bool Bool = false;
 		public int Int = -10;
@@ -14,6 +25,7 @@ namespace Sandbox
 		public Vector3 Vec3 = new Vector3(2.0f, 3.0f, 4.0f);
 		public Vector4 Vec4 = new Vector4(2.0f, 3.0f, 4.0f, 1.0f);
 		*/
+
 		private TransformComponent m_TransformComponent;
 		private Enemy m_Enemy;
 
@@ -50,7 +62,7 @@ namespace Sandbox
 
 			m_TransformComponent.Transform = transform;
 
-			Log.Info($"Enemy Speed: {m_Enemy.Speed}");
+			//Log.Info($"Enemy Speed: {m_Enemy.Speed}");
 		}
 
 		public void OnDestroy()

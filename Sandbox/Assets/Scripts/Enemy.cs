@@ -4,8 +4,8 @@ namespace Sandbox
 {
 	public class Enemy : Entity
 	{
-		public float Speed = 20.0f;
-		
+		[SerializeField] private float Speed = 20.0f;
+		/*
 		public bool Bool = false;
 		public byte Byte = 255;
 		public sbyte SByte = 127;
@@ -20,7 +20,7 @@ namespace Sandbox
 		public Vector2 Vec2 = new(2.0f, 3.0f);
 		public Vector3 Vec3 = new(2.0f, 3.0f, 4.0f);
 		public Vector4 Vec4 = new(2.0f, 3.0f, 4.0f, 1.0f);
-		
+		*/
 		private TransformComponent m_TransformComponent;
 
 		public void OnCreate()

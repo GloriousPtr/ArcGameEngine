@@ -41,5 +41,6 @@ namespace ArcEngine
 		EditorContext m_Context = {};
 		bool m_Locked = false;
 		ImGuiTextFilter m_Filter;
+		Ref<Scene> m_Scene;
 	};
 }

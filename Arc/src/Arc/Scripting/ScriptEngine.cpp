@@ -32,6 +32,11 @@ namespace ArcEngine
 		MonoImage* AppImage = nullptr;
 
 		MonoClass* EntityClass = nullptr;
+		MonoClass* SerializeFieldAttribute = nullptr;
+		MonoClass* HideInPropertiesAttribute = nullptr;
+		MonoClass* ShowInPropertiesAttribute = nullptr;
+		MonoClass* TooltipAttribute = nullptr;
+		MonoClass* RangeAttribute = nullptr;
 
 		eastl::unordered_map<eastl::string, Ref<ScriptClass>> EntityClasses;
 
@@ -52,6 +57,14 @@ namespace ArcEngine
 		mono_set_assemblies_path("mono/lib");
 
 		s_Data = CreateRef<ScriptEngineData>();
+
+		static const char* options[] =
+		{
+			"--soft-breakpoints",
+			"--debugger-agent=transport=dt_socket,address=127.0.0.1:2550,server=y,suspend=n"
+		};
+		mono_jit_parse_options(sizeof(options) / sizeof(char*), (char**)options);
+		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
 
 		s_Data->RootDomain = mono_jit_init("ArcJITRuntime");
 		ARC_CORE_ASSERT(s_Data->RootDomain);
@@ -89,6 +102,11 @@ namespace ArcEngine
 		s_Data->CoreImage = mono_assembly_get_image(s_Data->CoreAssembly);
 
 		s_Data->EntityClass = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "Entity");
+		s_Data->SerializeFieldAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "SerializeField");
+		s_Data->HideInPropertiesAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "HideInProperties");
+		s_Data->ShowInPropertiesAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "ShowInProperties");
+		s_Data->TooltipAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "Tooltip");
+		s_Data->RangeAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "Range");
 
 		GCManager::CollectGarbage();
 	}
@@ -386,7 +404,14 @@ namespace ArcEngine
 	GCHandle ScriptClass::InvokeMethod(GCHandle gcHandle, MonoMethod* method, void** params)
 	{
 		MonoObject* reference = GCManager::GetReferencedObject(gcHandle);
-		mono_runtime_invoke(method, reference, params, nullptr);
+		MonoObject* exception;
+		mono_runtime_invoke(method, reference, params, &exception);
+		if (exception != nullptr)
+		{
+			MonoString* monoString = mono_object_to_string(exception, nullptr);
+			eastl::string ex = MonoUtils::MonoStringToUTF8(monoString);
+			ARC_CRITICAL(ex.c_str());
+		}
 		return gcHandle;
 	}
 
@@ -415,20 +440,70 @@ namespace ArcEngine
 		InvokeMethod(gcHandle, method, params);
 	}
 
+	enum class Accessibility : uint8_t
+	{
+		None = 0,
+		Private = (1 << 0),
+		Internal = (1 << 1),
+		Protected = (1 << 2),
+		Public = (1 << 3)
+	};
+
+	// Gets the accessibility level of the given field
+	static uint8_t GetFieldAccessibility(MonoClassField* field)
+	{
+		uint8_t accessibility = (uint8_t)Accessibility::None;
+		uint32_t accessFlag = mono_field_get_flags(field) & MONO_FIELD_ATTR_FIELD_ACCESS_MASK;
+
+		switch (accessFlag)
+		{
+		case MONO_FIELD_ATTR_PRIVATE:
+		{
+			accessibility = (uint8_t)Accessibility::Private;
+			break;
+		}
+		case MONO_FIELD_ATTR_FAM_AND_ASSEM:
+		{
+			accessibility |= (uint8_t)Accessibility::Protected;
+			accessibility |= (uint8_t)Accessibility::Internal;
+			break;
+		}
+		case MONO_FIELD_ATTR_ASSEMBLY:
+		{
+			accessibility = (uint8_t)Accessibility::Internal;
+			break;
+		}
+		case MONO_FIELD_ATTR_FAMILY:
+		{
+			accessibility = (uint8_t)Accessibility::Protected;
+			break;
+		}
+		case MONO_FIELD_ATTR_FAM_OR_ASSEM:
+		{
+			accessibility |= (uint8_t)Accessibility::Private;
+			accessibility |= (uint8_t)Accessibility::Protected;
+			break;
+		}
+		case MONO_FIELD_ATTR_PUBLIC:
+		{
+			accessibility = (uint8_t)Accessibility::Public;
+			break;
+		}
+		}
+
+		return accessibility;
+	}
+
 	void ScriptClass::LoadFields()
 	{
 		m_Fields.clear();
 
-		MonoClassField* iter;
+		MonoClassField* monoField;
 		void* ptr = 0;
-		while ((iter = mono_class_get_fields(m_MonoClass, &ptr)) != NULL)
+		while ((monoField = mono_class_get_fields(m_MonoClass, &ptr)) != NULL)
 		{
-			const char* propertyName = mono_field_get_name(iter);
-			uint32_t flags = mono_field_get_flags(iter);
-			if ((flags & MONO_FIELD_ATTR_PUBLIC) == 0)
-				continue;
-
-			m_Fields.emplace(propertyName, iter);
+			const char* propertyName = mono_field_get_name(monoField);
+			m_Fields.emplace(propertyName, monoField);
 		}
 	}
 
@@ -502,12 +577,50 @@ namespace ArcEngine
 
 		for (auto [fieldName, monoField] : fields)
 		{
-			MonoCustomAttrInfo* attr = mono_custom_attrs_from_field(m_ScriptClass->m_MonoClass, monoField);
 			MonoType* fieldType = mono_field_get_type(monoField);
 			Field::FieldType type = Field::GetFieldType(fieldType);
-
+			
 			if (type == Field::FieldType::Unknown)
 				continue;
+
+			const char* name = fieldName.c_str();
+			uint8_t accessibilityFlag = GetFieldAccessibility(monoField);
+			bool serializable = accessibilityFlag & (uint8_t)Accessibility::Public;
+			bool hidden = !serializable;
+			eastl::string tooltip = "";
+			float min = 0;
+			float max = 0;
+
+			MonoCustomAttrInfo* attr = mono_custom_attrs_from_field(m_ScriptClass->m_MonoClass, monoField);
+			if (attr)
+			{
+				if (!serializable)
+					serializable = mono_custom_attrs_has_attr(attr, s_Data->SerializeFieldAttribute);
+
+				hidden = !serializable;
+
+				if (mono_custom_attrs_has_attr(attr, s_Data->HideInPropertiesAttribute))
+					hidden = true;
+				else if (mono_custom_attrs_has_attr(attr, s_Data->ShowInPropertiesAttribute))
+					hidden = false;
+
+				if (mono_custom_attrs_has_attr(attr, s_Data->TooltipAttribute))
+				{
+					MonoObject* attributeObject = mono_custom_attrs_get_attr(attr, s_Data->TooltipAttribute);
+					MonoClassField* messageField = mono_class_get_field_from_name(s_Data->TooltipAttribute, "Message");
+					MonoObject* monoStr = mono_field_get_value_object(ScriptEngine::GetDomain(), messageField, attributeObject);
+					tooltip = MonoUtils::MonoStringToUTF8((MonoString*)monoStr);
+				}
+
+				if (mono_custom_attrs_has_attr(attr, s_Data->RangeAttribute))
+				{
+					MonoObject* attributeObject = mono_custom_attrs_get_attr(attr, s_Data->RangeAttribute);
+					MonoClassField* minField = mono_class_get_field_from_name(s_Data->RangeAttribute, "Min");
+					MonoClassField* maxField = mono_class_get_field_from_name(s_Data->RangeAttribute, "Max");
+					mono_field_get_value(attributeObject, minField, &min);
+					mono_field_get_value(attributeObject, maxField, &max);
+				}
+			}
 
 			bool alreadyPresent = m_Fields.find(fieldName) != m_Fields.end();
 			bool sameType = alreadyPresent && m_Fields.at(fieldName)->Type == type;
@@ -526,6 +639,12 @@ namespace ArcEngine
 			{
 				finalFields[fieldName] = CreateRef<Field>(fieldName, type, monoField, m_Handle);
 			}
+
+			finalFields[fieldName]->Serializable = serializable;
+			finalFields[fieldName]->Hidden = hidden;
+			finalFields[fieldName]->Tooltip = tooltip;
+			finalFields[fieldName]->Min = min;
+			finalFields[fieldName]->Max = max;
 		}
 
 		m_Fields = finalFields;
