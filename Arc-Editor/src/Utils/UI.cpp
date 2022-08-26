@@ -68,23 +68,51 @@ namespace ArcEngine
 		ImGui::PopStyleVar();
 	}
 
+
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	/// Strings //////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////
 	bool UI::Property(const char* label, eastl::string& value)
 	{
 		bool modified = false;
 
 		BeginPropertyGrid(label);
 
-		char buffer[256];
-		strcpy(buffer, value.c_str());
-
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
-		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::InputText(s_IDBuffer, buffer, 256))
+		// Small strings
+		if (value.size() < 255)
 		{
-			value = buffer;
-			modified = true;
+			constexpr size_t size = 256;
+			char buffer[size];
+			memcpy(buffer, value.data(), size);
+
+			s_IDBuffer[0] = '#';
+			s_IDBuffer[1] = '#';
+			memset(s_IDBuffer + 2, 0, 14);
+			itoa(s_Counter++, s_IDBuffer + 2, 16);
+			if (ImGui::InputText(s_IDBuffer, buffer, size))
+			{
+				value = buffer;
+				modified = true;
+			}
+		}
+		// Big strings
+		else
+		{
+			const size_t size = value.size() + 256;
+			char* buffer = new char[size];
+			memcpy(buffer, value.data(), size);
+
+			s_IDBuffer[0] = '#';
+			s_IDBuffer[1] = '#';
+			memset(s_IDBuffer + 2, 0, 14);
+			itoa(s_Counter++, s_IDBuffer + 2, 16);
+			if (ImGui::InputText(s_IDBuffer, buffer, size))
+			{
+				value = buffer;
+				modified = true;
+			}
+
+			delete[size] buffer;
 		}
 
 		EndPropertyGrid();
@@ -105,6 +133,162 @@ namespace ArcEngine
 		EndPropertyGrid();
 	}
 
+
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	/// s/byte ///////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	bool UI::Property(const char* label, int8_t& value)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid(label);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_S8, &value))
+			modified = true;
+
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, uint8_t& value)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid(label);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_U8, &value))
+			modified = true;
+
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, int8_t& value, int8_t min, int8_t max)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid(label);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_S8, &value, &min, &max))
+			modified = true;
+
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, uint8_t& value, uint8_t min, uint8_t max)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid(label);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_U8, &value, &min, &max))
+			modified = true;
+
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	/// u/short //////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	bool UI::Property(const char* label, int16_t& value)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid(label);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_S16, &value))
+			modified = true;
+
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, uint16_t& value)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid(label);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_U16, &value))
+			modified = true;
+
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, int16_t& value, int16_t min, int16_t max)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid(label);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_S16, &value, &min, &max))
+			modified = true;
+
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, uint16_t& value, uint16_t min, uint16_t max)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid(label);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_U16, &value, &min, &max))
+			modified = true;
+
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	/// u/int ////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////
 	bool UI::Property(const char* label, int32_t& value)
 	{
 		bool modified = false;
@@ -115,7 +299,7 @@ namespace ArcEngine
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
 		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragInt(s_IDBuffer, &value))
+		if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_S32, &value))
 			modified = true;
 
 		EndPropertyGrid();
@@ -133,7 +317,7 @@ namespace ArcEngine
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
 		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragInt(s_IDBuffer, (int*)&value))
+		if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_U32, &value))
 			modified = true;
 
 		EndPropertyGrid();
@@ -151,7 +335,7 @@ namespace ArcEngine
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
 		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::SliderInt(s_IDBuffer, &value, min, max))
+		if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_S32, &value, &min, &max))
 			modified = true;
 
 		EndPropertyGrid();
@@ -169,7 +353,7 @@ namespace ArcEngine
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
 		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::SliderInt(s_IDBuffer, (int*)&value, min, max))
+		if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_U32, &value, &min, &max))
 			modified = true;
 
 		EndPropertyGrid();
@@ -177,6 +361,86 @@ namespace ArcEngine
 		return modified;
 	}
 
+
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	/// u/long ///////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	bool UI::Property(const char* label, int64_t& value)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid(label);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_S64, &value))
+			modified = true;
+
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, uint64_t& value)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid(label);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_U64, &value))
+			modified = true;
+
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, int64_t& value, int64_t min, int64_t max)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid(label);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_S64, &value, &min, &max))
+			modified = true;
+
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, uint64_t& value, uint64_t min, uint64_t max)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid(label);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_U64, &value, &min, &max))
+			modified = true;
+
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	/// Float ////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////
 	bool UI::Property(const char* label, float& value, float delta)
 	{
 		bool modified = false;
@@ -187,7 +451,7 @@ namespace ArcEngine
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
 		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragFloat(s_IDBuffer, &value, delta))
+		if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_Float, &value, delta))
 			modified = true;
 
 		EndPropertyGrid();
@@ -205,7 +469,7 @@ namespace ArcEngine
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
 		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::SliderFloat(s_IDBuffer, &value, min, max, fmt))
+		if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_Float, &value, &min, &max, fmt))
 			modified = true;
 
 		EndPropertyGrid();
@@ -223,7 +487,7 @@ namespace ArcEngine
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
 		itoa(s_Counter++, s_IDBuffer + 2, 16);
-		if (ImGui::DragFloat(s_IDBuffer, &value, delta, min, max, fmt))
+		if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_Float, &value, delta, &min, &max, fmt))
 			modified = true;
 
 		EndPropertyGrid();
@@ -231,6 +495,68 @@ namespace ArcEngine
 		return modified;
 	}
 
+
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	/// Double ///////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	bool UI::Property(const char* label, double& value, double delta)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid(label);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_Double, &value, delta))
+			modified = true;
+
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, double& value, double min, double max, const char* fmt)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid(label);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_Double, &value, &min, &max, fmt))
+			modified = true;
+
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, double& value, double delta, double min, double max, const char* fmt)
+	{
+		bool modified = false;
+
+		BeginPropertyGrid(label);
+
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		itoa(s_Counter++, s_IDBuffer + 2, 16);
+		if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_Double, &value, delta, &min, &max, fmt))
+			modified = true;
+
+		EndPropertyGrid();
+
+		return modified;
+	}
+
+
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	/// Vec2/3/4 /////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////
 	bool UI::Property(const char* label, glm::vec2& value, float delta)
 	{
 		bool modified = false;
@@ -285,6 +611,10 @@ namespace ArcEngine
 		return modified;
 	}
 
+
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	/// Bool /////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////
 	bool UI::Property(const char* label, bool& flag)
 	{
 		bool modified = false;
@@ -303,6 +633,10 @@ namespace ArcEngine
 		return modified;
 	}
 
+
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	/// Dropdown /////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////
 	bool UI::Property(const char* label, int& value, const char** dropdownStrings, size_t count)
 	{
 		bool modified = false;
@@ -339,6 +673,10 @@ namespace ArcEngine
 		return modified;
 	}
 
+
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	/// Colors ///////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////
 	bool UI::PropertyColor3(const char* label, glm::vec3& color)
 	{
 		bool modified = false;
@@ -393,6 +731,10 @@ namespace ArcEngine
 		return modified;
 	}
 
+
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	/// 2D/3D Textures ///////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////
 	bool UI::Property(const char* label, Ref<TextureCubemap>& texture, uint32_t overrideTextureID)
 	{
 		bool changed = false;
@@ -507,6 +849,10 @@ namespace ArcEngine
 		return changed;
 	}
 
+
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	/// Vec3 with reset button ///////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////
 	void UI::DrawVec3Control(const char* label, glm::vec3& values, float resetValue, float columnWidth)
 	{
 		ImGuiIO& io = ImGui::GetIO();
@@ -586,6 +932,10 @@ namespace ArcEngine
 		EndPropertyGrid();
 	}
 
+
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	/// Buttons //////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////
 	bool UI::IconButton(const char* icon, const char* label, ImVec4 iconColor)
 	{
 		bool clicked = false;

@@ -333,7 +333,7 @@ namespace ArcEngine
 				auto& fields = ScriptEngine::GetFields(entity, className.c_str());
 				for (auto [fieldName, field] : fields)
 				{
-					if (field->Type == Field::FieldType::None)
+					if (field->Type == Field::FieldType::Unknown)
 						continue;
 
 					GCHandle handle = ScriptEngine::GetInstance(entity, className)->GetHandle();
@@ -351,14 +351,49 @@ namespace ArcEngine
 							out << field->GetManagedValue<float>();
 							break;
 						}
+						case Field::FieldType::Double:
+						{
+							out << field->GetManagedValue<double>();
+							break;
+						}
+						case Field::FieldType::SByte:
+						{
+							out << field->GetManagedValue<int8_t>();
+							break;
+						}
+						case Field::FieldType::Byte:
+						{
+							out << field->GetManagedValue<uint8_t>();
+							break;
+						}
+						case Field::FieldType::Short:
+						{
+							out << field->GetManagedValue<int16_t>();
+							break;
+						}
+						case Field::FieldType::UShort:
+						{
+							out << field->GetManagedValue<uint16_t>();
+							break;
+						}
 						case Field::FieldType::Int:
 						{
 							out << field->GetManagedValue<int32_t>();
 							break;
 						}
-						case Field::FieldType::UnsignedInt:
+						case Field::FieldType::UInt:
 						{
 							out << field->GetManagedValue<uint32_t>();
+							break;
+						}
+						case Field::FieldType::Long:
+						{
+							out << field->GetManagedValue<int64_t>();
+							break;
+						}
+						case Field::FieldType::ULong:
+						{
+							out << field->GetManagedValue<uint64_t>();
 							break;
 						}
 						case Field::FieldType::Vec2:
@@ -611,15 +646,57 @@ namespace ArcEngine
 									field->SetValue(&value);
 									break;
 								}
+								case Field::FieldType::Double:
+								{
+									double value = fieldNode.as<double>();
+									field->SetValue(&value);
+									break;
+								}
+								case Field::FieldType::SByte:
+								{
+									int8_t value = fieldNode.as<int8_t>();
+									field->SetValue(&value);
+									break;
+								}
+								case Field::FieldType::Byte:
+								{
+									uint8_t value = fieldNode.as<uint8_t>();
+									field->SetValue(&value);
+									break;
+								}
+								case Field::FieldType::Short:
+								{
+									int16_t value = fieldNode.as<int16_t>();
+									field->SetValue(&value);
+									break;
+								}
+								case Field::FieldType::UShort:
+								{
+									uint16_t value = fieldNode.as<uint16_t>();
+									field->SetValue(&value);
+									break;
+								}
 								case Field::FieldType::Int:
 								{
 									int32_t value = fieldNode.as<int32_t>();
 									field->SetValue(&value);
 									break;
 								}
-								case Field::FieldType::UnsignedInt:
+								case Field::FieldType::UInt:
 								{
 									uint32_t value = fieldNode.as<uint32_t>();
+									field->SetValue(&value);
+									break;
+								}
+								case Field::FieldType::Long:
+								{
+									int64_t value = fieldNode.as<int64_t>();
+									field->SetValue(&value);
+									break;
+								}
+								case Field::FieldType::ULong:
+								{
+									uint64_t value = fieldNode.as<uint64_t>();
 									field->SetValue(&value);
 									break;
 								}

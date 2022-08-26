@@ -11,11 +11,18 @@ namespace ArcEngine
 	{
 		enum class FieldType
 		{
-			None = 0,
+			Unknown = 0,
 			Bool,
 			Float,
+			Double,
+			SByte,
+			Byte,
+			Short,
+			UShort,
 			Int,
-			UnsignedInt,
+			UInt,
+			Long,
+			ULong,
 			String,
 
 			Vec2,
@@ -31,7 +38,7 @@ namespace ArcEngine
 
 		void* GetUnmanagedValue()
 		{
-			return m_Data;
+			return (void*)m_Data.data();
 		}
 
 		template<typename T>
@@ -46,13 +53,13 @@ namespace ArcEngine
 
 		void SetValue(void* value) const
 		{
-			memcpy(m_Data, value, m_Size);
+			memcpy((void*)m_Data.data(), value, m_Data.size());
 			SetManagedValue(value);
 		}
 
 		eastl::string GetManagedValueString();
 		void SetValueString(eastl::string& str);
-		size_t GetSize() { return m_Size; }
+		size_t GetSize() { return m_Data.size(); }
 
 		static FieldType GetFieldType(MonoType* monoType);
 
@@ -66,7 +73,6 @@ namespace ArcEngine
 
 		GCHandle m_Handle;
 		MonoClassField* m_Field;
-		void* m_Data;
-		size_t m_Size;
+		eastl::vector<char> m_Data;
 	};
 }

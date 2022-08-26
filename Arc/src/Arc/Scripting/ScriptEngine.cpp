@@ -506,6 +506,9 @@ namespace ArcEngine
 			MonoType* fieldType = mono_field_get_type(monoField);
 			Field::FieldType type = Field::GetFieldType(fieldType);
 
+			if (type == Field::FieldType::Unknown)
+				continue;
+
 			bool alreadyPresent = m_Fields.find(fieldName) != m_Fields.end();
 			bool sameType = alreadyPresent && m_Fields.at(fieldName)->Type == type;
 

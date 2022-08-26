@@ -176,14 +176,49 @@ namespace ArcEngine
 						DrawScriptField<float>(field);
 						break;
 					}
+					case Field::FieldType::Double:
+					{
+						DrawScriptField<double>(field);
+						break;
+					}
+					case Field::FieldType::SByte:
+					{
+						DrawScriptField<int8_t>(field);
+						break;
+					}
+					case Field::FieldType::Byte:
+					{
+						DrawScriptField<uint8_t>(field);
+						break;
+					}
+					case Field::FieldType::Short:
+					{
+						DrawScriptField<int16_t>(field);
+						break;
+					}
+					case Field::FieldType::UShort:
+					{
+						DrawScriptField<uint16_t>(field);
+						break;
+					}
 					case Field::FieldType::Int:
 					{
 						DrawScriptField<int32_t>(field);
 						break;
 					}
-					case Field::FieldType::UnsignedInt:
+					case Field::FieldType::UInt:
 					{
 						DrawScriptField<uint32_t>(field);
+						break;
+					}
+					case Field::FieldType::Long:
+					{
+						DrawScriptField<int64_t>(field);
+						break;
+					}
+					case Field::FieldType::ULong:
+					{
+						DrawScriptField<uint64_t>(field);
 						break;
 					}
 					case Field::FieldType::Vec2:
