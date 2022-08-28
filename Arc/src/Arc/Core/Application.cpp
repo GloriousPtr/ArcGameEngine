@@ -1,6 +1,7 @@
 #include "arcpch.h"
 #include "Arc/Core/Application.h"
 
+#include "Arc/Audio/AudioEngine.h"
 #include "Arc/Renderer/Renderer.h"
 #include "Arc/Scripting/ScriptEngine.h"
 
@@ -28,6 +29,7 @@ namespace ArcEngine
 		m_Window->SetEventCallBack(ARC_BIND_EVENT_FN(Application::OnEvent));
 
 		Renderer::Init();
+		AudioEngine::Init();
 		ScriptEngine::Init();
 
 		m_LayerStack = new LayerStack();
@@ -42,6 +44,7 @@ namespace ArcEngine
 		delete m_LayerStack;
 
 		ScriptEngine::Shutdown();
+		AudioEngine::Shutdown();
 		Renderer::Shutdown();
 
 		OPTICK_SHUTDOWN();

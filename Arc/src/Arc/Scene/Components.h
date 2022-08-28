@@ -10,6 +10,8 @@
 #include "Arc/Renderer/Mesh.h"
 #include "Arc/Utils/AABB.h"
 #include "Arc/Scripting/Field.h"
+#include "Arc/Audio/AudioSource.h"
+#include "Arc/Audio/AudioListener.h"
 
 #include <glm/glm.hpp>
 
@@ -274,6 +276,27 @@ namespace ArcEngine
 		ScriptComponent(const ScriptComponent&) = default;
 	};
 
+	struct AudioComponent
+	{
+		AudioSourceConfig Config;
+
+		Ref<AudioSource> Source = nullptr;
+
+		AudioComponent() = default;
+		AudioComponent(const AudioComponent&) = default;
+	};
+
+	struct AudioListenerComponent
+	{
+		bool Active = true;
+		AudioListenerConfig Config;
+
+		Ref<AudioListener> Listener;
+
+		AudioListenerComponent() = default;
+		AudioListenerComponent(const AudioListenerComponent&) = default;
+	};
+
 	template<typename... Component>
 	struct ComponentGroup
 	{
@@ -292,6 +315,8 @@ namespace ArcEngine
 		Rigidbody2DComponent,
 		BoxCollider2DComponent,
 		CircleCollider2DComponent,
-		ScriptComponent
+		ScriptComponent,
+		AudioComponent,
+		AudioListenerComponent
 	>;
 }

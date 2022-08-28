@@ -41,6 +41,7 @@ IncludeDir["box2d"] = "%{wks.location}/Arc/vendor/box2d/include"
 IncludeDir["mono"] = "%{wks.location}/Arc/vendor/mono/include"
 IncludeDir["EABase"] = "%{wks.location}/Arc/vendor/EABase/include/Common"
 IncludeDir["EASTL"] = "%{wks.location}/Arc/vendor/EASTL/include"
+IncludeDir["miniaudio"] = "%{wks.location}/Arc/vendor/miniaudio"
 
 LibDir = {}
 filter "configurations:Debug"

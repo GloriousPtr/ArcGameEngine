@@ -346,6 +346,8 @@ namespace ArcEngine
 				DrawAddComponent<BoxCollider2DComponent>(entity, ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider 2D");
 				DrawAddComponent<CircleCollider2DComponent>(entity, ICON_MDI_CIRCLE_OUTLINE " Circle Collider 2D");
 				DrawAddComponent<ScriptComponent>(entity, ICON_MDI_POUND_BOX " Script");
+				DrawAddComponent<AudioComponent>(entity, ICON_MDI_SPEAKER " Audio");
+				DrawAddComponent<AudioListenerComponent>(entity, ICON_MDI_CIRCLE " Audio Listener");
 
 				ImGui::EndPopup();
 			}
@@ -665,6 +667,94 @@ namespace ArcEngine
 			}
 			
 			DrawFields(entity, component);
+		});
+
+		DrawComponent<AudioComponent>(ICON_MDI_SPEAKER " Audio", entity, [&entity](AudioComponent& component)
+		{
+			auto& config = component.Config;
+
+			const char* filepath = component.Source ? component.Source->GetPath() : "Drop an audio file";
+			const float x = ImGui::GetContentRegionAvail().x;
+			const float y = ImGui::GetFrameHeight();
+			ImGui::Button(filepath, { x, y });
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+				{
+					const char* path = (const char*)payload->Data;
+					eastl::string ext = StringUtils::GetExtension(path);
+					if (ext == "mp3" || ext == "wav")
+						component.Source = CreateRef<AudioSource>(path);
+				}
+				ImGui::EndDragDropTarget();
+			}
+			ImGui::Spacing();
+			
+			UI::BeginProperties();
+			UI::Property("Volume Multiplier", config.VolumeMultiplier);
+			UI::Property("Pitch Multiplier", config.PitchMultiplier);
+			UI::Property("Play On Awake", config.PlayOnAwake);
+			UI::Property("Looping", config.Looping);
+			UI::EndProperties();
+
+			ImGui::Spacing();
+			if (UI::IconButton(ICON_MDI_PLAY, "Play", { 1.0f, 1.0f, 1.0f, 1.0f }))
+			{
+				if (component.Source)
+					component.Source->Play();
+			}
+			ImGui::SameLine();
+			if (UI::IconButton(ICON_MDI_PAUSE, "Pause", { 1.0f, 1.0f, 1.0f, 1.0f }))
+			{
+				if (component.Source)
+					component.Source->Pause();
+			}
+			ImGui::SameLine();
+			if (UI::IconButton(ICON_MDI_STOP, "Stop", { 1.0f, 1.0f, 1.0f, 1.0f }))
+			{
+				if (component.Source)
+					component.Source->Stop();
+			}
+			ImGui::Spacing();
+
+			UI::BeginProperties();
+			UI::Property("Spatialization", config.Spatialization);
+
+			if (config.Spatialization)
+			{
+				const char* attenuationTypeStrings[] = { "None", "Inverse", "Linear", "Exponential" };
+				int attenuationType = (int)config.AttenuationModel;
+				if (UI::Property("Attenuation Model", attenuationType, attenuationTypeStrings, 4))
+					config.AttenuationModel = (AttenuationModelType)attenuationType;
+				UI::Property("Roll Off", config.RollOff);
+				UI::Property("Min Gain", config.MinGain);
+				UI::Property("Max Gain", config.MaxGain);
+				UI::Property("Min Distance", config.MinDistance);
+				UI::Property("Max Distance", config.MaxDistance);
+				UI::Property("Cone Inner Angle", config.ConeInnerAngle);
+				UI::Property("Cone Outer Angle", config.ConeOuterAngle);
+				UI::Property("Cone Outer Gain", config.ConeOuterGain);
+				UI::Property("Doppler Factor", config.DopplerFactor);
+			}
+			UI::EndProperties();
+
+			if (component.Source)
+			{
+				const glm::mat4 inverted = glm::inverse(entity.GetWorldTransform());
+				const glm::vec3 forward = normalize(glm::vec3(inverted[2]));
+				component.Source->SetConfig(config, entity.GetTransform().Translation, forward);
+			}
+		});
+
+		DrawComponent<AudioListenerComponent>(ICON_MDI_CIRCLE " Audio Listener", entity, [](AudioListenerComponent& component)
+		{
+			auto& config = component.Config;
+			UI::BeginProperties();
+			UI::Property("Active", component.Active);
+			UI::Property("Cone Inner Angle", config.ConeInnerAngle);
+			UI::Property("Cone Outer Angle", config.ConeOuterAngle);
+			UI::Property("Cone Outer Gain", config.ConeOuterGain);
+			UI::EndProperties();
 		});
 	}
 

@@ -219,9 +219,50 @@ namespace ArcEngine
 			}
 		}
 
+
+		/////////////////////////////////////////////////////////////////////
+		// Sound ////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////
+		{
+			ARC_PROFILE_SCOPE("Sound");
+
+			bool foundActive = false;
+			auto listenerView = m_Registry.view<TransformComponent, AudioListenerComponent>();
+			for (auto e : listenerView)
+			{
+				auto [tc, ac] = listenerView.get<TransformComponent, AudioListenerComponent>(e);
+				ac.Listener = CreateRef<AudioListener>();
+				if (ac.Active && !foundActive)
+				{
+					foundActive = true;
+					Entity entity = { e, this };
+					const glm::mat4 inverted = glm::inverse(entity.GetWorldTransform());
+					const glm::vec3 forward = normalize(glm::vec3(inverted[2]));
+					ac.Listener->SetConfig(ac.Config, tc.Translation, forward);
+				}
+			}
+
+			auto sourceView = m_Registry.view<TransformComponent, AudioComponent>();
+			for (auto e : sourceView)
+			{
+				auto [tc, ac] = sourceView.get<TransformComponent, AudioComponent>(e);
+				if (ac.Source)
+				{
+					Entity entity = { e, this };
+					const glm::mat4 inverted = glm::inverse(entity.GetWorldTransform());
+					const glm::vec3 forward = normalize(glm::vec3(inverted[2]));
+					ac.Source->SetConfig(ac.Config, tc.Translation, forward);
+					if (ac.Config.PlayOnAwake)
+						ac.Source->Play();
+				}
+			}
+		}
+
+		/////////////////////////////////////////////////////////////////////
+		// Scripting ////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////
 		ScriptEngine::SetScene(this);
 		ScriptEngine::OnRuntimeBegin();
-
 		auto scriptView = m_Registry.view<IDComponent, TagComponent, ScriptComponent>();
 		for (auto e : scriptView)
 		{
@@ -251,9 +292,23 @@ namespace ArcEngine
 
 			script.Classes.clear();
 		}
-
 		ScriptEngine::OnRuntimeEnd();
 		ScriptEngine::SetScene(nullptr);
+
+		/////////////////////////////////////////////////////////////////////
+		// Sound ////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////
+		{
+			ARC_PROFILE_SCOPE("Sound");
+
+			auto view = m_Registry.view<TransformComponent, AudioComponent>();
+			for (auto e : view)
+			{
+				auto [tc, ac] = view.get<TransformComponent, AudioComponent>(e);
+				if (ac.Source)
+					ac.Source->Stop();
+			}
+		}
 
 		delete m_PhysicsWorld2D;
 		m_PhysicsWorld2D = nullptr;
@@ -382,6 +437,40 @@ namespace ArcEngine
 				transform.Translation.x = position.x;
 				transform.Translation.y = position.y;
 				transform.Rotation.z = rb->GetAngle();
+			}
+		}
+
+		/////////////////////////////////////////////////////////////////////
+		// Sound ////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////
+		{
+			ARC_PROFILE_SCOPE("Sound");
+
+			auto listenerView = m_Registry.view<TransformComponent, AudioListenerComponent>();
+			for (auto e : listenerView)
+			{
+				auto [tc, ac] = listenerView.get<TransformComponent, AudioListenerComponent>(e);
+				if (ac.Active)
+				{
+					Entity entity = { e, this };
+					const glm::mat4 inverted = glm::inverse(entity.GetWorldTransform());
+					const glm::vec3 forward = normalize(glm::vec3(inverted[2]));
+					ac.Listener->SetConfig(ac.Config, tc.Translation, -forward);
+					break;
+				}
+			}
+
+			auto sourceView = m_Registry.view<TransformComponent, AudioComponent>();
+			for (auto e : sourceView)
+			{
+				auto [tc, ac] = sourceView.get<TransformComponent, AudioComponent>(e);
+				if (ac.Source)
+				{
+					Entity entity = { e, this };
+					const glm::mat4 inverted = glm::inverse(entity.GetWorldTransform());
+					const glm::vec3 forward = normalize(glm::vec3(inverted[2]));
+					ac.Source->SetConfig(ac.Config, tc.Translation, -forward);
+				}
 			}
 		}
 
@@ -584,6 +673,16 @@ namespace ArcEngine
 
 	template<>
 	void Scene::OnComponentAdded<ScriptComponent>(Entity entity, ScriptComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<AudioComponent>(Entity entity, AudioComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<AudioListenerComponent>(Entity entity, AudioListenerComponent& component)
 	{
 	}
 }

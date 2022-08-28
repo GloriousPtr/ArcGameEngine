@@ -49,6 +49,7 @@ project "Arc"
 		"%{IncludeDir.mono}",
 		"%{IncludeDir.EABase}",
 		"%{IncludeDir.EASTL}",
+		"%{IncludeDir.miniaudio}",
 	}
 
 	links
