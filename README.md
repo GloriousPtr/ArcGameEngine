@@ -17,7 +17,6 @@ I develop it in my spare time as a personal project, so expect frequent periods 
 
 ## Set up
 
-- Make sure to install [Mono](https://www.mono-project.com/download/stable/).
 - Clone Arc Game Engine using git. Make sure you do a ```--recursive``` clone!
 ```
 git clone --recursive https://github.com/MohitSethi99/ArcEngine.git
@@ -35,36 +34,43 @@ Right now, Arc Game Engine is very bare-bones. Its most remarkable features are:
 | **ECS support**       | Entity Component System approach through *entt*.                         | Done ✔️ |
 | **2D Renderer**       | 2D batch renderer supporting OpenGL.                                     | Done ✔️ |
 | **3D Renderer**       | Basic 3D renderer with lighting, IBL and PBR workflow supporting OpenGL. | Done ✔️ |
-| **ImGui support**     | Basic game editor and in-game debug UI using ImGui.                      | Done ✔️ |
+| **ImGui support**     | Basic game editor and in-game debug UI using *dear imgui*.               | Done ✔️ |
 | **Shadow Support**    | Soft and Hard shadow support in OpenGL 3D Renderer.                      | Done ✔️ |
-| **2D Physics**        | Basic 2D Physics using Box2D                              							 | Done ✔️ |
+| **2D Physics**        | Basic 2D Physics using *Box2D* with Rigidbody, Box and Circle Collider.	 | Done ✔️ |
+| **Scripting**         | Basic scripting in C# using *mono*.                                      | Done ✔️ |
+| **Audio**             | Basic Sound API with spatialization through *miniaudio*.                 | Done ✔️ |
 
 ## Planned Features
 
-| Feature               | Description                                               | Status   |
-| -------               | -----------                                               | ------   |
-| **Scripting**         | Basic scripting in C# using mono.                         | WIP 💻  |
-| **3D Physics**        | Nvidia's Physx engine support for 3D physics.             | TODO 📋 |
-| **Asset manager**     | Basic asset handling API.                                 | TODO 📋 |
-| **Audio**             | Sound API.                                                | TODO 📋 |
-| **Font**              | Extend the Renderer capabilities so it can draw text.     | TODO 📋 |
-| **Direct3D**          | Extend the Renderer to support D3D12.                     | TODO 📋 |
+| Feature                | Description                                               | Status   |
+| -------                | -----------                                               | ------   |
+| **C# API**             | C# API for all the components.                            | WIP 💻  |
+| **Extended 2D Physics**| Extend 2D physics to support more collider types and API. | WIP 💻  |
+| **3D Physics**         | Jolt Physics support for 3D physics.                      | TODO 📋 |
+| **Font**               | Extend the Renderer capabilities so it can draw text.     | TODO 📋 |
+| **Advanced Audio**     | Advanced Sound API with effects.                          | TODO 📋 |
+| **Asset manager**      | Basic asset handling API.                                 | TODO 📋 |
+| **Direct3D**           | Extend the Renderer to support D3D12.                     | TODO 📋 |
 
 ## Dependencies
 
 Arc Game Engine has the following dependencies:
 
-  - [ImGui](https://github.com/ocornut/imgui) for GUI rendering.
-  - [GLFW](https://github.com/glfw/glfw) for OpenGL, OpenGL ES, window creation 
-  and input handling. More info at its [website](https://www.glfw.org/).
-  - [Glad](https://glad.dav1d.de) for OpenGL rendering.
-  - [glm](https://github.com/g-truc//glm) as math(s) library.
-  - [entt](https://github.com/skypjack/entt) for ECS management.
-  - [spdlog](https://github.com/gabime/spdlog) for logging.
-  - [stb_image.h](https://github.com/nothings/stb) for loading textures.
   - [assimp](https://github.com/assimp/assimp) for loading meshes.
   - [box2d](https://github.com/erincatto/box2d.git) for 2D physics.
+  - [dear imgui](https://github.com/ocornut/imgui) for GUI rendering.
+  - [EABase](https://github.com/electronicarts/EABase) dependency for EASTL.
+  - [EASTL](https://github.com/electronicarts/EASTL) replacement for stl.
+  - [entt](https://github.com/skypjack/entt) for ECS management.
+  - [Glad](https://glad.dav1d.de) for OpenGL rendering.
+  - [GLFW](https://github.com/glfw/glfw) for OpenGL, OpenGL ES, window creation and input handling. More info at its [website](https://www.glfw.org/).
+  - [glm](https://github.com/g-truc//glm) as math(s) library.
   - [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo) for in editor transformation gizmos.
+  - [miniaudio](https://github.com/mackron/miniaudio) for audio.
+  - [mono](https://github.com/mono/mono) for C# scripting.
+  - [optick](https://github.com/bombomby/optick) for profiling.
+  - [spdlog](https://github.com/gabime/spdlog) for logging.
+  - [stb_image.h](https://github.com/nothings/stb) for loading textures.
   - [yaml-cpp](https://github.com/jbeder/yaml-cpp) for scene serialization in YAML.
 
 Projects are generated with [Premake 5](https://github.com/premake/premake-core/releases).
