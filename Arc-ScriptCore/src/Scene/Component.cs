@@ -1,8 +1,12 @@
-﻿namespace ArcEngine
+﻿using System.Runtime.CompilerServices;
+
+namespace ArcEngine
 {
 	public interface IComponent
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal ulong GetEntityID();
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void SetEntity(Entity e);
 	}
 
@@ -10,8 +14,10 @@
 	{
 		internal Entity entity;
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		ulong IComponent.GetEntityID() => entity.ID;
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		void IComponent.SetEntity(Entity e) => entity = e;
 	}
 

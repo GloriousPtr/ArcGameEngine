@@ -61,7 +61,7 @@ namespace ArcEngine
 		case Field::FieldType::UInt:			return sizeof(uint32_t);
 		case Field::FieldType::Long:			return sizeof(int64_t);
 		case Field::FieldType::ULong:			return sizeof(uint64_t);
-		case Field::FieldType::String:			return 16;
+		case Field::FieldType::String:			return 256;
 		case Field::FieldType::Vec2:			return sizeof(glm::vec2);
 		case Field::FieldType::Vec3:			return sizeof(glm::vec3);
 		case Field::FieldType::Vec4:			return sizeof(glm::vec4);
@@ -119,11 +119,12 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		size_t size = str.size();
+		const size_t size = str.size();
 		if (m_Data.capacity() <= size)
 		{
-			ARC_CORE_TRACE("Increasing size to {}", size);
-			m_Data.reserve(size + 256);
+			const size_t newSize = size + 256;
+			ARC_CORE_TRACE("Increasing size to {}", newSize);
+			m_Data.resize(newSize);
 		}
 
 		memcpy(m_Data.data(), str.data(), size);

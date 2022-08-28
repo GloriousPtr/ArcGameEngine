@@ -41,24 +41,19 @@ namespace ArcEngine
 		static bool Property(const char* label, uint64_t& value, uint64_t min, uint64_t max, const char* tooltip = nullptr);
 
 		// Float
-		static bool Property(const char* label, float& value, const char* tooltip = nullptr);
-		static bool Property(const char* label, float& value, float delta, const char* tooltip = nullptr);
-		static bool Property(const char* label, float& value, float min, float max, const char* fmt = "%.3f", const char* tooltip = nullptr);
-		static bool Property(const char* label, float& value, float delta, float min, float max, const char* fmt = "%.3f", const char* tooltip = nullptr);
+		static bool Property(const char* label, float& value, const char* tooltip = nullptr, float delta = 0.1f);
+		static bool Property(const char* label, float& value, float min, float max, const char* tooltip = nullptr, const char* fmt = "%.3f");
+		static bool Property(const char* label, float& value, float delta, float min, float max, const char* tooltip = nullptr, const char* fmt = "%.3f");
 
 		// Double
-		static bool Property(const char* label, double& value, const char* tooltip = nullptr);
-		static bool Property(const char* label, double& value, float delta, const char* tooltip = nullptr);
-		static bool Property(const char* label, double& value, float min, float max, const char* fmt = "%.6f", const char* tooltip = nullptr);
-		static bool Property(const char* label, double& value, float delta, float min, float max, const char* fmt = "%.6f", const char* tooltip = nullptr);
+		static bool Property(const char* label, double& value, const char* tooltip = nullptr, float delta = 0.1f);
+		static bool Property(const char* label, double& value, float min, float max, const char* tooltip = nullptr, const char* fmt = "%.6f");
+		static bool Property(const char* label, double& value, float delta, float min, float max, const char* tooltip = nullptr, const char* fmt = "%.6f");
 
 		// Vec2/3/4
-		static bool Property(const char* label, glm::vec2& value, const char* tooltip = nullptr);
-		static bool Property(const char* label, glm::vec3& value, const char* tooltip = nullptr);
-		static bool Property(const char* label, glm::vec4& value, const char* tooltip = nullptr);
-		static bool Property(const char* label, glm::vec2& value, float delta, const char* tooltip = nullptr);
-		static bool Property(const char* label, glm::vec3& value, float delta, const char* tooltip = nullptr);
-		static bool Property(const char* label, glm::vec4& value, float delta, const char* tooltip = nullptr);
+		static bool Property(const char* label, glm::vec2& value, const char* tooltip = nullptr, float delta = 0.1f);
+		static bool Property(const char* label, glm::vec3& value, const char* tooltip = nullptr, float delta = 0.1f);
+		static bool Property(const char* label, glm::vec4& value, const char* tooltip = nullptr, float delta = 0.1f);
 
 		// Bool
 		static bool Property(const char* label, bool& flag, const char* tooltip = nullptr);
@@ -75,12 +70,15 @@ namespace ArcEngine
 		static bool Property(const char* label, Ref<TextureCubemap>& texture, uint32_t overrideTextureID = 0, const char* tooltip = nullptr);
 		static bool Property(const char* label, Ref<Texture2D>& texture, uint32_t overrideTextureID = 0, const char* tooltip = nullptr);
 
+		// Field
+		static void DrawField(Field& field);
+		
 		// Vec3 with reset button
-		static void DrawVec3Control(const char* label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f, const char* tooltip = nullptr);
+		static void DrawVec3Control(const char* label, glm::vec3& values, const char* tooltip = nullptr, float resetValue = 0.0f, float columnWidth = 100.0f);
 
 		// Buttons
 		static bool IconButton(const char* icon, const char* label, ImVec4 iconColor = { 0.537f, 0.753f, 0.286f, 1.0f });
-		static bool UI::ToggleButton(const char* label, bool state, ImVec2 size = { 0, 0 }, float alpha = 1.0f, float pressedAlpha = 1.0f, ImGuiButtonFlags buttonFlags = ImGuiButtonFlags_None);
+		static bool ToggleButton(const char* label, bool state, ImVec2 size = { 0, 0 }, float alpha = 1.0f, float pressedAlpha = 1.0f, ImGuiButtonFlags buttonFlags = ImGuiButtonFlags_None);
 
 	private:
 		static void PushID();

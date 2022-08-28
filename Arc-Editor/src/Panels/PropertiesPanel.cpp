@@ -103,33 +103,6 @@ namespace ArcEngine
 		}
 	}
 
-	template<typename T>
-	static void DrawScriptFieldScalar(Ref<Field>& field)
-	{
-		const char* tooltip = field->Tooltip.empty() ? nullptr : field->Tooltip.c_str();
-		T value = field->GetManagedValue<T>();
-		if (field->Min < field->Max)
-		{
-			if (UI::Property(field->Name.c_str(), value, field->Min, field->Max, tooltip))
-				field->SetValue(&value);
-		}
-		else
-		{
-			if (UI::Property(field->Name.c_str(), value, tooltip))
-				field->SetValue(&value);
-		}
-	}
-
-	template<typename T>
-	static void DrawScriptField(Ref<Field>& field)
-	{
-		const char* tooltip = field->Tooltip.empty() ? nullptr : field->Tooltip.c_str();
-		
-		T value = field->GetManagedValue<T>();
-		if (UI::Property(field->Name.c_str(), value, tooltip))
-			field->SetValue(&value);
-	}
-
 	static void DrawFields(Entity entity, ScriptComponent& component)
 	{
 		static const ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen
@@ -186,97 +159,7 @@ namespace ArcEngine
 					if (field->Hidden)
 						continue;
 
-					switch (field->Type)
-					{
-					case Field::FieldType::Bool:
-					{
-						DrawScriptField<bool>(field);
-						break;
-					}
-					case Field::FieldType::Float:
-					{
-						DrawScriptFieldScalar<float>(field);
-						break;
-					}
-					case Field::FieldType::Double:
-					{
-						DrawScriptFieldScalar<double>(field);
-						break;
-					}
-					case Field::FieldType::SByte:
-					{
-						DrawScriptFieldScalar<int8_t>(field);
-						break;
-					}
-					case Field::FieldType::Byte:
-					{
-						DrawScriptFieldScalar<uint8_t>(field);
-						break;
-					}
-					case Field::FieldType::Short:
-					{
-						DrawScriptFieldScalar<int16_t>(field);
-						break;
-					}
-					case Field::FieldType::UShort:
-					{
-						DrawScriptFieldScalar<uint16_t>(field);
-						break;
-					}
-					case Field::FieldType::Int:
-					{
-						DrawScriptFieldScalar<int32_t>(field);
-						break;
-					}
-					case Field::FieldType::UInt:
-					{
-						DrawScriptFieldScalar<uint32_t>(field);
-						break;
-					}
-					case Field::FieldType::Long:
-					{
-						DrawScriptFieldScalar<int64_t>(field);
-						break;
-					}
-					case Field::FieldType::ULong:
-					{
-						DrawScriptFieldScalar<uint64_t>(field);
-						break;
-					}
-					case Field::FieldType::Vec2:
-					{
-						DrawScriptField<glm::vec2>(field);
-						break;
-					}
-					case Field::FieldType::Vec3:
-					{
-						DrawScriptField<glm::vec3>(field);
-						break;
-					}
-					case Field::FieldType::Vec4:
-					{
-						DrawScriptField<glm::vec4>(field);
-						break;
-					}
-					case Field::FieldType::Color:
-					{
-						const char* tooltip = field->Tooltip.empty() ? nullptr : field->Tooltip.c_str();
-						glm::vec4 value = field->GetManagedValue<glm::vec4>();
-						if (UI::PropertyColor4(field->Name.c_str(), value, tooltip))
-							field->SetValue(&value);
-						break;
-					}
-					case Field::FieldType::String:
-					{
-						const char* tooltip = field->Tooltip.empty() ? nullptr : field->Tooltip.c_str();
-						eastl::string& value = field->GetManagedValueString();
-						if (UI::Property(field->Name.c_str(), value, tooltip))
-						{
-							field->SetValueString(value);
-						}
-						break;
-					}
-					}
+					UI::DrawField(*field);
 				}
 				UI::EndProperties();
 
@@ -312,9 +195,7 @@ namespace ArcEngine
 					uint32_t tex = material->GetTexture(slot) ? material->GetTexture(slot)->GetRendererID() : 0;
 					Ref<Texture2D> tmp = material->GetTexture(slot);
 					if (UI::Property(displayName, tmp, tex))
-					{
 						material->SetTexture(slot, tmp);
-					}
 					break;
 				}
 				case MaterialPropertyType::Bool:
@@ -494,7 +375,7 @@ namespace ArcEngine
 			UI::DrawVec3Control("Rotation", rotation);
 			component.Rotation = glm::radians(rotation);
 
-			UI::DrawVec3Control("Scale", component.Scale, 1.0f);
+			UI::DrawVec3Control("Scale", component.Scale, nullptr, 1.0f);
 
 			UI::EndProperties();
 		}, false);
@@ -515,30 +396,30 @@ namespace ArcEngine
 			if(camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 			{
 				float verticalFov = glm::degrees(camera.GetPerspectiveVerticalFOV());
-				if(UI::Property("Vertical FOV", verticalFov, 0.1f))
+				if(UI::Property("Vertical FOV", verticalFov))
 					camera.SetPerspectiveVerticalFOV(glm::radians(verticalFov));
 
 				float perspectiveNear = camera.GetPerspectiveNearClip();
-				if(UI::Property("Near Clip", perspectiveNear, 0.1f))
+				if(UI::Property("Near Clip", perspectiveNear))
 					camera.SetPerspectiveNearClip(perspectiveNear);
 				
 				float perspectiveFar = camera.GetPerspectiveFarClip();
-				if(UI::Property("Far Clip", perspectiveFar, 0.1f))
+				if(UI::Property("Far Clip", perspectiveFar))
 					camera.SetPerspectiveFarClip(perspectiveFar);
 			}
 
 			if(camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
 			{
 				float orthoSize = camera.GetOrthographicSize();
-				if(UI::Property("Size", orthoSize, 0.1f))
+				if(UI::Property("Size", orthoSize))
 					camera.SetOrthographicSize(orthoSize);
 
 				float orthoNear = camera.GetOrthographicNearClip();
-				if(UI::Property("Near Clip", orthoNear, 0.1f))
+				if(UI::Property("Near Clip", orthoNear))
 					camera.SetOrthographicNearClip(orthoNear);
 				
 				float orthoFar = camera.GetOrthographicFarClip();
-				if(UI::Property("Far Clip", orthoFar, 0.1f))
+				if(UI::Property("Far Clip", orthoFar))
 					camera.SetOrthographicFarClip(orthoFar);
 
 				UI::Property("Fixed Aspect Ratio", component.FixedAspectRatio);
@@ -551,7 +432,7 @@ namespace ArcEngine
 		{
 			UI::BeginProperties();
 			UI::PropertyColor4("Color", component.Color);
-			UI::Property("Tiling Factor", component.TilingFactor, 0.1f);
+			UI::Property("Tiling Factor", component.TilingFactor);
 			UI::Property("Texture", component.Texture);
 			UI::EndProperties();
 		});
@@ -596,7 +477,9 @@ namespace ArcEngine
 			if (component.MeshGeometry)
 			{
 				UI::BeginProperties();
+
 				UI::Property("Submesh Index", component.SubmeshIndex, 0, component.MeshGeometry->GetSubmeshCount() - 1);
+				
 				const char* cullModeTypeStrings[] = { "Front", "Back", "Double Sided" };
 				int cullMode = (int) component.CullMode;
 				if (UI::Property("Cull Mode", cullMode, cullModeTypeStrings, 3))
@@ -663,14 +546,13 @@ namespace ArcEngine
 			else if (component.Type == LightComponent::LightType::Spot)
 			{
 				UI::Property("Range", component.Range);
+				UI::Property("Outer Cut-Off Angle", component.OuterCutOffAngle, 1.0f, 90.0f);
+				UI::Property("Cut-Off Angle", component.CutOffAngle, 1.0f, 90.0f);
+
 				if (component.Range < 0.1f)
 					component.Range = 0.1f;
-
-				UI::Property("Outer Cut-Off Angle", component.OuterCutOffAngle, 1.0f, 90.0f);
 				if (component.OuterCutOffAngle < component.CutOffAngle)
 					component.CutOffAngle = component.OuterCutOffAngle;
-
-				UI::Property("Cut-Off Angle", component.CutOffAngle, 1.0f, 90.0f);
 				if (component.CutOffAngle > component.OuterCutOffAngle)
 					component.OuterCutOffAngle = component.CutOffAngle;
 			}
@@ -678,6 +560,7 @@ namespace ArcEngine
 			{
 				const char* shadowQualityTypeStrings[] = { "Hard", "Soft", "Ultra Soft" };
 				int shadowQualityType = (int) component.ShadowQuality;
+
 				if (UI::Property("Shadow Quality Type", shadowQualityType, shadowQualityTypeStrings, 3))
 					component.ShadowQuality = (LightComponent::ShadowQualityType) shadowQualityType;
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace ArcEngine
 {
@@ -16,6 +17,7 @@ namespace ArcEngine
 	{
 		public string Message;
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Tooltip(string message)
 		{
 			Message = message;
@@ -28,12 +30,14 @@ namespace ArcEngine
 		public float Min;
 		public float Max;
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Range(float min, float max)
 		{
 			Min = min;
 			Max = max;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Range(int min, int max)
 		{
 			Min = min;

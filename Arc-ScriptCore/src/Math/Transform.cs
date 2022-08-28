@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace ArcEngine
 {
@@ -9,11 +10,16 @@ namespace ArcEngine
 		public Vector3 Rotation;
 		public Vector3 Scale;
 
+		#region Constructor
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Transform(Vector3 position, Vector3 rotation, Vector3 scale)
 		{
 			Translation = position;
 			Rotation = rotation;
 			Scale = scale;
 		}
+
+		#endregion
 	}
 }

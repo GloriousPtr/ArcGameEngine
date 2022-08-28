@@ -1,4 +1,5 @@
 using ArcEngine;
+using System.Collections.Generic;
 
 namespace Sandbox
 {
@@ -52,13 +53,13 @@ namespace Sandbox
 			float speed = Speed * timestep;
 
 			if (Input.IsKeyPressed(KeyCodes.W))
-				transform.Translation.Y += speed;
+				transform.Translation.y += speed;
 			else if (Input.IsKeyPressed(KeyCodes.S))
-				transform.Translation.Y -= speed;
+				transform.Translation.y -= speed;
 			if (Input.IsKeyPressed(KeyCodes.D))
-				transform.Translation.X += speed;
+				transform.Translation.x += speed;
 			else if (Input.IsKeyPressed(KeyCodes.A))
-				transform.Translation.X -= speed;
+				transform.Translation.x -= speed;
 
 			m_TransformComponent.Transform = transform;
 

@@ -252,6 +252,9 @@ namespace ArcEngine
 			eastl::string fullname = fmt::format("{}.{}", nameSpace, name).c_str();
 
 			MonoClass* monoClass = mono_class_from_name(image, nameSpace, name);
+			if (!monoClass)
+				continue;
+
 			MonoClass* parentClass = mono_class_get_parent(monoClass);
 			
 			if (parentClass)
