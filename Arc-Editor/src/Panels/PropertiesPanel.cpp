@@ -449,7 +449,7 @@ namespace ArcEngine
 					return;
 				}
 			}
-			
+			ImGui::SameLine();
 			if(ImGui::Button(component.MeshGeometry ? component.MeshGeometry->GetName() : "null"))
 			{
 				eastl::string filepath = FileDialogs::OpenFile("Mesh (*.assbin)\0*.assbin\0(*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
