@@ -35,6 +35,7 @@ namespace ArcEngine
 		MonoClass* SerializeFieldAttribute = nullptr;
 		MonoClass* HideInPropertiesAttribute = nullptr;
 		MonoClass* ShowInPropertiesAttribute = nullptr;
+		MonoClass* HeaderAttribute = nullptr;
 		MonoClass* TooltipAttribute = nullptr;
 		MonoClass* RangeAttribute = nullptr;
 
@@ -105,6 +106,7 @@ namespace ArcEngine
 		s_Data->SerializeFieldAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "SerializeField");
 		s_Data->HideInPropertiesAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "HideInProperties");
 		s_Data->ShowInPropertiesAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "ShowInProperties");
+		s_Data->HeaderAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "Header");
 		s_Data->TooltipAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "Tooltip");
 		s_Data->RangeAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "Range");
 
@@ -590,6 +592,7 @@ namespace ArcEngine
 			uint8_t accessibilityFlag = GetFieldAccessibility(monoField);
 			bool serializable = accessibilityFlag & (uint8_t)Accessibility::Public;
 			bool hidden = !serializable;
+			eastl::string header = "";
 			eastl::string tooltip = "";
 			float min = 0;
 			float max = 0;
@@ -606,6 +609,14 @@ namespace ArcEngine
 					hidden = true;
 				else if (mono_custom_attrs_has_attr(attr, s_Data->ShowInPropertiesAttribute))
 					hidden = false;
+
+				if (mono_custom_attrs_has_attr(attr, s_Data->HeaderAttribute))
+				{
+					MonoObject* attributeObject = mono_custom_attrs_get_attr(attr, s_Data->HeaderAttribute);
+					MonoClassField* messageField = mono_class_get_field_from_name(s_Data->HeaderAttribute, "Message");
+					MonoObject* monoStr = mono_field_get_value_object(ScriptEngine::GetDomain(), messageField, attributeObject);
+					header = MonoUtils::MonoStringToUTF8((MonoString*)monoStr);
+				}
 
 				if (mono_custom_attrs_has_attr(attr, s_Data->TooltipAttribute))
 				{
@@ -645,6 +656,7 @@ namespace ArcEngine
 
 			finalFields[fieldName]->Serializable = serializable;
 			finalFields[fieldName]->Hidden = hidden;
+			finalFields[fieldName]->Header = header;
 			finalFields[fieldName]->Tooltip = tooltip;
 			finalFields[fieldName]->Min = min;
 			finalFields[fieldName]->Max = max;

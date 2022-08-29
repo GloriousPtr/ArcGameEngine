@@ -159,6 +159,17 @@ namespace ArcEngine
 					if (field->Hidden)
 						continue;
 
+					const char* header = field->Header.empty() ? nullptr : field->Header.c_str();
+					if (header)
+					{
+						UI::EndProperties();
+						ImGui::Spacing();
+						ImGui::Spacing();
+						ImGui::TextUnformatted(header);
+						ImGui::Spacing();
+						UI::BeginProperties();
+					}
+
 					UI::DrawField(*field);
 				}
 				UI::EndProperties();

@@ -35,6 +35,7 @@ namespace ArcEngine
 		FieldType Type;
 		bool Serializable;
 		bool Hidden;
+		eastl::string Header;
 		eastl::string Tooltip;
 		float Min = 0.0f;
 		float Max = 0.0f;

@@ -13,6 +13,18 @@ namespace ArcEngine
 	public class ShowInProperties : Attribute { }
 
 	[AttributeUsage(AttributeTargets.Field)]
+	public class Header : Attribute
+	{
+		public string Message;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public Header(string message)
+		{
+			Message = message;
+		}
+	}
+
+	[AttributeUsage(AttributeTargets.Field)]
 	public class Tooltip : Attribute
 	{
 		public string Message;
