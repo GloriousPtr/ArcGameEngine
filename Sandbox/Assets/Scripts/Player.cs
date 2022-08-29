@@ -1,56 +1,43 @@
 using ArcEngine;
-using System.Collections.Generic;
 
 namespace Sandbox
 {
 	public class Player : Entity
 	{
-		[Range(3.0f, 12.0f)] public float Speed = 5.0f;
-		[Range(5, 8)] public int SpeedI = 5;
-		public Color PlayerColor = Color.Magenta;
-
-		[HideInProperties] public float PublicField = 5.0f;
-
-		[Tooltip("Tooltip for Private Field")] [SerializeField] private float PrivateField = 5.0f;
-		[Tooltip("Tooltip for Internal Field")] [ShowInProperties] internal float InternalField = 5.0f;
-
-		protected float ProtectedField = 5.0f;
-
-		/*
-		public bool Bool = false;
-		public int Int = -10;
-		public uint UInt = 5;
-		public string String = "FU";
-		public Vector2 Vec2 = new Vector2(2.0f, 3.0f);
-		public Vector3 Vec3 = new Vector3(2.0f, 3.0f, 4.0f);
-		public Vector4 Vec4 = new Vector4(2.0f, 3.0f, 4.0f, 1.0f);
-		*/
+		[Range(3.0f, 1000.0f)]
+		[SerializeField] private float Speed = 5.0f;
+		[SerializeField] private Vector2 Force = new(0.0f, 1.0f);
 
 		private TransformComponent m_TransformComponent;
-		private Enemy m_Enemy;
+		private Rigidbody2DComponent m_Rigidbody2D;
 
 		public void OnCreate()
 		{
 			m_TransformComponent = GetComponent<TransformComponent>();
-			Log.Info("Created entity: {0}", GetComponent<TagComponent>().Tag);
-			Log.Info("Player Color: {0}", PlayerColor);
-			m_Enemy = GetComponent<Enemy>();
-			/*
-			Log.Info("Bool: {0}", Bool);
-			Log.Info("Speed: {0}", Speed);
-			Log.Info("Int: {0}", Int);
-			Log.Info("UInt: {0}", UInt);
-			Log.Info("String: {0}", String);
-			Log.Info("Vec2: {0}", Vec2);
-			Log.Info("Vec3: {0}", Vec3);
-			Log.Info("Vec4: {0}", Vec4);
-			*/
+			m_Rigidbody2D = GetComponent<Rigidbody2DComponent>();
+
+			Log.Info("Created entity: {0}", GetComponent<TagComponent>().tag);
 		}
 
 		public void OnUpdate(float timestep)
 		{
-			Transform transform = m_TransformComponent.Transform;
+			if (Input.IsKeyPressed(KeyCodes.Space))
+				m_Rigidbody2D.ApplyLinearImpulse(Force);
+
 			float speed = Speed * timestep;
+			Vector2 pos = m_TransformComponent.transform.Translation;
+			if (Input.IsKeyPressed(KeyCodes.W))
+				pos.y += speed;
+			else if (Input.IsKeyPressed(KeyCodes.S))
+				pos.y -= speed;
+			if (Input.IsKeyPressed(KeyCodes.D))
+				pos.x += speed;
+			else if (Input.IsKeyPressed(KeyCodes.A))
+				pos.x -= speed;
+			m_Rigidbody2D.MovePosition(pos);
+
+			/*
+			Transform transform = m_TransformComponent.transform;
 
 			if (Input.IsKeyPressed(KeyCodes.W))
 				transform.Translation.y += speed;
@@ -61,14 +48,15 @@ namespace Sandbox
 			else if (Input.IsKeyPressed(KeyCodes.A))
 				transform.Translation.x -= speed;
 
-			m_TransformComponent.Transform = transform;
+			m_TransformComponent.transform = transform;
+			*/
 
 			//Log.Info($"Enemy Speed: {m_Enemy.Speed}");
 		}
 
 		public void OnDestroy()
 		{
-			Log.Info("Destroyed entity: {0}", GetComponent<TagComponent>().Tag);
+			Log.Info("Destroyed entity: {0}", GetComponent<TagComponent>().tag);
 		}
 	}
 }

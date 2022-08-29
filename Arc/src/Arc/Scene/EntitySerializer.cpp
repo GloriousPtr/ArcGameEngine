@@ -4,6 +4,8 @@
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 
+#include "Arc/Audio/AudioListener.h"
+#include "Arc/Audio/AudioSource.h"
 #include "Arc/Core/AssetManager.h"
 #include "Arc/Scripting/ScriptEngine.h"
 #include "Arc/Scripting/Field.h"
@@ -124,8 +126,21 @@ namespace ArcEngine
 		return out;
 	}
 
-#define TryGet(node, defaultValue) ((node) ? node.as<decltype(defaultValue)>() : defaultValue)
-#define TryGetEnum(node, defaultValue) ((node) ? (decltype(defaultValue)) node.as<int>() : defaultValue)
+	template<typename T>
+	inline T TrySet(T& value, YAML::Node node)
+	{
+		if (node)
+			value = node.as<T>();
+		return value;
+	}
+
+	template<typename T>
+	inline T TrySetEnum(T& value, YAML::Node node)
+	{
+		if (node)
+			value = (T) node.as<int>();
+		return value;
+	}
 
 	void EntitySerializer::SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
@@ -439,6 +454,47 @@ namespace ArcEngine
 			out << YAML::EndMap; // ScriptComponent
 		}
 
+		if (entity.HasComponent<AudioSourceComponent>())
+		{
+			out << YAML::Key << "AudioSourceComponent";
+			out << YAML::BeginMap; // AudioSourceComponent
+
+			auto& audioSourceComponent = entity.GetComponent<AudioSourceComponent>();
+			const char* f = (audioSourceComponent.Source ? audioSourceComponent.Source->GetPath() : "");
+			out << YAML::Key << "Filepath" << YAML::Value << f;
+			out << YAML::Key << "VolumeMultiplier" << YAML::Value << audioSourceComponent.Config.VolumeMultiplier;
+			out << YAML::Key << "PitchMultiplier" << YAML::Value << audioSourceComponent.Config.PitchMultiplier;
+			out << YAML::Key << "PlayOnAwake" << YAML::Value << audioSourceComponent.Config.PlayOnAwake;
+			out << YAML::Key << "Looping" << YAML::Value << audioSourceComponent.Config.Looping;
+			out << YAML::Key << "Spatialization" << YAML::Value << audioSourceComponent.Config.Spatialization;
+			out << YAML::Key << "AttenuationModel" << YAML::Value << (int)audioSourceComponent.Config.AttenuationModel;
+			out << YAML::Key << "RollOff" << YAML::Value << audioSourceComponent.Config.RollOff;
+			out << YAML::Key << "MinGain" << YAML::Value << audioSourceComponent.Config.MinGain;
+			out << YAML::Key << "MaxGain" << YAML::Value << audioSourceComponent.Config.MaxGain;
+			out << YAML::Key << "MinDistance" << YAML::Value << audioSourceComponent.Config.MinDistance;
+			out << YAML::Key << "MaxDistance" << YAML::Value << audioSourceComponent.Config.MaxDistance;
+			out << YAML::Key << "ConeInnerAngle" << YAML::Value << audioSourceComponent.Config.ConeInnerAngle;
+			out << YAML::Key << "ConeOuterAngle" << YAML::Value << audioSourceComponent.Config.ConeOuterAngle;
+			out << YAML::Key << "ConeOuterGain" << YAML::Value << audioSourceComponent.Config.ConeOuterGain;
+			out << YAML::Key << "DopplerFactor" << YAML::Value << audioSourceComponent.Config.DopplerFactor;
+
+			out << YAML::EndMap; // AudioSourceComponent
+		}
+
+		if (entity.HasComponent<AudioListenerComponent>())
+		{
+			out << YAML::Key << "AudioListenerComponent";
+			out << YAML::BeginMap; // AudioListenerComponent
+
+			auto& audioListenerComponent = entity.GetComponent<AudioListenerComponent>();
+			out << YAML::Key << "Active" << YAML::Value << audioListenerComponent.Active;
+			out << YAML::Key << "ConeInnerAngle" << YAML::Value << audioListenerComponent.Config.ConeInnerAngle;
+			out << YAML::Key << "ConeOuterAngle" << YAML::Value << audioListenerComponent.Config.ConeOuterAngle;
+			out << YAML::Key << "ConeOuterGain" << YAML::Value << audioListenerComponent.Config.ConeOuterGain;
+
+			out << YAML::EndMap; // AudioListenerComponent
+		}
+
 		out << YAML::EndMap; // Entity
 	}
 
@@ -454,7 +510,7 @@ namespace ArcEngine
 		if (tagComponent)
 		{
 			name = tagComponent["Tag"].as<std::string>().c_str();
-			enabled = TryGet(tagComponent["Enabled"], true);
+			TrySet(enabled, tagComponent["Enabled"]);
 		}
 
 		Entity deserializedEntity;
@@ -505,28 +561,41 @@ namespace ArcEngine
 
 			auto& cameraProps = cameraComponent["Camera"];
 			cc.Camera.SetViewportSize(1, 1);
-			cc.Camera.SetProjectionType(TryGetEnum(cameraProps["ProjectionType"], SceneCamera::ProjectionType::Perspective));
+			SceneCamera::ProjectionType projectionType = cc.Camera.GetProjectionType();
+			cc.Camera.SetProjectionType(TrySetEnum(projectionType, cameraProps["ProjectionType"]));
 
-			cc.Camera.SetPerspectiveVerticalFOV(TryGet(cameraProps["PerspectiveFOV"], 45.0f));
-			cc.Camera.SetPerspectiveNearClip(TryGet(cameraProps["PerspectiveNear"], 0.03f));
-			cc.Camera.SetPerspectiveFarClip(TryGet(cameraProps["PerspectiveFar"], 1000.0f));
+			float tmp = cc.Camera.GetPerspectiveVerticalFOV();
+			cc.Camera.SetPerspectiveVerticalFOV(TrySet(tmp, cameraProps["PerspectiveFOV"]));
 
-			cc.Camera.SetOrthographicSize(TryGet(cameraProps["OrthographicSize"], 10.0f));
-			cc.Camera.SetOrthographicNearClip(TryGet(cameraProps["OrthographicNear"], -1.0f));
-			cc.Camera.SetOrthographicFarClip(TryGet(cameraProps["OrthographicFar"], 1.0f));
+			tmp = cc.Camera.GetPerspectiveNearClip();
+			cc.Camera.SetPerspectiveNearClip(TrySet(tmp, cameraProps["PerspectiveNear"]));
 
-			cc.Primary = TryGet(cameraComponent["Primary"], true);
-			cc.FixedAspectRatio = TryGet(cameraComponent["FixedAspectRatio"], false);
+			tmp = cc.Camera.GetPerspectiveFarClip();
+			cc.Camera.SetPerspectiveFarClip(TrySet(tmp, cameraProps["PerspectiveFar"]));
+
+			tmp = cc.Camera.GetOrthographicSize();
+			cc.Camera.SetOrthographicSize(TrySet(tmp, cameraProps["OrthographicSize"]));
+
+			tmp = cc.Camera.GetOrthographicNearClip();
+			cc.Camera.SetOrthographicNearClip(TrySet(tmp, cameraProps["OrthographicNear"]));
+
+			tmp = cc.Camera.GetOrthographicFarClip();
+			cc.Camera.SetOrthographicFarClip(TrySet(tmp, cameraProps["OrthographicFar"]));
+
+			TrySet(cc.Primary, cameraComponent["Primary"]);
+			TrySet(cc.FixedAspectRatio, cameraComponent["FixedAspectRatio"]);
 		}
 
 		auto spriteRenderer = entity["SpriteRendererComponent"];
 		if (spriteRenderer)
 		{
 			auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
-			src.Color = TryGet(spriteRenderer["Color"], glm::vec4(1.0f));
-			src.TilingFactor = TryGet(spriteRenderer["TilingFactor"], 1.0f);
+			TrySet(src.Color, spriteRenderer["Color"]);
+			TrySet(src.TilingFactor, spriteRenderer["TilingFactor"]);
 
-			eastl::string texturePath = TryGet(spriteRenderer["TexturePath"], eastl::string(""));
+			eastl::string texturePath = "";
+			TrySet(texturePath, spriteRenderer["TexturePath"]);
+			
 			if (!texturePath.empty())
 				src.Texture = AssetManager::GetTexture2D(texturePath);
 		}
@@ -535,10 +604,11 @@ namespace ArcEngine
 		if (skyLight)
 		{
 			auto& src = deserializedEntity.AddComponent<SkyLightComponent>();
-			src.Intensity = TryGet(skyLight["Intensity"], 1.0f);
-			src.Rotation = TryGet(skyLight["Rotation"], 0.0f);
+			TrySet(src.Intensity, skyLight["Intensity"]);
+			TrySet(src.Rotation, skyLight["Rotation"]);
 
-			eastl::string texturePath = TryGet(skyLight["TexturePath"], eastl::string(""));
+			eastl::string texturePath = "";
+			TrySet(texturePath, skyLight["TexturePath"]);
 			if (!texturePath.empty())
 				src.Texture = AssetManager::GetTextureCubemap(texturePath);
 		}
@@ -547,63 +617,63 @@ namespace ArcEngine
 		if (lightComponent)
 		{
 			auto& src = deserializedEntity.AddComponent<LightComponent>();
-			src.Type = TryGetEnum(lightComponent["Type"], LightComponent::LightType::Point);
-			src.Color = TryGet(lightComponent["Color"], glm::vec3(1.0f));
-			src.UseColorTempratureMode = TryGet(lightComponent["UseColorTempratureMode"], false);
-			src.Intensity = TryGet(lightComponent["Intensity"], 10.0f);
-			src.Range = TryGet(lightComponent["Range"], 1.0f);
-			src.CutOffAngle = TryGet(lightComponent["CutOffAngle"], 12.5f);
-			src.OuterCutOffAngle = TryGet(lightComponent["OuterCutOffAngle"], 17.5f);
-			src.ShadowQuality = TryGetEnum(lightComponent["ShadowQuality"], LightComponent::ShadowQualityType::UltraSoft);
+			TrySetEnum(src.Type, lightComponent["Type"]);
+			TrySet(src.Color, lightComponent["Color"]);
+			TrySet(src.UseColorTempratureMode, lightComponent["UseColorTempratureMode"]);
+			TrySet(src.Intensity, lightComponent["Intensity"]);
+			TrySet(src.Range, lightComponent["Range"]);
+			TrySet(src.CutOffAngle, lightComponent["CutOffAngle"]);
+			TrySet(src.OuterCutOffAngle, lightComponent["OuterCutOffAngle"]);
+			TrySetEnum(src.ShadowQuality, lightComponent["ShadowQuality"]);
 		}
 
 		auto rb2dCpmponent = entity["Rigidbody2DComponent"];
 		if (rb2dCpmponent)
 		{
 			auto& src = deserializedEntity.AddComponent<Rigidbody2DComponent>();
-			src.Type = TryGetEnum(rb2dCpmponent["Type"], Rigidbody2DComponent::BodyType::Static);
-			src.AutoMass = TryGet(rb2dCpmponent["AutoMass"], true);
-			src.Mass = TryGet(rb2dCpmponent["Mass"], 1.0f);
-			src.LinearDrag = TryGet(rb2dCpmponent["LinearDrag"], 0.0f);
-			src.AngularDrag = TryGet(rb2dCpmponent["AngularDrag"], 0.05f);
-			src.AllowSleep = TryGet(rb2dCpmponent["AllowSleep"], true);
-			src.Awake = TryGet(rb2dCpmponent["Awake"], true);
-			src.Continuous = TryGet(rb2dCpmponent["Continuous"], false);
-			src.FreezeRotation = TryGet(rb2dCpmponent["FreezeRotation"], false);
-			src.GravityScale = TryGet(rb2dCpmponent["GravityScale"], 1.0f);
+			TrySetEnum(src.Type, rb2dCpmponent["Type"]);
+			TrySet(src.AutoMass, rb2dCpmponent["AutoMass"]);
+			TrySet(src.Mass, rb2dCpmponent["Mass"]);
+			TrySet(src.LinearDrag, rb2dCpmponent["LinearDrag"]);
+			TrySet(src.AngularDrag, rb2dCpmponent["AngularDrag"]);
+			TrySet(src.AllowSleep, rb2dCpmponent["AllowSleep"]);
+			TrySet(src.Awake, rb2dCpmponent["Awake"]);
+			TrySet(src.Continuous, rb2dCpmponent["Continuous"]);
+			TrySet(src.FreezeRotation, rb2dCpmponent["FreezeRotation"]);
+			TrySet(src.GravityScale, rb2dCpmponent["GravityScale"]);
 		}
 
 		auto bc2dCpmponent = entity["BoxCollider2DComponent"];
 		if (bc2dCpmponent)
 		{
 			auto& src = deserializedEntity.AddComponent<BoxCollider2DComponent>();
-			src.Size = TryGet(bc2dCpmponent["Size"], glm::vec2(0.5f));
-			src.Offset = TryGet(bc2dCpmponent["Offset"], glm::vec2(0.0f));
-			src.Density = TryGet(bc2dCpmponent["Density"], 1.0f);
-			src.Friction = TryGet(bc2dCpmponent["Friction"], 0.5f);
-			src.Restitution = TryGet(bc2dCpmponent["Restitution"], 0.0f);
-			src.RestitutionThreshold = TryGet(bc2dCpmponent["RestitutionThreshold"], 0.5f);
+			TrySet(src.Size, bc2dCpmponent["Size"]);
+			TrySet(src.Offset, bc2dCpmponent["Offset"]);
+			TrySet(src.Density, bc2dCpmponent["Density"]);
+			TrySet(src.Friction, bc2dCpmponent["Friction"]);
+			TrySet(src.Restitution, bc2dCpmponent["Restitution"]);
+			TrySet(src.RestitutionThreshold, bc2dCpmponent["RestitutionThreshold"]);
 		}
 
 		auto cc2dCpmponent = entity["CircleCollider2DComponent"];
 		if (cc2dCpmponent)
 		{
 			auto& src = deserializedEntity.AddComponent<CircleCollider2DComponent>();
-			src.Radius = TryGet(cc2dCpmponent["Radius"], 0.5f);
-			src.Offset = TryGet(cc2dCpmponent["Offset"], glm::vec2(0.0f));
-			src.Density = TryGet(cc2dCpmponent["Density"], 1.0f);
-			src.Friction = TryGet(cc2dCpmponent["Friction"], 0.5f);
-			src.Restitution = TryGet(cc2dCpmponent["Restitution"], 0.0f);
-			src.RestitutionThreshold = TryGet(cc2dCpmponent["RestitutionThreshold"], 0.5f);
+			TrySet(src.Radius, cc2dCpmponent["Radius"]);
+			TrySet(src.Offset, cc2dCpmponent["Offset"]);
+			TrySet(src.Density, cc2dCpmponent["Density"]);
+			TrySet(src.Friction, cc2dCpmponent["Friction"]);
+			TrySet(src.Restitution, cc2dCpmponent["Restitution"]);
+			TrySet(src.RestitutionThreshold, cc2dCpmponent["RestitutionThreshold"]);
 		}
 
 		auto meshComponent = entity["MeshComponent"];
 		if (meshComponent)
 		{
 			auto& src = deserializedEntity.AddComponent<MeshComponent>();
-			src.Filepath = TryGet(meshComponent["Filepath"], eastl::string(""));
-			src.SubmeshIndex = TryGet(meshComponent["SubmeshIndex"], 0);
-			src.CullMode = TryGetEnum(meshComponent["CullMode"], MeshComponent::CullModeType::Back);
+			TrySet(src.Filepath, meshComponent["Filepath"]);
+			TrySet(src.SubmeshIndex, meshComponent["SubmeshIndex"]);
+			TrySetEnum(src.CullMode, meshComponent["CullMode"]);
 
 			if (!src.Filepath.empty())
 				src.MeshGeometry = CreateRef<Mesh>(src.Filepath.c_str());
@@ -754,6 +824,42 @@ namespace ArcEngine
 					}
 				}
 			}
+		}
+
+		auto audioSourceComponent = entity["AudioSourceComponent"];
+		if (audioSourceComponent)
+		{
+			auto& src = deserializedEntity.AddComponent<AudioSourceComponent>();
+			eastl::string filepath = "";
+			TrySet(filepath, audioSourceComponent["Filepath"]);
+			TrySet(src.Config.VolumeMultiplier, audioSourceComponent["VolumeMultiplier"]);
+			TrySet(src.Config.PitchMultiplier, audioSourceComponent["PitchMultiplier"]);
+			TrySet(src.Config.PlayOnAwake, audioSourceComponent["PlayOnAwake"]);
+			TrySet(src.Config.Looping, audioSourceComponent["Looping"]);
+			TrySet(src.Config.Spatialization, audioSourceComponent["Spatialization"]);
+			TrySetEnum(src.Config.AttenuationModel, audioSourceComponent["AttenuationModel"]);
+			TrySet(src.Config.RollOff, audioSourceComponent["RollOff"]);
+			TrySet(src.Config.MinGain, audioSourceComponent["MinGain"]);
+			TrySet(src.Config.MaxGain, audioSourceComponent["MaxGain"]);
+			TrySet(src.Config.MinDistance, audioSourceComponent["MinDistance"]);
+			TrySet(src.Config.MaxDistance, audioSourceComponent["MaxDistance"]);
+			TrySet(src.Config.ConeInnerAngle, audioSourceComponent["ConeInnerAngle"]);
+			TrySet(src.Config.ConeOuterAngle, audioSourceComponent["ConeOuterAngle"]);
+			TrySet(src.Config.ConeOuterGain, audioSourceComponent["ConeOuterGain"]);
+			TrySet(src.Config.DopplerFactor, audioSourceComponent["DopplerFactor"]);
+
+			if (!filepath.empty())
+				src.Source = CreateRef<AudioSource>(filepath.c_str());
+		}
+
+		auto audioListenerComponent = entity["AudioListenerComponent"];
+		if (audioListenerComponent)
+		{
+			auto& src = deserializedEntity.AddComponent<AudioListenerComponent>();
+			TrySet(src.Active, audioListenerComponent["Active"]);
+			TrySet(src.Config.ConeInnerAngle, audioListenerComponent["ConeInnerAngle"]);
+			TrySet(src.Config.ConeOuterAngle, audioListenerComponent["ConeOuterAngle"]);
+			TrySet(src.Config.ConeOuterGain, audioListenerComponent["ConeOuterGain"]);
 		}
 
 		return deserializedEntity.GetUUID();

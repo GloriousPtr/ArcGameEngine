@@ -238,20 +238,24 @@ namespace ArcEngine
 					Entity entity = { e, this };
 					const glm::mat4 inverted = glm::inverse(entity.GetWorldTransform());
 					const glm::vec3 forward = normalize(glm::vec3(inverted[2]));
-					ac.Listener->SetConfig(ac.Config, tc.Translation, forward);
+					ac.Listener->SetConfig(ac.Config);
+					ac.Listener->SetPosition(tc.Translation);
+					ac.Listener->SetDirection(-forward);
 				}
 			}
 
-			auto sourceView = m_Registry.view<TransformComponent, AudioComponent>();
+			auto sourceView = m_Registry.view<TransformComponent, AudioSourceComponent>();
 			for (auto e : sourceView)
 			{
-				auto [tc, ac] = sourceView.get<TransformComponent, AudioComponent>(e);
+				auto [tc, ac] = sourceView.get<TransformComponent, AudioSourceComponent>(e);
 				if (ac.Source)
 				{
 					Entity entity = { e, this };
 					const glm::mat4 inverted = glm::inverse(entity.GetWorldTransform());
 					const glm::vec3 forward = normalize(glm::vec3(inverted[2]));
-					ac.Source->SetConfig(ac.Config, tc.Translation, forward);
+					ac.Source->SetConfig(ac.Config);
+					ac.Source->SetPosition(tc.Translation);
+					ac.Source->SetDirection(forward);
 					if (ac.Config.PlayOnAwake)
 						ac.Source->Play();
 				}
@@ -301,10 +305,10 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE("Sound");
 
-			auto view = m_Registry.view<TransformComponent, AudioComponent>();
+			auto view = m_Registry.view<TransformComponent, AudioSourceComponent>();
 			for (auto e : view)
 			{
-				auto [tc, ac] = view.get<TransformComponent, AudioComponent>(e);
+				auto [tc, ac] = view.get<TransformComponent, AudioSourceComponent>(e);
 				if (ac.Source)
 					ac.Source->Stop();
 			}
@@ -455,21 +459,23 @@ namespace ArcEngine
 					Entity entity = { e, this };
 					const glm::mat4 inverted = glm::inverse(entity.GetWorldTransform());
 					const glm::vec3 forward = normalize(glm::vec3(inverted[2]));
-					ac.Listener->SetConfig(ac.Config, tc.Translation, -forward);
+					ac.Listener->SetPosition(tc.Translation);
+					ac.Listener->SetDirection(-forward);
 					break;
 				}
 			}
 
-			auto sourceView = m_Registry.view<TransformComponent, AudioComponent>();
+			auto sourceView = m_Registry.view<TransformComponent, AudioSourceComponent>();
 			for (auto e : sourceView)
 			{
-				auto [tc, ac] = sourceView.get<TransformComponent, AudioComponent>(e);
+				auto [tc, ac] = sourceView.get<TransformComponent, AudioSourceComponent>(e);
 				if (ac.Source)
 				{
 					Entity entity = { e, this };
 					const glm::mat4 inverted = glm::inverse(entity.GetWorldTransform());
 					const glm::vec3 forward = normalize(glm::vec3(inverted[2]));
-					ac.Source->SetConfig(ac.Config, tc.Translation, -forward);
+					ac.Source->SetPosition(tc.Translation);
+					ac.Source->SetDirection(forward);
 				}
 			}
 		}
@@ -677,7 +683,7 @@ namespace ArcEngine
 	}
 
 	template<>
-	void Scene::OnComponentAdded<AudioComponent>(Entity entity, AudioComponent& component)
+	void Scene::OnComponentAdded<AudioSourceComponent>(Entity entity, AudioSourceComponent& component)
 	{
 	}
 

@@ -21,12 +21,6 @@ namespace ArcEngine
 		bool PlayOnAwake = true;
 		bool Looping = false;
 
-		/*
-		float LowPassFilter = -19999.0f;
-		float HighPassFilter = 0.0f;
-		float MasterReverbSend = 0.0f;
-		*/
-
 		bool Spatialization = false;
 		AttenuationModelType AttenuationModel = AttenuationModelType::Inverse;
 		float RollOff = 1.0f;
@@ -52,11 +46,32 @@ namespace ArcEngine
 
 		void Play();
 		void Pause();
+		void UnPause();
 		void Stop();
-		void SetConfig(const AudioSourceConfig& config, const glm::vec3& position, const glm::vec3& forward);
+		bool IsPlaying();
+
+		void SetConfig(const AudioSourceConfig& config);
+
+		void SetVolume(const float volume);
+		void SetPitch(const float pitch);
+		void SetLooping(const bool state);
+		void SetSpatialization(const bool state);
+		void SetAttenuationModel(const AttenuationModelType type);
+		void SetRollOff(const float rollOff);
+		void SetMinGain(const float minGain);
+		void SetMaxGain(const float maxGain);
+		void SetMinDistance(const float minDistance);
+		void SetMaxDistance(const float maxDistance);
+		void SetCone(const float innerAngle, const float outerAngle, const float outerGain);
+		void SetDopplerFactor(const float factor);
+
+		void SetPosition(const glm::vec3& position);
+		void SetDirection(const glm::vec3& forward);
+		void SetVelocity(const glm::vec3& velocity);
 
 	private:
 		eastl::string m_Path;
 		Scope<ma_sound> m_Sound = nullptr;
+		bool m_Spatialization = false;
 	};
 }

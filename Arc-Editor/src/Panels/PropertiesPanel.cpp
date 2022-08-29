@@ -357,8 +357,8 @@ namespace ArcEngine
 				DrawAddComponent<BoxCollider2DComponent>(entity, ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider 2D");
 				DrawAddComponent<CircleCollider2DComponent>(entity, ICON_MDI_CIRCLE_OUTLINE " Circle Collider 2D");
 				DrawAddComponent<ScriptComponent>(entity, ICON_MDI_POUND_BOX " Script");
-				DrawAddComponent<AudioComponent>(entity, ICON_MDI_SPEAKER " Audio");
-				DrawAddComponent<AudioListenerComponent>(entity, ICON_MDI_CIRCLE " Audio Listener");
+				DrawAddComponent<AudioSourceComponent>(entity, ICON_MDI_VOLUME_MEDIUM " Audio");
+				DrawAddComponent<AudioListenerComponent>(entity, ICON_MDI_CIRCLE_SLICE_8 " Audio Listener");
 
 				ImGui::EndPopup();
 			}
@@ -680,7 +680,7 @@ namespace ArcEngine
 			DrawFields(entity, component);
 		});
 
-		DrawComponent<AudioComponent>(ICON_MDI_SPEAKER " Audio", entity, [&entity](AudioComponent& component)
+		DrawComponent<AudioSourceComponent>(ICON_MDI_VOLUME_MEDIUM " Audio", entity, [&entity](AudioSourceComponent& component)
 		{
 			auto& config = component.Config;
 
@@ -715,11 +715,15 @@ namespace ArcEngine
 					component.Source->Play();
 			}
 			ImGui::SameLine();
+			ImGui::Spacing();
+			ImGui::SameLine();
 			if (UI::IconButton(ICON_MDI_PAUSE, "Pause", { 1.0f, 1.0f, 1.0f, 1.0f }))
 			{
 				if (component.Source)
 					component.Source->Pause();
 			}
+			ImGui::SameLine();
+			ImGui::Spacing();
 			ImGui::SameLine();
 			if (UI::IconButton(ICON_MDI_STOP, "Stop", { 1.0f, 1.0f, 1.0f, 1.0f }))
 			{
@@ -753,11 +757,13 @@ namespace ArcEngine
 			{
 				const glm::mat4 inverted = glm::inverse(entity.GetWorldTransform());
 				const glm::vec3 forward = normalize(glm::vec3(inverted[2]));
-				component.Source->SetConfig(config, entity.GetTransform().Translation, forward);
+				component.Source->SetConfig(config);
+				component.Source->SetPosition(entity.GetTransform().Translation);
+				component.Source->SetDirection(-forward);
 			}
 		});
 
-		DrawComponent<AudioListenerComponent>(ICON_MDI_CIRCLE " Audio Listener", entity, [](AudioListenerComponent& component)
+		DrawComponent<AudioListenerComponent>(ICON_MDI_CIRCLE_SLICE_8 " Audio Listener", entity, [](AudioListenerComponent& component)
 		{
 			auto& config = component.Config;
 			UI::BeginProperties();

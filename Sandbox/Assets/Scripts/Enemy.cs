@@ -4,8 +4,10 @@ namespace Sandbox
 {
 	public class Enemy : Entity
 	{
+		[Header("Player Config")]
 		[SerializeField] private float Speed = 20.0f;
-		
+
+		[Header("Test")]
 		public bool Bool = false;
 		public byte Byte = 255;
 		public sbyte SByte = 127;
@@ -30,14 +32,14 @@ namespace Sandbox
 
 		public void OnUpdate(float timestep)
 		{
-			Transform transform = m_TransformComponent.Transform;
+			Transform transform = m_TransformComponent.transform;
 
 			if (Input.IsKeyPressed(KeyCodes.Q))
 				transform.Rotation.z += Speed * timestep;
 			else if (Input.IsKeyPressed(KeyCodes.E))
 				transform.Rotation.z -= Speed * timestep;
 
-			m_TransformComponent.Transform = transform;
+			m_TransformComponent.transform = transform;
 		}
 	}
 }

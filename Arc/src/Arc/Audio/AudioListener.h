@@ -17,6 +17,12 @@ namespace ArcEngine
 		AudioListener() = default;
 		~AudioListener() = default;
 
-		void SetConfig(const AudioListenerConfig& config, const glm::vec3& position, const glm::vec3 forward);
+		void SetConfig(const AudioListenerConfig& config);
+		void SetPosition(const glm::vec3& position);
+		void SetDirection(const glm::vec3& forward);
+		void SetVelocity(const glm::vec3& velocity);
+
+	private:
+		uint32_t m_ListenerIndex = 0;
 	};
 }

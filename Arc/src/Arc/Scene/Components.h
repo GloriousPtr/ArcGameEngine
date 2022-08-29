@@ -276,14 +276,14 @@ namespace ArcEngine
 		ScriptComponent(const ScriptComponent&) = default;
 	};
 
-	struct AudioComponent
+	struct AudioSourceComponent
 	{
 		AudioSourceConfig Config;
 
 		Ref<AudioSource> Source = nullptr;
 
-		AudioComponent() = default;
-		AudioComponent(const AudioComponent&) = default;
+		AudioSourceComponent() = default;
+		AudioSourceComponent(const AudioSourceComponent&) = default;
 	};
 
 	struct AudioListenerComponent
@@ -316,7 +316,7 @@ namespace ArcEngine
 		BoxCollider2DComponent,
 		CircleCollider2DComponent,
 		ScriptComponent,
-		AudioComponent,
+		AudioSourceComponent,
 		AudioListenerComponent
 	>;
 }
