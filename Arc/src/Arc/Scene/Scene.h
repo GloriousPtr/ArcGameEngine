@@ -8,9 +8,11 @@
 #include "entt.hpp"
 
 class b2World;
+class b2Fixture;
 
 namespace ArcEngine
 {
+	class ContactListener;
 	class Entity;
 	
 	class Scene
@@ -51,13 +53,18 @@ namespace ArcEngine
 	private:
 		entt::registry m_Registry;
 		eastl::hash_map<UUID, entt::entity> m_EntityMap;
+		
 		b2World* m_PhysicsWorld2D;
+		ContactListener* m_ContactListener;
+		eastl::hash_map<b2Fixture*, entt::entity> m_FixtureMap;
+
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 		bool m_ViewportDirty = true;
 		
 		friend class Entity;
 		friend class SceneSerializer;
 		friend class SceneHierarchyPanel;
+		friend class ContactListener;
 
 	public:
 		uint32_t VelocityIterations = 8;

@@ -115,6 +115,10 @@ namespace ArcEngine
 		}
 	};
 
+	/////////////////////////////////////////////////////////////////////////////////////
+	// 3D ///////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////
+
 	struct MeshComponent
 	{
 		enum class CullModeType { Unknown = -1, Front, Back, DoubleSided };
@@ -127,6 +131,10 @@ namespace ArcEngine
 		MeshComponent() = default;
 		MeshComponent(const MeshComponent&) = default;
 	};
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// Lights ///////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////
 
 	struct SkyLightComponent
 	{
@@ -213,6 +221,10 @@ namespace ArcEngine
 		uint32_t m_Temprature = 6570;
 	};
 
+	/////////////////////////////////////////////////////////////////////////////////////
+	// Rigidbody and Colliders (2D) /////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////
+
 	struct Rigidbody2DComponent
 	{
 		enum class BodyType { Static = 0, Kinematic, Dynamic };
@@ -238,6 +250,7 @@ namespace ArcEngine
 	{
 		glm::vec2 Size = { 0.5f, 0.5f };
 		glm::vec2 Offset = { 0.0f, 0.0f };
+		bool IsSensor = false;
 
 		float Density = 1.0f;
 		float Friction = 0.5f;
@@ -254,6 +267,7 @@ namespace ArcEngine
 	{
 		float Radius = 0.5f;
 		glm::vec2 Offset = { 0.0f, 0.0f };
+		bool IsSensor = false;
 
 		float Density = 1.0f;
 		float Friction = 0.5f;
@@ -266,6 +280,71 @@ namespace ArcEngine
 		CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
 	};
 
+	/////////////////////////////////////////////////////////////////////////////////////
+	// Joints ///////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////
+
+	struct DistanceJoint2DComponent
+	{
+		bool EnableCollision = false;
+		UUID ConnectedRigidbody = 0;
+		glm::vec2 Anchor = glm::vec2(0.0f);
+		glm::vec2 ConnectedAnchor = glm::vec2(0.0f);
+		float MinDistance = 0.0f;
+		float MaxDistance = 2.0f;
+		float BreakForce = FLT_MAX;
+
+		void* RuntimeJoint = nullptr;
+
+		DistanceJoint2DComponent() = default;
+		DistanceJoint2DComponent(const DistanceJoint2DComponent&) = default;
+	};
+
+	struct SpringJoint2DComponent
+	{
+		bool EnableCollision = false;
+		UUID ConnectedRigidbody = 0;
+		glm::vec2 Anchor = glm::vec2(0.0f);
+		glm::vec2 ConnectedAnchor = glm::vec2(0.0f);
+		float MinDistance = 0.0f;
+		float MaxDistance = 2.0f;
+		float Frequency = 4.0f;
+		float DampingRatio = 0.5f;
+		float BreakForce = FLT_MAX;
+
+		void* RuntimeJoint = nullptr;
+
+		SpringJoint2DComponent() = default;
+		SpringJoint2DComponent(const SpringJoint2DComponent&) = default;
+	};
+
+	struct HingeJoint2DComponent
+	{
+		bool EnableCollision = false;
+		UUID ConnectedRigidbody = 0;
+		glm::vec2 Anchor = glm::vec2(0.0f);
+
+		bool UseLimits = false;
+		float LowerAngle = 0.0f;
+		float UpperAngle = 359.0f;
+		
+		bool UseMotor = false;
+		float MotorSpeed = 0.0f;
+		float MaxMotorTorque = 10000.0f;
+
+		float BreakForce = FLT_MAX;
+		float BreakTorque = FLT_MAX;
+
+		void* RuntimeJoint = nullptr;
+
+		HingeJoint2DComponent() = default;
+		HingeJoint2DComponent(const HingeJoint2DComponent&) = default;
+	};
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// Script ///////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////
+
 	class ScriptInstance;
 
 	struct ScriptComponent
@@ -275,6 +354,10 @@ namespace ArcEngine
 		ScriptComponent() = default;
 		ScriptComponent(const ScriptComponent&) = default;
 	};
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// Audio ////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////
 
 	struct AudioSourceComponent
 	{
@@ -315,6 +398,9 @@ namespace ArcEngine
 		Rigidbody2DComponent,
 		BoxCollider2DComponent,
 		CircleCollider2DComponent,
+		DistanceJoint2DComponent,
+		SpringJoint2DComponent,
+		HingeJoint2DComponent,
 		ScriptComponent,
 		AudioSourceComponent,
 		AudioListenerComponent

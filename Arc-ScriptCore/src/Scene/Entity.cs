@@ -4,9 +4,27 @@ using System.Runtime.InteropServices;
 
 namespace ArcEngine
 {
-	public abstract class Entity : IComponent
+	public class Entity : IComponent
 	{
 		internal ulong ID { get; private set; }
+
+		#region CollisionCallbacks
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct CollisionData
+		{
+			private ulong entityID;
+			public Vector2 relativeVelocity;
+
+			public Entity entity => new(entityID);
+		}
+
+		protected event Action<CollisionData> OnCollisionEnter2D;
+		protected event Action<CollisionData> OnCollisionExit2D;
+		protected event Action<CollisionData> OnSensorEnter2D;
+		protected event Action<CollisionData> OnSensorExit2D;
+
+		#endregion
 
 		#region Constructors
 
@@ -43,7 +61,7 @@ namespace ArcEngine
 
 			InternalCalls.Entity_AddComponent(ID, typeof(T));
 			T component = new T();
-			component.SetEntity(this);
+			component.SetEntity(ID);
 			return component;
 		}
 
@@ -55,7 +73,7 @@ namespace ArcEngine
 				if (typeof(T).BaseType == typeof(Component))
 				{
 					T component = new T();
-					component.SetEntity(this);
+					component.SetEntity(ID);
 					return component;
 				}
 				else
@@ -71,6 +89,30 @@ namespace ArcEngine
 
 		#endregion
 
+		#region CollisionHandlingMethods
+
+		private void HandleOnCollisionEnter2D(CollisionData data)
+		{
+			OnCollisionEnter2D?.Invoke(data);
+		}
+
+		private void HandleOnCollisionExit2D(CollisionData data)
+		{
+			OnCollisionExit2D?.Invoke(data);
+		}
+
+		private void HandleOnSensorEnter2D(CollisionData data)
+		{
+			OnSensorEnter2D?.Invoke(data);
+		}
+
+		private void HandleOnSensorExit2D(CollisionData data)
+		{
+			OnSensorExit2D?.Invoke(data);
+		}
+
+		#endregion
+
 		#region IComponentMethods
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,9 +122,9 @@ namespace ArcEngine
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		void IComponent.SetEntity(Entity e)
+		void IComponent.SetEntity(ulong id)
 		{
-			ID = e.ID;
+			ID = id;
 		}
 
 		#endregion

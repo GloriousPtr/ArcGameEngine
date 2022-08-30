@@ -9,9 +9,9 @@
 
 namespace ArcEngine
 {
-	static int s_UIContextID = 0;
-	static uint32_t s_Counter = 0;
-	static char s_IDBuffer[16];
+	int UI::s_UIContextID = 0;
+	uint32_t UI::s_Counter = 0;
+	char UI::s_IDBuffer[16];
 
 	void UI::PushID()
 	{
@@ -775,7 +775,7 @@ namespace ArcEngine
 		}
 		if (ImGui::BeginDragDropTarget())
 		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity"))
 			{
 				const char* path = (const char*)payload->Data;
 				texture = AssetManager::GetTextureCubemap(path);

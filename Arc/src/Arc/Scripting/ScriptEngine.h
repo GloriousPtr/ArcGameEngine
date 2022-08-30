@@ -25,7 +25,7 @@ namespace ArcEngine
 		ScriptClass(const eastl::string& classNamespace, const eastl::string& className);
 		
 		GCHandle Instantiate();
-		MonoMethod* GetMethod(const eastl::string& signature);
+		MonoMethod* GetMethod(const char* methodName, uint32_t parameterCount);
 		GCHandle InvokeMethod(GCHandle gcHandle, MonoMethod* method, void** params = nullptr);
 
 		MonoProperty* GetProperty(const char* className, const char* propertyName);
@@ -46,6 +46,12 @@ namespace ArcEngine
 		eastl::map<eastl::string, MonoProperty*> m_Properties;
 	};
 
+	struct Collision2DData
+	{
+		UUID EntityID = 0;
+		glm::vec2 RelativeVelocity = { 0.0f, 0.0f };
+	};
+
 	class ScriptInstance
 	{
 	public:
@@ -57,6 +63,10 @@ namespace ArcEngine
 		void InvokeOnCreate();
 		void InvokeOnUpdate(float ts);
 		void InvokeOnDestroy();
+		void InvokeOnCollisionEnter2D(Collision2DData& other);
+		void InvokeOnCollisionExit2D(Collision2DData& other);
+		void InvokeOnSensorEnter2D(Collision2DData& other);
+		void InvokeOnSensorExit2D(Collision2DData& other);
 
 		GCHandle GetHandle() { return m_Handle; }
 		eastl::map<eastl::string, Ref<Field>>& GetFields() { return m_Fields; }
@@ -64,9 +74,11 @@ namespace ArcEngine
 		void Invalidate(Ref<ScriptClass> scriptClass, UUID entityID);
 
 	private:
+		void LoadMethods();
 		void LoadFields();
 
 	private:
+		Ref<ScriptClass> m_EntityClass;
 		Ref<ScriptClass> m_ScriptClass;
 
 		GCHandle m_Handle = nullptr;
@@ -74,6 +86,11 @@ namespace ArcEngine
 		MonoMethod* m_OnCreateMethod = nullptr;
 		MonoMethod* m_OnUpdateMethod = nullptr;
 		MonoMethod* m_OnDestroyMethod = nullptr;
+
+		MonoMethod* m_OnCollisionEnter2DMethod = nullptr;
+		MonoMethod* m_OnCollisionExit2DMethod = nullptr;
+		MonoMethod* m_OnSensorEnter2DMethod = nullptr;
+		MonoMethod* m_OnSensorExit2DMethod = nullptr;
 
 		eastl::map<eastl::string, Ref<Field>> m_Fields;
 	};

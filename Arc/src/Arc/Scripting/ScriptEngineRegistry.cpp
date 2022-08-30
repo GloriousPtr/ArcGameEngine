@@ -516,6 +516,56 @@ namespace ArcEngine
 		component.Rotation.z = *angle;
 	}
 
+	void Rigidbody2D_GetVelocity(uint64_t entityID, glm::vec2* outVelocity)
+	{
+		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
+		if (component.RuntimeBody)
+		{
+			b2Body* body = (b2Body*)component.RuntimeBody;
+			b2Vec2 velocity = body->GetLinearVelocity();
+			outVelocity->x = velocity.x;
+			outVelocity->y = velocity.y;
+		}
+		else
+		{
+			*outVelocity = glm::vec2(0.0f);
+		}
+	}
+
+	void Rigidbody2D_SetVelocity(uint64_t entityID, glm::vec2* velocity)
+	{
+		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
+		if (component.RuntimeBody)
+		{
+			b2Body* body = (b2Body*)component.RuntimeBody;
+			body->SetLinearVelocity({ velocity->x, velocity->y });
+		}
+	}
+
+	void Rigidbody2D_GetAngularVelocity(uint64_t entityID, float* outVelocity)
+	{
+		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
+		if (component.RuntimeBody)
+		{
+			b2Body* body = (b2Body*)component.RuntimeBody;
+			*outVelocity = body->GetAngularVelocity();
+		}
+		else
+		{
+			*outVelocity = 0.0f;
+		}
+	}
+
+	void Rigidbody2D_SetAngularVelocity(uint64_t entityID, float* velocity)
+	{
+		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
+		if (component.RuntimeBody)
+		{
+			b2Body* body = (b2Body*)component.RuntimeBody;
+			body->SetAngularVelocity(*velocity);
+		}
+	}
+
 	void Rigidbody2D_Sleep(uint64_t entityID)
 	{
 		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
@@ -859,6 +909,10 @@ namespace ArcEngine
 		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_IsSleeping", Rigidbody2D_IsSleeping);
 		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_MovePosition", Rigidbody2D_MovePosition);
 		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_MoveRotation", Rigidbody2D_MoveRotation);
+		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_GetVelocity", Rigidbody2D_GetVelocity);
+		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_SetVelocity", Rigidbody2D_SetVelocity);
+		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_GetAngularVelocity", Rigidbody2D_GetAngularVelocity);
+		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_SetAngularVelocity", Rigidbody2D_SetAngularVelocity);
 		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_Sleep", Rigidbody2D_Sleep);
 		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_WakeUp", Rigidbody2D_WakeUp);
 

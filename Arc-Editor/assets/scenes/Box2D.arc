@@ -31,6 +31,7 @@ Entities:
     BoxCollider2DComponent:
       Size: [0.5, 0.5]
       Offset: [0, 0]
+      IsSensor: false
       Density: 1
       Friction: 0.5
       Restitution: 0.649999976
@@ -90,6 +91,7 @@ Entities:
     BoxCollider2DComponent:
       Size: [0.5, 0.5]
       Offset: [0, 0]
+      IsSensor: false
       Density: 1
       Friction: 0.5
       Restitution: 0
@@ -112,7 +114,7 @@ Entities:
       TexturePath: ""
       TilingFactor: 1
     Rigidbody2DComponent:
-      Type: 2
+      Type: 1
       AutoMass: false
       Mass: 3
       LinearDrag: 0
@@ -125,6 +127,7 @@ Entities:
     BoxCollider2DComponent:
       Size: [0.5, 0.5]
       Offset: [0, 0]
+      IsSensor: false
       Density: 1
       Friction: 0.5
       Restitution: 0.699999988
@@ -135,5 +138,5 @@ Entities:
         0:
           Name: Sandbox.Player
           Fields:
-            Force: [0, 50]
-            Speed: 225.380005
+            Force: [0, 5]
+            Speed: 3

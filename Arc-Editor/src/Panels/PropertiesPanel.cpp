@@ -356,6 +356,9 @@ namespace ArcEngine
 				DrawAddComponent<Rigidbody2DComponent>(entity, ICON_MDI_SOCCER " Rigidbody 2D");
 				DrawAddComponent<BoxCollider2DComponent>(entity, ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider 2D");
 				DrawAddComponent<CircleCollider2DComponent>(entity, ICON_MDI_CIRCLE_OUTLINE " Circle Collider 2D");
+				DrawAddComponent<DistanceJoint2DComponent>(entity, ICON_MDI_VECTOR_LINE " Distance Joint 2D");
+				DrawAddComponent<SpringJoint2DComponent>(entity, ICON_MDI_VECTOR_LINE " Spring Joint 2D");
+				DrawAddComponent<HingeJoint2DComponent>(entity, ICON_MDI_ANGLE_ACUTE " Hinge Joint 2D");
 				DrawAddComponent<ScriptComponent>(entity, ICON_MDI_POUND_BOX " Script");
 				DrawAddComponent<AudioSourceComponent>(entity, ICON_MDI_VOLUME_MEDIUM " Audio");
 				DrawAddComponent<AudioListenerComponent>(entity, ICON_MDI_CIRCLE_SLICE_8 " Audio Listener");
@@ -513,9 +516,9 @@ namespace ArcEngine
 		DrawComponent<SkyLightComponent>(ICON_MDI_EARTH " Sky Light", entity, [](SkyLightComponent& component)
 		{
 			UI::BeginProperties();
+			UI::Property("Texture", component.Texture, component.Texture == nullptr ? 0 : component.Texture->GetHRDRendererID());
 			UI::Property("Intensity", component.Intensity);
 			UI::Property("Rotation", component.Rotation, 0.0f, 360.0f);
-			UI::Property("Texture", component.Texture, component.Texture == nullptr ? 0 : component.Texture->GetHRDRendererID());
 			UI::EndProperties();
 		});
 
@@ -615,6 +618,12 @@ namespace ArcEngine
 			UI::BeginProperties();
 			UI::Property("Size", component.Size);
 			UI::Property("Offset", component.Offset);
+			UI::Property("Is Sensor", component.IsSensor);
+			UI::EndProperties();
+			
+			ImGui::Spacing();
+			
+			UI::BeginProperties();
 			UI::Property("Density", component.Density);
 			UI::Property("Friction", component.Friction);
 			UI::Property("Restitution", component.Restitution);
@@ -627,10 +636,120 @@ namespace ArcEngine
 			UI::BeginProperties();
 			UI::Property("Radius", component.Radius);
 			UI::Property("Offset", component.Offset);
+			UI::Property("Is Sensor", component.IsSensor);
+			UI::EndProperties();
+			
+			ImGui::Spacing();
+
+			UI::BeginProperties();
 			UI::Property("Density", component.Density);
 			UI::Property("Friction", component.Friction);
 			UI::Property("Restitution", component.Restitution);
 			UI::Property("Restitution Threshold", component.RestitutionThreshold);
+			UI::EndProperties();
+		});
+
+		DrawComponent<DistanceJoint2DComponent>(ICON_MDI_VECTOR_LINE " Distance Joint 2D", entity, [&entity](DistanceJoint2DComponent& component)
+		{
+			UI::BeginProperties();
+			UI::Property("Enable Collision", component.EnableCollision);
+
+			eastl::string name = "Empty Rigidbody 2D";
+			Entity rb2d;
+			
+			if (component.ConnectedRigidbody)
+				rb2d = entity.GetScene()->GetEntity(component.ConnectedRigidbody);
+			
+			if (rb2d && rb2d.HasComponent<Rigidbody2DComponent>())
+				name = rb2d.GetComponent<TagComponent>().Tag;
+			else
+				component.ConnectedRigidbody = 0;
+
+			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", name.c_str(), component.ConnectedRigidbody, nullptr);
+			
+			UI::Property("Anchor", component.Anchor);
+			UI::Property("Connected Anchor", component.ConnectedAnchor);
+			UI::Property("Min Distance", component.MinDistance);
+			UI::Property("Max Distance", component.MaxDistance);
+			UI::Property("Break Force", component.BreakForce);
+			UI::EndProperties();
+
+			component.MinDistance = glm::max(component.MinDistance, 0.0f);
+			component.MaxDistance = glm::max(component.MinDistance, component.MaxDistance);
+		});
+
+		DrawComponent<SpringJoint2DComponent>(ICON_MDI_VECTOR_LINE " Spring Joint 2D", entity, [&entity](SpringJoint2DComponent& component)
+		{
+			UI::BeginProperties();
+			UI::Property("Enable Collision", component.EnableCollision);
+
+			eastl::string name = "Empty Rigidbody 2D";
+			Entity rb2d;
+
+			if (component.ConnectedRigidbody)
+				rb2d = entity.GetScene()->GetEntity(component.ConnectedRigidbody);
+
+			if (rb2d && rb2d.HasComponent<Rigidbody2DComponent>())
+				name = rb2d.GetComponent<TagComponent>().Tag;
+			else
+				component.ConnectedRigidbody = 0;
+
+			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", name.c_str(), component.ConnectedRigidbody, nullptr);
+
+			UI::Property("Anchor", component.Anchor);
+			UI::Property("Connected Anchor", component.ConnectedAnchor);
+			UI::Property("Min Distance", component.MinDistance);
+			UI::Property("Max Distance", component.MaxDistance);
+			UI::Property("Frequency", component.Frequency);
+			UI::Property("Damping Ratio", component.DampingRatio, 0.0f, 1.0f);
+			UI::Property("Break Force", component.BreakForce);
+			UI::EndProperties();
+
+			component.MinDistance = glm::max(component.MinDistance, 0.0f);
+			component.MaxDistance = glm::max(component.MinDistance, component.MaxDistance);
+			component.Frequency = glm::max(component.Frequency, 0.0f);
+		});
+
+		DrawComponent<HingeJoint2DComponent>(ICON_MDI_ANGLE_ACUTE " Hinge Joint 2D", entity, [&entity](HingeJoint2DComponent& component)
+		{
+			UI::BeginProperties();
+			UI::Property("Enable Collision", component.EnableCollision);
+
+			eastl::string name = "Empty Rigidbody 2D";
+			Entity rb2d;
+
+			if (component.ConnectedRigidbody)
+				rb2d = entity.GetScene()->GetEntity(component.ConnectedRigidbody);
+
+			if (rb2d && rb2d.HasComponent<Rigidbody2DComponent>())
+				name = rb2d.GetComponent<TagComponent>().Tag;
+			else
+				component.ConnectedRigidbody = 0;
+
+			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", name.c_str(), component.ConnectedRigidbody, nullptr);
+			UI::Property("Anchor", component.Anchor);
+
+			UI::Property("Use Limits", component.UseLimits);
+			if (component.UseLimits)
+			{
+				ImGui::Indent();
+				UI::Property("Lower Angle", component.LowerAngle, 0.0f, 359.0f);
+				component.UpperAngle = glm::max(component.LowerAngle, component.UpperAngle);
+				UI::Property("Upper Angle", component.UpperAngle, component.LowerAngle, 359.9f);
+				ImGui::Unindent();
+			}
+
+			UI::Property("Use Motor", component.UseMotor);
+			if (component.UseMotor)
+			{
+				ImGui::Indent();
+				UI::Property("Motor Speed", component.MotorSpeed);
+				UI::Property("Max Motor Torque", component.MaxMotorTorque);
+				ImGui::Unindent();
+			}
+
+			UI::Property("Break Force", component.BreakForce);
+			UI::Property("Break Torque", component.BreakTorque);
 			UI::EndProperties();
 		});
 
@@ -709,27 +828,25 @@ namespace ArcEngine
 			UI::EndProperties();
 
 			ImGui::Spacing();
-			if (UI::IconButton(ICON_MDI_PLAY, "Play", { 1.0f, 1.0f, 1.0f, 1.0f }))
+			ImVec2 region = ImGui::GetContentRegionAvail();
+			region.y = ImGui::GetFrameHeight();
+			ImGui::BeginHorizontal("AudioSourceComponentButtons", region);
+			if (ImGui::Button(ICON_MDI_PLAY "Play "))
 			{
 				if (component.Source)
 					component.Source->Play();
 			}
-			ImGui::SameLine();
-			ImGui::Spacing();
-			ImGui::SameLine();
-			if (UI::IconButton(ICON_MDI_PAUSE, "Pause", { 1.0f, 1.0f, 1.0f, 1.0f }))
+			if (ImGui::Button(ICON_MDI_PAUSE "Pause "))
 			{
 				if (component.Source)
 					component.Source->Pause();
 			}
-			ImGui::SameLine();
-			ImGui::Spacing();
-			ImGui::SameLine();
-			if (UI::IconButton(ICON_MDI_STOP, "Stop", { 1.0f, 1.0f, 1.0f, 1.0f }))
+			if (ImGui::Button(ICON_MDI_STOP "Stop "))
 			{
 				if (component.Source)
 					component.Source->Stop();
 			}
+			ImGui::EndHorizontal();
 			ImGui::Spacing();
 
 			UI::BeginProperties();

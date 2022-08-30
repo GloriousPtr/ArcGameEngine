@@ -289,6 +289,7 @@ namespace ArcEngine
 			auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
 			out << YAML::Key << "Size" << YAML::Value << bc2d.Size;
 			out << YAML::Key << "Offset" << YAML::Value << bc2d.Offset;
+			out << YAML::Key << "IsSensor" << YAML::Value << bc2d.IsSensor;
 			out << YAML::Key << "Density" << YAML::Value << bc2d.Density;
 			out << YAML::Key << "Friction" << YAML::Value << bc2d.Friction;
 			out << YAML::Key << "Restitution" << YAML::Value << bc2d.Restitution;
@@ -305,6 +306,7 @@ namespace ArcEngine
 			auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
 			out << YAML::Key << "Radius" << YAML::Value << cc2d.Radius;
 			out << YAML::Key << "Offset" << YAML::Value << cc2d.Offset;
+			out << YAML::Key << "IsSensor" << YAML::Value << cc2d.IsSensor;
 			out << YAML::Key << "Density" << YAML::Value << cc2d.Density;
 			out << YAML::Key << "Friction" << YAML::Value << cc2d.Friction;
 			out << YAML::Key << "Restitution" << YAML::Value << cc2d.Restitution;
@@ -649,6 +651,7 @@ namespace ArcEngine
 			auto& src = deserializedEntity.AddComponent<BoxCollider2DComponent>();
 			TrySet(src.Size, bc2dCpmponent["Size"]);
 			TrySet(src.Offset, bc2dCpmponent["Offset"]);
+			TrySet(src.IsSensor, bc2dCpmponent["IsSensor"]);
 			TrySet(src.Density, bc2dCpmponent["Density"]);
 			TrySet(src.Friction, bc2dCpmponent["Friction"]);
 			TrySet(src.Restitution, bc2dCpmponent["Restitution"]);
@@ -661,6 +664,7 @@ namespace ArcEngine
 			auto& src = deserializedEntity.AddComponent<CircleCollider2DComponent>();
 			TrySet(src.Radius, cc2dCpmponent["Radius"]);
 			TrySet(src.Offset, cc2dCpmponent["Offset"]);
+			TrySet(src.IsSensor, cc2dCpmponent["IsSensor"]);
 			TrySet(src.Density, cc2dCpmponent["Density"]);
 			TrySet(src.Friction, cc2dCpmponent["Friction"]);
 			TrySet(src.Restitution, cc2dCpmponent["Restitution"]);

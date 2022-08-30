@@ -70,6 +70,60 @@ namespace ArcEngine
 		static bool Property(const char* label, Ref<TextureCubemap>& texture, uint32_t overrideTextureID = 0, const char* tooltip = nullptr);
 		static bool Property(const char* label, Ref<Texture2D>& texture, uint32_t overrideTextureID = 0, const char* tooltip = nullptr);
 
+		template<typename T>
+		static bool PropertyComponent(const char* label, const char* emptyText, UUID& entity, const char* tooltip = nullptr)
+		{
+			BeginPropertyGrid(label, tooltip);
+
+			bool modified = false;
+
+			s_IDBuffer[0] = '#';
+			s_IDBuffer[1] = '#';
+			memset(s_IDBuffer + 2, 0, 14);
+			itoa(s_Counter++, s_IDBuffer + 2, 16);
+			ImVec2 region = ImGui::GetContentRegionAvail();
+			region.x -= 20.0f;
+			region.y = ImGui::GetFrameHeight();
+
+			ImVec2 pos = ImGui::GetCursorPos();
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyle().Colors[ImGuiCol_Button]);
+			ImGui::Button(s_IDBuffer, region);
+			ImGui::PopStyleColor();
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity"))
+				{
+					Entity* e = (Entity*)payload->Data;
+					if (e->HasComponent<T>())
+					{
+						entity = e->GetUUID();
+						modified = true;
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+			ImGui::SameLine();
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.3f, 0.3f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
+			if (ImGui::Button("x", { 20.0f, region.y }))
+			{
+				entity = 0;
+				modified = true;
+			}
+			ImGui::PopStyleColor(3);
+			ImGui::PopStyleVar();
+
+			ImVec2 padding = ImGui::GetStyle().FramePadding;
+			ImGui::SetCursorPos({ pos.x + padding.x, pos.y + padding.y });
+			ImGui::Text(emptyText);
+			
+			EndPropertyGrid();
+
+			return modified;
+		}
+
 		// Field
 		static void DrawField(Field& field);
 		
@@ -86,5 +140,10 @@ namespace ArcEngine
 
 		static void BeginPropertyGrid(const char* label, const char* tooltip, bool rightAlignNextColumn = true);
 		static void EndPropertyGrid();
+
+	private:
+		static int s_UIContextID;
+		static uint32_t s_Counter;
+		static char s_IDBuffer[16];
 	};
 }

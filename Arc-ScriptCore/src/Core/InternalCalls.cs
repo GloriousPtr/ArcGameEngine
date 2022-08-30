@@ -144,6 +144,14 @@ namespace ArcEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void Rigidbody2DComponent_MoveRotation(ulong entityID, ref float r);
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void Rigidbody2DComponent_GetVelocity(ulong entityID, out Vector2 v);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void Rigidbody2DComponent_SetVelocity(ulong entityID, ref Vector2 v);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void Rigidbody2DComponent_GetAngularVelocity(ulong entityID, out float v);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void Rigidbody2DComponent_SetAngularVelocity(ulong entityID, ref float v);
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void Rigidbody2DComponent_Sleep(ulong entityID);
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void Rigidbody2DComponent_WakeUp(ulong entityID);

@@ -28,6 +28,28 @@ namespace Sandbox
 		public void OnCreate()
 		{
 			m_TransformComponent = GetComponent<TransformComponent>();
+
+			/*
+			OnSensorEnter2D += (CollisionData data) =>
+			{
+				Log.Info("Sensor Enter 2D: {0}, other: {1}", GetComponent<TagComponent>().tag, data.otherEntity.GetComponent<TagComponent>().tag);
+			};
+
+			OnSensorExit2D += (CollisionData data) =>
+			{
+				Log.Info("Sensor Exit 2D: {0}, other: {1}", GetComponent<TagComponent>().tag, data.otherEntity.GetComponent<TagComponent>().tag);
+			};
+
+			OnCollisionEnter2D += (CollisionData data) =>
+			{
+				Log.Info("Collision Enter 2D: {0}, other: {1}", GetComponent<TagComponent>().tag, data.otherEntity.GetComponent<TagComponent>().tag);
+			};
+
+			OnCollisionExit2D += (CollisionData data) =>
+			{
+				Log.Info("Collision Exit 2D: {0}, other: {1}", GetComponent<TagComponent>().tag, data.otherEntity.GetComponent<TagComponent>().tag);
+			};
+			*/
 		}
 
 		public void OnUpdate(float timestep)
@@ -40,6 +62,10 @@ namespace Sandbox
 				transform.Rotation.z -= Speed * timestep;
 
 			m_TransformComponent.transform = transform;
+		}
+
+		public void OnDestroy()
+		{
 		}
 	}
 }

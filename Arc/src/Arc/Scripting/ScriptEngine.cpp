@@ -399,11 +399,9 @@ namespace ArcEngine
 		return nullptr;
 	}
 
-	MonoMethod* ScriptClass::GetMethod(const eastl::string& signature)
+	MonoMethod* ScriptClass::GetMethod(const char* methodName, uint32_t parameterCount)
 	{
-		eastl::string desc = m_ClassNamespace + "." + m_ClassName + ":" + signature;
-		MonoMethodDesc* methodDesc = mono_method_desc_new(desc.c_str(), true);
-		return mono_method_desc_search_in_class(methodDesc, m_MonoClass);
+		return mono_class_get_method_from_name(m_MonoClass, methodName, parameterCount);
 	}
 
 	GCHandle ScriptClass::InvokeMethod(GCHandle gcHandle, MonoMethod* method, void** params)
@@ -522,15 +520,12 @@ namespace ArcEngine
 		MonoObject* copy = mono_object_clone(GCManager::GetReferencedObject(scriptInstance->m_Handle));
 		m_Handle = GCManager::CreateObjectReference(copy, false);
 
-		ScriptClass entityClass = ScriptClass(s_Data->EntityClass);
-		m_Constructor = entityClass.GetMethod(".ctor(ulong)");
+		m_EntityClass = CreateRef<ScriptClass>(s_Data->EntityClass);
+		m_Constructor = m_EntityClass->GetMethod(".ctor", 1);
 		void* params = &entityID;
-		entityClass.InvokeMethod(m_Handle, m_Constructor, &params);
+		m_EntityClass->InvokeMethod(m_Handle, m_Constructor, &params);
 
-		m_OnCreateMethod = m_ScriptClass->GetMethod("OnCreate()");
-		m_OnUpdateMethod = m_ScriptClass->GetMethod("OnUpdate(single)");
-		m_OnDestroyMethod = m_ScriptClass->GetMethod("OnDestroy()");
-
+		LoadMethods();
 		LoadFields();
 	}
 
@@ -539,16 +534,12 @@ namespace ArcEngine
 	{
 		m_Handle = scriptClass->Instantiate();
 
-		MonoClass* entityKlass = s_Data->EntityClass;
-		ScriptClass entityClass = ScriptClass(entityKlass);
-		m_Constructor = entityClass.GetMethod(".ctor(ulong)");
+		m_EntityClass = CreateRef<ScriptClass>(s_Data->EntityClass);
+		m_Constructor = m_EntityClass->GetMethod(".ctor", 1);
 		void* params = &entityID;
-		entityClass.InvokeMethod(m_Handle, m_Constructor, &params);
-
-		m_OnCreateMethod = scriptClass->GetMethod("OnCreate()");
-		m_OnUpdateMethod = scriptClass->GetMethod("OnUpdate(single)");
-		m_OnDestroyMethod = scriptClass->GetMethod("OnDestroy()");
-
+		m_EntityClass->InvokeMethod(m_Handle, m_Constructor, &params);
+		
+		LoadMethods();
 		LoadFields();
 	}
 
@@ -562,17 +553,25 @@ namespace ArcEngine
 		m_ScriptClass = scriptClass;
 		m_Handle = scriptClass->Instantiate();
 
-		MonoClass* entityKlass = s_Data->EntityClass;
-		ScriptClass entityClass = ScriptClass(entityKlass);
-		m_Constructor = entityClass.GetMethod(".ctor(ulong)");
+		m_EntityClass = CreateRef<ScriptClass>(s_Data->EntityClass);
+		m_Constructor = m_EntityClass->GetMethod(".ctor", 1);
 		void* params = &entityID;
-		entityClass.InvokeMethod(m_Handle, m_Constructor, &params);
+		m_EntityClass->InvokeMethod(m_Handle, m_Constructor, &params);
 
-		m_OnCreateMethod = scriptClass->GetMethod("OnCreate()");
-		m_OnUpdateMethod = scriptClass->GetMethod("OnUpdate(single)");
-		m_OnDestroyMethod = scriptClass->GetMethod("OnDestroy()");
-
+		LoadMethods();
 		LoadFields();
+	}
+
+	void ScriptInstance::LoadMethods()
+	{
+		m_OnCreateMethod = m_ScriptClass->GetMethod("OnCreate", 0);
+		m_OnUpdateMethod = m_ScriptClass->GetMethod("OnUpdate", 1);
+		m_OnDestroyMethod = m_ScriptClass->GetMethod("OnDestroy", 0);
+
+		m_OnCollisionEnter2DMethod = m_EntityClass->GetMethod("HandleOnCollisionEnter2D", 1);
+		m_OnCollisionExit2DMethod = m_EntityClass->GetMethod("HandleOnCollisionExit2D", 1);
+		m_OnSensorEnter2DMethod = m_EntityClass->GetMethod("HandleOnSensorEnter2D", 1);
+		m_OnSensorExit2DMethod = m_EntityClass->GetMethod("HandleOnSensorExit2D", 1);
 	}
 
 	void ScriptInstance::LoadFields()
@@ -684,5 +683,29 @@ namespace ArcEngine
 	{
 		if (m_OnDestroyMethod)
 			m_ScriptClass->InvokeMethod(m_Handle, m_OnDestroyMethod);
+	}
+
+	void ScriptInstance::InvokeOnCollisionEnter2D(Collision2DData& other)
+	{
+		void* params = &other;
+		m_EntityClass->InvokeMethod(m_Handle, m_OnCollisionEnter2DMethod, &params);
+	}
+
+	void ScriptInstance::InvokeOnCollisionExit2D(Collision2DData& other)
+	{
+		void* params = &other;
+		m_EntityClass->InvokeMethod(m_Handle, m_OnCollisionExit2DMethod, &params);
+	}
+
+	void ScriptInstance::InvokeOnSensorEnter2D(Collision2DData& other)
+	{
+		void* params = &other;
+		m_EntityClass->InvokeMethod(m_Handle, m_OnSensorEnter2DMethod, &params);
+	}
+
+	void ScriptInstance::InvokeOnSensorExit2D(Collision2DData& other)
+	{
+		void* params = &other;
+		m_EntityClass->InvokeMethod(m_Handle, m_OnSensorExit2DMethod, &params);
 	}
 }
