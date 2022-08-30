@@ -1043,18 +1043,127 @@ namespace ArcEngine
 	}
 
 	template<>
-	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component)
+	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& body)
 	{
+		if (m_PhysicsWorld2D)
+		{
+			TransformComponent& transform = entity.GetTransform();
+
+			b2BodyDef def;
+			def.type = (b2BodyType)body.Type;
+			def.linearDamping = body.LinearDrag;
+			def.angularDamping = body.AngularDrag;
+			def.allowSleep = body.AllowSleep;
+			def.awake = body.Awake;
+			def.fixedRotation = body.FreezeRotation;
+			def.bullet = body.Continuous;
+			def.gravityScale = body.GravityScale;
+
+			def.position.Set(transform.Translation.x, transform.Translation.y);
+			def.angle = transform.Rotation.z;
+
+			b2Body* rb = m_PhysicsWorld2D->CreateBody(&def);
+			body.RuntimeBody = rb;
+
+			if (entity.HasComponent<BoxCollider2DComponent>())
+			{
+				auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
+
+				b2PolygonShape boxShape;
+				boxShape.SetAsBox(bc2d.Size.x * transform.Scale.x, bc2d.Size.y * transform.Scale.y);
+
+				b2FixtureDef fixtureDef;
+				fixtureDef.shape = &boxShape;
+				fixtureDef.isSensor = bc2d.IsSensor;
+				fixtureDef.density = bc2d.Density;
+				fixtureDef.friction = bc2d.Friction;
+				fixtureDef.restitution = bc2d.Restitution;
+				fixtureDef.restitutionThreshold = bc2d.RestitutionThreshold;
+
+				b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
+				bc2d.RuntimeFixture = fixture;
+				m_FixtureMap[fixture] = entity;
+			}
+
+			if (entity.HasComponent<CircleCollider2DComponent>())
+			{
+				auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
+
+				b2CircleShape circleShape;
+				circleShape.m_radius = cc2d.Radius * glm::max(transform.Scale.x, transform.Scale.y);
+
+				b2FixtureDef fixtureDef;
+				fixtureDef.shape = &circleShape;
+				fixtureDef.isSensor = cc2d.IsSensor;
+				fixtureDef.density = cc2d.Density;
+				fixtureDef.friction = cc2d.Friction;
+				fixtureDef.restitution = cc2d.Restitution;
+				fixtureDef.restitutionThreshold = cc2d.RestitutionThreshold;
+
+				b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
+				cc2d.RuntimeFixture = fixture;
+				m_FixtureMap[fixture] = entity;
+			}
+
+			if (!body.AutoMass && body.Mass > 0.01f)
+			{
+				b2MassData massData = rb->GetMassData();
+				massData.mass = body.Mass;
+				rb->SetMassData(&massData);
+			}
+		}
 	}
 
 	template<>
-	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
+	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& bc2d)
 	{
+		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
+		{
+			TransformComponent& transform = entity.GetTransform();
+			b2Body* rb = (b2Body*) entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
+
+			b2PolygonShape boxShape;
+			boxShape.SetAsBox(bc2d.Size.x * transform.Scale.x, bc2d.Size.y * transform.Scale.y);
+
+			b2FixtureDef fixtureDef;
+			fixtureDef.shape = &boxShape;
+			fixtureDef.isSensor = bc2d.IsSensor;
+			fixtureDef.density = bc2d.Density;
+			fixtureDef.friction = bc2d.Friction;
+			fixtureDef.restitution = bc2d.Restitution;
+			fixtureDef.restitutionThreshold = bc2d.RestitutionThreshold;
+
+			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
+			bc2d.RuntimeFixture = fixture;
+			m_FixtureMap[fixture] = entity;
+		}
 	}
 	
 	template<>
-	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component)
+	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& cc2d)
 	{
+		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
+		{
+			TransformComponent& transform = entity.GetTransform();
+			b2Body* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
+
+			auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
+
+			b2CircleShape circleShape;
+			circleShape.m_radius = cc2d.Radius * glm::max(transform.Scale.x, transform.Scale.y);
+
+			b2FixtureDef fixtureDef;
+			fixtureDef.shape = &circleShape;
+			fixtureDef.isSensor = cc2d.IsSensor;
+			fixtureDef.density = cc2d.Density;
+			fixtureDef.friction = cc2d.Friction;
+			fixtureDef.restitution = cc2d.Restitution;
+			fixtureDef.restitutionThreshold = cc2d.RestitutionThreshold;
+
+			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
+			cc2d.RuntimeFixture = fixture;
+			m_FixtureMap[fixture] = entity;
+		}
 	}
 
 	template<>
