@@ -359,6 +359,8 @@ namespace ArcEngine
 				DrawAddComponent<DistanceJoint2DComponent>(entity, ICON_MDI_VECTOR_LINE " Distance Joint 2D");
 				DrawAddComponent<SpringJoint2DComponent>(entity, ICON_MDI_VECTOR_LINE " Spring Joint 2D");
 				DrawAddComponent<HingeJoint2DComponent>(entity, ICON_MDI_ANGLE_ACUTE " Hinge Joint 2D");
+				DrawAddComponent<SliderJoint2DComponent>(entity, ICON_MDI_ANGLE_ACUTE " Slider Joint 2D");
+				DrawAddComponent<WheelJoint2DComponent>(entity, ICON_MDI_CAR " Wheel Joint 2D");
 				DrawAddComponent<ScriptComponent>(entity, ICON_MDI_POUND_BOX " Script");
 				DrawAddComponent<AudioSourceComponent>(entity, ICON_MDI_VOLUME_MEDIUM " Audio");
 				DrawAddComponent<AudioListenerComponent>(entity, ICON_MDI_CIRCLE_SLICE_8 " Audio Listener");
@@ -736,6 +738,95 @@ namespace ArcEngine
 				UI::Property("Lower Angle", component.LowerAngle, 0.0f, 359.0f);
 				component.UpperAngle = glm::max(component.LowerAngle, component.UpperAngle);
 				UI::Property("Upper Angle", component.UpperAngle, component.LowerAngle, 359.9f);
+				ImGui::Unindent();
+			}
+
+			UI::Property("Use Motor", component.UseMotor);
+			if (component.UseMotor)
+			{
+				ImGui::Indent();
+				UI::Property("Motor Speed", component.MotorSpeed);
+				UI::Property("Max Motor Torque", component.MaxMotorTorque);
+				ImGui::Unindent();
+			}
+
+			UI::Property("Break Force", component.BreakForce);
+			UI::Property("Break Torque", component.BreakTorque);
+			UI::EndProperties();
+		});
+
+		DrawComponent<SliderJoint2DComponent>(ICON_MDI_ANGLE_ACUTE " Slider Joint 2D", entity, [&entity](SliderJoint2DComponent& component)
+		{
+			UI::BeginProperties();
+			UI::Property("Enable Collision", component.EnableCollision);
+
+			eastl::string name = "Empty Rigidbody 2D";
+			Entity rb2d;
+
+			if (component.ConnectedRigidbody)
+				rb2d = entity.GetScene()->GetEntity(component.ConnectedRigidbody);
+
+			if (rb2d && rb2d.HasComponent<Rigidbody2DComponent>())
+				name = rb2d.GetComponent<TagComponent>().Tag;
+			else
+				component.ConnectedRigidbody = 0;
+
+			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", name.c_str(), component.ConnectedRigidbody, nullptr);
+			UI::Property("Anchor", component.Anchor);
+
+			UI::Property("Angle", component.Angle);
+			UI::Property("Use Limits", component.UseLimits);
+			if (component.UseLimits)
+			{
+				ImGui::Indent();
+				UI::Property("Lower Translation", component.LowerTranslation);
+				component.UpperTranslation = glm::max(component.LowerTranslation, component.UpperTranslation);
+				UI::Property("Upper Angle", component.UpperTranslation);
+				ImGui::Unindent();
+			}
+
+			UI::Property("Use Motor", component.UseMotor);
+			if (component.UseMotor)
+			{
+				ImGui::Indent();
+				UI::Property("Motor Speed", component.MotorSpeed);
+				UI::Property("Max Motor Force", component.MaxMotorForce);
+				ImGui::Unindent();
+			}
+
+			UI::Property("Break Force", component.BreakForce);
+			UI::Property("Break Torque", component.BreakTorque);
+			UI::EndProperties();
+		});
+
+		DrawComponent<WheelJoint2DComponent>(ICON_MDI_CAR " Wheel Joint 2D", entity, [&entity](WheelJoint2DComponent& component)
+		{
+			UI::BeginProperties();
+			UI::Property("Enable Collision", component.EnableCollision);
+
+			eastl::string name = "Empty Rigidbody 2D";
+			Entity rb2d;
+
+			if (component.ConnectedRigidbody)
+				rb2d = entity.GetScene()->GetEntity(component.ConnectedRigidbody);
+
+			if (rb2d && rb2d.HasComponent<Rigidbody2DComponent>())
+				name = rb2d.GetComponent<TagComponent>().Tag;
+			else
+				component.ConnectedRigidbody = 0;
+
+			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", name.c_str(), component.ConnectedRigidbody, nullptr);
+			UI::Property("Anchor", component.Anchor);
+
+			UI::Property("Frequency", component.Frequency);
+			UI::Property("Damping Ratio", component.DampingRatio);
+			UI::Property("Use Limits", component.UseLimits);
+			if (component.UseLimits)
+			{
+				ImGui::Indent();
+				UI::Property("Lower Translation", component.LowerTranslation);
+				component.UpperTranslation = glm::max(component.LowerTranslation, component.UpperTranslation);
+				UI::Property("Upper Angle", component.UpperTranslation);
 				ImGui::Unindent();
 			}
 

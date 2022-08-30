@@ -329,7 +329,7 @@ namespace ArcEngine
 		float UpperAngle = 359.0f;
 		
 		bool UseMotor = false;
-		float MotorSpeed = 0.0f;
+		float MotorSpeed = 5.0f;
 		float MaxMotorTorque = 10000.0f;
 
 		float BreakForce = FLT_MAX;
@@ -339,6 +339,56 @@ namespace ArcEngine
 
 		HingeJoint2DComponent() = default;
 		HingeJoint2DComponent(const HingeJoint2DComponent&) = default;
+	};
+
+	struct SliderJoint2DComponent
+	{
+		bool EnableCollision = false;
+		UUID ConnectedRigidbody = 0;
+		glm::vec2 Anchor = glm::vec2(0.0f);
+		float Angle = 0.0f;
+
+		bool UseLimits = false;
+		float LowerTranslation = 0.0f;
+		float UpperTranslation = 0.0f;
+
+		bool UseMotor = false;
+		float MotorSpeed = 5.0f;
+		float MaxMotorForce = 20.0f;
+
+		float BreakForce = FLT_MAX;
+		float BreakTorque = FLT_MAX;
+
+		void* RuntimeJoint = nullptr;
+
+		SliderJoint2DComponent() = default;
+		SliderJoint2DComponent(const SliderJoint2DComponent&) = default;
+	};
+
+	struct WheelJoint2DComponent
+	{
+		bool EnableCollision = false;
+		UUID ConnectedRigidbody = 0;
+		glm::vec2 Anchor = glm::vec2(0.0f);
+
+		float Frequency = 4.0f;
+		float DampingRatio = 0.7f;
+
+		bool UseLimits = true;
+		float LowerTranslation = -0.25f;
+		float UpperTranslation = 0.25f;
+
+		bool UseMotor = true;
+		float MotorSpeed = 10.0f;
+		float MaxMotorTorque = 20.0f;
+
+		float BreakForce = FLT_MAX;
+		float BreakTorque = FLT_MAX;
+
+		void* RuntimeJoint = nullptr;
+
+		WheelJoint2DComponent() = default;
+		WheelJoint2DComponent(const WheelJoint2DComponent&) = default;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -401,6 +451,8 @@ namespace ArcEngine
 		DistanceJoint2DComponent,
 		SpringJoint2DComponent,
 		HingeJoint2DComponent,
+		SliderJoint2DComponent,
+		WheelJoint2DComponent,
 		ScriptComponent,
 		AudioSourceComponent,
 		AudioListenerComponent

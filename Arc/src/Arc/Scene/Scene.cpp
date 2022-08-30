@@ -418,10 +418,10 @@ namespace ArcEngine
 				}
 			}
 
-			auto hingeJoint = m_Registry.view<Rigidbody2DComponent, HingeJoint2DComponent>();
-			for (auto e : hingeJoint)
+			auto hingeJointView = m_Registry.view<Rigidbody2DComponent, HingeJoint2DComponent>();
+			for (auto e : hingeJointView)
 			{
-				auto [body, joint] = hingeJoint.get<Rigidbody2DComponent, HingeJoint2DComponent>(e);
+				auto [body, joint] = hingeJointView.get<Rigidbody2DComponent, HingeJoint2DComponent>(e);
 				Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
 				if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
 				{
@@ -441,6 +441,68 @@ namespace ArcEngine
 					jointDef.maxMotorTorque = joint.MaxMotorTorque;
 
 					joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jointDef);
+				}
+			}
+
+			auto sliderJointView = m_Registry.view<Rigidbody2DComponent, SliderJoint2DComponent>();
+			for (auto e : sliderJointView)
+			{
+				auto [body, joint] = sliderJointView.get<Rigidbody2DComponent, SliderJoint2DComponent>(e);
+				Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
+				if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+				{
+					b2Body* body1 = (b2Body*)body.RuntimeBody;
+					b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+					b2Vec2 body1Center = body1->GetWorldCenter();
+					b2Vec2 anchorPos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
+					
+					b2Vec2 worldAxis(1.0f, 0.0f);
+
+					b2PrismaticJointDef jointDef;
+					jointDef.Initialize(body1, body2, anchorPos, worldAxis);
+					jointDef.collideConnected = joint.EnableCollision;
+					jointDef.referenceAngle = glm::radians(joint.Angle);
+					jointDef.enableLimit = joint.UseLimits;
+					jointDef.lowerTranslation = joint.LowerTranslation;
+					jointDef.upperTranslation = joint.UpperTranslation;
+					jointDef.enableMotor = joint.UseMotor;
+					jointDef.motorSpeed = joint.MotorSpeed;
+					jointDef.maxMotorForce = joint.MaxMotorForce;
+
+					joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jointDef);
+				}
+			}
+
+			auto wheelJointView = m_Registry.view<Rigidbody2DComponent, WheelJoint2DComponent>();
+			for (auto e : wheelJointView)
+			{
+				auto [body, joint] = wheelJointView.get<Rigidbody2DComponent, WheelJoint2DComponent>(e);
+				Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
+				if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+				{
+					b2Body* body1 = (b2Body*)body.RuntimeBody;
+					b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+					b2Vec2 body1Center = body1->GetPosition();
+					b2Vec2 anchorPos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
+
+					b2Vec2 axis(0.0f, 1.0f);
+
+					float mass = body1->GetMass();
+					float omega = 2.0f * b2_pi * joint.Frequency;
+
+					b2WheelJointDef jd;
+					jd.Initialize(body1, body2, anchorPos, axis);
+					jd.collideConnected = joint.EnableCollision;
+					jd.stiffness = mass * omega * omega;
+					jd.damping = 2.0f * mass * joint.DampingRatio * omega;
+					jd.enableMotor = joint.UseMotor;
+					jd.motorSpeed = joint.MotorSpeed;
+					jd.maxMotorTorque = joint.MaxMotorTorque;
+					jd.enableLimit = joint.UseLimits;
+					jd.lowerTranslation = joint.LowerTranslation;
+					jd.upperTranslation = joint.UpperTranslation;
+
+					joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
 				}
 			}
 		}
@@ -726,6 +788,40 @@ namespace ArcEngine
 					}
 				}
 			}
+
+			auto sliderJointView = m_Registry.view<SliderJoint2DComponent>();
+			for (auto e : sliderJointView)
+			{
+				auto& joint = sliderJointView.get<SliderJoint2DComponent>(e);
+				if (joint.RuntimeJoint)
+				{
+					b2Joint* j = (b2Joint*)joint.RuntimeJoint;
+
+					if (j->GetReactionForce(invdt).LengthSquared() > joint.BreakForce * joint.BreakForce
+						|| j->GetReactionTorque(invdt) > joint.BreakTorque)
+					{
+						m_PhysicsWorld2D->DestroyJoint(j);
+						joint.RuntimeJoint = nullptr;
+					}
+				}
+			}
+
+			auto wheelJointView = m_Registry.view<WheelJoint2DComponent>();
+			for (auto e : wheelJointView)
+			{
+				auto& joint = wheelJointView.get<WheelJoint2DComponent>(e);
+				if (joint.RuntimeJoint)
+				{
+					b2Joint* j = (b2Joint*)joint.RuntimeJoint;
+
+					if (j->GetReactionForce(invdt).LengthSquared() > joint.BreakForce * joint.BreakForce
+						|| j->GetReactionTorque(invdt) > joint.BreakTorque)
+					{
+						m_PhysicsWorld2D->DestroyJoint(j);
+						joint.RuntimeJoint = nullptr;
+					}
+				}
+			}
 		}
 
 		/////////////////////////////////////////////////////////////////////
@@ -973,6 +1069,16 @@ namespace ArcEngine
 
 	template<>
 	void Scene::OnComponentAdded<HingeJoint2DComponent>(Entity entity, HingeJoint2DComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<SliderJoint2DComponent>(Entity entity, SliderJoint2DComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<WheelJoint2DComponent>(Entity entity, WheelJoint2DComponent& component)
 	{
 	}
 
