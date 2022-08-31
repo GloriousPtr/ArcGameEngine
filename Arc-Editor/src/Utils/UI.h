@@ -71,8 +71,18 @@ namespace ArcEngine
 		static bool Property(const char* label, Ref<Texture2D>& texture, uint32_t overrideTextureID = 0, const char* tooltip = nullptr);
 
 		template<typename T>
-		static bool PropertyComponent(const char* label, const char* emptyText, UUID& entity, const char* tooltip = nullptr)
+		static bool PropertyComponent(const char* label, const char* text, Scene* scene, UUID& entityID, const char* tooltip = nullptr)
 		{
+			Entity entity;
+			if (entityID)
+				entity = scene->GetEntity(entityID);
+
+			const char* tag = "none";
+			if (entity && entity.HasComponent<T>())
+				tag = entity.GetComponent<TagComponent>().Tag.c_str();
+			else
+				entityID = 0;
+
 			BeginPropertyGrid(label, tooltip);
 
 			bool modified = false;
@@ -94,10 +104,10 @@ namespace ArcEngine
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity"))
 				{
-					Entity* e = (Entity*)payload->Data;
-					if (e->HasComponent<T>())
+					Entity* payloadEntity = (Entity*)payload->Data;
+					if (payloadEntity->HasComponent<T>())
 					{
-						entity = e->GetUUID();
+						entityID = payloadEntity->GetUUID();
 						modified = true;
 					}
 				}
@@ -109,15 +119,21 @@ namespace ArcEngine
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
 			if (ImGui::Button("x", { 20.0f, region.y }))
 			{
-				entity = 0;
+				entityID = 0;
 				modified = true;
 			}
 			ImGui::PopStyleColor(3);
 			ImGui::PopStyleVar();
 
+			if (!entityID)
+				ImGui::PushStyleColor(ImGuiCol_Text, { 0.8f, 0.2f, 0.2f, 1.0f });
+
 			ImVec2 padding = ImGui::GetStyle().FramePadding;
 			ImGui::SetCursorPos({ pos.x + padding.x, pos.y + padding.y });
-			ImGui::Text(emptyText);
+			ImGui::Text("%s (%s)", tag, text);
+
+			if (!entityID)
+				ImGui::PopStyleColor();
 			
 			EndPropertyGrid();
 

@@ -655,20 +655,7 @@ namespace ArcEngine
 		{
 			UI::BeginProperties();
 			UI::Property("Enable Collision", component.EnableCollision);
-
-			eastl::string name = "Empty Rigidbody 2D";
-			Entity rb2d;
-			
-			if (component.ConnectedRigidbody)
-				rb2d = entity.GetScene()->GetEntity(component.ConnectedRigidbody);
-			
-			if (rb2d && rb2d.HasComponent<Rigidbody2DComponent>())
-				name = rb2d.GetComponent<TagComponent>().Tag;
-			else
-				component.ConnectedRigidbody = 0;
-
-			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", name.c_str(), component.ConnectedRigidbody, nullptr);
-			
+			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", "Rigidbody 2D", entity.GetScene(), component.ConnectedRigidbody, nullptr);
 			UI::Property("Anchor", component.Anchor);
 			UI::Property("Connected Anchor", component.ConnectedAnchor);
 			UI::Property("Min Distance", component.MinDistance);
@@ -684,20 +671,7 @@ namespace ArcEngine
 		{
 			UI::BeginProperties();
 			UI::Property("Enable Collision", component.EnableCollision);
-
-			eastl::string name = "Empty Rigidbody 2D";
-			Entity rb2d;
-
-			if (component.ConnectedRigidbody)
-				rb2d = entity.GetScene()->GetEntity(component.ConnectedRigidbody);
-
-			if (rb2d && rb2d.HasComponent<Rigidbody2DComponent>())
-				name = rb2d.GetComponent<TagComponent>().Tag;
-			else
-				component.ConnectedRigidbody = 0;
-
-			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", name.c_str(), component.ConnectedRigidbody, nullptr);
-
+			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", "Rigidbody 2D", entity.GetScene(), component.ConnectedRigidbody, nullptr);
 			UI::Property("Anchor", component.Anchor);
 			UI::Property("Connected Anchor", component.ConnectedAnchor);
 			UI::Property("Min Distance", component.MinDistance);
@@ -716,19 +690,7 @@ namespace ArcEngine
 		{
 			UI::BeginProperties();
 			UI::Property("Enable Collision", component.EnableCollision);
-
-			eastl::string name = "Empty Rigidbody 2D";
-			Entity rb2d;
-
-			if (component.ConnectedRigidbody)
-				rb2d = entity.GetScene()->GetEntity(component.ConnectedRigidbody);
-
-			if (rb2d && rb2d.HasComponent<Rigidbody2DComponent>())
-				name = rb2d.GetComponent<TagComponent>().Tag;
-			else
-				component.ConnectedRigidbody = 0;
-
-			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", name.c_str(), component.ConnectedRigidbody, nullptr);
+			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", "Rigidbody 2D", entity.GetScene(), component.ConnectedRigidbody, nullptr);
 			UI::Property("Anchor", component.Anchor);
 
 			UI::Property("Use Limits", component.UseLimits);
@@ -759,19 +721,7 @@ namespace ArcEngine
 		{
 			UI::BeginProperties();
 			UI::Property("Enable Collision", component.EnableCollision);
-
-			eastl::string name = "Empty Rigidbody 2D";
-			Entity rb2d;
-
-			if (component.ConnectedRigidbody)
-				rb2d = entity.GetScene()->GetEntity(component.ConnectedRigidbody);
-
-			if (rb2d && rb2d.HasComponent<Rigidbody2DComponent>())
-				name = rb2d.GetComponent<TagComponent>().Tag;
-			else
-				component.ConnectedRigidbody = 0;
-
-			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", name.c_str(), component.ConnectedRigidbody, nullptr);
+			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", "Rigidbody 2D", entity.GetScene(), component.ConnectedRigidbody, nullptr);
 			UI::Property("Anchor", component.Anchor);
 
 			UI::Property("Angle", component.Angle);
@@ -803,19 +753,7 @@ namespace ArcEngine
 		{
 			UI::BeginProperties();
 			UI::Property("Enable Collision", component.EnableCollision);
-
-			eastl::string name = "Empty Rigidbody 2D";
-			Entity rb2d;
-
-			if (component.ConnectedRigidbody)
-				rb2d = entity.GetScene()->GetEntity(component.ConnectedRigidbody);
-
-			if (rb2d && rb2d.HasComponent<Rigidbody2DComponent>())
-				name = rb2d.GetComponent<TagComponent>().Tag;
-			else
-				component.ConnectedRigidbody = 0;
-
-			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", name.c_str(), component.ConnectedRigidbody, nullptr);
+			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", "Rigidbody 2D", entity.GetScene(), component.ConnectedRigidbody, nullptr);
 			UI::Property("Anchor", component.Anchor);
 
 			UI::Property("Frequency", component.Frequency);
