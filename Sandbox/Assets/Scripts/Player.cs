@@ -25,17 +25,19 @@ namespace Sandbox
 				m_Rigidbody2D.ApplyLinearImpulse(Force);
 
 			float speed = Speed * timestep;
-			Vector2 pos = m_TransformComponent.transform.Translation;
-			if (Input.IsKeyPressed(KeyCodes.W))
-				pos.y += speed;
-			else if (Input.IsKeyPressed(KeyCodes.S))
-				pos.y -= speed;
-			if (Input.IsKeyPressed(KeyCodes.D))
-				pos.x += speed;
-			else if (Input.IsKeyPressed(KeyCodes.A))
-				pos.x -= speed;
+			Vector2 dir = new Vector2(0.0f);
 
-			m_Rigidbody2D.MovePosition(pos);
+			if (Input.IsKeyPressed(KeyCodes.W))
+				dir.y = 1.0f;
+			else if (Input.IsKeyPressed(KeyCodes.S))
+				dir.y = -1.0f;
+			if (Input.IsKeyPressed(KeyCodes.D))
+				dir.x = 1.0f;
+			else if (Input.IsKeyPressed(KeyCodes.A))
+				dir.x = -1.0f;
+
+			Vector2 velocity = dir * speed;
+			m_Rigidbody2D.velocity = velocity;
 		}
 	}
 }

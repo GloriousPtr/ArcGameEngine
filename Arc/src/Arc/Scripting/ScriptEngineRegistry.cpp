@@ -505,15 +505,22 @@ namespace ArcEngine
 
 	void Rigidbody2D_MovePosition(uint64_t entityID, glm::vec2* position)
 	{
-		auto& component = GetEntity(entityID).GetComponent<TransformComponent>();
-		component.Translation.x = position->x;
-		component.Translation.y = position->y;
+		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
+		if (component.RuntimeBody)
+		{
+			b2Body* body = (b2Body*)component.RuntimeBody;
+			body->SetTransform({ position->x, position->y }, body->GetAngle());
+		}
 	}
 
 	void Rigidbody2D_MoveRotation(uint64_t entityID, float* angle)
 	{
-		auto& component = GetEntity(entityID).GetComponent<TransformComponent>();
-		component.Rotation.z = *angle;
+		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
+		if (component.RuntimeBody)
+		{
+			b2Body* body = (b2Body*)component.RuntimeBody;
+			body->SetTransform(body->GetPosition(), glm::radians(*angle));
+		}
 	}
 
 	void Rigidbody2D_GetVelocity(uint64_t entityID, glm::vec2* outVelocity)

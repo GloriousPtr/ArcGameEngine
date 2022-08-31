@@ -677,6 +677,16 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE("Update");
 
+			{
+				auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
+				for (auto e : view)
+				{
+					auto [tc, body] = view.get<TransformComponent, Rigidbody2DComponent>(e);
+					b2Body* rb = (b2Body*)body.RuntimeBody;
+					rb->SetTransform(b2Vec2(tc.Translation.x, tc.Translation.y), tc.Rotation.z);
+				}
+			}
+
 			/////////////////////////////////////////////////////////////////////
 			// Scripting ////////////////////////////////////////////////////////
 			/////////////////////////////////////////////////////////////////////
@@ -713,17 +723,9 @@ namespace ArcEngine
 		/////////////////////////////////////////////////////////////////////
 		{
 			ARC_PROFILE_SCOPE("Physics 2D");
+			m_PhysicsWorld2D->Step(ts, VelocityIterations, PositionIterations);
 
 			auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
-			for (auto e : view)
-			{
-				auto [tc, body] = view.get<TransformComponent, Rigidbody2DComponent>(e);
-				b2Body* rb = (b2Body*)body.RuntimeBody;
-				rb->SetTransform(b2Vec2(tc.Translation.x, tc.Translation.y), tc.Rotation.z);
-			}
-
-			m_PhysicsWorld2D->Step(ts, VelocityIterations, PositionIterations);
-		
 			for (auto e : view)
 			{
 				auto [transform, body] = view.get<TransformComponent, Rigidbody2DComponent>(e);
