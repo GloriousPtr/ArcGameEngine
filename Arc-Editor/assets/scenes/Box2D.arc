@@ -14,8 +14,8 @@ Entities:
       Children:
         {}
     SpriteRendererComponent:
-      Color: [0.800000012, 0.200000003, 0.200000003, 1]
-      TexturePath: ""
+      Color: [1, 1, 1, 1]
+      TexturePath: Assets\textures\circle.png
       TilingFactor: 1
     Rigidbody2DComponent:
       Type: 2
@@ -28,13 +28,13 @@ Entities:
       Continuous: false
       FreezeRotation: false
       GravityScale: 1
-    BoxCollider2DComponent:
-      Size: [0.5, 0.5]
+    CircleCollider2DComponent:
+      Radius: 0.5
       Offset: [0, 0]
       IsSensor: false
       Density: 1
       Friction: 0.5
-      Restitution: 0.649999976
+      Restitution: 0
       RestitutionThreshold: 0.5
   - Entity: 1324993968739374613
     TagComponent:
@@ -65,20 +65,20 @@ Entities:
       Tag: Ground
       Enabled: true
     TransformComponent:
-      Translation: [0, -2.02967358, 0]
+      Translation: [0, -2.32999992, 0]
       Rotation: [0, 0, 0]
-      Scale: [6.34841347, 1, 1]
+      Scale: [6.34841347, 3, 1]
     RelationshipComponent:
       Parent: 0
       ChildrenCount: 0
       Children:
         {}
     SpriteRendererComponent:
-      Color: [0.272219539, 0.807829201, 0.264485002, 1]
+      Color: [0.199999988, 0.76510638, 1, 0.53191489]
       TexturePath: ""
       TilingFactor: 1
     Rigidbody2DComponent:
-      Type: 0
+      Type: 1
       AutoMass: true
       Mass: 1
       LinearDrag: 0
@@ -91,11 +91,19 @@ Entities:
     BoxCollider2DComponent:
       Size: [0.5, 0.5]
       Offset: [0, 0]
-      IsSensor: false
+      IsSensor: true
       Density: 1
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
+    ScriptComponent:
+      ScriptCount: 1
+      Scripts:
+        0:
+          Name: Sandbox.Player
+          Fields:
+            Force: [0, 1]
+            Speed: 5
   - Entity: 8816232855549296649
     TagComponent:
       Tag: Box
@@ -114,9 +122,9 @@ Entities:
       TexturePath: ""
       TilingFactor: 1
     Rigidbody2DComponent:
-      Type: 1
+      Type: 2
       AutoMass: false
-      Mass: 3
+      Mass: 1
       LinearDrag: 0
       AngularDrag: 0.0500000007
       AllowSleep: false
@@ -132,11 +140,3 @@ Entities:
       Friction: 0.5
       Restitution: 0.699999988
       RestitutionThreshold: 0.5
-    ScriptComponent:
-      ScriptCount: 1
-      Scripts:
-        0:
-          Name: Sandbox.Player
-          Fields:
-            Force: [0, 5]
-            Speed: 3

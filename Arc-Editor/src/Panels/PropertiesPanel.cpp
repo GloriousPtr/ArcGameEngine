@@ -361,6 +361,7 @@ namespace ArcEngine
 				DrawAddComponent<HingeJoint2DComponent>(entity, ICON_MDI_ANGLE_ACUTE " Hinge Joint 2D");
 				DrawAddComponent<SliderJoint2DComponent>(entity, ICON_MDI_ANGLE_ACUTE " Slider Joint 2D");
 				DrawAddComponent<WheelJoint2DComponent>(entity, ICON_MDI_CAR " Wheel Joint 2D");
+				DrawAddComponent<BuoyancyEffector2DComponent>(entity, ICON_MDI_WATER " Buoyancy Effector 2D");
 				DrawAddComponent<ScriptComponent>(entity, ICON_MDI_POUND_BOX " Script");
 				DrawAddComponent<AudioSourceComponent>(entity, ICON_MDI_VOLUME_MEDIUM " Audio");
 				DrawAddComponent<AudioListenerComponent>(entity, ICON_MDI_CIRCLE_SLICE_8 " Audio Listener");
@@ -779,6 +780,14 @@ namespace ArcEngine
 
 			UI::Property("Break Force", component.BreakForce);
 			UI::Property("Break Torque", component.BreakTorque);
+			UI::EndProperties();
+		});
+
+		DrawComponent<BuoyancyEffector2DComponent>(ICON_MDI_WATER " Buoyancy Effector 2D", entity, [&entity](BuoyancyEffector2DComponent& component)
+		{
+			UI::BeginProperties();
+			UI::Property("Density", component.Density);
+			UI::Property("Drag Multiplier", component.DragMultiplier);
 			UI::EndProperties();
 		});
 

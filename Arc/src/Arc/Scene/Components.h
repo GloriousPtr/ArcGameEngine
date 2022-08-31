@@ -391,6 +391,17 @@ namespace ArcEngine
 		WheelJoint2DComponent(const WheelJoint2DComponent&) = default;
 	};
 
+	struct BuoyancyEffector2DComponent
+	{
+		float Density = 2.0f;
+		float DragMultiplier = 1.0f;
+
+		void* RuntimeJoint = nullptr;
+
+		BuoyancyEffector2DComponent() = default;
+		BuoyancyEffector2DComponent(const BuoyancyEffector2DComponent&) = default;
+	};
+
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Script ///////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -453,6 +464,7 @@ namespace ArcEngine
 		HingeJoint2DComponent,
 		SliderJoint2DComponent,
 		WheelJoint2DComponent,
+		BuoyancyEffector2DComponent,
 		ScriptComponent,
 		AudioSourceComponent,
 		AudioListenerComponent

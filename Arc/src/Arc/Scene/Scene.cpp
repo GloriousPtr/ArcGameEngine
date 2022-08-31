@@ -1,6 +1,7 @@
 #include "arcpch.h"
 #include "Arc/Scene/Scene.h"
 
+#include "Arc/Physics/PhysicsUtils.h"
 #include "Arc/Scene/Components.h"
 #include "Arc/Scene/ScriptableEntity.h"
 #include "Arc/Renderer/Renderer2D.h"
@@ -10,6 +11,7 @@
 #include <glm/glm.hpp>
 #include <glad/glad.h>
 #include <box2d/box2d.h>
+#include <EASTL/set.h>
 
 #include "Entity.h"
 
@@ -24,14 +26,31 @@ namespace ArcEngine
 		{
 		}
 
+		virtual ~ContactListener()
+		{
+			m_BuoyancyFixtures.clear();
+		}
+
 		virtual void BeginContact(b2Contact* contact) override
 		{
 			b2Fixture* a = contact->GetFixtureA();
 			b2Fixture* b = contact->GetFixtureB();
+
 			bool aSensor = a->IsSensor();
 			bool bSensor = b->IsSensor();
 			Entity e1 = { m_Scene->m_FixtureMap.at(a), m_Scene };
 			Entity e2 = { m_Scene->m_FixtureMap.at(b), m_Scene };
+
+			if (e1.HasComponent<BuoyancyEffector2DComponent>() && aSensor
+				&& !e2.HasComponent<BuoyancyEffector2DComponent>() && b->GetBody()->GetType() == b2_dynamicBody)
+			{
+				m_BuoyancyFixtures.insert(eastl::make_pair(a, b));
+			}
+			else if (e2.HasComponent<BuoyancyEffector2DComponent>() && bSensor
+				&& !e1.HasComponent<BuoyancyEffector2DComponent>() && a->GetBody()->GetType() == b2_dynamicBody)
+			{
+				m_BuoyancyFixtures.insert(eastl::make_pair(b, a));
+			}
 
 			b2WorldManifold worldManifold;
 			contact->GetWorldManifold(&worldManifold);
@@ -89,6 +108,17 @@ namespace ArcEngine
 			Entity e1 = { m_Scene->m_FixtureMap.at(a), m_Scene };
 			Entity e2 = { m_Scene->m_FixtureMap.at(b), m_Scene };
 
+			if (e1.HasComponent<BuoyancyEffector2DComponent>() && aSensor
+				&& !e2.HasComponent<BuoyancyEffector2DComponent>() && b->GetBody()->GetType() == b2_dynamicBody)
+			{
+				m_BuoyancyFixtures.erase(eastl::make_pair(a, b));
+			}
+			else if (e2.HasComponent<BuoyancyEffector2DComponent>() && bSensor
+				&& !e1.HasComponent<BuoyancyEffector2DComponent>() && a->GetBody()->GetType() == b2_dynamicBody)
+			{
+				m_BuoyancyFixtures.erase(eastl::make_pair(b, a));
+			}
+
 			b2WorldManifold worldManifold;
 			contact->GetWorldManifold(&worldManifold);
 			b2Vec2 point = worldManifold.points[0];
@@ -144,8 +174,28 @@ namespace ArcEngine
 		{
 		}
 
+		void OnUpdate(Timestep ts)
+		{
+			auto it = m_BuoyancyFixtures.begin();
+			auto end = m_BuoyancyFixtures.end();
+			while (it != end)
+			{
+				b2Fixture* fluid = it->first;
+				b2Fixture* fixture = it->second;
+
+				Entity fluidEntity = { m_Scene->m_FixtureMap.at(fluid), m_Scene };
+				Entity fixtureEntity = { m_Scene->m_FixtureMap.at(fixture), m_Scene };
+
+				auto& buoyancyComponent2D = fluidEntity.GetComponent<BuoyancyEffector2DComponent>();
+				PhysicsUtils::HandleBuoyancy(fluid, fixture, m_Scene->m_PhysicsWorld2D->GetGravity(), buoyancyComponent2D.Density, buoyancyComponent2D.DragMultiplier);
+				++it;
+			}
+		}
+
 	private:
 		Scene* m_Scene;
+
+		eastl::set<eastl::pair<b2Fixture*, b2Fixture*>> m_BuoyancyFixtures;
 	};
 
 	Scene::Scene()
@@ -723,6 +773,8 @@ namespace ArcEngine
 		/////////////////////////////////////////////////////////////////////
 		{
 			ARC_PROFILE_SCOPE("Physics 2D");
+			
+			m_ContactListener->OnUpdate(ts);
 			m_PhysicsWorld2D->Step(ts, VelocityIterations, PositionIterations);
 
 			auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
@@ -1190,6 +1242,11 @@ namespace ArcEngine
 
 	template<>
 	void Scene::OnComponentAdded<WheelJoint2DComponent>(Entity entity, WheelJoint2DComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<BuoyancyEffector2DComponent>(Entity entity, BuoyancyEffector2DComponent& component)
 	{
 	}
 
