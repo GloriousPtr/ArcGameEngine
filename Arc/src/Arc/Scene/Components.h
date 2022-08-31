@@ -8,7 +8,6 @@
 #include "Arc/Renderer/VertexArray.h"
 #include "Arc/Renderer/Framebuffer.h"
 #include "Arc/Renderer/Mesh.h"
-#include "Arc/Utils/AABB.h"
 #include "Arc/Scripting/Field.h"
 #include "Arc/Audio/AudioSource.h"
 #include "Arc/Audio/AudioListener.h"
@@ -152,7 +151,8 @@ namespace ArcEngine
 		enum class ShadowQualityType { Hard = 0, Soft, UltraSoft };
 
 		LightType Type = LightType::Point;
-		bool UseColorTempratureMode = true;
+		bool UseColorTemperatureMode = false;
+		uint32_t Temperature = 6570;
 		glm::vec3 Color = glm::vec3(1.0f);
 		float Intensity = 20.0f;
 
@@ -171,15 +171,13 @@ namespace ArcEngine
 			spec.Width = 4096;
 			spec.Height = 4096;
 			ShadowMapFramebuffer = Framebuffer::Create(spec);
-
-			if (UseColorTempratureMode)
-				SetTemprature(m_Temprature);
 		}
 
 		LightComponent(const LightComponent& other)
 		{
 			Type = other.Type;
-			UseColorTempratureMode = other.UseColorTempratureMode;
+			UseColorTemperatureMode = other.UseColorTemperatureMode;
+			Temperature = other.Temperature;
 			Color = other.Color;
 			Intensity = other.Intensity;
 			Range = other.Range;
@@ -193,32 +191,6 @@ namespace ArcEngine
 			spec.Height = 4096;
 			ShadowMapFramebuffer = Framebuffer::Create(spec);
 		}
-
-		uint32_t GetTemprature() { return m_Temprature; }
-
-		void SetTemprature(const uint32_t kelvin)
-		{
-			m_Temprature = glm::clamp(kelvin, 1000u, 40000u);
-			
-			uint32_t temp = m_Temprature / 100;
-			if (temp <= 66)
-			{
-				Color = glm::vec3(255.0f,
-								  99.4708025861f * glm::log(temp) - 161.1195681661f,
-								  temp <= 19 ? 0.0f : 138.5177312231f * glm::log(temp - 10) - 305.0447927307f) / 255.0f;
-			}
-			else
-			{
-				Color = glm::vec3(329.698727447f * glm::pow(temp - 60, -0.1332047592f),
-								  288.1221695283f * glm::pow(temp - 60, -0.0755148492f),
-								  255.0f) / 255.0f;
-			}
-
-			Color = glm::clamp(Color, glm::vec3(0.0f), glm::vec3(1.0f));
-		}
-
-	private:
-		uint32_t m_Temprature = 6570;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -290,8 +262,11 @@ namespace ArcEngine
 		UUID ConnectedRigidbody = 0;
 		glm::vec2 Anchor = glm::vec2(0.0f);
 		glm::vec2 ConnectedAnchor = glm::vec2(0.0f);
+
+		bool AutoDistance = true;
+		float Distance = 0.0f;
 		float MinDistance = 0.0f;
-		float MaxDistance = 2.0f;
+		float MaxDistanceBy = 2.0f;
 		float BreakForce = FLT_MAX;
 
 		void* RuntimeJoint = nullptr;
@@ -306,8 +281,11 @@ namespace ArcEngine
 		UUID ConnectedRigidbody = 0;
 		glm::vec2 Anchor = glm::vec2(0.0f);
 		glm::vec2 ConnectedAnchor = glm::vec2(0.0f);
+
+		bool AutoDistance = true;
+		float Distance = 0.0f;
 		float MinDistance = 0.0f;
-		float MaxDistance = 2.0f;
+		float MaxDistanceBy = 2.0f;
 		float Frequency = 4.0f;
 		float DampingRatio = 0.5f;
 		float BreakForce = FLT_MAX;
@@ -395,8 +373,10 @@ namespace ArcEngine
 	{
 		float Density = 2.0f;
 		float DragMultiplier = 1.0f;
+		bool FlipGravity = false;
 
-		void* RuntimeJoint = nullptr;
+		float FlowMagnitude = 0.0f;
+		float FlowAngle = 0.0f;
 
 		BuoyancyEffector2DComponent() = default;
 		BuoyancyEffector2DComponent(const BuoyancyEffector2DComponent&) = default;

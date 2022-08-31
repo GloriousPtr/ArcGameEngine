@@ -173,13 +173,13 @@ namespace ArcEngine
 						buffer[newLine] = '\0';
 						ARC_ERROR(buffer);
 					}
+
+					fclose(errors);
 				}
 				else
 				{
 					ARC_CORE_ERROR("AssemblyBuildErrors.log not found!");
 				}
-
-				fclose(errors);
 			}
 
 			// Warnings
@@ -195,13 +195,13 @@ namespace ArcEngine
 						buffer[newLine] = '\0';
 						ARC_WARN(buffer);
 					}
+
+					fclose(warns);
 				}
 				else
 				{
 					ARC_CORE_ERROR("AssemblyBuildWarnings.log not found!");
 				}
-
-				fclose(warns);
 			}
 		}
 
@@ -344,9 +344,14 @@ namespace ArcEngine
 		return s_Data->AppDomain;
 	}
 
-	eastl::map<eastl::string, Ref<Field>>& ScriptEngine::GetFields(Entity entity, const char* className)
+	eastl::vector<eastl::string>& ScriptEngine::GetFields(Entity entity, const char* className)
 	{
 		return (*s_Data->CurrentEntityInstanceMap)[entity.GetUUID()].at(className)->GetFields();
+	}
+
+	eastl::map<eastl::string, Ref<Field>>& ScriptEngine::GetFieldMap(Entity entity, const char* className)
+	{
+		return (*s_Data->CurrentEntityInstanceMap)[entity.GetUUID()].at(className)->GetFieldMap();
 	}
 
 	eastl::unordered_map<eastl::string, Ref<ScriptClass>>& ScriptEngine::GetClasses()
@@ -500,13 +505,15 @@ namespace ArcEngine
 	void ScriptClass::LoadFields()
 	{
 		m_Fields.clear();
+		m_FieldsMap.clear();
 
 		MonoClassField* monoField;
 		void* ptr = 0;
 		while ((monoField = mono_class_get_fields(m_MonoClass, &ptr)) != NULL)
 		{
 			const char* propertyName = mono_field_get_name(monoField);
-			m_Fields.emplace(propertyName, monoField);
+			m_Fields.push_back(propertyName);
+			m_FieldsMap.emplace(propertyName, monoField);
 		}
 	}
 
@@ -576,11 +583,14 @@ namespace ArcEngine
 
 	void ScriptInstance::LoadFields()
 	{
-		auto& fields = m_ScriptClass->m_Fields;
+		m_Fields.clear();
+
+		auto& fieldMap = m_ScriptClass->m_FieldsMap;
 		eastl::map<eastl::string, Ref<Field>> finalFields;
 
-		for (auto [fieldName, monoField] : fields)
+		for (auto fieldName : m_ScriptClass->m_Fields)
 		{
+			MonoClassField* monoField = fieldMap.at(fieldName);
 			MonoType* fieldType = mono_field_get_type(monoField);
 			Field::FieldType type = Field::GetFieldType(fieldType);
 			
@@ -635,13 +645,13 @@ namespace ArcEngine
 				}
 			}
 
-			bool alreadyPresent = m_Fields.find(fieldName) != m_Fields.end();
-			bool sameType = alreadyPresent && m_Fields.at(fieldName)->Type == type;
+			bool alreadyPresent = m_FieldsMap.find(fieldName) != m_FieldsMap.end();
+			bool sameType = alreadyPresent && m_FieldsMap.at(fieldName)->Type == type;
 
 			if (sameType)
 			{
-				void* value = m_Fields[fieldName]->GetUnmanagedValue();
-				size_t size = m_Fields[fieldName]->GetSize();
+				void* value = m_FieldsMap[fieldName]->GetUnmanagedValue();
+				size_t size = m_FieldsMap[fieldName]->GetSize();
 				void* copy = new char[size];
 				memcpy(copy, value, size);
 				finalFields[fieldName] = CreateRef<Field>(fieldName, type, monoField, m_Handle);
@@ -659,9 +669,11 @@ namespace ArcEngine
 			finalFields[fieldName]->Tooltip = tooltip;
 			finalFields[fieldName]->Min = min;
 			finalFields[fieldName]->Max = max;
+
+			m_Fields.push_back(fieldName);
 		}
 
-		m_Fields = finalFields;
+		m_FieldsMap = finalFields;
 	}
 
 	void ScriptInstance::InvokeOnCreate()

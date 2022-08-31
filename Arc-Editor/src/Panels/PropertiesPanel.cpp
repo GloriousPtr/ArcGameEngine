@@ -8,7 +8,6 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include <Arc/Utils/PlatformUtils.h>
 #include <Arc/Scene/EntitySerializer.h>
 
 #include "../Utils/UI.h"
@@ -153,9 +152,11 @@ namespace ArcEngine
 
 				// Public Fields
 				UI::BeginProperties();
-				auto& fieldMap = ScriptEngine::GetFields(entity, className.c_str());
-				for (auto& [name, field] : fieldMap)
+				auto& fields = ScriptEngine::GetFields(entity, className.c_str());
+				auto& fieldMap = ScriptEngine::GetFieldMap(entity, className.c_str());
+				for (auto& name : fields)
 				{
+					auto& field = fieldMap.at(name);
 					if (field->Hidden)
 						continue;
 
@@ -533,17 +534,16 @@ namespace ArcEngine
 			if (UI::Property("Light Type", lightType, lightTypeStrings, 3))
 				component.Type = (LightComponent::LightType) lightType;
 
-			if (UI::Property("Use color temprature mode", component.UseColorTempratureMode))
+			if (UI::Property("Use color temperature mode", component.UseColorTemperatureMode))
 			{
-				if (component.UseColorTempratureMode)
-					component.SetTemprature(component.GetTemprature());
+				if (component.UseColorTemperatureMode)
+					ColorUtils::TempratureToColor(component.Temperature, component.Color);
 			}
 
-			if (component.UseColorTempratureMode)
+			if (component.UseColorTemperatureMode)
 			{
-				int temp = component.GetTemprature();
-				if (UI::Property("Tempratur (K)", temp, 1000, 40000))
-					component.SetTemprature(temp);
+				if (UI::Property("Temperature (K)", component.Temperature, 1000, 40000))
+					ColorUtils::TempratureToColor(component.Temperature, component.Color);
 			}
 			else
 			{
@@ -611,6 +611,9 @@ namespace ArcEngine
 				UI::Property("Awake", component.Awake);
 				UI::Property("Continuous", component.Continuous);
 				UI::Property("Freeze Rotation", component.FreezeRotation);
+
+				component.LinearDrag = glm::max(component.LinearDrag, 0.0f);
+				component.AngularDrag = glm::max(component.AngularDrag, 0.0f);
 			}
 
 			UI::EndProperties();
@@ -624,14 +627,16 @@ namespace ArcEngine
 			UI::Property("Is Sensor", component.IsSensor);
 			UI::EndProperties();
 			
-			ImGui::Spacing();
-			
-			UI::BeginProperties();
-			UI::Property("Density", component.Density);
-			UI::Property("Friction", component.Friction);
-			UI::Property("Restitution", component.Restitution);
-			UI::Property("Restitution Threshold", component.RestitutionThreshold);
-			UI::EndProperties();
+			if (!component.IsSensor)
+			{
+				ImGui::Spacing();
+				UI::BeginProperties();
+				UI::Property("Density", component.Density);
+				UI::Property("Friction", component.Friction);
+				UI::Property("Restitution", component.Restitution);
+				UI::Property("Restitution Threshold", component.RestitutionThreshold);
+				UI::EndProperties();
+			}
 		});
 
 		DrawComponent<CircleCollider2DComponent>(ICON_MDI_CIRCLE_OUTLINE " Circle Collider 2D", entity, [](CircleCollider2DComponent& component)
@@ -642,14 +647,16 @@ namespace ArcEngine
 			UI::Property("Is Sensor", component.IsSensor);
 			UI::EndProperties();
 			
-			ImGui::Spacing();
-
-			UI::BeginProperties();
-			UI::Property("Density", component.Density);
-			UI::Property("Friction", component.Friction);
-			UI::Property("Restitution", component.Restitution);
-			UI::Property("Restitution Threshold", component.RestitutionThreshold);
-			UI::EndProperties();
+			if (!component.IsSensor)
+			{
+				ImGui::Spacing();
+				UI::BeginProperties();
+				UI::Property("Density", component.Density);
+				UI::Property("Friction", component.Friction);
+				UI::Property("Restitution", component.Restitution);
+				UI::Property("Restitution Threshold", component.RestitutionThreshold);
+				UI::EndProperties();
+			}
 		});
 
 		DrawComponent<DistanceJoint2DComponent>(ICON_MDI_VECTOR_LINE " Distance Joint 2D", entity, [&entity](DistanceJoint2DComponent& component)
@@ -659,13 +666,16 @@ namespace ArcEngine
 			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", "Rigidbody 2D", entity.GetScene(), component.ConnectedRigidbody, nullptr);
 			UI::Property("Anchor", component.Anchor);
 			UI::Property("Connected Anchor", component.ConnectedAnchor);
+			UI::Property("Auto Distance", component.AutoDistance);
+			if (!component.AutoDistance)
+				UI::Property("Distance", component.Distance);
 			UI::Property("Min Distance", component.MinDistance);
-			UI::Property("Max Distance", component.MaxDistance);
+			UI::Property("Max Distance By", component.MaxDistanceBy);
 			UI::Property("Break Force", component.BreakForce);
 			UI::EndProperties();
 
 			component.MinDistance = glm::max(component.MinDistance, 0.0f);
-			component.MaxDistance = glm::max(component.MinDistance, component.MaxDistance);
+			component.MaxDistanceBy = glm::max(component.MaxDistanceBy, 0.0f);
 		});
 
 		DrawComponent<SpringJoint2DComponent>(ICON_MDI_VECTOR_LINE " Spring Joint 2D", entity, [&entity](SpringJoint2DComponent& component)
@@ -675,15 +685,18 @@ namespace ArcEngine
 			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", "Rigidbody 2D", entity.GetScene(), component.ConnectedRigidbody, nullptr);
 			UI::Property("Anchor", component.Anchor);
 			UI::Property("Connected Anchor", component.ConnectedAnchor);
+			UI::Property("Auto Distance", component.AutoDistance);
+			if (!component.AutoDistance)
+				UI::Property("Distance", component.Distance);
 			UI::Property("Min Distance", component.MinDistance);
-			UI::Property("Max Distance", component.MaxDistance);
+			UI::Property("Max Distance By", component.MaxDistanceBy);
 			UI::Property("Frequency", component.Frequency);
 			UI::Property("Damping Ratio", component.DampingRatio, 0.0f, 1.0f);
 			UI::Property("Break Force", component.BreakForce);
 			UI::EndProperties();
 
 			component.MinDistance = glm::max(component.MinDistance, 0.0f);
-			component.MaxDistance = glm::max(component.MinDistance, component.MaxDistance);
+			component.MaxDistanceBy = glm::max(component.MaxDistanceBy, 0.0f);
 			component.Frequency = glm::max(component.Frequency, 0.0f);
 		});
 
@@ -788,6 +801,9 @@ namespace ArcEngine
 			UI::BeginProperties();
 			UI::Property("Density", component.Density);
 			UI::Property("Drag Multiplier", component.DragMultiplier);
+			UI::Property("Flip Gravity", component.FlipGravity);
+			UI::Property("Flow Magnitude", component.FlowMagnitude);
+			UI::Property("Flow Angle", component.FlowAngle);
 			UI::EndProperties();
 		});
 
@@ -892,6 +908,7 @@ namespace ArcEngine
 
 			if (config.Spatialization)
 			{
+				ImGui::Indent();
 				const char* attenuationTypeStrings[] = { "None", "Inverse", "Linear", "Exponential" };
 				int attenuationType = (int)config.AttenuationModel;
 				if (UI::Property("Attenuation Model", attenuationType, attenuationTypeStrings, 4))
@@ -905,6 +922,7 @@ namespace ArcEngine
 				UI::Property("Cone Outer Angle", config.ConeOuterAngle);
 				UI::Property("Cone Outer Gain", config.ConeOuterGain);
 				UI::Property("Doppler Factor", config.DopplerFactor);
+				ImGui::Unindent();
 			}
 			UI::EndProperties();
 

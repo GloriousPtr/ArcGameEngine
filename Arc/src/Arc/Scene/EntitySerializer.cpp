@@ -7,8 +7,10 @@
 #include "Arc/Audio/AudioListener.h"
 #include "Arc/Audio/AudioSource.h"
 #include "Arc/Core/AssetManager.h"
+#include "Arc/Core/UUID.h"
 #include "Arc/Scripting/ScriptEngine.h"
 #include "Arc/Scripting/Field.h"
+#include "Arc/Utils/ColorUtils.h"
 #include "Arc/Utils/StringUtils.h"
 
 namespace YAML
@@ -101,6 +103,23 @@ namespace YAML
 			return true;
 		}
 	};
+
+	template<>
+	struct convert<ArcEngine::UUID>
+	{
+		static Node encode(const ArcEngine::UUID& uuid)
+		{
+			Node node;
+			node.push_back((uint64_t)uuid);
+			return node;
+		}
+
+		static bool decode(const Node& node, ArcEngine::UUID& uuid)
+		{
+			uuid = node.as<uint64_t>();
+			return true;
+		}
+	};
 }
 
 namespace ArcEngine
@@ -123,6 +142,13 @@ namespace ArcEngine
 	{
 		out << YAML::Flow;
 		out << YAML::BeginSeq << v.x << v.y << v.z << v.w << YAML::EndSeq;
+		return out;
+	}
+
+	YAML::Emitter& operator<<(YAML::Emitter& out, const UUID& uuid)
+	{
+		out << YAML::Flow;
+		out << (uint64_t)uuid;
 		return out;
 	}
 
@@ -250,7 +276,8 @@ namespace ArcEngine
 
 			auto& lightComponent = entity.GetComponent<LightComponent>();
 			out << YAML::Key << "Type" << YAML::Value << (int)lightComponent.Type;
-			out << YAML::Key << "UseColorTempratureMode" << YAML::Value << lightComponent.UseColorTempratureMode;
+			out << YAML::Key << "UseColorTemperatureMode" << YAML::Value << lightComponent.UseColorTemperatureMode;
+			out << YAML::Key << "Temperature" << YAML::Value << lightComponent.Temperature;
 			out << YAML::Key << "Color" << YAML::Value << lightComponent.Color;
 			out << YAML::Key << "Intensity" << YAML::Value << lightComponent.Intensity;
 			out << YAML::Key << "Range" << YAML::Value << lightComponent.Range;
@@ -315,6 +342,127 @@ namespace ArcEngine
 			out << YAML::EndMap; // CircleCollider2DComponent
 		}
 
+		if (entity.HasComponent<DistanceJoint2DComponent>())
+		{
+			out << YAML::Key << "DistanceJoint2DComponent";
+			out << YAML::BeginMap; // DistanceJoint2DComponent
+
+			auto& dj2d = entity.GetComponent<DistanceJoint2DComponent>();
+			out << YAML::Key << "EnableCollision" << YAML::Value << dj2d.EnableCollision;
+			out << YAML::Key << "ConnectedRigidbody" << YAML::Value << dj2d.ConnectedRigidbody;
+			out << YAML::Key << "Anchor" << YAML::Value << dj2d.Anchor;
+			out << YAML::Key << "ConnectedAnchor" << YAML::Value << dj2d.ConnectedAnchor;
+			out << YAML::Key << "AutoDistance" << YAML::Value << dj2d.AutoDistance;
+			out << YAML::Key << "Distance" << YAML::Value << dj2d.Distance;
+			out << YAML::Key << "MinDistance" << YAML::Value << dj2d.MinDistance;
+			out << YAML::Key << "MaxDistanceBy" << YAML::Value << dj2d.MaxDistanceBy;
+			out << YAML::Key << "BreakForce" << YAML::Value << dj2d.BreakForce;
+
+			out << YAML::EndMap; // DistanceJoint2DComponent
+		}
+
+		if (entity.HasComponent<SpringJoint2DComponent>())
+		{
+			out << YAML::Key << "SpringJoint2DComponent";
+			out << YAML::BeginMap; // SpringJoint2DComponent
+
+			auto& sj2d = entity.GetComponent<SpringJoint2DComponent>();
+			out << YAML::Key << "EnableCollision" << YAML::Value << sj2d.EnableCollision;
+			out << YAML::Key << "ConnectedRigidbody" << YAML::Value << sj2d.ConnectedRigidbody;
+			out << YAML::Key << "Anchor" << YAML::Value << sj2d.Anchor;
+			out << YAML::Key << "ConnectedAnchor" << YAML::Value << sj2d.ConnectedAnchor;
+			out << YAML::Key << "AutoDistance" << YAML::Value << sj2d.AutoDistance;
+			out << YAML::Key << "Distance" << YAML::Value << sj2d.Distance;
+			out << YAML::Key << "MinDistance" << YAML::Value << sj2d.MinDistance;
+			out << YAML::Key << "MaxDistanceBy" << YAML::Value << sj2d.MaxDistanceBy;
+			out << YAML::Key << "Frequency" << YAML::Value << sj2d.Frequency;
+			out << YAML::Key << "DampingRatio" << YAML::Value << sj2d.DampingRatio;
+			out << YAML::Key << "BreakForce" << YAML::Value << sj2d.BreakForce;
+
+			out << YAML::EndMap; // SpringJoint2DComponent
+		}
+
+		if (entity.HasComponent<HingeJoint2DComponent>())
+		{
+			out << YAML::Key << "HingeJoint2DComponent";
+			out << YAML::BeginMap; // HingeJoint2DComponent
+
+			auto& hj2d = entity.GetComponent<HingeJoint2DComponent>();
+			out << YAML::Key << "EnableCollision" << YAML::Value << hj2d.EnableCollision;
+			out << YAML::Key << "ConnectedRigidbody" << YAML::Value << hj2d.ConnectedRigidbody;
+			out << YAML::Key << "Anchor" << YAML::Value << hj2d.Anchor;
+			out << YAML::Key << "UseLimits" << YAML::Value << hj2d.UseLimits;
+			out << YAML::Key << "LowerAngle" << YAML::Value << hj2d.LowerAngle;
+			out << YAML::Key << "UpperAngle" << YAML::Value << hj2d.UpperAngle;
+			out << YAML::Key << "UseMotor" << YAML::Value << hj2d.UseMotor;
+			out << YAML::Key << "MotorSpeed" << YAML::Value << hj2d.MotorSpeed;
+			out << YAML::Key << "MaxMotorTorque" << YAML::Value << hj2d.MaxMotorTorque;
+			out << YAML::Key << "BreakForce" << YAML::Value << hj2d.BreakForce;
+			out << YAML::Key << "BreakTorque" << YAML::Value << hj2d.BreakTorque;
+
+			out << YAML::EndMap; // HingeJoint2DComponent
+		}
+
+		if (entity.HasComponent<SliderJoint2DComponent>())
+		{
+			out << YAML::Key << "SliderJoint2DComponent";
+			out << YAML::BeginMap; // SliderJoint2DComponent
+
+			auto& sj2d = entity.GetComponent<SliderJoint2DComponent>();
+			out << YAML::Key << "EnableCollision" << YAML::Value << sj2d.EnableCollision;
+			out << YAML::Key << "ConnectedRigidbody" << YAML::Value << sj2d.ConnectedRigidbody;
+			out << YAML::Key << "Anchor" << YAML::Value << sj2d.Anchor;
+			out << YAML::Key << "Angle" << YAML::Value << sj2d.Angle;
+			out << YAML::Key << "UseLimits" << YAML::Value << sj2d.UseLimits;
+			out << YAML::Key << "LowerTranslation" << YAML::Value << sj2d.LowerTranslation;
+			out << YAML::Key << "UpperTranslation" << YAML::Value << sj2d.UpperTranslation;
+			out << YAML::Key << "UseMotor" << YAML::Value << sj2d.UseMotor;
+			out << YAML::Key << "MotorSpeed" << YAML::Value << sj2d.MotorSpeed;
+			out << YAML::Key << "MaxMotorForce" << YAML::Value << sj2d.MaxMotorForce;
+			out << YAML::Key << "BreakForce" << YAML::Value << sj2d.BreakForce;
+			out << YAML::Key << "BreakTorque" << YAML::Value << sj2d.BreakTorque;
+
+			out << YAML::EndMap; // SliderJoint2DComponent
+		}
+
+		if (entity.HasComponent<WheelJoint2DComponent>())
+		{
+			out << YAML::Key << "WheelJoint2DComponent";
+			out << YAML::BeginMap; // WheelJoint2DComponent
+
+			auto& wj2d = entity.GetComponent<WheelJoint2DComponent>();
+			out << YAML::Key << "EnableCollision" << YAML::Value << wj2d.EnableCollision;
+			out << YAML::Key << "ConnectedRigidbody" << YAML::Value << wj2d.ConnectedRigidbody;
+			out << YAML::Key << "Anchor" << YAML::Value << wj2d.Anchor;
+			out << YAML::Key << "Frequency" << YAML::Value << wj2d.Frequency;
+			out << YAML::Key << "DampingRatio" << YAML::Value << wj2d.DampingRatio;
+			out << YAML::Key << "UseLimits" << YAML::Value << wj2d.UseLimits;
+			out << YAML::Key << "LowerTranslation" << YAML::Value << wj2d.LowerTranslation;
+			out << YAML::Key << "UpperTranslation" << YAML::Value << wj2d.UpperTranslation;
+			out << YAML::Key << "UseMotor" << YAML::Value << wj2d.UseMotor;
+			out << YAML::Key << "MotorSpeed" << YAML::Value << wj2d.MotorSpeed;
+			out << YAML::Key << "MaxMotorTorque" << YAML::Value << wj2d.MaxMotorTorque;
+			out << YAML::Key << "BreakForce" << YAML::Value << wj2d.BreakForce;
+			out << YAML::Key << "BreakTorque" << YAML::Value << wj2d.BreakTorque;
+
+			out << YAML::EndMap; // SliderJoint2DComponent
+		}
+
+		if (entity.HasComponent<BuoyancyEffector2DComponent>())
+		{
+			out << YAML::Key << "BuoyancyEffector2DComponent";
+			out << YAML::BeginMap; // BuoyancyEffector2DComponent
+
+			auto& be2d = entity.GetComponent<BuoyancyEffector2DComponent>();
+			out << YAML::Key << "Density" << YAML::Value << be2d.Density;
+			out << YAML::Key << "DragMultiplier" << YAML::Value << be2d.DragMultiplier;
+			out << YAML::Key << "FlipGravity" << YAML::Value << be2d.FlipGravity;
+			out << YAML::Key << "FlowMagnitude" << YAML::Value << be2d.FlowMagnitude;
+			out << YAML::Key << "FlowAngle" << YAML::Value << be2d.FlowAngle;
+
+			out << YAML::EndMap; // BuoyancyEffector2DComponent
+		}
+
 		if (entity.HasComponent<MeshComponent>())
 		{
 			out << YAML::Key << "MeshComponent";
@@ -347,7 +495,7 @@ namespace ArcEngine
 				out << YAML::Key << "Name" << YAML::Value << className.c_str();
 				out << YAML::Key << "Fields" << YAML::BeginMap;
 
-				auto& fields = ScriptEngine::GetFields(entity, className.c_str());
+				auto& fields = ScriptEngine::GetFieldMap(entity, className.c_str());
 				for (auto [fieldName, field] : fields)
 				{
 					if (field->Type == Field::FieldType::Unknown)
@@ -620,13 +768,17 @@ namespace ArcEngine
 		{
 			auto& src = deserializedEntity.AddComponent<LightComponent>();
 			TrySetEnum(src.Type, lightComponent["Type"]);
+			TrySet(src.UseColorTemperatureMode, lightComponent["UseColorTemperatureMode"]);
+			TrySet(src.Temperature, lightComponent["Temperature"]);
 			TrySet(src.Color, lightComponent["Color"]);
-			TrySet(src.UseColorTempratureMode, lightComponent["UseColorTempratureMode"]);
 			TrySet(src.Intensity, lightComponent["Intensity"]);
 			TrySet(src.Range, lightComponent["Range"]);
 			TrySet(src.CutOffAngle, lightComponent["CutOffAngle"]);
 			TrySet(src.OuterCutOffAngle, lightComponent["OuterCutOffAngle"]);
 			TrySetEnum(src.ShadowQuality, lightComponent["ShadowQuality"]);
+
+			if (src.UseColorTemperatureMode)
+				ColorUtils::TempratureToColor(src.Temperature, src.Color);
 		}
 
 		auto rb2dCpmponent = entity["Rigidbody2DComponent"];
@@ -671,6 +823,103 @@ namespace ArcEngine
 			TrySet(src.RestitutionThreshold, cc2dCpmponent["RestitutionThreshold"]);
 		}
 
+		auto distJoint2dCpmponent = entity["DistanceJoint2DComponent"];
+		if (distJoint2dCpmponent)
+		{
+			auto& src = deserializedEntity.AddComponent<DistanceJoint2DComponent>();
+			TrySet(src.EnableCollision, distJoint2dCpmponent["EnableCollision"]);
+			TrySet(src.ConnectedRigidbody, distJoint2dCpmponent["ConnectedRigidbody"]);
+			TrySet(src.Anchor, distJoint2dCpmponent["Anchor"]);
+			TrySet(src.ConnectedAnchor, distJoint2dCpmponent["ConnectedAnchor"]);
+			TrySet(src.AutoDistance, distJoint2dCpmponent["AutoDistance"]);
+			TrySet(src.Distance, distJoint2dCpmponent["Distance"]);
+			TrySet(src.MinDistance, distJoint2dCpmponent["MinDistance"]);
+			TrySet(src.MaxDistanceBy, distJoint2dCpmponent["MaxDistanceBy"]);
+			TrySet(src.BreakForce, distJoint2dCpmponent["BreakForce"]);
+		}
+
+		auto springJoint2dCpmponent = entity["SpringJoint2DComponent"];
+		if (springJoint2dCpmponent)
+		{
+			auto& src = deserializedEntity.AddComponent<SpringJoint2DComponent>();
+			TrySet(src.EnableCollision, springJoint2dCpmponent["EnableCollision"]);
+			TrySet(src.ConnectedRigidbody, springJoint2dCpmponent["ConnectedRigidbody"]);
+			TrySet(src.Anchor, springJoint2dCpmponent["Anchor"]);
+			TrySet(src.ConnectedAnchor, springJoint2dCpmponent["ConnectedAnchor"]);
+			TrySet(src.AutoDistance, distJoint2dCpmponent["AutoDistance"]);
+			TrySet(src.Distance, distJoint2dCpmponent["Distance"]);
+			TrySet(src.MinDistance, distJoint2dCpmponent["MinDistance"]);
+			TrySet(src.MaxDistanceBy, distJoint2dCpmponent["MaxDistanceBy"]);
+			TrySet(src.Frequency, springJoint2dCpmponent["Frequency"]);
+			TrySet(src.DampingRatio, springJoint2dCpmponent["DampingRatio"]);
+			TrySet(src.BreakForce, springJoint2dCpmponent["BreakForce"]);
+		}
+
+		auto hingeJoint2dCpmponent = entity["HingeJoint2DComponent"];
+		if (hingeJoint2dCpmponent)
+		{
+			auto& src = deserializedEntity.AddComponent<HingeJoint2DComponent>();
+			TrySet(src.EnableCollision, hingeJoint2dCpmponent["EnableCollision"]);
+			TrySet(src.ConnectedRigidbody, hingeJoint2dCpmponent["ConnectedRigidbody"]);
+			TrySet(src.Anchor, hingeJoint2dCpmponent["Anchor"]);
+			TrySet(src.UseLimits, hingeJoint2dCpmponent["UseLimits"]);
+			TrySet(src.LowerAngle, hingeJoint2dCpmponent["LowerAngle"]);
+			TrySet(src.UpperAngle, hingeJoint2dCpmponent["UpperAngle"]);
+			TrySet(src.UseMotor, hingeJoint2dCpmponent["UseMotor"]);
+			TrySet(src.MotorSpeed, hingeJoint2dCpmponent["MotorSpeed"]);
+			TrySet(src.MaxMotorTorque, hingeJoint2dCpmponent["MaxMotorTorque"]);
+			TrySet(src.BreakForce, hingeJoint2dCpmponent["BreakForce"]);
+			TrySet(src.BreakTorque, hingeJoint2dCpmponent["BreakTorque"]);
+		}
+
+		auto sliderJoint2dCpmponent = entity["SliderJoint2DComponent"];
+		if (sliderJoint2dCpmponent)
+		{
+			auto& src = deserializedEntity.AddComponent<SliderJoint2DComponent>();
+			TrySet(src.EnableCollision, sliderJoint2dCpmponent["EnableCollision"]);
+			TrySet(src.ConnectedRigidbody, sliderJoint2dCpmponent["ConnectedRigidbody"]);
+			TrySet(src.Anchor, sliderJoint2dCpmponent["Anchor"]);
+			TrySet(src.Angle, sliderJoint2dCpmponent["Angle"]);
+			TrySet(src.UseLimits, sliderJoint2dCpmponent["UseLimits"]);
+			TrySet(src.LowerTranslation, sliderJoint2dCpmponent["LowerTranslation"]);
+			TrySet(src.UpperTranslation, sliderJoint2dCpmponent["UpperTranslation"]);
+			TrySet(src.UseMotor, sliderJoint2dCpmponent["UseMotor"]);
+			TrySet(src.MotorSpeed, sliderJoint2dCpmponent["MotorSpeed"]);
+			TrySet(src.MaxMotorForce, sliderJoint2dCpmponent["MaxMotorForce"]);
+			TrySet(src.BreakForce, sliderJoint2dCpmponent["BreakForce"]);
+			TrySet(src.BreakTorque, sliderJoint2dCpmponent["BreakTorque"]);
+		}
+
+		auto wheelJoint2dCpmponent = entity["WheelJoint2DComponent"];
+		if (wheelJoint2dCpmponent)
+		{
+			auto& src = deserializedEntity.AddComponent<WheelJoint2DComponent>();
+			TrySet(src.EnableCollision, wheelJoint2dCpmponent["EnableCollision"]);
+			TrySet(src.ConnectedRigidbody, wheelJoint2dCpmponent["ConnectedRigidbody"]);
+			TrySet(src.Anchor, wheelJoint2dCpmponent["Anchor"]);
+			TrySet(src.Frequency, wheelJoint2dCpmponent["Frequency"]);
+			TrySet(src.DampingRatio, wheelJoint2dCpmponent["DampingRatio"]);
+			TrySet(src.UseLimits, wheelJoint2dCpmponent["UseLimits"]);
+			TrySet(src.LowerTranslation, wheelJoint2dCpmponent["LowerTranslation"]);
+			TrySet(src.UpperTranslation, wheelJoint2dCpmponent["UpperTranslation"]);
+			TrySet(src.UseMotor, wheelJoint2dCpmponent["UseMotor"]);
+			TrySet(src.MotorSpeed, wheelJoint2dCpmponent["MotorSpeed"]);
+			TrySet(src.MaxMotorTorque, wheelJoint2dCpmponent["MaxMotorTorque"]);
+			TrySet(src.BreakForce, wheelJoint2dCpmponent["BreakForce"]);
+			TrySet(src.BreakTorque, wheelJoint2dCpmponent["BreakTorque"]);
+		}
+
+		auto buoyancyEffector2DComponent = entity["BuoyancyEffector2DComponent"];
+		if (buoyancyEffector2DComponent)
+		{
+			auto& src = deserializedEntity.AddComponent<BuoyancyEffector2DComponent>();
+			TrySet(src.Density, buoyancyEffector2DComponent["Density"]);
+			TrySet(src.DragMultiplier, buoyancyEffector2DComponent["DragMultiplier"]);
+			TrySet(src.FlipGravity, buoyancyEffector2DComponent["FlipGravity"]);
+			TrySet(src.FlowMagnitude, buoyancyEffector2DComponent["FlowMagnitude"]);
+			TrySet(src.FlowAngle, buoyancyEffector2DComponent["FlowAngle"]);
+		}
+
 		auto meshComponent = entity["MeshComponent"];
 		if (meshComponent)
 		{
@@ -707,7 +956,7 @@ namespace ArcEngine
 					GCHandle handle = ScriptEngine::CreateInstance(deserializedEntity, scriptName.c_str())->GetHandle();
 					sc.Classes.emplace_back(scriptName.c_str());
 
-					auto& fields = ScriptEngine::GetFields(deserializedEntity, scriptName.c_str());
+					auto& fields = ScriptEngine::GetFieldMap(deserializedEntity, scriptName.c_str());
 					{
 						for (auto [name, field] : fields)
 						{
@@ -890,7 +1139,7 @@ namespace ArcEngine
 
 		YAML::Emitter out;
 		out << YAML::BeginMap;
-		out << YAML::Key << "Prefab" << YAML::Value << (uint64_t)entity.AddComponent<PrefabComponent>().ID;
+		out << YAML::Key << "Prefab" << YAML::Value << entity.AddComponent<PrefabComponent>().ID;
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 
 		eastl::vector<Entity> entities;

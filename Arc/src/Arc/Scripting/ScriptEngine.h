@@ -42,7 +42,8 @@ namespace ArcEngine
 		eastl::string m_ClassName;
 
 		MonoClass* m_MonoClass = nullptr;
-		eastl::map<eastl::string, MonoClassField*> m_Fields;
+		eastl::vector<eastl::string> m_Fields;
+		eastl::map<eastl::string, MonoClassField*> m_FieldsMap;
 		eastl::map<eastl::string, MonoProperty*> m_Properties;
 	};
 
@@ -69,7 +70,8 @@ namespace ArcEngine
 		void InvokeOnSensorExit2D(Collision2DData& other);
 
 		GCHandle GetHandle() { return m_Handle; }
-		eastl::map<eastl::string, Ref<Field>>& GetFields() { return m_Fields; }
+		eastl::vector<eastl::string>& GetFields() { return m_Fields; }
+		eastl::map<eastl::string, Ref<Field>>& GetFieldMap() { return m_FieldsMap; }
 
 		void Invalidate(Ref<ScriptClass> scriptClass, UUID entityID);
 
@@ -92,7 +94,8 @@ namespace ArcEngine
 		MonoMethod* m_OnSensorEnter2DMethod = nullptr;
 		MonoMethod* m_OnSensorExit2DMethod = nullptr;
 
-		eastl::map<eastl::string, Ref<Field>> m_Fields;
+		eastl::vector<eastl::string> m_Fields;
+		eastl::map<eastl::string, Ref<Field>> m_FieldsMap;
 	};
 
 	class ScriptEngine
@@ -122,7 +125,8 @@ namespace ArcEngine
 
 		static bool HasClass(const eastl::string& className);
 		static eastl::unordered_map<eastl::string, Ref<ScriptClass>>& GetClasses();
-		static eastl::map<eastl::string, Ref<Field>>& GetFields(Entity entity, const char* className);
+		static eastl::vector<eastl::string>& GetFields(Entity entity, const char* className);
+		static eastl::map<eastl::string, Ref<Field>>& GetFieldMap(Entity entity, const char* className);
 
 		static void SetScene(Scene* scene) { s_CurrentScene = scene; }
 		static Scene* GetScene() { return s_CurrentScene; }

@@ -162,17 +162,22 @@ namespace ArcEngine
 			return c;
 		}
 
-		static void HandleBuoyancy(b2Fixture* fluid, b2Fixture* fixture, b2Vec2 gravity, float density, float dragMultiplier)
+		static void HandleBuoyancy(b2Fixture* fluid, b2Fixture* fixture, b2Vec2 gravity, bool flipGravity, float density, float dragMultiplier, float flowMagnitude, float flowAngle)
 		{
 			eastl::vector<b2Vec2> intersectionPoints;
 			if (FindIntersectionOfFixtures(fluid, fixture, intersectionPoints))
 			{
 				float area = 0;
 				b2Vec2 centroid = ComputeCentroid(intersectionPoints, area);
+				float gravityMultiplier = flipGravity ? -1.0f : 1.0f;
 
 				float displacedMass = density * area;
-				b2Vec2 buoyancyForce = displacedMass * -gravity;
+				b2Vec2 buoyancyForce = displacedMass * gravityMultiplier * -gravity;
 				fixture->GetBody()->ApplyForce(buoyancyForce, centroid, true);
+
+				float radians = glm::radians(flowAngle);
+				b2Vec2 flowForce = flowMagnitude * b2Vec2(glm::cos(radians), glm::sin(radians));
+				fixture->GetBody()->ApplyForceToCenter(flowForce, true);
 
 				//apply drag separately for each polygon edge
 				for (int i = 0; i < intersectionPoints.size(); i++)
@@ -187,7 +192,7 @@ namespace ArcEngine
 						fluid->GetBody()->GetLinearVelocityFromWorldPoint(midPoint);
 
 					b2Vec2 edge = v1 - v0;
-					b2Vec2 normal = b2Cross(-1, edge); //gets perpendicular vector
+					b2Vec2 normal = b2Cross(-gravityMultiplier, edge); //gets perpendicular vector
 
 					float dragDot = b2Dot(normal, velDir);
 					if (dragDot < 0)
@@ -202,7 +207,7 @@ namespace ArcEngine
 
 					//apply lift
 					float liftMag = b2Dot(edge, velDir) * dragMag;
-					b2Vec2 liftDir = b2Cross(1, velDir); //gets perpendicular vector
+					b2Vec2 liftDir = b2Cross(gravityMultiplier, velDir); //gets perpendicular vector
 					b2Vec2 liftForce = liftMag * liftDir;
 					fixture->GetBody()->ApplyForce(liftForce, midPoint, true);
 				}

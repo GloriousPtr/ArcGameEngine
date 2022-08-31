@@ -26,6 +26,7 @@ namespace ArcEngine
 		Entity CreateEntity(const eastl::string& name = eastl::string());
 		Entity CreateEntityWithUUID(UUID uuid, const eastl::string& name = eastl::string());
 		void DestroyEntity(Entity entity);
+		Entity Duplicate(Entity entity);
 		bool HasEntity(UUID uuid);
 		Entity GetEntity(UUID uuid);
 

@@ -44,4 +44,6 @@
 #include "Arc/Scripting/ScriptEngine.h"
 #include "Arc/Scripting/Field.h"
 
+#include "Arc/Utils/ColorUtils.h"
+#include "Arc/Utils/PlatformUtils.h"
 #include "Arc/Utils/StringUtils.h"

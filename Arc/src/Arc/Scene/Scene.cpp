@@ -187,7 +187,7 @@ namespace ArcEngine
 				Entity fixtureEntity = { m_Scene->m_FixtureMap.at(fixture), m_Scene };
 
 				auto& buoyancyComponent2D = fluidEntity.GetComponent<BuoyancyEffector2DComponent>();
-				PhysicsUtils::HandleBuoyancy(fluid, fixture, m_Scene->m_PhysicsWorld2D->GetGravity(), buoyancyComponent2D.Density, buoyancyComponent2D.DragMultiplier);
+				PhysicsUtils::HandleBuoyancy(fluid, fixture, m_Scene->m_PhysicsWorld2D->GetGravity(), buoyancyComponent2D.FlipGravity, buoyancyComponent2D.Density, buoyancyComponent2D.DragMultiplier, buoyancyComponent2D.FlowMagnitude, buoyancyComponent2D.FlowAngle);
 				++it;
 			}
 		}
@@ -239,6 +239,28 @@ namespace ArcEngine
 	static void CopyComponent(ComponentGroup<Component...>, entt::registry& dst, entt::registry& src, eastl::hash_map<UUID, entt::entity> enttMap)
 	{
 		CopyComponent<Component...>(dst, src, enttMap);
+	}
+
+	template<typename... Component>
+	static void CopyComponent(entt::registry& dst, Entity srcEntity, Entity dstEntity)
+	{
+		([&]()
+			{
+				if (srcEntity.HasComponent<Component>())
+				{
+					if (typeid(Component) != typeid(ScriptComponent))				// Currently not support duplicating ScriptComponent
+					{
+						auto& component = srcEntity.GetComponent<Component>();
+						dst.emplace_or_replace<Component>(dstEntity, component);
+					}
+				}
+			}(), ...);
+	}
+
+	template<typename... Component>
+	static void CopyComponent(ComponentGroup<Component...>, entt::registry& dst, Entity srcEntity, Entity dstEntity)
+	{
+		CopyComponent<Component...>(dst, srcEntity, dstEntity);
 	}
 
 	Ref<Scene> Scene::CopyTo(Ref<Scene> other)
@@ -316,6 +338,14 @@ namespace ArcEngine
 		m_Registry.destroy(entity);
 	}
 
+	Entity Scene::Duplicate(Entity entity)
+	{
+		eastl::string name = entity.GetComponent<TagComponent>().Tag;
+		Entity duplicate = CreateEntity(name);
+		CopyComponent(AllComponents{}, m_Registry, entity, duplicate);
+		return duplicate;
+	}
+
 	bool Scene::HasEntity(UUID uuid)
 	{
 		ARC_PROFILE_SCOPE();
@@ -351,8 +381,8 @@ namespace ArcEngine
 
 				b2BodyDef def;
 				def.type = (b2BodyType)body.Type;
-				def.linearDamping = body.LinearDrag;
-				def.angularDamping = body.AngularDrag;
+				def.linearDamping = glm::max(body.LinearDrag, 0.0f);
+				def.angularDamping = glm::max(body.AngularDrag, 0.0f);
 				def.allowSleep = body.AllowSleep;
 				def.awake = body.Awake;
 				def.fixedRotation = body.FreezeRotation;
@@ -436,8 +466,10 @@ namespace ArcEngine
 					b2DistanceJointDef jointDef;
 					jointDef.Initialize(body1, body2, anchor1Pos, anchor2Pos);
 					jointDef.collideConnected = joint.EnableCollision;
-					jointDef.minLength = joint.MinDistance;
-					jointDef.maxLength = joint.MaxDistance;
+					if (!joint.AutoDistance)
+						jointDef.length = joint.Distance;
+					jointDef.minLength = glm::min(jointDef.length, joint.MinDistance);
+					jointDef.maxLength = jointDef.length + glm::max(joint.MaxDistanceBy, 0.0f);
 
 					joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jointDef);
 				}
@@ -460,8 +492,10 @@ namespace ArcEngine
 					b2DistanceJointDef jointDef;
 					jointDef.Initialize(body1, body2, anchor1Pos, anchor2Pos);
 					jointDef.collideConnected = joint.EnableCollision;
-					jointDef.minLength = joint.MinDistance;
-					jointDef.maxLength = joint.MaxDistance;
+					if (!joint.AutoDistance)
+						jointDef.length = joint.Distance;
+					jointDef.minLength = glm::min(jointDef.length, joint.MinDistance);
+					jointDef.maxLength = jointDef.length + glm::max(joint.MaxDistanceBy, 0.0f);
 					b2LinearStiffness(jointDef.stiffness, jointDef.damping, joint.Frequency, joint.DampingRatio, body1, body2);
 
 					joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jointDef);
@@ -1105,8 +1139,8 @@ namespace ArcEngine
 
 			b2BodyDef def;
 			def.type = (b2BodyType)body.Type;
-			def.linearDamping = body.LinearDrag;
-			def.angularDamping = body.AngularDrag;
+			def.linearDamping = glm::max(body.LinearDrag, 0.0f);
+			def.angularDamping = glm::max(body.AngularDrag, 0.0f);
 			def.allowSleep = body.AllowSleep;
 			def.awake = body.Awake;
 			def.fixedRotation = body.FreezeRotation;

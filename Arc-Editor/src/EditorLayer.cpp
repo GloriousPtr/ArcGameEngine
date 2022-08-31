@@ -53,8 +53,6 @@ namespace ArcEngine
 
 		m_Panels.push_back(CreateScope<RendererSettingsPanel>());
 		m_Panels.push_back(CreateScope<StatsPanel>());
-
-		ProjectSettingsPanel::LoadAssemblies();
 	}
 
 	void EditorLayer::OnDetach()
@@ -479,6 +477,18 @@ namespace ArcEngine
 					SaveScene();
 				break;
 			}
+			case Key::D:
+			{
+				if (control)
+				{
+					if (m_SelectedContext.Type == EditorContextType::Entity)
+					{
+						Entity* e = (Entity*) m_SelectedContext.Data;
+						m_ActiveScene->Duplicate(*e);
+					}
+				}
+				break;
+			}
 		}
 	}
 
@@ -534,6 +544,9 @@ namespace ArcEngine
 		m_ActiveScene->OnViewportResize(1, 1);
 		m_ActiveScene->MarkViewportDirty();
 		m_EditorScene = m_ActiveScene;
+
+		if (m_Viewports.size() > 0)
+			m_Viewports[0]->OnUpdate(m_ActiveScene, 0.0f, true);
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
@@ -606,9 +619,11 @@ namespace ArcEngine
 		m_ActiveScene = m_EditorScene;
 
 		if (m_Viewports.size() > 0)
+		{
 			m_Viewports[0]->SetSimulation(false);
+			m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
+		}
 
-		m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 

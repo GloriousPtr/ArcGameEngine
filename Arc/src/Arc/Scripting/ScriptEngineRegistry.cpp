@@ -31,7 +31,9 @@ namespace ArcEngine
 				ARC_CORE_TRACE("Registering {}", name.c_str());
 				uint32_t id = mono_type_get_type(type);
 				s_HasComponentFuncs[type] = [](Entity& entity, MonoType* monoType) { return entity.HasComponent<Component>(); };
-				s_AddComponentFuncs[type] = [](Entity& entity, MonoType* monoType) { entity.AddComponent<Component>(); };
+				s_AddComponentFuncs[type] = [](Entity& entity, MonoType* monoType) {
+					entity.AddComponent<Component>();
+				};
 			}
 			else
 			{
@@ -306,7 +308,7 @@ namespace ArcEngine
 	void Rigidbody2D_SetLinearDrag(uint64_t entityID, float* drag)
 	{
 		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		component.LinearDrag = *drag;
+		component.LinearDrag = glm::max(*drag, 0.0f);
 		if (component.RuntimeBody)
 		{
 			b2Body* body = (b2Body*)component.RuntimeBody;
@@ -323,7 +325,7 @@ namespace ArcEngine
 	void Rigidbody2D_SetAngularDrag(uint64_t entityID, float* drag)
 	{
 		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		component.AngularDrag = *drag;
+		component.AngularDrag = glm::max(*drag, 0.0f);
 		if (component.RuntimeBody)
 		{
 			b2Body* body = (b2Body*)component.RuntimeBody;

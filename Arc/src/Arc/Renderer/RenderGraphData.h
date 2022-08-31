@@ -11,13 +11,14 @@ namespace ArcEngine
 		Ref<Framebuffer> RenderPassTarget;
 		Ref<Framebuffer> LightingPassTarget;
 
-		static const size_t BlurSamples = 6;
+		static const size_t MaxBlurSamples = 6;
+		size_t BlurSamples = MaxBlurSamples;
 		Ref<Framebuffer> PrefilteredFramebuffer;
-		Ref<Framebuffer> TempBlurFramebuffers[BlurSamples];
-		Ref<Framebuffer> DownsampledFramebuffers[BlurSamples];
-		Ref<Framebuffer> UpsampledFramebuffers[BlurSamples];
+		Ref<Framebuffer> TempBlurFramebuffers[MaxBlurSamples];
+		Ref<Framebuffer> DownsampledFramebuffers[MaxBlurSamples];
+		Ref<Framebuffer> UpsampledFramebuffers[MaxBlurSamples];
 
-		void Resize(uint32_t width,  uint32_t height)
+		void Resize(uint32_t width, uint32_t height)
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -29,10 +30,17 @@ namespace ArcEngine
 			height /= 2;
 			PrefilteredFramebuffer->Resize(width, height);
 
-			for (size_t i = 0; i < BlurSamples; i++)
+			for (size_t i = 0; i < MaxBlurSamples; i++)
 			{
 				width /= 2;
 				height /= 2;
+
+				if (width <= 0.0f || height <= 0.0f)
+				{
+					BlurSamples = i + 1;
+					break;
+				}
+
 				TempBlurFramebuffers[i]->Resize(width, height);
 				DownsampledFramebuffers[i]->Resize(width, height);
 				UpsampledFramebuffers[i]->Resize(width, height);
