@@ -70,17 +70,17 @@ namespace ArcEngine
 		{
 			if (HasComponent<T>())
 			{
-				if (typeof(T).BaseType == typeof(Component))
-				{
-					T component = new T();
-					component.SetEntity(ID);
-					return component;
-				}
-				else
+				if (typeof(T).BaseType == typeof(Entity))
 				{
 					InternalCalls.Entity_GetComponent(ID, typeof(T), out IntPtr gcHandle);
 					GCHandle gch = GCHandle.FromIntPtr(gcHandle);
 					return (T)gch.Target;
+				}
+				else
+				{
+					T component = new T();
+					component.SetEntity(ID);
+					return component;
 				}
 			}
 
