@@ -332,7 +332,10 @@ namespace ArcEngine
 		auto children = entity.GetComponent<RelationshipComponent>().Children;
 
 		for (size_t i = 0; i < children.size(); i++)
-			DestroyEntity(GetEntity(children[i]));
+		{
+			if (Entity childEntity = GetEntity(children[i]))
+				DestroyEntity(childEntity);
+		}
 
 		m_EntityMap.erase(entity.GetUUID());
 		m_Registry.destroy(entity);

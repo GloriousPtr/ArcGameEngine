@@ -446,7 +446,7 @@ namespace ArcEngine
 				std::string filepath = file.DirectoryEntry.path().string();
 				const char* filename = file.Name.c_str();
 
-				uint32_t textureId = m_DirectoryIcon->GetRendererID();
+				uint64_t textureId = m_DirectoryIcon->GetRendererID();
 				const char* fontIcon = nullptr;
 				if (!isDir)
 				{

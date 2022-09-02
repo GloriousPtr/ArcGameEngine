@@ -648,7 +648,7 @@ namespace ArcEngine
 		out << YAML::EndMap; // Entity
 	}
 
-	UUID EntitySerializer::DeserializeEntity(YAML::Node node, Scene& scene, bool preserveUUID)
+	UUID EntitySerializer::DeserializeEntity(const YAML::Node& node, Scene& scene, bool preserveUUID)
 	{
 		YAML::Node entity = node;
 

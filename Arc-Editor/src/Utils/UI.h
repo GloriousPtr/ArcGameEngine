@@ -67,8 +67,8 @@ namespace ArcEngine
 		static bool PropertyColor4as3(const char* label, glm::vec4& color, const char* tooltip = nullptr);
 
 		// 2D/3D Textures
-		static bool Property(const char* label, Ref<TextureCubemap>& texture, uint32_t overrideTextureID = 0, const char* tooltip = nullptr);
-		static bool Property(const char* label, Ref<Texture2D>& texture, uint32_t overrideTextureID = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, Ref<TextureCubemap>& texture, uint64_t overrideTextureID = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, Ref<Texture2D>& texture, uint64_t overrideTextureID = 0, const char* tooltip = nullptr);
 
 		template<typename T>
 		static bool PropertyComponent(const char* label, const char* text, Scene* scene, UUID& entityID, const char* tooltip = nullptr)

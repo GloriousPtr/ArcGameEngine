@@ -745,7 +745,7 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// 2D/3D Textures ///////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, Ref<TextureCubemap>& texture, uint32_t overrideTextureID, const char* tooltip)
+	bool UI::Property(const char* label, Ref<TextureCubemap>& texture, uint64_t overrideTextureID, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
 
@@ -761,7 +761,7 @@ namespace ArcEngine
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
 
-		uint32_t id = overrideTextureID;
+		uint64_t id = overrideTextureID;
 		if (id == 0)
 			id = texture == nullptr ? 0 : texture->GetHRDRendererID();
 		ImGui::ImageButton((ImTextureID)id, buttonSize, { 1, 1 }, { 0, 0 }, 0);
@@ -802,7 +802,7 @@ namespace ArcEngine
 		return changed;
 	}
 
-	bool UI::Property(const char* label, Ref<Texture2D>& texture, uint32_t overrideTextureID, const char* tooltip)
+	bool UI::Property(const char* label, Ref<Texture2D>& texture, uint64_t overrideTextureID, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
 
@@ -818,7 +818,7 @@ namespace ArcEngine
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
 		
-		uint32_t id = overrideTextureID;
+		uint64_t id = overrideTextureID;
 		if (id == 0)
 			id = texture == nullptr ? 0 : texture->GetRendererID();
 		ImGui::ImageButton((ImTextureID)id, buttonSize, { 1, 1 }, { 0, 0 }, 0);
