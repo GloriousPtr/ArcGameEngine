@@ -19,7 +19,7 @@ namespace ArcEngine
 		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
 	}
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(float* vertices, uint32_t size)
+	OpenGLVertexBuffer::OpenGLVertexBuffer(const float* vertices, uint32_t size)
 	{
 		ARC_PROFILE_SCOPE();
 		
@@ -62,7 +62,7 @@ namespace ArcEngine
 	// IndexBuffer ///////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////
 	
-	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indices, uint32_t count)
+	OpenGLIndexBuffer::OpenGLIndexBuffer(const uint32_t* indices, uint32_t count)
 		: m_Count(count)
 	{
 		ARC_PROFILE_SCOPE();
@@ -126,7 +126,7 @@ namespace ArcEngine
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
-	void OpenGLUniformBuffer::SetData(void* data, uint32_t offset, uint32_t size)
+	void OpenGLUniformBuffer::SetData(const void* data, uint32_t offset, uint32_t size)
 	{
 		ARC_PROFILE_SCOPE();
 

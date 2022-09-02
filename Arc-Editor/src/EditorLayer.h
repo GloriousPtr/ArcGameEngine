@@ -17,7 +17,7 @@ namespace ArcEngine
 	{
 	public:
 		EditorLayer();
-		virtual ~EditorLayer();
+		virtual ~EditorLayer() override = default;
 		
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
@@ -27,7 +27,7 @@ namespace ArcEngine
 		virtual void OnEvent(Event& e) override;
 
 		void SetContext(EditorContextType type, void* data, size_t size) { m_SelectedContext.Set(type, data, size); }
-		const EditorContext& GetContext() { return m_SelectedContext; }
+		const EditorContext& GetContext() const { return m_SelectedContext; }
 		void OpenScene(const char* filepath);
 
 		static EditorLayer* GetInstance() { return s_Instance; }

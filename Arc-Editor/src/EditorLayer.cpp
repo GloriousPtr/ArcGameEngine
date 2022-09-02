@@ -27,10 +27,6 @@ namespace ArcEngine
 		s_Instance = this;
 	}
 
-	EditorLayer::~EditorLayer()
-	{
-	}
-
 	void EditorLayer::OnAttach()
 	{
 		ARC_PROFILE_SCOPE();
@@ -68,7 +64,7 @@ namespace ArcEngine
 		Renderer3D::ResetStats();
 
 		// Remove unused scene viewports
-		for (auto it = m_Viewports.begin(); it != m_Viewports.end(); it++)
+		for (const Scope<SceneViewport>* it = m_Viewports.begin(); it != m_Viewports.end(); it++)
 		{
 			if (!it->get()->Showing)
 			{
@@ -78,7 +74,7 @@ namespace ArcEngine
 		}
 
 		// Remove unused properties panels
-		for (auto it = m_Properties.begin(); it != m_Properties.end(); it++)
+		for (const Scope<PropertiesPanel>* it = m_Properties.begin(); it != m_Properties.end(); it++)
 		{
 			if (!it->get()->Showing)
 			{
@@ -88,19 +84,19 @@ namespace ArcEngine
 		}
 
 		bool useEditorCamera = m_SceneState == SceneState::Edit || m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
-		for (auto& panel : m_Viewports)
+		for (const auto& panel : m_Viewports)
 		{
 			if (panel->Showing)
 				panel->OnUpdate(m_ActiveScene, ts, useEditorCamera);
 		}
 
-		for (auto& panel : m_AssetPanels)
+		for (const auto& panel : m_AssetPanels)
 		{
 			if (panel->Showing)
 				panel->OnUpdate(ts);
 		}
 		
-		for (auto& panel : m_Panels)
+		for (const auto& panel : m_Panels)
 		{
 			if (panel->Showing)
 				panel->OnUpdate(ts);
