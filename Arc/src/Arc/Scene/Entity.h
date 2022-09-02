@@ -40,6 +40,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE();
 
+			ARC_CORE_ASSERT(m_Scene, "Scene is null!");
 			return m_Scene->m_Registry.has<T>(m_EntityHandle);
 		}
 

@@ -11,7 +11,7 @@ namespace ArcEngine
 		
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
-		virtual uint32_t GetRendererID() const = 0;
+		virtual uint64_t GetRendererID() const = 0;
 		virtual const eastl::string& GetPath() const = 0;
 
 		virtual void SetData(void* data, uint32_t size) = 0;
@@ -36,6 +36,6 @@ namespace ArcEngine
 		virtual void BindIrradianceMap(uint32_t slot) const = 0;
 		virtual void BindRadianceMap(uint32_t slot) const = 0;
 
-		virtual uint32_t GetHRDRendererID() const = 0;
+		virtual uint64_t GetHRDRendererID() const = 0;
 	};
 }

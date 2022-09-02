@@ -59,7 +59,7 @@ namespace ArcEngine
 		auto entities = data["Entities"];
 		if (entities)
 		{
-			for (auto entity : entities)
+			for (auto& entity : entities)
 			{
 				EntitySerializer::DeserializeEntity(entity, *m_Scene, true);
 			}

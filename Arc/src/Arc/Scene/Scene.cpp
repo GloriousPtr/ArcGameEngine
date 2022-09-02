@@ -716,12 +716,8 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE("PrepareSkylightData");
 
 			auto view = m_Registry.view<IDComponent, SkyLightComponent>();
-			for (auto entity : view)
-			{
-				auto [id, light] = view.get<IDComponent, SkyLightComponent>(entity);
-				skylight = Entity(entity, this);
-				break;
-			}
+			if (view.size() > 0)
+				skylight = Entity(*view.begin(), this);
 		}
 
 		Renderer3D::BeginScene(camera, skylight, lights);
@@ -992,15 +988,11 @@ namespace ArcEngine
 			}
 			Entity skylight = {};
 			{
-				ARC_PROFILE_SCOPE("Prepare Skylight Data");
+				ARC_PROFILE_SCOPE("PrepareSkylightData");
 
 				auto view = m_Registry.view<IDComponent, SkyLightComponent>();
-				for (auto entity : view)
-				{
-					auto [id, light] = view.get<IDComponent, SkyLightComponent>(entity);
-					skylight = Entity(entity, this);
-					break;
-				}
+				if (view.size() > 0)
+					skylight = Entity(*view.begin(), this);
 			}
 
 			Renderer3D::BeginScene(*mainCamera, cameraTransform, skylight, lights);

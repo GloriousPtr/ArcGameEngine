@@ -1180,7 +1180,7 @@ namespace ArcEngine
 		if (entities)
 		{
 			eastl::unordered_map<UUID, UUID> oldNewIdMap;
-			for (auto entity : entities)
+			for (auto& entity : entities)
 			{
 				UUID oldUUID = entity["Entity"].as<uint64_t>();
 				UUID newUUID = EntitySerializer::DeserializeEntity(entity, scene, false);

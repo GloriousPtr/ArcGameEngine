@@ -151,10 +151,16 @@ namespace ArcEngine
 				auto& v1 = mesh->mVertices[index + 1];
 				auto& v2 = mesh->mVertices[index + 2];
 
+				glm::vec2 uv0(0.0f);
+				glm::vec2 uv1(0.0f);
+				glm::vec2 uv2(0.0f);
 				// Shortcuts for UVs
-				auto& uv0 = mesh->mTextureCoords[0][index + 0];
-				auto& uv1 = mesh->mTextureCoords[0][index + 1];
-				auto& uv2 = mesh->mTextureCoords[0][index + 2];
+				if (auto uv = mesh->mTextureCoords[0])
+				{
+					uv0 = { uv[index + 0].x, uv[index + 0].x };
+					uv1 = { uv[index + 1].x, uv[index + 1].y };
+					uv2 = { uv[index + 2].x, uv[index + 2].y };
+				}
 
 				// Edges of the triangle : position delta
 				auto deltaPos1 = v1 - v0;
