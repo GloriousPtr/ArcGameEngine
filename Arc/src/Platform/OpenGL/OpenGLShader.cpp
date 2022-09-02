@@ -230,7 +230,7 @@ namespace ArcEngine
 		
 		eastl::unordered_map<GLenum, eastl::string> shaderSources;
 
-		const char* typeToken = "#type";
+		constexpr char* typeToken = "#type";
 		size_t typeTokenLength = strlen(typeToken);
 		size_t pos = source.find(typeToken, 0);
 		while (pos != eastl::string::npos)
@@ -349,7 +349,7 @@ namespace ArcEngine
 			GLenum type;
 			glGetActiveUniform(program, i, maxLength, nullptr, &size, &type, &name[0]);
 
-			static const char* prefix = "u_Material.";
+			static constexpr char* prefix = "u_Material.";
 			if (strncmp(name, prefix, strlen(prefix)) == 0)
 			{
 				MaterialPropertyType propertyType = GetMaterialPropertyType(type);

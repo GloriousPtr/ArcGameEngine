@@ -52,11 +52,14 @@ namespace ArcEngine
 
 	static void DragDropFrom(const char* filepath)
 	{
-		if (ImGui::BeginDragDropSource())
+		if (filepath)
 		{
-			ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", filepath, (strlen(filepath) + 1) * sizeof(char));
-			ImGui::Text(StringUtils::GetName(filepath).c_str());
-			ImGui::EndDragDropSource();
+			if (ImGui::BeginDragDropSource())
+			{
+				ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", filepath, (strlen(filepath) + 1) * sizeof(char));
+				ImGui::Text(StringUtils::GetName(filepath).c_str());
+				ImGui::EndDragDropSource();
+			}
 		}
 	}
 
@@ -477,7 +480,7 @@ namespace ArcEngine
 					{
 						auto& path = m_CurrentDirectory / file.DirectoryEntry.path().filename();
 						std::string strPath = path.string();
-						EditorLayer::GetInstance()->SetContext(EditorContextType::File, (void*)strPath.c_str(), sizeof(char) * (strlen(strPath.c_str()) + 1));
+						EditorLayer::GetInstance()->SetContext(EditorContextType::File, (void*)strPath.c_str(), sizeof(char) * (strPath.length() + 1));
 					}
 					if (isDir)
 						DragDropTarget(filepath.c_str());

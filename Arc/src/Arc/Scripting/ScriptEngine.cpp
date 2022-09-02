@@ -169,9 +169,12 @@ namespace ArcEngine
 				{
 					while (fgets(buffer, sizeof(buffer), errors))
 					{
-						size_t newLine = strlen(buffer) - 1;
-						buffer[newLine] = '\0';
-						ARC_ERROR(buffer);
+						if (buffer)
+						{
+							size_t newLine = strlen(buffer) - 1;
+							buffer[newLine] = '\0';
+							ARC_ERROR(buffer);
+						}
 					}
 
 					fclose(errors);
@@ -191,9 +194,12 @@ namespace ArcEngine
 				{
 					while (fgets(buffer, sizeof(buffer), warns))
 					{
-						size_t newLine = strlen(buffer) - 1;
-						buffer[newLine] = '\0';
-						ARC_WARN(buffer);
+						if (buffer)
+						{
+							size_t newLine = strlen(buffer) - 1;
+							buffer[newLine] = '\0';
+							ARC_WARN(buffer);
+						}
 					}
 
 					fclose(warns);

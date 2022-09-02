@@ -304,7 +304,8 @@ namespace ArcEngine
 		{
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
-			std::strncpy(buffer, tag.c_str(), sizeof(buffer));
+			size_t minSize = glm::min(sizeof(buffer), tag.size());
+			std::strncpy(buffer, tag.c_str(), minSize);
 			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
 				tag = eastl::string(buffer);
 
