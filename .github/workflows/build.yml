@@ -1,13 +1,13 @@
 name: Build
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths-ignore:
       - '.github/resources/**'
       - '**.md'
       - '**.txt'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths-ignore:
       - '.github/resources/**'
       - '**.md'
