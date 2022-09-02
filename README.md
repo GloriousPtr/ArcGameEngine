@@ -2,6 +2,10 @@
 
 [![Build Status](https://github.com/MohitSethi99/ArcEngine/workflows/build/badge.svg)](https://github.com/MohitSethi99/ArcEngine/actions?workflow=build)
 [![CodeQL](https://github.com/MohitSethi99/ArcEngine/workflows/CodeQL/badge.svg)](https://github.com/MohitSethi99/ArcEngine/actions?workflow=CodeQL)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcEngine&metric=bugs)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcEngine)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcEngine&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcEngine)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcEngine&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcEngine)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcEngine&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcEngine)
 
 ![Platform](https://img.shields.io/badge/platform-Windows-blue?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/MohitSethi99/ArcEngine?color=blue&style=flat-square)

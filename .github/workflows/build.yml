@@ -1,10 +1,17 @@
 name: Build
 on:
   push:
-    branches:
-      - main
+    branches: [ master ]
+    paths-ignore:
+      - '.github/resources/**'
+      - '**.md'
+      - '**.txt'
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches: [ master ]
+    paths-ignore:
+      - '.github/resources/**'
+      - '**.md'
+      - '**.txt'
 jobs:
   build:
     name: Build
