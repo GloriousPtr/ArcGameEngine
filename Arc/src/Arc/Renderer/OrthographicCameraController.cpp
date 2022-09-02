@@ -59,7 +59,7 @@ namespace ArcEngine
 		m_Camera.SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
 	}
 
-	bool OrthographicCameraController::OnMouseScrolled(MouseScrolledEvent& e)
+	bool OrthographicCameraController::OnMouseScrolled(const MouseScrolledEvent& e)
 	{
 		ARC_PROFILE_SCOPE();
 		
@@ -73,7 +73,7 @@ namespace ArcEngine
 		return false;
 	}
 
-	bool OrthographicCameraController::OnWindowResized(WindowResizeEvent& e)
+	bool OrthographicCameraController::OnWindowResized(const WindowResizeEvent& e)
 	{
 		ARC_PROFILE_SCOPE();
 

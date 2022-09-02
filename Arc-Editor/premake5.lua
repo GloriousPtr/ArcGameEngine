@@ -28,6 +28,7 @@ project "Arc-Editor"
 		"%{IncludeDir.EABase}",
 		"%{IncludeDir.EASTL}",
 		"%{IncludeDir.miniaudio}",
+		"%{IncludeDir.icons}",
 	}
 
 	links

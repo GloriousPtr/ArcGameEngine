@@ -30,7 +30,7 @@ namespace ArcEngine
 		}
 
 		char* buffer = new char[size];
-		stream.read((char*)buffer, size);
+		stream.read(buffer, size);
 		stream.close();
 
 		*outSize = (uint32_t)size;
@@ -49,7 +49,7 @@ namespace ArcEngine
 		if (status != MONO_IMAGE_OK)
 		{
 			const char* errorMessage = mono_image_strerror(status);
-			// Log some error message using the errorMessage data
+			ARC_CORE_ERROR("Could not load mono image from assembly.\n{}", errorMessage);
 			return nullptr;
 		}
 

@@ -15,15 +15,16 @@ typedef struct _MonoClassField MonoClassField;
 
 namespace ArcEngine
 {
-	using GCHandle = void*;
-
 	class ScriptClass
 	{
 	public:
 		ScriptClass() = default;
-		ScriptClass(MonoClass* monoClass);
+		explicit ScriptClass(MonoClass* monoClass);
 		ScriptClass(const eastl::string& classNamespace, const eastl::string& className);
 		
+		ScriptClass(const ScriptClass& other) = delete;
+		ScriptClass(ScriptClass&& other) = delete;
+
 		GCHandle Instantiate();
 		MonoMethod* GetMethod(const char* methodName, uint32_t parameterCount);
 		GCHandle InvokeMethod(GCHandle gcHandle, MonoMethod* method, void** params = nullptr);
@@ -56,8 +57,11 @@ namespace ArcEngine
 	class ScriptInstance
 	{
 	public:
-		ScriptInstance(ScriptInstance*, UUID entityID);
 		ScriptInstance(Ref<ScriptClass> scriptClass, UUID entityID);
+		ScriptInstance(ScriptInstance*, UUID entityID);
+
+		ScriptInstance(const ScriptInstance& other) = delete;
+		ScriptInstance(ScriptInstance&& other) = delete;
 
 		~ScriptInstance();
 

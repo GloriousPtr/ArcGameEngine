@@ -1,5 +1,11 @@
 #pragma once
 
+#include <assimp/Importer.hpp>
+#include <EASTL/hash_set.h>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
+
 #include "Arc/Core/UUID.h"
 #include "Arc/Renderer/Texture.h"
 #include "Arc/Scene/SceneCamera.h"
@@ -11,14 +17,6 @@
 #include "Arc/Scripting/Field.h"
 #include "Arc/Audio/AudioSource.h"
 #include "Arc/Audio/AudioListener.h"
-
-#include <glm/glm.hpp>
-
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/quaternion.hpp>
-
-#include <assimp/Importer.hpp>
-#include <EASTL/hash_set.h>
 
 namespace ArcEngine
 {
@@ -42,7 +40,7 @@ namespace ArcEngine
 
 		TagComponent() = default;
 		TagComponent(const TagComponent&) = default;
-		TagComponent(const eastl::string& tag)
+		explicit TagComponent(const eastl::string& tag)
 			: Tag(tag) {}
 	};
 	
@@ -55,8 +53,6 @@ namespace ArcEngine
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
-		TransformComponent(const glm::vec3& translation)
-			: Translation(translation) {}
 	};
 
 	struct RelationshipComponent
@@ -84,8 +80,6 @@ namespace ArcEngine
 
 		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;
-		SpriteRendererComponent(const glm::vec4& color)
-			: Color(color) {}
 	};
 
 	struct CameraComponent
@@ -98,22 +92,6 @@ namespace ArcEngine
 		CameraComponent(const CameraComponent&) = default;
 	};
 
-	class ScriptableEntity;
-	struct NativeScriptComponent
-	{
-		ScriptableEntity* Instance = nullptr;
-
-		ScriptableEntity* (*InstantiateScript)();
-		void (*DestroyScript)(NativeScriptComponent*);
-		
-		template<typename T>
-		void Bind()
-		{
-			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
-			DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
-		}
-	};
-
 	/////////////////////////////////////////////////////////////////////////////////////
 	// 3D ///////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -124,7 +102,7 @@ namespace ArcEngine
 
 		eastl::string Filepath;
 		Ref<Mesh> MeshGeometry = nullptr;
-		uint32_t SubmeshIndex = 0;
+		size_t SubmeshIndex = 0;
 		CullModeType CullMode = CullModeType::Back;
 
 		MeshComponent() = default;
@@ -174,17 +152,11 @@ namespace ArcEngine
 		}
 
 		LightComponent(const LightComponent& other)
+			:	Type(other.Type), UseColorTemperatureMode(other.UseColorTemperatureMode), Temperature(other.Temperature),
+				Color(other.Color), Intensity(other.Intensity), Range(other.Range),
+				CutOffAngle(other.CutOffAngle), OuterCutOffAngle(other.OuterCutOffAngle),
+				ShadowQuality(other.ShadowQuality)
 		{
-			Type = other.Type;
-			UseColorTemperatureMode = other.UseColorTemperatureMode;
-			Temperature = other.Temperature;
-			Color = other.Color;
-			Intensity = other.Intensity;
-			Range = other.Range;
-			CutOffAngle = other.CutOffAngle;
-			OuterCutOffAngle = other.OuterCutOffAngle;
-			ShadowQuality = other.ShadowQuality;
-
 			FramebufferSpecification spec;
 			spec.Attachments = { FramebufferTextureFormat::Depth };
 			spec.Width = 4096;
@@ -432,7 +404,6 @@ namespace ArcEngine
 		PrefabComponent,
 		SpriteRendererComponent,
 		CameraComponent,
-		NativeScriptComponent,
 		MeshComponent,
 		SkyLightComponent,
 		LightComponent,

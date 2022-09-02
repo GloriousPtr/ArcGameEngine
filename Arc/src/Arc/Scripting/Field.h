@@ -6,6 +6,7 @@ typedef struct _MonoClassField MonoClassField;
 namespace ArcEngine
 {
 	using GCHandle = void*;
+	using FieldData = void*;
 
 	struct Field
 	{
@@ -43,9 +44,12 @@ namespace ArcEngine
 		Field(const eastl::string& name, FieldType type, void* monoClassField, GCHandle handle);
 		~Field();
 
-		void* GetUnmanagedValue()
+		Field(const Field& other) = delete;
+		Field(Field&& other) = delete;
+
+		FieldData GetUnmanagedValue()
 		{
-			return (void*)m_Data.data();
+			return (FieldData)m_Data.data();
 		}
 
 		template<typename T>
@@ -58,7 +62,7 @@ namespace ArcEngine
 			return value;
 		}
 
-		void SetValue(void* value) const
+		void SetValue(FieldData value) const
 		{
 			memcpy((void*)m_Data.data(), value, m_Data.size());
 			SetManagedValue(value);
@@ -66,20 +70,20 @@ namespace ArcEngine
 
 		eastl::string GetManagedValueString();
 		void SetValueString(eastl::string& str);
-		size_t GetSize() { return m_Data.size(); }
+		size_t GetSize() const { return m_Data.size(); }
 
 		static FieldType GetFieldType(MonoType* monoType);
 
 	private:
 
-		void GetManagedValueInternal(void* outValue) const;
+		void GetManagedValueInternal(FieldData outValue) const;
 
-		void SetManagedValue(void* value) const;
+		void SetManagedValue(FieldData value) const;
 
 		static FieldType GetFieldTypeFromValueType(MonoType* monoType);
 
-		GCHandle m_Handle;
 		MonoClassField* m_Field;
+		GCHandle m_Handle;
 		eastl::vector<char> m_Data;
 	};
 }

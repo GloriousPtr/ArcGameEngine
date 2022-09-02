@@ -153,7 +153,7 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	inline T TrySet(T& value, YAML::Node node)
+	inline T TrySet(T& value, const YAML::Node& node)
 	{
 		if (node)
 			value = node.as<T>();
@@ -161,7 +161,7 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	inline T TrySetEnum(T& value, YAML::Node node)
+	inline T TrySetEnum(T& value, YAML::Node& node)
 	{
 		if (node)
 			value = (T) node.as<int>();
@@ -180,7 +180,7 @@ namespace ArcEngine
 			out << YAML::Key << "TagComponent";
 			out << YAML::BeginMap; // TagComponent
 
-			auto& tc = entity.GetComponent<TagComponent>();
+			const auto& tc = entity.GetComponent<TagComponent>();
 			out << YAML::Key << "Tag" << YAML::Value << tc.Tag.c_str();
 			out << YAML::Key << "Enabled" << YAML::Value << tc.Enabled;
 
@@ -192,7 +192,7 @@ namespace ArcEngine
 			out << YAML::Key << "TransformComponent";
 			out << YAML::BeginMap; // TransformComponent
 
-			auto& tc = entity.GetComponent<TransformComponent>();
+			const auto& tc = entity.GetComponent<TransformComponent>();
 			out << YAML::Key << "Translation" << YAML::Value << tc.Translation;
 			out << YAML::Key << "Rotation" << YAML::Value << tc.Rotation;
 			out << YAML::Key << "Scale" << YAML::Value << tc.Scale;
@@ -205,7 +205,7 @@ namespace ArcEngine
 			out << YAML::Key << "RelationshipComponent";
 			out << YAML::BeginMap; // RelationshipComponent
 
-			auto& tc = entity.GetComponent<RelationshipComponent>();
+			const auto& tc = entity.GetComponent<RelationshipComponent>();
 			out << YAML::Key << "Parent" << YAML::Value << tc.Parent;
 
 			out << YAML::Key << "ChildrenCount" << YAML::Value << tc.Children.size();
@@ -223,8 +223,8 @@ namespace ArcEngine
 			out << YAML::Key << "CameraComponent";
 			out << YAML::BeginMap; // CameraComponent
 
-			auto& cameraComponent = entity.GetComponent<CameraComponent>();
-			auto& camera = cameraComponent.Camera;
+			const auto& cameraComponent = entity.GetComponent<CameraComponent>();
+			const auto& camera = cameraComponent.Camera;
 
 			out << YAML::Key << "Camera" << YAML::Value;
 			out << YAML::BeginMap; // Camera
@@ -248,7 +248,7 @@ namespace ArcEngine
 			out << YAML::Key << "SpriteRendererComponent";
 			out << YAML::BeginMap; // SpriteRendererComponent
 
-			auto& spriteRendererComponent = entity.GetComponent<SpriteRendererComponent>();
+			const auto& spriteRendererComponent = entity.GetComponent<SpriteRendererComponent>();
 			out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.Color;
 			out << YAML::Key << "TexturePath" << YAML::Value << (spriteRendererComponent.Texture ? spriteRendererComponent.Texture->GetPath().c_str() : "");
 			out << YAML::Key << "TilingFactor" << YAML::Value << spriteRendererComponent.TilingFactor;
@@ -261,7 +261,7 @@ namespace ArcEngine
 			out << YAML::Key << "SkyLightComponent";
 			out << YAML::BeginMap; // MeshComponent
 
-			auto& skyLightComponent = entity.GetComponent<SkyLightComponent>();
+			const auto& skyLightComponent = entity.GetComponent<SkyLightComponent>();
 			out << YAML::Key << "TexturePath" << YAML::Value << (skyLightComponent.Texture ? skyLightComponent.Texture->GetPath().c_str() : "");
 			out << YAML::Key << "Intensity" << YAML::Value << skyLightComponent.Intensity;
 			out << YAML::Key << "Rotation" << YAML::Value << skyLightComponent.Rotation;
@@ -274,7 +274,7 @@ namespace ArcEngine
 			out << YAML::Key << "LightComponent";
 			out << YAML::BeginMap; // LightComponent
 
-			auto& lightComponent = entity.GetComponent<LightComponent>();
+			const auto& lightComponent = entity.GetComponent<LightComponent>();
 			out << YAML::Key << "Type" << YAML::Value << (int)lightComponent.Type;
 			out << YAML::Key << "UseColorTemperatureMode" << YAML::Value << lightComponent.UseColorTemperatureMode;
 			out << YAML::Key << "Temperature" << YAML::Value << lightComponent.Temperature;
@@ -293,7 +293,7 @@ namespace ArcEngine
 			out << YAML::Key << "Rigidbody2DComponent";
 			out << YAML::BeginMap; // Rigidbody2DComponent
 
-			auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			const auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 			out << YAML::Key << "Type" << YAML::Value << (int)rb2d.Type;
 			out << YAML::Key << "AutoMass" << YAML::Value << rb2d.AutoMass;
 			out << YAML::Key << "Mass" << YAML::Value << rb2d.Mass;
@@ -313,7 +313,7 @@ namespace ArcEngine
 			out << YAML::Key << "BoxCollider2DComponent";
 			out << YAML::BeginMap; // BoxCollider2DComponent
 
-			auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
+			const auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
 			out << YAML::Key << "Size" << YAML::Value << bc2d.Size;
 			out << YAML::Key << "Offset" << YAML::Value << bc2d.Offset;
 			out << YAML::Key << "IsSensor" << YAML::Value << bc2d.IsSensor;
@@ -330,7 +330,7 @@ namespace ArcEngine
 			out << YAML::Key << "CircleCollider2DComponent";
 			out << YAML::BeginMap; // CircleCollider2DComponent
 
-			auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
+			const auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
 			out << YAML::Key << "Radius" << YAML::Value << cc2d.Radius;
 			out << YAML::Key << "Offset" << YAML::Value << cc2d.Offset;
 			out << YAML::Key << "IsSensor" << YAML::Value << cc2d.IsSensor;
@@ -347,7 +347,7 @@ namespace ArcEngine
 			out << YAML::Key << "DistanceJoint2DComponent";
 			out << YAML::BeginMap; // DistanceJoint2DComponent
 
-			auto& dj2d = entity.GetComponent<DistanceJoint2DComponent>();
+			const auto& dj2d = entity.GetComponent<DistanceJoint2DComponent>();
 			out << YAML::Key << "EnableCollision" << YAML::Value << dj2d.EnableCollision;
 			out << YAML::Key << "ConnectedRigidbody" << YAML::Value << dj2d.ConnectedRigidbody;
 			out << YAML::Key << "Anchor" << YAML::Value << dj2d.Anchor;
@@ -366,7 +366,7 @@ namespace ArcEngine
 			out << YAML::Key << "SpringJoint2DComponent";
 			out << YAML::BeginMap; // SpringJoint2DComponent
 
-			auto& sj2d = entity.GetComponent<SpringJoint2DComponent>();
+			const auto& sj2d = entity.GetComponent<SpringJoint2DComponent>();
 			out << YAML::Key << "EnableCollision" << YAML::Value << sj2d.EnableCollision;
 			out << YAML::Key << "ConnectedRigidbody" << YAML::Value << sj2d.ConnectedRigidbody;
 			out << YAML::Key << "Anchor" << YAML::Value << sj2d.Anchor;
@@ -387,7 +387,7 @@ namespace ArcEngine
 			out << YAML::Key << "HingeJoint2DComponent";
 			out << YAML::BeginMap; // HingeJoint2DComponent
 
-			auto& hj2d = entity.GetComponent<HingeJoint2DComponent>();
+			const auto& hj2d = entity.GetComponent<HingeJoint2DComponent>();
 			out << YAML::Key << "EnableCollision" << YAML::Value << hj2d.EnableCollision;
 			out << YAML::Key << "ConnectedRigidbody" << YAML::Value << hj2d.ConnectedRigidbody;
 			out << YAML::Key << "Anchor" << YAML::Value << hj2d.Anchor;
@@ -408,7 +408,7 @@ namespace ArcEngine
 			out << YAML::Key << "SliderJoint2DComponent";
 			out << YAML::BeginMap; // SliderJoint2DComponent
 
-			auto& sj2d = entity.GetComponent<SliderJoint2DComponent>();
+			const auto& sj2d = entity.GetComponent<SliderJoint2DComponent>();
 			out << YAML::Key << "EnableCollision" << YAML::Value << sj2d.EnableCollision;
 			out << YAML::Key << "ConnectedRigidbody" << YAML::Value << sj2d.ConnectedRigidbody;
 			out << YAML::Key << "Anchor" << YAML::Value << sj2d.Anchor;
@@ -430,7 +430,7 @@ namespace ArcEngine
 			out << YAML::Key << "WheelJoint2DComponent";
 			out << YAML::BeginMap; // WheelJoint2DComponent
 
-			auto& wj2d = entity.GetComponent<WheelJoint2DComponent>();
+			const auto& wj2d = entity.GetComponent<WheelJoint2DComponent>();
 			out << YAML::Key << "EnableCollision" << YAML::Value << wj2d.EnableCollision;
 			out << YAML::Key << "ConnectedRigidbody" << YAML::Value << wj2d.ConnectedRigidbody;
 			out << YAML::Key << "Anchor" << YAML::Value << wj2d.Anchor;
@@ -453,7 +453,7 @@ namespace ArcEngine
 			out << YAML::Key << "BuoyancyEffector2DComponent";
 			out << YAML::BeginMap; // BuoyancyEffector2DComponent
 
-			auto& be2d = entity.GetComponent<BuoyancyEffector2DComponent>();
+			const auto& be2d = entity.GetComponent<BuoyancyEffector2DComponent>();
 			out << YAML::Key << "Density" << YAML::Value << be2d.Density;
 			out << YAML::Key << "DragMultiplier" << YAML::Value << be2d.DragMultiplier;
 			out << YAML::Key << "FlipGravity" << YAML::Value << be2d.FlipGravity;
@@ -468,7 +468,7 @@ namespace ArcEngine
 			out << YAML::Key << "MeshComponent";
 			out << YAML::BeginMap; // MeshComponent
 			
-			auto& meshComponent = entity.GetComponent<MeshComponent>();
+			const auto& meshComponent = entity.GetComponent<MeshComponent>();
 			out << YAML::Key << "Filepath" << YAML::Value << meshComponent.Filepath.c_str();
 			out << YAML::Key << "SubmeshIndex" << YAML::Value << meshComponent.SubmeshIndex;
 			out << YAML::Key << "CullMode" << YAML::Value << (int)meshComponent.CullMode;
@@ -481,13 +481,13 @@ namespace ArcEngine
 			out << YAML::Key << "ScriptComponent";
 			out << YAML::BeginMap; // ScriptComponent
 
-			auto& sc = entity.GetComponent<ScriptComponent>();
+			const auto& sc = entity.GetComponent<ScriptComponent>();
 
 			out << YAML::Key << "ScriptCount" << YAML::Value << sc.Classes.size();
 
 			out << YAML::Key << "Scripts" << YAML::BeginMap;
 			int i = 0;
-			for (auto& className : sc.Classes)
+			for (const auto& className : sc.Classes)
 			{
 				out << YAML::Key << i << YAML::BeginMap;
 				++i;
@@ -495,8 +495,8 @@ namespace ArcEngine
 				out << YAML::Key << "Name" << YAML::Value << className.c_str();
 				out << YAML::Key << "Fields" << YAML::BeginMap;
 
-				auto& fields = ScriptEngine::GetFieldMap(entity, className.c_str());
-				for (auto [fieldName, field] : fields)
+				const auto& fields = ScriptEngine::GetFieldMap(entity, className.c_str());
+				for (const auto& [fieldName, field] : fields)
 				{
 					if (field->Type == Field::FieldType::Unknown)
 						continue;
@@ -504,7 +504,7 @@ namespace ArcEngine
 					if (!field->Serializable)
 						continue;
 
-					GCHandle handle = ScriptEngine::GetInstance(entity, className)->GetHandle();
+					ScriptEngine::GetInstance(entity, className);
 					out << YAML::Key << fieldName.c_str() << YAML::Value;
 
 					switch (field->Type)
@@ -592,6 +592,7 @@ namespace ArcEngine
 						default:
 						{
 							ARC_CORE_ASSERT(false);
+							break;
 						}
 					}
 				}
@@ -609,7 +610,7 @@ namespace ArcEngine
 			out << YAML::Key << "AudioSourceComponent";
 			out << YAML::BeginMap; // AudioSourceComponent
 
-			auto& audioSourceComponent = entity.GetComponent<AudioSourceComponent>();
+			const auto& audioSourceComponent = entity.GetComponent<AudioSourceComponent>();
 			const char* f = (audioSourceComponent.Source ? audioSourceComponent.Source->GetPath() : "");
 			out << YAML::Key << "Filepath" << YAML::Value << f;
 			out << YAML::Key << "VolumeMultiplier" << YAML::Value << audioSourceComponent.Config.VolumeMultiplier;
@@ -636,7 +637,7 @@ namespace ArcEngine
 			out << YAML::Key << "AudioListenerComponent";
 			out << YAML::BeginMap; // AudioListenerComponent
 
-			auto& audioListenerComponent = entity.GetComponent<AudioListenerComponent>();
+			const auto& audioListenerComponent = entity.GetComponent<AudioListenerComponent>();
 			out << YAML::Key << "Active" << YAML::Value << audioListenerComponent.Active;
 			out << YAML::Key << "ConeInnerAngle" << YAML::Value << audioListenerComponent.Config.ConeInnerAngle;
 			out << YAML::Key << "ConeOuterAngle" << YAML::Value << audioListenerComponent.Config.ConeOuterAngle;
@@ -953,12 +954,12 @@ namespace ArcEngine
 						continue;
 					}
 
-					GCHandle handle = ScriptEngine::CreateInstance(deserializedEntity, scriptName.c_str())->GetHandle();
+					ScriptEngine::CreateInstance(deserializedEntity, scriptName.c_str());
 					sc.Classes.emplace_back(scriptName.c_str());
 
-					auto& fields = ScriptEngine::GetFieldMap(deserializedEntity, scriptName.c_str());
+					const auto& fields = ScriptEngine::GetFieldMap(deserializedEntity, scriptName.c_str());
 					{
-						for (auto [name, field] : fields)
+						for (const auto& [name, field] : fields)
 						{
 							if (field->Type == Field::FieldType::Unknown)
 								continue;
@@ -1121,11 +1122,11 @@ namespace ArcEngine
 	static void GetAllChildren(Entity parent, eastl::vector<Entity>& outEntities)
 	{
 		eastl::vector<UUID> children = parent.GetComponent<RelationshipComponent>().Children;
-		for (auto& child : children)
+		for (const auto& child : children)
 		{
-			Entity e = parent.GetScene()->GetEntity(child);
-			outEntities.push_back(e);
-			GetAllChildren(e, outEntities);
+			Entity entity = parent.GetScene()->GetEntity(child);
+			outEntities.push_back(entity);
+			GetAllChildren(entity, outEntities);
 		}
 	}
 
@@ -1146,7 +1147,7 @@ namespace ArcEngine
 		entities.push_back(entity);
 		GetAllChildren(entity, entities);
 
-		for (auto& entity : entities)
+		for (const auto& entity : entities)
 		{
 			if (!entity)
 				return;
@@ -1180,7 +1181,7 @@ namespace ArcEngine
 		if (entities)
 		{
 			eastl::unordered_map<UUID, UUID> oldNewIdMap;
-			for (auto& entity : entities)
+			for (const auto& entity : entities)
 			{
 				UUID oldUUID = entity["Entity"].as<uint64_t>();
 				UUID newUUID = EntitySerializer::DeserializeEntity(entity, scene, false);
@@ -1193,7 +1194,7 @@ namespace ArcEngine
 			root.AddComponent<PrefabComponent>().ID = prefabID;
 
 			// Fix parent/children UUIDs
-			for (auto [oldId, newId] : oldNewIdMap)
+			for (const auto& [oldId, newId] : oldNewIdMap)
 			{
 				auto& relationshipComponent = scene.GetEntity(newId).GetRelationship();
 				UUID parent = relationshipComponent.Parent;
@@ -1201,11 +1202,8 @@ namespace ArcEngine
 					relationshipComponent.Parent = oldNewIdMap.at(parent);
 
 				auto& children = relationshipComponent.Children;
-				for (size_t i = 0; i < children.size(); i++)
-				{
-					UUID childId = children[i];
-					children[i] = oldNewIdMap.at(childId);
-				}
+				for (auto& id : children)
+					id = oldNewIdMap.at(id);
 			}
 		}
 		else

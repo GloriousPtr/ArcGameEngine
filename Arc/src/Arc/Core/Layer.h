@@ -9,14 +9,14 @@ namespace ArcEngine
 	class Layer
 	{
 	public:
-		Layer(const eastl::string& name = "Layer");
+		explicit Layer(const eastl::string& name = "Layer");
 		virtual ~Layer() = default;
 
-		virtual void OnAttach() {}
-		virtual void OnDetach() {}
-		virtual void OnUpdate(Timestep ts) {}
-		virtual void OnImGuiRender() {}
-		virtual void OnEvent(Event& e) {}
+		virtual void OnAttach() { /* Called when layer is attached */ }
+		virtual void OnDetach() { /* Called when layer is detached */ }
+		virtual void OnUpdate(Timestep ts) { /* Layer OnUpdate */ }
+		virtual void OnImGuiRender() { /* Layer OnRender */ }
+		virtual void OnEvent(Event& e) { /* Called when an event is fired */ }
 
 		inline const eastl::string& GetName() const { return m_DebugName; }
 	protected:

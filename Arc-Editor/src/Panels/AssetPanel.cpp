@@ -50,16 +50,13 @@ namespace ArcEngine
 		return false;
 	}
 
-	static void DragDropFrom(const char* filepath)
+	static void DragDropFrom(const eastl::string& filepath)
 	{
-		if (filepath)
+		if (ImGui::BeginDragDropSource())
 		{
-			if (ImGui::BeginDragDropSource())
-			{
-				ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", filepath, (strlen(filepath) + 1) * sizeof(char));
-				ImGui::Text(StringUtils::GetName(filepath).c_str());
-				ImGui::EndDragDropSource();
-			}
+			ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", filepath.c_str(), filepath.length() + 1);
+			ImGui::Text(StringUtils::GetName(filepath.c_str()).c_str());
+			ImGui::EndDragDropSource();
 		}
 	}
 
@@ -107,11 +104,11 @@ namespace ArcEngine
 				anyNodeClicked = true;
 			}
 
-			const std::string filepath = entryPath.string();
+			const eastl::string filepath = entryPath.string().c_str();
 
 			if (!entryIsFile)
 				DragDropTarget(filepath.c_str());
-			DragDropFrom(filepath.c_str());
+			DragDropFrom(filepath);
 
 			eastl::string name = StringUtils::GetNameWithExtension(filepath.c_str());
 			const char* folderIcon;
@@ -125,7 +122,6 @@ namespace ArcEngine
 			ImGui::TextUnformatted(folderIcon);
 			ImGui::PopStyleColor();
 			ImGui::SameLine();
-			float x = ImGui::GetContentRegionAvail().x;
 			ImGui::TextUnformatted(name.c_str());
 			m_CurrentlyVisibleItemsTreeView++;
 
@@ -135,12 +131,12 @@ namespace ArcEngine
 			{
 				if (open)
 				{
-					auto clickState = DirectoryTreeViewRecursive(entryPath, count, selectionMask, flags);
+					const auto [isClicked, clickedNode] = DirectoryTreeViewRecursive(entryPath, count, selectionMask, flags);
 
 					if (!anyNodeClicked)
 					{
-						anyNodeClicked = clickState.first;
-						nodeClicked = clickState.second;
+						anyNodeClicked = isClicked;
+						nodeClicked = clickedNode;
 					}
 
 					ImGui::TreePop();
@@ -157,7 +153,7 @@ namespace ArcEngine
 	}
 
 	AssetPanel::AssetPanel(const char* name)
-		: BasePanel(name, ICON_MDI_FOLDER_STAR, true), m_CurrentDirectory(s_AssetPath)
+		: BasePanel(name, ICON_MDI_FOLDER_STAR, true)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -274,7 +270,7 @@ namespace ArcEngine
 
 			if (ImGui::Button(ICON_MDI_ARROW_RIGHT_CIRCLE_OUTLINE))
 			{
-				auto& top = m_BackStack.top();
+				const auto& top = m_BackStack.top();
 				UpdateDirectoryEntries(top);
 				m_BackStack.pop();
 			}
@@ -352,13 +348,12 @@ namespace ArcEngine
 				UpdateDirectoryEntries(s_AssetPath);
 				selectionMask = 0;
 			}
-			const char* folderIcon = open ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
+			const char* folderIcon = opened ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
 			ImGui::SameLine();
 			ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::AssetIconColor);
 			ImGui::TextUnformatted(folderIcon);
 			ImGui::PopStyleColor();
 			ImGui::SameLine();
-			float x = ImGui::GetContentRegionAvail().x;
 			ImGui::TextUnformatted("Assets");
 
 			if (opened)
@@ -367,15 +362,15 @@ namespace ArcEngine
 				for (const auto& entry : std::filesystem::recursive_directory_iterator(s_AssetPath))
 					count++;
 
-				auto clickState = DirectoryTreeViewRecursive(s_AssetPath, &count, &selectionMask, treeNodeFlags);
+				const auto [isClicked, clickedNode] = DirectoryTreeViewRecursive(s_AssetPath, &count, &selectionMask, treeNodeFlags);
 
-				if (clickState.first)
+				if (isClicked)
 				{
 					// (process outside of tree loop to avoid visual inconsistencies during the clicking frame)
 					if (ImGui::GetIO().KeyCtrl)
-						selectionMask ^= BIT(clickState.second);          // CTRL+click to toggle
-					else //if (!(selection_mask & (1 << clickState.second))) // Depending on selection behavior you want, may want to preserve selection when clicking on item that is part of the selection
-						selectionMask = BIT(clickState.second);           // Click to single-select
+						selectionMask ^= BIT(clickedNode);          // CTRL+click to toggle
+					else
+						selectionMask = BIT(clickedNode);           // Click to single-select
 				}
 
 				ImGui::TreePop();
@@ -384,7 +379,7 @@ namespace ArcEngine
 			ImGui::EndTable();
 
 			if (ImGui::IsItemClicked())
-				EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
+				EditorLayer::GetInstance()->SetContext(EditorContextType::None, nullptr, 0);
 		}
 
 		ImGui::PopStyleVar();
@@ -409,13 +404,10 @@ namespace ArcEngine
 			columnCount = 1;
 
 		float lineHeight = ImGui::GetTextLineHeight();
-		ImVec2 framePadding = ImGui::GetStyle().FramePadding;
-
 		uint32_t flags = ImGuiTableFlags_ContextMenuInBody
 			| ImGuiTableFlags_NoPadInnerX
 			| ImGuiTableFlags_ScrollY;
 
-		uint32_t i = 0;
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0, 0 });
 
 		if (!grid)
@@ -438,15 +430,16 @@ namespace ArcEngine
 		ImGui::SetCursorPos(cursorPos);
 
 		bool anyItemHovered = false;
-
+		uint32_t i = 0;
 		if (ImGui::BeginTable("BodyTable", columnCount, flags))
 		{
-			for (auto& file : m_DirectoryEntries)
+			for (const auto& file : m_DirectoryEntries)
 			{
-				ImGui::PushID(i++);
+				++i;
+				ImGui::PushID(i);
 
 				bool isDir = file.DirectoryEntry.is_directory();
-				std::string filepath = file.DirectoryEntry.path().string();
+				eastl::string filepath = file.DirectoryEntry.path().string().c_str();
 				const char* filename = file.Name.c_str();
 
 				uint64_t textureId = m_DirectoryIcon->GetRendererID();
@@ -455,7 +448,7 @@ namespace ArcEngine
 				{
 					eastl::string ext = StringUtils::GetExtension((eastl::string&&)file.Name);
 					if (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp")
-						textureId = AssetManager::GetTexture2D(filepath.c_str())->GetRendererID();
+						textureId = AssetManager::GetTexture2D(filepath)->GetRendererID();
 					else
 						fontIcon = GetFileIcon(ext.c_str());
 				}
@@ -464,8 +457,8 @@ namespace ArcEngine
 
 				if (grid)
 				{
+					cursorPos = ImGui::GetCursorPos();
 					ImVec2 textSize = ImGui::CalcTextSize(filename);
-					ImVec2 cursorPos = ImGui::GetCursorPos();
 
 					bool highlight = false;
 					EditorContext context = EditorLayer::GetInstance()->GetContext();
@@ -475,17 +468,17 @@ namespace ArcEngine
 						highlight = path == file.DirectoryEntry.path();
 					}
 
-					bool clicked = UI::ToggleButton(("##" + std::to_string(i)).c_str(), highlight, { m_ThumbnailSize + padding * 2, m_ThumbnailSize + textSize.y + padding * 8 }, 0.0f, 1.0f);
+					bool const clicked = UI::ToggleButton(("##" + std::to_string(i)).c_str(), highlight, { m_ThumbnailSize + padding * 2, m_ThumbnailSize + textSize.y + padding * 8 }, 0.0f, 1.0f);
 					if (m_ElapsedTime > 0.25f && clicked)
 					{
-						auto& path = m_CurrentDirectory / file.DirectoryEntry.path().filename();
+						const auto& path = m_CurrentDirectory / file.DirectoryEntry.path().filename();
 						std::string strPath = path.string();
 						EditorLayer::GetInstance()->SetContext(EditorContextType::File, (void*)strPath.c_str(), sizeof(char) * (strPath.length() + 1));
 					}
 					if (isDir)
 						DragDropTarget(filepath.c_str());
 
-					DragDropFrom(filepath.c_str());
+					DragDropFrom(filepath);
 
 					if (ImGui::IsItemHovered())
 						anyItemHovered = true;
@@ -493,7 +486,7 @@ namespace ArcEngine
 					if (isDir && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 					{
 						directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
-						EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
+						EditorLayer::GetInstance()->SetContext(EditorContextType::None, nullptr, 0);
 					}
 
 					ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
@@ -525,19 +518,13 @@ namespace ArcEngine
 					{
 						float rectMin_x = rectMin.x - padding + (rectSize.x - textSize.x) / 2;
 						float rectMin_y = rectMin.y + rectSize.y;
-
-						float rectMax_x = rectMin_x + textSize.x + padding * 2;
-						float rectMax_y = rectMin_y + textSize.y + padding * 2;
-
 						windowDrawList.AddText({ rectMin_x + padding, rectMin_y + padding * 2 }, ImColor(1.0f, 1.0f, 1.0f), filename);
 					}
 					else
 					{
 						float rectMin_y = rectMin.y + rectSize.y;
-
 						float rectMax_x = rectMin.x + rectSize.x;
 						float rectMax_y = rectMin_y + textSize.y + padding * 2;
-
 						ImGui::RenderTextEllipsis(&windowDrawList, { rectMin.x + padding, rectMin_y + padding * 2 }, { rectMax_x, rectMax_y }, rectMax_x, rectMax_x, filename, nullptr, &textSize);
 					}
 					ImGui::SetCursorPosY(ImGui::GetCursorPosY() + textSize.y + padding * 4);
@@ -577,7 +564,7 @@ namespace ArcEngine
 			ImGui::EndTable();
 
 			if (!anyItemHovered && ImGui::IsItemClicked())
-				EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
+				EditorLayer::GetInstance()->SetContext(EditorContextType::None, nullptr, 0);
 		}
 		ImGui::PopStyleVar();
 
@@ -585,7 +572,7 @@ namespace ArcEngine
 			UpdateDirectoryEntries(directoryToOpen);
 	}
 
-	void AssetPanel::UpdateDirectoryEntries(std::filesystem::path directory)
+	void AssetPanel::UpdateDirectoryEntries(const std::filesystem::path& directory)
 	{
 		ARC_PROFILE_SCOPE();
 

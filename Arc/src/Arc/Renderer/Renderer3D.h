@@ -26,12 +26,12 @@ namespace ArcEngine
 
 		static void BeginScene(const Camera& camera,const glm::mat4& transform, Entity cubemap, eastl::vector<Entity>& lights);
 		static void BeginScene(const EditorCamera& camera, Entity cubemap, eastl::vector<Entity>& lights);
-		static void EndScene(Ref<RenderGraphData>& renderTarget);
+		static void EndScene(const Ref<RenderGraphData>& renderTarget);
 
 		static void DrawCube();
 		static void DrawQuad();
 		static void ReserveMeshes(uint32_t count);
-		static void SubmitMesh(MeshComponent& meshComponent, const glm::mat4& transform);
+		static void SubmitMesh(const MeshComponent& meshComponent, const glm::mat4& transform);
 
 		static ShaderLibrary& GetShaderLibrary() { return s_ShaderLibrary; }
 
@@ -47,11 +47,11 @@ namespace ArcEngine
 	private:
 		static void SetupCameraData();
 		static void SetupLightsData();
-		static void Flush(Ref<RenderGraphData> renderGraphData);
-		static void CompositePass(Ref<RenderGraphData> renderGraphData);
-		static void BloomPass(Ref<RenderGraphData> renderGraphData);
-		static void LightingPass(Ref<RenderGraphData> renderGraphData);
-		static void RenderPass(Ref<Framebuffer> renderTarget);
+		static void Flush(const Ref<RenderGraphData> renderGraphData);
+		static void CompositePass(const Ref<RenderGraphData> renderGraphData);
+		static void BloomPass(const Ref<RenderGraphData> renderGraphData);
+		static void LightingPass(const Ref<RenderGraphData> renderGraphData);
+		static void RenderPass(const Ref<Framebuffer> renderTarget);
 		static void ShadowMapPass();
 
 	private:

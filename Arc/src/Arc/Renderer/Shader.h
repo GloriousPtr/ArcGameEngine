@@ -31,6 +31,7 @@ namespace ArcEngine
 			case MaterialPropertyType::Float2				: return sizeof(glm::vec2);
 			case MaterialPropertyType::Float3				: return sizeof(glm::vec3);
 			case MaterialPropertyType::Float4				: return sizeof(glm::vec4);
+			default											: return 0;
 		}
 	}
 
@@ -51,7 +52,7 @@ namespace ArcEngine
 		virtual void Unbind() const = 0;
 
 		virtual void SetInt(const eastl::string& name, int value) = 0;
-		virtual void SetIntArray(const eastl::string& name, int* values, uint32_t count) = 0;
+		virtual void SetIntArray(const eastl::string& name, const int* values, uint32_t count) = 0;
 		virtual void SetFloat(const eastl::string& name, float value) = 0;
 		virtual void SetFloat2(const eastl::string& name, const glm::vec2& value) = 0;
 		virtual void SetFloat3(const eastl::string& name, const glm::vec3& value) = 0;

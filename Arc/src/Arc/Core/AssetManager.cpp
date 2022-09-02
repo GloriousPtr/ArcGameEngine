@@ -9,6 +9,7 @@ namespace ArcEngine
 
 	void AssetManager::Init()
 	{
+		/* Init stuff here */
 	}
 
 	void AssetManager::Shutdown()

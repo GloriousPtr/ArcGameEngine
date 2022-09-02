@@ -1,5 +1,34 @@
 Scene: Untitled
 Entities:
+  - Entity: 4794170410324563299
+    TagComponent:
+      Tag: Camera
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 0
+      ChildrenCount: 0
+      Children:
+        {}
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+    AudioListenerComponent:
+      Active: true
+      ConeInnerAngle: 360
+      ConeOuterAngle: 360
+      ConeOuterGain: 0
   - Entity: 3351491715015009777
     TagComponent:
       Tag: Sprite
@@ -45,11 +74,11 @@ Entities:
             Force: [0, 1]
             Speed: 5
     AudioSourceComponent:
-      Filepath: Assets\audio\crowd.mp3
+      Filepath: Assets\audio\ding.wav
       VolumeMultiplier: 1
       PitchMultiplier: 1
       PlayOnAwake: true
-      Looping: false
+      Looping: true
       Spatialization: true
       AttenuationModel: 1
       RollOff: 1
@@ -61,32 +90,3 @@ Entities:
       ConeOuterAngle: 360
       ConeOuterGain: 0
       DopplerFactor: 1
-  - Entity: 4794170410324563299
-    TagComponent:
-      Tag: Camera
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 0
-      ChildrenCount: 0
-      Children:
-        {}
-    CameraComponent:
-      Camera:
-        ProjectionType: 1
-        PerspectiveFOV: 0.785398185
-        PerspectiveNear: 0.00999999978
-        PerspectiveFar: 1000
-        OrthographicSize: 10
-        OrthographicNear: -1
-        OrthographicFar: 1
-      Primary: true
-      FixedAspectRatio: false
-    AudioListenerComponent:
-      Active: true
-      ConeInnerAngle: 360
-      ConeOuterAngle: 360
-      ConeOuterGain: 0

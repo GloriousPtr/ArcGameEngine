@@ -7,36 +7,39 @@
 
 namespace ArcEngine
 {
-	Ref<VertexBuffer> VertexBuffer::Create(uint32_t size)
+	Ref<VertexBuffer> VertexBuffer::Create(const size_t size)
 	{
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLVertexBuffer>(size);
+			default:						ARC_CORE_ASSERT(false, "Unknown RendererAPI!"); return nullptr;
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
 	}
 
-	Ref<VertexBuffer> VertexBuffer::Create(float* verticies, uint32_t size)
+	Ref<VertexBuffer> VertexBuffer::Create(const float* verticies, const size_t size)
 	{
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLVertexBuffer>(verticies, size);
+			default:						ARC_CORE_ASSERT(false, "Unknown RendererAPI!"); return nullptr;
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
 	}
 
-	Ref<IndexBuffer> IndexBuffer::Create(uint32_t* indices, uint32_t count)
+	Ref<IndexBuffer> IndexBuffer::Create(const uint32_t* indices, const size_t count)
 	{
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLIndexBuffer>(indices, count);
+			default:						ARC_CORE_ASSERT(false, "Unknown RendererAPI!"); return nullptr;
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -49,6 +52,7 @@ namespace ArcEngine
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLUniformBuffer>();
+			default:						ARC_CORE_ASSERT(false, "Unknown RendererAPI!"); return nullptr;
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");

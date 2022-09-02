@@ -1,22 +1,27 @@
 #pragma once
 
 #include <ArcEngine.h>
+#include <icons/IconsMaterialDesignIcons.h>
 
 #include "BasePanel.h"
 #include "EditorContext.h"
-#include "../Utils/IconsMaterialDesignIcons.h"
 
 namespace ArcEngine
 {
 	class PropertiesPanel : public BasePanel
 	{
 	public:
-		PropertiesPanel(const char* name = "Properties")
+		explicit PropertiesPanel(const char* name = "Properties")
 			: BasePanel(name, ICON_MDI_INFORMATION, true)
 		{
 		}
 
 		virtual ~PropertiesPanel() override = default;
+
+		PropertiesPanel(const PropertiesPanel& other) = delete;
+		PropertiesPanel(PropertiesPanel&& other) = delete;
+		PropertiesPanel& operator=(const PropertiesPanel& other) = delete;
+		PropertiesPanel& operator=(PropertiesPanel&& other) = delete;
 
 		virtual void OnImGuiRender() override;
 
@@ -35,7 +40,7 @@ namespace ArcEngine
 		void DrawFileProperties(const char* filepath);
 
 		template<typename Component>
-		void DrawAddComponent(Entity entity, const char* name);
+		void DrawAddComponent(Entity entity, const char* name) const;
 
 	private:
 		EditorContext m_Context = {};

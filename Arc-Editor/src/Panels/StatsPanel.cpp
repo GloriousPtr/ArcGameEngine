@@ -12,7 +12,7 @@ namespace ArcEngine
 		
 		float avg = 0.0f;
 
-		const uint32_t size = m_FrameTimes.size();
+		const size_t size = m_FrameTimes.size();
 		if (size >= 50)
 			m_FrameTimes.erase(m_FrameTimes.begin());
 
@@ -23,7 +23,7 @@ namespace ArcEngine
 			avg += m_FrameTimes[i];
 		}
 		
-		avg /= size;
+		avg /= (float)size;
 
 		if (OnBegin())
 		{
@@ -63,7 +63,7 @@ namespace ArcEngine
 				Application::Get().GetWindow().SetVSync(vSync);
 			UI::EndProperties();
 
-			ImGui::PlotLines("##FPS", m_FpsValues, size);
+			ImGui::PlotLines("##FPS", m_FpsValues, (int)size);
 			ImGui::Text("FPS: %f", avg);
 			const float fps = (1.0f / avg) * 1000.0f;
 			ImGui::Text("Frame time (ms): %f", fps);

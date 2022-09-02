@@ -7,13 +7,13 @@ namespace ArcEngine
 	class SceneSerializer
 	{
 	public:
-		SceneSerializer(const Ref<Scene>& scene);
+		explicit SceneSerializer(const Ref<Scene>& scene);
 
-		void Serialize(const eastl::string& filepath);
-		void SerializeRuntime(const eastl::string& filepath);
+		void Serialize(const eastl::string& filepath) const;
+		void SerializeRuntime(const eastl::string& filepath) const;
 
-		bool Deserialize(const eastl::string& filepath);
-		bool DeserializeRuntime(const eastl::string& filepath);
+		bool Deserialize(const eastl::string& filepath) const;
+		bool DeserializeRuntime(const eastl::string& filepath) const;
 	private:
 		Ref<Scene> m_Scene;
 	};

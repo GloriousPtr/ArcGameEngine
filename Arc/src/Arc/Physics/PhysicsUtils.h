@@ -20,7 +20,7 @@ namespace ArcEngine
 			b2Vec2 dp(s.x - e.x, s.y - e.y);
 			float n1 = cp1.x * cp2.y - cp1.y * cp2.x;
 			float n2 = s.x * e.y - s.y * e.x;
-			float n3 = 1.0 / (dc.x * dp.y - dc.y * dp.x);
+			float n3 = 1.0f / (dc.x * dp.y - dc.y * dp.x);
 			return b2Vec2((n1 * dp.x - n2 * dc.x) * n3, (n1 * dp.y - n2 * dc.y) * n3);
 		}
 
@@ -31,14 +31,15 @@ namespace ArcEngine
 
 			b2CircleShape* circle = (b2CircleShape*)fixture->GetShape();
 			b2Vec2 position = fixture->GetBody()->GetPosition();
-			float radius = circle->m_radius;
+			const float radius = circle->m_radius;
 
-			uint32_t polyCount = resolution * radius;
-			float deltaAngle = 360.0f / polyCount;
+			const float polyCount = (float)resolution * radius;
+			constexpr float twoPi = 6.28318530718f;
+			const float deltaRadians = twoPi / polyCount;
 
 			for (uint32_t i = 0; i < polyCount; ++i)
 			{
-				float radians = glm::radians(deltaAngle * i);
+				float radians = deltaRadians * (float)i;
 				b2Vec2 point = { glm::cos(radians), glm::sin(radians) };
 				vertices.push_back(position + (radius * point));
 			}
@@ -53,7 +54,7 @@ namespace ArcEngine
 		{
 			eastl::vector<b2Vec2> clipPolygon;
 
-			b2PolygonShape* polyA = nullptr;
+			const b2PolygonShape* polyA = nullptr;
 			switch (fA->GetShape()->GetType())
 			{
 			case b2Shape::e_polygon:
@@ -69,7 +70,7 @@ namespace ArcEngine
 				return false;
 			}
 
-			b2PolygonShape* polyB = nullptr;
+			const b2PolygonShape* polyB = nullptr;
 			switch (fB->GetShape()->GetType())
 			{
 			case b2Shape::e_polygon:
@@ -89,23 +90,21 @@ namespace ArcEngine
 				return false;
 
 			b2Vec2 cp1 = clipPolygon[clipPolygon.size() - 1];
-			for (int j = 0; j < clipPolygon.size(); j++)
+			for (const auto& cp2 : clipPolygon)
 			{
-				b2Vec2 cp2 = clipPolygon[j];
 				if (outputVertices.empty())
 					return false;
+
 				eastl::vector<b2Vec2> inputList = outputVertices;
 				outputVertices.clear();
 				b2Vec2 s = inputList[inputList.size() - 1]; //last on the input list
-				for (int i = 0; i < inputList.size(); i++)
+				for (const auto& e : inputList)
 				{
-					b2Vec2 e = inputList[i];
 					if (Inside(cp1, cp2, e))
 					{
 						if (!Inside(cp1, cp2, s))
-						{
 							outputVertices.push_back(Intersection(cp1, cp2, s, e));
-						}
+						
 						outputVertices.push_back(e);
 					}
 					else if (Inside(cp1, cp2, s))

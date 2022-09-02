@@ -123,7 +123,7 @@ namespace ArcEngine
 		}
 	}
 
-	bool Application::OnWindowClose(WindowCloseEvent& e)
+	bool Application::OnWindowClose(const WindowCloseEvent& e)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -131,7 +131,7 @@ namespace ArcEngine
 		return true;
 	}
 
-	bool Application::OnWindowResize(WindowResizeEvent& e)
+	bool Application::OnWindowResize(const WindowResizeEvent& e)
 	{
 		ARC_PROFILE_SCOPE();
 		

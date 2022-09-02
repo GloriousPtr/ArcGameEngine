@@ -19,7 +19,7 @@ namespace ArcEngine
 		m_Context = context;
 	}
 
-	void SceneHierarchyPanel::DragDropTarget()
+	void SceneHierarchyPanel::DragDropTarget() const
 	{
 		if (ImGui::BeginDragDropTarget())
 		{
@@ -53,10 +53,10 @@ namespace ArcEngine
 
 					Entity parent = m_Context->CreateEntity(mesh->GetName());
 
-					uint32_t meshCount = mesh->GetSubmeshCount();
+					size_t meshCount = mesh->GetSubmeshCount();
 					for (size_t i = 0; i < meshCount; i++)
 					{
-						auto& submesh = mesh->GetSubmesh(i);
+						const auto& submesh = mesh->GetSubmesh(i);
 						Entity entity = m_Context->CreateEntity(submesh.Name);
 						entity.SetParent(parent);
 						auto& meshComponent = entity.AddComponent<MeshComponent>();
@@ -80,7 +80,6 @@ namespace ArcEngine
 			| ImGuiTableFlags_BordersInner
 			| ImGuiTableFlags_ScrollY;
 
-		ImVec2 cellPadding = ImGui::GetStyle().CellPadding;
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0, 0 });
 
 		if (OnBegin(ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar))
@@ -153,7 +152,7 @@ namespace ArcEngine
 				ImGui::EndTable();
 
 				if (ImGui::IsItemClicked())
-					EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
+					EditorLayer::GetInstance()->SetContext(EditorContextType::None, nullptr, 0);
 			}
 
 			if (m_DraggedEntity && m_DraggedEntityTarget)
@@ -168,7 +167,7 @@ namespace ArcEngine
 				EditorContext context = EditorLayer::GetInstance()->GetContext();
 				Entity entityContext = *((Entity*)context.Data);
 				if (context.Type == EditorContextType::Entity && entityContext == m_DeletedEntity)
-					EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
+					EditorLayer::GetInstance()->SetContext(EditorContextType::None, nullptr, 0);
 
 				m_Context->DestroyEntity(m_DeletedEntity);
 				m_DeletedEntity = {};
@@ -189,8 +188,8 @@ namespace ArcEngine
 		auto& tagComponent = entity.GetComponent<TagComponent>();
 		auto& tag = tagComponent.Tag;
 
-		auto& rc = entity.GetRelationship();
-		uint32_t childrenSize = rc.Children.size();
+		const auto& rc = entity.GetRelationship();
+		size_t childrenSize = rc.Children.size();
 
 		if (m_Filter.IsActive() && !m_Filter.PassFilter(tag.c_str()))
 		{
@@ -216,12 +215,7 @@ namespace ArcEngine
 			flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 		}
 
-		ImVec2 startPos = ImGui::GetCursorPos();
-		float columnWidth = ImGui::GetContentRegionMax().x;
-		float columnHeight = ImGui::GetFrameHeight();
-
 		bool highlight = selectedEntity == entity;
-
 		if (highlight)
 		{
 			ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, ImGui::GetColorU32(EditorTheme::HeaderSelectedColor));
@@ -272,15 +266,14 @@ namespace ArcEngine
 		{
 			if (ImGui::BeginDragDropTarget())
 			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity"))
+				if (const ImGuiPayload* entityPayload = ImGui::AcceptDragDropPayload("Entity"))
 				{
-					Entity* e = (Entity*)payload->Data;
-					m_DraggedEntity = *e;
+					m_DraggedEntity = *((Entity*)entityPayload->Data);
 					m_DraggedEntityTarget = entity;
 				}
-				else if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+				else if (const ImGuiPayload* assetPanelPayload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
-					const char* path = (const char*)payload->Data;
+					const char* path = (const char*)assetPanelPayload->Data;
 					eastl::string ext = StringUtils::GetExtension(path);
 					if (ext == "prefab")
 					{
@@ -305,7 +298,7 @@ namespace ArcEngine
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
 			size_t minSize = glm::min(sizeof(buffer), tag.size());
-			std::strncpy(buffer, tag.c_str(), minSize);
+			strncpy_s(buffer, tag.c_str(), minSize);
 			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
 				tag = eastl::string(buffer);
 
@@ -356,18 +349,21 @@ namespace ArcEngine
 				depth %= 4;
 				switch (depth)
 				{
-				case 0:
-					treeLineColor = ImColor(254, 112, 246);
-					break;
-				case 1:
-					treeLineColor = ImColor(142, 112, 254);
-					break;
-				case 2:
-					treeLineColor = ImColor(112, 180, 254);
-					break;
-				case 3:
-					treeLineColor = ImColor(48, 134, 198);
-					break;
+					case 0:
+						treeLineColor = ImColor(254, 112, 246);
+						break;
+					case 1:
+						treeLineColor = ImColor(142, 112, 254);
+						break;
+					case 2:
+						treeLineColor = ImColor(112, 180, 254);
+						break;
+					case 3:
+						treeLineColor = ImColor(48, 134, 198);
+						break;
+					default:
+						treeLineColor = ImColor(255, 255, 255);
+						break;
 				}
 
 				ImDrawList* drawList = ImGui::GetWindowDrawList();
@@ -378,7 +374,7 @@ namespace ArcEngine
 				{
 					UUID childId = entity.GetRelationship().Children[i];
 					Entity child = m_Context->GetEntity(childId);
-					const float HorizontalTreeLineSize = child.GetRelationship().Children.size() == 0 ? 18.0f : 9.0f; //chosen arbitrarily
+					const float HorizontalTreeLineSize = child.GetRelationship().Children.empty() ? 18.0f : 9.0f; //chosen arbitrarily
 					const ImRect childRect = DrawEntityNode(child, createChild, depth + 1, forceExpandTree, isPartOfPrefab);
 
 					const float midpoint = (childRect.Min.y + childRect.Max.y) / 2.0f;
@@ -405,11 +401,11 @@ namespace ArcEngine
 		return nodeRect;
 	}
 
-	void SceneHierarchyPanel::DrawContextMenu()
+	void SceneHierarchyPanel::DrawContextMenu() const
 	{
 		if (ImGui::BeginPopupContextWindow("SceneHierarchyContextWindow", 1, false))
 		{
-			EditorLayer::GetInstance()->SetContext(EditorContextType::None, 0, 0);
+			EditorLayer::GetInstance()->SetContext(EditorContextType::None, nullptr, 0);
 			Entity toSelect = {};
 			if (ImGui::BeginMenu("Create"))
 			{

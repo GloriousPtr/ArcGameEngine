@@ -7,6 +7,8 @@
 
 namespace ArcEngine
 {
+	using WindowHandle = void*;
+
 	struct WindowProps
 	{
 		eastl::string Title;
@@ -39,9 +41,8 @@ namespace ArcEngine
 		virtual void ShowCursor() = 0;
 		virtual void HideCursor() = 0;
 
-		virtual void* GetNativeWindow() const = 0;
+		virtual WindowHandle GetNativeWindow() const = 0;
 		
 		static Scope<Window> Create(const WindowProps& props = WindowProps());
 	};
 }
-

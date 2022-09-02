@@ -87,7 +87,7 @@ namespace ArcEngine
 		UploadUniformInt(name, value);
 	}
 
-	void OpenGLShader::SetIntArray(const eastl::string& name, int* values, uint32_t count)
+	void OpenGLShader::SetIntArray(const eastl::string& name, const int* values, uint32_t count)
 	{
 		ARC_PROFILE_SCOPE();
 		
@@ -148,7 +148,7 @@ namespace ArcEngine
 		glUniform1i(GetLocation(name), value);
 	}
 
-	void OpenGLShader::UploadUniformIntArray(const eastl::string& name, int* values, uint32_t count)
+	void OpenGLShader::UploadUniformIntArray(const eastl::string& name, const int* values, uint32_t count)
 	{
 		glUniform1iv(GetLocation(name), count, values);
 	}

@@ -50,9 +50,9 @@ namespace ArcEngine
 		delete[m_BufferSizeInBytes] m_Buffer;
 
 		m_BufferSizeInBytes = 0;
-		auto& materialProperties = m_Shader->GetMaterialProperties();
+		const auto& materialProperties = m_Shader->GetMaterialProperties();
 
-		for (auto& [name, property] : materialProperties)
+		for (const auto& [name, property] : materialProperties)
 			m_BufferSizeInBytes += property.SizeInBytes;
 
 		m_Buffer = new char[m_BufferSizeInBytes];
@@ -85,10 +85,10 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		auto& materialProperties = m_Shader->GetMaterialProperties();
+		const auto& materialProperties = m_Shader->GetMaterialProperties();
 
 		m_Shader->Bind();
-		for (auto& [name, property] : materialProperties)
+		for (const auto& [name, property] : materialProperties)
 		{
 			char* bufferStart = m_Buffer + property.OffsetInBytes;
 			uint32_t slot = *(uint32_t*)bufferStart;
@@ -130,35 +130,40 @@ namespace ArcEngine
 					m_Shader->SetFloat4(name, *((glm::vec4*)bufferStart));
 					break;
 				}
+				default:
+				{
+					ARC_CORE_ASSERT("Unknown type material property: {}", name.c_str());
+					break;
+				}
 			}
 		}
 	}
 
-	void Material::Unbind()
+	void Material::Unbind() const
 	{
 		ARC_PROFILE_SCOPE();
 
 		m_Shader->Unbind();
 	}
 
-	void* Material::GetData_Internal(const char* name)
+	Material::MaterialData Material::GetData_Internal(const char* name)
 	{
 		ARC_PROFILE_SCOPE();
 
-		auto& materialProperties = m_Shader->GetMaterialProperties();
-		for (auto& [n, property] : materialProperties)
+		const auto& materialProperties = m_Shader->GetMaterialProperties();
+		for (const auto& [n, property] : materialProperties)
 		{
 			if (n == name)
 				return m_Buffer + property.OffsetInBytes;
 		}
 	}
 
-	void Material::SetData_Internal(const char* name, void* data)
+	void Material::SetData_Internal(const char* name, const Material::MaterialData data)
 	{
 		ARC_PROFILE_SCOPE();
 
-		auto& materialProperties = m_Shader->GetMaterialProperties();
-		for (auto& [n, property] : materialProperties)
+		const auto& materialProperties = m_Shader->GetMaterialProperties();
+		for (const auto& [n, property] : materialProperties)
 		{
 			if (n == name)
 			{

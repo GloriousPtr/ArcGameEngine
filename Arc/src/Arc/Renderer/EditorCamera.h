@@ -29,8 +29,8 @@ namespace ArcEngine
 		const glm::vec3& GetForward() const { return m_Forward; }
 		const glm::vec3& GetRight() const { return m_Right; }
 		const glm::vec3& GetUp() const { return m_Up; }
-		const float GetYaw() const { return m_Yaw; }
-		const float GetPitch() const { return m_Pitch; }
+		float GetYaw() const { return m_Yaw; }
+		float GetPitch() const { return m_Pitch; }
 
 	private:
 		float m_Fov = 45.0f;

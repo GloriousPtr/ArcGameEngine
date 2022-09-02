@@ -1,6 +1,10 @@
 #pragma once
-#include <spdlog/sinks/base_sink.h>
+
+#include <mutex>
+
 #include <EASTL/string.h>
+#include <spdlog/details/null_mutex.h>
+#include <spdlog/sinks/base_sink.h>
 
 namespace ArcEngine
 {
@@ -70,6 +74,7 @@ namespace ArcEngine
 				case spdlog::level::level_enum::warn:			return Log::Level::Warn;
 				case spdlog::level::level_enum::err:			return Log::Level::Error;
 				case spdlog::level::level_enum::critical:		return Log::Level::Critical;
+				default:										return Log::Level::Trace;
 			}
 			return Log::Level::Trace;
 		}
@@ -82,8 +87,6 @@ namespace ArcEngine
 	};
 }
 
-#include "spdlog/details/null_mutex.h"
-#include <mutex>
 namespace ArcEngine
 {
 	using ExternalConsoleSink_mt = ExternalConsoleSink<std::mutex>;                  // multi-threaded

@@ -1,8 +1,9 @@
 #pragma once
+
 #include <ArcEngine.h>
+#include <icons/IconsMaterialDesignIcons.h>
 
 #include "BasePanel.h"
-#include "../Utils/IconsMaterialDesignIcons.h"
 
 struct ImRect;
 
@@ -11,12 +12,16 @@ namespace ArcEngine
 	class SceneHierarchyPanel : public BasePanel
 	{
 	public:
-		SceneHierarchyPanel(const char* name = "Hierarchy")
+		explicit SceneHierarchyPanel(const char* name = "Hierarchy")
 			: BasePanel(name, ICON_MDI_VIEW_LIST, true)
 		{
 		}
-
 		virtual ~SceneHierarchyPanel() = default;
+
+		SceneHierarchyPanel(const SceneHierarchyPanel& other) = delete;
+		SceneHierarchyPanel(SceneHierarchyPanel&& other) = delete;
+		SceneHierarchyPanel& operator=(const SceneHierarchyPanel& other) = delete;
+		SceneHierarchyPanel& operator=(SceneHierarchyPanel&& other) = delete;
 
 		void SetContext(const Ref<Scene>& context);
 
@@ -24,8 +29,8 @@ namespace ArcEngine
 
 	private:
 		ImRect DrawEntityNode(Entity entity, bool skipChildren = false, uint32_t depth = 0, bool forceExpandTree = false, bool isPartOfPrefab = false);
-		void SceneHierarchyPanel::DrawContextMenu();
-		void DragDropTarget();
+		void SceneHierarchyPanel::DrawContextMenu() const;
+		void DragDropTarget() const;
 
 		friend class SceneViewport;
 

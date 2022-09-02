@@ -12,6 +12,7 @@
 #include <mono/metadata/debug-helpers.h>
 #endif // ARC_DEBUG
 
+#include "Arc/Scene/Entity.h"
 #include "MonoUtils.h"
 #include "GCManager.h"
 #include "ScriptEngineRegistry.h"
@@ -59,7 +60,7 @@ namespace ArcEngine
 
 		s_Data = CreateRef<ScriptEngineData>();
 
-		static const char* options[] =
+		static char* options[] =
 		{
 			"--soft-breakpoints",
 			"--debugger-agent=transport=dt_socket,address=127.0.0.1:2550,server=y,suspend=n"
@@ -133,12 +134,10 @@ namespace ArcEngine
 	void ScriptEngine::ReloadAppDomain()
 	{
 		// Clean old instances
-		for (auto [id, script] : s_Data->EntityInstances)
+		for (const auto& [id, script] : s_Data->EntityInstances)
 		{
-			for (auto& it = script.begin(); it != script.end(); ++it)
-			{
-				GCManager::ReleaseObjectReference(it->second->GetHandle());
-			}
+			for (const auto& [scriptName, instance] : script)
+				GCManager::ReleaseObjectReference(instance->GetHandle());
 		}
 
 		if (s_Data->AppDomain)
@@ -221,11 +220,11 @@ namespace ArcEngine
 
 		// Recreate instances
 		eastl::unordered_map<UUID, eastl::unordered_map<eastl::string, ScriptInstance*>> entityInstances;
-		for (auto [id, script] : s_Data->EntityInstances)
+		for (const auto& [id, script] : s_Data->EntityInstances)
 		{
-			for (auto [name, scriptInstance] : script)
+			for (const auto& [name, scriptInstance] : script)
 			{
-				auto& scriptClass = s_Data->EntityClasses.at(name);
+				const auto& scriptClass = s_Data->EntityClasses.at(name);
 				if (s_Data->EntityInstances[id][name] != nullptr)
 				{
 					entityInstances[id][name] = s_Data->EntityInstances[id][name];
@@ -293,9 +292,9 @@ namespace ArcEngine
 	{
 		s_Data->CurrentEntityInstanceMap = &s_Data->EntityRuntimeInstances;
 
-		for (auto [id, script] : s_Data->EntityInstances)
+		for (const auto& [id, script] : s_Data->EntityInstances)
 		{
-			for (auto [name, scriptInstance] : script)
+			for (const auto& [name, scriptInstance] : script)
 			{
 				ScriptInstance* copy = new ScriptInstance(scriptInstance, id);
 				s_Data->EntityRuntimeInstances[id][name] = copy;
@@ -306,7 +305,7 @@ namespace ArcEngine
 	void ScriptEngine::OnRuntimeEnd()
 	{
 		s_Data->CurrentEntityInstanceMap = &s_Data->EntityInstances;
-		for (auto [id, script] : s_Data->EntityRuntimeInstances)
+		for (const auto& [id, script] : s_Data->EntityRuntimeInstances)
 		{
 			for (auto& it = script.begin(); it != script.end(); ++it)
 				delete it->second;
@@ -503,6 +502,8 @@ namespace ArcEngine
 			accessibility = (uint8_t)Accessibility::Public;
 			break;
 		}
+		default:
+			break;
 		}
 
 		return accessibility;
@@ -514,8 +515,8 @@ namespace ArcEngine
 		m_FieldsMap.clear();
 
 		MonoClassField* monoField;
-		void* ptr = 0;
-		while ((monoField = mono_class_get_fields(m_MonoClass, &ptr)) != NULL)
+		void* ptr = nullptr;
+		while ((monoField = mono_class_get_fields(m_MonoClass, &ptr)) != nullptr)
 		{
 			const char* propertyName = mono_field_get_name(monoField);
 			m_Fields.push_back(propertyName);
@@ -526,21 +527,6 @@ namespace ArcEngine
 	////////////////////////////////////////////////////////////////////////
 	// Script Instance /////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////
-	ScriptInstance::ScriptInstance(ScriptInstance* scriptInstance, UUID entityID)
-	{
-		m_ScriptClass = scriptInstance->m_ScriptClass;
-
-		MonoObject* copy = mono_object_clone(GCManager::GetReferencedObject(scriptInstance->m_Handle));
-		m_Handle = GCManager::CreateObjectReference(copy, false);
-
-		m_EntityClass = CreateRef<ScriptClass>(s_Data->EntityClass);
-		m_Constructor = m_EntityClass->GetMethod(".ctor", 1);
-		void* params = &entityID;
-		m_EntityClass->InvokeMethod(m_Handle, m_Constructor, &params);
-
-		LoadMethods();
-		LoadFields();
-	}
 
 	ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass, UUID entityID)
 		: m_ScriptClass(scriptClass)
@@ -552,6 +538,21 @@ namespace ArcEngine
 		void* params = &entityID;
 		m_EntityClass->InvokeMethod(m_Handle, m_Constructor, &params);
 		
+		LoadMethods();
+		LoadFields();
+	}
+
+	ScriptInstance::ScriptInstance(ScriptInstance* scriptInstance, UUID entityID)
+		: m_ScriptClass(scriptInstance->m_ScriptClass)
+	{
+		MonoObject* copy = mono_object_clone(GCManager::GetReferencedObject(scriptInstance->m_Handle));
+		m_Handle = GCManager::CreateObjectReference(copy, false);
+
+		m_EntityClass = CreateRef<ScriptClass>(s_Data->EntityClass);
+		m_Constructor = m_EntityClass->GetMethod(".ctor", 1);
+		void* params = &entityID;
+		m_EntityClass->InvokeMethod(m_Handle, m_Constructor, &params);
+
 		LoadMethods();
 		LoadFields();
 	}
@@ -591,10 +592,10 @@ namespace ArcEngine
 	{
 		m_Fields.clear();
 
-		auto& fieldMap = m_ScriptClass->m_FieldsMap;
+		const auto& fieldMap = m_ScriptClass->m_FieldsMap;
 		eastl::map<eastl::string, Ref<Field>> finalFields;
 
-		for (auto fieldName : m_ScriptClass->m_Fields)
+		for (const auto& fieldName : m_ScriptClass->m_Fields)
 		{
 			MonoClassField* monoField = fieldMap.at(fieldName);
 			MonoType* fieldType = mono_field_get_type(monoField);
@@ -603,7 +604,6 @@ namespace ArcEngine
 			if (type == Field::FieldType::Unknown)
 				continue;
 
-			const char* name = fieldName.c_str();
 			uint8_t accessibilityFlag = GetFieldAccessibility(monoField);
 			bool serializable = accessibilityFlag & (uint8_t)Accessibility::Public;
 			bool hidden = !serializable;
@@ -656,7 +656,7 @@ namespace ArcEngine
 
 			if (sameType)
 			{
-				void* value = m_FieldsMap[fieldName]->GetUnmanagedValue();
+				const void* value = m_FieldsMap[fieldName]->GetUnmanagedValue();
 				size_t size = m_FieldsMap[fieldName]->GetSize();
 				void* copy = new char[size];
 				memcpy(copy, value, size);
@@ -669,12 +669,13 @@ namespace ArcEngine
 				finalFields[fieldName] = CreateRef<Field>(fieldName, type, monoField, m_Handle);
 			}
 
-			finalFields[fieldName]->Serializable = serializable;
-			finalFields[fieldName]->Hidden = hidden;
-			finalFields[fieldName]->Header = header;
-			finalFields[fieldName]->Tooltip = tooltip;
-			finalFields[fieldName]->Min = min;
-			finalFields[fieldName]->Max = max;
+			auto& field = finalFields[fieldName];
+			field->Serializable = serializable;
+			field->Hidden = hidden;
+			field->Header = header;
+			field->Tooltip = tooltip;
+			field->Min = min;
+			field->Max = max;
 
 			m_Fields.push_back(fieldName);
 		}

@@ -29,6 +29,7 @@ namespace ArcEngine
 			case MONO_TYPE_U8:			return FieldType::ULong;
 			case MONO_TYPE_STRING:		return FieldType::String;
 			case MONO_TYPE_VALUETYPE:	return GetFieldTypeFromValueType(monoType);
+			default:					return FieldType::Unknown;
 		}
 
 		return FieldType::Unknown;
@@ -66,6 +67,7 @@ namespace ArcEngine
 		case Field::FieldType::Vec3:			return sizeof(glm::vec3);
 		case Field::FieldType::Vec4:			return sizeof(glm::vec4);
 		case Field::FieldType::Color:			return sizeof(glm::vec4);
+		default:								return 0;
 		}
 
 		return 0;
@@ -95,13 +97,13 @@ namespace ArcEngine
 		m_Data.clear();
 	}
 
-	void Field::GetManagedValueInternal(void* outValue) const
+	void Field::GetManagedValueInternal(FieldData outValue) const
 	{
 		ARC_PROFILE_SCOPE();
 		mono_field_get_value(GCManager::GetReferencedObject(m_Handle), m_Field, outValue);
 	}
 
-	void Field::SetManagedValue(void* value) const
+	void Field::SetManagedValue(FieldData value) const
 	{
 		ARC_PROFILE_SCOPE();
 		mono_field_set_value(GCManager::GetReferencedObject(m_Handle), m_Field, value);

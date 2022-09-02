@@ -13,6 +13,7 @@ namespace ArcEngine
 	};
 
 	static GCState* s_GCState;
+
 	void GCManager::Init()
 	{
 		ARC_PROFILE_SCOPE();
@@ -24,21 +25,21 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (s_GCState->StrongRefMap.size() > 0)
+		if (!s_GCState->StrongRefMap.empty())
 		{
 			ARC_CORE_ERROR("Memory leak detected\n Not all GCHandles have been cleaned up!");
 
-			for (auto& [handle, object] : s_GCState->StrongRefMap)
+			for (const auto& [handle, object] : s_GCState->StrongRefMap)
 				mono_gchandle_free_v2(handle);
 
 			s_GCState->StrongRefMap.clear();
 		}
 
-		if (s_GCState->WeakRefMap.size() > 0)
+		if (!s_GCState->WeakRefMap.empty())
 		{
 			ARC_CORE_ERROR("Memory leak detected\n Not all GCHandles have been cleaned up!");
 
-			for (auto& [handle, object] : s_GCState->WeakRefMap)
+			for (const auto& [handle, object] : s_GCState->WeakRefMap)
 				mono_gchandle_free_v2(handle);
 
 			s_GCState->WeakRefMap.clear();

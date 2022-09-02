@@ -1,19 +1,17 @@
 #include "SceneViewport.h"
 
+#include <entt.hpp>
+#include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui.h>
 #include <ImGuizmo.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <entt.hpp>
 
 #include "Arc/Math/Math.h"
-#include "../Utils/IconsMaterialDesignIcons.h"
 #include "../EditorLayer.h"
 #include "../Utils/UI.h"
 
 namespace ArcEngine
 {
-	static int s_ID = 0;
-	
 	SceneViewport::SceneViewport(const char* name)
 		: BasePanel(name, ICON_MDI_TERRAIN, true)
 	{
@@ -82,7 +80,7 @@ namespace ArcEngine
 		m_EditorCamera.SetViewportSize(1280, 720);
 	}
 
-	void SceneViewport::OnUpdate(Ref<Scene>& scene, Timestep timestep, bool useEditorCamera)
+	void SceneViewport::OnUpdate(const Ref<Scene>& scene, Timestep timestep, bool useEditorCamera)
 	{
 		ARC_PROFILE_SCOPE(m_ID.c_str());
 
@@ -90,7 +88,7 @@ namespace ArcEngine
 
 		if (FramebufferSpecification spec = m_RenderGraphData->CompositePassTarget->GetSpecification();
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
-			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
+			(spec.Width != (uint32_t)m_ViewportSize.x || spec.Height != (uint32_t)m_ViewportSize.y))
 		{
 			m_RenderGraphData->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
@@ -197,7 +195,7 @@ namespace ArcEngine
 				Entity entity = *((Entity*)context.Data);
 				if (entity)
 				{
-					auto& transform = entity.GetComponent<TransformComponent>();
+					const auto& transform = entity.GetComponent<TransformComponent>();
 					glm::vec3 pos = transform.Translation;
 					pos.z -= 5.0f;
 					auto& view = glm::lookAt(pos, transform.Translation, m_EditorCamera.GetUp());
@@ -214,18 +212,14 @@ namespace ArcEngine
 			auto [mx, my] = ImGui::GetMousePos();
 			mx -= m_ViewportBounds[0].x;
 			my -= m_ViewportBounds[0].y;
-			const auto viewportWidth = m_ViewportBounds[1].x - m_ViewportBounds[0].x;
-			const auto viewportHeight = m_ViewportBounds[1].y - m_ViewportBounds[0].y;
+			const int viewportWidth = (int)(m_ViewportBounds[1].x - m_ViewportBounds[0].x);
+			const int viewportHeight = (int)(m_ViewportBounds[1].y - m_ViewportBounds[0].y);
 			my = viewportHeight - my;
 			const int mouseX = (int)mx;
 			const int mouseY = (int)my;
 			if(mouseX >= 0 && mouseY >= 0 && mouseX < viewportWidth && mouseY < viewportHeight)
 			{
-				// TODO: Raycast selection
-				/*
-				const Entity selectedEntity = pixelData < 0 || !scene->HasEntity(pixelData) ? Entity() : scene->GetEntity(pixelData);
-				m_SceneHierarchyPanel->SetSelectedEntity(selectedEntity);
-				*/
+				// TODO: Scene GetEntity or use raycast for selection
 			}
 		}
 	}
@@ -254,7 +248,7 @@ namespace ArcEngine
 			m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
 			uint64_t textureID = m_RenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
-			ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+			ImGui::Image((ImTextureID)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 			if (m_SceneHierarchyPanel)
 				m_SceneHierarchyPanel->DragDropTarget();
@@ -277,7 +271,7 @@ namespace ArcEngine
 						const glm::mat4& cameraView = m_EditorCamera.GetViewMatrix();
 						// Entity Transform
 						auto& tc = selectedEntity.GetComponent<TransformComponent>();
-						auto& rc = selectedEntity.GetComponent<RelationshipComponent>();
+						const auto& rc = selectedEntity.GetComponent<RelationshipComponent>();
 						glm::mat4 transform = selectedEntity.GetWorldTransform();
 
 						// Snapping
@@ -292,7 +286,7 @@ namespace ArcEngine
 
 						if (m_ViewportHovered && ImGuizmo::IsUsing())
 						{
-							glm::mat4& parentWorldTransform = rc.Parent != 0 ? selectedEntity.GetParent().GetWorldTransform() : glm::mat4(1.0f);
+							const glm::mat4& parentWorldTransform = rc.Parent != 0 ? selectedEntity.GetParent().GetWorldTransform() : glm::mat4(1.0f);
 							glm::vec3 translation, rotation, scale;
 							Math::DecomposeTransform(glm::inverse(parentWorldTransform) * transform, translation, rotation, scale);
 
@@ -326,23 +320,22 @@ namespace ArcEngine
 		ImGui::PopStyleVar();
 	}
 
-	void SceneViewport::OnOverlayRender(Ref<Scene>& scene)
+	void SceneViewport::OnOverlayRender(const Ref<Scene>& scene) const
 	{
 		Renderer2D::BeginScene(m_EditorCamera);
 		{
 			auto view = scene->GetAllEntitiesWith<TransformComponent, CameraComponent>();
-			for (auto entity : view)
+			for (auto entityHandle : view)
 			{
-				auto& [tc, cam] = view.get<TransformComponent, CameraComponent>(entity);
-				glm::mat4 transform = Entity(entity, scene.get()).GetWorldTransform();
-
-				const auto inv = glm::inverse(cam.Camera.GetProjection() * glm::inverse(transform));
+				const auto& [tc, cam] = view.get<TransformComponent, CameraComponent>(entityHandle);
+				Entity entity = { entityHandle, scene.get() };
+				const auto inv = glm::inverse(cam.Camera.GetProjection() * glm::inverse(entity.GetWorldTransform()));
 				eastl::vector<glm::vec3> frustumCorners;
-				for (unsigned int x = 0; x < 2; ++x)
+				for (float x = 0.0f; x < 2.0f; x += 1.0f)
 				{
-					for (unsigned int y = 0; y < 2; ++y)
+					for (float y = 0.0f; y < 2.0f; y += 1.0f)
 					{
-						for (unsigned int z = 0; z < 2; ++z)
+						for (float z = 0.0f; z < 2.0f; z += 1.0f)
 						{
 							const glm::vec4 pt = 
 							inv * glm::vec4(
@@ -375,7 +368,6 @@ namespace ArcEngine
 			auto view = scene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
 			for (auto entity : view)
 			{
-				auto& [tc, bc2d] = view.get<TransformComponent, BoxCollider2DComponent>(entity);
 				Renderer2D::DrawRect(Entity(entity, scene.get()).GetWorldTransform(), { 0.2f, 0.8f, 0.2f, 1.0f });
 			}
 		}
@@ -383,7 +375,7 @@ namespace ArcEngine
 		Renderer2D::EndScene(m_RenderGraphData);
 	}
 
-	bool SceneViewport::OnMouseButtonPressed(MouseButtonPressedEvent& e)
+	bool SceneViewport::OnMouseButtonPressed(const MouseButtonPressedEvent& e)
 	{
 		if (e.GetMouseButton() == Mouse::Button1 && m_ViewportHovered && !m_SimulationRunning)
 		{
@@ -395,9 +387,9 @@ namespace ArcEngine
 		return false;
 	}
 
-	bool SceneViewport::OnMouseButtonReleased(MouseButtonReleasedEvent& e)
+	bool SceneViewport::OnMouseButtonReleased(const MouseButtonReleasedEvent& e)
 	{
-		if (m_CursorLocked == true)
+		if (e.GetMouseButton() == Mouse::Button1 && m_CursorLocked == true)
 		{
 			Application::Get().GetWindow().ShowCursor();
 			m_CursorLocked = false;

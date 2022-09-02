@@ -16,7 +16,7 @@ namespace ArcEngine
 		Ref<Material> Mat;
 		Ref<VertexArray> Geometry;
 
-		Submesh(const char* name, Ref<Material>& material, Ref<VertexArray>& geometry)
+		Submesh(const char* name, const Ref<Material>& material, const Ref<VertexArray>& geometry)
 			: Name(name), Mat(material), Geometry(geometry)
 		{
 		}
@@ -26,18 +26,18 @@ namespace ArcEngine
 	{
 	public:
 		Mesh() = default;
-		Mesh(const char* filepath);
+		explicit Mesh(const char* filepath);
 		virtual ~Mesh() = default;
 
 		void Load(const char* filepath);
 
-		Submesh& GetSubmesh(uint32_t index);
-		const uint32_t GetSubmeshCount() const { return m_Submeshes.size(); }
+		Submesh& GetSubmesh(size_t index);
+		size_t GetSubmeshCount() const { return m_Submeshes.size(); }
 		const char* GetName() const { return m_Name.c_str(); }
 
 	private:
-		void ProcessNode(aiNode *node, const aiScene *scene, const char* filepath);
-		void ProcessMesh(aiMesh *mesh, const aiScene *scene, const char* filepath, const char* nodeName);
+		void ProcessNode(const aiNode* node, const aiScene* scene, const char* filepath);
+		void ProcessMesh(const aiMesh* mesh, const aiScene* scene, const char* filepath, const char* nodeName);
 
 	private:
 		eastl::string m_Name;

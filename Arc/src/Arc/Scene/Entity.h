@@ -17,7 +17,7 @@ namespace ArcEngine
 		Entity(const Entity& other) = default;
 
 		template<typename T, typename... Args>
-		T& AddComponent(Args&&... args)
+		T& AddComponent(Args&&... args) const
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -28,7 +28,7 @@ namespace ArcEngine
 		}
 
 		template<typename T>
-		T& GetComponent()
+		T& GetComponent() const
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -37,7 +37,7 @@ namespace ArcEngine
 		}
 
 		template<typename T>
-		bool HasComponent()
+		bool HasComponent() const
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -46,7 +46,7 @@ namespace ArcEngine
 		}
 
 		template<typename T>
-		void RemoveComponent()
+		void RemoveComponent() const
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -62,7 +62,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE();
 
-			auto& rc = GetComponent<RelationshipComponent>();
+			const auto& rc = GetComponent<RelationshipComponent>();
 			return rc.Parent != 0 ? m_Scene->GetEntity(rc.Parent) : Entity {};
 		}
 
@@ -103,8 +103,8 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE();
 
-			auto& transform = GetTransform();
-			auto& rc = GetRelationship();
+			const auto& transform = GetTransform();
+			const auto& rc = GetRelationship();
 			glm::mat4 parentTransform = glm::mat4(1.0f);
 			if (rc.Parent != 0)
 				parentTransform = m_Scene->GetEntity(rc.Parent).GetWorldTransform();
@@ -116,7 +116,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE();
 
-			auto& transform = GetTransform();
+			const auto& transform = GetTransform();
 			return glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);
 		}
 

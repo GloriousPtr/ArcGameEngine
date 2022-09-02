@@ -50,6 +50,7 @@ project "Arc"
 		"%{IncludeDir.EABase}",
 		"%{IncludeDir.EASTL}",
 		"%{IncludeDir.miniaudio}",
+		"%{IncludeDir.icons}",
 	}
 
 	links

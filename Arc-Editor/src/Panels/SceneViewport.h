@@ -1,4 +1,5 @@
 #pragma once
+
 #include <ArcEngine.h>
 
 #include "BasePanel.h"
@@ -9,20 +10,25 @@ namespace ArcEngine
 	class SceneViewport : public BasePanel
 	{
 	public:
-		SceneViewport(const char* name = "Viewport");
+		explicit SceneViewport(const char* name = "Viewport");
 		virtual ~SceneViewport() override = default;
 
-		virtual void OnUpdate(Ref<Scene>& scene, Timestep timestep, bool useEditorCamera);
+		SceneViewport(const SceneViewport& other) = delete;
+		SceneViewport(SceneViewport&& other) = delete;
+		SceneViewport& operator=(const SceneViewport& other) = delete;
+		SceneViewport& operator=(SceneViewport&& other) = delete;
+
+		virtual void OnUpdate(const Ref<Scene>& scene, Timestep timestep, bool useEditorCamera);
 		virtual void OnImGuiRender() override;
 
-		void OnOverlayRender(Ref<Scene>& scene);
+		void OnOverlayRender(const Ref<Scene>& scene) const;
 
-		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
-		bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
+		bool OnMouseButtonPressed(const MouseButtonPressedEvent& e);
+		bool OnMouseButtonReleased(const MouseButtonReleasedEvent& e);
 		void SetSceneHierarchyPanel(SceneHierarchyPanel& sceneHierarchyPanel) { m_SceneHierarchyPanel = &sceneHierarchyPanel; }
 
-		bool IsHovered() { return m_ViewportHovered; }
-		bool IsFocused() { return m_ViewportFocused; }
+		bool IsHovered() const { return m_ViewportHovered; }
+		bool IsFocused() const { return m_ViewportFocused; }
 		
 		void SetSimulation(const bool value) { m_SimulationRunning = value; }
 

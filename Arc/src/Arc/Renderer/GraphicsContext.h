@@ -2,6 +2,8 @@
 
 namespace ArcEngine
 {
+	using WindowHandle = void*;
+
 	class GraphicsContext
 	{
 	public:
@@ -10,7 +12,7 @@ namespace ArcEngine
 		virtual void Init() = 0;
 		virtual void SwapBuffers() = 0;
 
-		static Scope<GraphicsContext> Create(void* window);
+		static Scope<GraphicsContext> Create(WindowHandle window);
 	};
 }
 

@@ -42,6 +42,8 @@ namespace ArcEngine
 						DrawFileProperties(selectedFile);
 					}
 					break;
+				default:
+					break;
 			}
 
 			OnEnd();
@@ -62,7 +64,6 @@ namespace ArcEngine
 				| ImGuiTreeNodeFlags_FramePadding;
 
 			auto& component = entity.GetComponent<T>();
-			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 			
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
 			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
@@ -110,24 +111,22 @@ namespace ArcEngine
 			| ImGuiTreeNodeFlags_Framed
 			| ImGuiTreeNodeFlags_FramePadding;
 
-		eastl::string* toRemove = nullptr;
+		const eastl::string* toRemove = nullptr;
 		
-		for (auto it = component.Classes.begin(); it != component.Classes.end(); ++it)
+		for (const auto* it = component.Classes.begin(); it != component.Classes.end(); ++it)
 		{
-			eastl::string& className = *it;
+			const eastl::string& className = *it;
 			auto instance = ScriptEngine::GetInstance(entity, className);
-			GCHandle handle = instance->GetHandle();
+			const GCHandle handle = instance->GetHandle();
 
 			ImGui::PushID(handle);
-
-			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
 			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
 
-			bool open = ImGui::TreeNodeEx((void*)handle, treeFlags, className.c_str());
+			bool open = ImGui::TreeNodeEx(handle, treeFlags, className.c_str());
 
 			{
 				ImGui::SameLine(ImGui::GetContentRegionMax().x - lineHeight);
@@ -152,9 +151,9 @@ namespace ArcEngine
 
 				// Public Fields
 				UI::BeginProperties();
-				auto& fields = ScriptEngine::GetFields(entity, className.c_str());
-				auto& fieldMap = ScriptEngine::GetFieldMap(entity, className.c_str());
-				for (auto& name : fields)
+				const auto& fields = ScriptEngine::GetFields(entity, className.c_str());
+				const auto& fieldMap = ScriptEngine::GetFieldMap(entity, className.c_str());
+				for (const auto& name : fields)
 				{
 					auto& field = fieldMap.at(name);
 					if (field->Hidden)
@@ -188,12 +187,12 @@ namespace ArcEngine
 		}
 	}
 
-	static void DrawMaterialProperties(Ref<Material>& material)
+	static void DrawMaterialProperties(const Ref<Material>& material)
 	{
 		UI::BeginProperties();
 
-		auto& materialProperties = material->GetShader()->GetMaterialProperties();
-		for (auto& [n, property] : materialProperties)
+		const auto& materialProperties = material->GetShader()->GetMaterialProperties();
+		for (const auto& [n, property] : materialProperties)
 		{
 			const char* name = n.c_str();
 			const char* displayName = n.c_str() + 11;
@@ -204,7 +203,7 @@ namespace ArcEngine
 				case MaterialPropertyType::Sampler2D:
 				{
 					uint32_t slot = material->GetData<uint32_t>(name);
-					uint32_t tex = material->GetTexture(slot) ? material->GetTexture(slot)->GetRendererID() : 0;
+					uint64_t tex = material->GetTexture(slot) ? material->GetTexture(slot)->GetRendererID() : 0;
 					Ref<Texture2D> tmp = material->GetTexture(slot);
 					if (UI::Property(displayName, tmp, tex))
 						material->SetTexture(slot, tmp);
@@ -281,6 +280,8 @@ namespace ArcEngine
 					}
 					break;
 				}
+				default:
+					break;
 			}
 		}
 
@@ -457,7 +458,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<MeshComponent>(ICON_MDI_VECTOR_SQUARE " Mesh", entity, [&](MeshComponent& component)
+		DrawComponent<MeshComponent>(ICON_MDI_VECTOR_SQUARE " Mesh", entity, [](MeshComponent& component)
 		{
 			if(ImGui::Button("Import"))
 			{
@@ -534,10 +535,9 @@ namespace ArcEngine
 			if (UI::Property("Light Type", lightType, lightTypeStrings, 3))
 				component.Type = (LightComponent::LightType) lightType;
 
-			if (UI::Property("Use color temperature mode", component.UseColorTemperatureMode))
+			if (UI::Property("Use color temperature mode", component.UseColorTemperatureMode) && component.UseColorTemperatureMode)
 			{
-				if (component.UseColorTemperatureMode)
-					ColorUtils::TempratureToColor(component.Temperature, component.Color);
+				ColorUtils::TempratureToColor(component.Temperature, component.Color);
 			}
 
 			if (component.UseColorTemperatureMode)
@@ -550,10 +550,9 @@ namespace ArcEngine
 				UI::PropertyColor3("Color", component.Color);
 			}
 
-			if (UI::Property("Intensity", component.Intensity))
+			if (UI::Property("Intensity", component.Intensity) && component.Intensity < 0.0f)
 			{
-				if (component.Intensity < 0.0f)
-					component.Intensity = 0.0f;
+				component.Intensity = 0.0f;
 			}
 
 			ImGui::Spacing();
@@ -583,8 +582,8 @@ namespace ArcEngine
 				if (UI::Property("Shadow Quality Type", shadowQualityType, shadowQualityTypeStrings, 3))
 					component.ShadowQuality = (LightComponent::ShadowQualityType) shadowQualityType;
 
-				uint32_t textureID = component.ShadowMapFramebuffer->GetDepthAttachmentRendererID();
-				ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ 256, 256 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+				uint64_t textureID = component.ShadowMapFramebuffer->GetDepthAttachmentRendererID();
+				ImGui::Image((ImTextureID)textureID, ImVec2{ 256, 256 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 			}
 
 			UI::EndProperties();
@@ -796,7 +795,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<BuoyancyEffector2DComponent>(ICON_MDI_WATER " Buoyancy Effector 2D", entity, [&entity](BuoyancyEffector2DComponent& component)
+		DrawComponent<BuoyancyEffector2DComponent>(ICON_MDI_WATER " Buoyancy Effector 2D", entity, [](BuoyancyEffector2DComponent& component)
 		{
 			UI::BeginProperties();
 			UI::Property("Density", component.Density);
@@ -807,7 +806,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<ScriptComponent>(ICON_MDI_POUND_BOX " Script", entity, [&](ScriptComponent& component)
+		DrawComponent<ScriptComponent>(ICON_MDI_POUND_BOX " Script", entity, [this, &entity](ScriptComponent& component)
 		{
 			float regionX = ImGui::GetContentRegionAvail().x;
 			float frameHeight = ImGui::GetFrameHeight();
@@ -816,10 +815,10 @@ namespace ArcEngine
 				ImGui::OpenPopup("ScriptAddPopup");
 			}
 
-			auto& classes = ScriptEngine::GetClasses();
+			const auto& classes = ScriptEngine::GetClasses();
 			if (ImGui::BeginPopup("ScriptAddPopup"))
 			{
-				if (classes.size() > 0)
+				if (!classes.empty())
 				{
 					const float filterCursorPosX = ImGui::GetCursorPosX();
 					m_Filter.Draw("###PropertiesFilter", ImGui::GetContentRegionAvail().x);
@@ -832,18 +831,15 @@ namespace ArcEngine
 					}
 				}
 
-				for (auto [name, scriptClass] : classes)
+				for (const auto& [name, scriptClass] : classes)
 				{
 					bool notFound = (std::find(component.Classes.begin(), component.Classes.end(), name) == component.Classes.end());
-					if (notFound)
+					if (notFound && !m_Filter.IsActive() || (m_Filter.IsActive() && m_Filter.PassFilter(name.c_str())))
 					{
-						if (!m_Filter.IsActive() || (m_Filter.IsActive() && m_Filter.PassFilter(name.c_str())))
+						if (ImGui::MenuItem(name.c_str()))
 						{
-							if (ImGui::MenuItem(name.c_str()))
-							{
-								ScriptEngine::CreateInstance(entity, name);
-								component.Classes.push_back(name);
-							}
+							ScriptEngine::CreateInstance(entity, name);
+							component.Classes.push_back(name);
 						}
 					}
 				}
@@ -885,21 +881,12 @@ namespace ArcEngine
 			ImVec2 region = ImGui::GetContentRegionAvail();
 			region.y = ImGui::GetFrameHeight();
 			ImGui::BeginHorizontal("AudioSourceComponentButtons", region);
-			if (ImGui::Button(ICON_MDI_PLAY "Play "))
-			{
-				if (component.Source)
-					component.Source->Play();
-			}
-			if (ImGui::Button(ICON_MDI_PAUSE "Pause "))
-			{
-				if (component.Source)
-					component.Source->Pause();
-			}
-			if (ImGui::Button(ICON_MDI_STOP "Stop "))
-			{
-				if (component.Source)
-					component.Source->Stop();
-			}
+			if (ImGui::Button(ICON_MDI_PLAY "Play ")&& component.Source)
+				component.Source->Play();
+			if (ImGui::Button(ICON_MDI_PAUSE "Pause ") && component.Source)
+				component.Source->Pause();
+			if (ImGui::Button(ICON_MDI_STOP "Stop ") && component.Source)
+				component.Source->Stop();
 			ImGui::EndHorizontal();
 			ImGui::Spacing();
 
@@ -950,8 +937,8 @@ namespace ArcEngine
 
 	void PropertiesPanel::DrawFileProperties(const char* filepath)
 	{
-		eastl::string name = StringUtils::GetNameWithExtension(filepath);
-		eastl::string& ext = StringUtils::GetExtension(name.c_str());
+		const eastl::string name = StringUtils::GetNameWithExtension(filepath);
+		const eastl::string& ext = StringUtils::GetExtension(name.c_str());
 
 		if (ext == "prefab")
 		{
@@ -976,7 +963,7 @@ namespace ArcEngine
 	}
 
 	template<typename Component>
-	void PropertiesPanel::DrawAddComponent(Entity entity, const char* name)
+	void PropertiesPanel::DrawAddComponent(Entity entity, const char* name) const
 	{
 		if (!entity.HasComponent<Component>())
 		{

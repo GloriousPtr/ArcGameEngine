@@ -1,9 +1,9 @@
 #pragma once
 
+#include "Arc/Scene/Components.h"
+
 typedef struct _MonoType MonoType;
 typedef struct _MonoObject MonoObject;
-
-#include "Arc/Scene/Entity.h"
 
 namespace ArcEngine
 {
@@ -27,8 +27,8 @@ namespace ArcEngine
 		static void RegisterComponent(ComponentGroup<Component...>);
 		static void RegisterScriptComponent(const eastl::string& className);
 
-		static eastl::hash_map<MonoType*, eastl::function<bool(Entity&, MonoType*)>> s_HasComponentFuncs;
-		static eastl::hash_map<MonoType*, eastl::function<void(Entity&, MonoType*)>> s_AddComponentFuncs;
-		static eastl::hash_map<MonoType*, eastl::function<GCHandle(Entity&, MonoType*)>> s_GetComponentFuncs;
+		static eastl::hash_map<MonoType*, eastl::function<bool(const Entity&, MonoType*)>> s_HasComponentFuncs;
+		static eastl::hash_map<MonoType*, eastl::function<void(const Entity&, MonoType*)>> s_AddComponentFuncs;
+		static eastl::hash_map<MonoType*, eastl::function<GCHandle(const Entity&, MonoType*)>> s_GetComponentFuncs;
 	};
 }

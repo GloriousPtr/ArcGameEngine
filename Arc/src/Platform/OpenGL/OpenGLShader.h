@@ -22,7 +22,7 @@ namespace ArcEngine
 		virtual void Unbind() const;
 
 		virtual void SetInt(const eastl::string& name, int value) override;
-		virtual void SetIntArray(const eastl::string& name, int* values, uint32_t count) override;
+		virtual void SetIntArray(const eastl::string& name, const int* values, uint32_t count) override;
 		virtual void SetFloat(const eastl::string& name, float value) override;
 		virtual void SetFloat2(const eastl::string& name, const glm::vec2& value) override;
 		virtual void SetFloat3(const eastl::string& name, const glm::vec3& value) override;
@@ -36,7 +36,7 @@ namespace ArcEngine
 		virtual const eastl::string& GetName() const override { return m_Name; }
 		
 		void UploadUniformInt(const eastl::string& name, int value);
-		void UploadUniformIntArray(const eastl::string& name, int* values, uint32_t count);
+		void UploadUniformIntArray(const eastl::string& name, const int* values, uint32_t count);
 
 		void UploadUniformFloat(const eastl::string& name, float value);
 		void UploadUniformFloat2(const eastl::string& name, const glm::vec2& values);

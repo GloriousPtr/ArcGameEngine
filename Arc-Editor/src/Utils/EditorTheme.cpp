@@ -1,6 +1,6 @@
 #include "EditorTheme.h"
 
-#include "MaterialDesign.inl"
+#include <icons/MaterialDesign.inl>
 
 namespace ArcEngine
 {
@@ -49,11 +49,9 @@ namespace ArcEngine
 		io.Fonts->TexGlyphPadding = 1;
         for(int n = 0; n < io.Fonts->ConfigData.Size; n++)
         {
-            ImFontConfig* fontConfig = (ImFontConfig*)&io.Fonts->ConfigData[n];
+            ImFontConfig* fontConfig = &io.Fonts->ConfigData[n];
             fontConfig->RasterizerMultiply = 1.0f;
         }
-
 		io.Fonts->Build();
 	}
-
 }

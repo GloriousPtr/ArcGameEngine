@@ -33,11 +33,11 @@ namespace ArcEngine
 		static EditorLayer* GetInstance() { return s_Instance; }
 
 	private:
-		void BeginDockspace(const char* name);
-		void EndDockspace();
-		bool OnKeyPressed(KeyPressedEvent& e);
-		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
-		bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
+		void BeginDockspace(const char* name) const;
+		void EndDockspace() const;
+		bool OnKeyPressed(const KeyPressedEvent& e);
+		bool OnMouseButtonPressed(const MouseButtonPressedEvent& e) const;
+		bool OnMouseButtonReleased(const MouseButtonReleasedEvent& e) const;
 
 		void NewScene();
 		void OpenScene();

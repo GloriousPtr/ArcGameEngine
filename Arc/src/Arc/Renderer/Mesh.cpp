@@ -56,7 +56,7 @@ namespace ArcEngine
 		m_Name = StringUtils::GetName(filepath);
 	}
 
-	Submesh& Mesh::GetSubmesh(uint32_t index)
+	Submesh& Mesh::GetSubmesh(size_t index)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -65,7 +65,7 @@ namespace ArcEngine
 		return m_Submeshes[index];
 	}
 
-	void Mesh::ProcessNode(aiNode *node, const aiScene *scene, const char* filepath)
+	void Mesh::ProcessNode(const aiNode *node, const aiScene *scene, const char* filepath)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -82,7 +82,7 @@ namespace ArcEngine
 		}
 	}
 
-	eastl::vector<Ref<Texture2D>> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, const char* filepath)
+	eastl::vector<Ref<Texture2D>> LoadMaterialTextures(const aiMaterial *mat, aiTextureType type, const char* filepath)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -99,7 +99,7 @@ namespace ArcEngine
 		return textures;
 	}
 
-	void Mesh::ProcessMesh(aiMesh *mesh, const aiScene *scene, const char* filepath, const char* nodeName)
+	void Mesh::ProcessMesh(const aiMesh *mesh, const aiScene *scene, const char* filepath, const char* nodeName)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -110,7 +110,7 @@ namespace ArcEngine
 		eastl::vector<uint32_t> indices;
 		for(size_t i = 0; i < mesh->mNumVertices; i++)
 		{
-			auto& vertexPosition = mesh->mVertices[i];
+			const auto& vertexPosition = mesh->mVertices[i];
 			vertices.push_back(vertexPosition.x);
 			vertices.push_back(vertexPosition.y);
 			vertices.push_back(vertexPosition.z);
@@ -126,19 +126,19 @@ namespace ArcEngine
 				vertices.push_back(0.0f);
 			}
 			
-			auto& normal = mesh->mNormals[i];
+			const auto& normal = mesh->mNormals[i];
 			vertices.push_back(normal.x);
 			vertices.push_back(normal.y);
 			vertices.push_back(normal.z);
 
 			if (mesh->mTangents)
 			{
-				auto tangent = mesh->mTangents[i];
+				const auto& tangent = mesh->mTangents[i];
 				vertices.push_back(tangent.x);
 				vertices.push_back(tangent.y);
 				vertices.push_back(tangent.z);
 
-				auto bitangent = mesh->mBitangents[i];
+				const auto& bitangent = mesh->mBitangents[i];
 				vertices.push_back(bitangent.x);
 				vertices.push_back(bitangent.y);
 				vertices.push_back(bitangent.z);
@@ -147,15 +147,15 @@ namespace ArcEngine
 			{
 				size_t index = i / 3;
 				// Shortcuts for vertices
-				auto& v0 = mesh->mVertices[index + 0];
-				auto& v1 = mesh->mVertices[index + 1];
-				auto& v2 = mesh->mVertices[index + 2];
+				const auto& v0 = mesh->mVertices[index + 0];
+				const auto& v1 = mesh->mVertices[index + 1];
+				const auto& v2 = mesh->mVertices[index + 2];
 
 				glm::vec2 uv0(0.0f);
 				glm::vec2 uv1(0.0f);
 				glm::vec2 uv2(0.0f);
 				// Shortcuts for UVs
-				if (auto uv = mesh->mTextureCoords[0])
+				if (const auto uv = mesh->mTextureCoords[0])
 				{
 					uv0 = { uv[index + 0].x, uv[index + 0].x };
 					uv1 = { uv[index + 1].x, uv[index + 1].y };
@@ -163,16 +163,16 @@ namespace ArcEngine
 				}
 
 				// Edges of the triangle : position delta
-				auto deltaPos1 = v1 - v0;
-				auto deltaPos2 = v2 - v0;
+				const auto deltaPos1 = v1 - v0;
+				const auto deltaPos2 = v2 - v0;
 
 				// UV delta
-				auto deltaUV1 = uv1 - uv0;
-				auto deltaUV2 = uv2 - uv0;
+				const auto deltaUV1 = uv1 - uv0;
+				const auto deltaUV2 = uv2 - uv0;
 
-				float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-				auto tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
-				auto bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+				const float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+				const auto tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+				const auto bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
 
 				vertices.push_back(tangent.x);
 				vertices.push_back(tangent.y);
@@ -212,33 +212,33 @@ namespace ArcEngine
 		eastl::vector<Ref<Texture2D>> heightMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, filepath);
 		eastl::vector<Ref<Texture2D>> emissiveMaps = LoadMaterialTextures(material, aiTextureType_EMISSIVE, filepath);
 
-		uint32_t index = m_Submeshes.size();
+		size_t index = m_Submeshes.size();
 		m_Submeshes.emplace_back(nodeName, CreateRef<Material>(), vertexArray);
-		Submesh& submesh = m_Submeshes[index];
+		const Submesh& submesh = m_Submeshes[index];
 
-		auto& materialProperties = submesh.Mat->GetShader()->GetMaterialProperties();
+		const auto& materialProperties = submesh.Mat->GetShader()->GetMaterialProperties();
 		bool normalMapApplied = false;
-		for (auto& [name, property] : materialProperties)
+		for (const auto& [name, property] : materialProperties)
 		{
 			if (property.Type == MaterialPropertyType::Sampler2D)
 			{
 				uint32_t slot = submesh.Mat->GetData<uint32_t>(name.c_str());
 
-				if (diffuseMaps.size() > 0 && 
+				if (!diffuseMaps.empty() && 
 					(name.find("albedo") != eastl::string::npos || name.find("Albedo") != eastl::string::npos ||
 					name.find("diff") != eastl::string::npos || name.find("Diff") != eastl::string::npos))
 				{
 					submesh.Mat->SetTexture(slot, diffuseMaps[0]);
 				}
 
-				if (normalMaps.size() > 0 && 
+				if (!normalMaps.empty() &&
 					(name.find("norm") != eastl::string::npos || name.find("Norm") != eastl::string::npos ||
 					name.find("height") != eastl::string::npos || name.find("Height") != eastl::string::npos))
 				{
 					submesh.Mat->SetTexture(slot, normalMaps[0]);
 					normalMapApplied = true;
 				}
-				else if (heightMaps.size() > 0 && 
+				else if (!heightMaps.empty() &&
 					(name.find("norm") != eastl::string::npos || name.find("Norm") != eastl::string::npos ||
 					name.find("height") != eastl::string::npos || name.find("Height") != eastl::string::npos))
 				{
@@ -246,7 +246,8 @@ namespace ArcEngine
 					normalMapApplied = true;
 				}
 
-				if (emissiveMaps.size() > 0 && 	(name.find("emissi") != eastl::string::npos || name.find("Emissi") != eastl::string::npos))
+				if (!emissiveMaps.empty() &&
+					(name.find("emissi") != eastl::string::npos || name.find("Emissi") != eastl::string::npos))
 				{
 					submesh.Mat->SetTexture(slot, emissiveMaps[0]);
 				}

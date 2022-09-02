@@ -8,7 +8,7 @@ namespace ArcEngine
 	{
 	public:
 		Camera() = default;
-		Camera(const glm::mat4& projection)
+		explicit Camera(const glm::mat4& projection)
 			: m_Projection(projection) {}
 		
 		virtual ~Camera() = default;

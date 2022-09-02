@@ -3,7 +3,6 @@
 
 #include "Arc/Physics/PhysicsUtils.h"
 #include "Arc/Scene/Components.h"
-#include "Arc/Scene/ScriptableEntity.h"
 #include "Arc/Renderer/Renderer2D.h"
 #include "Arc/Renderer/Renderer3D.h"
 #include "Arc/Scripting/ScriptEngine.h"
@@ -758,7 +757,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		{
-			ARC_PROFILE_SCOPE("Update");
+			ARC_PROFILE_SCOPE("Scripting Update");
 
 			{
 				auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
@@ -783,21 +782,6 @@ namespace ArcEngine
 					for (auto& className : script.Classes)
 						ScriptEngine::GetInstance(entity, className)->InvokeOnUpdate(ts);
 				}
-			}
-
-			{
-				m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
-				{
-					if(!nsc.Instance)
-					{
-						nsc.Instance = nsc.InstantiateScript();
-						nsc.Instance->m_Entity = { entity, this };
-					
-						nsc.Instance->OnCreate();
-					}
-
-					nsc.Instance->OnUpdate(ts);
-				});
 			}
 		}
 		
@@ -1102,11 +1086,6 @@ namespace ArcEngine
 
 	template<>
 	void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent& component)
-	{
-	}
-
-	template<>
-	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
 	{
 	}
 

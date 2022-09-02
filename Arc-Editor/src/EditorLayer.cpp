@@ -109,7 +109,7 @@ namespace ArcEngine
 
 		m_MenuBarHeight = ImGui::GetFrameHeight();
 		
-		BeginDockspace("Dockspace");
+		BeginDockspace("MyDockSpace");
 		{
 			ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
 			ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar
@@ -128,10 +128,6 @@ namespace ArcEngine
 					{
 						if (ImGui::BeginMenu("File"))
 						{
-							// Disabling fullscreen would allow the window to be moved to the front of other windows, 
-							// which we can't undo at the moment without finer window depth/z control.
-							//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
-
 							if (ImGui::MenuItem("New", "Ctrl+N"))
 							{
 								NewScene();
@@ -183,11 +179,8 @@ namespace ArcEngine
 							ImGui::MenuItem(m_ProjectSettingsPanel.GetName(), nullptr, &m_ProjectSettingsPanel.Showing);
 							ImGui::MenuItem(m_ConsolePanel.GetName(), nullptr, &m_ConsolePanel.Showing);
 
-							for (size_t i = 0; i < m_Panels.size(); i++)
-							{
-								BasePanel* panel = m_Panels[i].get();
+							for (const auto& panel : m_Panels)
 								ImGui::MenuItem(panel->GetName(), nullptr, &panel->Showing);
-							}
 
 							ImGui::MenuItem("ImGui Demo Window", nullptr, &m_ShowDemoWindow);
 
@@ -209,7 +202,7 @@ namespace ArcEngine
 						{
 							if (ImGui::MenuItem("Reload Assemblies"))
 							{
-								ProjectSettingsPanel::LoadAssemblies();
+								ScriptEngine::ReloadAppDomain();
 							}
 
 							ImGui::EndMenu();
@@ -231,8 +224,6 @@ namespace ArcEngine
 						float frameHeight = ImGui::GetFrameHeight();
 						ImVec2 buttonSize = { frameHeight * 1.5f, frameHeight };
 						ImGui::SetCursorPosX(region.x * 0.5f - 3 * 0.5f * buttonSize.x);
-
-						ImVec4 activeColor = ImGui::GetStyle().Colors[ImGuiCol_ButtonActive];
 
 						//Play Button
 						bool highlight = m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
@@ -260,13 +251,10 @@ namespace ArcEngine
 						if (m_SceneState == SceneState::Step)
 							OnScenePause();
 						ImGui::PushItemFlag(ImGuiItemFlags_Disabled, m_SceneState != SceneState::Pause);
-						if (ImGui::Button(ICON_MDI_STEP_FORWARD, buttonSize))
+						if (ImGui::Button(ICON_MDI_STEP_FORWARD, buttonSize) && m_SceneState == SceneState::Pause)
 						{
-							if (m_SceneState == SceneState::Pause)
-							{
-								OnSceneUnpause();
-								m_SceneState = SceneState::Step;
-							}
+							OnSceneUnpause();
+							m_SceneState = SceneState::Step;
 						}
 
 						ImGui::PopItemFlag();
@@ -313,39 +301,39 @@ namespace ArcEngine
 			//////////////////////////////////////////////////////////////////////////
 			// SCENE VIEWPORTS ///////////////////////////////////////////////////////
 			//////////////////////////////////////////////////////////////////////////
-			for (size_t i = 0; i < m_Viewports.size(); i++)
+			for (const auto& viewportPanel : m_Viewports)
 			{
-				if (m_Viewports[i]->Showing)
-					m_Viewports[i]->OnImGuiRender();
+				if (viewportPanel->Showing)
+					viewportPanel->OnImGuiRender();
 			}
 
 			//////////////////////////////////////////////////////////////////////////
 			// ASSETS PANELS /////////////////////////////////////////////////////////
 			//////////////////////////////////////////////////////////////////////////
-			for (size_t i = 0; i < m_AssetPanels.size(); i++)
+			for (const auto& assetPanel : m_AssetPanels)
 			{
-				if (m_AssetPanels[i]->Showing)
-					m_AssetPanels[i]->OnImGuiRender();
+				if (assetPanel->Showing)
+					assetPanel->OnImGuiRender();
 			}
 
 			//////////////////////////////////////////////////////////////////////////
 			// OTHER PANELS //////////////////////////////////////////////////////////
 			//////////////////////////////////////////////////////////////////////////
-			for (size_t i = 0; i < m_Panels.size(); i++)
+			for (const auto& panel : m_Panels)
 			{
-				if (m_Panels[i]->Showing)
-					m_Panels[i]->OnImGuiRender();
+				if (panel->Showing)
+					panel->OnImGuiRender();
 			}
 
 			//////////////////////////////////////////////////////////////////////////
 			// PROPERTY PANELS ///////////////////////////////////////////////////////
 			//////////////////////////////////////////////////////////////////////////
-			for (size_t i = 0; i < m_Properties.size(); i++)
+			for (const auto& propertyPanel : m_Properties)
 			{
-				if (m_Properties[i]->Showing)
+				if (propertyPanel->Showing)
 				{
-					m_Properties[i]->SetContext(m_SelectedContext);
-					m_Properties[i]->OnImGuiRender();
+					propertyPanel->SetContext(m_SelectedContext);
+					propertyPanel->OnImGuiRender();
 				}
 			}
 
@@ -373,7 +361,7 @@ namespace ArcEngine
 		dispatcher.Dispatch<MouseButtonReleasedEvent>(ARC_BIND_EVENT_FN(EditorLayer::OnMouseButtonReleased));
 	}
 
-	void EditorLayer::BeginDockspace(const char* name)
+	void EditorLayer::BeginDockspace(const char* name) const
 	{
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen_persistant = true;
@@ -385,7 +373,7 @@ namespace ArcEngine
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 		if (opt_fullscreen)
 		{
-			ImGuiViewport* viewport = ImGui::GetMainViewport();
+			const ImGuiViewport* viewport = ImGui::GetMainViewport();
 			ImGui::SetNextWindowPos(viewport->Pos);
 			ImGui::SetNextWindowSize(viewport->Size);
 			ImGui::SetNextWindowViewport(viewport->ID);
@@ -412,23 +400,22 @@ namespace ArcEngine
 			ImGui::PopStyleVar(2);
 
 		// DockSpace
-		uint32_t topMenuBarCount = 2;
-		uint32_t bottomMenuBarCount = 1;
-		float dockSpaceOffsetY = ImGui::GetCursorPosY() + (topMenuBarCount - 1) * m_MenuBarHeight;
+		float topMenuBarCount = 2.0f;
+		float bottomMenuBarCount = 1.0f;
+		float dockSpaceOffsetY = ImGui::GetCursorPosY() + (topMenuBarCount - 1.0f) * m_MenuBarHeight;
 
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImVec2 dockSpaceSize = ImVec2(viewport->Size.x, viewport->Size.y - (topMenuBarCount + bottomMenuBarCount) * m_MenuBarHeight);
 
-		ImGuiIO& io = ImGui::GetIO();
 		ImGuiStyle& style = ImGui::GetStyle();
 		float minWinSizeX = style.WindowMinSize.x;
 		float minWinSizeY = style.WindowMinSize.y;
 		style.WindowMinSize.x = 370.0f;
 		style.WindowMinSize.y = 50.0f;
-		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
 			ImGui::SetCursorPosY(dockSpaceOffsetY);
-			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+			ImGuiID dockspace_id = ImGui::GetID(name);
 			ImGui::DockSpace(dockspace_id, dockSpaceSize, dockspace_flags);
 		}
 
@@ -436,12 +423,12 @@ namespace ArcEngine
 		style.WindowMinSize.y = minWinSizeY;
 	}
 
-	void EditorLayer::EndDockspace()
+	void EditorLayer::EndDockspace() const
 	{
 		ImGui::End();
 	}
 
-	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
+	bool EditorLayer::OnKeyPressed(const KeyPressedEvent& e)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -475,23 +462,21 @@ namespace ArcEngine
 			}
 			case Key::D:
 			{
-				if (control)
+				if (control && m_SelectedContext.Type == EditorContextType::Entity)
 				{
-					if (m_SelectedContext.Type == EditorContextType::Entity)
-					{
-						Entity* e = (Entity*) m_SelectedContext.Data;
-						m_ActiveScene->Duplicate(*e);
-					}
+					m_ActiveScene->Duplicate(*((Entity*)m_SelectedContext.Data));
 				}
 				break;
 			}
+			default:
+				break;
 		}
 	}
 
-	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
+	bool EditorLayer::OnMouseButtonPressed(const MouseButtonPressedEvent& e) const
 	{
 		bool handled = false;
-		for (auto& viewport : m_Viewports)
+		for (const auto& viewport : m_Viewports)
 		{
 			handled = viewport->OnMouseButtonPressed(e);
 			if (handled)
@@ -501,10 +486,10 @@ namespace ArcEngine
 		return false;
 	}
 
-	bool EditorLayer::OnMouseButtonReleased(MouseButtonReleasedEvent& e)
+	bool EditorLayer::OnMouseButtonReleased(const MouseButtonReleasedEvent& e) const
 	{
 		bool handled = false;
-		for (auto& viewport : m_Viewports)
+		for (const auto& viewport : m_Viewports)
 		{
 			handled = viewport->OnMouseButtonReleased(e);
 			if (handled)
@@ -516,10 +501,10 @@ namespace ArcEngine
 
 	void EditorLayer::NewScene()
 	{
-		SetContext(EditorContextType::None, 0, 0);
+		SetContext(EditorContextType::None, nullptr, 0);
 
-		for (size_t i = 0; i < m_Properties.size(); i++)
-			m_Properties[i]->ForceSetContext({});
+		for (const auto& propertyPanel : m_Properties)
+			propertyPanel->ForceSetContext(m_SelectedContext);
 
 		m_ActiveScene = CreateRef<Scene>();
 		m_ActiveScene->MarkViewportDirty();
@@ -531,17 +516,17 @@ namespace ArcEngine
 
 	void EditorLayer::OpenScene(const char* filepath)
 	{
-		SetContext(EditorContextType::None, 0, 0);
+		SetContext(EditorContextType::None, nullptr, 0);
 
-		for (size_t i = 0; i < m_Properties.size(); i++)
-			m_Properties[i]->ForceSetContext({});
+		for (const auto& propertyPanel : m_Properties)
+			propertyPanel->ForceSetContext(m_SelectedContext);
 
 		m_ActiveScene = CreateRef<Scene>();
 		m_ActiveScene->OnViewportResize(1, 1);
 		m_ActiveScene->MarkViewportDirty();
 		m_EditorScene = m_ActiveScene;
 
-		if (m_Viewports.size() > 0)
+		if (!m_Viewports.empty())
 			m_Viewports[0]->OnUpdate(m_ActiveScene, 0.0f, true);
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
@@ -586,7 +571,7 @@ namespace ArcEngine
 
 	void ArcEngine::EditorLayer::OnScenePlay()
 	{
-		SetContext(EditorContextType::None, 0, 0);
+		SetContext(EditorContextType::None, nullptr, 0);
 
 		m_EditorScene = m_ActiveScene;
 		m_RuntimeScene = Scene::CopyTo(m_EditorScene);
@@ -595,7 +580,7 @@ namespace ArcEngine
 		m_ActiveScene->OnRuntimeStart();
 		m_SceneState = SceneState::Play;
 
-		if (m_Viewports.size() < 0)
+		if (m_Viewports.empty())
 			m_Viewports.push_back(CreateScope<SceneViewport>());
 
 		m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
@@ -605,7 +590,7 @@ namespace ArcEngine
 
 	void ArcEngine::EditorLayer::OnSceneStop()
 	{
-		SetContext(EditorContextType::None, 0, 0);
+		SetContext(EditorContextType::None, nullptr, 0);
 
 		m_ActiveScene->OnRuntimeStop();
 		m_SceneState = SceneState::Edit;
@@ -614,7 +599,7 @@ namespace ArcEngine
 		m_ActiveScene = nullptr;
 		m_ActiveScene = m_EditorScene;
 
-		if (m_Viewports.size() > 0)
+		if (!m_Viewports.empty())
 		{
 			m_Viewports[0]->SetSimulation(false);
 			m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
@@ -627,7 +612,7 @@ namespace ArcEngine
 	{
 		m_SceneState = SceneState::Pause;
 
-		if (m_Viewports.size() > 0)
+		if (!m_Viewports.empty())
 			m_Viewports[0]->SetSimulation(false);
 	}
 
@@ -635,7 +620,7 @@ namespace ArcEngine
 	{
 		m_SceneState = SceneState::Play;
 
-		if (m_Viewports.size() > 0)
+		if (!m_Viewports.empty())
 			m_Viewports[0]->SetSimulation(true);
 	}
 }

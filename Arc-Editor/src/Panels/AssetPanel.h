@@ -2,18 +2,23 @@
 
 #include <EASTL/stack.h>
 #include <imgui/imgui.h>
+#include <icons/IconsMaterialDesignIcons.h>
 
 #include "BasePanel.h"
-#include "../Utils/IconsMaterialDesignIcons.h"
 
 namespace ArcEngine
 {
 	class AssetPanel : public BasePanel
 	{
 	public:
-		AssetPanel(const char* name = "Assets");
+		explicit AssetPanel(const char* name = "Assets");
 
 		virtual ~AssetPanel() override = default;
+
+		AssetPanel(const AssetPanel& other) = delete;
+		AssetPanel(AssetPanel&& other) = delete;
+		AssetPanel& operator=(const AssetPanel& other) = delete;
+		AssetPanel& operator=(AssetPanel&& other) = delete;
 
 		virtual void OnUpdate(Timestep ts) override;
 		virtual void OnImGuiRender() override;
@@ -23,7 +28,7 @@ namespace ArcEngine
 		void RenderHeader();
 		void RenderSideView();
 		void RenderBody(bool grid);
-		void UpdateDirectoryEntries(std::filesystem::path directory);
+		void UpdateDirectoryEntries(const std::filesystem::path& directory);
 
 	private:
 		struct File

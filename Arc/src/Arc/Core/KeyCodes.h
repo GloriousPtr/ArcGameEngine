@@ -10,25 +10,25 @@ namespace ArcEngine
 		{
 			// From glfw3.h
 			Space               = 32,
-			Apostrophe          = 39, /* ' */
-			Comma               = 44, /* , */
-			Minus               = 45, /* - */
-			Period              = 46, /* . */
-			Slash               = 47, /* / */
+			Apostrophe          = 39,
+			Comma               = 44,
+			Minus               = 45,
+			Period              = 46,
+			Slash               = 47,
 
-			D0                  = 48, /* 0 */
-			D1                  = 49, /* 1 */
-			D2                  = 50, /* 2 */
-			D3                  = 51, /* 3 */
-			D4                  = 52, /* 4 */
-			D5                  = 53, /* 5 */
-			D6                  = 54, /* 6 */
-			D7                  = 55, /* 7 */
-			D8                  = 56, /* 8 */
-			D9                  = 57, /* 9 */
+			D0                  = 48,
+			D1                  = 49,
+			D2                  = 50,
+			D3                  = 51,
+			D4                  = 52,
+			D5                  = 53,
+			D6                  = 54,
+			D7                  = 55,
+			D8                  = 56,
+			D9                  = 57,
 
-			Semicolon           = 59, /* ; */
-			Equal               = 61, /* = */
+			Semicolon           = 59,
+			Equal               = 61,
 
 			A                   = 65,
 			B                   = 66,
@@ -57,13 +57,13 @@ namespace ArcEngine
 			Y                   = 89,
 			Z                   = 90,
 
-			LeftBracket         = 91,  /* [ */
-			Backslash           = 92,  /* \ */
-			RightBracket        = 93,  /* ] */
-			GraveAccent         = 96,  /* ` */
+			LeftBracket         = 91, 
+			Backslash           = 92, 
+			RightBracket        = 93, 
+			GraveAccent         = 96, 
 
-			World1              = 161, /* non-US #1 */
-			World2              = 162, /* non-US #2 */
+			World1              = 161,
+			World2              = 162,
 
 			/* Function keys */
 			Escape              = 256,

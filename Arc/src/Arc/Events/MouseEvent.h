@@ -8,7 +8,7 @@ namespace ArcEngine
 	class MouseMovedEvent : public Event
 	{
 	public:
-		MouseMovedEvent(const float x, const float y)
+		explicit MouseMovedEvent(const float x, const float y)
 			:m_MouseX(x), m_MouseY(y) {}
 
 		float GetX() const { return m_MouseX; }
@@ -32,7 +32,7 @@ namespace ArcEngine
 	class MouseScrolledEvent : public Event
 	{
 	public:
-		MouseScrolledEvent(const float xOffset, const float yOffset)
+		explicit MouseScrolledEvent(const float xOffset, const float yOffset)
 			:m_XOffset(xOffset), m_YOffset(yOffset) {}
 
 		float GetXOffset() const { return m_XOffset; }
@@ -60,7 +60,7 @@ namespace ArcEngine
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput | EventCategoryMouseButton)
 
 	protected:
-		MouseButtonEvent(const MouseCode button)
+		explicit MouseButtonEvent(const MouseCode button)
 			:m_Button(button) {}
 
 		MouseCode m_Button;
@@ -69,7 +69,7 @@ namespace ArcEngine
 	class MouseButtonPressedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonPressedEvent(const MouseCode button)
+		explicit MouseButtonPressedEvent(const MouseCode button)
 			:MouseButtonEvent(button) {}
 		
 		std::string ToString() const override
@@ -85,7 +85,7 @@ namespace ArcEngine
 	class MouseButtonReleasedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonReleasedEvent(const MouseCode button)
+		explicit MouseButtonReleasedEvent(const MouseCode button)
 			:MouseButtonEvent(button) {}
 
 		std::string ToString() const override

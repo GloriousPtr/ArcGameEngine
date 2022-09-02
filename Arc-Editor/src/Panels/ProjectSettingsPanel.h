@@ -1,7 +1,8 @@
 #pragma once
 
+#include <icons/IconsMaterialDesignIcons.h>
+
 #include "BasePanel.h"
-#include "../Utils/IconsMaterialDesignIcons.h"
 
 namespace ArcEngine
 {
@@ -14,9 +15,12 @@ namespace ArcEngine
 		}
 
 		virtual ~ProjectSettingsPanel() override = default;
+		
+		ProjectSettingsPanel(const ProjectSettingsPanel& other) = delete;
+		ProjectSettingsPanel(ProjectSettingsPanel&& other) = delete;
+		ProjectSettingsPanel& operator=(const ProjectSettingsPanel& other) = delete;
+		ProjectSettingsPanel& operator=(ProjectSettingsPanel&& other) = delete;
 
 		virtual void OnImGuiRender() override;
-
-		static void LoadAssemblies();
 	};
 }

@@ -46,13 +46,13 @@ namespace ArcEngine
 		virtual int GetCategoryFlags() const = 0;
 		virtual std::string ToString() const { return GetName(); }
 
-		bool IsInCategory(EventCategory category) { return GetCategoryFlags() & category; }
+		bool IsInCategory(EventCategory category) const { return GetCategoryFlags() & category; }
 	};
 
 	class EventDispatcher
 	{
 	public:
-		EventDispatcher(Event& event)
+		explicit EventDispatcher(Event& event)
 			: m_Event(event)
 		{
 		}

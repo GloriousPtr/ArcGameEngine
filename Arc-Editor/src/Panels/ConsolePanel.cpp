@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "Arc/ImGui/Modules/ExternalConsoleSink.h"
-#include "../Utils/IconsMaterialDesignIcons.h"
+#include <icons/IconsMaterialDesignIcons.h>
 
 namespace ArcEngine
 {
@@ -14,14 +14,14 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-        s_MessageBufferRenderFilter |= Log::Level::Trace;
+		s_MessageBufferRenderFilter |= Log::Level::Trace;
 		s_MessageBufferRenderFilter |= Log::Level::Info;
 		s_MessageBufferRenderFilter |= Log::Level::Debug;
 		s_MessageBufferRenderFilter |= Log::Level::Warn;
 		s_MessageBufferRenderFilter |= Log::Level::Error;
 		s_MessageBufferRenderFilter |= Log::Level::Critical;
 
-		ExternalConsoleSink<std::mutex>::SetConsoleSink_HandleFlush([&](eastl::string message, Log::Level level){ AddMessage(message, level); });
+		ExternalConsoleSink<std::mutex>::SetConsoleSink_HandleFlush([this](eastl::string message, Log::Level level){ AddMessage(message, level); });
 		m_MessageBuffer = eastl::vector<Ref<ConsolePanel::Message>>(m_Capacity);
 	}
 
@@ -63,8 +63,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		for (auto message = m_MessageBuffer.begin(); message != m_MessageBuffer.end(); message++)
-			(*message) = nullptr;
+		for (auto& message : m_MessageBuffer)
+			message = nullptr;
 
 		m_BufferBegin = 0;
 	}
@@ -85,7 +85,7 @@ namespace ArcEngine
 		}
 	}
 
-	void ConsolePanel::SetFocus()
+	void ConsolePanel::SetFocus() const
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -115,7 +115,7 @@ namespace ArcEngine
         float levelButtonWidths = (levelButtonWidth + ImGui::GetStyle().ItemSpacing.x) * 7;
 
 		const float cursorPosX = ImGui::GetCursorPosX();
-		m_Filter.Draw("###ConsoleFilter", ImGui::GetContentRegionAvail().x - (levelButtonWidths));
+		m_Filter.Draw("###ConsoleFilter", ImGui::GetContentRegionAvail().x - levelButtonWidths);
 
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 		for(int i = 0; i < 6; i++)
@@ -167,13 +167,11 @@ namespace ArcEngine
 		const float spacing = ImGui::GetStyle().ItemInnerSpacing.x + ImGui::CalcTextSize(" ").x;
 
 		// Checkbox for scrolling lock
-		//ImGui::AlignFirstTextHeightToWidgets();
 		ImGui::Text("Scroll to bottom");
 		ImGui::SameLine(0.0f, spacing + maxWidth - ImGui::CalcTextSize("Scroll to bottom").x);
 		ImGui::Checkbox("##ScrollToBottom", &m_AllowScrollingToBottom);
 
 		// Slider for font scale
-		//ImGui::AlignFirstTextHeightToWidgets();
 		ImGui::Text("Display scale");
 		ImGui::SameLine(0.0f, spacing + maxWidth - ImGui::CalcTextSize("Display scale").x);
 		ImGui::PushItemWidth(maxWidth * 1.25f / 1.1f);
@@ -194,17 +192,17 @@ namespace ArcEngine
 		{
 			ImGui::SetWindowFontScale(m_DisplayScale);
 
-			auto messageStart = m_MessageBuffer.begin() + m_BufferBegin;
+			const auto& messageStart = m_MessageBuffer.begin() + m_BufferBegin;
 			if (*messageStart) // If contains old message here
 			{
-				for (auto message = messageStart; message != m_MessageBuffer.end(); message++)
+				for (const auto* message = messageStart; message != m_MessageBuffer.end(); message++)
 				{
 					if (!(s_MessageBufferRenderFilter & (*message)->Level))
 						continue;
 
 					if (m_Filter.IsActive())
 					{
-						auto& m = (*message);
+						const auto& m = *message;
 						if (m_Filter.PassFilter(m->Buffer.c_str()))
 						{
 							m->OnImGuiRender();
@@ -219,7 +217,7 @@ namespace ArcEngine
 
 			if (m_BufferBegin != 0) // Skipped first messages in vector
 			{
-				for (auto message = m_MessageBuffer.begin(); message != messageStart; message++)
+				for (const auto* message = m_MessageBuffer.begin(); message != messageStart; message++)
 				{
 					if (!(s_MessageBufferRenderFilter & (*message)->Level))
 						continue;
@@ -255,7 +253,7 @@ namespace ArcEngine
 
 	}
 
-	void ConsolePanel::Message::OnImGuiRender()
+	void ConsolePanel::Message::OnImGuiRender() const
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -287,7 +285,10 @@ namespace ArcEngine
 			case Log::Level::Warn:			return "Warning";
 			case Log::Level::Error:			return "Error";
 			case Log::Level::Critical:		return "Critical";
+			default:						return "Unknown name";
 		}
+
+		// To keep the compiler happy
 		return "Unknown name";
 	}
 
@@ -301,7 +302,10 @@ namespace ArcEngine
 			case Log::Level::Warn:			return { 0.80f, 0.80f, 0.20f, 1.00f }; // Yellow
 			case Log::Level::Error:			return { 0.90f, 0.25f, 0.25f, 1.00f }; // Red
 			case Log::Level::Critical:		return { 0.60f, 0.20f, 0.80f, 1.00f }; // Purple
+			default:						return { 1.00f, 1.00f, 1.00f, 1.00f };
 		}
+
+		// To keep the compiler happy
 		return { 1.00f, 1.00f, 1.00f, 1.00f };
 	}
 
@@ -309,14 +313,16 @@ namespace ArcEngine
     {
         switch(level)
         {
-        case Log::Level::Trace:				return ICON_MDI_MESSAGE_TEXT;
-        case Log::Level::Info:				return ICON_MDI_INFORMATION;
-        case Log::Level::Debug:				return ICON_MDI_BUG;
-        case Log::Level::Warn:				return ICON_MDI_ALERT;
-        case Log::Level::Error:				return ICON_MDI_CLOSE_OCTAGON;
-        case Log::Level::Critical:			return ICON_MDI_ALERT_OCTAGRAM;
-        default:
-            return "Unknown name";
+			case Log::Level::Trace:				return ICON_MDI_MESSAGE_TEXT;
+			case Log::Level::Info:				return ICON_MDI_INFORMATION;
+			case Log::Level::Debug:				return ICON_MDI_BUG;
+			case Log::Level::Warn:				return ICON_MDI_ALERT;
+			case Log::Level::Error:				return ICON_MDI_CLOSE_OCTAGON;
+			case Log::Level::Critical:			return ICON_MDI_ALERT_OCTAGRAM;
+			default:							return "Unknown name";
         }
+
+		// To keep the compiler happy
+		return "Unknown name";
     }
 }

@@ -26,9 +26,11 @@ namespace ArcEngine
 		void SetZoomSpeed(const float value) { m_ZoomSpeed = value; }
 		void SetTranslationSpeed(const float value) { m_CameraTranslationSpeed = value; }
 		void SetRotationSpeed(const float value) { m_CameraRotationSpeed = value; }
+
 	private:
-		bool OnMouseScrolled(MouseScrolledEvent& e);
-		bool OnWindowResized(WindowResizeEvent& e);
+		bool OnMouseScrolled(const MouseScrolledEvent& e);
+		bool OnWindowResized(const WindowResizeEvent& e);
+
 	private:
 		float m_AspectRatio;
 		float m_ZoomLevel = 1.0f;

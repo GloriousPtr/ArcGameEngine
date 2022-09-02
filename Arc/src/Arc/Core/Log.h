@@ -40,7 +40,7 @@ namespace ArcEngine
 template<>
 struct fmt::formatter<eastl::string>
 {
-	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())
+	constexpr auto parse(format_parse_context& ctx) const -> decltype(ctx.begin())
 	{
 		return ctx.end();
 	}

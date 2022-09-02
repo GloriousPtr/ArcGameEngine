@@ -17,9 +17,12 @@ namespace ArcEngine
 	class Application
 	{
 	public:
-		Application(const eastl::string& name = "Arc App");
+		explicit Application(const eastl::string& name = "Arc App");
 		virtual ~Application();
 		
+		Application(const Application& other) = delete;
+		Application(Application&& other) = delete;
+
 		void OnEvent(Event& e);
 
 		void PushLayer(Layer* layer);
@@ -35,8 +38,8 @@ namespace ArcEngine
 		
 	private:
 		void Run();
-		bool OnWindowClose(WindowCloseEvent& e);
-		bool OnWindowResize(WindowResizeEvent& e);
+		bool OnWindowClose(const WindowCloseEvent& e);
+		bool OnWindowResize(const WindowResizeEvent& e);
 		
 		Scope<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer;

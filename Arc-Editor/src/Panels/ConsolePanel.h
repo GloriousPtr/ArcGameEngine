@@ -17,7 +17,7 @@ namespace ArcEngine
 			Log::Level Level;
 
 			Message(const eastl::string id, const eastl::string message = "", Log::Level level = Log::Level::Trace);
-			void OnImGuiRender();
+			void OnImGuiRender() const;
 
 			static const char* GetLevelName(Log::Level level);
 			static glm::vec4 GetRenderColor(Log::Level level);
@@ -25,13 +25,18 @@ namespace ArcEngine
 		};
 
 	public:
-		ConsolePanel(const char* name = "Console");
+		explicit ConsolePanel(const char* name = "Console");
 		virtual ~ConsolePanel() override;
+
+		ConsolePanel(const ConsolePanel& other) = delete;
+		ConsolePanel(ConsolePanel&& other) = delete;
+		ConsolePanel& operator=(const ConsolePanel& other) = delete;
+		ConsolePanel& operator=(ConsolePanel&& other) = delete;
 
 		void AddMessage(eastl::string message, Log::Level level);
 		const Message* GetRecentMessage();
 		void Clear();
-		void SetFocus();
+		void SetFocus() const;
 
 		virtual void OnImGuiRender() override;
 
@@ -45,7 +50,7 @@ namespace ArcEngine
 		uint16_t m_Capacity = 200;
 		uint16_t m_BufferSize = 0;
 		uint16_t m_BufferBegin = 0;
-		uint32_t s_MessageBufferRenderFilter = Log::Level::Trace;
+		uint32_t s_MessageBufferRenderFilter = (uint32_t)Log::Level::Trace;
 		bool m_AllowScrollingToBottom = true;
 		bool m_RequestScrollToBottom = false;
 		eastl::vector<Ref<Message>> m_MessageBuffer;

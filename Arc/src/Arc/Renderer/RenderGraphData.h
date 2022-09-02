@@ -35,7 +35,7 @@ namespace ArcEngine
 				width /= 2;
 				height /= 2;
 
-				if (width <= 0.0f || height <= 0.0f)
+				if (width <= 0 || height <= 0)
 				{
 					BlurSamples = i + 1;
 					break;

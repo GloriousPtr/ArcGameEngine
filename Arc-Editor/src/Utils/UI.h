@@ -14,7 +14,6 @@ namespace ArcEngine
 
 		// Strings
 		static bool Property(const char* label, eastl::string& value, const char* tooltip = nullptr);
-		static void Property(const char* label, const char* value, const char* tooltip = nullptr);
 
 		// s/byte
 		static bool Property(const char* label, int8_t& value, const char* tooltip = nullptr);
@@ -87,10 +86,6 @@ namespace ArcEngine
 
 			bool modified = false;
 
-			s_IDBuffer[0] = '#';
-			s_IDBuffer[1] = '#';
-			memset(s_IDBuffer + 2, 0, 14);
-			itoa(s_Counter++, s_IDBuffer + 2, 16);
 			ImVec2 region = ImGui::GetContentRegionAvail();
 			region.x -= 20.0f;
 			region.y = ImGui::GetFrameHeight();
@@ -144,7 +139,7 @@ namespace ArcEngine
 		static void DrawField(Field& field);
 		
 		// Vec3 with reset button
-		static void DrawVec3Control(const char* label, glm::vec3& values, const char* tooltip = nullptr, float resetValue = 0.0f, float columnWidth = 100.0f);
+		static void DrawVec3Control(const char* label, glm::vec3& values, const char* tooltip = nullptr, float resetValue = 0.0f);
 
 		// Buttons
 		static bool IconButton(const char* icon, const char* label, ImVec4 iconColor = { 0.537f, 0.753f, 0.286f, 1.0f });

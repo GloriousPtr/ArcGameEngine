@@ -21,7 +21,6 @@
 
 #include "Arc/Scene/Scene.h"
 #include "Arc/Scene/Entity.h"
-#include "Arc/Scene/ScriptableEntity.h"
 #include "Arc/Scene/Components.h"
 
 //-----Renderer-----------------------------------

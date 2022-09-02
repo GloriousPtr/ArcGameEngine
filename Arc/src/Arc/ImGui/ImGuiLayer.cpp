@@ -24,7 +24,6 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 		
-		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -36,62 +35,6 @@ namespace ArcEngine
 		io.ConfigWindowsMoveFromTitleBarOnly = true;
 		io.ConfigDragClickToInputText = true;
 		io.ConfigDockingTransparentPayload = true;
-
-		/*
-		io.AddInputCharacter(GLFW_KEY_SPACE);
-	    io.AddInputCharacter(GLFW_KEY_APOSTROPHE);
-	    io.AddInputCharacter(GLFW_KEY_COMMA);
-	    io.AddInputCharacter(GLFW_KEY_MINUS);
-	    io.AddInputCharacter(GLFW_KEY_PERIOD);
-	    io.AddInputCharacter(GLFW_KEY_SLASH);
-	    io.AddInputCharacter(GLFW_KEY_0);
-	    io.AddInputCharacter(GLFW_KEY_1);
-	    io.AddInputCharacter(GLFW_KEY_2);
-	    io.AddInputCharacter(GLFW_KEY_3);
-	    io.AddInputCharacter(GLFW_KEY_4);
-	    io.AddInputCharacter(GLFW_KEY_5);
-	    io.AddInputCharacter(GLFW_KEY_6);
-	    io.AddInputCharacter(GLFW_KEY_7);
-	    io.AddInputCharacter(GLFW_KEY_8);
-	    io.AddInputCharacter(GLFW_KEY_9);
-	    io.AddInputCharacter(GLFW_KEY_SEMICOLON);
-	    io.AddInputCharacter(GLFW_KEY_EQUAL);
-	    io.AddInputCharacter(GLFW_KEY_A);
-	    io.AddInputCharacter(GLFW_KEY_B);
-	    io.AddInputCharacter(GLFW_KEY_C);
-	    io.AddInputCharacter(GLFW_KEY_D);
-	    io.AddInputCharacter(GLFW_KEY_E);
-	    io.AddInputCharacter(GLFW_KEY_F);
-	    io.AddInputCharacter(GLFW_KEY_G);
-	    io.AddInputCharacter(GLFW_KEY_H);
-	    io.AddInputCharacter(GLFW_KEY_I);
-	    io.AddInputCharacter(GLFW_KEY_J);
-	    io.AddInputCharacter(GLFW_KEY_K);
-	    io.AddInputCharacter(GLFW_KEY_L);
-	    io.AddInputCharacter(GLFW_KEY_M);
-	    io.AddInputCharacter(GLFW_KEY_N);
-	    io.AddInputCharacter(GLFW_KEY_O);
-	    io.AddInputCharacter(GLFW_KEY_P);
-	    io.AddInputCharacter(GLFW_KEY_Q);
-	    io.AddInputCharacter(GLFW_KEY_R);
-	    io.AddInputCharacter(GLFW_KEY_S);
-	    io.AddInputCharacter(GLFW_KEY_T);
-	    io.AddInputCharacter(GLFW_KEY_U);
-	    io.AddInputCharacter(GLFW_KEY_V);
-	    io.AddInputCharacter(GLFW_KEY_W);
-	    io.AddInputCharacter(GLFW_KEY_X);
-	    io.AddInputCharacter(GLFW_KEY_Y);
-	    io.AddInputCharacter(GLFW_KEY_Z);
-	    io.AddInputCharacter(GLFW_KEY_LEFT_BRACKET);
-	    io.AddInputCharacter(GLFW_KEY_BACKSLASH);
-	    io.AddInputCharacter(GLFW_KEY_RIGHT_BRACKET);
-	    io.AddInputCharacter(GLFW_KEY_GRAVE_ACCENT);
-	    io.AddInputCharacter(GLFW_KEY_WORLD_1);
-	    io.AddInputCharacter(GLFW_KEY_WORLD_2);
-		*/
-		
-		// Setup Dear ImGui style
-		//ImGui::StyleColorsClassic();
 
 		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -122,13 +65,13 @@ namespace ArcEngine
 	{
 		if(m_BlockEvents)
 		{
-			ImGuiIO& io = ImGui::GetIO();
+			const ImGuiIO& io = ImGui::GetIO();
 			e.Handled |= e.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
 			e.Handled |= e.IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
 		}
 	}
 
-	void ImGuiLayer::Begin()
+	void ImGuiLayer::Begin() const
 	{
 		ARC_PROFILE_SCOPE();
 		
@@ -138,7 +81,7 @@ namespace ArcEngine
 		ImGuizmo::BeginFrame();
 	}
 
-	void ImGuiLayer::End()
+	void ImGuiLayer::End() const
 	{
 		ARC_PROFILE_SCOPE();
 		

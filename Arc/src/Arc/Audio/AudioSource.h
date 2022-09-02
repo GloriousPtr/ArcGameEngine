@@ -42,32 +42,34 @@ namespace ArcEngine
 		AudioSource(const char* filepath);
 		~AudioSource();
 
-		const char* GetPath() { return m_Path.c_str(); }
+		AudioSource(const AudioSource& other) = default;
 
-		void Play();
-		void Pause();
-		void UnPause();
-		void Stop();
-		bool IsPlaying();
+		const char* GetPath() const { return m_Path.c_str(); }
+
+		void Play() const;
+		void Pause() const;
+		void UnPause() const;
+		void Stop() const;
+		bool IsPlaying() const;
 
 		void SetConfig(const AudioSourceConfig& config);
 
-		void SetVolume(const float volume);
-		void SetPitch(const float pitch);
-		void SetLooping(const bool state);
+		void SetVolume(const float volume) const;
+		void SetPitch(const float pitch) const;
+		void SetLooping(const bool state) const;
 		void SetSpatialization(const bool state);
-		void SetAttenuationModel(const AttenuationModelType type);
-		void SetRollOff(const float rollOff);
-		void SetMinGain(const float minGain);
-		void SetMaxGain(const float maxGain);
-		void SetMinDistance(const float minDistance);
-		void SetMaxDistance(const float maxDistance);
-		void SetCone(const float innerAngle, const float outerAngle, const float outerGain);
-		void SetDopplerFactor(const float factor);
+		void SetAttenuationModel(const AttenuationModelType type) const;
+		void SetRollOff(const float rollOff) const;
+		void SetMinGain(const float minGain) const;
+		void SetMaxGain(const float maxGain) const;
+		void SetMinDistance(const float minDistance) const;
+		void SetMaxDistance(const float maxDistance) const;
+		void SetCone(const float innerAngle, const float outerAngle, const float outerGain) const;
+		void SetDopplerFactor(const float factor) const;
 
-		void SetPosition(const glm::vec3& position);
-		void SetDirection(const glm::vec3& forward);
-		void SetVelocity(const glm::vec3& velocity);
+		void SetPosition(const glm::vec3& position) const;
+		void SetDirection(const glm::vec3& forward) const;
+		void SetVelocity(const glm::vec3& velocity) const;
 
 	private:
 		eastl::string m_Path;

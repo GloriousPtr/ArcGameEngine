@@ -12,7 +12,7 @@ namespace ArcEngine
 
 		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 	protected:
-		KeyEvent(const KeyCode keyCode)
+		explicit KeyEvent(const KeyCode keyCode)
 			:m_KeyCode(keyCode) {}
 
 		KeyCode m_KeyCode;
@@ -21,7 +21,7 @@ namespace ArcEngine
 	class KeyPressedEvent : public KeyEvent
 	{
 	public:
-		KeyPressedEvent(const KeyCode keyCode, const uint16_t repeatCount)
+		explicit KeyPressedEvent(const KeyCode keyCode, const uint16_t repeatCount)
 			: KeyEvent(keyCode), m_RepeatCount(repeatCount) {}
 
 		uint16_t GetRepeatCount() const { return m_RepeatCount; }
@@ -41,7 +41,7 @@ namespace ArcEngine
 	class KeyReleasedEvent : public KeyEvent
 	{
 	public:
-		KeyReleasedEvent(const KeyCode keyCode)
+		explicit KeyReleasedEvent(const KeyCode keyCode)
 			: KeyEvent(keyCode) {}
 
 		std::string ToString() const override
@@ -57,7 +57,7 @@ namespace ArcEngine
 	class KeyTypedEvent : public KeyEvent
 	{
 	public:
-		KeyTypedEvent(const KeyCode keycode)
+		explicit KeyTypedEvent(const KeyCode keycode)
 			: KeyEvent(keycode) {}
 
 		std::string ToString() const override

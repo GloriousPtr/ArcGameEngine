@@ -228,7 +228,7 @@ namespace ArcEngine
 		SetupLightsData();
 	}
 
-	void Renderer3D::EndScene(Ref<RenderGraphData>& renderTarget)
+	void Renderer3D::EndScene(const Ref<RenderGraphData>& renderTarget)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -256,7 +256,7 @@ namespace ArcEngine
 		meshes.reserve(count);
 	}
 
-	void Renderer3D::SubmitMesh(MeshComponent& meshComponent, const glm::mat4& transform)
+	void Renderer3D::SubmitMesh(const MeshComponent& meshComponent, const glm::mat4& transform)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -312,7 +312,6 @@ namespace ArcEngine
 		offset += sizeof(glm::mat4);
 		
 		ubCamera->SetData((void*)glm::value_ptr(cameraPosition), offset, sizeof(glm::vec4));
-		offset += sizeof(glm::vec4);
 	}
 
 	void Renderer3D::SetupLightsData()
@@ -335,7 +334,7 @@ namespace ArcEngine
 
 			for (Entity e : sceneLights)
 			{
-				LightComponent& lightComponent = e.GetComponent<LightComponent>();
+				const LightComponent& lightComponent = e.GetComponent<LightComponent>();
 				if (lightComponent.Type == LightComponent::LightType::Directional)
 					continue;
 				TransformComponent transformComponent = e.GetComponent<TransformComponent>();
@@ -382,7 +381,7 @@ namespace ArcEngine
 
 			for (Entity e : sceneLights)
 			{
-				LightComponent& lightComponent = e.GetComponent<LightComponent>();
+				const LightComponent& lightComponent = e.GetComponent<LightComponent>();
 				if (lightComponent.Type != LightComponent::LightType::Directional)
 					continue;
 
@@ -417,7 +416,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Renderer3D::CompositePass(Ref<RenderGraphData> renderGraphData)
+	void Renderer3D::CompositePass(const Ref<RenderGraphData> renderGraphData)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -433,7 +432,7 @@ namespace ArcEngine
 		DrawQuad();
 	}
 
-	void Renderer3D::BloomPass(Ref<RenderGraphData> renderGraphData)
+	void Renderer3D::BloomPass(const Ref<RenderGraphData> renderGraphData)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -514,7 +513,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Renderer3D::LightingPass(Ref<RenderGraphData> renderGraphData)
+	void Renderer3D::LightingPass(const Ref<RenderGraphData> renderGraphData)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -578,7 +577,7 @@ namespace ArcEngine
 		DrawQuad();
 	}
 
-	void Renderer3D::RenderPass(Ref<Framebuffer> renderTarget)
+	void Renderer3D::RenderPass(const Ref<Framebuffer> renderTarget)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -648,6 +647,7 @@ namespace ArcEngine
 					}
 				}
 
+				// TODO: Fix warning (Unallocated fallthrough between switch labels)
 				RenderCommand::DrawIndexed(meshData->SubmeshGeometry.Geometry);
 				s_Stats.DrawCalls++;
 				s_Stats.IndexCount += meshData->SubmeshGeometry.Geometry->GetIndexBuffer()->GetCount();
@@ -659,11 +659,10 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-//		RenderCommand::FrontCull();
 		for (size_t i = 0; i < sceneLights.size(); i++)
 		{
 			Entity e = sceneLights[i];
-			LightComponent& light = e.GetComponent<LightComponent>();
+			const LightComponent& light = e.GetComponent<LightComponent>();
 			if (light.Type != LightComponent::LightType::Directional)
 				continue;
 
@@ -688,12 +687,11 @@ namespace ArcEngine
 
 			for (auto it = meshes.rbegin(); it != meshes.rend(); it++)
 			{
-				MeshData* meshData = &(*it);
+				const MeshData* meshData = &(*it);
 
 				shadowMapShader->SetMat4("u_Model", meshData->Transform);
 				RenderCommand::DrawIndexed(meshData->SubmeshGeometry.Geometry);
 			}
 		}
-//		RenderCommand::BackCull();
 	}
 }

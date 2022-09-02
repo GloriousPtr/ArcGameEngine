@@ -8,22 +8,27 @@ namespace ArcEngine
 {
 	class Material
 	{
+		using MaterialData = void*;
+
 	public:
-		Material(const char* shaderPath = "assets/shaders/PBR.glsl");
+		explicit Material(const char* shaderPath = "assets/shaders/PBR.glsl");
 		virtual ~Material();
+
+		Material(const Material& other) = default;
+		Material(Material&& other) = default;
 
 		void Invalidate();
 		void Bind();
-		void Unbind();
-		Ref<Shader> GetShader() { return m_Shader; }
-		Ref<Texture2D> GetTexture(uint32_t slot) { return m_Textures.at(slot); }
+		void Unbind() const;
+		Ref<Shader> GetShader() const { return m_Shader; }
+		Ref<Texture2D> GetTexture(uint32_t slot) const { return m_Textures.at(slot); }
 		void SetTexture(uint32_t slot, Ref<Texture2D> texture) { m_Textures[slot] = texture; }
 
 		template<typename T>
 		T GetData(const char* name)
 		{
-			void* value = GetData_Internal(name);
-			return *reinterpret_cast<T*>(value);
+			MaterialData value = GetData_Internal(name);
+			return *(T*)(value);
 		}
 
 		template<typename T>
@@ -33,8 +38,8 @@ namespace ArcEngine
 		}
 
 	private:
-		void* GetData_Internal(const char* name);
-		void SetData_Internal(const char* name, void* data);
+		MaterialData GetData_Internal(const char* name);
+		void SetData_Internal(const char* name, MaterialData data);
 
 	private:
 		Ref<Shader> m_Shader = nullptr;
