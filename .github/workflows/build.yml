@@ -12,9 +12,11 @@ on:
       - '.github/resources/**'
       - '**.md'
       - '**.txt'
+  schedule:
+    - cron: '23 17 * * 3'
 jobs:
   build:
-    name: Build
+    name: Build for ${{matrix.BUILD_CONFIGURATION}}
     runs-on: windows-latest
     strategy:
       matrix:
