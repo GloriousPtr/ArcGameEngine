@@ -18,7 +18,7 @@ namespace ArcEngine
 	class Scene
 	{
 	public:
-		Scene();
+		Scene() = default;
 		~Scene();
 
 		static Ref<Scene> CopyTo(Ref<Scene> other);
@@ -30,15 +30,14 @@ namespace ArcEngine
 		bool HasEntity(UUID uuid);
 		Entity GetEntity(UUID uuid);
 
-		void OnUpdateEditor(Timestep ts, Ref<RenderGraphData>& renderGraphData, EditorCamera& camera);
-		void OnUpdateRuntime(Timestep ts, Ref<RenderGraphData>& renderGraphData, EditorCamera* overrideCamera = nullptr);
+		void OnUpdateEditor(Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera);
+		void OnUpdateRuntime(Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera = nullptr);
 		void OnRuntimeStart();
 		void OnRuntimeStop();
 
 		void OnViewportResize(uint32_t width, uint32_t height);
 		void MarkViewportDirty() { m_ViewportDirty = true; }
-
-		bool IsViewportDirty() { return m_ViewportDirty; }
+		bool IsViewportDirty() const { return m_ViewportDirty; }
 		Entity GetPrimaryCameraEntity();
 
 		template<typename... Components>

@@ -251,7 +251,7 @@ namespace ArcEngine
 		RenderCommand::DrawIndexed(quadVertexArray);
 	}
 
-	void Renderer3D::ReserveMeshes(const uint32_t count)
+	void Renderer3D::ReserveMeshes(const size_t count)
 	{
 		meshes.reserve(count);
 	}

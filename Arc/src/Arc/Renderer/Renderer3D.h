@@ -30,7 +30,7 @@ namespace ArcEngine
 
 		static void DrawCube();
 		static void DrawQuad();
-		static void ReserveMeshes(uint32_t count);
+		static void ReserveMeshes(size_t count);
 		static void SubmitMesh(const MeshComponent& meshComponent, const glm::mat4& transform);
 
 		static ShaderLibrary& GetShaderLibrary() { return s_ShaderLibrary; }

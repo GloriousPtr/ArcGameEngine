@@ -54,11 +54,11 @@ namespace ArcEngine
 			m_Scene->m_Registry.remove<T>(m_EntityHandle);
 		}
 
-		UUID GetUUID() { return GetComponent<IDComponent>(); }
-		TransformComponent& GetTransform() { return GetComponent<TransformComponent>(); }
-		RelationshipComponent& GetRelationship() { return GetComponent<RelationshipComponent>(); }
+		const UUID GetUUID() const { return GetComponent<IDComponent>(); }
+		TransformComponent& GetTransform() const { return GetComponent<TransformComponent>(); }
+		RelationshipComponent& GetRelationship() const { return GetComponent<RelationshipComponent>(); }
 		
-		Entity GetParent()
+		Entity GetParent() const
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -66,7 +66,7 @@ namespace ArcEngine
 			return rc.Parent != 0 ? m_Scene->GetEntity(rc.Parent) : Entity {};
 		}
 
-		void SetParent(Entity parent)
+		void SetParent(Entity parent) const
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -78,7 +78,7 @@ namespace ArcEngine
 			parent.GetRelationship().Children.push_back(GetUUID());
 		}
 
-		void Deparent()
+		void Deparent() const
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -88,7 +88,7 @@ namespace ArcEngine
 
 			UUID uuid = GetUUID();
 			auto& parent = GetParent().GetRelationship();
-			for (auto it = parent.Children.begin(); it != parent.Children.end(); it++)
+			for (const auto* it = parent.Children.begin(); it != parent.Children.end(); it++)
 			{
 				if (*it == uuid)
 				{
@@ -99,7 +99,7 @@ namespace ArcEngine
 			transform.Parent = 0;
 		}
 		
-		glm::mat4 GetWorldTransform()
+		glm::mat4 GetWorldTransform() const
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -112,7 +112,7 @@ namespace ArcEngine
 			return parentTransform * glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);
 		}
 
-		glm::mat4 GetLocalTransform()
+		glm::mat4 GetLocalTransform() const
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -120,7 +120,7 @@ namespace ArcEngine
 			return glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);
 		}
 
-		Scene* GetScene() { return m_Scene; }
+		Scene* GetScene() const { return m_Scene; }
 
 		operator bool() const { return m_EntityHandle != entt::null && m_Scene != nullptr; }
 		operator entt::entity() const { return m_EntityHandle; }

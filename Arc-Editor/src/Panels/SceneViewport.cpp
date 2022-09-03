@@ -214,7 +214,7 @@ namespace ArcEngine
 			my -= m_ViewportBounds[0].y;
 			const int viewportWidth = (int)(m_ViewportBounds[1].x - m_ViewportBounds[0].x);
 			const int viewportHeight = (int)(m_ViewportBounds[1].y - m_ViewportBounds[0].y);
-			my = viewportHeight - my;
+			my = (float)viewportHeight - my;
 			const int mouseX = (int)mx;
 			const int mouseY = (int)my;
 			if(mouseX >= 0 && mouseY >= 0 && mouseX < viewportWidth && mouseY < viewportHeight)
@@ -331,17 +331,17 @@ namespace ArcEngine
 				Entity entity = { entityHandle, scene.get() };
 				const auto inv = glm::inverse(cam.Camera.GetProjection() * glm::inverse(entity.GetWorldTransform()));
 				eastl::vector<glm::vec3> frustumCorners;
-				for (float x = 0.0f; x < 2.0f; x += 1.0f)
+				for (int x = 0; x < 2; ++x)
 				{
-					for (float y = 0.0f; y < 2.0f; y += 1.0f)
+					for (int y = 0; y < 2; ++y)
 					{
-						for (float z = 0.0f; z < 2.0f; z += 1.0f)
+						for (int z = 0; z < 2; ++z)
 						{
 							const glm::vec4 pt = 
 							inv * glm::vec4(
-							2.0f * x - 1.0f,
-							2.0f * y - 1.0f,
-							2.0f * z - 1.0f,
+							2.0f * (float)x - 1.0f,
+							2.0f * (float)y - 1.0f,
+							2.0f * (float)z - 1.0f,
 							1.0f);
 							frustumCorners.push_back(glm::vec3(pt) / pt.w);
 						}

@@ -443,21 +443,34 @@ namespace ArcEngine
 			case Key::N:
 			{
 				if (control)
+				{
 					NewScene();
+					return true;
+				}
 				break;
 			}
 			case Key::O:
 			{
 				if (control)
+				{
 					OpenScene();
+					return true;
+				}
 				break;
 			}
 			case Key::S:
 			{
 				if (control && shift)
+				{
 					SaveSceneAs();
+					return true;
+				}
+
 				else if (control)
+				{
 					SaveScene();
+					return true;
+				}
 				break;
 			}
 			case Key::D:
@@ -465,12 +478,15 @@ namespace ArcEngine
 				if (control && m_SelectedContext.Type == EditorContextType::Entity)
 				{
 					m_ActiveScene->Duplicate(*((Entity*)m_SelectedContext.Data));
+					return true;
 				}
 				break;
 			}
 			default:
 				break;
 		}
+
+		return false;
 	}
 
 	bool EditorLayer::OnMouseButtonPressed(const MouseButtonPressedEvent& e) const

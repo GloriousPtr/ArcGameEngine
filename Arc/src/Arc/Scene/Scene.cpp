@@ -20,7 +20,7 @@ namespace ArcEngine
 	{
 	public:
 
-		ContactListener(Scene* scene)
+		explicit ContactListener(Scene* scene)
 			: m_Scene(scene)
 		{
 		}
@@ -29,6 +29,11 @@ namespace ArcEngine
 		{
 			m_BuoyancyFixtures.clear();
 		}
+
+		ContactListener(const ContactListener& other) = delete;
+		ContactListener(ContactListener&& other) = delete;
+		ContactListener& operator=(const ContactListener& other) = delete;
+		ContactListener& operator=(ContactListener&& other) = delete;
 
 		virtual void BeginContact(b2Contact* contact) override
 		{
@@ -63,15 +68,15 @@ namespace ArcEngine
 
 			if (e1.HasComponent<ScriptComponent>())
 			{
-				auto& sc = e1.GetComponent<ScriptComponent>();
+				const auto& sc = e1.GetComponent<ScriptComponent>();
 				if (bSensor)
 				{
-					for (auto& className : sc.Classes)
+					for (const auto& className : sc.Classes)
 						ScriptEngine::GetInstance(e1, className)->InvokeOnSensorEnter2D(collisionData);
 				}
 				else
 				{
-					for (auto& className : sc.Classes)
+					for (const auto& className : sc.Classes)
 						ScriptEngine::GetInstance(e1, className)->InvokeOnCollisionEnter2D(collisionData);
 				}
 			}
@@ -84,15 +89,15 @@ namespace ArcEngine
 			collisionData.RelativeVelocity = { velocityA.x - velocityB.x, velocityA.y - velocityB.y };
 			if (e2.HasComponent<ScriptComponent>())
 			{
-				auto& sc = e2.GetComponent<ScriptComponent>();
+				const auto& sc = e2.GetComponent<ScriptComponent>();
 				if (aSensor)
 				{
-					for (auto& className : sc.Classes)
+					for (const auto& className : sc.Classes)
 						ScriptEngine::GetInstance(e2, className)->InvokeOnSensorEnter2D(collisionData);
 				}
 				else
 				{
-					for (auto& className : sc.Classes)
+					for (const auto& className : sc.Classes)
 						ScriptEngine::GetInstance(e2, className)->InvokeOnCollisionEnter2D(collisionData);
 				}
 			}
@@ -130,15 +135,15 @@ namespace ArcEngine
 
 			if (e1.HasComponent<ScriptComponent>())
 			{
-				auto& sc = e1.GetComponent<ScriptComponent>();
+				const auto& sc = e1.GetComponent<ScriptComponent>();
 				if (bSensor)
 				{
-					for (auto& className : sc.Classes)
+					for (const auto& className : sc.Classes)
 						ScriptEngine::GetInstance(e1, className)->InvokeOnSensorExit2D(collisionData);
 				}
 				else
 				{
-					for (auto& className : sc.Classes)
+					for (const auto& className : sc.Classes)
 						ScriptEngine::GetInstance(e1, className)->InvokeOnCollisionExit2D(collisionData);
 				}
 			}
@@ -151,15 +156,15 @@ namespace ArcEngine
 			collisionData.RelativeVelocity = { velocityA.x - velocityB.x, velocityA.y - velocityB.y };
 			if (e2.HasComponent<ScriptComponent>())
 			{
-				auto& sc = e2.GetComponent<ScriptComponent>();
+				const auto& sc = e2.GetComponent<ScriptComponent>();
 				if (aSensor)
 				{
-					for (auto& className : sc.Classes)
+					for (const auto& className : sc.Classes)
 						ScriptEngine::GetInstance(e2, className)->InvokeOnSensorExit2D(collisionData);
 				}
 				else
 				{
-					for (auto& className : sc.Classes)
+					for (const auto& className : sc.Classes)
 						ScriptEngine::GetInstance(e2, className)->InvokeOnCollisionExit2D(collisionData);
 				}
 			}
@@ -167,10 +172,12 @@ namespace ArcEngine
 
 		virtual void PreSolve(b2Contact* contact, const b2Manifold* oldManifold) override
 		{
+			/* Handle pre solve */
 		}
 
 		virtual void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) override
 		{
+			/* Handle post solve */
 		}
 
 		void OnUpdate(Timestep ts)
@@ -185,7 +192,7 @@ namespace ArcEngine
 				Entity fluidEntity = { m_Scene->m_FixtureMap.at(fluid), m_Scene };
 				Entity fixtureEntity = { m_Scene->m_FixtureMap.at(fixture), m_Scene };
 
-				auto& buoyancyComponent2D = fluidEntity.GetComponent<BuoyancyEffector2DComponent>();
+				const auto& buoyancyComponent2D = fluidEntity.GetComponent<BuoyancyEffector2DComponent>();
 				PhysicsUtils::HandleBuoyancy(fluid, fixture, m_Scene->m_PhysicsWorld2D->GetGravity(), buoyancyComponent2D.FlipGravity, buoyancyComponent2D.Density, buoyancyComponent2D.DragMultiplier, buoyancyComponent2D.FlowMagnitude, buoyancyComponent2D.FlowAngle);
 				++it;
 			}
@@ -197,10 +204,6 @@ namespace ArcEngine
 		eastl::set<eastl::pair<b2Fixture*, b2Fixture*>> m_BuoyancyFixtures;
 	};
 
-	Scene::Scene()
-	{
-	}
-
 	Scene::~Scene()
 	{
 		ARC_PROFILE_SCOPE();
@@ -210,9 +213,9 @@ namespace ArcEngine
 			auto scriptView = m_Registry.view<ScriptComponent>();
 			for (auto e : scriptView)
 			{
-				ScriptComponent& script = scriptView.get<ScriptComponent>(e);
+				const ScriptComponent& script = scriptView.get<ScriptComponent>(e);
 				Entity entity = { e, this };
-				for (auto& className : script.Classes)
+				for (const auto& className : script.Classes)
 					ScriptEngine::RemoveInstance(entity, className);
 			}
 		}
@@ -228,7 +231,7 @@ namespace ArcEngine
 			{
 				UUID uuid = src.get<IDComponent>(e).ID;
 				entt::entity dstEnttID = enttMap.at(uuid);
-				auto& component = src.get<Component>(e);
+				const auto& component = src.get<Component>(e);
 				dst.emplace_or_replace<Component>(dstEnttID, component);
 			}
 		}(), ...);
@@ -244,16 +247,13 @@ namespace ArcEngine
 	static void CopyComponent(entt::registry& dst, Entity srcEntity, Entity dstEntity)
 	{
 		([&]()
+		{
+			if (typeid(Component) != typeid(ScriptComponent) && srcEntity.HasComponent<Component>())	// Currently not support duplicating ScriptComponent
 			{
-				if (srcEntity.HasComponent<Component>())
-				{
-					if (typeid(Component) != typeid(ScriptComponent))				// Currently not support duplicating ScriptComponent
-					{
-						auto& component = srcEntity.GetComponent<Component>();
-						dst.emplace_or_replace<Component>(dstEntity, component);
-					}
-				}
-			}(), ...);
+				const auto& component = srcEntity.GetComponent<Component>();
+				dst.emplace_or_replace<Component>(dstEntity, component);
+			}
+		}(), ...);
 	}
 
 	template<typename... Component>
@@ -330,9 +330,9 @@ namespace ArcEngine
 		entity.Deparent();
 		auto children = entity.GetComponent<RelationshipComponent>().Children;
 
-		for (size_t i = 0; i < children.size(); i++)
+		for (const auto& child : children)
 		{
-			if (Entity childEntity = GetEntity(children[i]))
+			if (Entity childEntity = GetEntity(child))
 				DestroyEntity(childEntity);
 		}
 
@@ -641,13 +641,13 @@ namespace ArcEngine
 		/////////////////////////////////////////////////////////////////////
 		ScriptEngine::SetScene(this);
 		ScriptEngine::OnRuntimeBegin();
-		auto scriptView = m_Registry.view<IDComponent, TagComponent, ScriptComponent>();
+		auto scriptView = m_Registry.view<ScriptComponent>();
 		for (auto e : scriptView)
 		{
-			auto& [id, tag, script] = scriptView.get<IDComponent, TagComponent, ScriptComponent>(e);
+			const auto& sc = scriptView.get<ScriptComponent>(e);
 			Entity entity = { e, this };
 
-			for (auto& className : script.Classes)
+			for (auto& className : sc.Classes)
 				ScriptEngine::GetInstance(entity, className)->InvokeOnCreate();
 		}
 	}
@@ -662,7 +662,7 @@ namespace ArcEngine
 			ScriptComponent& script = scriptView.get<ScriptComponent>(e);
 			Entity entity = { e, this };
 
-			for (auto& className : script.Classes)
+			for (const auto& className : script.Classes)
 			{
 				ScriptEngine::GetInstance(entity, className)->InvokeOnDestroy();
 				ScriptEngine::RemoveInstance(entity, className);
@@ -695,7 +695,7 @@ namespace ArcEngine
 		m_PhysicsWorld2D = nullptr;
 	}
 
-	void Scene::OnUpdateEditor(Timestep ts, Ref<RenderGraphData>& renderGraphData, EditorCamera& camera)
+	void Scene::OnUpdateEditor(Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera)
 	{
 		ARC_PROFILE_SCOPE();
 		
@@ -708,17 +708,14 @@ namespace ArcEngine
 			auto view = m_Registry.view<IDComponent, LightComponent>();
 			lights.reserve(view.size());
 			for (auto entity : view)
-			{
-				auto [id, light] = view.get<IDComponent, LightComponent>(entity);
 				lights.emplace_back(Entity(entity, this));
-			}
 		}
 		Entity skylight = {};
 		{
 			ARC_PROFILE_SCOPE("PrepareSkylightData");
 
 			auto view = m_Registry.view<IDComponent, SkyLightComponent>();
-			if (view.size() > 0)
+			if (!view.empty())
 				skylight = Entity(*view.begin(), this);
 		}
 
@@ -752,7 +749,7 @@ namespace ArcEngine
 		Renderer2D::EndScene(renderGraphData);
 	}
 
-	void Scene::OnUpdateRuntime(Timestep ts, Ref<RenderGraphData>& renderGraphData, EditorCamera* overrideCamera)
+	void Scene::OnUpdateRuntime(Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -776,10 +773,10 @@ namespace ArcEngine
 				auto scriptView = m_Registry.view<ScriptComponent>();
 				for (auto e : scriptView)
 				{
-					ScriptComponent& script = scriptView.get<ScriptComponent>(e);
+					const ScriptComponent& script = scriptView.get<ScriptComponent>(e);
 					Entity entity = { e, this };
 
-					for (auto& className : script.Classes)
+					for (const auto& className : script.Classes)
 						ScriptEngine::GetInstance(entity, className)->InvokeOnUpdate(ts);
 				}
 			}
@@ -798,7 +795,7 @@ namespace ArcEngine
 			for (auto e : view)
 			{
 				auto [transform, body] = view.get<TransformComponent, Rigidbody2DComponent>(e);
-				b2Body* rb = (b2Body*)body.RuntimeBody;
+				const b2Body* rb = (b2Body*)body.RuntimeBody;
 				b2Vec2 position = rb->GetPosition();
 				transform.Translation.x = position.x;
 				transform.Translation.y = position.y;
@@ -936,7 +933,7 @@ namespace ArcEngine
 		/////////////////////////////////////////////////////////////////////
 
 		glm::mat4 cameraTransform;
-		Camera* mainCamera = nullptr;
+		const Camera* mainCamera = nullptr;
 		if (!overrideCamera)
 		{
 			auto view = m_Registry.view<IDComponent, CameraComponent>();
@@ -968,17 +965,14 @@ namespace ArcEngine
 				auto view = m_Registry.view<IDComponent, LightComponent>();
 				lights.reserve(view.size());
 				for (auto entity : view)
-				{
-					auto [id, light] = view.get<IDComponent, LightComponent>(entity);
 					lights.emplace_back(Entity(entity, this));
-				}
 			}
 			Entity skylight = {};
 			{
 				ARC_PROFILE_SCOPE("PrepareSkylightData");
 
 				auto view = m_Registry.view<IDComponent, SkyLightComponent>();
-				if (view.size() > 0)
+				if (!view.empty())
 					skylight = Entity(*view.begin(), this);
 			}
 
@@ -1056,60 +1050,71 @@ namespace ArcEngine
 	template<>
 	void Scene::OnComponentAdded<IDComponent>(Entity entity, IDComponent& component)
 	{
+		/* On IDComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component)
 	{
+		/* On TransformComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<RelationshipComponent>(Entity entity, RelationshipComponent& component)
 	{
+		/* On RelationshipComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<PrefabComponent>(Entity entity, PrefabComponent& component)
 	{
+		/* On PrefabComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
 	{
+		/* On CameraComponent added */
 		component.Camera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
 	}
 
 	template<>
 	void Scene::OnComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component)
 	{
+		/* On SpriteRendererComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent& component)
 	{
+		/* On TagComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& component)
 	{
+		/* On MeshComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<SkyLightComponent>(Entity entity, SkyLightComponent& component)
 	{
+		/* On SkyLightComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<LightComponent>(Entity entity, LightComponent& component)
 	{
+		/* On LightComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& body)
 	{
+		/* On Rigidbody2DComponent added */
 		if (m_PhysicsWorld2D)
 		{
-			TransformComponent& transform = entity.GetTransform();
+			const TransformComponent& transform = entity.GetTransform();
 
 			b2BodyDef def;
 			def.type = (b2BodyType)body.Type;
@@ -1179,9 +1184,10 @@ namespace ArcEngine
 	template<>
 	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& bc2d)
 	{
+		/* On BoxCollider2DComponent added */
 		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
 		{
-			TransformComponent& transform = entity.GetTransform();
+			const TransformComponent& transform = entity.GetTransform();
 			b2Body* rb = (b2Body*) entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
 
 			b2PolygonShape boxShape;
@@ -1204,12 +1210,11 @@ namespace ArcEngine
 	template<>
 	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& cc2d)
 	{
+		/* On CircleCollider2DComponent added */
 		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
 		{
-			TransformComponent& transform = entity.GetTransform();
+			const TransformComponent& transform = entity.GetTransform();
 			b2Body* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
-
-			auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
 
 			b2CircleShape circleShape;
 			circleShape.m_radius = cc2d.Radius * glm::max(transform.Scale.x, transform.Scale.y);
@@ -1231,45 +1236,54 @@ namespace ArcEngine
 	template<>
 	void Scene::OnComponentAdded<DistanceJoint2DComponent>(Entity entity, DistanceJoint2DComponent& component)
 	{
+		/* On DistanceJoint2DComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<SpringJoint2DComponent>(Entity entity, SpringJoint2DComponent& component)
 	{
+		/* On SpringJoint2DComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<HingeJoint2DComponent>(Entity entity, HingeJoint2DComponent& component)
 	{
+		/* On HingeJoint2DComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<SliderJoint2DComponent>(Entity entity, SliderJoint2DComponent& component)
 	{
+		/* On SliderJoint2DComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<WheelJoint2DComponent>(Entity entity, WheelJoint2DComponent& component)
 	{
+		/* On WheelJoint2DComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<BuoyancyEffector2DComponent>(Entity entity, BuoyancyEffector2DComponent& component)
 	{
+		/* On BuoyancyEffector2DComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<ScriptComponent>(Entity entity, ScriptComponent& component)
 	{
+		/* On ScriptComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<AudioSourceComponent>(Entity entity, AudioSourceComponent& component)
 	{
+		/* On AudioSourceComponent added */
 	}
 
 	template<>
 	void Scene::OnComponentAdded<AudioListenerComponent>(Entity entity, AudioListenerComponent& component)
 	{
+		/* On AudioListenerComponent added */
 	}
 }

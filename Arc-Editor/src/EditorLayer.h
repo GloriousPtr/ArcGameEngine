@@ -26,7 +26,7 @@ namespace ArcEngine
 		virtual void OnImGuiRender() override;
 		virtual void OnEvent(Event& e) override;
 
-		void SetContext(EditorContextType type, void* data, size_t size) { m_SelectedContext.Set(type, data, size); }
+		void SetContext(EditorContextType type, const void* data, size_t size) { m_SelectedContext.Set(type, data, size); }
 		const EditorContext& GetContext() const { return m_SelectedContext; }
 		void OpenScene(const char* filepath);
 

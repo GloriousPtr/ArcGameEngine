@@ -22,7 +22,7 @@ namespace ArcEngine
 		out << YAML::BeginMap;
 		out << YAML::Key << "Scene" << YAML::Value << "Untitled";
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
-		m_Scene->m_Registry.each([&](auto entityID)
+		m_Scene->m_Registry.each([this, &out](auto entityID)
 		{
 			Entity entity = { entityID, m_Scene.get() };
 			if (!entity)
@@ -37,10 +37,9 @@ namespace ArcEngine
 		fout << out.c_str();
 	}
 
-	void SceneSerializer::SerializeRuntime(const eastl::string& filepath) const
+	void SceneSerializer::SerializeRuntime(const eastl::string&) const
 	{
 		// Not implemented
-		ARC_CORE_ASSERT(false, "Cannot serialize {} during runtime", filepath);
 	}
 
 	bool SceneSerializer::Deserialize(const eastl::string& filepath) const
@@ -66,10 +65,9 @@ namespace ArcEngine
 		return true;
 	}
 
-	bool SceneSerializer::DeserializeRuntime(const eastl::string& filepath) const
+	bool SceneSerializer::DeserializeRuntime(const eastl::string&) const
 	{
 		// Not implemented
-		ARC_CORE_ASSERT(false, "Cannot deserialize {} during runtime", filepath);
 		return false;
 	}
 }
