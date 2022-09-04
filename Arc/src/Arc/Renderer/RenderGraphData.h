@@ -5,6 +5,14 @@
 
 namespace ArcEngine
 {
+	struct CameraData
+	{
+		glm::mat4 View;
+		glm::mat4 Projection;
+		glm::mat4 ViewProjection;
+		glm::vec3 Position;
+	};
+
 	struct RenderGraphData
 	{
 		Ref<Framebuffer> CompositePassTarget;

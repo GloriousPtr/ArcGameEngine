@@ -186,28 +186,13 @@ namespace ArcEngine
 
 	}
 
-	void Renderer3D::BeginScene(const Camera& camera, const glm::mat4& transform, Entity cubemap, const eastl::vector<Entity>& lights)
+	void Renderer3D::BeginScene(const CameraData& cameraData, Entity cubemap, const eastl::vector<Entity>& lights)
 	{
 		ARC_PROFILE_SCOPE();
 		
-		s_CameraView = glm::inverse(transform);
-		s_CameraProjection = camera.GetProjection();
-		s_CameraPosition = transform[3];
-
-		s_Skylight = cubemap;
-		s_SceneLights = lights;
-
-		SetupCameraData();
-		SetupLightsData();
-	}
-
-	void Renderer3D::BeginScene(const EditorCamera& camera, Entity cubemap, const eastl::vector<Entity>& lights)
-	{
-		ARC_PROFILE_SCOPE();
-		
-		s_CameraView = camera.GetViewMatrix();
-		s_CameraProjection = camera.GetProjection();
-		s_CameraPosition = camera.GetPosition();
+		s_CameraView = cameraData.View;
+		s_CameraProjection = cameraData.Projection;
+		s_CameraPosition = cameraData.Position;
 
 		s_Skylight = cubemap;
 		s_SceneLights = lights;

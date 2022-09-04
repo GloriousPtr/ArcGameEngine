@@ -14,8 +14,7 @@ namespace ArcEngine
 		static void Init();
 		static void Shutdown();
 		
-		static void BeginScene(const Camera& camera, const glm::mat4& transform);
-		static void BeginScene(const EditorCamera& camera);
+		static void BeginScene(const glm::mat4& viewProjection);
 		static void EndScene(const Ref<RenderGraphData>& renderGraphData);
 		static void Flush();
 

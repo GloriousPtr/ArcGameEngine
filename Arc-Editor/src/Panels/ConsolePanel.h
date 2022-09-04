@@ -16,7 +16,7 @@ namespace ArcEngine
 			eastl::string Buffer;
 			Log::Level Level;
 
-			Message(const eastl::string id, const eastl::string message = "", Log::Level level = Log::Level::Trace);
+			Message(const eastl::string& id, const eastl::string& message = "", Log::Level level = Log::Level::Trace);
 			void OnImGuiRender() const;
 
 			static const char* GetLevelName(Log::Level level);
@@ -33,7 +33,7 @@ namespace ArcEngine
 		ConsolePanel& operator=(const ConsolePanel& other) = delete;
 		ConsolePanel& operator=(ConsolePanel&& other) = delete;
 
-		void AddMessage(eastl::string message, Log::Level level);
+		void AddMessage(const eastl::string& message, Log::Level level);
 		const Message* GetRecentMessage();
 		void Clear();
 		void SetFocus() const;

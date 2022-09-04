@@ -14,6 +14,9 @@ namespace ArcEngine
 {
 	class ContactListener;
 	class Entity;
+	struct Rigidbody2DComponent;
+	struct BoxCollider2DComponent;
+	struct CircleCollider2DComponent;
 	
 	class Scene
 	{
@@ -51,6 +54,11 @@ namespace ArcEngine
 		}
 
 	private:
+		void OnRender(const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData);
+		void CreateRigidbody2D(Entity entity, Rigidbody2DComponent* component);
+		void CreateBoxCollider2D(Entity entity, BoxCollider2DComponent* component);
+		void CreateCircleCollider2D(Entity entity, CircleCollider2DComponent* component);
+
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
 	

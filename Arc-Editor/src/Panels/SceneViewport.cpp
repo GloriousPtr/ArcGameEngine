@@ -320,7 +320,7 @@ namespace ArcEngine
 
 	void SceneViewport::OnOverlayRender() const
 	{
-		Renderer2D::BeginScene(m_EditorCamera);
+		Renderer2D::BeginScene(m_EditorCamera.GetViewProjection());
 		{
 			auto view = m_Scene->GetAllEntitiesWith<TransformComponent, CameraComponent>();
 			for (auto entityHandle : view)

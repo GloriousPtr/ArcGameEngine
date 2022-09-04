@@ -372,78 +372,15 @@ namespace ArcEngine
 		/////////////////////////////////////////////////////////////////////
 		// Rigidbody and Colliders (2D) /////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
+		m_PhysicsWorld2D = new b2World({ 0.0f, -9.8f });
+		m_ContactListener = new ContactListener(this);
+		m_PhysicsWorld2D->SetContactListener(m_ContactListener);
 		{
-			m_PhysicsWorld2D = new b2World({ 0.0f, -9.8f });
-			m_ContactListener = new ContactListener(this);
-			m_PhysicsWorld2D->SetContactListener(m_ContactListener);
 			auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
 			for (auto e : view)
 			{
 				auto [transform, body] = view.get<TransformComponent, Rigidbody2DComponent>(e);
-
-				b2BodyDef def;
-				def.type = (b2BodyType)body.Type;
-				def.linearDamping = glm::max(body.LinearDrag, 0.0f);
-				def.angularDamping = glm::max(body.AngularDrag, 0.0f);
-				def.allowSleep = body.AllowSleep;
-				def.awake = body.Awake;
-				def.fixedRotation = body.FreezeRotation;
-				def.bullet = body.Continuous;
-				def.gravityScale = body.GravityScale;
-
-				def.position.Set(transform.Translation.x, transform.Translation.y);
-				def.angle = transform.Rotation.z;
-
-				b2Body* rb = m_PhysicsWorld2D->CreateBody(&def);
-				body.RuntimeBody = rb;
-
-				Entity entity = { e, this };
-				if (entity.HasComponent<BoxCollider2DComponent>())
-				{
-					auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
-
-					b2PolygonShape boxShape;
-					boxShape.SetAsBox(bc2d.Size.x * transform.Scale.x, bc2d.Size.y * transform.Scale.y);
-
-					b2FixtureDef fixtureDef;
-					fixtureDef.shape = &boxShape;
-					fixtureDef.isSensor = bc2d.IsSensor;
-					fixtureDef.density = bc2d.Density;
-					fixtureDef.friction = bc2d.Friction;
-					fixtureDef.restitution = bc2d.Restitution;
-					fixtureDef.restitutionThreshold = bc2d.RestitutionThreshold;
-
-					b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
-					bc2d.RuntimeFixture = fixture;
-					m_FixtureMap[fixture] = e;
-				}
-
-				if (entity.HasComponent<CircleCollider2DComponent>())
-				{
-					auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
-
-					b2CircleShape circleShape;
-					circleShape.m_radius = cc2d.Radius * glm::max(transform.Scale.x, transform.Scale.y);
-
-					b2FixtureDef fixtureDef;
-					fixtureDef.shape = &circleShape;
-					fixtureDef.isSensor = cc2d.IsSensor;
-					fixtureDef.density = cc2d.Density;
-					fixtureDef.friction = cc2d.Friction;
-					fixtureDef.restitution = cc2d.Restitution;
-					fixtureDef.restitutionThreshold = cc2d.RestitutionThreshold;
-
-					b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
-					cc2d.RuntimeFixture = fixture;
-					m_FixtureMap[fixture] = e;
-				}
-
-				if (!body.AutoMass && body.Mass > 0.01f)
-				{
-					b2MassData massData = rb->GetMassData();
-					massData.mass = body.Mass;
-					rb->SetMassData(&massData);
-				}
+				CreateRigidbody2D({ e, this }, &body);
 			}
 		}
 
@@ -699,54 +636,13 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 		
-		// Lights
-		eastl::vector<Entity> lights;
-		lights.reserve(Renderer3D::MAX_NUM_LIGHTS);
-		{
-			ARC_PROFILE_SCOPE("PrepareLightData");
+		CameraData cameraData = {};
+		cameraData.View = camera.GetViewMatrix();
+		cameraData.Projection = camera.GetProjectionMatrix();
+		cameraData.ViewProjection = cameraData.Projection * cameraData.View;
+		cameraData.Position = camera.GetPosition();
 
-			auto view = m_Registry.view<IDComponent, LightComponent>();
-			lights.reserve(view.size());
-			for (auto entity : view)
-				lights.emplace_back(Entity(entity, this));
-		}
-		Entity skylight = {};
-		{
-			ARC_PROFILE_SCOPE("PrepareSkylightData");
-
-			auto view = m_Registry.view<IDComponent, SkyLightComponent>();
-			if (!view.empty())
-				skylight = Entity(*view.begin(), this);
-		}
-
-		Renderer3D::BeginScene(camera, skylight, lights);
-		// Meshes
-		{
-			ARC_PROFILE_SCOPE("Submit Mesh Data");
-
-			auto view = m_Registry.view<IDComponent, MeshComponent>();
-			Renderer3D::ReserveMeshes(view.size());
-			for (auto entity : view)
-			{
-				auto [id, mesh] = view.get<IDComponent, MeshComponent>(entity);
-				if (mesh.MeshGeometry != nullptr)
-					Renderer3D::SubmitMesh(mesh, Entity(entity, this).GetWorldTransform());
-			}
-		}
-		Renderer3D::EndScene(renderGraphData);
-		
-		Renderer2D::BeginScene(camera);
-		{
-			ARC_PROFILE_SCOPE("Submit 2D Data");
-
-			auto view = m_Registry.view<IDComponent, SpriteRendererComponent>();
-			for (auto entity : view)
-			{
-				auto [id, sprite] = view.get<IDComponent, SpriteRendererComponent>(entity);
-				Renderer2D::DrawQuad(Entity(entity, this).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
-			}
-		}
-		Renderer2D::EndScene(renderGraphData);
+		OnRender(renderGraphData, cameraData);
 	}
 
 	void Scene::OnUpdateRuntime(Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera)
@@ -932,80 +828,27 @@ namespace ArcEngine
 		// Rendering ////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
 
-		glm::mat4 cameraTransform;
-		const Camera* mainCamera = nullptr;
+		CameraData cameraData = {};
+		Entity cameraEntity = GetPrimaryCameraEntity();
 		if (!overrideCamera)
 		{
-			auto view = m_Registry.view<IDComponent, CameraComponent>();
-			for (auto entity : view)
+			if (cameraEntity)
 			{
-				auto [id, camera] = view.get<IDComponent, CameraComponent>(entity);
-
-				if(camera.Primary)
-				{
-					mainCamera = &camera.Camera;
-					cameraTransform = GetEntity(id.ID).GetWorldTransform();
-					break;
-				}
+				cameraData.View = glm::inverse(cameraEntity.GetWorldTransform());
+				cameraData.Projection = cameraEntity.GetComponent<CameraComponent>().Camera.GetProjection();
+				cameraData.ViewProjection = cameraData.Projection * cameraData.View;
+				cameraData.Position = cameraEntity.GetTransform().Translation;
 			}
 		}
 		else
 		{
-			mainCamera = overrideCamera;
-			cameraTransform = glm::inverse(overrideCamera->GetViewMatrix());
+			cameraData.View = overrideCamera->GetViewMatrix();
+			cameraData.Projection = overrideCamera->GetProjectionMatrix();
+			cameraData.ViewProjection = cameraData.Projection * cameraData.View;
+			cameraData.Position = overrideCamera->GetPosition();
 		}
 
-		if(mainCamera)
-		{
-			eastl::vector<Entity> lights;
-			lights.reserve(Renderer3D::MAX_NUM_LIGHTS);
-			{
-				ARC_PROFILE_SCOPE("Prepare Light Data");
-
-				auto view = m_Registry.view<IDComponent, LightComponent>();
-				lights.reserve(view.size());
-				for (auto entity : view)
-					lights.emplace_back(Entity(entity, this));
-			}
-			Entity skylight = {};
-			{
-				ARC_PROFILE_SCOPE("PrepareSkylightData");
-
-				auto view = m_Registry.view<IDComponent, SkyLightComponent>();
-				if (!view.empty())
-					skylight = Entity(*view.begin(), this);
-			}
-
-			Renderer3D::BeginScene(*mainCamera, cameraTransform, skylight, lights);
-			// Meshes
-			{
-				ARC_PROFILE_SCOPE("Submit Mesh Data");
-
-				auto view = m_Registry.view<IDComponent, MeshComponent>();
-				Renderer3D::ReserveMeshes(view.size());
-				for (auto entity : view)
-				{
-					auto [id, mesh] = view.get<IDComponent, MeshComponent>(entity);
-					if (mesh.MeshGeometry != nullptr)
-						Renderer3D::SubmitMesh(mesh, Entity(entity, this).GetWorldTransform());
-				}
-			}
-			Renderer3D::EndScene(renderGraphData);
-
-			Renderer2D::BeginScene(*mainCamera, cameraTransform);
-			{
-				ARC_PROFILE_SCOPE("Submit 2D Data");
-
-				auto view = m_Registry.view<IDComponent, SpriteRendererComponent>();
-				for (auto entity : view)
-				{
-					auto [id, sprite] = view.get<IDComponent, SpriteRendererComponent>(entity);
-				
-					Renderer2D::DrawQuad(GetEntity(id.ID).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
-				}
-			}
-			Renderer2D::EndScene(renderGraphData);
-		}
+		OnRender(renderGraphData, cameraData);
 	}
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
@@ -1039,6 +882,152 @@ namespace ArcEngine
 				return Entity(entity, this);
 		}
 		return {};
+	}
+
+	void Scene::OnRender(const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData)
+	{
+		eastl::vector<Entity> lights;
+		lights.reserve(Renderer3D::MAX_NUM_LIGHTS);
+		{
+			ARC_PROFILE_SCOPE("Prepare Light Data");
+
+			auto view = m_Registry.view<IDComponent, LightComponent>();
+			lights.reserve(view.size());
+			for (auto entity : view)
+				lights.emplace_back(Entity(entity, this));
+		}
+		Entity skylight = {};
+		{
+			ARC_PROFILE_SCOPE("PrepareSkylightData");
+
+			auto view = m_Registry.view<IDComponent, SkyLightComponent>();
+			if (!view.empty())
+				skylight = Entity(*view.begin(), this);
+		}
+
+		Renderer3D::BeginScene(cameraData, skylight, lights);
+		// Meshes
+		{
+			ARC_PROFILE_SCOPE("Submit Mesh Data");
+
+			auto view = m_Registry.view<IDComponent, MeshComponent>();
+			Renderer3D::ReserveMeshes(view.size());
+			for (auto entity : view)
+			{
+				auto [id, mesh] = view.get<IDComponent, MeshComponent>(entity);
+				if (mesh.MeshGeometry != nullptr)
+					Renderer3D::SubmitMesh(mesh, Entity(entity, this).GetWorldTransform());
+			}
+		}
+		Renderer3D::EndScene(renderGraphData);
+
+		Renderer2D::BeginScene(cameraData.ViewProjection);
+		{
+			ARC_PROFILE_SCOPE("Submit 2D Data");
+
+			auto view = m_Registry.view<IDComponent, SpriteRendererComponent>();
+			for (auto entity : view)
+			{
+				auto [id, sprite] = view.get<IDComponent, SpriteRendererComponent>(entity);
+
+				Renderer2D::DrawQuad(GetEntity(id.ID).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+			}
+		}
+		Renderer2D::EndScene(renderGraphData);
+	}
+
+	void Scene::CreateRigidbody2D(Entity entity, Rigidbody2DComponent* component)
+	{
+		if (m_PhysicsWorld2D && component)
+		{
+			const TransformComponent& transform = entity.GetTransform();
+			auto& body = *component;
+
+			b2BodyDef def;
+			def.type = (b2BodyType)body.Type;
+			def.linearDamping = glm::max(body.LinearDrag, 0.0f);
+			def.angularDamping = glm::max(body.AngularDrag, 0.0f);
+			def.allowSleep = body.AllowSleep;
+			def.awake = body.Awake;
+			def.fixedRotation = body.FreezeRotation;
+			def.bullet = body.Continuous;
+			def.gravityScale = body.GravityScale;
+
+			def.position.Set(transform.Translation.x, transform.Translation.y);
+			def.angle = transform.Rotation.z;
+
+			b2Body* rb = m_PhysicsWorld2D->CreateBody(&def);
+			body.RuntimeBody = rb;
+
+			if (entity.HasComponent<BoxCollider2DComponent>())
+			{
+				auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
+				CreateBoxCollider2D(entity, &bc2d);
+			}
+
+			if (entity.HasComponent<CircleCollider2DComponent>())
+			{
+				auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
+				CreateCircleCollider2D(entity, &cc2d);
+			}
+
+			if (!body.AutoMass && body.Mass > 0.01f)
+			{
+				b2MassData massData = rb->GetMassData();
+				massData.mass = body.Mass;
+				rb->SetMassData(&massData);
+			}
+		}
+	}
+
+	void Scene::CreateBoxCollider2D(Entity entity, BoxCollider2DComponent* component)
+	{
+		if (m_PhysicsWorld2D && component && entity.HasComponent<Rigidbody2DComponent>())
+		{
+			const TransformComponent& transform = entity.GetTransform();
+			b2Body* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
+			auto& bc2d = *component;
+
+			b2PolygonShape boxShape;
+			boxShape.SetAsBox(bc2d.Size.x * transform.Scale.x, bc2d.Size.y * transform.Scale.y);
+
+			b2FixtureDef fixtureDef;
+			fixtureDef.shape = &boxShape;
+			fixtureDef.isSensor = bc2d.IsSensor;
+			fixtureDef.density = bc2d.Density;
+			fixtureDef.friction = bc2d.Friction;
+			fixtureDef.restitution = bc2d.Restitution;
+			fixtureDef.restitutionThreshold = bc2d.RestitutionThreshold;
+
+			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
+			bc2d.RuntimeFixture = fixture;
+			m_FixtureMap[fixture] = entity;
+		}
+	}
+
+	void Scene::CreateCircleCollider2D(Entity entity, CircleCollider2DComponent* component)
+	{
+		if (m_PhysicsWorld2D && component && entity.HasComponent<Rigidbody2DComponent>())
+		{
+			const TransformComponent& transform = entity.GetTransform();
+			b2Body* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
+			auto& cc2d = *component;
+
+			b2CircleShape circleShape;
+			circleShape.m_radius = cc2d.Radius * glm::max(transform.Scale.x, transform.Scale.y);
+
+			b2FixtureDef fixtureDef;
+			fixtureDef.shape = &circleShape;
+			fixtureDef.isSensor = cc2d.IsSensor;
+			fixtureDef.density = cc2d.Density;
+			fixtureDef.friction = cc2d.Friction;
+			fixtureDef.restitution = cc2d.Restitution;
+			fixtureDef.restitutionThreshold = cc2d.RestitutionThreshold;
+
+			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
+			cc2d.RuntimeFixture = fixture;
+			m_FixtureMap[fixture] = entity;
+		}
 	}
 
 	template<typename T>
@@ -1112,125 +1101,21 @@ namespace ArcEngine
 	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& body)
 	{
 		/* On Rigidbody2DComponent added */
-		if (m_PhysicsWorld2D)
-		{
-			const TransformComponent& transform = entity.GetTransform();
-
-			b2BodyDef def;
-			def.type = (b2BodyType)body.Type;
-			def.linearDamping = glm::max(body.LinearDrag, 0.0f);
-			def.angularDamping = glm::max(body.AngularDrag, 0.0f);
-			def.allowSleep = body.AllowSleep;
-			def.awake = body.Awake;
-			def.fixedRotation = body.FreezeRotation;
-			def.bullet = body.Continuous;
-			def.gravityScale = body.GravityScale;
-
-			def.position.Set(transform.Translation.x, transform.Translation.y);
-			def.angle = transform.Rotation.z;
-
-			b2Body* rb = m_PhysicsWorld2D->CreateBody(&def);
-			body.RuntimeBody = rb;
-
-			if (entity.HasComponent<BoxCollider2DComponent>())
-			{
-				auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
-
-				b2PolygonShape boxShape;
-				boxShape.SetAsBox(bc2d.Size.x * transform.Scale.x, bc2d.Size.y * transform.Scale.y);
-
-				b2FixtureDef fixtureDef;
-				fixtureDef.shape = &boxShape;
-				fixtureDef.isSensor = bc2d.IsSensor;
-				fixtureDef.density = bc2d.Density;
-				fixtureDef.friction = bc2d.Friction;
-				fixtureDef.restitution = bc2d.Restitution;
-				fixtureDef.restitutionThreshold = bc2d.RestitutionThreshold;
-
-				b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
-				bc2d.RuntimeFixture = fixture;
-				m_FixtureMap[fixture] = entity;
-			}
-
-			if (entity.HasComponent<CircleCollider2DComponent>())
-			{
-				auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
-
-				b2CircleShape circleShape;
-				circleShape.m_radius = cc2d.Radius * glm::max(transform.Scale.x, transform.Scale.y);
-
-				b2FixtureDef fixtureDef;
-				fixtureDef.shape = &circleShape;
-				fixtureDef.isSensor = cc2d.IsSensor;
-				fixtureDef.density = cc2d.Density;
-				fixtureDef.friction = cc2d.Friction;
-				fixtureDef.restitution = cc2d.Restitution;
-				fixtureDef.restitutionThreshold = cc2d.RestitutionThreshold;
-
-				b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
-				cc2d.RuntimeFixture = fixture;
-				m_FixtureMap[fixture] = entity;
-			}
-
-			if (!body.AutoMass && body.Mass > 0.01f)
-			{
-				b2MassData massData = rb->GetMassData();
-				massData.mass = body.Mass;
-				rb->SetMassData(&massData);
-			}
-		}
+		CreateRigidbody2D(entity, &body);
 	}
 
 	template<>
 	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& bc2d)
 	{
 		/* On BoxCollider2DComponent added */
-		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
-		{
-			const TransformComponent& transform = entity.GetTransform();
-			b2Body* rb = (b2Body*) entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
-
-			b2PolygonShape boxShape;
-			boxShape.SetAsBox(bc2d.Size.x * transform.Scale.x, bc2d.Size.y * transform.Scale.y);
-
-			b2FixtureDef fixtureDef;
-			fixtureDef.shape = &boxShape;
-			fixtureDef.isSensor = bc2d.IsSensor;
-			fixtureDef.density = bc2d.Density;
-			fixtureDef.friction = bc2d.Friction;
-			fixtureDef.restitution = bc2d.Restitution;
-			fixtureDef.restitutionThreshold = bc2d.RestitutionThreshold;
-
-			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
-			bc2d.RuntimeFixture = fixture;
-			m_FixtureMap[fixture] = entity;
-		}
+		CreateBoxCollider2D(entity, &bc2d);
 	}
 	
 	template<>
 	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& cc2d)
 	{
 		/* On CircleCollider2DComponent added */
-		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
-		{
-			const TransformComponent& transform = entity.GetTransform();
-			b2Body* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
-
-			b2CircleShape circleShape;
-			circleShape.m_radius = cc2d.Radius * glm::max(transform.Scale.x, transform.Scale.y);
-
-			b2FixtureDef fixtureDef;
-			fixtureDef.shape = &circleShape;
-			fixtureDef.isSensor = cc2d.IsSensor;
-			fixtureDef.density = cc2d.Density;
-			fixtureDef.friction = cc2d.Friction;
-			fixtureDef.restitution = cc2d.Restitution;
-			fixtureDef.restitutionThreshold = cc2d.RestitutionThreshold;
-
-			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
-			cc2d.RuntimeFixture = fixture;
-			m_FixtureMap[fixture] = entity;
-		}
+		CreateCircleCollider2D(entity, &cc2d);
 	}
 
 	template<>
