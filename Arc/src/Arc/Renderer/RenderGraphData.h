@@ -30,16 +30,16 @@ namespace ArcEngine
 			height /= 2;
 			PrefilteredFramebuffer->Resize(width, height);
 
+			BlurSamples = 0;
 			for (size_t i = 0; i < MaxBlurSamples; i++)
 			{
+				++BlurSamples;
+
 				width /= 2;
 				height /= 2;
 
 				if (width <= 0 || height <= 0)
-				{
-					BlurSamples = i + 1;
 					break;
-				}
 
 				TempBlurFramebuffers[i]->Resize(width, height);
 				DownsampledFramebuffers[i]->Resize(width, height);
