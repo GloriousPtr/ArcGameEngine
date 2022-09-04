@@ -33,7 +33,7 @@ namespace ArcEngine
 			b2Vec2 position = fixture->GetBody()->GetPosition();
 			const float radius = circle->m_radius;
 
-			const float polyCount = (uint32_t)(resolution * radius);
+			const float polyCount = resolution * radius;
 			constexpr float twoPi = 6.28318530718f;
 			const float deltaRadians = twoPi / polyCount;
 
