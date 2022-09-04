@@ -9,6 +9,9 @@ namespace ArcEngine
 	public:
 		OpenGLVertexArray();
 		virtual ~OpenGLVertexArray();
+
+		OpenGLVertexArray(const OpenGLVertexArray& other) = default;
+		OpenGLVertexArray(OpenGLVertexArray&& other) = default;
 		
 		virtual void Bind() const override;
 		virtual void Unbind() const override;
@@ -16,6 +19,7 @@ namespace ArcEngine
 		virtual void SetIndexBuffer(Ref<IndexBuffer>& indexBuffer) override;
 		const eastl::vector<Ref<VertexBuffer>>& GetVertexBuffer() const override { return m_VertexBuffers; }
 		const Ref<IndexBuffer>& GetIndexBuffer() const override { return m_IndexBuffer; }
+
 	private:
 		uint32_t m_RendererID;
 		uint32_t m_VertexBufferIndex = 0;

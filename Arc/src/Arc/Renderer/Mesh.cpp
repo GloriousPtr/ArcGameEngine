@@ -71,15 +71,13 @@ namespace ArcEngine
 
 		for(unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
-			aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+			const aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 			const char* nodeName = node->mName.C_Str();
 			ProcessMesh(mesh, scene, filepath, nodeName);
 		}
 
 		for(unsigned int i = 0; i < node->mNumChildren; i++)
-		{
 			ProcessNode(node->mChildren[i], scene, filepath);
-		}
 	}
 
 	eastl::vector<Ref<Texture2D>> LoadMaterialTextures(const aiMaterial *mat, aiTextureType type, const char* filepath)
@@ -206,7 +204,7 @@ namespace ArcEngine
 		Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(&(indices[0]), indices.size());
 		vertexArray->SetIndexBuffer(indexBuffer);
 
-        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+        const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
         eastl::vector<Ref<Texture2D>> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, filepath);
 		eastl::vector<Ref<Texture2D>> normalMaps = LoadMaterialTextures(material, aiTextureType_NORMALS, filepath);
 		eastl::vector<Ref<Texture2D>> heightMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, filepath);

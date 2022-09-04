@@ -75,13 +75,11 @@ namespace ArcEngine
 		static FieldType GetFieldType(MonoType* monoType);
 
 	private:
-
 		void GetManagedValueInternal(FieldData outValue) const;
-
 		void SetManagedValue(FieldData value) const;
-
 		static FieldType GetFieldTypeFromValueType(MonoType* monoType);
 
+	private:
 		MonoClassField* m_Field;
 		GCHandle m_Handle;
 		eastl::vector<char> m_Data;

@@ -315,7 +315,7 @@ namespace ArcEngine
 
 	ScriptInstance* ScriptEngine::CreateInstance(Entity entity, const eastl::string& name)
 	{
-		auto& scriptClass = s_Data->EntityClasses.at(name);
+		const auto& scriptClass = s_Data->EntityClasses.at(name);
 		UUID entityID = entity.GetUUID();
 		ScriptInstance* instance = new ScriptInstance(scriptClass, entityID);
 		(*s_Data->CurrentEntityInstanceMap)[entityID][name] = instance;
@@ -669,7 +669,7 @@ namespace ArcEngine
 				finalFields[fieldName] = CreateRef<Field>(fieldName, type, monoField, m_Handle);
 			}
 
-			auto& field = finalFields[fieldName];
+			const auto& field = finalFields[fieldName];
 			field->Serializable = serializable;
 			field->Hidden = hidden;
 			field->Header = header;

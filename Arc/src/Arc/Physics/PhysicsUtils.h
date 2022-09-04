@@ -24,20 +24,20 @@ namespace ArcEngine
 			return b2Vec2((n1 * dp.x - n2 * dc.x) * n3, (n1 * dp.y - n2 * dc.y) * n3);
 		}
 
-		static bool VerticesFromCircle(b2Fixture* fixture, eastl::vector<b2Vec2>& vertices, uint32_t resolution = 16)
+		static bool VerticesFromCircle(b2Fixture* fixture, eastl::vector<b2Vec2>& vertices, float resolution = 16.0f)
 		{
 			if (fixture->GetShape()->GetType() != b2Shape::e_circle)
 				return false;
 
-			b2CircleShape* circle = (b2CircleShape*)fixture->GetShape();
+			const b2CircleShape* circle = (b2CircleShape*)fixture->GetShape();
 			b2Vec2 position = fixture->GetBody()->GetPosition();
 			const float radius = circle->m_radius;
 
-			const float polyCount = (float)resolution * radius;
+			const float polyCount = (uint32_t)(resolution * radius);
 			constexpr float twoPi = 6.28318530718f;
 			const float deltaRadians = twoPi / polyCount;
 
-			for (uint32_t i = 0; i < polyCount; ++i)
+			for (uint32_t i = 0; i < (uint32_t)polyCount; ++i)
 			{
 				float radians = deltaRadians * (float)i;
 				b2Vec2 point = { glm::cos(radians), glm::sin(radians) };

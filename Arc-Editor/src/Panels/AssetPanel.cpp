@@ -379,7 +379,7 @@ namespace ArcEngine
 			ImGui::EndTable();
 
 			if (ImGui::IsItemClicked())
-				EditorLayer::GetInstance()->SetContext(EditorContextType::None, nullptr, 0);
+				EditorLayer::GetInstance()->ResetContext();
 		}
 
 		ImGui::PopStyleVar();
@@ -461,8 +461,8 @@ namespace ArcEngine
 					ImVec2 textSize = ImGui::CalcTextSize(filename);
 
 					bool highlight = false;
-					EditorContext context = EditorLayer::GetInstance()->GetContext();
-					if (context.Type == EditorContextType::File && (char*)context.Data)
+					const EditorContext& context = EditorLayer::GetInstance()->GetContext();
+					if (context.IsValid(EditorContextType::File))
 					{
 						const char* path = (char*)context.Data;
 						highlight = path == file.DirectoryEntry.path();
@@ -486,7 +486,7 @@ namespace ArcEngine
 					if (isDir && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 					{
 						directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
-						EditorLayer::GetInstance()->SetContext(EditorContextType::None, nullptr, 0);
+						EditorLayer::GetInstance()->ResetContext();
 					}
 
 					ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
@@ -564,7 +564,7 @@ namespace ArcEngine
 			ImGui::EndTable();
 
 			if (!anyItemHovered && ImGui::IsItemClicked())
-				EditorLayer::GetInstance()->SetContext(EditorContextType::None, nullptr, 0);
+				EditorLayer::GetInstance()->ResetContext();
 		}
 		ImGui::PopStyleVar();
 

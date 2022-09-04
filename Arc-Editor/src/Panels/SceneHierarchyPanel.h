@@ -23,9 +23,9 @@ namespace ArcEngine
 		SceneHierarchyPanel& operator=(const SceneHierarchyPanel& other) = delete;
 		SceneHierarchyPanel& operator=(SceneHierarchyPanel&& other) = delete;
 
-		void SetContext(const Ref<Scene>& context);
-
 		virtual void OnImGuiRender() override;
+
+		void SetContext(const Ref<Scene>& context);
 
 	private:
 		ImRect DrawEntityNode(Entity entity, bool skipChildren = false, uint32_t depth = 0, bool forceExpandTree = false, bool isPartOfPrefab = false);

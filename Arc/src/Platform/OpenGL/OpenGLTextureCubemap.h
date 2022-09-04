@@ -9,8 +9,11 @@ namespace ArcEngine
 	class OpenGLTextureCubemap : public TextureCubemap
 	{
 	public:
-		OpenGLTextureCubemap(const eastl::string& path);
+		explicit OpenGLTextureCubemap(const eastl::string& path);
 		virtual ~OpenGLTextureCubemap();
+
+		OpenGLTextureCubemap(const OpenGLTextureCubemap& other) = default;
+		OpenGLTextureCubemap(OpenGLTextureCubemap&& other) = default;
 		
 		virtual uint32_t GetWidth() const override { return m_Width; }
 		virtual uint32_t GetHeight() const override { return m_Height; }
@@ -24,7 +27,6 @@ namespace ArcEngine
 		virtual void BindIrradianceMap(uint32_t slot) const override;
 		virtual void BindRadianceMap(uint32_t slot) const override;
 
-		virtual bool operator==(const Texture& other) const override { return m_RendererID == ((OpenGLTextureCubemap&)other).m_RendererID; }
 	private:
 		eastl::string m_Path;
 		uint32_t m_Width, m_Height;

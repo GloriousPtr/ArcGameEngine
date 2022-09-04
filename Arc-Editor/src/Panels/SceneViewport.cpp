@@ -80,11 +80,9 @@ namespace ArcEngine
 		m_EditorCamera.SetViewportSize(1280, 720);
 	}
 
-	void SceneViewport::OnUpdate(const Ref<Scene>& scene, Timestep timestep, bool useEditorCamera)
+	void SceneViewport::OnUpdate(Timestep timestep)
 	{
 		ARC_PROFILE_SCOPE(m_ID.c_str());
-
-		m_Scene = scene;
 
 		if (FramebufferSpecification spec = m_RenderGraphData->CompositePassTarget->GetSpecification();
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
@@ -92,14 +90,14 @@ namespace ArcEngine
 		{
 			m_RenderGraphData->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
-			scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
-		else if (scene->IsViewportDirty())
+		else if (m_Scene->IsViewportDirty())
 		{
-			scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
-		if (!m_SimulationRunning && useEditorCamera)
+		if (!m_SimulationRunning && m_UseEditorCamera)
 		{
 			m_MousePosition = *((glm::vec2*) &(ImGui::GetMousePos()));
 			const glm::vec3& position = m_EditorCamera.GetPosition();
@@ -161,14 +159,14 @@ namespace ArcEngine
 
 		if (m_SimulationRunning)
 		{
-			scene->OnUpdateRuntime(timestep, m_RenderGraphData, useEditorCamera ? &m_EditorCamera : nullptr);
-			if (useEditorCamera)
-				OnOverlayRender(scene);
+			m_Scene->OnUpdateRuntime(timestep, m_RenderGraphData, m_UseEditorCamera ? &m_EditorCamera : nullptr);
+			if (m_UseEditorCamera)
+				OnOverlayRender();
 		}
 		else
 		{
-			scene->OnUpdateEditor(timestep, m_RenderGraphData, m_EditorCamera);
-			OnOverlayRender(scene);
+			m_Scene->OnUpdateEditor(timestep, m_RenderGraphData, m_EditorCamera);
+			OnOverlayRender();
 		}
 
 		m_RenderGraphData->RenderPassTarget->Unbind();
@@ -189,8 +187,8 @@ namespace ArcEngine
 
 		if (ImGui::IsKeyPressed(Key::F) && m_SceneHierarchyPanel)
 		{
-			EditorContext context = EditorLayer::GetInstance()->GetContext();
-			if (context.Type == EditorContextType::Entity && context.Data)
+			const EditorContext& context = EditorLayer::GetInstance()->GetContext();
+			if (context.IsValid(EditorContextType::Entity))
 			{
 				Entity entity = *((Entity*)context.Data);
 				if (entity)
@@ -257,7 +255,7 @@ namespace ArcEngine
 			if (m_ViewportHovered && m_SceneHierarchyPanel && m_GizmoType != -1 && !m_SimulationRunning)
 			{
 				EditorContext context = EditorLayer::GetInstance()->GetContext();
-				if (context.Type == EditorContextType::Entity && context.Data)
+				if (context.IsValid(EditorContextType::Entity))
 				{
 					Entity selectedEntity = *((Entity*)context.Data);
 					if (selectedEntity)
@@ -320,15 +318,15 @@ namespace ArcEngine
 		ImGui::PopStyleVar();
 	}
 
-	void SceneViewport::OnOverlayRender(const Ref<Scene>& scene) const
+	void SceneViewport::OnOverlayRender() const
 	{
 		Renderer2D::BeginScene(m_EditorCamera);
 		{
-			auto view = scene->GetAllEntitiesWith<TransformComponent, CameraComponent>();
+			auto view = m_Scene->GetAllEntitiesWith<TransformComponent, CameraComponent>();
 			for (auto entityHandle : view)
 			{
 				const auto& [tc, cam] = view.get<TransformComponent, CameraComponent>(entityHandle);
-				Entity entity = { entityHandle, scene.get() };
+				Entity entity = { entityHandle, m_Scene.get() };
 				const auto inv = glm::inverse(cam.Camera.GetProjection() * glm::inverse(entity.GetWorldTransform()));
 				eastl::vector<glm::vec3> frustumCorners;
 				for (int x = 0; x < 2; ++x)
@@ -365,10 +363,10 @@ namespace ArcEngine
 		}
 
 		{
-			auto view = scene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
+			auto view = m_Scene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
 			for (auto entity : view)
 			{
-				Renderer2D::DrawRect(Entity(entity, scene.get()).GetWorldTransform(), { 0.2f, 0.8f, 0.2f, 1.0f });
+				Renderer2D::DrawRect(Entity(entity, m_Scene.get()).GetWorldTransform(), { 0.2f, 0.8f, 0.2f, 1.0f });
 			}
 		}
 

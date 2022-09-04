@@ -27,7 +27,9 @@ namespace ArcEngine
 		virtual void OnEvent(Event& e) override;
 
 		void SetContext(EditorContextType type, const void* data, size_t size) { m_SelectedContext.Set(type, data, size); }
+		void ResetContext() { m_SelectedContext.Reset(); }
 		const EditorContext& GetContext() const { return m_SelectedContext; }
+		
 		void OpenScene(const char* filepath);
 
 		static EditorLayer* GetInstance() { return s_Instance; }

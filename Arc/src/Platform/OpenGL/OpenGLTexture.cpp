@@ -59,6 +59,9 @@ namespace ArcEngine
 			internalFormat = GL_RGBA8;
 			dataFormat = GL_RGBA;
 			break;
+		default:
+			ARC_CORE_ERROR("Texture channel count is not within (1-4) range. Channel count: {}, File: {}", channels, path);
+			break;
 		}
 
 		m_InternalFormat = internalFormat;

@@ -6,20 +6,21 @@
 namespace ArcEngine
 {
 	void OpenGLMessageCallback(
-		unsigned source,
-		unsigned type,
-		unsigned id,
-		unsigned severity,
-		int length,
-		const char* message,
-		const void* userParam)
+		[[maybe_unused]] unsigned source,
+		[[maybe_unused]] unsigned type,
+		[[maybe_unused]] unsigned id,
+		[[maybe_unused]] unsigned severity,
+		[[maybe_unused]] int length,
+		[[maybe_unused]] const char* message,
+		[[maybe_unused]] const void* userParam)
 	{
 		switch (severity)
 		{
-			case GL_DEBUG_SEVERITY_HIGH:         ARC_CORE_CRITICAL(message); return;
-			case GL_DEBUG_SEVERITY_MEDIUM:       ARC_CORE_ERROR(message); return;
-			case GL_DEBUG_SEVERITY_LOW:          ARC_CORE_WARN(message); return;
-			case GL_DEBUG_SEVERITY_NOTIFICATION: ARC_CORE_TRACE(message); return;
+			case GL_DEBUG_SEVERITY_HIGH:			ARC_CORE_CRITICAL(message); return;
+			case GL_DEBUG_SEVERITY_MEDIUM:			ARC_CORE_ERROR(message); return;
+			case GL_DEBUG_SEVERITY_LOW:				ARC_CORE_WARN(message); return;
+			case GL_DEBUG_SEVERITY_NOTIFICATION:	ARC_CORE_TRACE(message); return;
+			default:								ARC_CORE_ERROR(message); return;
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown severity level!");

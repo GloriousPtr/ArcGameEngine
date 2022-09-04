@@ -959,7 +959,7 @@ namespace ArcEngine
 
 					const auto& fields = ScriptEngine::GetFieldMap(deserializedEntity, scriptName.c_str());
 					{
-						for (const auto& [name, field] : fields)
+						for (const auto& [fieldName, field] : fields)
 						{
 							if (field->Type == Field::FieldType::Unknown)
 								continue;
@@ -967,7 +967,7 @@ namespace ArcEngine
 							if (!field->Serializable)
 								continue;
 
-							auto& fieldNode = scriptNode["Fields"][name.c_str()];
+							auto& fieldNode = scriptNode["Fields"][fieldName.c_str()];
 							if (fieldNode)
 							{
 								switch (field->Type)
@@ -1147,12 +1147,10 @@ namespace ArcEngine
 		entities.push_back(entity);
 		GetAllChildren(entity, entities);
 
-		for (const auto& entity : entities)
+		for (const auto& child : entities)
 		{
-			if (!entity)
-				return;
-
-			EntitySerializer::SerializeEntity(out, entity);
+			if (child)
+				EntitySerializer::SerializeEntity(out, child);
 		}
 		out << YAML::EndSeq;
 		out << YAML::EndMap;

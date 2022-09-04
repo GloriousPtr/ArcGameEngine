@@ -78,7 +78,8 @@ namespace ArcEngine
 		{
 			switch (format)
 			{
-				case ArcEngine::FramebufferTextureFormat::DEPTH24STENCIL8: return true;
+				case ArcEngine::FramebufferTextureFormat::DEPTH24STENCIL8:  return true;
+				default:													return false;
 			}
 
 			return false;
@@ -90,12 +91,12 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		for (auto& spec : m_Specification.Attachments.Attachments)
+		for (const auto& s : m_Specification.Attachments.Attachments)
 		{
-			if (!Utils::IsDepthFormat(spec.TextureFormat))
-				m_ColorAttachmentSpecifications.emplace_back(spec);
+			if (!Utils::IsDepthFormat(s.TextureFormat))
+				m_ColorAttachmentSpecifications.emplace_back(s);
 			else
-				m_DepthAttachmentSpecification = spec;
+				m_DepthAttachmentSpecification = s;
 		}
 
 		Invalidate();
@@ -141,9 +142,10 @@ namespace ArcEngine
 			if (m_ColorAttachmentSpecifications.size())
 			{
 				m_ColorAttachments.resize(m_ColorAttachmentSpecifications.size());
-				Utils::CreateTextures(multisample, m_ColorAttachments.data(), m_ColorAttachments.size());
+				uint32_t colorAttachmentSize = (uint32_t)m_ColorAttachments.size();
+				Utils::CreateTextures(multisample, m_ColorAttachments.data(), colorAttachmentSize);
 
-				for (size_t i = 0; i < m_ColorAttachments.size(); i++)
+				for (uint32_t i = 0; i < colorAttachmentSize; i++)
 				{
 					Utils::BindTexture(multisample, m_ColorAttachments[i]);
 					switch (m_ColorAttachmentSpecifications[i].TextureFormat)
@@ -166,6 +168,9 @@ namespace ArcEngine
 						case FramebufferTextureFormat::R32I:
 							Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_R32I, GL_RED_INTEGER, m_Specification.Width, m_Specification.Height, i);
 							break;
+						default:
+							ARC_CORE_ASSERT(false);
+							break;
 					}
 				}
 			}
@@ -178,6 +183,9 @@ namespace ArcEngine
 				{
 					case FramebufferTextureFormat::DEPTH24STENCIL8:
 						Utils::AttachDepthTexture(m_DepthAttachment, m_Specification.Samples, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT, m_Specification.Width, m_Specification.Height);
+						break;
+					default:
+						ARC_CORE_ASSERT(false);
 						break;
 				}
 			}

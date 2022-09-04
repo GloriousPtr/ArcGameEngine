@@ -18,6 +18,10 @@ namespace ArcEngine
 	class Scene
 	{
 	public:
+		uint32_t VelocityIterations = 8;
+		uint32_t PositionIterations = 3;
+
+	public:
 		Scene() = default;
 		~Scene();
 
@@ -51,6 +55,12 @@ namespace ArcEngine
 		void OnComponentAdded(Entity entity, T& component);
 	
 	private:
+
+		friend class Entity;
+		friend class SceneSerializer;
+		friend class SceneHierarchyPanel;
+		friend class ContactListener;
+
 		entt::registry m_Registry;
 		eastl::hash_map<UUID, entt::entity> m_EntityMap;
 		
@@ -60,14 +70,5 @@ namespace ArcEngine
 
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 		bool m_ViewportDirty = true;
-		
-		friend class Entity;
-		friend class SceneSerializer;
-		friend class SceneHierarchyPanel;
-		friend class ContactListener;
-
-	public:
-		uint32_t VelocityIterations = 8;
-		uint32_t PositionIterations = 3;
 	};
 }

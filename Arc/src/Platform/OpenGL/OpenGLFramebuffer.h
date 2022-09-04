@@ -7,8 +7,11 @@ namespace ArcEngine
 	class OpenGLFramebuffer : public Framebuffer
 	{
 	public:
-		OpenGLFramebuffer(const FramebufferSpecification& spec);
+		explicit OpenGLFramebuffer(const FramebufferSpecification& spec);
 		virtual ~OpenGLFramebuffer();
+
+		OpenGLFramebuffer(const OpenGLFramebuffer& other) = default;
+		OpenGLFramebuffer(OpenGLFramebuffer&& other) = default;
 		
 		void Invalidate();
 

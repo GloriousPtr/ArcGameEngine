@@ -4,17 +4,17 @@
 
 #include <glm/glm.hpp>
 
-// TODO: REMOVE
-typedef unsigned int GLenum;
-
 namespace ArcEngine
 {
 	class OpenGLShader : public Shader
 	{
 	public:
-		OpenGLShader(const eastl::string& filepath);
+		explicit OpenGLShader(const eastl::string& filepath);
 		OpenGLShader(const eastl::string& name, const eastl::string& vertexSrc, const eastl::string& fragmentSrc);
 		virtual ~OpenGLShader();
+
+		OpenGLShader(const OpenGLShader& other) = default;
+		OpenGLShader(OpenGLShader&& other) = default;
 
 		virtual void Recompile(const eastl::string& filepath);
 
@@ -45,11 +45,13 @@ namespace ArcEngine
 		
 		void UploadUniformMat3(const eastl::string& name, const glm::mat3& matrix);
 		void UploadUniformMat4(const eastl::string& name, const glm::mat4& matrix);
+
 	private:
 		int GetLocation(const eastl::string& name);
-		eastl::string ReadFile(const eastl::string& filepath);
-		eastl::unordered_map<GLenum, eastl::string> PreProcess(const eastl::string& source);
-		void Compile(const eastl::unordered_map<GLenum, eastl::string>& shaderSources);
+		eastl::string ReadFile(const eastl::string& filepath) const;
+		eastl::unordered_map<uint32_t, eastl::string> PreProcess(const eastl::string& source) const;
+		void Compile(const eastl::unordered_map<uint32_t, eastl::string>& shaderSources);
+
 	private:
 		uint32_t m_RendererID;
 		eastl::string m_Name;

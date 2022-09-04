@@ -10,39 +10,27 @@
 
 namespace ArcEngine
 {
-	struct MeshData
-	{
-		glm::mat4 Transform;
-		Submesh SubmeshGeometry;
-		MeshComponent::CullModeType CullMode;
+	Renderer3D::Statistics Renderer3D::s_Stats;
+	eastl::vector<Renderer3D::MeshData> Renderer3D::s_Meshes;
+	Ref<Texture2D> Renderer3D::s_BRDFLutTexture;
+	Ref<Shader> Renderer3D::s_Shader;
+	Ref<Shader> Renderer3D::s_LightingShader;
+	Ref<Shader> Renderer3D::s_ShadowMapShader;
+	Ref<Shader> Renderer3D::s_CubemapShader;
+	Ref<Shader> Renderer3D::s_GaussianBlurShader;
+	Ref<Shader> Renderer3D::s_HdrShader;
+	Ref<Shader> Renderer3D::s_BloomShader;
+	Ref<VertexArray> Renderer3D::s_QuadVertexArray;
+	Ref<VertexArray> Renderer3D::s_CubeVertexArray;
+	Ref<UniformBuffer> Renderer3D::s_UbCamera;
+	Ref<UniformBuffer> Renderer3D::s_UbPointLights;
+	Ref<UniformBuffer> Renderer3D::s_UbDirectionalLights;
 
-		MeshData(const glm::mat4& transform, const Submesh& submesh, const MeshComponent::CullModeType cullMode)
-			: Transform(transform), SubmeshGeometry(submesh), CullMode(cullMode)
-		{
-		}
-	};
-
-	Renderer3D::Statistics s_Stats;
-	static eastl::vector<MeshData> meshes;
-	static Ref<Texture2D> s_BRDFLutTexture;
-	static Ref<Shader> shader;
-	static Ref<Shader> lightingShader;
-	static Ref<Shader> shadowMapShader;
-	static Ref<Shader> cubemapShader;
-	static Ref<Shader> gaussianBlurShader;
-	static Ref<Shader> hdrShader;
-	static Ref<Shader> bloomShader;
-	static Ref<VertexArray> quadVertexArray;
-	static Ref<VertexArray> cubeVertexArray;
-	static Ref<UniformBuffer> ubCamera;
-	static Ref<UniformBuffer> ubPointLights;
-	static Ref<UniformBuffer> ubDirectionalLights;
-
-	static glm::mat4 cameraView;
-	static glm::mat4 cameraProjection;
-	static glm::vec3 cameraPosition;
-	static Entity skylight;
-	static eastl::vector<Entity> sceneLights;
+	glm::mat4 Renderer3D::s_CameraView;
+	glm::mat4 Renderer3D::s_CameraProjection;
+	glm::vec3 Renderer3D::s_CameraPosition;
+	Entity Renderer3D::s_Skylight;
+	eastl::vector<Entity> Renderer3D::s_SceneLights;
 
 	ShaderLibrary Renderer3D::s_ShaderLibrary;
 	Renderer3D::TonemappingType Renderer3D::Tonemapping = Renderer3D::TonemappingType::ACES;
@@ -57,24 +45,24 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		ubCamera = UniformBuffer::Create();
-		ubCamera->SetLayout({
+		s_UbCamera = UniformBuffer::Create();
+		s_UbCamera->SetLayout({
 			{ ShaderDataType::Mat4, "u_View" },
 			{ ShaderDataType::Mat4, "u_Projection" },
 			{ ShaderDataType::Mat4, "u_ViewProjection" },
 			{ ShaderDataType::Float4, "u_CameraPosition" }
 		}, 0);
 
-		ubPointLights = UniformBuffer::Create();
-		ubPointLights->SetLayout({
+		s_UbPointLights = UniformBuffer::Create();
+		s_UbPointLights->SetLayout({
 			{ ShaderDataType::Float4, "u_Position" },
 			{ ShaderDataType::Float4, "u_Color" },
 			{ ShaderDataType::Float4, "u_AttenFactors" },
 			{ ShaderDataType::Float4, "u_LightDir" },
 		}, 1, MAX_NUM_LIGHTS + 1);
 
-		ubDirectionalLights = UniformBuffer::Create();
-		ubDirectionalLights->SetLayout({
+		s_UbDirectionalLights = UniformBuffer::Create();
+		s_UbDirectionalLights->SetLayout({
 			{ ShaderDataType::Float4, "u_Position" },
 			{ ShaderDataType::Float4, "u_Color" },
 			{ ShaderDataType::Float4, "u_LightDir" },
@@ -84,21 +72,21 @@ namespace ArcEngine
 		s_BRDFLutTexture = Texture2D::Create("Resources/Renderer/BRDF_LUT.jpg");
 
 		s_ShaderLibrary = ShaderLibrary();
-		shadowMapShader = s_ShaderLibrary.Load("assets/shaders/DepthShader.glsl");
-		cubemapShader = s_ShaderLibrary.Load("assets/shaders/Cubemap.glsl");
-		gaussianBlurShader = s_ShaderLibrary.Load("assets/shaders/GaussianBlur.glsl");
-		hdrShader = s_ShaderLibrary.Load("assets/shaders/HDR.glsl");
-		bloomShader = s_ShaderLibrary.Load("assets/shaders/Bloom.glsl");
-		shader = s_ShaderLibrary.Load("assets/shaders/PBR.glsl");
-		lightingShader = s_ShaderLibrary.Load("assets/shaders/LightingPass.glsl");
+		s_ShadowMapShader = s_ShaderLibrary.Load("assets/shaders/DepthShader.glsl");
+		s_CubemapShader = s_ShaderLibrary.Load("assets/shaders/Cubemap.glsl");
+		s_GaussianBlurShader = s_ShaderLibrary.Load("assets/shaders/GaussianBlur.glsl");
+		s_HdrShader = s_ShaderLibrary.Load("assets/shaders/HDR.glsl");
+		s_BloomShader = s_ShaderLibrary.Load("assets/shaders/Bloom.glsl");
+		s_Shader = s_ShaderLibrary.Load("assets/shaders/PBR.glsl");
+		s_LightingShader = s_ShaderLibrary.Load("assets/shaders/LightingPass.glsl");
 
-		shader->Bind();
-		shader->SetUniformBlock("Camera", 0);
+		s_Shader->Bind();
+		s_Shader->SetUniformBlock("Camera", 0);
 
-		lightingShader->Bind();
-		lightingShader->SetUniformBlock("Camera", 0);
-		lightingShader->SetUniformBlock("PointLightBuffer", 1);
-		lightingShader->SetUniformBlock("DirectionalLightBuffer", 2);
+		s_LightingShader->Bind();
+		s_LightingShader->SetUniformBlock("Camera", 0);
+		s_LightingShader->SetUniformBlock("PointLightBuffer", 1);
+		s_LightingShader->SetUniformBlock("DirectionalLightBuffer", 2);
 
 		// Cubemap
 		{
@@ -160,8 +148,8 @@ namespace ArcEngine
 				{ ShaderDataType::Float3, "a_Position" }
 			});
 
-			cubeVertexArray = VertexArray::Create();
-			cubeVertexArray->AddVertexBuffer(cubeVertexBuffer);
+			s_CubeVertexArray = VertexArray::Create();
+			s_CubeVertexArray->AddVertexBuffer(cubeVertexBuffer);
 		}
 
 		// Quad
@@ -178,17 +166,17 @@ namespace ArcEngine
 				0, 2, 3
 			};
 
-			quadVertexArray = VertexArray::Create();
+			s_QuadVertexArray = VertexArray::Create();
 
 			Ref<VertexBuffer> quadVertexBuffer = VertexBuffer::Create(vertices, 20 * sizeof(float));
 			quadVertexBuffer->SetLayout({
 				{ ShaderDataType::Float3, "a_Position" },
 				{ ShaderDataType::Float2, "a_TexCoord" }
 			});
-			quadVertexArray->AddVertexBuffer(quadVertexBuffer);
+			s_QuadVertexArray->AddVertexBuffer(quadVertexBuffer);
 
 			Ref<IndexBuffer> quadIndexBuffer = IndexBuffer::Create(indices, 6);
-			quadVertexArray->SetIndexBuffer(quadIndexBuffer);
+			s_QuadVertexArray->SetIndexBuffer(quadIndexBuffer);
 		}
 	}
 
@@ -198,31 +186,31 @@ namespace ArcEngine
 
 	}
 
-	void Renderer3D::BeginScene(const Camera& camera, const glm::mat4& transform, Entity cubemap, eastl::vector<Entity>& lights)
+	void Renderer3D::BeginScene(const Camera& camera, const glm::mat4& transform, Entity cubemap, const eastl::vector<Entity>& lights)
 	{
 		ARC_PROFILE_SCOPE();
 		
-		cameraView = glm::inverse(transform);
-		cameraProjection = camera.GetProjection();
-		cameraPosition = transform[3];
+		s_CameraView = glm::inverse(transform);
+		s_CameraProjection = camera.GetProjection();
+		s_CameraPosition = transform[3];
 
-		skylight = cubemap;
-		sceneLights = lights;
+		s_Skylight = cubemap;
+		s_SceneLights = lights;
 
 		SetupCameraData();
 		SetupLightsData();
 	}
 
-	void Renderer3D::BeginScene(const EditorCamera& camera, Entity cubemap, eastl::vector<Entity>& lights)
+	void Renderer3D::BeginScene(const EditorCamera& camera, Entity cubemap, const eastl::vector<Entity>& lights)
 	{
 		ARC_PROFILE_SCOPE();
 		
-		cameraView = camera.GetViewMatrix();
-		cameraProjection = camera.GetProjection();
-		cameraPosition = camera.GetPosition();
+		s_CameraView = camera.GetViewMatrix();
+		s_CameraProjection = camera.GetProjection();
+		s_CameraPosition = camera.GetPosition();
 
-		skylight = cubemap;
-		sceneLights = lights;
+		s_Skylight = cubemap;
+		s_SceneLights = lights;
 
 		SetupCameraData();
 		SetupLightsData();
@@ -234,26 +222,26 @@ namespace ArcEngine
 
 		Flush(renderTarget);
 
-		shader->Unbind();
+		s_Shader->Unbind();
 	}
 
 	void Renderer3D::DrawCube()
 	{
 		ARC_PROFILE_SCOPE();
 
-		RenderCommand::Draw(cubeVertexArray, 36);
+		RenderCommand::Draw(s_CubeVertexArray, 36);
 	}
 
 	void Renderer3D::DrawQuad()
 	{
 		ARC_PROFILE_SCOPE();
 
-		RenderCommand::DrawIndexed(quadVertexArray);
+		RenderCommand::DrawIndexed(s_QuadVertexArray);
 	}
 
 	void Renderer3D::ReserveMeshes(const size_t count)
 	{
-		meshes.reserve(count);
+		s_Meshes.reserve(count);
 	}
 
 	void Renderer3D::SubmitMesh(const MeshComponent& meshComponent, const glm::mat4& transform)
@@ -265,7 +253,7 @@ namespace ArcEngine
 
 		ARC_CORE_ASSERT(meshComponent.MeshGeometry->GetSubmeshCount() > meshComponent.SubmeshIndex, "Trying to access submesh index that does not exist!");
 
-		meshes.emplace_back(transform, meshComponent.MeshGeometry->GetSubmesh(meshComponent.SubmeshIndex), meshComponent.CullMode);
+		s_Meshes.emplace_back(transform, meshComponent.MeshGeometry->GetSubmesh(meshComponent.SubmeshIndex), meshComponent.CullMode);
 	}
 
 	void Renderer3D::Flush(Ref<RenderGraphData> renderGraphData)
@@ -277,7 +265,7 @@ namespace ArcEngine
 		LightingPass(renderGraphData);
 		BloomPass(renderGraphData);
 		CompositePass(renderGraphData);
-		meshes.clear();
+		s_Meshes.clear();
 	}
 
 	void Renderer3D::ResetStats()
@@ -298,20 +286,20 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		ubCamera->Bind();
+		s_UbCamera->Bind();
 
 		uint32_t offset = 0;
 
-		ubCamera->SetData((void*)glm::value_ptr(cameraView), offset, sizeof(glm::mat4));
+		s_UbCamera->SetData((void*)glm::value_ptr(s_CameraView), offset, sizeof(glm::mat4));
 		offset += sizeof(glm::mat4);
 
-		ubCamera->SetData((void*)glm::value_ptr(cameraProjection), offset, sizeof(glm::mat4));
+		s_UbCamera->SetData((void*)glm::value_ptr(s_CameraProjection), offset, sizeof(glm::mat4));
 		offset += sizeof(glm::mat4);
 
-		ubCamera->SetData((void*)glm::value_ptr(cameraProjection * cameraView), offset, sizeof(glm::mat4));
+		s_UbCamera->SetData((void*)glm::value_ptr(s_CameraProjection * s_CameraView), offset, sizeof(glm::mat4));
 		offset += sizeof(glm::mat4);
 		
-		ubCamera->SetData((void*)glm::value_ptr(cameraPosition), offset, sizeof(glm::vec4));
+		s_UbCamera->SetData((void*)glm::value_ptr(s_CameraPosition), offset, sizeof(glm::vec4));
 	}
 
 	void Renderer3D::SetupLightsData()
@@ -330,9 +318,9 @@ namespace ArcEngine
 			uint32_t numLights = 0;
 			const uint32_t size = sizeof(PointLightData);
 
-			ubPointLights->Bind();
+			s_UbPointLights->Bind();
 
-			for (Entity e : sceneLights)
+			for (Entity e : s_SceneLights)
 			{
 				const LightComponent& lightComponent = e.GetComponent<LightComponent>();
 				if (lightComponent.Type == LightComponent::LightType::Directional)
@@ -356,13 +344,13 @@ namespace ArcEngine
 					zDir
 				};
 
-				ubPointLights->SetData((void*)(&pointLightData), size * numLights, size);
+				s_UbPointLights->SetData((void*)(&pointLightData), size * numLights, size);
 
 				numLights++;
 			}
 
 			// Pass number of lights within the scene
-			ubPointLights->SetData(&numLights, MAX_NUM_LIGHTS * size, sizeof(uint32_t));
+			s_UbPointLights->SetData(&numLights, MAX_NUM_LIGHTS * size, sizeof(uint32_t));
 		}
 
 		{
@@ -377,9 +365,9 @@ namespace ArcEngine
 			uint32_t numLights = 0;
 			const uint32_t size = sizeof(DirectionalLightData);
 
-			ubDirectionalLights->Bind();
+			s_UbDirectionalLights->Bind();
 
-			for (Entity e : sceneLights)
+			for (Entity e : s_SceneLights)
 			{
 				const LightComponent& lightComponent = e.GetComponent<LightComponent>();
 				if (lightComponent.Type != LightComponent::LightType::Directional)
@@ -406,13 +394,13 @@ namespace ArcEngine
 					dirLightViewProj
 				};
 
-				ubDirectionalLights->SetData((void*)(&dirLightData), size * numLights, size);
+				s_UbDirectionalLights->SetData((void*)(&dirLightData), size * numLights, size);
 
 				numLights++;
 			}
 
 			// Pass number of lights within the scene
-			ubDirectionalLights->SetData(&numLights, MAX_NUM_DIR_LIGHTS * size, sizeof(uint32_t));
+			s_UbDirectionalLights->SetData(&numLights, MAX_NUM_DIR_LIGHTS * size, sizeof(uint32_t));
 		}
 	}
 
@@ -421,12 +409,12 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		renderGraphData->CompositePassTarget->Bind();
-		hdrShader->Bind();
+		s_HdrShader->Bind();
 		glm::vec4 tonemappingParams = glm::vec4(((int) Tonemapping), Exposure, 0.0f, 0.0f);
-		hdrShader->SetFloat4("u_TonemappParams", tonemappingParams);
-		hdrShader->SetFloat("u_BloomStrength", UseBloom ? BloomStrength : 0.0f);
-		hdrShader->SetInt("u_Texture", 0);
-		hdrShader->SetInt("u_BloomTexture", 1);
+		s_HdrShader->SetFloat4("u_TonemappParams", tonemappingParams);
+		s_HdrShader->SetFloat("u_BloomStrength", UseBloom ? BloomStrength : 0.0f);
+		s_HdrShader->SetInt("u_Texture", 0);
+		s_HdrShader->SetInt("u_BloomTexture", 1);
 		renderGraphData->LightingPassTarget->BindColorAttachment(0, 0);
 		renderGraphData->UpsampledFramebuffers[0]->BindColorAttachment(0, 1);
 		DrawQuad();
@@ -446,10 +434,10 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE("Prefilter");
 
 			renderGraphData->PrefilteredFramebuffer->Bind();
-			bloomShader->Bind();
-			bloomShader->SetFloat4("u_Threshold", threshold);
-			bloomShader->SetFloat4("u_Params", params);
-			bloomShader->SetInt("u_Texture", 0);
+			s_BloomShader->Bind();
+			s_BloomShader->SetFloat4("u_Threshold", threshold);
+			s_BloomShader->SetFloat4("u_Params", params);
+			s_BloomShader->SetInt("u_Texture", 0);
 			renderGraphData->LightingPassTarget->BindColorAttachment(0, 0);
 			DrawQuad();
 		}
@@ -459,12 +447,12 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE("Downsample");
 
-			gaussianBlurShader->Bind();
-			gaussianBlurShader->SetInt("u_Texture", 0);
+			s_GaussianBlurShader->Bind();
+			s_GaussianBlurShader->SetInt("u_Texture", 0);
 			for (size_t i = 0; i < blurSamples; i++)
 			{
 				renderGraphData->TempBlurFramebuffers[i]->Bind();
-				gaussianBlurShader->SetInt("u_Horizontal", static_cast<int>(true));
+				s_GaussianBlurShader->SetInt("u_Horizontal", static_cast<int>(true));
 				if (i == 0)
 					renderGraphData->PrefilteredFramebuffer->BindColorAttachment(0, 0);
 				else
@@ -472,7 +460,7 @@ namespace ArcEngine
 				DrawQuad();
 
 				renderGraphData->DownsampledFramebuffers[i]->Bind();
-				gaussianBlurShader->SetInt("u_Horizontal", static_cast<int>(false));
+				s_GaussianBlurShader->SetInt("u_Horizontal", static_cast<int>(false));
 				renderGraphData->TempBlurFramebuffers[i]->BindColorAttachment(0, 0);
 				DrawQuad();
 			}
@@ -481,12 +469,12 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE("Upsample");
 
-			bloomShader->Bind();
-			bloomShader->SetFloat4("u_Threshold", threshold);
+			s_BloomShader->Bind();
+			s_BloomShader->SetFloat4("u_Threshold", threshold);
 			params = glm::vec4(BloomClamp, 3.0f, 1.0f, 1.0f);
-			bloomShader->SetFloat4("u_Params", params);
-			bloomShader->SetInt("u_Texture", 0);
-			bloomShader->SetInt("u_AdditiveTexture", 1);
+			s_BloomShader->SetFloat4("u_Params", params);
+			s_BloomShader->SetInt("u_Texture", 0);
+			s_BloomShader->SetInt("u_AdditiveTexture", 1);
 			size_t upsampleCount = blurSamples - 1;
 			for (size_t i = upsampleCount; i > 0; i--)
 			{
@@ -504,10 +492,10 @@ namespace ArcEngine
 				}
 				DrawQuad();
 			}
-		
+
 			renderGraphData->UpsampledFramebuffers[0]->Bind();
 			params = glm::vec4(BloomClamp, 3.0f, 1.0f, 0.0f);
-			bloomShader->SetFloat4("u_Params", params);
+			s_BloomShader->SetFloat4("u_Params", params);
 			renderGraphData->UpsampledFramebuffers[1]->BindColorAttachment(0, 0);
 			DrawQuad();
 		}
@@ -520,22 +508,22 @@ namespace ArcEngine
 		renderGraphData->LightingPassTarget->Bind();
 		RenderCommand::Clear();
 
-		lightingShader->Bind();
+		s_LightingShader->Bind();
 
-		lightingShader->SetInt("u_Albedo", 0);
-		lightingShader->SetInt("u_Normal", 1);
-		lightingShader->SetInt("u_MetallicRoughnessAO", 2);
-		lightingShader->SetInt("u_Emission", 3);
-		lightingShader->SetInt("u_Depth", 4);
+		s_LightingShader->SetInt("u_Albedo", 0);
+		s_LightingShader->SetInt("u_Normal", 1);
+		s_LightingShader->SetInt("u_MetallicRoughnessAO", 2);
+		s_LightingShader->SetInt("u_Emission", 3);
+		s_LightingShader->SetInt("u_Depth", 4);
 
-		lightingShader->SetInt("u_IrradianceMap", 5);
-		lightingShader->SetInt("u_RadianceMap", 6);
-		lightingShader->SetInt("u_BRDFLutMap", 7);
+		s_LightingShader->SetInt("u_IrradianceMap", 5);
+		s_LightingShader->SetInt("u_RadianceMap", 6);
+		s_LightingShader->SetInt("u_BRDFLutMap", 7);
 
 		int32_t samplers[MAX_NUM_DIR_LIGHTS];
 		for (uint32_t i = 0; i < MAX_NUM_DIR_LIGHTS; i++)
 			samplers[i] = i + 8;
-		lightingShader->SetIntArray("u_DirectionalShadowMap", samplers, MAX_NUM_DIR_LIGHTS);
+		s_LightingShader->SetIntArray("u_DirectionalShadowMap", samplers, MAX_NUM_DIR_LIGHTS);
 
 		renderGraphData->RenderPassTarget->BindColorAttachment(0, 0);
 		renderGraphData->RenderPassTarget->BindColorAttachment(1, 1);
@@ -543,13 +531,13 @@ namespace ArcEngine
 		renderGraphData->RenderPassTarget->BindColorAttachment(3, 3);
 		renderGraphData->RenderPassTarget->BindDepthAttachment(4);
 		
-		if (skylight)
+		if (s_Skylight)
 		{
-			SkyLightComponent& skylightComponent = skylight.GetComponent<SkyLightComponent>();
+			const SkyLightComponent& skylightComponent = s_Skylight.GetComponent<SkyLightComponent>();
 			if (skylightComponent.Texture)
 			{
-				lightingShader->SetFloat("u_IrradianceIntensity", skylightComponent.Intensity);
-				lightingShader->SetFloat("u_EnvironmentRotation", skylightComponent.Rotation);
+				s_LightingShader->SetFloat("u_IrradianceIntensity", skylightComponent.Intensity);
+				s_LightingShader->SetFloat("u_EnvironmentRotation", skylightComponent.Rotation);
 				skylightComponent.Texture->BindIrradianceMap(5);
 				skylightComponent.Texture->BindRadianceMap(6);
 			}
@@ -557,9 +545,9 @@ namespace ArcEngine
 		s_BRDFLutTexture->Bind(7);
 		
 		uint32_t dirLightIndex = 0;
-		for (size_t i = 0; i < sceneLights.size(); i++)
+		for (const auto& lightEntity : s_SceneLights)
 		{
-			LightComponent& light = sceneLights[i].GetComponent<LightComponent>();
+			const LightComponent& light = lightEntity.GetComponent<LightComponent>();
 			if (light.Type == LightComponent::LightType::Directional)
 			{
 				if (dirLightIndex < MAX_NUM_DIR_LIGHTS)
@@ -586,15 +574,15 @@ namespace ArcEngine
 		RenderCommand::SetClearColor(glm::vec4(0.0f));
 		RenderCommand::Clear();
 
-		SkyLightComponent* skylightComponent = nullptr;
+		const SkyLightComponent* skylightComponent = nullptr;
 		float skylightIntensity = 0.0f;
 		float skylightRotation = 0.0f;
 		{
 			ARC_PROFILE_SCOPE("Skylight");
 
-			if (skylight)
+			if (s_Skylight)
 			{
-				skylightComponent = &(skylight.GetComponent<SkyLightComponent>());
+				skylightComponent = &(s_Skylight.GetComponent<SkyLightComponent>());
 				if (skylightComponent->Texture)
 				{
 					RenderCommand::SetDepthMask(false);
@@ -603,11 +591,11 @@ namespace ArcEngine
 					skylightRotation = skylightComponent->Rotation;
 
 					skylightComponent->Texture->Bind(0);
-					cubemapShader->Bind();
-					cubemapShader->SetMat4("u_View", cameraView);
-					cubemapShader->SetMat4("u_Projection", cameraProjection);
-					cubemapShader->SetFloat("u_Intensity", skylightIntensity);
-					cubemapShader->SetFloat("u_Rotation", skylightRotation);
+					s_CubemapShader->Bind();
+					s_CubemapShader->SetMat4("u_View", s_CameraView);
+					s_CubemapShader->SetMat4("u_Projection", s_CameraProjection);
+					s_CubemapShader->SetFloat("u_Intensity", skylightIntensity);
+					s_CubemapShader->SetFloat("u_Rotation", skylightRotation);
 
 					DrawCube();
 
@@ -620,34 +608,34 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE("Draw Meshes");
 
 			MeshComponent::CullModeType currentCullMode = MeshComponent::CullModeType::Unknown;
-			for (auto it = meshes.rbegin(); it != meshes.rend(); it++)
+			for (auto it = s_Meshes.rbegin(); it != s_Meshes.rend(); it++)
 			{
-				MeshData* meshData = &(*it);
+				const MeshData* meshData = &(*it);
 				meshData->SubmeshGeometry.Mat->Bind();
-				shader->SetMat4("u_Model", meshData->Transform);
+				s_Shader->SetMat4("u_Model", meshData->Transform);
 				
 				if (currentCullMode != meshData->CullMode)
 				{
 					currentCullMode = meshData->CullMode;
 					switch (currentCullMode)
 					{
-					case MeshComponent::CullModeType::DoubleSided:
-						RenderCommand::DisableCulling();
-						break;
-					case MeshComponent::CullModeType::Front:
-						RenderCommand::EnableCulling();
-						RenderCommand::FrontCull();
-						break;
-					case MeshComponent::CullModeType::Back:
-						RenderCommand::EnableCulling();
-						RenderCommand::BackCull();
-						break;
-					default:
-						ARC_CORE_ASSERT(false);
+						case MeshComponent::CullModeType::DoubleSided:
+							RenderCommand::DisableCulling();
+							break;
+						case MeshComponent::CullModeType::Front:
+							RenderCommand::EnableCulling();
+							RenderCommand::FrontCull();
+							break;
+						case MeshComponent::CullModeType::Back:
+							RenderCommand::EnableCulling();
+							RenderCommand::BackCull();
+							break;
+						default:
+							ARC_CORE_ASSERT(false);
+							break;
 					}
 				}
-
-				// TODO: Fix warning (Unallocated fallthrough between switch labels)
+				
 				RenderCommand::DrawIndexed(meshData->SubmeshGeometry.Geometry);
 				s_Stats.DrawCalls++;
 				s_Stats.IndexCount += meshData->SubmeshGeometry.Geometry->GetIndexBuffer()->GetCount();
@@ -659,17 +647,16 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		for (size_t i = 0; i < sceneLights.size(); i++)
+		for (const auto& lightEntity : s_SceneLights)
 		{
-			Entity e = sceneLights[i];
-			const LightComponent& light = e.GetComponent<LightComponent>();
+			const LightComponent& light = lightEntity.GetComponent<LightComponent>();
 			if (light.Type != LightComponent::LightType::Directional)
 				continue;
 
 			light.ShadowMapFramebuffer->Bind();
 			RenderCommand::Clear();
 
-			glm::mat4 transform = e.GetWorldTransform();
+			glm::mat4 transform = lightEntity.GetWorldTransform();
 			float near_plane = -100.0f, far_plane = 100.0f;
 			
 			glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
@@ -682,14 +669,13 @@ namespace ArcEngine
 			glm::mat4 dirLightView = glm::lookAt(pos, lookAt, glm::vec3(0, 1 ,0));
 			glm::mat4 dirLightViewProj = lightProjection * dirLightView;
 
-			shadowMapShader->Bind();
-			shadowMapShader->SetMat4("u_ViewProjection", dirLightViewProj);
+			s_ShadowMapShader->Bind();
+			s_ShadowMapShader->SetMat4("u_ViewProjection", dirLightViewProj);
 
-			for (auto it = meshes.rbegin(); it != meshes.rend(); it++)
+			for (auto it = s_Meshes.rbegin(); it != s_Meshes.rend(); it++)
 			{
 				const MeshData* meshData = &(*it);
-
-				shadowMapShader->SetMat4("u_Model", meshData->Transform);
+				s_ShadowMapShader->SetMat4("u_Model", meshData->Transform);
 				RenderCommand::DrawIndexed(meshData->SubmeshGeometry.Geometry);
 			}
 		}

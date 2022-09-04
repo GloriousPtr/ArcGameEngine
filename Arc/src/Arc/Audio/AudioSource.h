@@ -39,10 +39,11 @@ namespace ArcEngine
 	class AudioSource
 	{
 	public:
-		AudioSource(const char* filepath);
+		explicit AudioSource(const char* filepath);
 		~AudioSource();
 
 		AudioSource(const AudioSource& other) = default;
+		AudioSource(AudioSource&& other) = default;
 
 		const char* GetPath() const { return m_Path.c_str(); }
 

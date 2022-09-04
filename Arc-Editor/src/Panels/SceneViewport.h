@@ -18,18 +18,19 @@ namespace ArcEngine
 		SceneViewport& operator=(const SceneViewport& other) = delete;
 		SceneViewport& operator=(SceneViewport&& other) = delete;
 
-		virtual void OnUpdate(const Ref<Scene>& scene, Timestep timestep, bool useEditorCamera);
+		virtual void OnUpdate(Timestep timestep) override;
 		virtual void OnImGuiRender() override;
 
-		void OnOverlayRender(const Ref<Scene>& scene) const;
+		void OnOverlayRender() const;
 
 		bool OnMouseButtonPressed(const MouseButtonPressedEvent& e);
 		bool OnMouseButtonReleased(const MouseButtonReleasedEvent& e);
-		void SetSceneHierarchyPanel(SceneHierarchyPanel& sceneHierarchyPanel) { m_SceneHierarchyPanel = &sceneHierarchyPanel; }
 
 		bool IsHovered() const { return m_ViewportHovered; }
 		bool IsFocused() const { return m_ViewportFocused; }
 		
+		void SetContext(const Ref<Scene>& scene, SceneHierarchyPanel& sceneHierarchyPanel) { m_SceneHierarchyPanel = &sceneHierarchyPanel; m_Scene = scene; }
+		void SetUseEditorCamera(bool state) { m_UseEditorCamera = state; }
 		void SetSimulation(const bool value) { m_SimulationRunning = value; }
 
 	private:
@@ -58,6 +59,7 @@ namespace ArcEngine
 		glm::vec3 m_MoveDirection = glm::vec3(0.0f);
 		float m_MoveVelocity = 0.0f;
 
+		bool m_UseEditorCamera = true;
 		bool m_SimulationRunning = false;
 		bool m_CursorLocked = false;
 	};

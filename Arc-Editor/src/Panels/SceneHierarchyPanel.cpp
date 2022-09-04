@@ -152,7 +152,7 @@ namespace ArcEngine
 				ImGui::EndTable();
 
 				if (ImGui::IsItemClicked())
-					EditorLayer::GetInstance()->SetContext(EditorContextType::None, nullptr, 0);
+					EditorLayer::GetInstance()->ResetContext();
 			}
 
 			if (m_DraggedEntity && m_DraggedEntityTarget)
@@ -164,10 +164,9 @@ namespace ArcEngine
 
 			if (m_DeletedEntity)
 			{
-				EditorContext context = EditorLayer::GetInstance()->GetContext();
-				Entity entityContext = *((Entity*)context.Data);
-				if (context.Type == EditorContextType::Entity && entityContext == m_DeletedEntity)
-					EditorLayer::GetInstance()->SetContext(EditorContextType::None, nullptr, 0);
+				const EditorContext& context = EditorLayer::GetInstance()->GetContext();
+				if (context.IsValid(EditorContextType::Entity) && *((Entity*)context.Data) == m_DeletedEntity)
+					EditorLayer::GetInstance()->ResetContext();
 
 				m_Context->DestroyEntity(m_DeletedEntity);
 				m_DeletedEntity = {};
@@ -202,8 +201,8 @@ namespace ArcEngine
 			return { 0, 0, 0, 0 };
 		}
 
-		EditorContext context = EditorLayer::GetInstance()->GetContext();
-		Entity selectedEntity = (context.Type == EditorContextType::Entity ? *((Entity*)context.Data) : Entity({}));
+		const EditorContext& context = EditorLayer::GetInstance()->GetContext();
+		Entity selectedEntity = (context.IsValid(EditorContextType::Entity) ? *((Entity*)context.Data) : Entity({}));
 
 		ImGuiTreeNodeFlags flags = (selectedEntity == entity ? ImGuiTreeNodeFlags_Selected : 0);
 		flags |= ImGuiTreeNodeFlags_OpenOnArrow;
@@ -405,7 +404,7 @@ namespace ArcEngine
 	{
 		if (ImGui::BeginPopupContextWindow("SceneHierarchyContextWindow", 1, false))
 		{
-			EditorLayer::GetInstance()->SetContext(EditorContextType::None, nullptr, 0);
+			EditorLayer::GetInstance()->ResetContext();
 			Entity toSelect = {};
 			if (ImGui::BeginMenu("Create"))
 			{

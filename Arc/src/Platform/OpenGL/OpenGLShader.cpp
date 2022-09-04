@@ -6,6 +6,8 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
+typedef uint32_t GLenum;
+
 namespace ArcEngine
 {
 	static GLenum ShaderTypeFromString(const eastl::string& type)
@@ -195,7 +197,7 @@ namespace ArcEngine
 		return location;
 	}
 
-	eastl::string OpenGLShader::ReadFile(const eastl::string& filepath)
+	eastl::string OpenGLShader::ReadFile(const eastl::string& filepath) const
 	{
 		ARC_PROFILE_SCOPE();
 		
@@ -224,13 +226,13 @@ namespace ArcEngine
 		return result;
 	}
 
-	eastl::unordered_map<GLenum, eastl::string> OpenGLShader::PreProcess(const eastl::string& source)
+	eastl::unordered_map<GLenum, eastl::string> OpenGLShader::PreProcess(const eastl::string& source) const
 	{
 		ARC_PROFILE_SCOPE();
 		
 		eastl::unordered_map<GLenum, eastl::string> shaderSources;
 
-		constexpr char* typeToken = "#type";
+		const char* typeToken = "#type";
 		size_t typeTokenLength = strlen(typeToken);
 		size_t pos = source.find(typeToken, 0);
 		while (pos != eastl::string::npos)
@@ -260,6 +262,7 @@ namespace ArcEngine
 			case GL_FLOAT_VEC2:		return MaterialPropertyType::Float2;
 			case GL_FLOAT_VEC3:		return MaterialPropertyType::Float3;
 			case GL_FLOAT_VEC4:		return MaterialPropertyType::Float4;
+			default:				return MaterialPropertyType::None;
 		}
 
 		return MaterialPropertyType::None;
@@ -273,15 +276,12 @@ namespace ArcEngine
 		ARC_CORE_ASSERT(shaderSources.size() <= 2, "We only support 2 shaders for now");
 		eastl::array<GLenum, 2> glShaderIDs;
 		int glShaderIDIndex = 0;
-		for (auto kv : shaderSources)
+		for (const auto& [type, source] : shaderSources)
 		{
-			GLenum type = kv.first;
-			const eastl::string& source = kv.second;
-
 			GLuint shader = glCreateShader(type);
 			
 			const GLchar* sourceCStr = source.c_str();
-			glShaderSource(shader, 1, &sourceCStr, 0);
+			glShaderSource(shader, 1, &sourceCStr, nullptr);
 
 			// Compile the vertex shader
 			glCompileShader(shader);
@@ -304,13 +304,14 @@ namespace ArcEngine
 			}
 
 			glAttachShader(program, shader);
-			glShaderIDs[glShaderIDIndex++] = shader;
+			glShaderIDs[glShaderIDIndex] = shader;
+			++glShaderIDIndex;
 		}
 
 		glLinkProgram(program);
 
 		GLint isLinked = 0;
-		glGetProgramiv(program, GL_LINK_STATUS, (int *)&isLinked);
+		glGetProgramiv(program, GL_LINK_STATUS, &isLinked);
 		if (isLinked == GL_FALSE)
 		{
 			GLint maxLength = 0;
@@ -342,14 +343,14 @@ namespace ArcEngine
 		glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &uniformCount);
 
 		size_t offset = 0;
-		for (size_t i = 0; i < uniformCount; i++)
+		for (GLuint i = 0; i < uniformCount; i++)
 		{
 			char name[128];
 			int size;
 			GLenum type;
 			glGetActiveUniform(program, i, maxLength, nullptr, &size, &type, &name[0]);
 
-			static constexpr char* prefix = "u_Material.";
+			static const char* prefix = "u_Material.";
 			if (strncmp(name, prefix, strlen(prefix)) == 0)
 			{
 				MaterialPropertyType propertyType = GetMaterialPropertyType(type);

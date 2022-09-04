@@ -13,22 +13,35 @@ namespace ArcEngine
 	{
 		EditorContextType Type = EditorContextType::None;
 		void* Data = nullptr;
-		size_t Size = 0;
-
-		EditorContext() = delete;
 
 		void Set(EditorContextType type, const void* data, size_t size)
 		{
-			if (Size != 0)
-				delete[Size] Data;
-
-			Type = type;
+			if (m_Size != 0)
+				delete[m_Size] Data;
 
 			if (size != 0)
 			{
-				Data = new char[size];
-				memcpy(Data, data, size);
+				Type = type;
+				m_Size = size;
+				Data = new char[m_Size];
+				memcpy(Data, data, m_Size);
+			}
+			else
+			{
+				Type = EditorContextType::None;
+				Data = nullptr;
 			}
 		}
+
+		void Reset()
+		{
+			Set(EditorContextType::None, nullptr, 0);
+		}
+
+		bool IsValid(EditorContextType type) const { return type == Type && Data != nullptr; }
+		operator bool() const { return Type != EditorContextType::None && Data != nullptr; }
+
+	private:
+		size_t m_Size = 0;
 	};
 }

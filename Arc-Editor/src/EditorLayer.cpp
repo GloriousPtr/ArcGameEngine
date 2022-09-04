@@ -42,7 +42,7 @@ namespace ArcEngine
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
 		m_Viewports.push_back(CreateScope<SceneViewport>());
-		m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
+		m_Viewports[0]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
 		
 		m_Properties.push_back(CreateScope<PropertiesPanel>());
 		m_AssetPanels.push_back(CreateScope<AssetPanel>());
@@ -87,7 +87,10 @@ namespace ArcEngine
 		for (const auto& panel : m_Viewports)
 		{
 			if (panel->Showing)
-				panel->OnUpdate(m_ActiveScene, ts, useEditorCamera);
+			{
+				panel->OnUpdate(ts);
+				panel->SetUseEditorCamera(useEditorCamera);
+			}
 		}
 
 		for (const auto& panel : m_AssetPanels)
@@ -162,7 +165,7 @@ namespace ArcEngine
 								{
 									size_t index = m_Viewports.size();
 									m_Viewports.push_back(CreateScope<SceneViewport>());
-									m_Viewports[index]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
+									m_Viewports[index]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
 								}
 								if (ImGui::MenuItem("Properties"))
 								{
@@ -517,7 +520,9 @@ namespace ArcEngine
 
 	void EditorLayer::NewScene()
 	{
-		SetContext(EditorContextType::None, nullptr, 0);
+		ResetContext();
+		if (m_SceneState != SceneState::Edit)
+			OnSceneStop();
 
 		for (const auto& propertyPanel : m_Properties)
 			propertyPanel->ForceSetContext(m_SelectedContext);
@@ -527,12 +532,16 @@ namespace ArcEngine
 		m_EditorScene = m_ActiveScene;
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		if (!m_Viewports.empty())
+			m_Viewports[0]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
 		m_ScenePath = "";
 	}
 
 	void EditorLayer::OpenScene(const char* filepath)
 	{
-		SetContext(EditorContextType::None, nullptr, 0);
+		ResetContext();
+		if (m_SceneState != SceneState::Edit)
+			OnSceneStop();
 
 		for (const auto& propertyPanel : m_Properties)
 			propertyPanel->ForceSetContext(m_SelectedContext);
@@ -542,10 +551,9 @@ namespace ArcEngine
 		m_ActiveScene->MarkViewportDirty();
 		m_EditorScene = m_ActiveScene;
 
-		if (!m_Viewports.empty())
-			m_Viewports[0]->OnUpdate(m_ActiveScene, 0.0f, true);
-
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		if (!m_Viewports.empty())
+			m_Viewports[0]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
 
 		SceneSerializer serializer(m_ActiveScene);
 		serializer.Deserialize(filepath);
@@ -587,7 +595,7 @@ namespace ArcEngine
 
 	void ArcEngine::EditorLayer::OnScenePlay()
 	{
-		SetContext(EditorContextType::None, nullptr, 0);
+		ResetContext();
 
 		m_EditorScene = m_ActiveScene;
 		m_RuntimeScene = Scene::CopyTo(m_EditorScene);
@@ -596,17 +604,16 @@ namespace ArcEngine
 		m_ActiveScene->OnRuntimeStart();
 		m_SceneState = SceneState::Play;
 
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		if (m_Viewports.empty())
 			m_Viewports.push_back(CreateScope<SceneViewport>());
-
-		m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_Viewports[0]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
 		m_Viewports[0]->SetSimulation(true);
 	}
 
 	void ArcEngine::EditorLayer::OnSceneStop()
 	{
-		SetContext(EditorContextType::None, nullptr, 0);
+		ResetContext();
 
 		m_ActiveScene->OnRuntimeStop();
 		m_SceneState = SceneState::Edit;
@@ -615,13 +622,12 @@ namespace ArcEngine
 		m_ActiveScene = nullptr;
 		m_ActiveScene = m_EditorScene;
 
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		if (!m_Viewports.empty())
 		{
 			m_Viewports[0]->SetSimulation(false);
-			m_Viewports[0]->SetSceneHierarchyPanel(m_SceneHierarchyPanel);
+			m_Viewports[0]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
 		}
-
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void ArcEngine::EditorLayer::OnScenePause()

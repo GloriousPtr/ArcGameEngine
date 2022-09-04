@@ -7,9 +7,12 @@ namespace ArcEngine
 	class OpenGLVertexBuffer : public VertexBuffer
 	{
 	public:
-		OpenGLVertexBuffer(uint32_t size);
+		explicit OpenGLVertexBuffer(uint32_t size);
 		OpenGLVertexBuffer(const float* vertices, uint32_t size);
 		virtual ~OpenGLVertexBuffer();
+
+		OpenGLVertexBuffer(const OpenGLVertexBuffer& other) = default;
+		OpenGLVertexBuffer(OpenGLVertexBuffer&& other) = default;
 
 		virtual void Bind() const override;
 		virtual void Unbind() const override;
@@ -29,6 +32,9 @@ namespace ArcEngine
 		OpenGLIndexBuffer(const uint32_t* indices, uint32_t count);
 		virtual ~OpenGLIndexBuffer();
 
+		OpenGLIndexBuffer(const OpenGLIndexBuffer& other) = default;
+		OpenGLIndexBuffer(OpenGLIndexBuffer&& other) = default;
+
 		virtual void Bind() const override;
 		virtual void Unbind() const override;
 
@@ -43,6 +49,9 @@ namespace ArcEngine
 	public:
 		OpenGLUniformBuffer();
 		virtual ~OpenGLUniformBuffer();
+
+		OpenGLUniformBuffer(const OpenGLUniformBuffer& other) = default;
+		OpenGLUniformBuffer(OpenGLUniformBuffer&& other) = default;
 
 		virtual void Bind() const override;
 		virtual void Unbind() const override;

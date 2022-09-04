@@ -54,7 +54,7 @@ namespace ArcEngine
 			m_Scene->m_Registry.remove<T>(m_EntityHandle);
 		}
 
-		const UUID GetUUID() const { return GetComponent<IDComponent>(); }
+		UUID GetUUID() const { return GetComponent<IDComponent>(); }
 		TransformComponent& GetTransform() const { return GetComponent<TransformComponent>(); }
 		RelationshipComponent& GetRelationship() const { return GetComponent<RelationshipComponent>(); }
 		

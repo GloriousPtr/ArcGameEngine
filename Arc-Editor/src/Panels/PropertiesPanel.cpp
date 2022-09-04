@@ -22,7 +22,7 @@ namespace ArcEngine
 
 		if (OnBegin())
 		{
-			EditorContext context = EditorLayer::GetInstance()->GetContext();
+			const EditorContext& context = EditorLayer::GetInstance()->GetContext();
 			switch (context.Type)
 			{
 				case EditorContextType::None:

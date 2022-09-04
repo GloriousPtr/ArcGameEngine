@@ -10,7 +10,7 @@ namespace ArcEngine
 	class WindowsWindow : public Window
 	{
 	public:
-		WindowsWindow(const WindowProps& props);
+		explicit WindowsWindow(const WindowProps& props);
 		virtual ~WindowsWindow();
 		
 		void OnUpdate() override;
@@ -45,6 +45,8 @@ namespace ArcEngine
 		};
 
 		WindowData m_Data;
+
+		static uint8_t s_GLFWWindowCount;
 	};
 }
 
