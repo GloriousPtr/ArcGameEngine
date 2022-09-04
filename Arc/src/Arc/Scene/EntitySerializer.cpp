@@ -930,7 +930,7 @@ namespace ArcEngine
 			TrySetEnum(src.CullMode, meshComponent["CullMode"]);
 
 			if (!src.Filepath.empty())
-				src.MeshGeometry = CreateRef<Mesh>(src.Filepath.c_str());
+				src.MeshGeometry = AssetManager::GetMesh(src.Filepath);
 		}
 
 		auto scriptComponent = entity["ScriptComponent"];
