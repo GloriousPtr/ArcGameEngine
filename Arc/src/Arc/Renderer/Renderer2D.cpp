@@ -165,16 +165,6 @@ namespace ArcEngine
 		StartBatch();
 	}
 
-	void Renderer2D::BeginScene(const OrthographicCamera& camera)
-	{
-		ARC_PROFILE_SCOPE();
-		
-		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
-
-		StartBatch();
-	}
-
 	void Renderer2D::EndScene(const Ref<RenderGraphData>& renderGraphData)
 	{
 		ARC_PROFILE_SCOPE();

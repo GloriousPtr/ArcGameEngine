@@ -30,29 +30,4 @@ namespace ArcEngine
 
 		RenderCommand::SetViewport(0, 0, width, height);
 	}
-
-	void Renderer::BeginScene(const OrthographicCamera& camera)
-	{
-		ARC_PROFILE_SCOPE();
-
-		s_SceneData->ViewProjectionMatrix = camera.GetViewProjectionMatrix();
-	}
-
-	void Renderer::EndScene()
-	{
-		ARC_PROFILE_SCOPE();
-
-	}
-
-	void Renderer::Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const glm::mat4& transform)
-	{
-		ARC_PROFILE_SCOPE();
-
-		shader->Bind();
-		shader->SetMat4("u_ViewProjection", s_SceneData->ViewProjectionMatrix);
-		shader->SetMat4("u_Transform", transform);
-		
-		vertexArray->Bind();
-		RenderCommand::DrawIndexed(vertexArray);
-	}
 }
