@@ -39,6 +39,7 @@ namespace ArcEngine
 
 		void OnUpdateEditor(Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera);
 		void OnUpdateRuntime(Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera = nullptr);
+		void OnRender(const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData);
 		void OnRuntimeStart();
 		void OnRuntimeStop();
 
@@ -54,7 +55,6 @@ namespace ArcEngine
 		}
 
 	private:
-		void OnRender(const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData);
 		void CreateRigidbody2D(Entity entity, Rigidbody2DComponent& component);
 		void CreateBoxCollider2D(Entity entity, BoxCollider2DComponent& component);
 		void CreateCircleCollider2D(Entity entity, CircleCollider2DComponent& component);

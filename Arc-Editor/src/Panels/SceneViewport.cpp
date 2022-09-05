@@ -22,62 +22,11 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		m_RenderGraphData = CreateRef<RenderGraphData>();
-
-		uint32_t width = 1280;
-		uint32_t height = 720;
-		{
-			FramebufferSpecification spec;
-			spec.Attachments = { FramebufferTextureFormat::R11G11B10 };
-			spec.Width = width;
-			spec.Height = height;
-			m_RenderGraphData->CompositePassTarget = Framebuffer::Create(spec);
-		}
-
-		{
-			FramebufferSpecification spec;
-			spec.Attachments = {
-				FramebufferTextureFormat::RGBA8,				// Albedo
-				FramebufferTextureFormat::RG16F,				// Normal
-				FramebufferTextureFormat::RGBA8,				// Metallic, Roughness, AO
-				FramebufferTextureFormat::RGBA8,				// rgb: EmissionColor, a: intensity
-				FramebufferTextureFormat::Depth
-			};
-			spec.Width = width;
-			spec.Height = height;
-			m_RenderGraphData->RenderPassTarget = Framebuffer::Create(spec);
-		}
-
-		{
-			FramebufferSpecification spec;
-			spec.Attachments = { FramebufferTextureFormat::R11G11B10 };
-			spec.Width = width;
-			spec.Height = height;
-			m_RenderGraphData->LightingPassTarget = Framebuffer::Create(spec);
-		}
-
-		width /= 2;
-		height /= 2;
-		FramebufferSpecification bloomSpec;
-		bloomSpec.Attachments = { FramebufferTextureFormat::R11G11B10 };
-		bloomSpec.Width = width;
-		bloomSpec.Height = height;
-		m_RenderGraphData->PrefilteredFramebuffer = Framebuffer::Create(bloomSpec);
-		
-		for (size_t i = 0; i < m_RenderGraphData->BlurSamples; i++)
-		{
-			width /= 2;
-			height /= 2;
-			FramebufferSpecification blurSpec;
-			blurSpec.Attachments = { FramebufferTextureFormat::R11G11B10 };
-			blurSpec.Width = width;
-			blurSpec.Height = height;
-			m_RenderGraphData->TempBlurFramebuffers[i] = Framebuffer::Create(bloomSpec);
-			m_RenderGraphData->DownsampledFramebuffers[i] = Framebuffer::Create(blurSpec);
-			m_RenderGraphData->UpsampledFramebuffers[i] = Framebuffer::Create(blurSpec);
-		}
-
-		m_EditorCamera.SetViewportSize(1280, 720);
+		const uint32_t width = 1280;
+		const uint32_t height = 720;
+		m_RenderGraphData = CreateRef<RenderGraphData>(width, height);
+		m_MiniViewportRenderGraphData = CreateRef<RenderGraphData>(width, height);
+		m_EditorCamera.SetViewportSize(width, height);
 	}
 
 	void SceneViewport::OnUpdate(Timestep timestep)
@@ -88,6 +37,7 @@ namespace ArcEngine
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
 			(spec.Width != (uint32_t)m_ViewportSize.x || spec.Height != (uint32_t)m_ViewportSize.y))
 		{
+			m_MiniViewportRenderGraphData->Resize((uint32_t)(m_ViewportSize.x * m_MiniViewportSizeMultiplier), (uint32_t)(m_ViewportSize.y * m_MiniViewportSizeMultiplier));
 			m_RenderGraphData->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
@@ -294,6 +244,32 @@ namespace ArcEngine
 							tc.Scale = scale;
 						}
 					}
+				}
+			}
+
+			// Showing mini camera viewport if selected entity has a CameraComponent
+			ImVec2 endCursorPos = ImGui::GetContentRegionMax();
+			EditorContext context = EditorLayer::GetInstance()->GetContext();
+			if (!m_SimulationRunning && context.IsValid(EditorContextType::Entity))
+			{
+				Entity selectedEntity = *((Entity*)context.Data);
+				if (selectedEntity && selectedEntity.HasComponent<CameraComponent>())
+				{
+					CameraData cameraData;
+					cameraData.View = glm::inverse(selectedEntity.GetWorldTransform());
+					cameraData.Projection = selectedEntity.GetComponent<CameraComponent>().Camera.GetProjection();
+					cameraData.ViewProjection = cameraData.Projection * cameraData.View;
+					cameraData.Position = selectedEntity.GetTransform().Translation;
+
+					m_MiniViewportRenderGraphData->RenderPassTarget->Bind();
+					m_Scene->OnRender(m_MiniViewportRenderGraphData, cameraData);
+					m_MiniViewportRenderGraphData->RenderPassTarget->Unbind();
+
+					ImGui::SetItemAllowOverlap();
+					ImVec2 miniViewportSize = { m_ViewportSize.x * m_MiniViewportSizeMultiplier, m_ViewportSize.y * m_MiniViewportSizeMultiplier };
+					ImGui::SetCursorPos({ endCursorPos.x - miniViewportSize.x - windowPadding.x, endCursorPos.y - miniViewportSize.y - windowPadding.y });
+					uint64_t textureId = m_MiniViewportRenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
+					ImGui::Image((ImTextureID)textureId, ImVec2{ miniViewportSize.x, miniViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
 				}
 			}
 

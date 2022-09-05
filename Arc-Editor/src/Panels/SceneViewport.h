@@ -37,9 +37,11 @@ namespace ArcEngine
 		void OnInit();
 
 	private:
-		Ref<RenderGraphData> m_RenderGraphData;
-		EditorCamera m_EditorCamera;
 		Ref<Scene> m_Scene;
+		Ref<RenderGraphData> m_RenderGraphData = nullptr;
+		Ref<RenderGraphData> m_MiniViewportRenderGraphData = nullptr;
+		float m_MiniViewportSizeMultiplier = 0.25f;
+		EditorCamera m_EditorCamera;
 
 		bool m_ViewportFocused = false;
 		bool m_ViewportHovered = false;
