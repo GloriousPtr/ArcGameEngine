@@ -380,7 +380,7 @@ namespace ArcEngine
 			for (auto e : view)
 			{
 				auto [transform, body] = view.get<TransformComponent, Rigidbody2DComponent>(e);
-				CreateRigidbody2D({ e, this }, &body);
+				CreateRigidbody2D({ e, this }, body);
 			}
 		}
 
@@ -936,12 +936,11 @@ namespace ArcEngine
 		Renderer2D::EndScene(renderGraphData);
 	}
 
-	void Scene::CreateRigidbody2D(Entity entity, Rigidbody2DComponent* component)
+	void Scene::CreateRigidbody2D(Entity entity, Rigidbody2DComponent& body)
 	{
-		if (m_PhysicsWorld2D && component)
+		if (m_PhysicsWorld2D)
 		{
 			const TransformComponent& transform = entity.GetTransform();
-			auto& body = *component;
 
 			b2BodyDef def;
 			def.type = (b2BodyType)body.Type;
@@ -962,13 +961,13 @@ namespace ArcEngine
 			if (entity.HasComponent<BoxCollider2DComponent>())
 			{
 				auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
-				CreateBoxCollider2D(entity, &bc2d);
+				CreateBoxCollider2D(entity, bc2d);
 			}
 
 			if (entity.HasComponent<CircleCollider2DComponent>())
 			{
 				auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
-				CreateCircleCollider2D(entity, &cc2d);
+				CreateCircleCollider2D(entity, cc2d);
 			}
 
 			if (!body.AutoMass && body.Mass > 0.01f)
@@ -980,13 +979,12 @@ namespace ArcEngine
 		}
 	}
 
-	void Scene::CreateBoxCollider2D(Entity entity, BoxCollider2DComponent* component)
+	void Scene::CreateBoxCollider2D(Entity entity, BoxCollider2DComponent& bc2d)
 	{
-		if (m_PhysicsWorld2D && component && entity.HasComponent<Rigidbody2DComponent>())
+		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
 		{
 			const TransformComponent& transform = entity.GetTransform();
 			b2Body* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
-			auto& bc2d = *component;
 
 			b2PolygonShape boxShape;
 			boxShape.SetAsBox(bc2d.Size.x * transform.Scale.x, bc2d.Size.y * transform.Scale.y);
@@ -1005,13 +1003,12 @@ namespace ArcEngine
 		}
 	}
 
-	void Scene::CreateCircleCollider2D(Entity entity, CircleCollider2DComponent* component)
+	void Scene::CreateCircleCollider2D(Entity entity, CircleCollider2DComponent& cc2d)
 	{
-		if (m_PhysicsWorld2D && component && entity.HasComponent<Rigidbody2DComponent>())
+		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
 		{
 			const TransformComponent& transform = entity.GetTransform();
 			b2Body* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
-			auto& cc2d = *component;
 
 			b2CircleShape circleShape;
 			circleShape.m_radius = cc2d.Radius * glm::max(transform.Scale.x, transform.Scale.y);
@@ -1101,21 +1098,21 @@ namespace ArcEngine
 	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& body)
 	{
 		/* On Rigidbody2DComponent added */
-		CreateRigidbody2D(entity, &body);
+		CreateRigidbody2D(entity, body);
 	}
 
 	template<>
 	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& bc2d)
 	{
 		/* On BoxCollider2DComponent added */
-		CreateBoxCollider2D(entity, &bc2d);
+		CreateBoxCollider2D(entity, bc2d);
 	}
 	
 	template<>
 	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& cc2d)
 	{
 		/* On CircleCollider2DComponent added */
-		CreateCircleCollider2D(entity, &cc2d);
+		CreateCircleCollider2D(entity, cc2d);
 	}
 
 	template<>
