@@ -54,13 +54,16 @@ namespace ArcEngine
 			m_Scene->m_Registry.remove<T>(m_EntityHandle);
 		}
 
-		UUID GetUUID() const { return GetComponent<IDComponent>(); }
+		UUID GetUUID() const { return GetComponent<IDComponent>().ID; }
 		TransformComponent& GetTransform() const { return GetComponent<TransformComponent>(); }
 		RelationshipComponent& GetRelationship() const { return GetComponent<RelationshipComponent>(); }
 		
 		Entity GetParent() const
 		{
 			ARC_PROFILE_SCOPE();
+
+			if (!m_Scene)
+				return {};
 
 			const auto& rc = GetComponent<RelationshipComponent>();
 			return rc.Parent != 0 ? m_Scene->GetEntity(rc.Parent) : Entity {};
@@ -83,11 +86,13 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE();
 
 			auto& transform = GetRelationship();
-			if (transform.Parent == 0)
+			UUID uuid = GetUUID();
+			Entity parentEntity = GetParent();
+			
+			if (!parentEntity)
 				return;
 
-			UUID uuid = GetUUID();
-			auto& parent = GetParent().GetRelationship();
+			auto& parent = parentEntity.GetRelationship();
 			for (const auto* it = parent.Children.begin(); it != parent.Children.end(); it++)
 			{
 				if (*it == uuid)

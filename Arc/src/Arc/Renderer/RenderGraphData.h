@@ -31,8 +31,8 @@ namespace ArcEngine
 			if (width <= 0 || height <= 0)
 			{
 				ARC_CORE_ERROR("Cannot create a RenderGraph with {}x{} dimensions, making it 1x1", width, height);
-				width = 1.0f;
-				height = 1.0f;
+				width = 1;
+				height = 1;
 			}
 			
 			{

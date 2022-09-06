@@ -6,6 +6,7 @@
 
 #include <ArcEngine.h>
 #include <Arc/Scene/SceneSerializer.h>
+#include <Arc/Scripting/ScriptEngine.h>
 #include <Arc/Utils/PlatformUtils.h>
 #include <Arc/Math/Math.h>
 
@@ -535,6 +536,8 @@ namespace ArcEngine
 		if (!m_Viewports.empty())
 			m_Viewports[0]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
 		m_ScenePath = "";
+
+		ScriptEngine::SetScene(m_ActiveScene.get());
 	}
 
 	void EditorLayer::OpenScene(const char* filepath)
@@ -550,6 +553,7 @@ namespace ArcEngine
 		m_ActiveScene->OnViewportResize(1, 1);
 		m_ActiveScene->MarkViewportDirty();
 		m_EditorScene = m_ActiveScene;
+		ScriptEngine::SetScene(m_ActiveScene.get());
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		if (!m_Viewports.empty())
@@ -601,6 +605,7 @@ namespace ArcEngine
 		m_RuntimeScene = Scene::CopyTo(m_EditorScene);
 		
 		m_ActiveScene = m_RuntimeScene;
+		ScriptEngine::SetScene(m_ActiveScene.get());
 		m_ActiveScene->OnRuntimeStart();
 		m_SceneState = SceneState::Play;
 
@@ -621,6 +626,7 @@ namespace ArcEngine
 		m_RuntimeScene = nullptr;
 		m_ActiveScene = nullptr;
 		m_ActiveScene = m_EditorScene;
+		ScriptEngine::SetScene(m_ActiveScene.get());
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		if (!m_Viewports.empty())

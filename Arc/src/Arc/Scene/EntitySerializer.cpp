@@ -531,7 +531,8 @@ namespace ArcEngine
 						}
 						case Field::FieldType::Byte:
 						{
-							out << field->GetManagedValue<uint8_t>();
+							uint16_t v = (uint16_t) field->GetManagedValue<uint8_t>();
+							out << v;
 							break;
 						}
 						case Field::FieldType::Short:
