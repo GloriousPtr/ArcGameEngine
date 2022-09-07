@@ -5,6 +5,7 @@ namespace Sandbox
 	public class Enemy : Entity
 	{
 		[Header("Player Config")]
+		[Tooltip("Go Brrrr.............")]
 		[SerializeField] private float Speed = 20.0f;
 
 		[Header("Test")]
@@ -22,7 +23,8 @@ namespace Sandbox
 		public Vector2 Vec2 = new(2.0f, 3.0f);
 		public Vector3 Vec3 = new(2.0f, 3.0f, 4.0f);
 		public Vector4 Vec4 = new(2.0f, 3.0f, 4.0f, 1.0f);
-		
+		public Color EnemyColor = new(1.0f, 0.0f, 1.0f, 1.0f);
+
 		private TransformComponent m_TransformComponent;
 
 		public void OnCreate()

@@ -21,9 +21,9 @@ namespace Sandbox
 
 		public void OnUpdate(float timestep)
 		{
-			if (Input.IsKeyPressed(KeyCodes.Space))
+			/*if (Input.IsKeyPressed(KeyCodes.Space))
 				m_Rigidbody2D.ApplyLinearImpulse(Force);
-
+			*/
 			float speed = Speed * timestep;
 			Vector2 dir = new Vector2(0.0f);
 

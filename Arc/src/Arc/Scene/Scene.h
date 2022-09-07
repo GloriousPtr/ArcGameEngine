@@ -36,6 +36,7 @@ namespace ArcEngine
 		Entity Duplicate(Entity entity);
 		bool HasEntity(UUID uuid);
 		Entity GetEntity(UUID uuid);
+		bool IsRunning() const { return m_IsRunning; }
 
 		void OnUpdateEditor(Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera);
 		void OnUpdateRuntime(Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera = nullptr);
@@ -71,6 +72,7 @@ namespace ArcEngine
 
 		entt::registry m_Registry;
 		eastl::hash_map<UUID, entt::entity> m_EntityMap;
+		bool m_IsRunning = false;
 		
 		b2World* m_PhysicsWorld2D = nullptr;
 		ContactListener* m_ContactListener = nullptr;

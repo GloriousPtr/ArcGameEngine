@@ -116,17 +116,13 @@ namespace ArcEngine
 		for (const auto* it = component.Classes.begin(); it != component.Classes.end(); ++it)
 		{
 			const eastl::string& className = *it;
-			auto instance = ScriptEngine::GetInstance(entity, className);
-			const GCHandle handle = instance->GetHandle();
-
-			ImGui::PushID(handle);
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
 			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
 
-			bool open = ImGui::TreeNodeEx(handle, treeFlags, className.c_str());
+			bool open = ImGui::TreeNodeEx(it, treeFlags, className.c_str());
 
 			{
 				ImGui::SameLine(ImGui::GetContentRegionMax().x - lineHeight);
@@ -151,15 +147,15 @@ namespace ArcEngine
 
 				// Public Fields
 				UI::BeginProperties();
-				const auto& fields = ScriptEngine::GetFields(entity, className.c_str());
-				const auto& fieldMap = ScriptEngine::GetFieldMap(entity, className.c_str());
+				const auto& fields = ScriptEngine::GetFields(className.c_str());
+				auto& fieldMap = ScriptEngine::GetFieldMap(className.c_str());
 				for (const auto& name : fields)
 				{
 					auto& field = fieldMap.at(name);
-					if (field->Hidden)
+					if (field.Hidden)
 						continue;
 
-					const char* header = field->Header.empty() ? nullptr : field->Header.c_str();
+					const char* header = field.Header.empty() ? nullptr : field.Header.c_str();
 					if (header)
 					{
 						UI::EndProperties();
@@ -170,19 +166,16 @@ namespace ArcEngine
 						UI::BeginProperties();
 					}
 
-					UI::DrawField(*field);
+					UI::DrawField(entity, className, name);
 				}
 				UI::EndProperties();
 
 				ImGui::TreePop();
 			}
-
-			ImGui::PopID();
 		}
 
 		if (toRemove)
 		{
-			ScriptEngine::RemoveInstance(entity, *toRemove);
 			component.Classes.erase(toRemove);
 		}
 	}
@@ -602,7 +595,7 @@ namespace ArcEngine
 			{
 				UI::Property("Auto Mass", component.AutoMass);
 				if (!component.AutoMass)
-					UI::Property("Mass", component.Mass, 0.1f, 0.01f, 100.0f);
+					UI::Property("Mass", component.Mass, 0.01f, 10000.0f);
 				UI::Property("Linear Drag", component.LinearDrag);
 				UI::Property("Angular Drag", component.AngularDrag);
 				UI::Property("Gravity Scale", component.GravityScale);
@@ -838,7 +831,6 @@ namespace ArcEngine
 					{
 						if (ImGui::MenuItem(name.c_str()))
 						{
-							ScriptEngine::CreateInstance(entity, name);
 							component.Classes.push_back(name);
 						}
 					}

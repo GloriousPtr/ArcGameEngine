@@ -7,6 +7,8 @@ typedef struct _MonoObject MonoObject;
 
 namespace ArcEngine
 {
+	using GCHandle = void*;
+
 	class ScriptEngineRegistry
 	{
 	public:

@@ -207,18 +207,6 @@ namespace ArcEngine
 	Scene::~Scene()
 	{
 		ARC_PROFILE_SCOPE();
-
-		// Scripting
-		{
-			auto scriptView = m_Registry.view<ScriptComponent>();
-			for (auto e : scriptView)
-			{
-				const ScriptComponent& script = scriptView.get<ScriptComponent>(e);
-				Entity entity = { e, this };
-				for (const auto& className : script.Classes)
-					ScriptEngine::RemoveInstance(entity, className);
-			}
-		}
 	}
 
 	template<typename... Component>
@@ -368,6 +356,8 @@ namespace ArcEngine
 	void Scene::OnRuntimeStart()
 	{
 		ARC_PROFILE_SCOPE();
+
+		m_IsRunning = true;
 
 		/////////////////////////////////////////////////////////////////////
 		// Rigidbody and Colliders (2D) /////////////////////////////////////
@@ -576,12 +566,14 @@ namespace ArcEngine
 		/////////////////////////////////////////////////////////////////////
 		// Scripting ////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
-		ScriptEngine::OnRuntimeBegin();
 		auto scriptView = m_Registry.view<ScriptComponent>();
 		for (auto e : scriptView)
 		{
 			const auto& sc = scriptView.get<ScriptComponent>(e);
 			Entity entity = { e, this };
+
+			for (auto& className : sc.Classes)
+				ScriptEngine::CreateInstance(entity, className);
 
 			for (auto& className : sc.Classes)
 				ScriptEngine::GetInstance(entity, className)->InvokeOnCreate();
@@ -591,6 +583,8 @@ namespace ArcEngine
 	void Scene::OnRuntimeStop()
 	{
 		ARC_PROFILE_SCOPE();
+
+		m_IsRunning = false;
 
 		auto scriptView = m_Registry.view<ScriptComponent>();
 		for (auto e : scriptView)
@@ -606,7 +600,6 @@ namespace ArcEngine
 
 			script.Classes.clear();
 		}
-		ScriptEngine::OnRuntimeEnd();
 
 		/////////////////////////////////////////////////////////////////////
 		// Sound ////////////////////////////////////////////////////////////

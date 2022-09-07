@@ -9,7 +9,6 @@
 #include "Arc/Core/AssetManager.h"
 #include "Arc/Core/UUID.h"
 #include "Arc/Scripting/ScriptEngine.h"
-#include "Arc/Scripting/Field.h"
 #include "Arc/Utils/ColorUtils.h"
 #include "Arc/Utils/StringUtils.h"
 
@@ -495,99 +494,95 @@ namespace ArcEngine
 				out << YAML::Key << "Name" << YAML::Value << className.c_str();
 				out << YAML::Key << "Fields" << YAML::BeginMap;
 
-				const auto& fields = ScriptEngine::GetFieldMap(entity, className.c_str());
-				for (const auto& [fieldName, field] : fields)
+				const auto& fields = ScriptEngine::GetFieldMap(className.c_str());
+				const auto& fieldInstances = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
+				for (const auto& [fieldName, fieldInstance] : fieldInstances)
 				{
-					if (field->Type == Field::FieldType::Unknown)
+					const auto& field = fields.at(fieldName);
+					if (field.Type == FieldType::Unknown)
 						continue;
 
-					if (!field->Serializable)
+					if (!field.Serializable)
 						continue;
 
-					ScriptEngine::GetInstance(entity, className);
 					out << YAML::Key << fieldName.c_str() << YAML::Value;
 
-					switch (field->Type)
+					switch (field.Type)
 					{
-						case Field::FieldType::Bool:
+						case FieldType::Bool:
 						{
-							out << field->GetManagedValue<bool>();
+							out << fieldInstance.GetValue<bool>();
 							break;
 						}
-						case Field::FieldType::Float:
+						case FieldType::Float:
 						{
-							out << field->GetManagedValue<float>();
+							out << fieldInstance.GetValue<float>();
 							break;
 						}
-						case Field::FieldType::Double:
+						case FieldType::Double:
 						{
-							out << field->GetManagedValue<double>();
+							out << fieldInstance.GetValue<double>();
 							break;
 						}
-						case Field::FieldType::SByte:
+						case FieldType::Byte:
 						{
-							out << field->GetManagedValue<int8_t>();
+							out << fieldInstance.GetValue<int8_t>();
 							break;
 						}
-						case Field::FieldType::Byte:
+						case FieldType::UByte:
 						{
-							uint16_t v = (uint16_t) field->GetManagedValue<uint8_t>();
+							uint16_t v = (uint16_t) fieldInstance.GetValue<uint8_t>();
 							out << v;
 							break;
 						}
-						case Field::FieldType::Short:
+						case FieldType::Short:
 						{
-							out << field->GetManagedValue<int16_t>();
+							out << fieldInstance.GetValue<int16_t>();
 							break;
 						}
-						case Field::FieldType::UShort:
+						case FieldType::UShort:
 						{
-							out << field->GetManagedValue<uint16_t>();
+							out << fieldInstance.GetValue<uint16_t>();
 							break;
 						}
-						case Field::FieldType::Int:
+						case FieldType::Int:
 						{
-							out << field->GetManagedValue<int32_t>();
+							out << fieldInstance.GetValue<int32_t>();
 							break;
 						}
-						case Field::FieldType::UInt:
+						case FieldType::UInt:
 						{
-							out << field->GetManagedValue<uint32_t>();
+							out << fieldInstance.GetValue<uint32_t>();
 							break;
 						}
-						case Field::FieldType::Long:
+						case FieldType::Long:
 						{
-							out << field->GetManagedValue<int64_t>();
+							out << fieldInstance.GetValue<int64_t>();
 							break;
 						}
-						case Field::FieldType::ULong:
+						case FieldType::ULong:
 						{
-							out << field->GetManagedValue<uint64_t>();
+							out << fieldInstance.GetValue<uint64_t>();
 							break;
 						}
-						case Field::FieldType::Vec2:
+						case FieldType::Vector2:
 						{
-							out << field->GetManagedValue<glm::vec2>();
+							out << fieldInstance.GetValue<glm::vec2>();
 							break;
 						}
-						case Field::FieldType::Vec3:
+						case FieldType::Vector3:
 						{
-							out << field->GetManagedValue<glm::vec3>();
+							out << fieldInstance.GetValue<glm::vec3>();
 							break;
 						}
-						case Field::FieldType::Vec4:
+						case FieldType::Vector4:
 						{
-							out << field->GetManagedValue<glm::vec4>();
+							out << fieldInstance.GetValue<glm::vec4>();
 							break;
 						}
-						case Field::FieldType::Color:
+						case FieldType::Color:
 						{
-							out << field->GetManagedValue<glm::vec4>();
-							break;
-						}
-						case Field::FieldType::String:
-						{
-							out << field->GetManagedValueString().c_str();
+							out << fieldInstance.GetValue<glm::vec4>();
 							break;
 						}
 						default:
@@ -955,118 +950,113 @@ namespace ArcEngine
 						continue;
 					}
 
-					ScriptEngine::CreateInstance(deserializedEntity, scriptName.c_str());
 					sc.Classes.emplace_back(scriptName.c_str());
 
-					const auto& fields = ScriptEngine::GetFieldMap(deserializedEntity, scriptName.c_str());
+					const auto& fields = ScriptEngine::GetFieldMap(scriptName.c_str());
+					auto& fieldInstances = ScriptEngine::GetFieldInstanceMap(deserializedEntity, scriptName.c_str());
 					{
 						for (const auto& [fieldName, field] : fields)
 						{
-							if (field->Type == Field::FieldType::Unknown)
+							if (field.Type == FieldType::Unknown)
 								continue;
 
-							if (!field->Serializable)
+							if (!field.Serializable)
 								continue;
 
 							auto& fieldNode = scriptNode["Fields"][fieldName.c_str()];
 							if (fieldNode)
 							{
-								switch (field->Type)
+								auto& fieldInstance = fieldInstances[fieldName];
+								switch (field.Type)
 								{
-								case Field::FieldType::Bool:
+								case FieldType::Bool:
 								{
 									bool value = fieldNode.as<bool>();
-									field->SetValue(&value);
+									fieldInstance.SetValue(value);
 									break;
 								}
-								case Field::FieldType::Float:
+								case FieldType::Float:
 								{
 									float value = fieldNode.as<float>();
-									field->SetValue(&value);
+									fieldInstance.SetValue(value);
 									break;
 								}
-								case Field::FieldType::Double:
+								case FieldType::Double:
 								{
 									double value = fieldNode.as<double>();
-									field->SetValue(&value);
+									fieldInstance.SetValue(value);
 									break;
 								}
-								case Field::FieldType::SByte:
+								case FieldType::Byte:
 								{
 									int8_t value = fieldNode.as<int8_t>();
-									field->SetValue(&value);
+									fieldInstance.SetValue(value);
 									break;
 								}
-								case Field::FieldType::Byte:
+								case FieldType::UByte:
 								{
 									uint8_t value = fieldNode.as<uint8_t>();
-									field->SetValue(&value);
+									fieldInstance.SetValue(value);
 									break;
 								}
-								case Field::FieldType::Short:
+								case FieldType::Short:
 								{
 									int16_t value = fieldNode.as<int16_t>();
-									field->SetValue(&value);
+									fieldInstance.SetValue(value);
 									break;
 								}
-								case Field::FieldType::UShort:
+								case FieldType::UShort:
 								{
 									uint16_t value = fieldNode.as<uint16_t>();
-									field->SetValue(&value);
+									fieldInstance.SetValue(value);
 									break;
 								}
-								case Field::FieldType::Int:
+								case FieldType::Int:
 								{
 									int32_t value = fieldNode.as<int32_t>();
-									field->SetValue(&value);
+									fieldInstance.SetValue(value);
 									break;
 								}
-								case Field::FieldType::UInt:
+								case FieldType::UInt:
 								{
 									uint32_t value = fieldNode.as<uint32_t>();
-									field->SetValue(&value);
+									fieldInstance.SetValue(value);
 									break;
 								}
-								case Field::FieldType::Long:
+								case FieldType::Long:
 								{
 									int64_t value = fieldNode.as<int64_t>();
-									field->SetValue(&value);
+									fieldInstance.SetValue(value);
 									break;
 								}
-								case Field::FieldType::ULong:
+								case FieldType::ULong:
 								{
 									uint64_t value = fieldNode.as<uint64_t>();
-									field->SetValue(&value);
+									fieldInstance.SetValue(value);
 									break;
 								}
-								case Field::FieldType::Vec2:
+								case FieldType::Vector2:
 								{
 									glm::vec2 value = fieldNode.as<glm::vec2>();
-									field->SetValue(&value);
+									fieldInstance.SetValue(value);
 									break;
 								}
-								case Field::FieldType::Vec3:
+								case FieldType::Vector3:
 								{
 									glm::vec3 value = fieldNode.as<glm::vec3>();
-									field->SetValue(&value);
+									fieldInstance.SetValue(value);
 									break;
 								}
-								case Field::FieldType::Vec4:
+								case FieldType::Vector4:
 								{
 									glm::vec4 value = fieldNode.as<glm::vec4>();
-									field->SetValue(&value);
+									fieldInstance.SetValue(value);
 									break;
 								}
-								case Field::FieldType::Color:
+								case FieldType::Color:
 								{
 									glm::vec4 value = fieldNode.as<glm::vec4>();
-									field->SetValue(&value);
-									break;
-								}
-								case Field::FieldType::String:
-								{
-									eastl::string value = fieldNode.as<std::string>().c_str();
-									field->SetValueString(value);
+									fieldInstance.SetValue(value);
 									break;
 								}
 								default:

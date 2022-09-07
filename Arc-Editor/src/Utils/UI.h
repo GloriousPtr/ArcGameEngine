@@ -16,38 +16,26 @@ namespace ArcEngine
 		static bool Property(const char* label, eastl::string& value, const char* tooltip = nullptr);
 
 		// s/byte
-		static bool Property(const char* label, int8_t& value, const char* tooltip = nullptr);
-		static bool Property(const char* label, uint8_t& value, const char* tooltip = nullptr);
-		static bool Property(const char* label, int8_t& value, int8_t min, int8_t max, const char* tooltip = nullptr);
-		static bool Property(const char* label, uint8_t& value, uint8_t min, uint8_t max, const char* tooltip = nullptr);
+		static bool Property(const char* label, int8_t& value, int8_t min = 0, int8_t max = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, uint8_t& value, uint8_t min = 0, uint8_t max = 0, const char* tooltip = nullptr);
 
 		// u/short
-		static bool Property(const char* label, int16_t& value, const char* tooltip = nullptr);
-		static bool Property(const char* label, uint16_t& value, const char* tooltip = nullptr);
-		static bool Property(const char* label, int16_t& value, int16_t min, int16_t max, const char* tooltip = nullptr);
-		static bool Property(const char* label, uint16_t& value, uint16_t min, uint16_t max, const char* tooltip = nullptr);
+		static bool Property(const char* label, int16_t& value, int16_t min = 0, int16_t max = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, uint16_t& value, uint16_t min = 0, uint16_t max = 0, const char* tooltip = nullptr);
 		
 		// u/int
-		static bool Property(const char* label, int32_t& value, const char* tooltip = nullptr);
-		static bool Property(const char* label, uint32_t& value, const char* tooltip = nullptr);
-		static bool Property(const char* label, int32_t& value, int32_t min, int32_t max, const char* tooltip = nullptr);
-		static bool Property(const char* label, uint32_t& value, uint32_t min, uint32_t max, const char* tooltip = nullptr);
+		static bool Property(const char* label, int32_t& value, int32_t min = 0, int32_t max = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, uint32_t& value, uint32_t min = 0, uint32_t max = 0, const char* tooltip = nullptr);
 
 		// u/long
-		static bool Property(const char* label, int64_t& value, const char* tooltip = nullptr);
-		static bool Property(const char* label, uint64_t& value, const char* tooltip = nullptr);
-		static bool Property(const char* label, int64_t& value, int64_t min, int64_t max, const char* tooltip = nullptr);
-		static bool Property(const char* label, uint64_t& value, uint64_t min, uint64_t max, const char* tooltip = nullptr);
+		static bool Property(const char* label, int64_t& value, int64_t min = 0, int64_t max = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, uint64_t& value, uint64_t min = 0, uint64_t max = 0, const char* tooltip = nullptr);
 
 		// Float
-		static bool Property(const char* label, float& value, const char* tooltip = nullptr, float delta = 0.1f);
-		static bool Property(const char* label, float& value, float min, float max, const char* tooltip = nullptr, const char* fmt = "%.3f");
-		static bool Property(const char* label, float& value, float delta, float min, float max, const char* tooltip = nullptr, const char* fmt = "%.3f");
+		static bool Property(const char* label, float& value, float min = 0.0f, float max = 0.0f, const char* tooltip = nullptr, float delta = 0.1f, const char* fmt = "%.3f");
 
 		// Double
-		static bool Property(const char* label, double& value, const char* tooltip = nullptr, float delta = 0.1f);
-		static bool Property(const char* label, double& value, float min, float max, const char* tooltip = nullptr, const char* fmt = "%.6f");
-		static bool Property(const char* label, double& value, float delta, float min, float max, const char* tooltip = nullptr, const char* fmt = "%.6f");
+		static bool Property(const char* label, double& value, double min = 0.0, double max = 0.0, const char* tooltip = nullptr, float delta = 0.1f, const char* fmt = "%.6f");
 
 		// Vec2/3/4
 		static bool Property(const char* label, glm::vec2& value, const char* tooltip = nullptr, float delta = 0.1f);
@@ -136,7 +124,7 @@ namespace ArcEngine
 		}
 
 		// Field
-		static void DrawField(Field& field);
+		static void DrawField(Entity entity, const eastl::string& className, const eastl::string& fieldName);
 		
 		// Vec3 with reset button
 		static void DrawVec3Control(const char* label, glm::vec3& values, const char* tooltip = nullptr, float resetValue = 0.0f);

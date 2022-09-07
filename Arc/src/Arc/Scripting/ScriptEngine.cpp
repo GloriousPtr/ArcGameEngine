@@ -19,6 +19,27 @@
 
 namespace ArcEngine
 {
+	static const eastl::unordered_map<eastl::string, FieldType> s_ScriptFieldTypeMap =
+	{
+		{ "System.Single",		FieldType::Float },
+		{ "System.Double",		FieldType::Double },
+		{ "System.Boolean",		FieldType::Bool },
+		{ "System.Char",		FieldType::Char },
+		{ "System.SByte",		FieldType::Byte },
+		{ "System.Int16",		FieldType::Short },
+		{ "System.Int32",		FieldType::Int },
+		{ "System.Int64",		FieldType::Long },
+		{ "System.Byte",		FieldType::UByte },
+		{ "System.UInt16",		FieldType::UShort },
+		{ "System.UInt32",		FieldType::UInt },
+		{ "System.UInt64",		FieldType::ULong },
+
+		{ "ArcEngine.Vector2",	FieldType::Vector2 },
+		{ "ArcEngine.Vector3",	FieldType::Vector3 },
+		{ "ArcEngine.Vector4",	FieldType::Vector4 },
+		{ "ArcEngine.Color",	FieldType::Color },
+	};
+
 	struct ScriptEngineData
 	{
 		eastl::string CoreAssemblyPath = "../Sandbox/Assemblies/Arc-ScriptCore.dll";
@@ -41,11 +62,10 @@ namespace ArcEngine
 		MonoClass* RangeAttribute = nullptr;
 
 		eastl::unordered_map<eastl::string, Ref<ScriptClass>> EntityClasses;
+		eastl::unordered_map<UUID, eastl::unordered_map<eastl::string, eastl::unordered_map<eastl::string, ScriptFieldInstance>>> EntityFields;
 
 		using EntityInstanceMap = eastl::unordered_map<UUID, eastl::unordered_map<eastl::string, ScriptInstance*>>;
-		EntityInstanceMap EntityInstances;
 		EntityInstanceMap EntityRuntimeInstances;
-		EntityInstanceMap* CurrentEntityInstanceMap = nullptr;
 	};
 
 	static Ref<ScriptEngineData> s_Data;
@@ -82,14 +102,9 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		for (auto [id, script] : s_Data->EntityInstances)
-		{
-			for (auto& it = script.begin(); it != script.end(); ++it)
-			{
-				delete it->second;
-			}
-		}
 		s_Data->EntityClasses.clear();
+		s_Data->EntityFields.clear();
+		s_Data->EntityRuntimeInstances.clear();
 
 		GCManager::Shutdown();
 
@@ -133,13 +148,6 @@ namespace ArcEngine
 
 	void ScriptEngine::ReloadAppDomain()
 	{
-		// Clean old instances
-		for (const auto& [id, script] : s_Data->EntityInstances)
-		{
-			for (const auto& [scriptName, instance] : script)
-				GCManager::ReleaseObjectReference(instance->GetHandle());
-		}
-
 		if (s_Data->AppDomain)
 		{
 			mono_domain_set(s_Data->RootDomain, true);
@@ -217,28 +225,6 @@ namespace ArcEngine
 
 		LoadCoreAssembly();
 		LoadClientAssembly();
-
-		// Recreate instances
-		eastl::unordered_map<UUID, eastl::unordered_map<eastl::string, ScriptInstance*>> entityInstances;
-		for (const auto& [id, script] : s_Data->EntityInstances)
-		{
-			for (const auto& [name, scriptInstance] : script)
-			{
-				const auto& scriptClass = s_Data->EntityClasses.at(name);
-				if (s_Data->EntityInstances[id][name] != nullptr)
-				{
-					entityInstances[id][name] = s_Data->EntityInstances[id][name];
-					entityInstances[id][name]->Invalidate(scriptClass, id);
-				}
-				else
-				{
-					entityInstances[id][name] = new ScriptInstance(scriptClass, id);
-				}
-			}
-		}
-		s_Data->EntityInstances = entityInstances;
-
-		s_Data->CurrentEntityInstanceMap = &s_Data->EntityInstances;
 	}
 
 	void ArcEngine::ScriptEngine::LoadAssemblyClasses(MonoAssembly* assembly)
@@ -272,8 +258,6 @@ namespace ArcEngine
 				bool isEntity = monoClass && strcmp(parentName, "Entity") == 0 && strcmp(parentNamespace, "ArcEngine") == 0;
 				if (isEntity)
 					s_Data->EntityClasses[fullname] = CreateRef<ScriptClass>(nameSpace, name);
-				
-				ARC_CORE_TRACE(fullname.c_str());
 			}
 		}
 	}
@@ -288,49 +272,24 @@ namespace ArcEngine
 		return s_Data->AppImage;
 	}
 
-	void ScriptEngine::OnRuntimeBegin()
-	{
-		s_Data->CurrentEntityInstanceMap = &s_Data->EntityRuntimeInstances;
-
-		for (const auto& [id, script] : s_Data->EntityInstances)
-		{
-			for (const auto& [name, scriptInstance] : script)
-			{
-				ScriptInstance* copy = new ScriptInstance(scriptInstance, id);
-				s_Data->EntityRuntimeInstances[id][name] = copy;
-			}
-		}
-	}
-
-	void ScriptEngine::OnRuntimeEnd()
-	{
-		s_Data->CurrentEntityInstanceMap = &s_Data->EntityInstances;
-		for (const auto& [id, script] : s_Data->EntityRuntimeInstances)
-		{
-			for (auto& it = script.begin(); it != script.end(); ++it)
-				delete it->second;
-		}
-		s_Data->EntityRuntimeInstances.clear();
-	}
-
 	ScriptInstance* ScriptEngine::CreateInstance(Entity entity, const eastl::string& name)
 	{
 		const auto& scriptClass = s_Data->EntityClasses.at(name);
 		UUID entityID = entity.GetUUID();
 		ScriptInstance* instance = new ScriptInstance(scriptClass, entityID);
-		(*s_Data->CurrentEntityInstanceMap)[entityID][name] = instance;
-		return (*s_Data->CurrentEntityInstanceMap)[entityID][name];
+		s_Data->EntityRuntimeInstances[entityID][name] = instance;
+		return instance;
 	}
 
 	bool ScriptEngine::HasInstance(Entity entity, const eastl::string& name)
 	{
 		UUID id = entity.GetUUID();
-		return (*s_Data->CurrentEntityInstanceMap)[id].find(name) != (*s_Data->CurrentEntityInstanceMap)[id].end();
+		return s_Data->EntityRuntimeInstances[id].find(name) != s_Data->EntityRuntimeInstances[id].end();
 	}
 
 	ScriptInstance* ScriptEngine::GetInstance(Entity entity, const eastl::string& name)
 	{
-		return (*s_Data->CurrentEntityInstanceMap)[entity.GetUUID()].at(name);
+		return s_Data->EntityRuntimeInstances.at(entity.GetUUID()).at(name);
 	}
 
 	bool ScriptEngine::HasClass(const eastl::string& className)
@@ -340,8 +299,8 @@ namespace ArcEngine
 
 	void ScriptEngine::RemoveInstance(Entity entity, const eastl::string& name)
 	{
-		delete (*s_Data->CurrentEntityInstanceMap)[entity.GetUUID()][name];
-		(*s_Data->CurrentEntityInstanceMap)[entity.GetUUID()].erase(name);
+		delete s_Data->EntityRuntimeInstances.at(entity.GetUUID()).at(name);
+		s_Data->EntityRuntimeInstances[entity.GetUUID()].erase(name);
 	}
 
 	MonoDomain* ScriptEngine::GetDomain()
@@ -349,36 +308,24 @@ namespace ArcEngine
 		return s_Data->AppDomain;
 	}
 
-	eastl::vector<eastl::string>& ScriptEngine::GetFields(Entity entity, const char* className)
+	const eastl::vector<eastl::string>& ScriptEngine::GetFields(const char* className)
 	{
-		return (*s_Data->CurrentEntityInstanceMap)[entity.GetUUID()].at(className)->GetFields();
+		return s_Data->EntityClasses.at(className)->GetFields();
 	}
 
-	eastl::map<eastl::string, Ref<Field>>& ScriptEngine::GetFieldMap(Entity entity, const char* className)
+	const eastl::unordered_map<eastl::string, ScriptField>& ScriptEngine::GetFieldMap(const char* className)
 	{
-		return (*s_Data->CurrentEntityInstanceMap)[entity.GetUUID()].at(className)->GetFieldMap();
+		return s_Data->EntityClasses.at(className)->GetFieldsMap();
+	}
+
+	eastl::unordered_map<eastl::string, ScriptFieldInstance>& ScriptEngine::GetFieldInstanceMap(Entity entity, const char* className)
+	{
+		return s_Data->EntityFields[entity.GetUUID()][className];
 	}
 
 	eastl::unordered_map<eastl::string, Ref<ScriptClass>>& ScriptEngine::GetClasses()
 	{
 		return s_Data->EntityClasses;
-	}
-
-	void ScriptEngine::SetProperty(GCHandle handle, void* property, void** params)
-	{
-		ARC_PROFILE_SCOPE();
-
-		MonoMethod* method = mono_property_get_set_method((MonoProperty*)property);
-		MonoObject* reference = GCManager::GetReferencedObject(handle);
-		if (reference)
-			mono_runtime_invoke(method, reference, params, nullptr);
-	}
-
-	MonoProperty* ScriptEngine::GetProperty(const char* className, const char* propertyName)
-	{
-		ARC_PROFILE_SCOPE();
-
-		return s_Data->EntityClasses.at(className)->GetProperty(className, propertyName);
 	}
 
 	////////////////////////////////////////////////////////////////////////
@@ -426,31 +373,6 @@ namespace ArcEngine
 			ARC_CRITICAL(ex.c_str());
 		}
 		return gcHandle;
-	}
-
-	MonoProperty* ScriptClass::GetProperty(const char* className, const char* propertyName)
-	{
-		ARC_PROFILE_SCOPE();
-
-		eastl::string key = eastl::string(className) + propertyName;
-		if (m_Properties.find(key) != m_Properties.end())
-			return m_Properties.at(key);
-
-		MonoProperty* property = mono_class_get_property_from_name(m_MonoClass, propertyName);
-		if (property)
-			m_Properties.emplace(key, property);
-		else
-			ARC_CORE_ERROR("Property: {0} not found in class {1}", propertyName, className);
-
-		return property;
-	}
-
-	void ScriptClass::SetProperty(GCHandle gcHandle, void* property, void** params)
-	{
-		ARC_PROFILE_SCOPE();
-
-		MonoMethod* method = mono_property_get_set_method((MonoProperty*)property);
-		InvokeMethod(gcHandle, method, params);
 	}
 
 	enum class Accessibility : uint8_t
@@ -514,94 +436,24 @@ namespace ArcEngine
 		m_Fields.clear();
 		m_FieldsMap.clear();
 
+		MonoObject* tempObject = mono_object_new(s_Data->AppDomain, m_MonoClass);
+		GCHandle tempObjectHandle = GCManager::CreateObjectReference(tempObject, false);
+		mono_runtime_object_init(tempObject);
+
 		MonoClassField* monoField;
 		void* ptr = nullptr;
 		while ((monoField = mono_class_get_fields(m_MonoClass, &ptr)) != nullptr)
 		{
-			const char* propertyName = mono_field_get_name(monoField);
-			m_Fields.push_back(propertyName);
-			m_FieldsMap.emplace(propertyName, monoField);
-		}
-	}
+			const char* fieldName = mono_field_get_name(monoField);
 
-	////////////////////////////////////////////////////////////////////////
-	// Script Instance /////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////
-
-	ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass, UUID entityID)
-		: m_ScriptClass(scriptClass)
-	{
-		m_Handle = scriptClass->Instantiate();
-
-		m_EntityClass = CreateRef<ScriptClass>(s_Data->EntityClass);
-		m_Constructor = m_EntityClass->GetMethod(".ctor", 1);
-		void* params = &entityID;
-		m_EntityClass->InvokeMethod(m_Handle, m_Constructor, &params);
-		
-		LoadMethods();
-		LoadFields();
-	}
-
-	ScriptInstance::ScriptInstance(ScriptInstance* scriptInstance, UUID entityID)
-		: m_ScriptClass(scriptInstance->m_ScriptClass)
-	{
-		MonoObject* copy = mono_object_clone(GCManager::GetReferencedObject(scriptInstance->m_Handle));
-		m_Handle = GCManager::CreateObjectReference(copy, false);
-
-		m_EntityClass = CreateRef<ScriptClass>(s_Data->EntityClass);
-		m_Constructor = m_EntityClass->GetMethod(".ctor", 1);
-		void* params = &entityID;
-		m_EntityClass->InvokeMethod(m_Handle, m_Constructor, &params);
-
-		LoadMethods();
-		LoadFields();
-	}
-
-	ScriptInstance::~ScriptInstance()
-	{
-		GCManager::ReleaseObjectReference(m_Handle);
-	}
-
-	void ScriptInstance::Invalidate(Ref<ScriptClass> scriptClass, UUID entityID)
-	{
-		m_ScriptClass = scriptClass;
-		m_Handle = scriptClass->Instantiate();
-
-		m_EntityClass = CreateRef<ScriptClass>(s_Data->EntityClass);
-		m_Constructor = m_EntityClass->GetMethod(".ctor", 1);
-		void* params = &entityID;
-		m_EntityClass->InvokeMethod(m_Handle, m_Constructor, &params);
-
-		LoadMethods();
-		LoadFields();
-	}
-
-	void ScriptInstance::LoadMethods()
-	{
-		m_OnCreateMethod = m_ScriptClass->GetMethod("OnCreate", 0);
-		m_OnUpdateMethod = m_ScriptClass->GetMethod("OnUpdate", 1);
-		m_OnDestroyMethod = m_ScriptClass->GetMethod("OnDestroy", 0);
-
-		m_OnCollisionEnter2DMethod = m_EntityClass->GetMethod("HandleOnCollisionEnter2D", 1);
-		m_OnCollisionExit2DMethod = m_EntityClass->GetMethod("HandleOnCollisionExit2D", 1);
-		m_OnSensorEnter2DMethod = m_EntityClass->GetMethod("HandleOnSensorEnter2D", 1);
-		m_OnSensorExit2DMethod = m_EntityClass->GetMethod("HandleOnSensorExit2D", 1);
-	}
-
-	void ScriptInstance::LoadFields()
-	{
-		m_Fields.clear();
-
-		const auto& fieldMap = m_ScriptClass->m_FieldsMap;
-		eastl::map<eastl::string, Ref<Field>> finalFields;
-
-		for (const auto& fieldName : m_ScriptClass->m_Fields)
-		{
-			MonoClassField* monoField = fieldMap.at(fieldName);
 			MonoType* fieldType = mono_field_get_type(monoField);
-			Field::FieldType type = Field::GetFieldType(fieldType);
-			
-			if (type == Field::FieldType::Unknown)
+			eastl::string typeName = mono_type_get_name(fieldType);
+
+			FieldType type = FieldType::Unknown;
+			if (s_ScriptFieldTypeMap.find(typeName) != s_ScriptFieldTypeMap.end())
+				type = s_ScriptFieldTypeMap.at(typeName);
+
+			if (type == FieldType::Unknown)
 				continue;
 
 			uint8_t accessibilityFlag = GetFieldAccessibility(monoField);
@@ -612,7 +464,7 @@ namespace ArcEngine
 			float min = 0;
 			float max = 0;
 
-			MonoCustomAttrInfo* attr = mono_custom_attrs_from_field(m_ScriptClass->m_MonoClass, monoField);
+			MonoCustomAttrInfo* attr = mono_custom_attrs_from_field(m_MonoClass, monoField);
 			if (attr)
 			{
 				if (!serializable)
@@ -651,36 +503,62 @@ namespace ArcEngine
 				}
 			}
 
-			bool alreadyPresent = m_FieldsMap.find(fieldName) != m_FieldsMap.end();
-			bool sameType = alreadyPresent && m_FieldsMap.at(fieldName)->Type == type;
-
-			if (sameType)
-			{
-				const void* value = m_FieldsMap[fieldName]->GetUnmanagedValue();
-				size_t size = m_FieldsMap[fieldName]->GetSize();
-				void* copy = new char[size];
-				memcpy(copy, value, size);
-				finalFields[fieldName] = CreateRef<Field>(fieldName, type, monoField, m_Handle);
-				finalFields[fieldName]->SetValue(copy);
-				delete[size] copy;
-			}
-			else
-			{
-				finalFields[fieldName] = CreateRef<Field>(fieldName, type, monoField, m_Handle);
-			}
-
-			const auto& field = finalFields[fieldName];
-			field->Serializable = serializable;
-			field->Hidden = hidden;
-			field->Header = header;
-			field->Tooltip = tooltip;
-			field->Min = min;
-			field->Max = max;
+			auto& scriptField = m_FieldsMap[fieldName];
+			scriptField.Name = fieldName;
+			scriptField.Type = type;
+			scriptField.Field = monoField;
+			scriptField.Serializable = serializable;
+			scriptField.Hidden = hidden;
+			scriptField.Header = header;
+			scriptField.Tooltip = tooltip;
+			scriptField.Min = min;
+			scriptField.Max = max;
+			mono_field_get_value(tempObject, monoField, scriptField.DefaultValue);
 
 			m_Fields.push_back(fieldName);
 		}
 
-		m_FieldsMap = finalFields;
+		GCManager::ReleaseObjectReference(tempObjectHandle);
+	}
+
+	////////////////////////////////////////////////////////////////////////
+	// Script Instance /////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////
+
+	ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass, UUID entityID)
+		: m_ScriptClass(scriptClass)
+	{
+		m_Handle = scriptClass->Instantiate();
+
+		m_EntityClass = CreateRef<ScriptClass>(s_Data->EntityClass);
+		m_Constructor = m_EntityClass->GetMethod(".ctor", 1);
+		void* params = &entityID;
+		m_EntityClass->InvokeMethod(m_Handle, m_Constructor, &params);
+		
+		eastl::string fullClassName = fmt::format("{}.{}", scriptClass->m_ClassNamespace.c_str(), scriptClass->m_ClassName.c_str()).c_str();
+		auto& fieldsMap = s_Data->EntityFields[entityID][fullClassName];
+		for (const auto& [fieldName, field] : scriptClass->m_FieldsMap)
+		{
+			if (fieldsMap.find(fieldName) != fieldsMap.end())
+			{
+				const ScriptFieldInstance& fieldInstance = fieldsMap.at(fieldName);
+				SetFieldValueInternal(fieldName, fieldInstance.GetBuffer());
+			}
+		}
+
+		m_OnCreateMethod = scriptClass->GetMethod("OnCreate", 0);
+		m_OnUpdateMethod = scriptClass->GetMethod("OnUpdate", 1);
+		m_OnDestroyMethod = scriptClass->GetMethod("OnDestroy", 0);
+
+		m_OnCollisionEnter2DMethod = m_EntityClass->GetMethod("HandleOnCollisionEnter2D", 1);
+		m_OnCollisionExit2DMethod = m_EntityClass->GetMethod("HandleOnCollisionExit2D", 1);
+		m_OnSensorEnter2DMethod = m_EntityClass->GetMethod("HandleOnSensorEnter2D", 1);
+		m_OnSensorExit2DMethod = m_EntityClass->GetMethod("HandleOnSensorExit2D", 1);
+	}
+
+	ScriptInstance::~ScriptInstance()
+	{
+		GCManager::ReleaseObjectReference(m_Handle);
 	}
 
 	void ScriptInstance::InvokeOnCreate()
@@ -726,5 +604,17 @@ namespace ArcEngine
 	{
 		void* params = &other;
 		m_EntityClass->InvokeMethod(m_Handle, m_OnSensorExit2DMethod, &params);
+	}
+
+	void ScriptInstance::GetFieldValueInternal(const eastl::string& name, void* value) const
+	{
+		MonoClassField* classField = m_ScriptClass->m_FieldsMap.at(name).Field;
+		mono_field_get_value(GCManager::GetReferencedObject(m_Handle), classField, value);
+	}
+
+	void ScriptInstance::SetFieldValueInternal(const eastl::string& name, const void* value)
+	{
+		MonoClassField* classField = m_ScriptClass->m_FieldsMap.at(name).Field;
+		mono_field_set_value(GCManager::GetReferencedObject(m_Handle), classField, (void*)value);
 	}
 }

@@ -1,13 +1,56 @@
 Scene: Untitled
 Entities:
-  - Entity: 3437048607795030429
+  - Entity: 16781464313560543156
     TagComponent:
-      Tag: Hook
+      Tag: Sprite
       Enabled: true
     TransformComponent:
-      Translation: [0, 0, 0]
+      Translation: [-4.42000008, 5, 0]
       Rotation: [0, 0, 0]
-      Scale: [0.100000001, 0.100000001, 0.100000001]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 0
+      ChildrenCount: 0
+      Children:
+        {}
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: Assets\textures\circle.png
+      TilingFactor: 1
+    Rigidbody2DComponent:
+      Type: 1
+      AutoMass: false
+      Mass: 5
+      LinearDrag: 0
+      AngularDrag: 0.0500000007
+      AllowSleep: true
+      Awake: true
+      Continuous: false
+      FreezeRotation: false
+      GravityScale: 1
+    CircleCollider2DComponent:
+      Radius: 0.5
+      Offset: [0, 0]
+      IsSensor: false
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+    ScriptComponent:
+      ScriptCount: 1
+      Scripts:
+        0:
+          Name: Sandbox.Player
+          Fields:
+            Speed: 209.276001
+  - Entity: 6856658344230727925
+    TagComponent:
+      Tag: Platform
+      Enabled: true
+    TransformComponent:
+      Translation: [-6.41462374, 1.9505372, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 0.100000001]
     RelationshipComponent:
       Parent: 0
       ChildrenCount: 0
@@ -36,124 +79,6 @@ Entities:
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
-  - Entity: 11002321157373702071
-    TagComponent:
-      Tag: Camera
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 0
-      ChildrenCount: 0
-      Children:
-        {}
-    CameraComponent:
-      Camera:
-        ProjectionType: 1
-        PerspectiveFOV: 0.785398185
-        PerspectiveNear: 0.00999999978
-        PerspectiveFar: 1000
-        OrthographicSize: 10
-        OrthographicNear: -1
-        OrthographicFar: 1
-      Primary: true
-      FixedAspectRatio: false
-  - Entity: 7392771533619020041
-    TagComponent:
-      Tag: Sprite
-      Enabled: true
-    TransformComponent:
-      Translation: [0, -2, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 0
-      ChildrenCount: 0
-      Children:
-        {}
-    SpriteRendererComponent:
-      Color: [0.19568257, 0.859574437, 0.153626055, 1]
-      TexturePath: ""
-      TilingFactor: 1
-    Rigidbody2DComponent:
-      Type: 2
-      AutoMass: true
-      Mass: 1
-      LinearDrag: 0
-      AngularDrag: 0.0500000007
-      AllowSleep: false
-      Awake: true
-      Continuous: false
-      FreezeRotation: false
-      GravityScale: 1
-    BoxCollider2DComponent:
-      Size: [0.5, 0.5]
-      Offset: [0, 0]
-      IsSensor: false
-      Density: 1
-      Friction: 0.5
-      Restitution: 0
-      RestitutionThreshold: 0.5
-    SpringJoint2DComponent:
-      EnableCollision: false
-      ConnectedRigidbody: 3437048607795030429
-      Anchor: [0, 0]
-      ConnectedAnchor: [0, 0]
-      AutoDistance: true
-      Distance: 0
-      MinDistance: 0
-      MaxDistanceBy: 2
-      Frequency: 3
-      DampingRatio: 0
-      BreakForce: 3.40282347e+38
-  - Entity: 1136875182593621305
-    TagComponent:
-      Tag: Sprite
-      Enabled: true
-    TransformComponent:
-      Translation: [3.6597538, -2.28152037, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 0
-      ChildrenCount: 0
-      Children:
-        {}
-    SpriteRendererComponent:
-      Color: [0.19568257, 0.859574437, 0.153626055, 1]
-      TexturePath: ""
-      TilingFactor: 1
-    Rigidbody2DComponent:
-      Type: 2
-      AutoMass: true
-      Mass: 1
-      LinearDrag: 0
-      AngularDrag: 0.0500000007
-      AllowSleep: false
-      Awake: true
-      Continuous: false
-      FreezeRotation: false
-      GravityScale: 1
-    BoxCollider2DComponent:
-      Size: [0.5, 0.5]
-      Offset: [0, 0]
-      IsSensor: false
-      Density: 1
-      Friction: 0.5
-      Restitution: 0
-      RestitutionThreshold: 0.5
-    DistanceJoint2DComponent:
-      EnableCollision: false
-      ConnectedRigidbody: 3437048607795030429
-      Anchor: [0, 0]
-      ConnectedAnchor: [0, 0]
-      AutoDistance: false
-      Distance: 2
-      MinDistance: 2
-      MaxDistanceBy: 2
-      BreakForce: 3.40282347e+38
   - Entity: 4519022041829155700
     TagComponent:
       Tag: HingePlatform
@@ -202,14 +127,132 @@ Entities:
       MaxMotorTorque: 100
       BreakForce: 3.40282347e+38
       BreakTorque: 3.40282347e+38
-  - Entity: 6856658344230727925
+  - Entity: 1136875182593621305
     TagComponent:
-      Tag: Platform
+      Tag: Sprite
       Enabled: true
     TransformComponent:
-      Translation: [-6.41462374, 1.9505372, 0]
+      Translation: [3.6597538, -2.28152037, 0]
       Rotation: [0, 0, 0]
-      Scale: [1, 1, 0.100000001]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 0
+      ChildrenCount: 0
+      Children:
+        {}
+    SpriteRendererComponent:
+      Color: [0.19568257, 0.859574437, 0.153626055, 1]
+      TexturePath: ""
+      TilingFactor: 1
+    Rigidbody2DComponent:
+      Type: 2
+      AutoMass: true
+      Mass: 1
+      LinearDrag: 0
+      AngularDrag: 0.0500000007
+      AllowSleep: false
+      Awake: true
+      Continuous: false
+      FreezeRotation: false
+      GravityScale: 1
+    BoxCollider2DComponent:
+      Size: [0.5, 0.5]
+      Offset: [0, 0]
+      IsSensor: false
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+    DistanceJoint2DComponent:
+      EnableCollision: false
+      ConnectedRigidbody: 3437048607795030429
+      Anchor: [0, 0]
+      ConnectedAnchor: [0, 0]
+      AutoDistance: false
+      Distance: 2
+      MinDistance: 2
+      MaxDistanceBy: 2
+      BreakForce: 3.40282347e+38
+  - Entity: 7392771533619020041
+    TagComponent:
+      Tag: Sprite
+      Enabled: true
+    TransformComponent:
+      Translation: [0, -2, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 0
+      ChildrenCount: 0
+      Children:
+        {}
+    SpriteRendererComponent:
+      Color: [0.19568257, 0.859574437, 0.153626055, 1]
+      TexturePath: ""
+      TilingFactor: 1
+    Rigidbody2DComponent:
+      Type: 2
+      AutoMass: true
+      Mass: 1
+      LinearDrag: 0
+      AngularDrag: 0.0500000007
+      AllowSleep: false
+      Awake: true
+      Continuous: false
+      FreezeRotation: false
+      GravityScale: 1
+    BoxCollider2DComponent:
+      Size: [0.5, 0.5]
+      Offset: [0, 0]
+      IsSensor: false
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+    SpringJoint2DComponent:
+      EnableCollision: false
+      ConnectedRigidbody: 3437048607795030429
+      Anchor: [0, 0]
+      ConnectedAnchor: [0, 0]
+      AutoDistance: true
+      Distance: 0
+      MinDistance: 0
+      MaxDistanceBy: 2
+      Frequency: 3
+      DampingRatio: 0
+      BreakForce: 3.40282347e+38
+  - Entity: 11002321157373702071
+    TagComponent:
+      Tag: Camera
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 0
+      ChildrenCount: 0
+      Children:
+        {}
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 3437048607795030429
+    TagComponent:
+      Tag: Hook
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [0.100000001, 0.100000001, 0.100000001]
     RelationshipComponent:
       Parent: 0
       ChildrenCount: 0
@@ -238,59 +281,3 @@ Entities:
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
-  - Entity: 16781464313560543156
-    TagComponent:
-      Tag: Sprite
-      Enabled: true
-    TransformComponent:
-      Translation: [-4.42000008, 5, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 0
-      ChildrenCount: 0
-      Children:
-        {}
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
-      TexturePath: Assets\textures\circle.png
-      TilingFactor: 1
-    Rigidbody2DComponent:
-      Type: 1
-      AutoMass: false
-      Mass: 5
-      LinearDrag: 0
-      AngularDrag: 0.0500000007
-      AllowSleep: true
-      Awake: true
-      Continuous: false
-      FreezeRotation: false
-      GravityScale: 1
-    CircleCollider2DComponent:
-      Radius: 0.5
-      Offset: [0, 0]
-      IsSensor: false
-      Density: 1
-      Friction: 0.5
-      Restitution: 0
-      RestitutionThreshold: 0.5
-    ScriptComponent:
-      ScriptCount: 1
-      Scripts:
-        0:
-          Name: Sandbox.Enemy
-          Fields:
-            Bool: false
-            Byte: 255
-            Int: -10
-            Long: -5000000000000000000
-            SByte: 127
-            Short: -25600
-            Speed: 20
-            String: Arc Engine
-            UInt: 5
-            ULong: 5000000000000000000
-            UShort: 50600
-            Vec2: [2, 3]
-            Vec3: [2, 3, 4]
-            Vec4: [2, 3, 4, 1]

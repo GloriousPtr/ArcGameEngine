@@ -14,7 +14,6 @@
 #include "Arc/Renderer/VertexArray.h"
 #include "Arc/Renderer/Framebuffer.h"
 #include "Arc/Renderer/Mesh.h"
-#include "Arc/Scripting/Field.h"
 #include "Arc/Audio/AudioSource.h"
 #include "Arc/Audio/AudioListener.h"
 

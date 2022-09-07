@@ -211,7 +211,7 @@ namespace ArcEngine
 		if (ImGui::BeginPopup("SettingsPopup"))
 		{
 			UI::BeginProperties(ImGuiTableFlags_SizingStretchSame);
-			UI::Property("Thumbnail Size", m_ThumbnailSize, 63.9f, 128.0f, nullptr, "");
+			UI::Property("Thumbnail Size", m_ThumbnailSize, 63.9f, 128.0f, nullptr, 0.1f, "");
 			UI::EndProperties();
 			ImGui::EndPopup();
 		}
