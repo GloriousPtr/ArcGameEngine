@@ -286,20 +286,25 @@ namespace ArcEngine
 
 		ImGui::Text(ICON_MDI_FOLDER);
 
+		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.0f, 0.0f, 0.0f, 0.0f });
 		std::filesystem::path current = "";
 		std::filesystem::path directoryToOpen = "";
 		for (auto& path : m_CurrentDirectory)
 		{
 			current /= path;
-
 			ImGui::SameLine();
-
 			const char* folderName = StringUtils::GetName(path.string().c_str()).c_str();
-			ImGui::Text("%s %s", folderName, ICON_MDI_GREATER_THAN);
-
-			if (ImGui::IsItemClicked() && ImGui::IsMouseDown(0))
+			if (ImGui::Button(folderName))
 				directoryToOpen = current;
+
+			if (m_CurrentDirectory != current)
+			{
+				ImGui::SameLine();
+				ImGui::TextUnformatted("/");
+			}
 		}
+		ImGui::PopStyleColor(2);
 
 		if (!directoryToOpen.empty())
 			UpdateDirectoryEntries(directoryToOpen);
@@ -431,9 +436,10 @@ namespace ArcEngine
 
 		bool anyItemHovered = false;
 		uint32_t i = 0;
+		bool textureCreated = false;
 		if (ImGui::BeginTable("BodyTable", columnCount, flags))
 		{
-			for (const auto& file : m_DirectoryEntries)
+			for (auto& file : m_DirectoryEntries)
 			{
 				++i;
 				ImGui::PushID(i);
@@ -448,9 +454,22 @@ namespace ArcEngine
 				{
 					eastl::string ext = StringUtils::GetExtension((eastl::string&&)file.Name);
 					if (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp")
-						textureId = AssetManager::GetTexture2D(filepath)->GetRendererID();
+					{
+						if (file.Thumbnail)
+						{
+							textureId = file.Thumbnail->GetRendererID();
+						}
+						else if (!textureCreated)
+						{
+							textureCreated = true;
+							file.Thumbnail = Texture2D::Create(filepath);
+							textureId = file.Thumbnail->GetRendererID();
+						}
+					}
 					else
+					{
 						fontIcon = GetFileIcon(ext.c_str());
+					}
 				}
 
 				ImGui::TableNextColumn();
@@ -583,7 +602,9 @@ namespace ArcEngine
 			const auto& path = directoryEntry.path();
 			auto relativePath = std::filesystem::relative(path, s_AssetPath);
 			eastl::string fileNameString = relativePath.filename().string().c_str();
-			m_DirectoryEntries.push_back({ fileNameString, directoryEntry });
+
+			eastl::string ext = StringUtils::GetExtension(relativePath.string().c_str());
+			m_DirectoryEntries.push_back({ fileNameString, directoryEntry, nullptr });
 		}
 
 		m_ElapsedTime = 0.0f;

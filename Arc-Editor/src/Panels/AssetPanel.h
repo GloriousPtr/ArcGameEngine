@@ -35,6 +35,7 @@ namespace ArcEngine
 		{
 			eastl::string Name;
 			std::filesystem::directory_entry DirectoryEntry;
+			Ref<Texture2D> Thumbnail;
 		};
 
 		std::filesystem::path m_CurrentDirectory;
