@@ -25,7 +25,7 @@ namespace ArcEngine
 	class Window
 	{
 	public:
-		using EventCallbackFn = std::function<void(Event&)>;
+		using EventCallbackFn = eastl::function<void(Event&)>;
 
 		virtual ~Window() = default;
 

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <EASTL/unordered_map.h>
-
 #include "Arc/Scene/Scene.h"
 
 typedef struct _MonoDomain MonoDomain;
@@ -118,7 +116,7 @@ namespace ArcEngine
 		GCHandle InvokeMethod(GCHandle gcHandle, MonoMethod* method, void** params = nullptr);
 
 		const eastl::vector<eastl::string>& GetFields() const { return m_Fields; }
-		const eastl::unordered_map<eastl::string, ScriptField>& GetFieldsMap() const { return m_FieldsMap; }
+		const eastl::hash_map<eastl::string, ScriptField>& GetFieldsMap() const { return m_FieldsMap; }
 
 	private:
 		void LoadFields();
@@ -132,7 +130,7 @@ namespace ArcEngine
 
 		MonoClass* m_MonoClass = nullptr;
 		eastl::vector<eastl::string> m_Fields;
-		eastl::unordered_map<eastl::string, ScriptField> m_FieldsMap;
+		eastl::hash_map<eastl::string, ScriptField> m_FieldsMap;
 	};
 
 	struct Collision2DData
@@ -221,10 +219,10 @@ namespace ArcEngine
 		static ScriptInstance* GetInstance(Entity entity, const eastl::string& name);
 		static void RemoveInstance(Entity entity, const eastl::string& name);
 		
-		static eastl::unordered_map<eastl::string, Ref<ScriptClass>>& GetClasses();
+		static eastl::hash_map<eastl::string, Ref<ScriptClass>>& GetClasses();
 		static const eastl::vector<eastl::string>& GetFields (const char* className);
-		static const eastl::unordered_map<eastl::string, ScriptField>& GetFieldMap(const char* className);
-		static eastl::unordered_map<eastl::string, ScriptFieldInstance>& GetFieldInstanceMap(Entity entity, const char* className);
+		static const eastl::hash_map<eastl::string, ScriptField>& GetFieldMap(const char* className);
+		static eastl::hash_map<eastl::string, ScriptFieldInstance>& GetFieldInstanceMap(Entity entity, const char* className);
 
 		static void SetScene(Scene* scene) { s_CurrentScene = scene; }
 		static Scene* GetScene() { return s_CurrentScene; }

@@ -10,7 +10,9 @@ project "Arc-Editor"
 	files
 	{
 		"src/**.h",
-		"src/**.cpp"
+		"src/**.cpp",
+
+		"%{IncludeDir.EASTL}/EASTL.natvis",
 	}
 
 	includedirs

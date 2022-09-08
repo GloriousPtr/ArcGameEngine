@@ -19,7 +19,7 @@
 
 namespace ArcEngine
 {
-	static const eastl::unordered_map<eastl::string, FieldType> s_ScriptFieldTypeMap =
+	static const eastl::hash_map<eastl::string, FieldType> s_ScriptFieldTypeMap =
 	{
 		{ "System.Single",		FieldType::Float },
 		{ "System.Double",		FieldType::Double },
@@ -62,10 +62,10 @@ namespace ArcEngine
 		MonoClass* TooltipAttribute = nullptr;
 		MonoClass* RangeAttribute = nullptr;
 
-		eastl::unordered_map<eastl::string, Ref<ScriptClass>> EntityClasses;
-		eastl::unordered_map<UUID, eastl::unordered_map<eastl::string, eastl::unordered_map<eastl::string, ScriptFieldInstance>>> EntityFields;
+		eastl::hash_map<eastl::string, Ref<ScriptClass>> EntityClasses;
+		eastl::hash_map<UUID, eastl::hash_map<eastl::string, eastl::hash_map<eastl::string, ScriptFieldInstance>>> EntityFields;
 
-		using EntityInstanceMap = eastl::unordered_map<UUID, eastl::unordered_map<eastl::string, ScriptInstance*>>;
+		using EntityInstanceMap = eastl::hash_map<UUID, eastl::hash_map<eastl::string, ScriptInstance*>>;
 		EntityInstanceMap EntityRuntimeInstances;
 	};
 
@@ -181,7 +181,7 @@ namespace ArcEngine
 						{
 							size_t newLine = strlen(buffer) - 1;
 							buffer[newLine] = '\0';
-							ARC_ERROR(buffer);
+							ARC_APP_ERROR(buffer);
 						}
 					}
 
@@ -206,7 +206,7 @@ namespace ArcEngine
 						{
 							size_t newLine = strlen(buffer) - 1;
 							buffer[newLine] = '\0';
-							ARC_WARN(buffer);
+							ARC_APP_WARN(buffer);
 						}
 					}
 
@@ -285,7 +285,7 @@ namespace ArcEngine
 	bool ScriptEngine::HasInstance(Entity entity, const eastl::string& name)
 	{
 		UUID id = entity.GetUUID();
-		return s_Data->EntityRuntimeInstances[id].find(name) != s_Data->EntityRuntimeInstances[id].end();
+		return s_Data->EntityRuntimeInstances[id].find_as(name) != s_Data->EntityRuntimeInstances[id].end();
 	}
 
 	ScriptInstance* ScriptEngine::GetInstance(Entity entity, const eastl::string& name)
@@ -314,17 +314,17 @@ namespace ArcEngine
 		return s_Data->EntityClasses.at(className)->GetFields();
 	}
 
-	const eastl::unordered_map<eastl::string, ScriptField>& ScriptEngine::GetFieldMap(const char* className)
+	const eastl::hash_map<eastl::string, ScriptField>& ScriptEngine::GetFieldMap(const char* className)
 	{
 		return s_Data->EntityClasses.at(className)->GetFieldsMap();
 	}
 
-	eastl::unordered_map<eastl::string, ScriptFieldInstance>& ScriptEngine::GetFieldInstanceMap(Entity entity, const char* className)
+	eastl::hash_map<eastl::string, ScriptFieldInstance>& ScriptEngine::GetFieldInstanceMap(Entity entity, const char* className)
 	{
 		return s_Data->EntityFields[entity.GetUUID()][className];
 	}
 
-	eastl::unordered_map<eastl::string, Ref<ScriptClass>>& ScriptEngine::GetClasses()
+	eastl::hash_map<eastl::string, Ref<ScriptClass>>& ScriptEngine::GetClasses()
 	{
 		return s_Data->EntityClasses;
 	}
@@ -371,7 +371,7 @@ namespace ArcEngine
 		{
 			MonoString* monoString = mono_object_to_string(exception, nullptr);
 			eastl::string ex = MonoUtils::MonoStringToUTF8(monoString);
-			ARC_CRITICAL(ex.c_str());
+			ARC_APP_CRITICAL(ex.c_str());
 		}
 		return gcHandle;
 	}
@@ -451,27 +451,12 @@ namespace ArcEngine
 			eastl::string typeName = mono_type_get_name(fieldType);
 
 			FieldType type = FieldType::Unknown;
-			if (s_ScriptFieldTypeMap.find(typeName) != s_ScriptFieldTypeMap.end())
+			if (s_ScriptFieldTypeMap.find_as(typeName) != s_ScriptFieldTypeMap.end())
 				type = s_ScriptFieldTypeMap.at(typeName);
 
 			if (type == FieldType::Unknown)
 			{
 				ARC_CORE_WARN("Unsupported Field Type Name: {}", typeName);
-
-				/*
-				MonoClass* m = mono_type_get_class(fieldType);
-				if (m)
-				{
-					ARC_CORE_WARN("\tenum {}", mono_class_is_enum(m));
-					MonoClassField* f;
-					void* ptrr = nullptr;
-					while ((f = mono_class_get_fields(m, &ptrr)) != nullptr)
-					{
-						ARC_CORE_WARN("\t\t {}", mono_field_get_name(f));
-					}
-				}
-
-				*/
 				continue;
 			}
 
@@ -568,7 +553,7 @@ namespace ArcEngine
 		auto& fieldsMap = s_Data->EntityFields[entityID][fullClassName];
 		for (const auto& [fieldName, field] : scriptClass->m_FieldsMap)
 		{
-			if (fieldsMap.find(fieldName) != fieldsMap.end())
+			if (fieldsMap.find_as(fieldName) != fieldsMap.end())
 			{
 				const ScriptFieldInstance& fieldInstance = fieldsMap.at(fieldName);
 				SetFieldValueInternal(fieldName, fieldInstance.GetBuffer());

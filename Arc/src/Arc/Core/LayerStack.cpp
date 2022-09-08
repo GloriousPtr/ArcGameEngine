@@ -30,7 +30,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		auto it = std::find(m_Layers.begin(), m_Layers.begin() + m_LayerInsertIndex, layer);
+		auto it = eastl::find(m_Layers.begin(), m_Layers.begin() + m_LayerInsertIndex, layer);
 		if(it != m_Layers.begin() + m_LayerInsertIndex)
 		{
 			layer->OnDetach();
@@ -43,7 +43,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		auto it = std::find(m_Layers.begin() + m_LayerInsertIndex, m_Layers.end(), overlay);
+		auto it = eastl::find(m_Layers.begin() + m_LayerInsertIndex, m_Layers.end(), overlay);
 		if (it != m_Layers.end())
 		{
 			overlay->OnDetach();

@@ -38,7 +38,7 @@ namespace ArcEngine
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLIndexBuffer>(indices, count);
+			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLIndexBuffer>(indices, (uint32_t)count);
 			default:						ARC_CORE_ASSERT(false, "Unknown RendererAPI!"); return nullptr;
 		}
 

@@ -10,7 +10,7 @@ namespace ArcEngine
 	// VertexBuffer //////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(uint32_t size)
+	OpenGLVertexBuffer::OpenGLVertexBuffer(size_t size)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -19,7 +19,7 @@ namespace ArcEngine
 		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
 	}
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(const float* vertices, uint32_t size)
+	OpenGLVertexBuffer::OpenGLVertexBuffer(const float* vertices, size_t size)
 	{
 		ARC_PROFILE_SCOPE();
 		

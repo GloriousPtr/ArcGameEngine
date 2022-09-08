@@ -826,7 +826,7 @@ namespace ArcEngine
 
 				for (const auto& [name, scriptClass] : classes)
 				{
-					bool notFound = (std::find(component.Classes.begin(), component.Classes.end(), name) == component.Classes.end());
+					bool notFound = eastl::find(component.Classes.begin(), component.Classes.end(), name) == component.Classes.end();
 					if (notFound && !m_Filter.IsActive() || (m_Filter.IsActive() && m_Filter.PassFilter(name.c_str())))
 					{
 						if (ImGui::MenuItem(name.c_str()))

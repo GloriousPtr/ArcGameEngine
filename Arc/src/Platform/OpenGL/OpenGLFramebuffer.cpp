@@ -107,7 +107,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		glDeleteFramebuffers(1, &m_RendererID);
-		glDeleteTextures(m_ColorAttachments.size(), m_ColorAttachments.data());
+		glDeleteTextures((uint32_t)m_ColorAttachments.size(), m_ColorAttachments.data());
 		glDeleteTextures(1, &m_DepthAttachment);
 	}
 
@@ -120,7 +120,7 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE("FramebufferDelete");
 
 			glDeleteFramebuffers(1, &m_RendererID);
-			glDeleteTextures(m_ColorAttachments.size(), m_ColorAttachments.data());
+			glDeleteTextures((uint32_t)m_ColorAttachments.size(), m_ColorAttachments.data());
 			glDeleteTextures(1, &m_DepthAttachment);
 
 			m_ColorAttachments.clear();
@@ -194,7 +194,7 @@ namespace ArcEngine
 			{
 				ARC_CORE_ASSERT(m_ColorAttachments.size() <= 5);
 				GLenum buffers[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
-				glDrawBuffers(m_ColorAttachments.size(), buffers);
+				glDrawBuffers((uint32_t)m_ColorAttachments.size(), buffers);
 			}
 			else if (m_ColorAttachments.empty())
 			{

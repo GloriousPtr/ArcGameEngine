@@ -149,27 +149,20 @@ namespace ArcEngine
 	Material::MaterialData Material::GetData_Internal(const char* name)
 	{
 		ARC_PROFILE_SCOPE();
-
 		const auto& materialProperties = m_Shader->GetMaterialProperties();
-		for (const auto& [n, property] : materialProperties)
-		{
-			if (n == name)
-				return m_Buffer + property.OffsetInBytes;
-		}
+		const auto& materialProperty = m_Shader->GetMaterialProperties().find_as(name);
+		if (materialProperty != materialProperties.end())
+			return m_Buffer + materialProperty->second.OffsetInBytes;
+
+		return nullptr;
 	}
 
 	void Material::SetData_Internal(const char* name, const Material::MaterialData data)
 	{
 		ARC_PROFILE_SCOPE();
-
 		const auto& materialProperties = m_Shader->GetMaterialProperties();
-		for (const auto& [n, property] : materialProperties)
-		{
-			if (n == name)
-			{
-				memcpy(m_Buffer + property.OffsetInBytes, data, property.SizeInBytes);
-				return;
-			}
-		}
+		const auto& property = m_Shader->GetMaterialProperties().find_as(name);
+		if (property != materialProperties.end())
+			memcpy(m_Buffer + property->second.OffsetInBytes, data, property->second.SizeInBytes);
 	}
 }

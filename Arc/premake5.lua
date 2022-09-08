@@ -21,6 +21,8 @@ project "Arc"
 
 		"vendor/ImGuizmo/ImGuizmo.h",
 		"vendor/ImGuizmo/ImGuizmo.cpp",
+
+		"vendor/EASTL/include/EASTL.natvis",
 	}
 
 	defines

@@ -259,8 +259,6 @@ namespace ArcEngine
 		newScene->m_ViewportWidth = other->m_ViewportWidth;
 		newScene->m_ViewportHeight = other->m_ViewportHeight;
 
-		auto& srcRegistry = other->m_Registry;
-		auto& dstRegistry = newScene->m_Registry;
 		auto view = other->m_Registry.view<IDComponent, TagComponent>();
 		for (auto e : view)
 		{
@@ -280,6 +278,9 @@ namespace ArcEngine
 				dst.SetParent(dstParent);
 			}
 		}
+
+		auto& srcRegistry = other->m_Registry;
+		auto& dstRegistry = newScene->m_Registry;
 
 		CopyComponent(AllComponents{}, dstRegistry, srcRegistry, newScene->m_EntityMap);
 

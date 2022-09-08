@@ -7,8 +7,8 @@ namespace ArcEngine
 	class OpenGLVertexBuffer : public VertexBuffer
 	{
 	public:
-		explicit OpenGLVertexBuffer(uint32_t size);
-		OpenGLVertexBuffer(const float* vertices, uint32_t size);
+		explicit OpenGLVertexBuffer(size_t size);
+		OpenGLVertexBuffer(const float* vertices, size_t size);
 		virtual ~OpenGLVertexBuffer();
 
 		OpenGLVertexBuffer(const OpenGLVertexBuffer& other) = default;

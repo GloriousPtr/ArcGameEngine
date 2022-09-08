@@ -97,7 +97,8 @@ namespace YAML
 		{
 			std::string buffer;
 			bool success = convert<std::string>::decode(node, buffer);
-			str = buffer.c_str();
+			if (success)
+				str = buffer.c_str();
 			return success;
 		}
 	};
@@ -114,9 +115,10 @@ namespace YAML
 
 		static bool decode(const Node& node, ArcEngine::UUID& uuid)
 		{
-			uint64_t tmp;
+			uint64_t tmp = 0;
 			bool success = convert<uint64_t>::decode(node, tmp);
-			uuid = tmp;
+			if (success)
+				uuid = tmp;
 			return success;
 		}
 	};
@@ -1204,7 +1206,7 @@ namespace ArcEngine
 
 		if (entities)
 		{
-			eastl::unordered_map<UUID, UUID> oldNewIdMap;
+			eastl::hash_map<UUID, UUID> oldNewIdMap;
 			for (const auto& entity : entities)
 			{
 				UUID oldUUID = 0;

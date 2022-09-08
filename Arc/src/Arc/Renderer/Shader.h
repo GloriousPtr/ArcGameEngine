@@ -1,8 +1,8 @@
 #pragma once
 
+#include <EASTL/hash_map.h>
+
 #include <EASTL/string.h>
-#include <EASTL/unordered_map.h>
-#include <EASTL/map.h>
 #include <glm/glm.hpp>
 
 namespace ArcEngine
@@ -61,7 +61,7 @@ namespace ArcEngine
 		virtual void SetMat4(const eastl::string& name, const glm::mat4& value) = 0;
 		virtual void SetUniformBlock(const eastl::string& name, uint32_t blockIndex) = 0;
 		
-		virtual eastl::map<eastl::string, MaterialProperty>& GetMaterialProperties() = 0;
+		virtual eastl::hash_map<eastl::string, MaterialProperty>& GetMaterialProperties() = 0;
 
 		virtual const eastl::string& GetName() const = 0;
 
@@ -82,7 +82,7 @@ namespace ArcEngine
 
 		bool Exists(const eastl::string& name) const;
 	private:
-		eastl::unordered_map<eastl::string, Ref<Shader>> m_Shaders;
-		eastl::unordered_map<eastl::string, eastl::string> m_ShaderPaths;
+		eastl::hash_map<eastl::string, Ref<Shader>> m_Shaders;
+		eastl::hash_map<eastl::string, eastl::string> m_ShaderPaths;
 	};
 }

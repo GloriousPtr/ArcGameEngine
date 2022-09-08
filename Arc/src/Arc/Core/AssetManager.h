@@ -1,7 +1,5 @@
 #pragma once
 
-#include <EASTL/hash_map.h>
-
 #include "Arc/Renderer/Texture.h"
 #include "Arc/Renderer/Mesh.h"
 

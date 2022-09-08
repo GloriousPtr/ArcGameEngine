@@ -579,7 +579,7 @@ namespace ArcEngine
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
-			if (fieldInstanceMap.find(fieldName) != fieldInstanceMap.end())
+			if (fieldInstanceMap.find_as(fieldName) != fieldInstanceMap.end())
 			{
 				ScriptFieldInstance& fieldInstance = fieldInstanceMap.at(fieldName);
 
@@ -621,9 +621,8 @@ namespace ArcEngine
 		ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
 		if (!scriptInstance)
 		{
-			T value = field.GetDefaultValue<T>();
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
-			if (fieldInstanceMap.find(fieldName) != fieldInstanceMap.end())
+			if (fieldInstanceMap.find_as(fieldName) != fieldInstanceMap.end())
 			{
 				ScriptFieldInstance& fieldInstance = fieldInstanceMap.at(fieldName);
 
@@ -666,7 +665,7 @@ namespace ArcEngine
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
-			if (fieldInstanceMap.find(fieldName) != fieldInstanceMap.end())
+			if (fieldInstanceMap.find_as(fieldName) != fieldInstanceMap.end())
 			{
 				ScriptFieldInstance& fieldInstance = fieldInstanceMap.at(fieldName);
 
@@ -708,7 +707,7 @@ namespace ArcEngine
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
-			if (fieldInstanceMap.find(fieldName) != fieldInstanceMap.end())
+			if (fieldInstanceMap.find_as(fieldName) != fieldInstanceMap.end())
 			{
 				ScriptFieldInstance& fieldInstance = fieldInstanceMap.at(fieldName);
 

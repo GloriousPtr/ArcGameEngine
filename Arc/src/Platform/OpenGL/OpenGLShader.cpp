@@ -189,7 +189,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
+		if (m_UniformLocationCache.find_as(name) != m_UniformLocationCache.end())
 			return m_UniformLocationCache.at(name);
 
 		int location = glGetUniformLocation(m_RendererID, name.c_str());
@@ -343,12 +343,12 @@ namespace ArcEngine
 		glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &uniformCount);
 
 		size_t offset = 0;
-		for (GLuint i = 0; i < uniformCount; i++)
+		for (int i = 0; i < uniformCount; i++)
 		{
 			char name[128];
 			int size;
 			GLenum type;
-			glGetActiveUniform(program, i, maxLength, nullptr, &size, &type, &name[0]);
+			glGetActiveUniform(program, (GLuint)i, maxLength, nullptr, &size, &type, &name[0]);
 
 			static const char* prefix = "u_Material.";
 			if (strncmp(name, prefix, strlen(prefix)) == 0)

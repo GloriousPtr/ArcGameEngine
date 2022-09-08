@@ -1,5 +1,7 @@
 #pragma once
 
+#include <EASTL/unordered_map.h>
+
 #include "Arc/Renderer/Shader.h"
 
 #include <glm/glm.hpp>
@@ -31,7 +33,7 @@ namespace ArcEngine
 		virtual void SetMat4(const eastl::string& name, const glm::mat4& value) override;
 		virtual void SetUniformBlock(const eastl::string& name, uint32_t blockIndex) override;
 
-		virtual eastl::map<eastl::string, MaterialProperty>& GetMaterialProperties() { return m_MaterialProperties; }
+		virtual eastl::hash_map<eastl::string, MaterialProperty>& GetMaterialProperties() { return m_MaterialProperties; }
 
 		virtual const eastl::string& GetName() const override { return m_Name; }
 		
@@ -55,8 +57,7 @@ namespace ArcEngine
 	private:
 		uint32_t m_RendererID;
 		eastl::string m_Name;
-		eastl::unordered_map<eastl::string, int> m_UniformLocationCache;
-		eastl::map<eastl::string, MaterialProperty> m_MaterialProperties;
+		eastl::hash_map<eastl::string, int> m_UniformLocationCache;
+		eastl::hash_map<eastl::string, MaterialProperty> m_MaterialProperties;
 	};
 }
-

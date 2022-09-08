@@ -77,10 +77,10 @@ namespace ArcEngine
 		{
 			shaderName = it->first;
 
-			if (m_ShaderPaths.find(shaderName) == m_ShaderPaths.end())
+			if (m_ShaderPaths.find_as(shaderName) == m_ShaderPaths.end())
 				continue;
 
-			it->second->Recompile(m_ShaderPaths[shaderName]);
+			it->second->Recompile(m_ShaderPaths.at(shaderName));
 		}
 	}
 
@@ -96,7 +96,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		return m_Shaders.find(name) != m_Shaders.end();
+		return m_Shaders.find_as(name) != m_Shaders.end();
 	}
 
 }

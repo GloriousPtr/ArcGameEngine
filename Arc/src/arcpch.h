@@ -19,7 +19,6 @@
 #include <EASTL/string.h>
 #include <EASTL/array.h>
 #include <EASTL/vector.h>
-#include <EASTL/map.h>
 #include <EASTL/hash_map.h>
 
 #include "Arc/Core/Base.h"

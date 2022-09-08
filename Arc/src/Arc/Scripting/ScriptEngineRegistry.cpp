@@ -9,7 +9,7 @@
 #include "Arc/Math/Math.h"
 #include "Arc/Scene/Entity.h"
 #include "GCManager.h"
-#include "MonoUtils.h";
+#include "MonoUtils.h"
 #include "ScriptEngine.h"
 
 namespace ArcEngine
@@ -23,7 +23,7 @@ namespace ArcEngine
 	{
 		([]()
 		{
-			static int n = strlen("struct ArcEngine::");
+			static size_t n = strlen("struct ArcEngine::");
 			const char* componentName = n + typeid(Component).name();
 			std::string name = std::string("ArcEngine.") + componentName;
 			MonoType* type = mono_reflection_type_from_name(&name[0], ScriptEngine::GetCoreAssemblyImage());
@@ -94,19 +94,19 @@ namespace ArcEngine
 
 		switch (level)
 		{
-			case Log::Level::Trace:		ARC_TRACE(MonoUtils::MonoStringToUTF8(formattedMessage));
+			case Log::Level::Trace:		ARC_APP_TRACE(MonoUtils::MonoStringToUTF8(formattedMessage));
 										break;
-			case Log::Level::Debug:		ARC_DEBUG(MonoUtils::MonoStringToUTF8(formattedMessage));
+			case Log::Level::Debug:		ARC_APP_DEBUG(MonoUtils::MonoStringToUTF8(formattedMessage));
 										break;
-			case Log::Level::Info:		ARC_INFO(MonoUtils::MonoStringToUTF8(formattedMessage));
+			case Log::Level::Info:		ARC_APP_INFO(MonoUtils::MonoStringToUTF8(formattedMessage));
 										break;
-			case Log::Level::Warn:		ARC_WARN(MonoUtils::MonoStringToUTF8(formattedMessage));
+			case Log::Level::Warn:		ARC_APP_WARN(MonoUtils::MonoStringToUTF8(formattedMessage));
 										break;
-			case Log::Level::Error:		ARC_ERROR(MonoUtils::MonoStringToUTF8(formattedMessage));
+			case Log::Level::Error:		ARC_APP_ERROR(MonoUtils::MonoStringToUTF8(formattedMessage));
 										break;
-			case Log::Level::Critical:	ARC_CRITICAL(MonoUtils::MonoStringToUTF8(formattedMessage));
+			case Log::Level::Critical:	ARC_APP_CRITICAL(MonoUtils::MonoStringToUTF8(formattedMessage));
 										break;
-			default:					ARC_TRACE(MonoUtils::MonoStringToUTF8(formattedMessage));
+			default:					ARC_APP_TRACE(MonoUtils::MonoStringToUTF8(formattedMessage));
 										break;
 		}
 	}

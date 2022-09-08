@@ -593,15 +593,14 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE("Draw Meshes");
 
 			MeshComponent::CullModeType currentCullMode = MeshComponent::CullModeType::Unknown;
-			for (auto it = s_Meshes.rbegin(); it != s_Meshes.rend(); it++)
+			for (const auto& meshData : s_Meshes)
 			{
-				const MeshData* meshData = &(*it);
-				meshData->SubmeshGeometry.Mat->Bind();
-				s_Shader->SetMat4("u_Model", meshData->Transform);
+				meshData.SubmeshGeometry.Mat->Bind();
+				s_Shader->SetMat4("u_Model", meshData.Transform);
 				
-				if (currentCullMode != meshData->CullMode)
+				if (currentCullMode != meshData.CullMode)
 				{
-					currentCullMode = meshData->CullMode;
+					currentCullMode = meshData.CullMode;
 					switch (currentCullMode)
 					{
 						case MeshComponent::CullModeType::DoubleSided:
@@ -621,9 +620,9 @@ namespace ArcEngine
 					}
 				}
 				
-				RenderCommand::DrawIndexed(meshData->SubmeshGeometry.Geometry);
+				RenderCommand::DrawIndexed(meshData.SubmeshGeometry.Geometry);
 				s_Stats.DrawCalls++;
-				s_Stats.IndexCount += meshData->SubmeshGeometry.Geometry->GetIndexBuffer()->GetCount();
+				s_Stats.IndexCount += meshData.SubmeshGeometry.Geometry->GetIndexBuffer()->GetCount();
 			}
 		}
 	}
