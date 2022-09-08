@@ -33,7 +33,8 @@ namespace ArcEngine
 		{ "System.UInt16",		FieldType::UShort },
 		{ "System.UInt32",		FieldType::UInt },
 		{ "System.UInt64",		FieldType::ULong },
-
+		{ "System.String",		FieldType::String },
+		
 		{ "ArcEngine.Vector2",	FieldType::Vector2 },
 		{ "ArcEngine.Vector3",	FieldType::Vector3 },
 		{ "ArcEngine.Vector4",	FieldType::Vector4 },
@@ -454,7 +455,25 @@ namespace ArcEngine
 				type = s_ScriptFieldTypeMap.at(typeName);
 
 			if (type == FieldType::Unknown)
+			{
+				ARC_CORE_WARN("Unsupported Field Type Name: {}", typeName);
+
+				/*
+				MonoClass* m = mono_type_get_class(fieldType);
+				if (m)
+				{
+					ARC_CORE_WARN("\tenum {}", mono_class_is_enum(m));
+					MonoClassField* f;
+					void* ptrr = nullptr;
+					while ((f = mono_class_get_fields(m, &ptrr)) != nullptr)
+					{
+						ARC_CORE_WARN("\t\t {}", mono_field_get_name(f));
+					}
+				}
+
+				*/
 				continue;
+			}
 
 			uint8_t accessibilityFlag = GetFieldAccessibility(monoField);
 			bool serializable = accessibilityFlag & (uint8_t)Accessibility::Public;
@@ -513,7 +532,17 @@ namespace ArcEngine
 			scriptField.Tooltip = tooltip;
 			scriptField.Min = min;
 			scriptField.Max = max;
-			mono_field_get_value(tempObject, monoField, scriptField.DefaultValue);
+
+			if (type == FieldType::String)
+			{
+				MonoString* monoStr = (MonoString*)mono_field_get_value_object(s_Data->AppDomain, monoField, tempObject);
+				eastl::string str = MonoUtils::MonoStringToUTF8(monoStr);
+				memcpy(scriptField.DefaultValue, str.data(), sizeof(scriptField.DefaultValue));
+			}
+			else
+			{
+				mono_field_get_value(tempObject, monoField, scriptField.DefaultValue);
+			}
 
 			m_Fields.push_back(fieldName);
 		}
@@ -614,7 +643,24 @@ namespace ArcEngine
 
 	void ScriptInstance::SetFieldValueInternal(const eastl::string& name, const void* value)
 	{
+		const auto& field = m_ScriptClass->m_FieldsMap.at(name);
+		MonoClassField* classField = field.Field;
+		if (field.Type == FieldType::String)
+		{
+			MonoString* monoStr = mono_string_new(s_Data->AppDomain, (const char*)value);
+			mono_field_set_value(GCManager::GetReferencedObject(m_Handle), classField, monoStr);
+		}
+		else
+		{
+			mono_field_set_value(GCManager::GetReferencedObject(m_Handle), classField, (void*)value);
+		}
+	}
+
+	eastl::string ScriptInstance::GetFieldValueStringInternal(const eastl::string& name) const
+	{
 		MonoClassField* classField = m_ScriptClass->m_FieldsMap.at(name).Field;
-		mono_field_set_value(GCManager::GetReferencedObject(m_Handle), classField, (void*)value);
+		MonoString* monoStr = (MonoString*)mono_field_get_value_object(s_Data->AppDomain, classField, GCManager::GetReferencedObject(m_Handle));
+		eastl::string str = MonoUtils::MonoStringToUTF8(monoStr);
+		return str;
 	}
 }

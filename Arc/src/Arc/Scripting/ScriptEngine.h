@@ -32,6 +32,7 @@ namespace ArcEngine
 		UShort,
 		UInt,
 		ULong,
+		String,
 
 		Vector2,
 		Vector3,
@@ -70,6 +71,8 @@ namespace ArcEngine
 
 	struct ScriptFieldInstance
 	{
+		FieldType Type = FieldType::Unknown;
+
 		ScriptFieldInstance()
 		{
 			memset(m_Buffer, 0, sizeof(m_Buffer));
@@ -87,6 +90,11 @@ namespace ArcEngine
 		{
 			static_assert(sizeof(T) <= 16, "Type too large");
 			memcpy(m_Buffer, &value, sizeof(T));
+		}
+
+		void SetValueString(const char* value)
+		{
+			memcpy(m_Buffer, value, sizeof(m_Buffer));
 		}
 
 		const void* GetBuffer() const { return m_Buffer; }
@@ -165,11 +173,17 @@ namespace ArcEngine
 			SetFieldValueInternal(fieldName, &value);
 		}
 
+		eastl::string GetFieldValueString(const eastl::string& fieldName) const
+		{
+			return GetFieldValueStringInternal(fieldName);
+		}
+
 		GCHandle GetHandle() { return m_Handle; }
 
 	private:
 		void GetFieldValueInternal(const eastl::string& name, void* value) const;
 		void SetFieldValueInternal(const eastl::string& name, const void* value);
+		eastl::string GetFieldValueStringInternal(const eastl::string& name) const;
 
 	private:
 		Ref<ScriptClass> m_EntityClass;

@@ -30,9 +30,8 @@ namespace YAML
 			if (!node.IsSequence() || node.size() != 2)
 				return false;
 
-			rhs.x = node[0].as<float>();
-			rhs.y = node[1].as<float>();
-			return true;
+			return convert<float>::decode(node[0], rhs.x)
+				&& convert<float>::decode(node[1], rhs.y);
 		}
 	};
 
@@ -53,10 +52,9 @@ namespace YAML
 			if (!node.IsSequence() || node.size() != 3)
 				return false;
 
-			rhs.x = node[0].as<float>();
-			rhs.y = node[1].as<float>();
-			rhs.z = node[2].as<float>();
-			return true;
+			return convert<float>::decode(node[0], rhs.x)
+				&& convert<float>::decode(node[1], rhs.y)
+				&& convert<float>::decode(node[2], rhs.z);
 		}
 	};
 
@@ -78,11 +76,10 @@ namespace YAML
 			if (!node.IsSequence() || node.size() != 4)
 				return false;
 
-			rhs.x = node[0].as<float>();
-			rhs.y = node[1].as<float>();
-			rhs.z = node[2].as<float>();
-			rhs.w = node[3].as<float>();
-			return true;
+			return convert<float>::decode(node[0], rhs.x)
+				&& convert<float>::decode(node[1], rhs.y)
+				&& convert<float>::decode(node[2], rhs.z)
+				&& convert<float>::decode(node[3], rhs.w);
 		}
 	};
 
@@ -98,8 +95,10 @@ namespace YAML
 
 		static bool decode(const Node& node, eastl::string& str)
 		{
-			str = node.as<std::string>().c_str();
-			return true;
+			std::string buffer;
+			bool success = convert<std::string>::decode(node, buffer);
+			str = buffer.c_str();
+			return success;
 		}
 	};
 
@@ -115,8 +114,10 @@ namespace YAML
 
 		static bool decode(const Node& node, ArcEngine::UUID& uuid)
 		{
-			uuid = node.as<uint64_t>();
-			return true;
+			uint64_t tmp;
+			bool success = convert<uint64_t>::decode(node, tmp);
+			uuid = tmp;
+			return success;
 		}
 	};
 }
@@ -155,7 +156,7 @@ namespace ArcEngine
 	inline T TrySet(T& value, const YAML::Node& node)
 	{
 		if (node)
-			value = node.as<T>();
+			value = node.as<T>(value);
 		return value;
 	}
 
@@ -163,7 +164,7 @@ namespace ArcEngine
 	inline T TrySetEnum(T& value, YAML::Node& node)
 	{
 		if (node)
-			value = (T) node.as<int>();
+			value = (T) node.as<int>((int)value);
 		return value;
 	}
 
@@ -678,9 +679,9 @@ namespace ArcEngine
 		{
 			// Entities always have transforms
 			auto& tc = deserializedEntity.GetComponent<TransformComponent>();
-			tc.Translation = transformComponent["Translation"].as<glm::vec3>();
-			tc.Rotation = transformComponent["Rotation"].as<glm::vec3>();
-			tc.Scale = transformComponent["Scale"].as<glm::vec3>();
+			TrySet(tc.Translation, transformComponent["Translation"]);
+			TrySet(tc.Rotation, transformComponent["Rotation"]);
+			TrySet(tc.Scale, transformComponent["Scale"]);
 		}
 
 		auto relationshipComponent = entity["RelationshipComponent"];
@@ -688,16 +689,22 @@ namespace ArcEngine
 		{
 			// Entities always have transforms
 			auto& tc = deserializedEntity.GetComponent<RelationshipComponent>();
-			tc.Parent = relationshipComponent["Parent"].as<uint64_t>();
+			TrySet(tc.Parent, relationshipComponent["Parent"]);
 
-			size_t childCount = relationshipComponent["ChildrenCount"].as<size_t>();
+			size_t childCount = 0;
+			TrySet(childCount, relationshipComponent["ChildrenCount"]);
 			tc.Children.clear();
 			tc.Children.reserve(childCount);
 			auto children = relationshipComponent["Children"];
 			if (children && childCount > 0)
 			{
 				for (size_t i = 0; i < childCount; i++)
-					tc.Children.push_back(children[i].as<uint64_t>());
+				{
+					UUID child = 0;
+					TrySet(child, children[i]);
+					if (child)
+						tc.Children.push_back(child);
+				}
 			}
 		}
 
@@ -934,7 +941,9 @@ namespace ArcEngine
 		{
 			auto& sc = deserializedEntity.AddComponent<ScriptComponent>();
 
-			size_t scriptCount = scriptComponent["ScriptCount"].as<size_t>();
+			size_t scriptCount = 0;
+			TrySet(scriptCount, scriptComponent["ScriptCount"]);
+
 			sc.Classes.clear();
 			auto scripts = scriptComponent["Scripts"];
 			if (scripts && scriptCount > 0)
@@ -943,7 +952,8 @@ namespace ArcEngine
 				{
 					auto& scriptNode = scripts[i];
 					
-					std::string scriptName = scriptNode["Name"].as<std::string>();
+					eastl::string scriptName = "";
+					TrySet(scriptName, scriptNode["Name"]);
 					if (!ScriptEngine::HasClass(scriptName.c_str()))
 					{
 						ARC_CORE_ERROR("Class not found with name: {}", scriptName.c_str());
@@ -967,102 +977,120 @@ namespace ArcEngine
 							if (fieldNode)
 							{
 								auto& fieldInstance = fieldInstances[fieldName];
+								fieldInstance.Type = field.Type;
+
 								switch (field.Type)
 								{
-								case FieldType::Bool:
-								{
-									bool value = fieldNode.as<bool>();
-									fieldInstance.SetValue(value);
-									break;
-								}
-								case FieldType::Float:
-								{
-									float value = fieldNode.as<float>();
-									fieldInstance.SetValue(value);
-									break;
-								}
-								case FieldType::Double:
-								{
-									double value = fieldNode.as<double>();
-									fieldInstance.SetValue(value);
-									break;
-								}
-								case FieldType::Byte:
-								{
-									int8_t value = fieldNode.as<int8_t>();
-									fieldInstance.SetValue(value);
-									break;
-								}
-								case FieldType::UByte:
-								{
-									uint8_t value = fieldNode.as<uint8_t>();
-									fieldInstance.SetValue(value);
-									break;
-								}
-								case FieldType::Short:
-								{
-									int16_t value = fieldNode.as<int16_t>();
-									fieldInstance.SetValue(value);
-									break;
-								}
-								case FieldType::UShort:
-								{
-									uint16_t value = fieldNode.as<uint16_t>();
-									fieldInstance.SetValue(value);
-									break;
-								}
-								case FieldType::Int:
-								{
-									int32_t value = fieldNode.as<int32_t>();
-									fieldInstance.SetValue(value);
-									break;
-								}
-								case FieldType::UInt:
-								{
-									uint32_t value = fieldNode.as<uint32_t>();
-									fieldInstance.SetValue(value);
-									break;
-								}
-								case FieldType::Long:
-								{
-									int64_t value = fieldNode.as<int64_t>();
-									fieldInstance.SetValue(value);
-									break;
-								}
-								case FieldType::ULong:
-								{
-									uint64_t value = fieldNode.as<uint64_t>();
-									fieldInstance.SetValue(value);
-									break;
-								}
-								case FieldType::Vector2:
-								{
-									glm::vec2 value = fieldNode.as<glm::vec2>();
-									fieldInstance.SetValue(value);
-									break;
-								}
-								case FieldType::Vector3:
-								{
-									glm::vec3 value = fieldNode.as<glm::vec3>();
-									fieldInstance.SetValue(value);
-									break;
-								}
-								case FieldType::Vector4:
-								{
-									glm::vec4 value = fieldNode.as<glm::vec4>();
-									fieldInstance.SetValue(value);
-									break;
-								}
-								case FieldType::Color:
-								{
-									glm::vec4 value = fieldNode.as<glm::vec4>();
-									fieldInstance.SetValue(value);
-									break;
-								}
-								default:
-								{
-									ARC_CORE_ASSERT(false);
-								}
+									case FieldType::Bool:
+									{
+										bool value = field.GetDefaultValue<bool>();
+										TrySet(value, fieldNode);
+										fieldInstance.SetValue(value);
+										break;
+									}
+									case FieldType::Float:
+									{
+										float value = field.GetDefaultValue<float>();
+										TrySet(value, fieldNode);
+										fieldInstance.SetValue(value);
+										break;
+									}
+									case FieldType::Double:
+									{
+										double value = field.GetDefaultValue<double>();
+										TrySet(value, fieldNode);
+										fieldInstance.SetValue(value);
+										break;
+									}
+									case FieldType::Byte:
+									{
+										int8_t value = field.GetDefaultValue<int8_t>();
+										TrySet(value, fieldNode);
+										fieldInstance.SetValue(value);
+										break;
+									}
+									case FieldType::UByte:
+									{
+										uint8_t value = field.GetDefaultValue<uint8_t>();
+										TrySet(value, fieldNode);
+										fieldInstance.SetValue(value);
+										break;
+									}
+									case FieldType::Short:
+									{
+										int16_t value = field.GetDefaultValue<int16_t>();
+										TrySet(value, fieldNode);
+										fieldInstance.SetValue(value);
+										break;
+									}
+									case FieldType::UShort:
+									{
+										uint16_t value = field.GetDefaultValue<uint16_t>();
+										TrySet(value, fieldNode);
+										fieldInstance.SetValue(value);
+										break;
+									}
+									case FieldType::Int:
+									{
+										int32_t value = field.GetDefaultValue<int32_t>();
+										TrySet(value, fieldNode);
+										fieldInstance.SetValue(value);
+										break;
+									}
+									case FieldType::UInt:
+									{
+										uint32_t value = field.GetDefaultValue<uint32_t>();
+										TrySet(value, fieldNode);
+										fieldInstance.SetValue(value);
+										break;
+									}
+									case FieldType::Long:
+									{
+										int64_t value = field.GetDefaultValue<int64_t>();
+										TrySet(value, fieldNode);
+										fieldInstance.SetValue(value);
+										break;
+									}
+									case FieldType::ULong:
+									{
+										uint64_t value = field.GetDefaultValue<uint64_t>();
+										TrySet(value, fieldNode);
+										fieldInstance.SetValue(value);
+										break;
+									}
+									case FieldType::Vector2:
+									{
+										glm::vec2 value = field.GetDefaultValue<glm::vec2>();
+										TrySet(value, fieldNode);
+										fieldInstance.SetValue(value);
+										break;
+									}
+									case FieldType::Vector3:
+									{
+										glm::vec3 value = field.GetDefaultValue<glm::vec3>();
+										TrySet(value, fieldNode);
+										fieldInstance.SetValue(value);
+										break;
+									}
+									case FieldType::Vector4:
+									{
+										glm::vec4 value = field.GetDefaultValue<glm::vec4>();
+										TrySet(value, fieldNode);
+										fieldInstance.SetValue(value);
+										break;
+									}
+									case FieldType::Color:
+									{
+										glm::vec4 value = field.GetDefaultValue<glm::vec4>();
+										TrySet(value, fieldNode);
+										fieldInstance.SetValue(value);
+										break;
+									}
+									default:
+									{
+										ARC_CORE_ASSERT(false);
+										break;
+									}
 								}
 							}
 						}
@@ -1160,7 +1188,14 @@ namespace ArcEngine
 		if (!data["Prefab"])
 			return {};
 
-		uint64_t prefabID = data["Prefab"].as<uint64_t>();
+		UUID prefabID = 0;
+		TrySet(prefabID, data["Prefab"]);
+
+		if (!prefabID)
+		{
+			ARC_CORE_ERROR("Ivalid prefab id : {0} ({1})", StringUtils::GetName(filepath).c_str(), prefabID);
+			return {};
+		}
 
 		auto entities = data["Entities"];
 		ARC_CORE_TRACE("Deserializing prefab : {0} ({1})", StringUtils::GetName(filepath).c_str(), prefabID);
@@ -1172,7 +1207,8 @@ namespace ArcEngine
 			eastl::unordered_map<UUID, UUID> oldNewIdMap;
 			for (const auto& entity : entities)
 			{
-				UUID oldUUID = entity["Entity"].as<uint64_t>();
+				UUID oldUUID = 0;
+				TrySet(oldUUID, entity["Entity"]);
 				UUID newUUID = EntitySerializer::DeserializeEntity(entity, scene, false);
 				oldNewIdMap.emplace(oldUUID, newUUID);
 				

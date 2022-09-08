@@ -583,6 +583,12 @@ namespace ArcEngine
 			{
 				ScriptFieldInstance& fieldInstance = fieldInstanceMap.at(fieldName);
 
+				if (fieldInstance.Type != field.Type)
+				{
+					fieldInstanceMap.erase(fieldName);
+					return;
+				}
+
 				T value = fieldInstance.GetValue<T>();
 				if (UI::Property(field.Name.c_str(), value, min, max, tooltip))
 					fieldInstance.SetValue(value);
@@ -591,7 +597,10 @@ namespace ArcEngine
 			{
 				T value = field.GetDefaultValue<T>();
 				if (UI::Property(field.Name.c_str(), value, min, max, tooltip))
+				{
+					fieldInstanceMap[fieldName].Type = field.Type;
 					fieldInstanceMap[fieldName].SetValue(value);
+				}
 			}
 		}
 		else
@@ -612,10 +621,17 @@ namespace ArcEngine
 		ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
 		if (!scriptInstance)
 		{
+			T value = field.GetDefaultValue<T>();
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
 			if (fieldInstanceMap.find(fieldName) != fieldInstanceMap.end())
 			{
 				ScriptFieldInstance& fieldInstance = fieldInstanceMap.at(fieldName);
+
+				if (fieldInstance.Type != field.Type)
+				{
+					fieldInstanceMap.erase(fieldName);
+					return;
+				}
 
 				T value = fieldInstance.GetValue<T>();
 				if (UI::Property(field.Name.c_str(), value, tooltip))
@@ -625,7 +641,10 @@ namespace ArcEngine
 			{
 				T value = field.GetDefaultValue<T>();
 				if (UI::Property(field.Name.c_str(), value, tooltip))
+				{
+					fieldInstanceMap[fieldName].Type = field.Type;
 					fieldInstanceMap[fieldName].SetValue(value);
+				}
 			}
 		}
 		else
@@ -651,6 +670,12 @@ namespace ArcEngine
 			{
 				ScriptFieldInstance& fieldInstance = fieldInstanceMap.at(fieldName);
 
+				if (fieldInstance.Type != field.Type)
+				{
+					fieldInstanceMap.erase(fieldName);
+					return;
+				}
+
 				T value = fieldInstance.GetValue<T>();
 				if (UI::PropertyColor4(field.Name.c_str(), value, tooltip))
 					fieldInstance.SetValue(value);
@@ -659,7 +684,10 @@ namespace ArcEngine
 			{
 				T value = field.GetDefaultValue<T>();
 				if (UI::PropertyColor4(field.Name.c_str(), value, tooltip))
+				{
+					fieldInstanceMap[fieldName].Type = field.Type;
 					fieldInstanceMap[fieldName].SetValue(value);
+				}
 			}
 		}
 		else
@@ -667,6 +695,48 @@ namespace ArcEngine
 			T value = scriptInstance->GetFieldValue<T>(field.Name);
 			if (UI::PropertyColor4(field.Name.c_str(), value, tooltip))
 				scriptInstance->SetFieldValue<T>(field.Name, value);
+		}
+	}
+
+	static void DrawScriptFieldString(Entity entity, const eastl::string& className, const eastl::string& fieldName)
+	{
+		const auto& fieldMap = ScriptEngine::GetFieldMap(className.c_str());
+		const ScriptField& field = fieldMap.at(fieldName);
+		const char* tooltip = field.Tooltip.empty() ? nullptr : field.Tooltip.c_str();
+
+		ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
+		if (!scriptInstance)
+		{
+			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
+			if (fieldInstanceMap.find(fieldName) != fieldInstanceMap.end())
+			{
+				ScriptFieldInstance& fieldInstance = fieldInstanceMap.at(fieldName);
+
+				if (fieldInstance.Type != field.Type)
+				{
+					fieldInstanceMap.erase(fieldName);
+					return;
+				}
+
+				eastl::string value = (const char*)fieldInstance.GetBuffer();
+				if (UI::Property(field.Name.c_str(), value, tooltip))
+					fieldInstance.SetValueString(value.c_str());
+			}
+			else
+			{
+				eastl::string value = field.DefaultValue;
+				if (UI::Property(field.Name.c_str(), value, tooltip))
+				{
+					fieldInstanceMap[fieldName].Type = field.Type;
+					fieldInstanceMap[fieldName].SetValueString(value.c_str());
+				}
+			}
+		}
+		else
+		{
+			eastl::string value = scriptInstance->GetFieldValueString(field.Name);
+			if (UI::Property(field.Name.c_str(), value, tooltip))
+				scriptInstance->SetFieldValue<const char*>(field.Name, value.c_str());
 		}
 	}
 
@@ -734,6 +804,11 @@ namespace ArcEngine
 			case FieldType::ULong:
 			{
 				DrawScriptFieldScalar<uint64_t>(entity, className, fieldName);
+				break;
+			}
+			case FieldType::String:
+			{
+				DrawScriptFieldString(entity, className, fieldName);
 				break;
 			}
 			case FieldType::Vector2:
