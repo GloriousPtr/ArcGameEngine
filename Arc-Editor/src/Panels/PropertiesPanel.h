@@ -40,7 +40,7 @@ namespace ArcEngine
 		void DrawFileProperties(const char* filepath);
 
 		template<typename Component>
-		void DrawAddComponent(Entity entity, const char* name) const;
+		void DrawAddComponent(Entity entity, const char* name, const char* category = nullptr) const;
 
 	private:
 		EditorContext m_Context = {};

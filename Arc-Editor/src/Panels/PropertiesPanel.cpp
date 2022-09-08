@@ -323,6 +323,9 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
+		ImVec2 headerRegion = ImGui::GetContentRegionAvail();
+		headerRegion.y = ImGui::GetFrameHeight();
+		ImGui::BeginChild("PropertiesHeader", headerRegion, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 		if(entity.HasComponent<TagComponent>())
 		{
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
@@ -343,23 +346,36 @@ namespace ArcEngine
 
 			if (ImGui::BeginPopup("AddComponentPopup"))
 			{
+				const float filterCursorPosX = ImGui::GetCursorPosX();
+				m_Filter.Draw("###PropertiesFilter", ImGui::GetContentRegionAvail().x);
+
+				if (!m_Filter.IsActive())
+				{
+					ImGui::SameLine();
+					ImGui::SetCursorPosX(filterCursorPosX + ImGui::GetFontSize() * 0.5f);
+					ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
+				}
+
+				DrawAddComponent<SpriteRendererComponent>(entity, ICON_MDI_IMAGE_SIZE_SELECT_ACTUAL " Sprite Renderer", "2D");
+				DrawAddComponent<Rigidbody2DComponent>(entity, ICON_MDI_SOCCER " Rigidbody 2D", "2D");
+				DrawAddComponent<BoxCollider2DComponent>(entity, ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider 2D", "2D");
+				DrawAddComponent<CircleCollider2DComponent>(entity, ICON_MDI_CIRCLE_OUTLINE " Circle Collider 2D", "2D");
+				DrawAddComponent<DistanceJoint2DComponent>(entity, ICON_MDI_VECTOR_LINE " Distance Joint 2D", "2D");
+				DrawAddComponent<SpringJoint2DComponent>(entity, ICON_MDI_VECTOR_LINE " Spring Joint 2D", "2D");
+				DrawAddComponent<HingeJoint2DComponent>(entity, ICON_MDI_ANGLE_ACUTE " Hinge Joint 2D", "2D");
+				DrawAddComponent<SliderJoint2DComponent>(entity, ICON_MDI_VIEW_AGENDA " Slider Joint 2D", "2D");
+				DrawAddComponent<WheelJoint2DComponent>(entity, ICON_MDI_CAR " Wheel Joint 2D", "2D");
+				DrawAddComponent<BuoyancyEffector2DComponent>(entity, ICON_MDI_WATER " Buoyancy Effector 2D", "2D");
+
+				DrawAddComponent<SkyLightComponent>(entity, ICON_MDI_EARTH " Sky Light", "3D");
+				DrawAddComponent<LightComponent>(entity, ICON_MDI_LIGHTBULB " Light", "3D");
+				DrawAddComponent<MeshComponent>(entity, ICON_MDI_VECTOR_SQUARE " Mesh", "3D");
+
+				DrawAddComponent<AudioSourceComponent>(entity, ICON_MDI_VOLUME_MEDIUM " Audio", "Audio");
+				DrawAddComponent<AudioListenerComponent>(entity, ICON_MDI_CIRCLE_SLICE_8 " Audio Listener", "Audio");
+
 				DrawAddComponent<CameraComponent>(entity, ICON_MDI_CAMERA " Camera");
-				DrawAddComponent<SpriteRendererComponent>(entity, ICON_MDI_IMAGE_SIZE_SELECT_ACTUAL " Sprite Renderer");
-				DrawAddComponent<MeshComponent>(entity, ICON_MDI_VECTOR_SQUARE " Mesh");
-				DrawAddComponent<SkyLightComponent>(entity, ICON_MDI_EARTH " Sky Light");
-				DrawAddComponent<LightComponent>(entity, ICON_MDI_LIGHTBULB " Light");
-				DrawAddComponent<Rigidbody2DComponent>(entity, ICON_MDI_SOCCER " Rigidbody 2D");
-				DrawAddComponent<BoxCollider2DComponent>(entity, ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider 2D");
-				DrawAddComponent<CircleCollider2DComponent>(entity, ICON_MDI_CIRCLE_OUTLINE " Circle Collider 2D");
-				DrawAddComponent<DistanceJoint2DComponent>(entity, ICON_MDI_VECTOR_LINE " Distance Joint 2D");
-				DrawAddComponent<SpringJoint2DComponent>(entity, ICON_MDI_VECTOR_LINE " Spring Joint 2D");
-				DrawAddComponent<HingeJoint2DComponent>(entity, ICON_MDI_ANGLE_ACUTE " Hinge Joint 2D");
-				DrawAddComponent<SliderJoint2DComponent>(entity, ICON_MDI_ANGLE_ACUTE " Slider Joint 2D");
-				DrawAddComponent<WheelJoint2DComponent>(entity, ICON_MDI_CAR " Wheel Joint 2D");
-				DrawAddComponent<BuoyancyEffector2DComponent>(entity, ICON_MDI_WATER " Buoyancy Effector 2D");
 				DrawAddComponent<ScriptComponent>(entity, ICON_MDI_POUND_BOX " Script");
-				DrawAddComponent<AudioSourceComponent>(entity, ICON_MDI_VOLUME_MEDIUM " Audio");
-				DrawAddComponent<AudioListenerComponent>(entity, ICON_MDI_CIRCLE_SLICE_8 " Audio Listener");
 
 				ImGui::EndPopup();
 			}
@@ -378,7 +394,9 @@ namespace ArcEngine
 			if (UI::ToggleButton(icon, m_Locked, lockButtonSize))
 				m_Locked = !m_Locked;
 		}
+		ImGui::EndChild();
 
+		ImGui::BeginChild("PropertiesBody");
 		DrawComponent<TransformComponent>(ICON_MDI_VECTOR_LINE " Transform", entity, [](TransformComponent& component)
 		{
 			UI::BeginProperties();
@@ -723,7 +741,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<SliderJoint2DComponent>(ICON_MDI_ANGLE_ACUTE " Slider Joint 2D", entity, [&entity](SliderJoint2DComponent& component)
+		DrawComponent<SliderJoint2DComponent>(ICON_MDI_VIEW_AGENDA " Slider Joint 2D", entity, [&entity](SliderJoint2DComponent& component)
 		{
 			UI::BeginProperties();
 			UI::Property("Enable Collision", component.EnableCollision);
@@ -801,12 +819,13 @@ namespace ArcEngine
 
 		DrawComponent<ScriptComponent>(ICON_MDI_POUND_BOX " Script", entity, [this, &entity](ScriptComponent& component)
 		{
-			float regionX = ImGui::GetContentRegionAvail().x;
-			float frameHeight = ImGui::GetFrameHeight();
-			if (ImGui::Button("Add", { regionX, frameHeight }))
-			{
+			ImGui::Spacing();
+			ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x - 55.0f);
+			if (UI::IconButton("  " ICON_MDI_PLUS, "Add  "))
 				ImGui::OpenPopup("ScriptAddPopup");
-			}
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
+			ImGui::Separator();
+			ImGui::Spacing();
 
 			const auto& classes = ScriptEngine::GetClasses();
 			if (ImGui::BeginPopup("ScriptAddPopup"))
@@ -925,6 +944,8 @@ namespace ArcEngine
 			UI::Property("Cone Outer Gain", config.ConeOuterGain);
 			UI::EndProperties();
 		});
+
+		ImGui::EndChild();
 	}
 
 	void PropertiesPanel::DrawFileProperties(const char* filepath)
@@ -955,14 +976,44 @@ namespace ArcEngine
 	}
 
 	template<typename Component>
-	void PropertiesPanel::DrawAddComponent(Entity entity, const char* name) const
+	void PropertiesPanel::DrawAddComponent(Entity entity, const char* name, const char* category) const
 	{
 		if (!entity.HasComponent<Component>())
 		{
-			if (ImGui::MenuItem(name))
+			if (!m_Filter.IsActive())
 			{
-				entity.AddComponent<Component>();
-				ImGui::CloseCurrentPopup();
+				if (category)
+				{
+					if (ImGui::BeginMenu(category))
+					{
+						if (ImGui::MenuItem(name))
+						{
+							entity.AddComponent<Component>();
+							ImGui::CloseCurrentPopup();
+						}
+
+						ImGui::EndMenu();
+					}
+				}
+				else
+				{
+					if (ImGui::MenuItem(name))
+					{
+						entity.AddComponent<Component>();
+						ImGui::CloseCurrentPopup();
+					}
+				}
+			}
+			else
+			{
+				if (m_Filter.IsActive() && m_Filter.PassFilter(name))
+				{
+					if (ImGui::MenuItem(name))
+					{
+						entity.AddComponent<Component>();
+						ImGui::CloseCurrentPopup();
+					}
+				}
 			}
 		}
 	}
