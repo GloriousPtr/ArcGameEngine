@@ -16,7 +16,7 @@ namespace ArcEngine
 		if (size >= 50)
 			m_FrameTimes.erase(m_FrameTimes.begin());
 
-		m_FrameTimes.push_back(ImGui::GetIO().Framerate);
+		m_FrameTimes.emplace_back(ImGui::GetIO().Framerate);
 		for (uint32_t i = 0; i < size; i++)
 		{
 			m_FpsValues[i] = m_FrameTimes[i];

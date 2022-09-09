@@ -92,7 +92,7 @@ namespace ArcEngine
 			aiString str;
 			mat->GetTexture(type, i, &str);
 			Ref<Texture2D> texture = AssetManager::GetTexture2D(dir + '\\' + str.C_Str());
-			textures.push_back(texture);
+			textures.emplace_back(texture);
 		}
 		return textures;
 	}
@@ -109,37 +109,37 @@ namespace ArcEngine
 		for(size_t i = 0; i < mesh->mNumVertices; i++)
 		{
 			const auto& vertexPosition = mesh->mVertices[i];
-			vertices.push_back(vertexPosition.x);
-			vertices.push_back(vertexPosition.y);
-			vertices.push_back(vertexPosition.z);
+			vertices.emplace_back(vertexPosition.x);
+			vertices.emplace_back(vertexPosition.y);
+			vertices.emplace_back(vertexPosition.z);
 
 			if(mesh->mTextureCoords[0])
             {
-                vertices.push_back(mesh->mTextureCoords[0][i].x);
-                vertices.push_back(mesh->mTextureCoords[0][i].y);
+                vertices.emplace_back(mesh->mTextureCoords[0][i].x);
+                vertices.emplace_back(mesh->mTextureCoords[0][i].y);
             }
             else
 			{
-				vertices.push_back(0.0f);
-				vertices.push_back(0.0f);
+				vertices.emplace_back(0.0f);
+				vertices.emplace_back(0.0f);
 			}
 			
 			const auto& normal = mesh->mNormals[i];
-			vertices.push_back(normal.x);
-			vertices.push_back(normal.y);
-			vertices.push_back(normal.z);
+			vertices.emplace_back(normal.x);
+			vertices.emplace_back(normal.y);
+			vertices.emplace_back(normal.z);
 
 			if (mesh->mTangents)
 			{
 				const auto& tangent = mesh->mTangents[i];
-				vertices.push_back(tangent.x);
-				vertices.push_back(tangent.y);
-				vertices.push_back(tangent.z);
+				vertices.emplace_back(tangent.x);
+				vertices.emplace_back(tangent.y);
+				vertices.emplace_back(tangent.z);
 
 				const auto& bitangent = mesh->mBitangents[i];
-				vertices.push_back(bitangent.x);
-				vertices.push_back(bitangent.y);
-				vertices.push_back(bitangent.z);
+				vertices.emplace_back(bitangent.x);
+				vertices.emplace_back(bitangent.y);
+				vertices.emplace_back(bitangent.z);
 			}
 			else
 			{
@@ -172,12 +172,12 @@ namespace ArcEngine
 				const auto tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
 				const auto bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
 
-				vertices.push_back(tangent.x);
-				vertices.push_back(tangent.y);
-				vertices.push_back(tangent.z);
-				vertices.push_back(bitangent.x);
-				vertices.push_back(bitangent.y);
-				vertices.push_back(bitangent.z);
+				vertices.emplace_back(tangent.x);
+				vertices.emplace_back(tangent.y);
+				vertices.emplace_back(tangent.z);
+				vertices.emplace_back(bitangent.x);
+				vertices.emplace_back(bitangent.y);
+				vertices.emplace_back(bitangent.z);
 			}
 		}
 
@@ -186,7 +186,7 @@ namespace ArcEngine
 			aiFace face = mesh->mFaces[i];
 			indices.reserve(face.mNumIndices);
 			for(size_t j = 0; j < face.mNumIndices; j++)
-				indices.push_back(face.mIndices[j]);
+				indices.emplace_back(face.mIndices[j]);
 		}
 
 		Ref<VertexArray> vertexArray = VertexArray::Create();

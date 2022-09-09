@@ -24,7 +24,7 @@ namespace ArcEngine
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene(const CameraData& cameraData, Entity cubemap, const eastl::vector<Entity>& lights);
+		static void BeginScene(const CameraData& cameraData, Entity cubemap, eastl::vector<Entity>&& lights);
 		static void EndScene(const Ref<RenderGraphData>& renderTarget);
 
 		static void DrawCube();

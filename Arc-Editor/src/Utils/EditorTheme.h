@@ -66,8 +66,8 @@ namespace ArcEngine
 			colors[ImGuiCol_PlotHistogram] = ImVec4(0.00f, 0.44f, 0.88f, 1.00f);
 			colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.00f, 0.47f, 0.94f, 1.00f);
 			colors[ImGuiCol_TableHeaderBg] = ImVec4(0.18f, 0.18f, 0.18f, 1.00f);
-			colors[ImGuiCol_TableBorderStrong] = ImVec4(0.102f, 0.102f, 0.102f, 1.00f);
-			colors[ImGuiCol_TableBorderLight] = ImVec4(0.102f, 0.102f, 0.102f, 1.00f);
+			colors[ImGuiCol_TableBorderStrong] = ImVec4(0.197f, 0.197f, 0.197f, 1.00f);
+			colors[ImGuiCol_TableBorderLight] = ImVec4(0.197f, 0.197f, 0.197f, 1.00f);
 			colors[ImGuiCol_TableRowBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.00f);
 			colors[ImGuiCol_TableRowBgAlt] = ImVec4(1.00f, 1.00f, 1.00f, 0.10f);
 			colors[ImGuiCol_TextSelectedBg] = ImVec4(0.19f, 0.53f, 0.78f, 1.00f);

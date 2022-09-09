@@ -78,7 +78,7 @@ namespace ArcEngine
 			
 			auto& rc = GetComponent<RelationshipComponent>();
 			rc.Parent = parent.GetUUID();
-			parent.GetRelationship().Children.push_back(GetUUID());
+			parent.GetRelationship().Children.emplace_back(GetUUID());
 		}
 
 		void Deparent() const
@@ -109,12 +109,7 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE();
 
 			const auto& transform = GetTransform();
-			const auto& rc = GetRelationship();
-			glm::mat4 parentTransform = glm::mat4(1.0f);
-			if (rc.Parent != 0)
-				parentTransform = m_Scene->GetEntity(rc.Parent).GetWorldTransform();
-
-			return parentTransform * glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);
+			return glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);
 		}
 
 		glm::mat4 GetLocalTransform() const
@@ -122,7 +117,12 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE();
 
 			const auto& transform = GetTransform();
-			return glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);
+			const auto& rc = GetRelationship();
+			glm::mat4 parentTransform = glm::mat4(1.0f);
+			if (rc.Parent != 0)
+				parentTransform = m_Scene->GetEntity(rc.Parent).GetWorldTransform();
+
+			return parentTransform * glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);
 		}
 
 		Scene* GetScene() const { return m_Scene; }

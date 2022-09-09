@@ -370,7 +370,7 @@ namespace ArcEngine
 			auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
 			for (auto e : view)
 			{
-				auto [transform, body] = view.get<TransformComponent, Rigidbody2DComponent>(e);
+				auto& body = view.get<Rigidbody2DComponent>(e);
 				CreateRigidbody2D({ e, this }, body);
 			}
 		}
@@ -528,21 +528,19 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE("Sound");
 
-			bool foundActive = false;
 			auto listenerView = m_Registry.view<TransformComponent, AudioListenerComponent>();
 			for (auto e : listenerView)
 			{
 				auto [tc, ac] = listenerView.get<TransformComponent, AudioListenerComponent>(e);
 				ac.Listener = CreateRef<AudioListener>();
-				if (ac.Active && !foundActive)
+				if (ac.Active)
 				{
-					foundActive = true;
-					Entity entity = { e, this };
-					const glm::mat4 inverted = glm::inverse(entity.GetWorldTransform());
+					const glm::mat4 inverted = glm::inverse(Entity(e, this).GetWorldTransform());
 					const glm::vec3 forward = normalize(glm::vec3(inverted[2]));
 					ac.Listener->SetConfig(ac.Config);
 					ac.Listener->SetPosition(tc.Translation);
 					ac.Listener->SetDirection(-forward);
+					break;
 				}
 			}
 
@@ -552,8 +550,7 @@ namespace ArcEngine
 				auto [tc, ac] = sourceView.get<TransformComponent, AudioSourceComponent>(e);
 				if (ac.Source)
 				{
-					Entity entity = { e, this };
-					const glm::mat4 inverted = glm::inverse(entity.GetWorldTransform());
+					const glm::mat4 inverted = glm::inverse(Entity(e, this).GetWorldTransform());
 					const glm::vec3 forward = normalize(glm::vec3(inverted[2]));
 					ac.Source->SetConfig(ac.Config);
 					ac.Source->SetPosition(tc.Translation);
@@ -608,10 +605,10 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE("Sound");
 
-			auto view = m_Registry.view<TransformComponent, AudioSourceComponent>();
+			auto view = m_Registry.view<AudioSourceComponent>();
 			for (auto e : view)
 			{
-				auto [tc, ac] = view.get<TransformComponent, AudioSourceComponent>(e);
+				auto& ac = view.get<AudioSourceComponent>(e);
 				if (ac.Source)
 					ac.Source->Stop();
 			}
@@ -792,8 +789,7 @@ namespace ArcEngine
 				auto [tc, ac] = listenerView.get<TransformComponent, AudioListenerComponent>(e);
 				if (ac.Active)
 				{
-					Entity entity = { e, this };
-					const glm::mat4 inverted = glm::inverse(entity.GetWorldTransform());
+					const glm::mat4 inverted = glm::inverse(Entity(e, this).GetWorldTransform());
 					const glm::vec3 forward = normalize(glm::vec3(inverted[2]));
 					ac.Listener->SetPosition(tc.Translation);
 					ac.Listener->SetDirection(-forward);
@@ -878,12 +874,13 @@ namespace ArcEngine
 
 	void Scene::OnRender(const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData)
 	{
+		ARC_PROFILE_SCOPE();
+
 		eastl::vector<Entity> lights;
-		lights.reserve(Renderer3D::MAX_NUM_LIGHTS);
 		{
 			ARC_PROFILE_SCOPE("Prepare Light Data");
 
-			auto view = m_Registry.view<IDComponent, LightComponent>();
+			auto view = m_Registry.view<LightComponent>();
 			lights.reserve(view.size());
 			for (auto entity : view)
 				lights.emplace_back(Entity(entity, this));
@@ -892,21 +889,21 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE("PrepareSkylightData");
 
-			auto view = m_Registry.view<IDComponent, SkyLightComponent>();
+			auto view = m_Registry.view<SkyLightComponent>();
 			if (!view.empty())
 				skylight = Entity(*view.begin(), this);
 		}
 
-		Renderer3D::BeginScene(cameraData, skylight, lights);
+		Renderer3D::BeginScene(cameraData, skylight, eastl::move(lights));
 		// Meshes
 		{
 			ARC_PROFILE_SCOPE("Submit Mesh Data");
 
-			auto view = m_Registry.view<IDComponent, MeshComponent>();
+			auto view = m_Registry.view<MeshComponent>();
 			Renderer3D::ReserveMeshes(view.size());
 			for (auto entity : view)
 			{
-				auto [id, mesh] = view.get<IDComponent, MeshComponent>(entity);
+				auto& mesh = view.get<MeshComponent>(entity);
 				if (mesh.MeshGeometry != nullptr)
 					Renderer3D::SubmitMesh(mesh, Entity(entity, this).GetWorldTransform());
 			}
@@ -917,12 +914,11 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE("Submit 2D Data");
 
-			auto view = m_Registry.view<IDComponent, SpriteRendererComponent>();
+			auto view = m_Registry.view<SpriteRendererComponent>();
 			for (auto entity : view)
 			{
-				auto [id, sprite] = view.get<IDComponent, SpriteRendererComponent>(entity);
-
-				Renderer2D::DrawQuad(GetEntity(id.ID).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+				auto& sprite = view.get<SpriteRendererComponent>(entity);
+				Renderer2D::DrawQuad(Entity(entity, this).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
 			}
 		}
 		Renderer2D::EndScene(renderGraphData);

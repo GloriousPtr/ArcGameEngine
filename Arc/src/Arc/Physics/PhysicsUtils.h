@@ -37,11 +37,12 @@ namespace ArcEngine
 			constexpr float twoPi = 6.28318530718f;
 			const float deltaRadians = twoPi / polyCount;
 
+			vertices.reserve((size_t)polyCount);
 			for (uint32_t i = 0; i < (uint32_t)polyCount; ++i)
 			{
 				float radians = deltaRadians * (float)i;
 				b2Vec2 point = { glm::cos(radians), glm::sin(radians) };
-				vertices.push_back(position + (radius * point));
+				vertices.emplace_back(position + (radius * point));
 			}
 
 			return true;
@@ -61,7 +62,7 @@ namespace ArcEngine
 				polyA = (b2PolygonShape*)fA->GetShape();
 				//fill subject polygon from fixtureA polygon
 				for (int i = 0; i < polyA->m_count; i++)
-					outputVertices.push_back(fA->GetBody()->GetWorldPoint(polyA->m_vertices[i]));
+					outputVertices.emplace_back(fA->GetBody()->GetWorldPoint(polyA->m_vertices[i]));
 				break;
 			case b2Shape::e_circle:
 				VerticesFromCircle(fA, outputVertices);
@@ -77,7 +78,7 @@ namespace ArcEngine
 				polyB = (b2PolygonShape*)fB->GetShape();
 				//fill clip polygon from fixtureB polygon
 				for (int i = 0; i < polyB->m_count; i++)
-					clipPolygon.push_back(fB->GetBody()->GetWorldPoint(polyB->m_vertices[i]));
+					clipPolygon.emplace_back(fB->GetBody()->GetWorldPoint(polyB->m_vertices[i]));
 				break;
 			case b2Shape::e_circle:
 				VerticesFromCircle(fB, clipPolygon);
@@ -103,13 +104,13 @@ namespace ArcEngine
 					if (Inside(cp1, cp2, e))
 					{
 						if (!Inside(cp1, cp2, s))
-							outputVertices.push_back(Intersection(cp1, cp2, s, e));
+							outputVertices.emplace_back(Intersection(cp1, cp2, s, e));
 						
-						outputVertices.push_back(e);
+						outputVertices.emplace_back(e);
 					}
 					else if (Inside(cp1, cp2, s))
 					{
-						outputVertices.push_back(Intersection(cp1, cp2, s, e));
+						outputVertices.emplace_back(Intersection(cp1, cp2, s, e));
 					}
 					s = e;
 				}

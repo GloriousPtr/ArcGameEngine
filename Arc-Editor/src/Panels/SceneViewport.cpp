@@ -204,6 +204,8 @@ namespace ArcEngine
 			// Gizmos
 			if (m_ViewportHovered && m_SceneHierarchyPanel && m_GizmoType != -1 && !m_SimulationRunning)
 			{
+				ARC_PROFILE_SCOPE("Transform Gizmos");
+
 				EditorContext context = EditorLayer::GetInstance()->GetContext();
 				if (context.IsValid(EditorContextType::Entity))
 				{
@@ -252,6 +254,8 @@ namespace ArcEngine
 			EditorContext context = EditorLayer::GetInstance()->GetContext();
 			if (!m_SimulationRunning && context.IsValid(EditorContextType::Entity))
 			{
+				ARC_PROFILE_SCOPE("MiniViewport");
+
 				Entity selectedEntity = *((Entity*)context.Data);
 				if (selectedEntity && selectedEntity.HasComponent<CameraComponent>())
 				{
@@ -296,6 +300,8 @@ namespace ArcEngine
 
 	void SceneViewport::OnOverlayRender() const
 	{
+		ARC_PROFILE_SCOPE();
+
 		Renderer2D::BeginScene(m_EditorCamera.GetViewProjection());
 		{
 			auto view = m_Scene->GetAllEntitiesWith<TransformComponent, CameraComponent>();
@@ -317,7 +323,7 @@ namespace ArcEngine
 							2.0f * (float)y - 1.0f,
 							2.0f * (float)z - 1.0f,
 							1.0f);
-							frustumCorners.push_back(glm::vec3(pt) / pt.w);
+							frustumCorners.emplace_back(glm::vec3(pt) / pt.w);
 						}
 					}
 				}

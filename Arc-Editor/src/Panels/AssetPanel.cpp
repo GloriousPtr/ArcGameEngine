@@ -169,6 +169,8 @@ namespace ArcEngine
 
 	void AssetPanel::OnUpdate(Timestep ts)
 	{
+		ARC_PROFILE_SCOPE();
+
 		m_ElapsedTime += ts;
 	}
 
@@ -234,7 +236,7 @@ namespace ArcEngine
 			bool disabledBackButton = false;
 			if (m_CurrentDirectory == std::filesystem::path(s_AssetPath))
 				disabledBackButton = true;
-		
+
 			if (disabledBackButton)
 			{
 				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -435,17 +437,17 @@ namespace ArcEngine
 		ImGui::SetCursorPos(cursorPos);
 
 		bool anyItemHovered = false;
-		uint32_t i = 0;
 		bool textureCreated = false;
 		if (ImGui::BeginTable("BodyTable", columnCount, flags))
 		{
-			for (auto& file : m_DirectoryEntries)
+			
+			for (size_t i = 0, len = m_DirectoryEntries.size(); i < len; ++i)
 			{
-				++i;
 				ImGui::PushID(i);
 
-				bool isDir = file.DirectoryEntry.is_directory();
-				eastl::string filepath = file.DirectoryEntry.path().string().c_str();
+				auto& file = m_DirectoryEntries[i];
+
+				bool isDir = file.IsDirectory;
 				const char* filename = file.Name.c_str();
 
 				uint64_t textureId = m_DirectoryIcon->GetRendererID();
@@ -462,7 +464,7 @@ namespace ArcEngine
 						else if (!textureCreated)
 						{
 							textureCreated = true;
-							file.Thumbnail = Texture2D::Create(filepath);
+							file.Thumbnail = Texture2D::Create(file.Filepath);
 							textureId = file.Thumbnail->GetRendererID();
 						}
 					}
@@ -484,7 +486,7 @@ namespace ArcEngine
 					if (context.IsValid(EditorContextType::File))
 					{
 						const char* path = (char*)context.Data;
-						highlight = path == file.DirectoryEntry.path();
+						highlight = path == file.Filepath;
 					}
 
 					bool const clicked = UI::ToggleButton(("##" + std::to_string(i)).c_str(), highlight, { m_ThumbnailSize + padding * 2, m_ThumbnailSize + textSize.y + padding * 8 }, 0.0f, 1.0f);
@@ -495,9 +497,9 @@ namespace ArcEngine
 						EditorLayer::GetInstance()->SetContext(EditorContextType::File, (void*)strPath.c_str(), sizeof(char) * (strPath.length() + 1));
 					}
 					if (isDir)
-						DragDropTarget(filepath.c_str());
+						DragDropTarget(file.Filepath.c_str());
 
-					DragDropFrom(filepath);
+					DragDropFrom(file.Filepath);
 
 					if (ImGui::IsItemHovered())
 						anyItemHovered = true;
@@ -559,10 +561,10 @@ namespace ArcEngine
 					if (ImGui::IsItemHovered())
 						anyItemHovered = true;
 
-					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && file.DirectoryEntry.is_directory())
+					if (isDir && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 						directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
 
-					DragDropFrom(file.DirectoryEntry.path().string().c_str());
+					DragDropFrom(file.Filepath.c_str());
 
 					ImGui::SameLine();
 					ImGui::SetCursorPosX(ImGui::GetCursorPosX() - lineHeight);
@@ -597,14 +599,13 @@ namespace ArcEngine
 
 		m_CurrentDirectory = directory;
 		m_DirectoryEntries.clear();
+
 		for (auto& directoryEntry : std::filesystem::directory_iterator(directory))
 		{
 			const auto& path = directoryEntry.path();
 			auto relativePath = std::filesystem::relative(path, s_AssetPath);
-			eastl::string fileNameString = relativePath.filename().string().c_str();
-
-			eastl::string ext = StringUtils::GetExtension(relativePath.string().c_str());
-			m_DirectoryEntries.push_back({ fileNameString, directoryEntry, nullptr });
+			eastl::string filename = relativePath.filename().string().c_str();
+			m_DirectoryEntries.emplace_back(filename, path.string().c_str(), StringUtils::GetExtension(filename.c_str()), directoryEntry, nullptr, directoryEntry.is_directory());
 		}
 
 		m_ElapsedTime = 0.0f;

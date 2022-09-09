@@ -122,7 +122,7 @@ namespace ArcEngine
 					ARC_CORE_ASSERT(false, "Unknown ShaderDataType!");
 			}
 		}
-		m_VertexBuffers.push_back(vertexBuffer);
+		m_VertexBuffers.emplace_back(vertexBuffer);
 	}
 
 	void OpenGLVertexArray::SetIndexBuffer(Ref<IndexBuffer>& indexBuffer)

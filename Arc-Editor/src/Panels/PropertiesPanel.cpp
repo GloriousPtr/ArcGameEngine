@@ -850,7 +850,7 @@ namespace ArcEngine
 					{
 						if (ImGui::MenuItem(name.c_str()))
 						{
-							component.Classes.push_back(name);
+							component.Classes.emplace_back(name);
 						}
 					}
 				}

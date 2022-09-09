@@ -529,7 +529,7 @@ namespace ArcEngine
 				mono_field_get_value(tempObject, monoField, scriptField.DefaultValue);
 			}
 
-			m_Fields.push_back(fieldName);
+			m_Fields.emplace_back(fieldName);
 		}
 
 		GCManager::ReleaseObjectReference(tempObjectHandle);

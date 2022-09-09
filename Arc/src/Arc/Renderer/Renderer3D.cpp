@@ -186,7 +186,7 @@ namespace ArcEngine
 
 	}
 
-	void Renderer3D::BeginScene(const CameraData& cameraData, Entity cubemap, const eastl::vector<Entity>& lights)
+	void Renderer3D::BeginScene(const CameraData& cameraData, Entity cubemap, eastl::vector<Entity>&& lights)
 	{
 		ARC_PROFILE_SCOPE();
 		
@@ -195,7 +195,7 @@ namespace ArcEngine
 		s_CameraPosition = cameraData.Position;
 
 		s_Skylight = cubemap;
-		s_SceneLights = lights;
+		s_SceneLights = eastl::move(lights);
 
 		SetupCameraData();
 		SetupLightsData();

@@ -34,8 +34,22 @@ namespace ArcEngine
 		struct File
 		{
 			eastl::string Name;
+			eastl::string Filepath;
+			eastl::string Extension;
 			std::filesystem::directory_entry DirectoryEntry;
-			Ref<Texture2D> Thumbnail;
+			Ref<Texture2D> Thumbnail = nullptr;
+			bool IsDirectory = false;
+
+			File(const eastl::string& name,
+				const eastl::string& filepath,
+				const eastl::string& extension,
+				const std::filesystem::directory_entry& directoryEntry,
+				const Ref<Texture2D> thumbnail,
+				bool isDir)
+				:	Name(name), Filepath(filepath), Extension(extension),
+					DirectoryEntry(directoryEntry), Thumbnail(thumbnail), IsDirectory(isDir)
+			{
+			}
 		};
 
 		std::filesystem::path m_CurrentDirectory;

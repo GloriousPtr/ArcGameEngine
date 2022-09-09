@@ -42,14 +42,14 @@ namespace ArcEngine
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
-		m_Viewports.push_back(CreateScope<SceneViewport>());
+		m_Viewports.emplace_back(CreateScope<SceneViewport>());
 		m_Viewports[0]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
 		
-		m_Properties.push_back(CreateScope<PropertiesPanel>());
-		m_AssetPanels.push_back(CreateScope<AssetPanel>());
+		m_Properties.emplace_back(CreateScope<PropertiesPanel>());
+		m_AssetPanels.emplace_back(CreateScope<AssetPanel>());
 
-		m_Panels.push_back(CreateScope<RendererSettingsPanel>());
-		m_Panels.push_back(CreateScope<StatsPanel>());
+		m_Panels.emplace_back(CreateScope<RendererSettingsPanel>());
+		m_Panels.emplace_back(CreateScope<StatsPanel>());
 	}
 
 	void EditorLayer::OnDetach()
@@ -165,16 +165,16 @@ namespace ArcEngine
 								if (ImGui::MenuItem("Viewport"))
 								{
 									size_t index = m_Viewports.size();
-									m_Viewports.push_back(CreateScope<SceneViewport>());
+									m_Viewports.emplace_back(CreateScope<SceneViewport>());
 									m_Viewports[index]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
 								}
 								if (ImGui::MenuItem("Properties"))
 								{
-									m_Properties.push_back(CreateScope<PropertiesPanel>());
+									m_Properties.emplace_back(CreateScope<PropertiesPanel>());
 								}
 								if (ImGui::MenuItem("Assets"))
 								{
-									m_AssetPanels.push_back(CreateScope<AssetPanel>());
+									m_AssetPanels.emplace_back(CreateScope<AssetPanel>());
 								}
 								ImGui::EndMenu();
 							}
@@ -611,7 +611,7 @@ namespace ArcEngine
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		if (m_Viewports.empty())
-			m_Viewports.push_back(CreateScope<SceneViewport>());
+			m_Viewports.emplace_back(CreateScope<SceneViewport>());
 		m_Viewports[0]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
 		m_Viewports[0]->SetSimulation(true);
 	}

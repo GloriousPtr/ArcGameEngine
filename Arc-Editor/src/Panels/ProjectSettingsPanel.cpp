@@ -9,6 +9,8 @@ namespace ArcEngine
 {
 	void ProjectSettingsPanel::OnImGuiRender()
 	{
+		ARC_PROFILE_SCOPE();
+
 		if (OnBegin())
 		{
 			static const char* btnTitle = "Reload Assemblies";
