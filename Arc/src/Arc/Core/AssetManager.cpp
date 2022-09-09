@@ -9,17 +9,23 @@ namespace ArcEngine
 
 	void AssetManager::Init()
 	{
+		ARC_PROFILE_SCOPE();
+
 		/* Init stuff here */
 	}
 
 	void AssetManager::Shutdown()
 	{
+		ARC_PROFILE_SCOPE();
+
 		m_Texture2DMap.clear();
 		m_TextureCubeMap.clear();
 	}
 
 	Ref<Texture2D> AssetManager::GetTexture2D(const eastl::string& path)
 	{
+		ARC_PROFILE_SCOPE();
+
 		if (m_Texture2DMap.find_as(path) != m_Texture2DMap.end())
 			return m_Texture2DMap.at(path);
 
@@ -30,6 +36,8 @@ namespace ArcEngine
 
 	Ref<TextureCubemap> AssetManager::GetTextureCubemap(const eastl::string& path)
 	{
+		ARC_PROFILE_SCOPE();
+
 		if (m_TextureCubeMap.find_as(path) != m_TextureCubeMap.end())
 			return m_TextureCubeMap.at(path);
 
@@ -40,6 +48,8 @@ namespace ArcEngine
 
 	Ref<Mesh> AssetManager::GetMesh(const eastl::string& path)
 	{
+		ARC_PROFILE_SCOPE();
+
 		if (m_MeshMap.find_as(path) != m_MeshMap.end())
 			return m_MeshMap.at(path);
 

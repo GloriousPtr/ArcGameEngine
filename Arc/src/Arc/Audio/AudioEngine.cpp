@@ -10,6 +10,8 @@ namespace ArcEngine
 
 	void AudioEngine::Init()
 	{
+		ARC_PROFILE_SCOPE();
+
 		ma_engine_config config = ma_engine_config_init();
 		config.listenerCount = 1;
 
@@ -20,6 +22,8 @@ namespace ArcEngine
 
 	void AudioEngine::Shutdown()
 	{
+		ARC_PROFILE_SCOPE();
+
 		ma_engine_uninit(s_Engine);
 		delete s_Engine;
 	}

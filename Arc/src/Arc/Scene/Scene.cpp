@@ -37,6 +37,8 @@ namespace ArcEngine
 
 		virtual void BeginContact(b2Contact* contact) override
 		{
+			ARC_PROFILE_SCOPE();
+
 			b2Fixture* a = contact->GetFixtureA();
 			b2Fixture* b = contact->GetFixtureB();
 
@@ -105,6 +107,8 @@ namespace ArcEngine
 
 		virtual void EndContact(b2Contact* contact) override
 		{
+			ARC_PROFILE_SCOPE();
+
 			b2Fixture* a = contact->GetFixtureA();
 			b2Fixture* b = contact->GetFixtureB();
 			bool aSensor = a->IsSensor();
@@ -172,16 +176,22 @@ namespace ArcEngine
 
 		virtual void PreSolve(b2Contact* contact, const b2Manifold* oldManifold) override
 		{
+			ARC_PROFILE_SCOPE();
+
 			/* Handle pre solve */
 		}
 
 		virtual void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) override
 		{
+			ARC_PROFILE_SCOPE();
+
 			/* Handle post solve */
 		}
 
 		void OnUpdate(Timestep ts)
 		{
+			ARC_PROFILE_SCOPE();
+
 			auto it = m_BuoyancyFixtures.begin();
 			auto end = m_BuoyancyFixtures.end();
 			while (it != end)
@@ -331,6 +341,8 @@ namespace ArcEngine
 
 	Entity Scene::Duplicate(Entity entity)
 	{
+		ARC_PROFILE_SCOPE();
+
 		eastl::string name = entity.GetComponent<TagComponent>().Tag;
 		Entity duplicate = CreateEntity(name);
 		CopyComponent(AllComponents{}, m_Registry, entity, duplicate);
@@ -360,163 +372,167 @@ namespace ArcEngine
 
 		m_IsRunning = true;
 
-		/////////////////////////////////////////////////////////////////////
-		// Rigidbody and Colliders (2D) /////////////////////////////////////
-		/////////////////////////////////////////////////////////////////////
-		m_PhysicsWorld2D = new b2World({ 0.0f, -9.8f });
-		m_ContactListener = new ContactListener(this);
-		m_PhysicsWorld2D->SetContactListener(m_ContactListener);
 		{
-			auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
-			for (auto e : view)
-			{
-				auto& body = view.get<Rigidbody2DComponent>(e);
-				CreateRigidbody2D({ e, this }, body);
-			}
-		}
+			ARC_PROFILE_CATEGORY("Physics 2D", Optick::Category::Physics);
 
-		/////////////////////////////////////////////////////////////////////
-		// Joints (2D) //////////////////////////////////////////////////////
-		/////////////////////////////////////////////////////////////////////
-		{
-			auto distanceJointView = m_Registry.view<Rigidbody2DComponent, DistanceJoint2DComponent>();
-			for (auto e : distanceJointView)
+			/////////////////////////////////////////////////////////////////////
+			// Rigidbody and Colliders (2D) /////////////////////////////////////
+			/////////////////////////////////////////////////////////////////////
+			m_PhysicsWorld2D = new b2World({ 0.0f, -9.8f });
+			m_ContactListener = new ContactListener(this);
+			m_PhysicsWorld2D->SetContactListener(m_ContactListener);
 			{
-				auto [body, joint] = distanceJointView.get<Rigidbody2DComponent, DistanceJoint2DComponent>(e);
-				Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
-				if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+				auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
+				for (auto e : view)
 				{
-					b2Body* body1 = (b2Body*)body.RuntimeBody;
-					b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
-					b2Vec2 body1Center = body1->GetWorldCenter();
-					b2Vec2 body2Center = body2->GetWorldCenter();
-					b2Vec2 anchor1Pos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
-					b2Vec2 anchor2Pos = { body2Center.x + joint.ConnectedAnchor.x, body2Center.y + joint.ConnectedAnchor.y };
-
-					b2DistanceJointDef jointDef;
-					jointDef.Initialize(body1, body2, anchor1Pos, anchor2Pos);
-					jointDef.collideConnected = joint.EnableCollision;
-					if (!joint.AutoDistance)
-						jointDef.length = joint.Distance;
-					jointDef.minLength = glm::min(jointDef.length, joint.MinDistance);
-					jointDef.maxLength = jointDef.length + glm::max(joint.MaxDistanceBy, 0.0f);
-
-					joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jointDef);
+					auto& body = view.get<Rigidbody2DComponent>(e);
+					CreateRigidbody2D({ e, this }, body);
 				}
 			}
 
-			auto springJointView = m_Registry.view<Rigidbody2DComponent, SpringJoint2DComponent>();
-			for (auto e : springJointView)
+			/////////////////////////////////////////////////////////////////////
+			// Joints (2D) //////////////////////////////////////////////////////
+			/////////////////////////////////////////////////////////////////////
 			{
-				auto [body, joint] = springJointView.get<Rigidbody2DComponent, SpringJoint2DComponent>(e);
-				Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
-				if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+				auto distanceJointView = m_Registry.view<Rigidbody2DComponent, DistanceJoint2DComponent>();
+				for (auto e : distanceJointView)
 				{
-					b2Body* body1 = (b2Body*)body.RuntimeBody;
-					b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
-					b2Vec2 body1Center = body1->GetWorldCenter();
-					b2Vec2 body2Center = body2->GetWorldCenter();
-					b2Vec2 anchor1Pos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
-					b2Vec2 anchor2Pos = { body2Center.x + joint.ConnectedAnchor.x, body2Center.y + joint.ConnectedAnchor.y };
+					auto [body, joint] = distanceJointView.get<Rigidbody2DComponent, DistanceJoint2DComponent>(e);
+					Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
+					if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+					{
+						b2Body* body1 = (b2Body*)body.RuntimeBody;
+						b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+						b2Vec2 body1Center = body1->GetWorldCenter();
+						b2Vec2 body2Center = body2->GetWorldCenter();
+						b2Vec2 anchor1Pos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
+						b2Vec2 anchor2Pos = { body2Center.x + joint.ConnectedAnchor.x, body2Center.y + joint.ConnectedAnchor.y };
 
-					b2DistanceJointDef jointDef;
-					jointDef.Initialize(body1, body2, anchor1Pos, anchor2Pos);
-					jointDef.collideConnected = joint.EnableCollision;
-					if (!joint.AutoDistance)
-						jointDef.length = joint.Distance;
-					jointDef.minLength = glm::min(jointDef.length, joint.MinDistance);
-					jointDef.maxLength = jointDef.length + glm::max(joint.MaxDistanceBy, 0.0f);
-					b2LinearStiffness(jointDef.stiffness, jointDef.damping, joint.Frequency, joint.DampingRatio, body1, body2);
+						b2DistanceJointDef jointDef;
+						jointDef.Initialize(body1, body2, anchor1Pos, anchor2Pos);
+						jointDef.collideConnected = joint.EnableCollision;
+						if (!joint.AutoDistance)
+							jointDef.length = joint.Distance;
+						jointDef.minLength = glm::min(jointDef.length, joint.MinDistance);
+						jointDef.maxLength = jointDef.length + glm::max(joint.MaxDistanceBy, 0.0f);
 
-					joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jointDef);
+						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jointDef);
+					}
 				}
-			}
 
-			auto hingeJointView = m_Registry.view<Rigidbody2DComponent, HingeJoint2DComponent>();
-			for (auto e : hingeJointView)
-			{
-				auto [body, joint] = hingeJointView.get<Rigidbody2DComponent, HingeJoint2DComponent>(e);
-				Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
-				if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+				auto springJointView = m_Registry.view<Rigidbody2DComponent, SpringJoint2DComponent>();
+				for (auto e : springJointView)
 				{
-					b2Body* body1 = (b2Body*)body.RuntimeBody;
-					b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
-					b2Vec2 body1Center = body1->GetWorldCenter();
-					b2Vec2 anchorPos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
+					auto [body, joint] = springJointView.get<Rigidbody2DComponent, SpringJoint2DComponent>(e);
+					Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
+					if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+					{
+						b2Body* body1 = (b2Body*)body.RuntimeBody;
+						b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+						b2Vec2 body1Center = body1->GetWorldCenter();
+						b2Vec2 body2Center = body2->GetWorldCenter();
+						b2Vec2 anchor1Pos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
+						b2Vec2 anchor2Pos = { body2Center.x + joint.ConnectedAnchor.x, body2Center.y + joint.ConnectedAnchor.y };
 
-					b2RevoluteJointDef jointDef;
-					jointDef.Initialize(body1, body2, anchorPos);
-					jointDef.collideConnected = joint.EnableCollision;
-					jointDef.enableLimit = joint.UseLimits;
-					jointDef.lowerAngle = glm::radians(joint.LowerAngle);
-					jointDef.upperAngle = glm::radians(joint.UpperAngle);
-					jointDef.enableMotor = joint.UseMotor;
-					jointDef.motorSpeed = joint.MotorSpeed;
-					jointDef.maxMotorTorque = joint.MaxMotorTorque;
+						b2DistanceJointDef jointDef;
+						jointDef.Initialize(body1, body2, anchor1Pos, anchor2Pos);
+						jointDef.collideConnected = joint.EnableCollision;
+						if (!joint.AutoDistance)
+							jointDef.length = joint.Distance;
+						jointDef.minLength = glm::min(jointDef.length, joint.MinDistance);
+						jointDef.maxLength = jointDef.length + glm::max(joint.MaxDistanceBy, 0.0f);
+						b2LinearStiffness(jointDef.stiffness, jointDef.damping, joint.Frequency, joint.DampingRatio, body1, body2);
 
-					joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jointDef);
+						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jointDef);
+					}
 				}
-			}
 
-			auto sliderJointView = m_Registry.view<Rigidbody2DComponent, SliderJoint2DComponent>();
-			for (auto e : sliderJointView)
-			{
-				auto [body, joint] = sliderJointView.get<Rigidbody2DComponent, SliderJoint2DComponent>(e);
-				Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
-				if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+				auto hingeJointView = m_Registry.view<Rigidbody2DComponent, HingeJoint2DComponent>();
+				for (auto e : hingeJointView)
 				{
-					b2Body* body1 = (b2Body*)body.RuntimeBody;
-					b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
-					b2Vec2 body1Center = body1->GetWorldCenter();
-					b2Vec2 anchorPos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
-					
-					b2Vec2 worldAxis(1.0f, 0.0f);
+					auto [body, joint] = hingeJointView.get<Rigidbody2DComponent, HingeJoint2DComponent>(e);
+					Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
+					if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+					{
+						b2Body* body1 = (b2Body*)body.RuntimeBody;
+						b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+						b2Vec2 body1Center = body1->GetWorldCenter();
+						b2Vec2 anchorPos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
 
-					b2PrismaticJointDef jointDef;
-					jointDef.Initialize(body1, body2, anchorPos, worldAxis);
-					jointDef.collideConnected = joint.EnableCollision;
-					jointDef.referenceAngle = glm::radians(joint.Angle);
-					jointDef.enableLimit = joint.UseLimits;
-					jointDef.lowerTranslation = joint.LowerTranslation;
-					jointDef.upperTranslation = joint.UpperTranslation;
-					jointDef.enableMotor = joint.UseMotor;
-					jointDef.motorSpeed = joint.MotorSpeed;
-					jointDef.maxMotorForce = joint.MaxMotorForce;
+						b2RevoluteJointDef jointDef;
+						jointDef.Initialize(body1, body2, anchorPos);
+						jointDef.collideConnected = joint.EnableCollision;
+						jointDef.enableLimit = joint.UseLimits;
+						jointDef.lowerAngle = glm::radians(joint.LowerAngle);
+						jointDef.upperAngle = glm::radians(joint.UpperAngle);
+						jointDef.enableMotor = joint.UseMotor;
+						jointDef.motorSpeed = joint.MotorSpeed;
+						jointDef.maxMotorTorque = joint.MaxMotorTorque;
 
-					joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jointDef);
+						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jointDef);
+					}
 				}
-			}
 
-			auto wheelJointView = m_Registry.view<Rigidbody2DComponent, WheelJoint2DComponent>();
-			for (auto e : wheelJointView)
-			{
-				auto [body, joint] = wheelJointView.get<Rigidbody2DComponent, WheelJoint2DComponent>(e);
-				Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
-				if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+				auto sliderJointView = m_Registry.view<Rigidbody2DComponent, SliderJoint2DComponent>();
+				for (auto e : sliderJointView)
 				{
-					b2Body* body1 = (b2Body*)body.RuntimeBody;
-					b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
-					b2Vec2 body1Center = body1->GetPosition();
-					b2Vec2 anchorPos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
+					auto [body, joint] = sliderJointView.get<Rigidbody2DComponent, SliderJoint2DComponent>(e);
+					Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
+					if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+					{
+						b2Body* body1 = (b2Body*)body.RuntimeBody;
+						b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+						b2Vec2 body1Center = body1->GetWorldCenter();
+						b2Vec2 anchorPos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
 
-					b2Vec2 axis(0.0f, 1.0f);
+						b2Vec2 worldAxis(1.0f, 0.0f);
 
-					float mass = body1->GetMass();
-					float omega = 2.0f * b2_pi * joint.Frequency;
+						b2PrismaticJointDef jointDef;
+						jointDef.Initialize(body1, body2, anchorPos, worldAxis);
+						jointDef.collideConnected = joint.EnableCollision;
+						jointDef.referenceAngle = glm::radians(joint.Angle);
+						jointDef.enableLimit = joint.UseLimits;
+						jointDef.lowerTranslation = joint.LowerTranslation;
+						jointDef.upperTranslation = joint.UpperTranslation;
+						jointDef.enableMotor = joint.UseMotor;
+						jointDef.motorSpeed = joint.MotorSpeed;
+						jointDef.maxMotorForce = joint.MaxMotorForce;
 
-					b2WheelJointDef jd;
-					jd.Initialize(body1, body2, anchorPos, axis);
-					jd.collideConnected = joint.EnableCollision;
-					jd.stiffness = mass * omega * omega;
-					jd.damping = 2.0f * mass * joint.DampingRatio * omega;
-					jd.enableMotor = joint.UseMotor;
-					jd.motorSpeed = joint.MotorSpeed;
-					jd.maxMotorTorque = joint.MaxMotorTorque;
-					jd.enableLimit = joint.UseLimits;
-					jd.lowerTranslation = joint.LowerTranslation;
-					jd.upperTranslation = joint.UpperTranslation;
+						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jointDef);
+					}
+				}
 
-					joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
+				auto wheelJointView = m_Registry.view<Rigidbody2DComponent, WheelJoint2DComponent>();
+				for (auto e : wheelJointView)
+				{
+					auto [body, joint] = wheelJointView.get<Rigidbody2DComponent, WheelJoint2DComponent>(e);
+					Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
+					if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+					{
+						b2Body* body1 = (b2Body*)body.RuntimeBody;
+						b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+						b2Vec2 body1Center = body1->GetPosition();
+						b2Vec2 anchorPos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
+
+						b2Vec2 axis(0.0f, 1.0f);
+
+						float mass = body1->GetMass();
+						float omega = 2.0f * b2_pi * joint.Frequency;
+
+						b2WheelJointDef jd;
+						jd.Initialize(body1, body2, anchorPos, axis);
+						jd.collideConnected = joint.EnableCollision;
+						jd.stiffness = mass * omega * omega;
+						jd.damping = 2.0f * mass * joint.DampingRatio * omega;
+						jd.enableMotor = joint.UseMotor;
+						jd.motorSpeed = joint.MotorSpeed;
+						jd.maxMotorTorque = joint.MaxMotorTorque;
+						jd.enableLimit = joint.UseLimits;
+						jd.lowerTranslation = joint.LowerTranslation;
+						jd.upperTranslation = joint.UpperTranslation;
+
+						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
+					}
 				}
 			}
 		}
@@ -526,7 +542,7 @@ namespace ArcEngine
 		// Sound ////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
 		{
-			ARC_PROFILE_SCOPE("Sound");
+			ARC_PROFILE_CATEGORY("Audio", Optick::Category::Audio);
 
 			auto listenerView = m_Registry.view<TransformComponent, AudioListenerComponent>();
 			for (auto e : listenerView)
@@ -564,17 +580,21 @@ namespace ArcEngine
 		/////////////////////////////////////////////////////////////////////
 		// Scripting ////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
-		auto scriptView = m_Registry.view<ScriptComponent>();
-		for (auto e : scriptView)
 		{
-			const auto& sc = scriptView.get<ScriptComponent>(e);
-			Entity entity = { e, this };
+			ARC_PROFILE_CATEGORY("Script", Optick::Category::Script);
 
-			for (auto& className : sc.Classes)
-				ScriptEngine::CreateInstance(entity, className);
+			auto scriptView = m_Registry.view<ScriptComponent>();
+			for (auto e : scriptView)
+			{
+				const auto& sc = scriptView.get<ScriptComponent>(e);
+				Entity entity = { e, this };
 
-			for (auto& className : sc.Classes)
-				ScriptEngine::GetInstance(entity, className)->InvokeOnCreate();
+				for (auto& className : sc.Classes)
+					ScriptEngine::CreateInstance(entity, className);
+
+				for (auto& className : sc.Classes)
+					ScriptEngine::GetInstance(entity, className)->InvokeOnCreate();
+			}
 		}
 	}
 
@@ -584,41 +604,49 @@ namespace ArcEngine
 
 		m_IsRunning = false;
 
-		auto scriptView = m_Registry.view<ScriptComponent>();
-		for (auto e : scriptView)
 		{
-			ScriptComponent& script = scriptView.get<ScriptComponent>(e);
-			Entity entity = { e, this };
+			ARC_PROFILE_CATEGORY("Script", Optick::Category::Script);
 
-			for (const auto& className : script.Classes)
+			auto scriptView = m_Registry.view<ScriptComponent>();
+			for (auto e : scriptView)
 			{
-				ScriptEngine::GetInstance(entity, className)->InvokeOnDestroy();
-				ScriptEngine::RemoveInstance(entity, className);
-			}
+				ScriptComponent& script = scriptView.get<ScriptComponent>(e);
+				Entity entity = { e, this };
 
-			script.Classes.clear();
+				for (const auto& className : script.Classes)
+				{
+					ScriptEngine::GetInstance(entity, className)->InvokeOnDestroy();
+					ScriptEngine::RemoveInstance(entity, className);
+				}
+
+				script.Classes.clear();
+			}
 		}
 
 		/////////////////////////////////////////////////////////////////////
 		// Sound ////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
 		{
-			ARC_PROFILE_SCOPE("Sound");
+			ARC_PROFILE_CATEGORY("Audio", Optick::Category::Audio);
 
 			auto view = m_Registry.view<AudioSourceComponent>();
 			for (auto e : view)
 			{
-				auto& ac = view.get<AudioSourceComponent>(e);
+				const auto& ac = view.get<AudioSourceComponent>(e);
 				if (ac.Source)
 					ac.Source->Stop();
 			}
 		}
 
-		m_FixtureMap.clear();
-		delete m_ContactListener;
-		delete m_PhysicsWorld2D;
-		m_ContactListener = nullptr;
-		m_PhysicsWorld2D = nullptr;
+		{
+			ARC_PROFILE_CATEGORY("Physics 2D", Optick::Category::Physics);
+
+			m_FixtureMap.clear();
+			delete m_ContactListener;
+			delete m_PhysicsWorld2D;
+			m_ContactListener = nullptr;
+			m_PhysicsWorld2D = nullptr;
+		}
 	}
 
 	void Scene::OnUpdateEditor(Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera)
@@ -639,9 +667,9 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		{
-			ARC_PROFILE_SCOPE("Scripting Update");
-
 			{
+				ARC_PROFILE_CATEGORY("Physics 2D", Optick::Category::Physics);
+
 				auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
 				for (auto e : view)
 				{
@@ -655,6 +683,8 @@ namespace ArcEngine
 			// Scripting ////////////////////////////////////////////////////////
 			/////////////////////////////////////////////////////////////////////
 			{
+				ARC_PROFILE_CATEGORY("Script", Optick::Category::Script);
+
 				auto scriptView = m_Registry.view<ScriptComponent>();
 				for (auto e : scriptView)
 				{
@@ -671,7 +701,7 @@ namespace ArcEngine
 		// Physics //////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
 		{
-			ARC_PROFILE_SCOPE("Physics 2D");
+			ARC_PROFILE_CATEGORY("Physics 2D", Optick::Category::Physics);
 			
 			m_ContactListener->OnUpdate(ts);
 			m_PhysicsWorld2D->Step(ts, VelocityIterations, PositionIterations);
@@ -686,12 +716,10 @@ namespace ArcEngine
 				transform.Translation.y = position.y;
 				transform.Rotation.z = rb->GetAngle();
 			}
-		}
 
-		/////////////////////////////////////////////////////////////////////
-		// Joints (2D) //////////////////////////////////////////////////////
-		/////////////////////////////////////////////////////////////////////
-		{
+			/////////////////////////////////////////////////////////////////////
+			// Joints (2D) //////////////////////////////////////////////////////
+			/////////////////////////////////////////////////////////////////////
 			float invdt = 1.0f / ts;
 			auto distanceJointView = m_Registry.view<DistanceJoint2DComponent>();
 			for (auto e : distanceJointView)
@@ -781,7 +809,7 @@ namespace ArcEngine
 		// Sound ////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
 		{
-			ARC_PROFILE_SCOPE("Sound");
+			ARC_PROFILE_CATEGORY("Audio", Optick::Category::Audio);
 
 			auto listenerView = m_Registry.view<TransformComponent, AudioListenerComponent>();
 			for (auto e : listenerView)
@@ -817,23 +845,27 @@ namespace ArcEngine
 		/////////////////////////////////////////////////////////////////////
 
 		CameraData cameraData = {};
-		Entity cameraEntity = GetPrimaryCameraEntity();
-		if (!overrideCamera)
 		{
-			if (cameraEntity)
+			ARC_PROFILE_CATEGORY("Camera", Optick::Category::Camera);
+
+			Entity cameraEntity = GetPrimaryCameraEntity();
+			if (!overrideCamera)
 			{
-				cameraData.View = glm::inverse(cameraEntity.GetWorldTransform());
-				cameraData.Projection = cameraEntity.GetComponent<CameraComponent>().Camera.GetProjection();
-				cameraData.ViewProjection = cameraData.Projection * cameraData.View;
-				cameraData.Position = cameraEntity.GetTransform().Translation;
+				if (cameraEntity)
+				{
+					cameraData.View = glm::inverse(cameraEntity.GetWorldTransform());
+					cameraData.Projection = cameraEntity.GetComponent<CameraComponent>().Camera.GetProjection();
+					cameraData.ViewProjection = cameraData.Projection * cameraData.View;
+					cameraData.Position = cameraEntity.GetTransform().Translation;
+				}
 			}
-		}
-		else
-		{
-			cameraData.View = overrideCamera->GetViewMatrix();
-			cameraData.Projection = overrideCamera->GetProjectionMatrix();
-			cameraData.ViewProjection = cameraData.Projection * cameraData.View;
-			cameraData.Position = overrideCamera->GetPosition();
+			else
+			{
+				cameraData.View = overrideCamera->GetViewMatrix();
+				cameraData.Projection = overrideCamera->GetProjectionMatrix();
+				cameraData.ViewProjection = cameraData.Projection * cameraData.View;
+				cameraData.Position = overrideCamera->GetPosition();
+			}
 		}
 
 		OnRender(renderGraphData, cameraData);
@@ -860,7 +892,7 @@ namespace ArcEngine
 
 	Entity Scene::GetPrimaryCameraEntity()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_CATEGORY("Camera", Optick::Category::Camera);
 
 		auto view = m_Registry.view<CameraComponent>();
 		for (auto entity : view)
@@ -874,7 +906,7 @@ namespace ArcEngine
 
 	void Scene::OnRender(const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_CATEGORY("Rendering", Optick::Category::Rendering);
 
 		eastl::vector<Entity> lights;
 		{
@@ -903,9 +935,12 @@ namespace ArcEngine
 			Renderer3D::ReserveMeshes(view.size());
 			for (auto entity : view)
 			{
-				auto& mesh = view.get<MeshComponent>(entity);
-				if (mesh.MeshGeometry != nullptr)
-					Renderer3D::SubmitMesh(mesh, Entity(entity, this).GetWorldTransform());
+				const auto& meshComponent = view.get<MeshComponent>(entity);
+				if (meshComponent.MeshGeometry && meshComponent.MeshGeometry->GetSubmeshCount() != 0)
+				{
+					ARC_CORE_ASSERT(meshComponent.MeshGeometry->GetSubmeshCount() > meshComponent.SubmeshIndex, "Trying to access submesh index that does not exist!");
+					Renderer3D::SubmitMesh(Entity(entity, this).GetWorldTransform(), meshComponent.MeshGeometry->GetSubmesh(meshComponent.SubmeshIndex), meshComponent.CullMode);
+				}
 			}
 		}
 		Renderer3D::EndScene(renderGraphData);
@@ -917,7 +952,7 @@ namespace ArcEngine
 			auto view = m_Registry.view<SpriteRendererComponent>();
 			for (auto entity : view)
 			{
-				auto& sprite = view.get<SpriteRendererComponent>(entity);
+				const auto& sprite = view.get<SpriteRendererComponent>(entity);
 				Renderer2D::DrawQuad(Entity(entity, this).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
 			}
 		}
@@ -926,6 +961,8 @@ namespace ArcEngine
 
 	void Scene::CreateRigidbody2D(Entity entity, Rigidbody2DComponent& body)
 	{
+		ARC_PROFILE_SCOPE();
+
 		if (m_PhysicsWorld2D)
 		{
 			const TransformComponent& transform = entity.GetTransform();
@@ -969,6 +1006,8 @@ namespace ArcEngine
 
 	void Scene::CreateBoxCollider2D(Entity entity, BoxCollider2DComponent& bc2d)
 	{
+		ARC_PROFILE_SCOPE();
+
 		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
 		{
 			const TransformComponent& transform = entity.GetTransform();
@@ -993,6 +1032,8 @@ namespace ArcEngine
 
 	void Scene::CreateCircleCollider2D(Entity entity, CircleCollider2DComponent& cc2d)
 	{
+		ARC_PROFILE_SCOPE();
+
 		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
 		{
 			const TransformComponent& transform = entity.GetTransform();

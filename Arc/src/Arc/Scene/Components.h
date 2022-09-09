@@ -145,8 +145,8 @@ namespace ArcEngine
 		{
 			FramebufferSpecification spec;
 			spec.Attachments = { FramebufferTextureFormat::Depth };
-			spec.Width = 4096;
-			spec.Height = 4096;
+			spec.Width = 2048;
+			spec.Height = 2048;
 			ShadowMapFramebuffer = Framebuffer::Create(spec);
 		}
 
@@ -158,8 +158,8 @@ namespace ArcEngine
 		{
 			FramebufferSpecification spec;
 			spec.Attachments = { FramebufferTextureFormat::Depth };
-			spec.Width = 4096;
-			spec.Height = 4096;
+			spec.Width = 2048;
+			spec.Height = 2048;
 			ShadowMapFramebuffer = Framebuffer::Create(spec);
 		}
 	};

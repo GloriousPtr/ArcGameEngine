@@ -33,6 +33,7 @@ namespace ArcEngine
 
 	void EditorCamera::SetViewportSize(float width, float height)
 	{
+
 		ARC_PROFILE_SCOPE();
 
 		m_AspectRatio = width / height;

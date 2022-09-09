@@ -10,6 +10,8 @@ namespace ArcEngine
 {
 	bool Input::IsKeyPressed(const KeyCode key)
 	{
+		ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		int state = glfwGetKey(window, static_cast<int32_t>(key));
 		return state == GLFW_PRESS || state == GLFW_REPEAT;
@@ -17,6 +19,8 @@ namespace ArcEngine
 
 	bool Input::IsMouseButtonPressed(const MouseCode button)
 	{
+		ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		int state = glfwGetMouseButton(window, static_cast<int32_t>(button));
 		return state == GLFW_PRESS;
@@ -24,6 +28,8 @@ namespace ArcEngine
 
 	glm::vec2 Input::GetMousePosition()
 	{
+		ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		double xpos;
 		double ypos;
@@ -33,11 +39,15 @@ namespace ArcEngine
 
 	float Input::GetMouseX()
 	{
+		ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+
 		return GetMousePosition().x;
 	}
 
 	float Input::GetMouseY()
 	{
+		ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+
 		return GetMousePosition().y;
 	}
 }

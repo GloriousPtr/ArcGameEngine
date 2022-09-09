@@ -300,7 +300,7 @@ namespace ArcEngine
 
 	void SceneViewport::OnOverlayRender() const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_CATEGORY("Debug Rendering", Optick::Category::Debug);
 
 		Renderer2D::BeginScene(m_EditorCamera.GetViewProjection());
 		{

@@ -70,6 +70,8 @@ namespace ArcEngine
 		// Set GLFW callbacks
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
 		{
+			ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 			data.Width = width;
 			data.Height = height;
@@ -80,6 +82,8 @@ namespace ArcEngine
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 		{
+			ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+
 			const WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 			WindowCloseEvent event;
 			data.EventCallback(event);
@@ -87,6 +91,8 @@ namespace ArcEngine
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, [[maybe_unused]] int scancode, [[maybe_unused]] int action, [[maybe_unused]] int mods)
 		{
+			ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+
 			const WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
 			switch (action)
@@ -116,6 +122,8 @@ namespace ArcEngine
 
 		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int keycode)
 		{
+			ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+
 			const WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
 			KeyTypedEvent event((uint16_t)keycode);
@@ -124,6 +132,8 @@ namespace ArcEngine
 		
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, [[maybe_unused]] int action, [[maybe_unused]] int mods)
 		{
+			ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+
 			const WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
 			switch (action)
@@ -147,6 +157,8 @@ namespace ArcEngine
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
 		{
+			ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+
 			const WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
 			MouseScrolledEvent event((float)xOffset, (float)yOffset);
@@ -155,6 +167,8 @@ namespace ArcEngine
 
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos)
 		{
+			ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+
 			const WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
 			MouseMovedEvent event((float)xPos, (float)yPos);
@@ -177,8 +191,15 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 		
-		glfwPollEvents();
-		m_Context->SwapBuffers();
+		{
+			ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+			glfwPollEvents();
+		}
+
+		{
+			ARC_PROFILE_CATEGORY("Wait", Optick::Category::Wait);
+			m_Context->SwapBuffers();
+		}
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)

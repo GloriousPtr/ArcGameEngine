@@ -149,6 +149,7 @@ namespace ArcEngine
 	Material::MaterialData Material::GetData_Internal(const char* name)
 	{
 		ARC_PROFILE_SCOPE();
+
 		const auto& materialProperties = m_Shader->GetMaterialProperties();
 		const auto& materialProperty = m_Shader->GetMaterialProperties().find_as(name);
 		if (materialProperty != materialProperties.end())
@@ -160,6 +161,7 @@ namespace ArcEngine
 	void Material::SetData_Internal(const char* name, const Material::MaterialData data)
 	{
 		ARC_PROFILE_SCOPE();
+
 		const auto& materialProperties = m_Shader->GetMaterialProperties();
 		const auto& property = m_Shader->GetMaterialProperties().find_as(name);
 		if (property != materialProperties.end())

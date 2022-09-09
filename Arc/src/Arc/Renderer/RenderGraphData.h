@@ -28,6 +28,8 @@ namespace ArcEngine
 
 		RenderGraphData(uint32_t width, uint32_t height)
 		{
+			ARC_PROFILE_SCOPE();
+
 			if (width <= 0 || height <= 0)
 			{
 				ARC_CORE_ERROR("Cannot create a RenderGraph with {}x{} dimensions, making it 1x1", width, height);

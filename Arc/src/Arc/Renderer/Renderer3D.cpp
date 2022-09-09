@@ -229,16 +229,11 @@ namespace ArcEngine
 		s_Meshes.reserve(count);
 	}
 
-	void Renderer3D::SubmitMesh(const MeshComponent& meshComponent, const glm::mat4& transform)
+	void Renderer3D::SubmitMesh(const glm::mat4& transform, const Submesh& submesh, MeshComponent::CullModeType cullMode)
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (meshComponent.MeshGeometry->GetSubmeshCount() == 0)
-			return;
-
-		ARC_CORE_ASSERT(meshComponent.MeshGeometry->GetSubmeshCount() > meshComponent.SubmeshIndex, "Trying to access submesh index that does not exist!");
-
-		s_Meshes.emplace_back(transform, meshComponent.MeshGeometry->GetSubmesh(meshComponent.SubmeshIndex), meshComponent.CullMode);
+		s_Meshes.emplace_back(transform, submesh, cullMode);
 	}
 
 	void Renderer3D::Flush(Ref<RenderGraphData> renderGraphData)
