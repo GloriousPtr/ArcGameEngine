@@ -2,13 +2,16 @@
 
 namespace ArcEngine
 {
-	[StructLayout(LayoutKind.Sequential)]
+	[StructLayout(LayoutKind.Explicit)]
 	public struct Rect
 	{
-		public float x;
-		public float y;
-		public float width;
-		public float height;
+		[FieldOffset(0)] public float x;
+		[FieldOffset(4)] public float y;
+		[FieldOffset(8)] public float width;
+		[FieldOffset(12)] public float height;
+
+		[FieldOffset(0)] public float xMin;
+		[FieldOffset(4)] public float yMin;
 
 		public Vector2 center
 		{
@@ -66,36 +69,24 @@ namespace ArcEngine
 			set => x = value - width;
 		}
 
-		public float xMin
-		{
-			get => x;
-			set => x = value;
-		}
-
 		public float yMax
 		{
 			get => y + height;
 			set => y = value - height;
 		}
 
-		public float yMin
-		{
-			get => y;
-			set => y = value;
-		}
-
 		public Rect(float x, float y, float width, float height)
 		{
-			this.x = x;
-			this.y = y;
+			this.x = xMin = x;
+			this.y = yMin = y;
 			this.width = width;
 			this.height = height;
 		}
 
 		public Rect(Vector2 xy, Vector2 size)
 		{
-			x = xy.x;
-			y = xy.y;
+			x = xMin = xy.x;
+			y = yMin = xy.y;
 			width = size.x;
 			height = size.y;
 		}

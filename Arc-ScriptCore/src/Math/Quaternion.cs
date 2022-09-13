@@ -54,8 +54,8 @@ namespace ArcEngine
 		public static Quaternion FromToRotation(Vector3 v1, Vector3 v2)
 		{
 			Vector3 xyz = Vector3.Cross(v1, v2);
-			float w = Mathfs.Sqrt((v1.sqrMagnitude * v2.sqrMagnitude) + Vector3.Dot(v1, v2));
-			return new Quaternion(xyz, w);
+			float perspectiveDivideTerm = Mathfs.Sqrt((v1.sqrMagnitude * v2.sqrMagnitude) + Vector3.Dot(v1, v2));
+			return new Quaternion(xyz, perspectiveDivideTerm);
 		}
 
 		[MethodImpl(INLINE)]

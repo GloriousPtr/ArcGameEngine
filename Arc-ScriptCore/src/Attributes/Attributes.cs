@@ -4,53 +4,53 @@ using System.Runtime.CompilerServices;
 namespace ArcEngine
 {
 	[AttributeUsage(AttributeTargets.Field)]
-	public class SerializeField : Attribute { }
+	public class SerializeFieldAttribute : Attribute { }
 
 	[AttributeUsage(AttributeTargets.Field)]
-	public class HideInProperties : Attribute { }
+	public class HideInPropertiesAttribute : Attribute { }
 
 	[AttributeUsage(AttributeTargets.Field)]
-	public class ShowInProperties : Attribute { }
+	public class ShowInPropertiesAttribute : Attribute { }
 
 	[AttributeUsage(AttributeTargets.Field)]
-	public class Header : Attribute
+	public class HeaderAttribute : Attribute
 	{
-		public string Message;
+		internal string Message;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Header(string message)
+		public HeaderAttribute(string message)
 		{
 			Message = message;
 		}
 	}
 
 	[AttributeUsage(AttributeTargets.Field)]
-	public class Tooltip : Attribute
+	public class TooltipAttribute : Attribute
 	{
-		public string Message;
+		internal string Message;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Tooltip(string message)
+		public TooltipAttribute(string message)
 		{
 			Message = message;
 		}
 	}
 
 	[AttributeUsage(AttributeTargets.Field)]
-	public class Range : Attribute
+	public class RangeAttribute : Attribute
 	{
-		public float Min;
-		public float Max;
+		internal float Min;
+		internal float Max;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Range(float min, float max)
+		public RangeAttribute(float min, float max)
 		{
 			Min = min;
 			Max = max;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Range(int min, int max)
+		public RangeAttribute(int min, int max)
 		{
 			Min = min;
 			Max = max;

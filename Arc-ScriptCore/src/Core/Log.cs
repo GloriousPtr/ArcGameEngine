@@ -14,30 +14,58 @@ namespace ArcEngine
 			Critical = (1 << 5)
 		}
 
+		#region Trace Overloads
+		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Trace(string format, params object[] parameters) =>InternalCalls.Log_LogMessage(LogLevel.Trace, string.Format(format, parameters));
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void Trace(object value) => InternalCalls.Log_LogMessage(LogLevel.Trace, value != null ? value.ToString() : "null");
+		
+		#endregion
+
+		#region Debug Overloads
+		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Debug(string format, params object[] parameters) =>InternalCalls.Log_LogMessage(LogLevel.Debug, string.Format(format, parameters));
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void Debug(object value) => InternalCalls.Log_LogMessage(LogLevel.Debug, value != null ? value.ToString() : "null");
+		
+		#endregion
+
+		#region Info Overloads
+		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Info(string format, params object[] parameters) =>InternalCalls.Log_LogMessage(LogLevel.Info, string.Format(format, parameters));
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void Info(object value) => InternalCalls.Log_LogMessage(LogLevel.Info, value != null ? value.ToString() : "null");
+		
+		#endregion
+
+		#region Warn Overloads
+		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Warn(string format, params object[] parameters) =>InternalCalls.Log_LogMessage(LogLevel.Warn, string.Format(format, parameters));
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void Warn(object value) => InternalCalls.Log_LogMessage(LogLevel.Warn, value != null ? value.ToString() : "null");
+
+		#endregion
+
+		#region Error Overloads
+		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Error(string format, params object[] parameters) =>InternalCalls.Log_LogMessage(LogLevel.Error, string.Format(format, parameters));
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void Critical(string format, params object[] parameters) =>InternalCalls.Log_LogMessage(LogLevel.Critical, string.Format(format, parameters));
+		public static void Error(object value) => InternalCalls.Log_LogMessage(LogLevel.Error, value != null ? value.ToString() : "null");
+		
+		#endregion
 
+		#region Critical Overloads
+		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void Trace(object value) =>InternalCalls.Log_LogMessage(LogLevel.Trace, value != null ? value.ToString() : "null");
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void Debug(object value) =>InternalCalls.Log_LogMessage(LogLevel.Debug, value != null ? value.ToString() : "null");
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void Info(object value) =>InternalCalls.Log_LogMessage(LogLevel.Info, value != null ? value.ToString() : "null");
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void Warn(object value) =>InternalCalls.Log_LogMessage(LogLevel.Warn, value != null ? value.ToString() : "null");
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void Error(object value) =>InternalCalls.Log_LogMessage(LogLevel.Error, value != null ? value.ToString() : "null");
+		public static void Critical(string format, params object[] parameters) =>InternalCalls.Log_LogMessage(LogLevel.Critical, string.Format(format, parameters));
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Critical(object value) =>InternalCalls.Log_LogMessage(LogLevel.Critical, value != null ? value.ToString() : "null");
+
+		#endregion
 	}
 }

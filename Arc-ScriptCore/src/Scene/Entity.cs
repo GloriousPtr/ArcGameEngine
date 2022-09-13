@@ -1,6 +1,9 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+
+#pragma warning disable IDE0051
 
 namespace ArcEngine
 {
@@ -55,7 +58,7 @@ namespace ArcEngine
 		{
 			if (HasComponent<T>())
 			{
-				Log.Error($"{typeof(T).Name} already exists on Entity: {ID}");
+				Log.Error("{0} already exists on Entity: {1}", typeof(T).Name, ID);
 				return GetComponent<T>();
 			}
 
@@ -91,25 +94,13 @@ namespace ArcEngine
 
 		#region CollisionHandlingMethods
 
-		private void HandleOnCollisionEnter2D(CollisionData data)
-		{
-			OnCollisionEnter2D?.Invoke(data);
-		}
+		private void HandleOnCollisionEnter2D(CollisionData data) => OnCollisionEnter2D?.Invoke(data);
 
-		private void HandleOnCollisionExit2D(CollisionData data)
-		{
-			OnCollisionExit2D?.Invoke(data);
-		}
+		private void HandleOnCollisionExit2D(CollisionData data) => OnCollisionExit2D?.Invoke(data);
 
-		private void HandleOnSensorEnter2D(CollisionData data)
-		{
-			OnSensorEnter2D?.Invoke(data);
-		}
+		private void HandleOnSensorEnter2D(CollisionData data) => OnSensorEnter2D?.Invoke(data);
 
-		private void HandleOnSensorExit2D(CollisionData data)
-		{
-			OnSensorExit2D?.Invoke(data);
-		}
+		private void HandleOnSensorExit2D(CollisionData data) => OnSensorExit2D?.Invoke(data);
 
 		#endregion
 
@@ -130,3 +121,5 @@ namespace ArcEngine
 		#endregion
 	}
 }
+
+#pragma warning restore IDE0051

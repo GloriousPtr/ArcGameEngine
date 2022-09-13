@@ -65,21 +65,6 @@ namespace ArcEngine
 
 		#endregion
 
-		/*
-		#region CameraComponent
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void CameraComponent_GetPrimary(ulong entityID, out bool v);
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void CameraComponent_SetPrimary(ulong entityID, ref bool v);
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void CameraComponent_GetFixedAspectRatio(ulong entityID, out bool v);
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void CameraComponent_SetFixedAspectRatio(ulong entityID, ref bool v);
-
-		#endregion
-		*/
-
 		#region Rigidbody2DComponent
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

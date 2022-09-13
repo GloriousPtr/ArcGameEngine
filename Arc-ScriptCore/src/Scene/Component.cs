@@ -40,8 +40,8 @@ namespace ArcEngine
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				InternalCalls.TransformComponent_GetTransform(entityID, out Transform result);
-				return result;
+				InternalCalls.TransformComponent_GetTransform(entityID, out Transform v);
+				return v;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set => InternalCalls.TransformComponent_SetTransform(entityID, ref value);
@@ -55,8 +55,8 @@ namespace ArcEngine
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				InternalCalls.SpriteRendererComponent_GetColor(entityID, out Color t);
-				return t;
+				InternalCalls.SpriteRendererComponent_GetColor(entityID, out Color v);
+				return v;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set => InternalCalls.SpriteRendererComponent_SetColor(entityID, ref value);
@@ -67,8 +67,8 @@ namespace ArcEngine
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				InternalCalls.SpriteRendererComponent_GetTilingFactor(entityID, out float tiling);
-				return tiling;
+				InternalCalls.SpriteRendererComponent_GetTilingFactor(entityID, out float v);
+				return v;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set => InternalCalls.SpriteRendererComponent_SetTilingFactor(entityID, ref value);
@@ -84,14 +84,14 @@ namespace ArcEngine
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				InternalCalls.Rigidbody2DComponent_GetBodyType(entityID, out int bodyType);
-				return (BodyType)bodyType;
+				InternalCalls.Rigidbody2DComponent_GetBodyType(entityID, out int v);
+				return (BodyType)v;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
-				int bodyType = (int)value;
-				InternalCalls.Rigidbody2DComponent_SetBodyType(entityID, ref bodyType);
+				int v = (int)value;
+				InternalCalls.Rigidbody2DComponent_SetBodyType(entityID, ref v);
 			}
 		}
 
@@ -100,8 +100,8 @@ namespace ArcEngine
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				InternalCalls.Rigidbody2DComponent_GetAutoMass(entityID, out bool useAutoMass);
-				return useAutoMass;
+				InternalCalls.Rigidbody2DComponent_GetAutoMass(entityID, out bool v);
+				return v;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set => InternalCalls.Rigidbody2DComponent_SetAutoMass(entityID, ref value);
@@ -112,8 +112,8 @@ namespace ArcEngine
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				InternalCalls.Rigidbody2DComponent_GetMass(entityID, out float m);
-				return m;
+				InternalCalls.Rigidbody2DComponent_GetMass(entityID, out float v);
+				return v;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set => InternalCalls.Rigidbody2DComponent_SetMass(entityID, ref value);
@@ -124,8 +124,8 @@ namespace ArcEngine
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				InternalCalls.Rigidbody2DComponent_GetLinearDrag(entityID, out float drag);
-				return drag;
+				InternalCalls.Rigidbody2DComponent_GetLinearDrag(entityID, out float v);
+				return v;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set => InternalCalls.Rigidbody2DComponent_SetLinearDrag(entityID, ref value);
@@ -136,8 +136,8 @@ namespace ArcEngine
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				InternalCalls.Rigidbody2DComponent_GetAngularDrag(entityID, out float drag);
-				return drag;
+				InternalCalls.Rigidbody2DComponent_GetAngularDrag(entityID, out float v);
+				return v;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set => InternalCalls.Rigidbody2DComponent_SetAngularDrag(entityID, ref value);
@@ -148,8 +148,8 @@ namespace ArcEngine
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				InternalCalls.Rigidbody2DComponent_GetAllowSleep(entityID, out bool a);
-				return a;
+				InternalCalls.Rigidbody2DComponent_GetAllowSleep(entityID, out bool v);
+				return v;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set => InternalCalls.Rigidbody2DComponent_SetAllowSleep(entityID, ref value);
@@ -160,8 +160,8 @@ namespace ArcEngine
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				InternalCalls.Rigidbody2DComponent_GetAwake(entityID, out bool a);
-				return a;
+				InternalCalls.Rigidbody2DComponent_GetAwake(entityID, out bool v);
+				return v;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set => InternalCalls.Rigidbody2DComponent_SetAwake(entityID, ref value);
@@ -172,8 +172,8 @@ namespace ArcEngine
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				InternalCalls.Rigidbody2DComponent_GetContinuous(entityID, out bool a);
-				return a;
+				InternalCalls.Rigidbody2DComponent_GetContinuous(entityID, out bool v);
+				return v;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set => InternalCalls.Rigidbody2DComponent_SetContinuous(entityID, ref value);
@@ -184,8 +184,8 @@ namespace ArcEngine
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				InternalCalls.Rigidbody2DComponent_GetFreezeRotation(entityID, out bool a);
-				return a;
+				InternalCalls.Rigidbody2DComponent_GetFreezeRotation(entityID, out bool v);
+				return v;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set => InternalCalls.Rigidbody2DComponent_SetFreezeRotation(entityID, ref value);
@@ -196,8 +196,8 @@ namespace ArcEngine
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				InternalCalls.Rigidbody2DComponent_GetGravityScale(entityID, out float gravityScale);
-				return gravityScale;
+				InternalCalls.Rigidbody2DComponent_GetGravityScale(entityID, out float v);
+				return v;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set => InternalCalls.Rigidbody2DComponent_SetGravityScale(entityID, ref value);
@@ -248,15 +248,15 @@ namespace ArcEngine
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsAwake()
 		{
-			InternalCalls.Rigidbody2DComponent_IsAwake(entityID, out bool awake);
-			return awake;
+			InternalCalls.Rigidbody2DComponent_IsAwake(entityID, out bool v);
+			return v;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsSleeping()
 		{
-			InternalCalls.Rigidbody2DComponent_IsSleeping(entityID, out bool sleeping);
-			return sleeping;
+			InternalCalls.Rigidbody2DComponent_IsSleeping(entityID, out bool v);
+			return v;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -353,8 +353,8 @@ namespace ArcEngine
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
-				int type = (int)value;
-				InternalCalls.AudioSource_SetAttenuationModel(entityID, ref type);
+				int v = (int)value;
+				InternalCalls.AudioSource_SetAttenuationModel(entityID, ref v);
 			}
 		}
 

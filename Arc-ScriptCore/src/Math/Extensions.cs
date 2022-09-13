@@ -100,11 +100,11 @@ namespace ArcEngine
 		/// <summary>Sets X to 0</summary>
 		[MethodImpl(INLINE)] public static Vector2 FlattenX(this Vector2 v) => new Vector2(0f, v.y);
 
-		/// <summary>Sets Y to 0</summary>
-		[MethodImpl(INLINE)] public static Vector2 FlattenY(this Vector2 v) => new Vector2(v.x, 0f);
-
 		/// <summary>Sets X to 0</summary>
 		[MethodImpl(INLINE)] public static Vector3 FlattenX(this Vector3 v) => new Vector3(0f, v.y, v.z);
+
+		/// <summary>Sets Y to 0</summary>
+		[MethodImpl(INLINE)] public static Vector2 FlattenY(this Vector2 v) => new Vector2(v.x, 0f);
 
 		/// <summary>Sets Y to 0</summary>
 		[MethodImpl(INLINE)] public static Vector3 FlattenY(this Vector3 v) => new Vector3(v.x, 0f, v.z);
@@ -215,11 +215,11 @@ namespace ArcEngine
 		/// <summary>Squares the value. Equivalent to <c>v*v</c></summary>
 		[MethodImpl(INLINE)] public static float Square(this float v) => v * v;
 
-		/// <summary>Cubes the value. Equivalent to <c>v*v*v</c></summary>
-		[MethodImpl(INLINE)] public static float Cube(this float v) => v * v * v;
-
 		/// <summary>Squares the value. Equivalent to <c>v*v</c></summary>
 		[MethodImpl(INLINE)] public static int Square(this int v) => v * v;
+
+		/// <summary>Cubes the value. Equivalent to <c>v*v*v</c></summary>
+		[MethodImpl(INLINE)] public static float Cube(this float v) => v * v * v;
 
 		/// <summary>The next integer, modulo <c>length</c>. Behaves the way you want with negative values for stuff like array index access etc</summary>
 		[MethodImpl(INLINE)] public static int NextMod(this int value, int length) => (value + 1).Mod(length);

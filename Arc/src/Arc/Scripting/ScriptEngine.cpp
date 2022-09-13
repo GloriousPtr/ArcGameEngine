@@ -120,12 +120,12 @@ namespace ArcEngine
 		s_Data->CoreImage = mono_assembly_get_image(s_Data->CoreAssembly);
 
 		s_Data->EntityClass = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "Entity");
-		s_Data->SerializeFieldAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "SerializeField");
-		s_Data->HideInPropertiesAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "HideInProperties");
-		s_Data->ShowInPropertiesAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "ShowInProperties");
-		s_Data->HeaderAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "Header");
-		s_Data->TooltipAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "Tooltip");
-		s_Data->RangeAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "Range");
+		s_Data->SerializeFieldAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "SerializeFieldAttribute");
+		s_Data->HideInPropertiesAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "HideInPropertiesAttribute");
+		s_Data->ShowInPropertiesAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "ShowInPropertiesAttribute");
+		s_Data->HeaderAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "HeaderAttribute");
+		s_Data->TooltipAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "TooltipAttribute");
+		s_Data->RangeAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "RangeAttribute");
 
 		GCManager::CollectGarbage();
 	}
