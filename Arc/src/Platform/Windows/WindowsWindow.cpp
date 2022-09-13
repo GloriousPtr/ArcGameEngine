@@ -70,7 +70,7 @@ namespace ArcEngine
 		// Set GLFW callbacks
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
 		{
-			ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 			data.Width = width;
@@ -82,7 +82,7 @@ namespace ArcEngine
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 		{
-			ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
 			const WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 			WindowCloseEvent event;
@@ -91,7 +91,7 @@ namespace ArcEngine
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, [[maybe_unused]] int scancode, [[maybe_unused]] int action, [[maybe_unused]] int mods)
 		{
-			ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
 			const WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -122,7 +122,7 @@ namespace ArcEngine
 
 		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int keycode)
 		{
-			ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
 			const WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -132,7 +132,7 @@ namespace ArcEngine
 		
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, [[maybe_unused]] int action, [[maybe_unused]] int mods)
 		{
-			ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
 			const WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -157,7 +157,7 @@ namespace ArcEngine
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
 		{
-			ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
 			const WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -167,7 +167,7 @@ namespace ArcEngine
 
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos)
 		{
-			ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
 			const WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -192,12 +192,12 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 		
 		{
-			ARC_PROFILE_CATEGORY("Input", Optick::Category::Input);
+			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 			glfwPollEvents();
 		}
 
 		{
-			ARC_PROFILE_CATEGORY("Wait", Optick::Category::Wait);
+			ARC_PROFILE_CATEGORY("Wait", Profile::Category::Wait);
 			m_Context->SwapBuffers();
 		}
 	}

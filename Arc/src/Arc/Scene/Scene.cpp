@@ -373,7 +373,7 @@ namespace ArcEngine
 		m_IsRunning = true;
 
 		{
-			ARC_PROFILE_CATEGORY("Physics 2D", Optick::Category::Physics);
+			ARC_PROFILE_CATEGORY("Physics 2D", Profile::Category::Physics);
 
 			/////////////////////////////////////////////////////////////////////
 			// Rigidbody and Colliders (2D) /////////////////////////////////////
@@ -542,7 +542,7 @@ namespace ArcEngine
 		// Sound ////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
 		{
-			ARC_PROFILE_CATEGORY("Audio", Optick::Category::Audio);
+			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio);
 
 			auto listenerView = m_Registry.view<TransformComponent, AudioListenerComponent>();
 			for (auto e : listenerView)
@@ -581,7 +581,7 @@ namespace ArcEngine
 		// Scripting ////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
 		{
-			ARC_PROFILE_CATEGORY("Script", Optick::Category::Script);
+			ARC_PROFILE_CATEGORY("Script", Profile::Category::Script);
 
 			auto scriptView = m_Registry.view<ScriptComponent>();
 			for (auto e : scriptView)
@@ -605,7 +605,7 @@ namespace ArcEngine
 		m_IsRunning = false;
 
 		{
-			ARC_PROFILE_CATEGORY("Script", Optick::Category::Script);
+			ARC_PROFILE_CATEGORY("Script", Profile::Category::Script);
 
 			auto scriptView = m_Registry.view<ScriptComponent>();
 			for (auto e : scriptView)
@@ -627,7 +627,7 @@ namespace ArcEngine
 		// Sound ////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
 		{
-			ARC_PROFILE_CATEGORY("Audio", Optick::Category::Audio);
+			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio);
 
 			auto view = m_Registry.view<AudioSourceComponent>();
 			for (auto e : view)
@@ -639,7 +639,7 @@ namespace ArcEngine
 		}
 
 		{
-			ARC_PROFILE_CATEGORY("Physics 2D", Optick::Category::Physics);
+			ARC_PROFILE_CATEGORY("Physics 2D", Profile::Category::Physics);
 
 			m_FixtureMap.clear();
 			delete m_ContactListener;
@@ -668,7 +668,7 @@ namespace ArcEngine
 
 		{
 			{
-				ARC_PROFILE_CATEGORY("Physics 2D", Optick::Category::Physics);
+				ARC_PROFILE_CATEGORY("Physics 2D", Profile::Category::Physics);
 
 				auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
 				for (auto e : view)
@@ -683,7 +683,7 @@ namespace ArcEngine
 			// Scripting ////////////////////////////////////////////////////////
 			/////////////////////////////////////////////////////////////////////
 			{
-				ARC_PROFILE_CATEGORY("Script", Optick::Category::Script);
+				ARC_PROFILE_CATEGORY("Script", Profile::Category::Script);
 
 				auto scriptView = m_Registry.view<ScriptComponent>();
 				for (auto e : scriptView)
@@ -701,7 +701,7 @@ namespace ArcEngine
 		// Physics //////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
 		{
-			ARC_PROFILE_CATEGORY("Physics 2D", Optick::Category::Physics);
+			ARC_PROFILE_CATEGORY("Physics 2D", Profile::Category::Physics);
 			
 			m_ContactListener->OnUpdate(ts);
 			m_PhysicsWorld2D->Step(ts, VelocityIterations, PositionIterations);
@@ -809,7 +809,7 @@ namespace ArcEngine
 		// Sound ////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
 		{
-			ARC_PROFILE_CATEGORY("Audio", Optick::Category::Audio);
+			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio);
 
 			auto listenerView = m_Registry.view<TransformComponent, AudioListenerComponent>();
 			for (auto e : listenerView)
@@ -846,7 +846,7 @@ namespace ArcEngine
 
 		CameraData cameraData = {};
 		{
-			ARC_PROFILE_CATEGORY("Camera", Optick::Category::Camera);
+			ARC_PROFILE_CATEGORY("Camera", Profile::Category::Camera);
 
 			Entity cameraEntity = GetPrimaryCameraEntity();
 			if (!overrideCamera)
@@ -892,7 +892,7 @@ namespace ArcEngine
 
 	Entity Scene::GetPrimaryCameraEntity()
 	{
-		ARC_PROFILE_CATEGORY("Camera", Optick::Category::Camera);
+		ARC_PROFILE_CATEGORY("Camera", Profile::Category::Camera);
 
 		auto view = m_Registry.view<CameraComponent>();
 		for (auto entity : view)
@@ -906,7 +906,7 @@ namespace ArcEngine
 
 	void Scene::OnRender(const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData)
 	{
-		ARC_PROFILE_CATEGORY("Rendering", Optick::Category::Rendering);
+		ARC_PROFILE_CATEGORY("Rendering", Profile::Category::Rendering);
 
 		eastl::vector<Entity> lights;
 		{

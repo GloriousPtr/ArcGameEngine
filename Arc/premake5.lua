@@ -65,6 +65,7 @@ project "Arc"
 		"optick",
 		"box2d",
 		"EASTL",
+		"Arc-ScriptCore",
 		"opengl32.lib",
 
 		"%{Lib.mono}"
