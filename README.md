@@ -1,7 +1,6 @@
 # Arc Game Engine
 
 [![Build Status](https://github.com/MohitSethi99/ArcEngine/workflows/build/badge.svg)](https://github.com/MohitSethi99/ArcEngine/actions?workflow=build)
-[![CodeQL](https://github.com/MohitSethi99/ArcEngine/workflows/CodeQL/badge.svg)](https://github.com/MohitSethi99/ArcEngine/actions?workflow=CodeQL)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcEngine&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcEngine)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcEngine&metric=bugs)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcEngine)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcEngine&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcEngine)
