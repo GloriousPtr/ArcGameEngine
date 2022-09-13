@@ -1,11 +1,13 @@
 #include "ConsolePanel.h"
 
+#include <Arc/ImGui/Modules/ExternalConsoleSink.h>
+
+#include <glm/glm.hpp>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
-#include <glm/glm.hpp>
-
-#include "Arc/ImGui/Modules/ExternalConsoleSink.h"
 #include <icons/IconsMaterialDesignIcons.h>
+
+#include "../Utils/UI.h"
 
 namespace ArcEngine
 {
@@ -163,20 +165,10 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const float maxWidth = ImGui::CalcTextSize("Scroll to bottom").x * 1.1f;
-		const float spacing = ImGui::GetStyle().ItemInnerSpacing.x + ImGui::CalcTextSize(" ").x;
-
-		// Checkbox for scrolling lock
-		ImGui::Text("Scroll to bottom");
-		ImGui::SameLine(0.0f, spacing + maxWidth - ImGui::CalcTextSize("Scroll to bottom").x);
-		ImGui::Checkbox("##ScrollToBottom", &m_AllowScrollingToBottom);
-
-		// Slider for font scale
-		ImGui::Text("Display scale");
-		ImGui::SameLine(0.0f, spacing + maxWidth - ImGui::CalcTextSize("Display scale").x);
-		ImGui::PushItemWidth(maxWidth * 1.25f / 1.1f);
-		ImGui::SliderFloat("##DisplayScale", &m_DisplayScale, 0.5f, 4.0f, "%.1f");
-		ImGui::PopItemWidth();
+		UI::BeginProperties(ImGuiTableFlags_SizingStretchSame);
+		UI::Property("Scroll to bottom", m_AllowScrollingToBottom);
+		UI::Property("DisplayScale", m_DisplayScale, 0.5f, 4.0f, nullptr, 0.1f, "%.1f");
+		UI::EndProperties();
 	}
 
 	void ConsolePanel::ImGuiRenderMessages()
