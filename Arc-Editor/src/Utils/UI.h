@@ -3,13 +3,15 @@
 #include <ArcEngine.h>
 
 #include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
 
 namespace ArcEngine
 {
 	class UI
 	{
 	public:
-		static void BeginProperties(ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchSame);
+		static void BeginProperties(ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_BordersInner
+			| ImGuiTableFlags_BordersOuterH);
 		static void EndProperties();
 
 		// Strings
@@ -132,6 +134,9 @@ namespace ArcEngine
 		// Buttons
 		static bool IconButton(const char* icon, const char* label, ImVec4 iconColor = { 0.537f, 0.753f, 0.286f, 1.0f });
 		static bool ToggleButton(const char* label, bool state, ImVec2 size = { 0, 0 }, float alpha = 1.0f, float pressedAlpha = 1.0f, ImGuiButtonFlags buttonFlags = ImGuiButtonFlags_None);
+
+		static void ClippedText(const ImVec2& pos_min, const ImVec2& pos_max, const char* text, const char* text_end, const ImVec2* text_size_if_known, const ImVec2& align, const ImRect* clip_rect, float wrap_width);
+		static void ClippedText(ImDrawList* draw_list, const ImVec2& pos_min, const ImVec2& pos_max, const char* text, const char* text_display_end, const ImVec2* text_size_if_known, const ImVec2& align, const ImRect* clip_rect, float wrap_width);
 
 	private:
 		static void PushID();

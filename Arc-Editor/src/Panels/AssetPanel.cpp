@@ -15,6 +15,44 @@ namespace ArcEngine
 {
 	static const std::filesystem::path s_AssetPath = "Assets";
 
+	static const eastl::hash_map<eastl::string, eastl::string> s_FileTypes =
+	{
+		{ "png",	"Texture" },
+		{ "jpg",	"Texture" },
+		{ "jpeg",	"Texture" },
+		{ "bmp",	"Texture" },
+		{ "gif",	"Texture" },
+
+		{ "hdr",	"Cubemap" },
+		{ "tga",	"Cubemap" },
+
+		{ "glsl",	"Shader" },
+
+		{ "obj",	"Model" },
+		{ "fbx",	"Model" },
+		{ "gltf",	"Model" },
+		{ "assbin",	"Model" },
+
+		{ "mp3",	"Audio" },
+		{ "m4a",	"Audio" },
+		{ "wav",	"Audio" },
+
+		{ "arc",	"Scene" },
+		{ "prefab", "Prefab" },
+	};
+
+	static const eastl::hash_map<eastl::string, ImVec4> s_TypeColors =
+	{
+		{ "Texture",		{ 0.80f, 0.20f, 0.30f, 1.00f } },
+		{ "Cubemap",		{ 0.80f, 0.20f, 0.30f, 1.00f } },
+		{ "Shader",			{ 0.20f, 0.40f, 0.75f, 1.00f } },
+		{ "Model",			{ 0.20f, 0.80f, 0.75f, 1.00f } },
+		{ "Audio",			{ 0.20f, 0.80f, 0.50f, 1.00f } },
+
+		{ "Scene",			{ 0.75f, 0.35f, 0.20f, 1.00f } },
+		{ "Prefab",			{ 0.10f, 0.50f, 0.80f, 1.00f } },
+	};
+
 	static const char* GetFileIcon(const char* ext)
 	{
 		if (!(strcmp(ext, "txt") && strcmp(ext, "md")))
@@ -162,6 +200,7 @@ namespace ArcEngine
 		m_WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 
 		m_DirectoryIcon = Texture2D::Create("Resources/Icons/ContentBrowser/DirectoryIcon.png");
+		m_FileIcon = Texture2D::Create("Resources/Icons/ContentBrowser/FileIcon.png");
 
 		m_CurrentDirectory = s_AssetPath;
 		UpdateDirectoryEntries(s_AssetPath);
@@ -399,11 +438,13 @@ namespace ArcEngine
 		std::filesystem::path directoryToOpen = "";
 
 		float padding = 4.0f;
-		float cellSize = m_ThumbnailSize + 2 * padding;
+		float cellSize = m_ThumbnailSize + 2 * padding + m_ThumbnailSize * 0.1f;
 
 		float overlayPaddingY = 6.0f * padding;
 		float thumbnailPadding = overlayPaddingY * 0.5f;
 		float thumbnailSize = m_ThumbnailSize - thumbnailPadding;
+
+		ImVec2 backgroundThumbnailSize = { m_ThumbnailSize + padding * 2, m_ThumbnailSize * 1.25f + padding * 8 + ImGui::GetTextLineHeight() };
 
 		float panelWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ScrollbarSize;
 		int columnCount = (int) (panelWidth / cellSize);
@@ -411,19 +452,20 @@ namespace ArcEngine
 			columnCount = 1;
 
 		float lineHeight = ImGui::GetTextLineHeight();
-		uint32_t flags = ImGuiTableFlags_ContextMenuInBody
-			| ImGuiTableFlags_NoPadInnerX
-			| ImGuiTableFlags_ScrollY;
-
-		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0, 0 });
+		uint32_t flags = ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_ScrollY;
 
 		if (!grid)
 		{
+			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0, 0 });
 			columnCount = 1;
-			flags |= ImGuiTableFlags_RowBg | ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_SizingStretchSame;
+			flags |= ImGuiTableFlags_RowBg
+					| ImGuiTableFlags_NoPadOuterX
+					| ImGuiTableFlags_NoPadInnerX
+					| ImGuiTableFlags_SizingStretchSame;
 		}
 		else
 		{
+			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { m_ThumbnailSize * 0.05f, m_ThumbnailSize * 0.05f });
 			flags |= ImGuiTableFlags_PadOuterX | ImGuiTableFlags_SizingFixedFit;
 		}
 
@@ -440,8 +482,7 @@ namespace ArcEngine
 		bool textureCreated = false;
 		if (ImGui::BeginTable("BodyTable", columnCount, flags))
 		{
-			
-			for (size_t i = 0, len = m_DirectoryEntries.size(); i < len; ++i)
+			for (int i = 0, len = (int)m_DirectoryEntries.size(); i < len; ++i)
 			{
 				ImGui::PushID(i);
 
@@ -451,7 +492,6 @@ namespace ArcEngine
 				const char* filename = file.Name.c_str();
 
 				uint64_t textureId = m_DirectoryIcon->GetRendererID();
-				const char* fontIcon = nullptr;
 				if (!isDir)
 				{
 					eastl::string ext = StringUtils::GetExtension((eastl::string&&)file.Name);
@@ -467,10 +507,14 @@ namespace ArcEngine
 							file.Thumbnail = Texture2D::Create(file.Filepath);
 							textureId = file.Thumbnail->GetRendererID();
 						}
+						else
+						{
+							textureId = 0;
+						}
 					}
 					else
 					{
-						fontIcon = GetFileIcon(ext.c_str());
+						textureId = m_FileIcon->GetRendererID();
 					}
 				}
 
@@ -489,7 +533,10 @@ namespace ArcEngine
 						highlight = path == file.Filepath;
 					}
 
-					bool const clicked = UI::ToggleButton(("##" + std::to_string(i)).c_str(), highlight, { m_ThumbnailSize + padding * 2, m_ThumbnailSize + textSize.y + padding * 8 }, 0.0f, 1.0f);
+					// Background button
+					static eastl::string id = "###";
+					id[2] = (char)i;
+					bool const clicked = UI::ToggleButton(id.c_str(), highlight, backgroundThumbnailSize, 0.0f, 1.0f);
 					if (m_ElapsedTime > 0.25f && clicked)
 					{
 						const auto& path = m_CurrentDirectory / file.DirectoryEntry.path().filename();
@@ -510,44 +557,44 @@ namespace ArcEngine
 						EditorLayer::GetInstance()->ResetContext();
 					}
 
+					// Forground Image
 					ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
 					ImGui::SetItemAllowOverlap();
+					ImGui::Image((ImTextureID)m_WhiteTexture->GetRendererID(), { backgroundThumbnailSize.x - padding * 2.0f, backgroundThumbnailSize.y - padding * 2.0f }, { 0, 0 }, { 1, 1 }, EditorTheme::WindowBgAlternativeColor);
 
-					ImGui::Image((ImTextureID)m_WhiteTexture->GetRendererID(), { m_ThumbnailSize, m_ThumbnailSize + textSize.y + overlayPaddingY }, { 0, 0 }, { 1, 1 }, EditorTheme::WindowBgAlternativeColor);
+					// Thumbnail Image
+					ImGui::SetCursorPos({ cursorPos.x + thumbnailPadding * 0.75f, cursorPos.y + thumbnailPadding });
+					ImGui::SetItemAllowOverlap();
+					ImGui::Image((ImTextureID)textureId, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
 
-					ImDrawList& windowDrawList = *ImGui::GetWindowDrawList();
+					// Type Color frame
+					const char* fileType = "Unknown";
+					if (s_FileTypes.find_as(file.Extension.c_str()) != s_FileTypes.end())
+						fileType = s_FileTypes.at(file.Extension.c_str()).c_str();
+					ImVec4 typeColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+					if (s_TypeColors.find_as(fileType) != s_TypeColors.end())
+						typeColor = s_TypeColors.at(fileType);
+					ImVec2 typeColorFrameSize = { m_ThumbnailSize, m_ThumbnailSize * 0.03f };
+					ImGui::SetCursorPosX(cursorPos.x + padding);
+					ImGui::Image((ImTextureID)m_WhiteTexture->GetRendererID(), typeColorFrameSize, { 0, 0 }, { 1, 1 }, isDir ? ImVec4(0.0f, 0.0f, 0.0f, 0.0f) : typeColor);
 
 					ImVec2 rectMin = ImGui::GetItemRectMin();
 					ImVec2 rectSize = ImGui::GetItemRectSize();
+					float rectMin_x = rectMin.x + padding * 2.0f;
+					float rectMin_y = rectMin.y + rectSize.y + typeColorFrameSize.y;
+					ImRect clipRect = ImRect({ rectMin_x, rectMin_y }, { rectMin_x - padding * 2.0f + rectSize.x, rectMin_y + m_ThumbnailSize * 0.15f + textSize.y + overlayPaddingY - EditorTheme::SmallFont->FontSize });
+					UI::ClippedText(clipRect.Min, clipRect.Max, filename, nullptr, nullptr, { 0, 0 }, &clipRect, m_ThumbnailSize - padding * 4.0f);
 
-					ImGui::SetCursorPos({ cursorPos.x + thumbnailPadding * 0.75f, cursorPos.y + thumbnailPadding });
-					ImGui::SetItemAllowOverlap();
-					if (fontIcon)
+					if (!isDir)
 					{
-						ImGui::InvisibleButton(fontIcon, { thumbnailSize, thumbnailSize });
-						windowDrawList.AddText({ rectMin.x + rectSize.x * 0.5f - ImGui::CalcTextSize(fontIcon).x * 0.5f, rectMin.y + rectSize.y * 0.5f }, ImColor(1.0f, 1.0f, 1.0f), fontIcon);
-					}
-					else
-					{
-						ImGui::Image((ImTextureID)textureId, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+						ImGui::SetCursorPos({ cursorPos.x + padding * 2.0f, cursorPos.y + m_ThumbnailSize * 1.25f + textSize.y + overlayPaddingY - EditorTheme::SmallFont->FontSize * 0.75f });
+						ImGui::BeginDisabled();
+						ImGui::PushFont(EditorTheme::SmallFont);
+						ImGui::TextUnformatted(fileType);
+						ImGui::PopFont();
+						ImGui::EndDisabled();
 					}
 
-					rectMin = ImGui::GetItemRectMin();
-					rectSize = ImGui::GetItemRectSize();
-
-					if (textSize.x + padding * 2 <= rectSize.x)
-					{
-						float rectMin_x = rectMin.x - padding + (rectSize.x - textSize.x) / 2;
-						float rectMin_y = rectMin.y + rectSize.y;
-						windowDrawList.AddText({ rectMin_x + padding, rectMin_y + padding * 2 }, ImColor(1.0f, 1.0f, 1.0f), filename);
-					}
-					else
-					{
-						float rectMin_y = rectMin.y + rectSize.y;
-						float rectMax_x = rectMin.x + rectSize.x;
-						float rectMax_y = rectMin_y + textSize.y + padding * 2;
-						ImGui::RenderTextEllipsis(&windowDrawList, { rectMin.x + padding, rectMin_y + padding * 2 }, { rectMax_x, rectMax_y }, rectMax_x, rectMax_x, filename, nullptr, &textSize);
-					}
 					ImGui::SetCursorPosY(ImGui::GetCursorPosY() + textSize.y + padding * 4);
 				}
 				else
@@ -568,10 +615,7 @@ namespace ArcEngine
 
 					ImGui::SameLine();
 					ImGui::SetCursorPosX(ImGui::GetCursorPosX() - lineHeight);
-					if (fontIcon)
-						ImGui::TextUnformatted(fontIcon);
-					else
-						ImGui::Image((ImTextureID)textureId, { lineHeight, lineHeight }, { 0, 1 }, { 1, 0 });
+					ImGui::Image((ImTextureID)textureId, { lineHeight, lineHeight }, { 0, 1 }, { 1, 0 });
 					ImGui::SameLine();
 					ImGui::TextUnformatted(filename);
 
@@ -587,6 +631,7 @@ namespace ArcEngine
 			if (!anyItemHovered && ImGui::IsItemClicked())
 				EditorLayer::GetInstance()->ResetContext();
 		}
+
 		ImGui::PopStyleVar();
 
 		if (!directoryToOpen.empty())

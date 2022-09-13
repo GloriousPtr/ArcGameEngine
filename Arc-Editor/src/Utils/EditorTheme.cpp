@@ -11,6 +11,10 @@ namespace ArcEngine
 	ImVec4 EditorTheme::AssetIconColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 	ImVec2 EditorTheme::UIFramePadding = ImVec2(1.0f, 1.0f);
 
+	ImFont* EditorTheme::DefaultFont = nullptr;
+	ImFont* EditorTheme::SmallFont = nullptr;
+	ImFont* EditorTheme::BoldFont = nullptr;
+
 	static void AddIconFont(float fontSize)
 	{
 		ImGuiIO& io = ImGui::GetIO();
@@ -32,6 +36,7 @@ namespace ArcEngine
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		float fontSize = 18.0f;
+		float fontSizeSmall = 14.0f;
 		
 		ImFontConfig iconsConfig;
         iconsConfig.MergeMode = false;
@@ -40,10 +45,13 @@ namespace ArcEngine
         iconsConfig.GlyphMinAdvanceX = 4.0f;
         iconsConfig.SizePixels = 12.0f;
 		
-		io.Fonts->AddFontFromFileTTF("Resources/Fonts/opensans/OpenSans-Regular.ttf", fontSize, &iconsConfig);
+		DefaultFont = io.Fonts->AddFontFromFileTTF("Resources/Fonts/opensans/OpenSans-Regular.ttf", fontSize, &iconsConfig);
 		AddIconFont(fontSize);
 
-		io.Fonts->AddFontFromFileTTF("Resources/Fonts/opensans/OpenSans-Bold.ttf", fontSize, &iconsConfig);
+		SmallFont = io.Fonts->AddFontFromFileTTF("Resources/Fonts/opensans/OpenSans-Regular.ttf", fontSizeSmall, &iconsConfig);
+		AddIconFont(fontSizeSmall);
+
+		BoldFont = io.Fonts->AddFontFromFileTTF("Resources/Fonts/opensans/OpenSans-Bold.ttf", fontSize, &iconsConfig);
 		AddIconFont(fontSize);
 
 		io.Fonts->TexGlyphPadding = 1;

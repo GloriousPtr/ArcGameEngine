@@ -140,5 +140,9 @@ namespace ArcEngine
 		static ImVec4 WindowBgAlternativeColor;
 		static ImVec4 AssetIconColor;
 		static ImVec2 UIFramePadding;
+
+		static ImFont* DefaultFont;
+		static ImFont* SmallFont;
+		static ImFont* BoldFont;
 	};
 }

@@ -56,11 +56,12 @@ namespace ArcEngine
 		eastl::stack<std::filesystem::path> m_BackStack;
 		eastl::vector<File> m_DirectoryEntries;
 		uint32_t m_CurrentlyVisibleItemsTreeView = 0;
-		float m_ThumbnailSize = 64.0f;
+		float m_ThumbnailSize = 96.0f;
 		ImGuiTextFilter m_Filter;
 		float m_ElapsedTime = 0.0f;
 
 		Ref<Texture2D> m_WhiteTexture;
 		Ref<Texture2D> m_DirectoryIcon;
+		Ref<Texture2D> m_FileIcon;
 	};
 }
