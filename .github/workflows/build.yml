@@ -82,6 +82,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"MohitSethi99_ArcEngine" /o:"mohitsethi99" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /n:"ArcEngine" /v:"1.0" /d:sonar.cfamily.build-wrapper-output=${{ env.BUILD_WRAPPER_OUT_DIR }} /d:sonar.exclusions="Arc/vendor/**, Sandbox/**"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"MohitSethi99_ArcEngine" /o:"mohitsethi99" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /n:"ArcEngine" /v:"1.0" /d:sonar.cfamily.build-wrapper-output=${{ env.BUILD_WRAPPER_OUT_DIR }} /d:sonar.exclusions="Arc/vendor/**, Arc-ScriptCore/src/Math/Mathfs.cs, Sandbox/**"
           build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} msbuild /m /p:Configuration=${{matrix.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}} /t:rebuild /nodeReuse:false
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
