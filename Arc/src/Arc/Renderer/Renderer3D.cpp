@@ -42,7 +42,10 @@ namespace ArcEngine
 	float Renderer3D::BloomKnee = 0.1f;
 	float Renderer3D::BloomClamp = 100.0f;
 	bool Renderer3D::UseFXAA = true;
-	glm::vec2 Renderer3D::FXAAThreshold = glm::vec2(0.0078125f, 0.125f);
+	glm::vec2 Renderer3D::FXAAThreshold = glm::vec2(0.0078125f, 0.125f);		// x: current threshold, y: relative threshold
+	glm::vec4 Renderer3D::VignetteColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.25f);	// rgb: color, a: intensity
+	glm::vec4 Renderer3D::VignetteOffset = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);	// xy: offset, z: useMask, w: enable/disable effect
+	Ref<Texture2D> Renderer3D::VignetteMask = nullptr;
 
 	void Renderer3D::Init()
 	{
@@ -411,10 +414,12 @@ namespace ArcEngine
 		renderGraphData->CompositePassTarget->Bind();
 		s_HdrShader->Bind();
 		glm::vec4 tonemappingParams = glm::vec4(((int) Tonemapping), Exposure, 0.0f, 0.0f);
+		
 		s_HdrShader->SetFloat4("u_TonemappParams", tonemappingParams);
 		s_HdrShader->SetFloat("u_BloomStrength", UseBloom ? BloomStrength : 0.0f);
 		s_HdrShader->SetInt("u_Texture", 0);
 		s_HdrShader->SetInt("u_BloomTexture", 1);
+		s_HdrShader->SetInt("u_VignetteMask", 2);
 		
 		if (UseFXAA)
 			renderGraphData->FXAAPassTarget->BindColorAttachment(0, 0);
@@ -422,6 +427,15 @@ namespace ArcEngine
 			renderGraphData->LightingPassTarget->BindColorAttachment(0, 0);
 		
 		renderGraphData->UpsampledFramebuffers[0]->BindColorAttachment(0, 1);
+
+		if (VignetteOffset.a > 0.0f)
+		{
+			s_HdrShader->SetFloat4("u_VignetteColor", VignetteColor);
+			if (VignetteMask)
+				VignetteMask->Bind(2);
+		}
+		s_HdrShader->SetFloat4("u_VignetteOffset", VignetteOffset);
+
 		DrawQuad();
 	}
 

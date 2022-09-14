@@ -24,8 +24,13 @@ void main()
 // z,w: unused
 uniform vec4 u_TonemappParams;
 uniform float u_BloomStrength;
+
+uniform vec4 u_VignetteColor;			// rgb: color, a: intensity
+uniform vec4 u_VignetteOffset;			// xy: offset, z: useMask, w: enable/disable effect
+
 uniform sampler2D u_Texture;
 uniform sampler2D u_BloomTexture;
+uniform sampler2D u_VignetteMask;
 
 layout(location = 0) in vec2 v_TexCoord;
 
@@ -66,7 +71,7 @@ vec3 TonemapAces(const vec3 x)
     const float c = 2.43;
     const float d = 0.59;
     const float e = 0.14;
-    return clamp((x * (a * x + b)) / (x * (c * x + d ) + e), 0.0, 1.0);
+    return clamp((x * (a * x + b)) / (x * (c * x + d ) + e), vec3(0.0), vec3(1.0));
 }
 
 vec3 ExposureTonemapping(const vec3 color)
@@ -97,6 +102,26 @@ void main()
 		case 3:
 			result = TonemapUncharted2Exposure(u_TonemappParams.y * hdrColor);
 			break;
+	}
+
+	// Apply vignette
+	if (u_VignetteOffset.w > 0.0)
+	{
+		if (u_VignetteOffset.z > 0.0)
+		{
+			float vignetteOpacity = (1.0 - texture(u_VignetteMask, v_TexCoord).r) * u_VignetteColor.a;
+			result = mix(result, u_VignetteColor.rgb, vignetteOpacity);
+		}
+		else
+		{
+			vec2 uv = v_TexCoord + u_VignetteOffset.xy;
+			uv *= 1.0 - (v_TexCoord.yx + u_VignetteOffset.yx);
+			float vig = uv.x * uv.y * 15.0;
+			vig = pow(vig, u_VignetteColor.a);
+			vig = clamp(vig, 0.0, 1.0);
+
+			result = mix(u_VignetteColor.rgb, result, vig);
+		}
 	}
 
     // also gamma correct while we're at it

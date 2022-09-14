@@ -104,5 +104,8 @@ namespace ArcEngine
 		static float BloomClamp;
 		static bool UseFXAA;
 		static glm::vec2 FXAAThreshold;			// x: current threshold, y: relative threshold
+		static glm::vec4 VignetteColor;			// rgb: color, a: intensity
+		static glm::vec4 VignetteOffset;		// xy: offset, z: useMask, w: enable/disable effect
+		static Ref<Texture2D> VignetteMask;
 	};
 }

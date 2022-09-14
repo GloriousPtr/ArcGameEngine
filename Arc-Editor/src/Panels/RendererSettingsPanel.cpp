@@ -56,6 +56,40 @@ namespace ArcEngine
 				ImGui::TreePop();
 			}
 
+			if (ImGui::TreeNode("Vignette"))
+			{
+				UI::BeginProperties();
+
+				bool vignetteEnabled = Renderer3D::VignetteOffset.w > 0.0f;
+				if (UI::Property("Use Vignette", vignetteEnabled, "Enable/Disable Vignette."))
+					Renderer3D::VignetteOffset.w = vignetteEnabled ? 1.0f : 0.0f;
+
+				UI::PropertyColor4as3("Color", Renderer3D::VignetteColor, "Color of the vignette.");
+				UI::Property("Intensity", Renderer3D::VignetteColor.a, 0.0f, 50.0f, "Strength of the vignette effect.");
+
+				bool useMask = Renderer3D::VignetteOffset.z > 0.0f;
+				if (UI::Property("Use Mask", useMask, "Use a texture mask to create a custom vignette effect."))
+					Renderer3D::VignetteOffset.z = useMask ? 1.0f : 0.0f;
+
+				if (useMask)
+				{
+					UI::Property("Mask", Renderer3D::VignetteMask, 0, "Texture mask for vignette effect");
+				}
+				else
+				{
+					glm::vec2 offset = Renderer3D::VignetteOffset;
+					if (UI::Property("Offset", offset, "Set the offset of the vignette."))
+					{
+						Renderer3D::VignetteOffset.x = offset.x;
+						Renderer3D::VignetteOffset.y = offset.y;
+					}
+				}
+				
+				UI::EndProperties();
+
+				ImGui::TreePop();
+			}
+
 			OnEnd();
 		}
 	}
