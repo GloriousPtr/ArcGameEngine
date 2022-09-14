@@ -23,7 +23,9 @@ namespace ArcEngine
 			}
 			UI::EndProperties();
 
-			if (ImGui::TreeNode("Bloom"))
+			ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
+
+			if (ImGui::TreeNodeEx("Bloom", treeNodeFlags))
 			{
 				UI::BeginProperties();
 
@@ -45,7 +47,7 @@ namespace ArcEngine
 				ImGui::TreePop();
 			}
 
-			if (ImGui::TreeNode("FXAA"))
+			if (ImGui::TreeNodeEx("FXAA", treeNodeFlags))
 			{
 				UI::BeginProperties();
 				UI::Property("Use FXAA", Renderer3D::UseFXAA, "Enable/Disable FXAA.");
@@ -56,7 +58,7 @@ namespace ArcEngine
 				ImGui::TreePop();
 			}
 
-			if (ImGui::TreeNode("Vignette"))
+			if (ImGui::TreeNodeEx("Vignette", treeNodeFlags))
 			{
 				UI::BeginProperties();
 
