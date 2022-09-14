@@ -45,6 +45,17 @@ namespace ArcEngine
 				ImGui::TreePop();
 			}
 
+			if (ImGui::TreeNode("FXAA"))
+			{
+				UI::BeginProperties();
+				UI::Property("Use FXAA", Renderer3D::UseFXAA, "Enable/Disable FXAA.");
+				UI::Property("Current Threshold", Renderer3D::FXAAThreshold.x, 0.0078125f, 0.0833f, "Trims the algorithm from processing darks (lower = better quality).", 0.1f, "%.4f");
+				UI::Property("Relative Threshold", Renderer3D::FXAAThreshold.y, 0.063f, 0.3330f, "The minimum amount of local contrast required to apply (lower = better quality).", 0.1f, "%.4f");
+				UI::EndProperties();
+
+				ImGui::TreePop();
+			}
+
 			OnEnd();
 		}
 	}

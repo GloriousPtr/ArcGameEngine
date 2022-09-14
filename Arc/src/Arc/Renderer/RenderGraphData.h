@@ -18,6 +18,7 @@ namespace ArcEngine
 		Ref<Framebuffer> CompositePassTarget;
 		Ref<Framebuffer> RenderPassTarget;
 		Ref<Framebuffer> LightingPassTarget;
+		Ref<Framebuffer> FXAAPassTarget;
 
 		static const size_t MaxBlurSamples = 6;
 		size_t BlurSamples = MaxBlurSamples;
@@ -65,6 +66,7 @@ namespace ArcEngine
 				spec.Width = width;
 				spec.Height = height;
 				LightingPassTarget = Framebuffer::Create(spec);
+				FXAAPassTarget = Framebuffer::Create(spec);
 			}
 
 			width /= 2;
@@ -103,6 +105,7 @@ namespace ArcEngine
 			CompositePassTarget->Resize(width, height);
 			RenderPassTarget->Resize(width, height);
 			LightingPassTarget->Resize(width, height);
+			FXAAPassTarget->Resize(width, height);
 
 			width /= 2;
 			height /= 2;

@@ -18,6 +18,7 @@ namespace ArcEngine
 	Ref<Shader> Renderer3D::s_ShadowMapShader;
 	Ref<Shader> Renderer3D::s_CubemapShader;
 	Ref<Shader> Renderer3D::s_GaussianBlurShader;
+	Ref<Shader> Renderer3D::s_FxaaShader;
 	Ref<Shader> Renderer3D::s_HdrShader;
 	Ref<Shader> Renderer3D::s_BloomShader;
 	Ref<VertexArray> Renderer3D::s_QuadVertexArray;
@@ -40,6 +41,8 @@ namespace ArcEngine
 	float Renderer3D::BloomThreshold = 1.0f;
 	float Renderer3D::BloomKnee = 0.1f;
 	float Renderer3D::BloomClamp = 100.0f;
+	bool Renderer3D::UseFXAA = true;
+	glm::vec2 Renderer3D::FXAAThreshold = glm::vec2(0.0078125f, 0.125f);
 
 	void Renderer3D::Init()
 	{
@@ -75,6 +78,7 @@ namespace ArcEngine
 		s_ShadowMapShader = s_ShaderLibrary.Load("assets/shaders/DepthShader.glsl");
 		s_CubemapShader = s_ShaderLibrary.Load("assets/shaders/Cubemap.glsl");
 		s_GaussianBlurShader = s_ShaderLibrary.Load("assets/shaders/GaussianBlur.glsl");
+		s_FxaaShader = s_ShaderLibrary.Load("assets/shaders/FXAA.glsl");
 		s_HdrShader = s_ShaderLibrary.Load("assets/shaders/HDR.glsl");
 		s_BloomShader = s_ShaderLibrary.Load("assets/shaders/Bloom.glsl");
 		s_Shader = s_ShaderLibrary.Load("assets/shaders/PBR.glsl");
@@ -244,8 +248,24 @@ namespace ArcEngine
 		RenderPass(renderGraphData->RenderPassTarget);
 		LightingPass(renderGraphData);
 		BloomPass(renderGraphData);
+		FXAAPass(renderGraphData);
 		CompositePass(renderGraphData);
 		s_Meshes.clear();
+	}
+
+	void Renderer3D::FXAAPass(const Ref<RenderGraphData> renderGraphData)
+	{
+		ARC_PROFILE_SCOPE();
+
+		if (UseFXAA)
+		{
+			renderGraphData->FXAAPassTarget->Bind();
+			s_FxaaShader->Bind();
+			s_FxaaShader->SetFloat2("u_Threshold", FXAAThreshold);
+			s_FxaaShader->SetInt("u_Texture", 0);
+			renderGraphData->LightingPassTarget->BindColorAttachment(0, 0);
+			DrawQuad();
+		}
 	}
 
 	void Renderer3D::ResetStats()
@@ -395,7 +415,12 @@ namespace ArcEngine
 		s_HdrShader->SetFloat("u_BloomStrength", UseBloom ? BloomStrength : 0.0f);
 		s_HdrShader->SetInt("u_Texture", 0);
 		s_HdrShader->SetInt("u_BloomTexture", 1);
-		renderGraphData->LightingPassTarget->BindColorAttachment(0, 0);
+		
+		if (UseFXAA)
+			renderGraphData->FXAAPassTarget->BindColorAttachment(0, 0);
+		else
+			renderGraphData->LightingPassTarget->BindColorAttachment(0, 0);
+		
 		renderGraphData->UpsampledFramebuffers[0]->BindColorAttachment(0, 1);
 		DrawQuad();
 	}

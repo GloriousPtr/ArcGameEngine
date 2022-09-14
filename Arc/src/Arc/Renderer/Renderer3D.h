@@ -47,6 +47,7 @@ namespace ArcEngine
 		static void SetupCameraData();
 		static void SetupLightsData();
 		static void Flush(const Ref<RenderGraphData> renderGraphData);
+		static void FXAAPass(const Ref<RenderGraphData> renderGraphData);
 		static void CompositePass(const Ref<RenderGraphData> renderGraphData);
 		static void BloomPass(const Ref<RenderGraphData> renderGraphData);
 		static void LightingPass(const Ref<RenderGraphData> renderGraphData);
@@ -75,6 +76,7 @@ namespace ArcEngine
 		static Ref<Shader> s_ShadowMapShader;
 		static Ref<Shader> s_CubemapShader;
 		static Ref<Shader> s_GaussianBlurShader;
+		static Ref<Shader> s_FxaaShader;
 		static Ref<Shader> s_HdrShader;
 		static Ref<Shader> s_BloomShader;
 		static Ref<VertexArray> s_QuadVertexArray;
@@ -100,5 +102,7 @@ namespace ArcEngine
 		static float BloomThreshold;
 		static float BloomKnee;
 		static float BloomClamp;
+		static bool UseFXAA;
+		static glm::vec2 FXAAThreshold;			// x: current threshold, y: relative threshold
 	};
 }
