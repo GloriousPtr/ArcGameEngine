@@ -891,14 +891,14 @@ namespace ArcEngine
 			ImGui::Spacing();
 			ImVec2 region = ImGui::GetContentRegionAvail();
 			region.y = ImGui::GetFrameHeight();
-			ImGui::BeginHorizontal("AudioSourceComponentButtons", region);
 			if (ImGui::Button(ICON_MDI_PLAY "Play ")&& component.Source)
 				component.Source->Play();
+			ImGui::SameLine();
 			if (ImGui::Button(ICON_MDI_PAUSE "Pause ") && component.Source)
 				component.Source->Pause();
+			ImGui::SameLine();
 			if (ImGui::Button(ICON_MDI_STOP "Stop ") && component.Source)
 				component.Source->Stop();
-			ImGui::EndHorizontal();
 			ImGui::Spacing();
 
 			UI::BeginProperties();

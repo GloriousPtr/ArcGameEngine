@@ -495,27 +495,11 @@ namespace ArcEngine
 
 	bool EditorLayer::OnMouseButtonPressed(const MouseButtonPressedEvent& e) const
 	{
-		bool handled = false;
-		for (const auto& viewport : m_Viewports)
-		{
-			handled = viewport->OnMouseButtonPressed(e);
-			if (handled)
-				return true;
-		}
-
 		return false;
 	}
 
 	bool EditorLayer::OnMouseButtonReleased(const MouseButtonReleasedEvent& e) const
 	{
-		bool handled = false;
-		for (const auto& viewport : m_Viewports)
-		{
-			handled = viewport->OnMouseButtonReleased(e);
-			if (handled)
-				return true;
-		}
-
 		return false;
 	}
 

@@ -93,7 +93,7 @@ namespace ArcEngine
 		if (ImGui::BeginDragDropSource())
 		{
 			ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", filepath.c_str(), filepath.length() + 1);
-			ImGui::Text(StringUtils::GetName(filepath.c_str()).c_str());
+			ImGui::Text(StringUtils::GetName(eastl::move(filepath)).c_str());
 			ImGui::EndDragDropSource();
 		}
 	}

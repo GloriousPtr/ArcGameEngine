@@ -38,9 +38,6 @@ namespace ArcEngine
 		virtual void SetVSync(bool enabled) = 0;
 		virtual bool IsVSync() const = 0;
 
-		virtual void ShowCursor() = 0;
-		virtual void HideCursor() = 0;
-
 		virtual WindowHandle GetNativeWindow() const = 0;
 		
 		static Scope<Window> Create(const WindowProps& props = WindowProps());

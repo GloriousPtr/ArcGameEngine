@@ -16,5 +16,6 @@ namespace ArcEngine
 		static glm::vec2 GetMousePosition();
 		static float GetMouseX();
 		static float GetMouseY();
+		static void SetMousePosition(const glm::vec2& position);
 	};
 }

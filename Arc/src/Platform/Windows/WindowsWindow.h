@@ -23,9 +23,6 @@ namespace ArcEngine
 		void SetVSync(bool enabled) override;
 		bool IsVSync() const override;
 
-		void ShowCursor() override;
-		void HideCursor() override;
-
 		inline virtual WindowHandle GetNativeWindow() const { return m_Window; }
 	private:
 		virtual void Init(const WindowProps& props);

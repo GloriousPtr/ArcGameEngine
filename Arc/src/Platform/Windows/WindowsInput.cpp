@@ -50,4 +50,10 @@ namespace ArcEngine
 
 		return GetMousePosition().y;
 	}
+
+	void Input::SetMousePosition(const glm::vec2& position)
+	{
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		glfwSetCursorPos(window, position.x, position.y);
+	}
 }

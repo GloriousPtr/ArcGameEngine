@@ -31,7 +31,7 @@ namespace ArcEngine
 
 				UI::Property("Use Bloom", Renderer3D::UseBloom, "Enable/Disable Bloom.");
 
-				if (UI::Property("Bloom Strength", Renderer3D::BloomStrength, 0.0f, 0.0f, "	Strength of the Bloom filter.", 0.01f) && Renderer3D::BloomStrength <= 0.001f)
+				if (UI::Property("Bloom Strength", Renderer3D::BloomStrength, 0.0f, 0.0f, "Strength of the Bloom filter.", 0.01f) && Renderer3D::BloomStrength <= 0.001f)
 					Renderer3D::BloomStrength = 0.001f;
 
 				if (UI::Property("Bloom Threshold", Renderer3D::BloomThreshold, 0.0f, 0.0f, "Filters out pixels under this level of brightness. This value is expressed in gamma-space.", 0.01f) && Renderer3D::BloomThreshold <= 0.001f)

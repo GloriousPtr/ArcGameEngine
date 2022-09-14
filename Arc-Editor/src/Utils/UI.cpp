@@ -35,7 +35,7 @@ namespace ArcEngine
 		ImGui::PushID(label);
 		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
 		ImGui::Text(label);
-		if (tooltip && ImGui::IsItemHovered())
+		if (tooltip && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 		{
 			ImGui::BeginTooltip();
 			ImGui::Text(tooltip);
@@ -469,7 +469,7 @@ namespace ArcEngine
 		if (id == 0)
 			id = texture == nullptr ? 0 : texture->GetHRDRendererID();
 		ImGui::ImageButton((ImTextureID)id, buttonSize, { 1, 1 }, { 0, 0 }, 0);
-		if (texture && ImGui::IsItemHovered())
+		if (texture && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 		{
 			ImGui::BeginTooltip();
 			ImGui::Text(texture->GetPath().c_str());
@@ -526,7 +526,7 @@ namespace ArcEngine
 		if (id == 0)
 			id = texture == nullptr ? 0 : texture->GetRendererID();
 		ImGui::ImageButton((ImTextureID)id, buttonSize, { 1, 1 }, { 0, 0 }, 0);
-		if (texture && ImGui::IsItemHovered())
+		if (texture && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 		{
 			ImGui::BeginTooltip();
 			ImGui::Text(texture->GetPath().c_str());

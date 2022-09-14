@@ -49,15 +49,29 @@ namespace ArcEngine
 
 		if (!m_SimulationRunning && m_UseEditorCamera)
 		{
-			m_MousePosition = *((glm::vec2*) &(ImGui::GetMousePos()));
 			const glm::vec3& position = m_EditorCamera.GetPosition();
 			float yaw = m_EditorCamera.GetYaw();
 			float pitch = m_EditorCamera.GetPitch();
 
 			bool moved = false;
-			if (m_CursorLocked)
+			static bool pressed = false;
+			if (ImGui::IsMouseDown(ImGuiMouseButton_Right) && m_ViewportHovered)
 			{
-				const glm::vec2 change = (m_MousePosition - m_LastMousePosition) * m_MouseSensitivity;
+				ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+				glm::vec2 newMousePosition = *(glm::vec2*)&ImGui::GetMousePos();
+
+				if (!pressed)
+				{
+					pressed = true;
+					m_MousePosition = newMousePosition;
+				}
+
+				if (!ImGui::GetIO().WantSetMousePos)
+					ImGui::GetIO().WantSetMousePos = true;
+
+				ImGui::GetIO().MousePos = { m_MousePosition.x, m_MousePosition.y };
+
+				const glm::vec2 change = (newMousePosition - m_MousePosition) * m_MouseSensitivity;
 				yaw += change.x;
 				pitch = glm::clamp(pitch - change.y, -89.9f, 89.9f);
 
@@ -86,6 +100,13 @@ namespace ArcEngine
 				if (glm::length2(moveDirection) > Math::EPSILON)
 					m_MoveDirection = glm::normalize(moveDirection);
 			}
+			else
+			{
+				if (ImGui::GetIO().WantSetMousePos)
+					ImGui::GetIO().WantSetMousePos = false;
+
+				pressed = false;
+			}
 
 			m_MoveVelocity += (moved ? 1.0f : -1.0f) * timestep;
 			m_MoveVelocity *= glm::pow(m_MoveDampeningFactor, timestep);
@@ -97,7 +118,6 @@ namespace ArcEngine
 
 			m_EditorCamera.SetYaw(yaw);
 			m_EditorCamera.SetPitch(pitch);
-			m_LastMousePosition = m_MousePosition;
 
 			m_EditorCamera.OnUpdate(timestep);
 		}
@@ -353,32 +373,5 @@ namespace ArcEngine
 		}
 
 		Renderer2D::EndScene(m_RenderGraphData);
-	}
-
-	bool SceneViewport::OnMouseButtonPressed(const MouseButtonPressedEvent& e)
-	{
-		if (e.GetMouseButton() == Mouse::Button1 && m_ViewportHovered && !m_SimulationRunning)
-		{
-			Application::Get().GetWindow().HideCursor();
-			m_CursorLocked = true;
-			return true;
-		}
-
-		return false;
-	}
-
-	bool SceneViewport::OnMouseButtonReleased(const MouseButtonReleasedEvent& e)
-	{
-		if (e.GetMouseButton() == Mouse::Button1 && m_CursorLocked == true)
-		{
-			Application::Get().GetWindow().ShowCursor();
-			m_CursorLocked = false;
-			m_MoveVelocity = 0;
-			m_MoveDirection = glm::vec3(0.0f);
-
-			return true;
-		}
-
-		return false;
 	}
 }

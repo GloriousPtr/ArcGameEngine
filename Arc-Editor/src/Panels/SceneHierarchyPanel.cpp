@@ -402,7 +402,7 @@ namespace ArcEngine
 
 	void SceneHierarchyPanel::DrawContextMenu() const
 	{
-		if (ImGui::BeginPopupContextWindow("SceneHierarchyContextWindow", 1, false))
+		if (ImGui::BeginPopupContextWindow("SceneHierarchyContextWindow"))
 		{
 			EditorLayer::GetInstance()->ResetContext();
 			Entity toSelect = {};
