@@ -170,6 +170,20 @@ namespace ArcEngine
 		return value;
 	}
 
+#define READ_FIELD_TYPE(Type, NativeType)										\
+			case Type:															\
+				out << fieldInstance.GetValue<NativeType>();					\
+				break
+
+#define WRITE_FIELD_TYPE(Type, NativeType)										\
+			case Type:															\
+				{																\
+					NativeType value = field.GetDefaultValue<NativeType>();		\
+					TrySet(value, fieldNode);									\
+					fieldInstance.SetValue(value);								\
+				}																\
+				break
+
 	void EntitySerializer::SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
 		ARC_CORE_ASSERT(entity.HasComponent<IDComponent>());
@@ -512,87 +526,24 @@ namespace ArcEngine
 
 					switch (field.Type)
 					{
-						case FieldType::Bool:
-						{
-							out << fieldInstance.GetValue<bool>();
-							break;
-						}
-						case FieldType::Float:
-						{
-							out << fieldInstance.GetValue<float>();
-							break;
-						}
-						case FieldType::Double:
-						{
-							out << fieldInstance.GetValue<double>();
-							break;
-						}
-						case FieldType::Byte:
-						{
-							out << fieldInstance.GetValue<int8_t>();
-							break;
-						}
-						case FieldType::UByte:
-						{
-							uint16_t v = (uint16_t) fieldInstance.GetValue<uint8_t>();
-							out << v;
-							break;
-						}
-						case FieldType::Short:
-						{
-							out << fieldInstance.GetValue<int16_t>();
-							break;
-						}
-						case FieldType::UShort:
-						{
-							out << fieldInstance.GetValue<uint16_t>();
-							break;
-						}
-						case FieldType::Int:
-						{
-							out << fieldInstance.GetValue<int32_t>();
-							break;
-						}
-						case FieldType::UInt:
-						{
-							out << fieldInstance.GetValue<uint32_t>();
-							break;
-						}
-						case FieldType::Long:
-						{
-							out << fieldInstance.GetValue<int64_t>();
-							break;
-						}
-						case FieldType::ULong:
-						{
-							out << fieldInstance.GetValue<uint64_t>();
-							break;
-						}
-						case FieldType::Vector2:
-						{
-							out << fieldInstance.GetValue<glm::vec2>();
-							break;
-						}
-						case FieldType::Vector3:
-						{
-							out << fieldInstance.GetValue<glm::vec3>();
-							break;
-						}
-						case FieldType::Vector4:
-						{
-							out << fieldInstance.GetValue<glm::vec4>();
-							break;
-						}
-						case FieldType::Color:
-						{
-							out << fieldInstance.GetValue<glm::vec4>();
-							break;
-						}
+						READ_FIELD_TYPE(FieldType::Bool, bool);
+						READ_FIELD_TYPE(FieldType::Float, float);
+						READ_FIELD_TYPE(FieldType::Double, double);
+						READ_FIELD_TYPE(FieldType::Byte, int8_t);
+						READ_FIELD_TYPE(FieldType::UByte, uint8_t);
+						READ_FIELD_TYPE(FieldType::Short, int16_t);
+						READ_FIELD_TYPE(FieldType::UShort, uint16_t);
+						READ_FIELD_TYPE(FieldType::Int, int32_t);
+						READ_FIELD_TYPE(FieldType::UInt, uint32_t);
+						READ_FIELD_TYPE(FieldType::Long, int64_t);
+						READ_FIELD_TYPE(FieldType::ULong, uint64_t);
+						READ_FIELD_TYPE(FieldType::Vector2, glm::vec2);
+						READ_FIELD_TYPE(FieldType::Vector3, glm::vec3);
+						READ_FIELD_TYPE(FieldType::Vector4, glm::vec4);
+						READ_FIELD_TYPE(FieldType::Color, glm::vec4);
 						default:
-						{
 							ARC_CORE_ASSERT(false);
 							break;
-						}
 					}
 				}
 				out << YAML::EndMap; // Fields
@@ -983,116 +934,24 @@ namespace ArcEngine
 
 								switch (field.Type)
 								{
-									case FieldType::Bool:
-									{
-										bool value = field.GetDefaultValue<bool>();
-										TrySet(value, fieldNode);
-										fieldInstance.SetValue(value);
-										break;
-									}
-									case FieldType::Float:
-									{
-										float value = field.GetDefaultValue<float>();
-										TrySet(value, fieldNode);
-										fieldInstance.SetValue(value);
-										break;
-									}
-									case FieldType::Double:
-									{
-										double value = field.GetDefaultValue<double>();
-										TrySet(value, fieldNode);
-										fieldInstance.SetValue(value);
-										break;
-									}
-									case FieldType::Byte:
-									{
-										int8_t value = field.GetDefaultValue<int8_t>();
-										TrySet(value, fieldNode);
-										fieldInstance.SetValue(value);
-										break;
-									}
-									case FieldType::UByte:
-									{
-										uint8_t value = field.GetDefaultValue<uint8_t>();
-										TrySet(value, fieldNode);
-										fieldInstance.SetValue(value);
-										break;
-									}
-									case FieldType::Short:
-									{
-										int16_t value = field.GetDefaultValue<int16_t>();
-										TrySet(value, fieldNode);
-										fieldInstance.SetValue(value);
-										break;
-									}
-									case FieldType::UShort:
-									{
-										uint16_t value = field.GetDefaultValue<uint16_t>();
-										TrySet(value, fieldNode);
-										fieldInstance.SetValue(value);
-										break;
-									}
-									case FieldType::Int:
-									{
-										int32_t value = field.GetDefaultValue<int32_t>();
-										TrySet(value, fieldNode);
-										fieldInstance.SetValue(value);
-										break;
-									}
-									case FieldType::UInt:
-									{
-										uint32_t value = field.GetDefaultValue<uint32_t>();
-										TrySet(value, fieldNode);
-										fieldInstance.SetValue(value);
-										break;
-									}
-									case FieldType::Long:
-									{
-										int64_t value = field.GetDefaultValue<int64_t>();
-										TrySet(value, fieldNode);
-										fieldInstance.SetValue(value);
-										break;
-									}
-									case FieldType::ULong:
-									{
-										uint64_t value = field.GetDefaultValue<uint64_t>();
-										TrySet(value, fieldNode);
-										fieldInstance.SetValue(value);
-										break;
-									}
-									case FieldType::Vector2:
-									{
-										glm::vec2 value = field.GetDefaultValue<glm::vec2>();
-										TrySet(value, fieldNode);
-										fieldInstance.SetValue(value);
-										break;
-									}
-									case FieldType::Vector3:
-									{
-										glm::vec3 value = field.GetDefaultValue<glm::vec3>();
-										TrySet(value, fieldNode);
-										fieldInstance.SetValue(value);
-										break;
-									}
-									case FieldType::Vector4:
-									{
-										glm::vec4 value = field.GetDefaultValue<glm::vec4>();
-										TrySet(value, fieldNode);
-										fieldInstance.SetValue(value);
-										break;
-									}
-									case FieldType::Color:
-									{
-										glm::vec4 value = field.GetDefaultValue<glm::vec4>();
-										TrySet(value, fieldNode);
-										fieldInstance.SetValue(value);
-										break;
-									}
+									WRITE_FIELD_TYPE(FieldType::Bool, bool);
+									WRITE_FIELD_TYPE(FieldType::Float, float);
+									WRITE_FIELD_TYPE(FieldType::Double, double);
+									WRITE_FIELD_TYPE(FieldType::Byte, int8_t);
+									WRITE_FIELD_TYPE(FieldType::UByte, uint8_t);
+									WRITE_FIELD_TYPE(FieldType::Short, int16_t);
+									WRITE_FIELD_TYPE(FieldType::UShort, uint16_t);
+									WRITE_FIELD_TYPE(FieldType::Int, int32_t);
+									WRITE_FIELD_TYPE(FieldType::UInt, uint32_t);
+									WRITE_FIELD_TYPE(FieldType::Long, int64_t);
+									WRITE_FIELD_TYPE(FieldType::ULong, uint64_t);
+									WRITE_FIELD_TYPE(FieldType::Vector2, glm::vec2);
+									WRITE_FIELD_TYPE(FieldType::Vector3, glm::vec3);
+									WRITE_FIELD_TYPE(FieldType::Vector4, glm::vec4);
+									WRITE_FIELD_TYPE(FieldType::Color, glm::vec4);
 									default:
-									{
 										ARC_CORE_ASSERT(false);
 										break;
-									}
 								}
 							}
 						}
