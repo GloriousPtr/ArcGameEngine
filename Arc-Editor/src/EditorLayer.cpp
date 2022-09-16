@@ -107,12 +107,64 @@ namespace ArcEngine
 		}
 	}
 
+	void EditorLayer::WindowDragger()
+	{
+		if (m_Resizing)
+			return;
+
+		Window& window = m_Application->GetWindow();
+
+		ImVec2 region = ImGui::GetContentRegionMax();
+		ImGui::InvisibleButton("WindowMoveButton", region);
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+		{
+			if (window.IsMaximized())
+				window.Restore();
+			else
+				window.Maximize();
+		}
+
+		ImVec2 mousePosition = ImGui::GetMousePos();
+		if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))		// Dragging the window
+		{
+			m_WindowDragging = true;
+
+			if (window.IsMaximized())
+			{
+				glm::vec2 oldPosition = window.GetPosition();
+				glm::vec2 oldSize = window.GetSize();
+
+				window.Restore();
+
+				float ratio = Math::InverseLerp(oldPosition.x, oldPosition.x + oldSize.x, mousePosition.x);
+				float xStart = mousePosition.x - window.GetSize().x * ratio;
+				window.SetPosition({ xStart, 0.0f });
+			}
+			else
+			{
+				ImVec2 change = (mousePosition - m_LastMousePosition);
+				glm::vec2 windowPos = window.GetPosition();
+				glm::vec2 newWindowPos = { change.x + windowPos.x, change.y + windowPos.y };
+				window.SetPosition(newWindowPos);
+			}
+		}
+		else if (m_WindowDragging && ImGui::IsItemDeactivated())	// Dropped the window
+		{
+			m_WindowDragging = false;
+
+			if (!window.IsMaximized() && mousePosition.y == 0.0f)
+				window.Maximize();
+			else
+				window.SubmitRestorePosition(window.GetPosition());
+		}
+
+		ImGui::SetItemAllowOverlap();
+	}
+
 	void EditorLayer::OnImGuiRender()
 	{
 		ARC_PROFILE_SCOPE();
 
-		m_MenuBarHeight = ImGui::GetFrameHeight();
-		
 		BeginDockspace("MyDockSpace");
 		{
 			ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
@@ -121,6 +173,7 @@ namespace ArcEngine
 				| ImGuiWindowFlags_MenuBar
 				| ImGuiWindowFlags_NoNavFocus;
 
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 			{
 				//////////////////////////////////////////////////////////////////////////
@@ -133,28 +186,15 @@ namespace ArcEngine
 						if (ImGui::BeginMenu("File"))
 						{
 							if (ImGui::MenuItem("New", "Ctrl+N"))
-							{
 								NewScene();
-							}
-
 							if (ImGui::MenuItem("Open..", "Ctrl+O"))
-							{
 								OpenScene();
-							}
 							if (ImGui::MenuItem("Save...", "Ctrl+S"))
-							{
 								SaveScene();
-							}
 							if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
-							{
 								SaveSceneAs();
-							}
-
 							if (ImGui::MenuItem("Exit"))
-							{
 								m_Application->Close();
-							}
-
 							ImGui::EndMenu();
 						}
 
@@ -205,12 +245,45 @@ namespace ArcEngine
 						if (ImGui::BeginMenu("Scripting"))
 						{
 							if (ImGui::MenuItem("Reload Assemblies"))
-							{
 								ScriptEngine::ReloadAppDomain();
-							}
 
 							ImGui::EndMenu();
 						}
+
+						WindowDragger();
+
+						// Minimize/Maximize/Close buttons
+						ImVec2 region = ImGui::GetContentRegionMax();
+						ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
+						ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
+						ImVec2 buttonSize = { region.y * 1.5f, region.y };
+						ImGui::SetCursorPosX(region.x - 3.33f * buttonSize.x);
+						bool isNormalCursor = ImGui::GetMouseCursor() == ImGuiMouseCursor_Arrow;
+
+						// Minimize Button
+						if (ImGui::Button(ICON_MDI_WINDOW_MINIMIZE, buttonSize) && isNormalCursor)
+							m_Application->GetWindow().Minimize();
+
+						// Maximize Button
+						if (ImGui::Button(ICON_MDI_WINDOW_MAXIMIZE, buttonSize) && isNormalCursor)
+						{
+							Window& window = m_Application->GetWindow();
+							if (window.IsMaximized())
+								window.Restore();
+							else
+								window.Maximize();
+						}
+
+						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.909f, 0.066f, 0.137f, 1.0f });
+						ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0.920f, 0.066f, 0.120f, 1.0f });
+						// Close Button
+						if (ImGui::Button(ICON_MDI_WINDOW_CLOSE, buttonSize) && isNormalCursor)
+							m_Application->Close();
+						ImGui::PopStyleColor(2);
+
+						ImGui::PopStyleColor();
+						ImGui::PopStyleVar();
+
 						ImGui::EndMenuBar();
 					}
 					ImGui::End();
@@ -224,7 +297,9 @@ namespace ArcEngine
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 1, 1 });
 					if (ImGui::BeginMenuBar())
 					{
-						ImVec2 region = ImGui::GetContentRegionAvail();
+						WindowDragger();
+
+						ImVec2 region = ImGui::GetContentRegionMax();
 						float frameHeight = ImGui::GetFrameHeight();
 						ImVec2 buttonSize = { frameHeight * 1.5f, frameHeight };
 						ImGui::SetCursorPosX(region.x * 0.5f - 3 * 0.5f * buttonSize.x);
@@ -294,7 +369,7 @@ namespace ArcEngine
 					ImGui::End();
 				}
 			}
-			ImGui::PopStyleVar();
+			ImGui::PopStyleVar(2);
 
 			//////////////////////////////////////////////////////////////////////////
 			// HEIRARCHY /////////////////////////////////////////////////////////////
@@ -353,6 +428,10 @@ namespace ArcEngine
 			m_Application->GetImGuiLayer()->SetBlockEvents(false);
 		}
 		EndDockspace();
+
+		m_LastMousePosition = ImGui::GetMousePos();
+		if (m_WindowDragging && !ImGui::IsMouseDown(0))
+			m_WindowDragging = false;
 	}
 
 	void EditorLayer::OnEvent(Event& e)
@@ -365,8 +444,10 @@ namespace ArcEngine
 		dispatcher.Dispatch<MouseButtonReleasedEvent>(ARC_BIND_EVENT_FN(EditorLayer::OnMouseButtonReleased));
 	}
 
-	void EditorLayer::BeginDockspace(const char* name) const
+	void EditorLayer::BeginDockspace(const char* name)
 	{
+		HandleResize();
+
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen_persistant = true;
 		bool opt_fullscreen = opt_fullscreen_persistant;
@@ -375,9 +456,9 @@ namespace ArcEngine
 		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
 		// because it would be confusing to have two docking targets within each others.
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
 		if (opt_fullscreen)
 		{
-			const ImGuiViewport* viewport = ImGui::GetMainViewport();
 			ImGui::SetNextWindowPos(viewport->Pos);
 			ImGui::SetNextWindowSize(viewport->Size);
 			ImGui::SetNextWindowViewport(viewport->ID);
@@ -404,18 +485,19 @@ namespace ArcEngine
 			ImGui::PopStyleVar(2);
 
 		// DockSpace
+		m_MenuBarHeight = ImGui::GetFrameHeight();
+
 		float topMenuBarCount = 2.0f;
 		float bottomMenuBarCount = 1.0f;
 		float dockSpaceOffsetY = ImGui::GetCursorPosY() + (topMenuBarCount - 1.0f) * m_MenuBarHeight;
 
-		const ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImVec2 dockSpaceSize = ImVec2(viewport->Size.x, viewport->Size.y - (topMenuBarCount + bottomMenuBarCount) * m_MenuBarHeight);
+		ImVec2 dockSpaceSize = ImVec2(viewport->Size.x, viewport->Size.y - ((topMenuBarCount + bottomMenuBarCount) * m_MenuBarHeight));
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		float minWinSizeX = style.WindowMinSize.x;
 		float minWinSizeY = style.WindowMinSize.y;
 		style.WindowMinSize.x = 370.0f;
-		style.WindowMinSize.y = 50.0f;
+		style.WindowMinSize.y = 150.0f;
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
 			ImGui::SetCursorPosY(dockSpaceOffsetY);
@@ -425,6 +507,79 @@ namespace ArcEngine
 
 		style.WindowMinSize.x = minWinSizeX;
 		style.WindowMinSize.y = minWinSizeY;
+	}
+
+	void EditorLayer::HandleResize()
+	{
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		Window& window = m_Application->GetWindow();
+		if (!m_WindowDragging && !window.IsMaximized())
+		{
+			ImVec2 mousePos = ImGui::GetMousePos();
+			constexpr float delta = 6.0f;
+			bool top = glm::abs(mousePos.y - viewport->Pos.y) <= delta;
+			bool left = glm::abs(mousePos.x - viewport->Pos.x) <= delta;
+			bool bottom = glm::abs(viewport->Pos.y + viewport->Size.y - mousePos.y) <= delta;
+			bool right = glm::abs(viewport->Pos.x + viewport->Size.x - mousePos.x) <= delta;
+
+			if ((top && left) || (bottom && right))
+				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNWSE);
+			else if ((top && right) || (bottom && left))
+				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNESW);
+			else if (top || bottom)
+				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+			else if (left || right)
+				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+
+			if (top)
+				m_TopResizing = true;
+			if (left)
+				m_LeftResizing = true;
+			if (bottom)
+				m_BottomResizing = true;
+			if (right)
+				m_RightResizing = true;
+
+			if (m_LeftResizing || m_RightResizing || m_TopResizing || m_BottomResizing)
+			{
+				if (ImGui::IsMouseClicked(0))
+					m_Resizing = true;
+				else if (!ImGui::IsMouseDown(0))
+					m_Resizing = m_TopResizing = m_LeftResizing = m_BottomResizing = m_RightResizing = false;
+			}
+
+			if (ImGui::IsMouseDragging(0) && m_Resizing)
+			{
+
+				ImVec2 mousePosition = ImGui::GetMousePos();
+				ImVec2 change = mousePosition - m_LastMousePosition;
+				glm::vec2 windowPos = window.GetPosition();
+				glm::vec2 windowSize = window.GetSize();
+
+				if (m_TopResizing)
+				{
+					windowSize.y -= change.y;
+					windowPos.y += change.y;
+				}
+				if (m_LeftResizing)
+				{
+					windowSize.x -= change.x;
+					windowPos.x += change.x;
+				}
+				if (m_BottomResizing)
+				{
+					windowSize.y += change.y;
+				}
+				if (m_RightResizing)
+				{
+					windowSize.x += change.x;
+				}
+
+				window.Resize(windowPos, windowSize);
+				window.SubmitRestorePosition(windowPos);
+				window.SubmitRestoreSize(windowSize);
+			}
+		}
 	}
 
 	void EditorLayer::EndDockspace() const

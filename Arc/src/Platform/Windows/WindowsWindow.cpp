@@ -39,6 +39,9 @@ namespace ArcEngine
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
 		m_Data.Height = props.Height;
+		m_Data.RestoreWidth = props.Width;
+		m_Data.RestoreHeight = props.Height;
+		m_Data.RestorePosition = { 0.0f, 0.0f };
 		
 		ARC_CORE_INFO("Creating window {0} ({1}, {2})", props.Title, props.Width, props.Height);
 		
@@ -58,7 +61,9 @@ namespace ArcEngine
 					glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 			#endif
 
+			glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
 			m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
+			Maximize();
 			++s_GLFWWindowCount;
 		}
 		m_Context = GraphicsContext::Create(m_Window);
@@ -217,5 +222,80 @@ namespace ArcEngine
 	bool WindowsWindow::IsVSync() const
 	{
 		return m_Data.VSync;
+	}
+	
+	void WindowsWindow::Minimize()
+	{
+		glfwIconifyWindow(m_Window);
+	}
+
+	void WindowsWindow::Maximize()
+	{
+		if (m_Maximized)
+			return;
+
+		int monitorCount;
+		GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
+
+		if (monitorCount <= 0)
+			return;
+
+		int x;
+		int y;
+		int width;
+		int height;
+		glfwGetMonitorWorkarea(monitors[0], &x, &y, &width, &height);
+
+		glfwSetWindowPos(m_Window, x, y);
+		glfwSetWindowSize(m_Window, width, height);
+		m_Maximized = true;
+	}
+
+	void WindowsWindow::Restore()
+	{
+		if (m_Maximized)
+		{
+			glfwSetWindowPos(m_Window, m_Data.RestorePosition.x, m_Data.RestorePosition.y);
+			glfwSetWindowSize(m_Window, m_Data.RestoreWidth, m_Data.RestoreHeight);
+			m_Maximized = false;
+		}
+	}
+
+	glm::vec2 WindowsWindow::GetPosition()
+	{
+		int x;
+		int y;
+		glfwGetWindowPos(m_Window, &x, &y);
+		return glm::vec2((float)x, (float)y);
+	}
+
+	void WindowsWindow::SetPosition(const glm::vec2& position)
+	{
+		glfwSetWindowPos(m_Window, (int)position.x, (int)position.y);
+	}
+
+	glm::vec2 WindowsWindow::GetSize()
+	{
+		int width;
+		int height;
+		glfwGetWindowSize(m_Window, &width, &height);
+		return { (float)width, (float)height };
+	}
+
+	void WindowsWindow::Resize(const glm::vec2& position, const glm::vec2& size)
+	{
+		glfwSetWindowPos(m_Window, position.x, position.y);
+		glfwSetWindowSize(m_Window, size.x, size.y);
+	}
+
+	void WindowsWindow::SubmitRestorePosition(const glm::vec2& position)
+	{
+		m_Data.RestorePosition = position;
+	}
+
+	void WindowsWindow::SubmitRestoreSize(const glm::vec2& size)
+	{
+		m_Data.RestoreWidth = size.x;
+		m_Data.RestoreHeight = size.y;
 	}
 }

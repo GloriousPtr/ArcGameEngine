@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Arc/Core/Base.h"
 #include "EASTL/string.h"
 
 // This ignores all warnings raised inside External headers

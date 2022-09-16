@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include <glm/glm.hpp>
+
 #include "Arc/Core/Base.h"
 #include "Arc/Events/Event.h"
 
@@ -37,6 +39,17 @@ namespace ArcEngine
 		virtual void SetEventCallBack(const EventCallbackFn& callback) = 0;
 		virtual void SetVSync(bool enabled) = 0;
 		virtual bool IsVSync() const = 0;
+
+		virtual bool IsMaximized() = 0;
+		virtual void Minimize() = 0;
+		virtual void Maximize() = 0;
+		virtual void Restore() = 0;
+		virtual glm::vec2 GetPosition() = 0;
+		virtual void SetPosition(const glm::vec2& position) = 0;
+		virtual glm::vec2 GetSize() = 0;
+		virtual void Resize(const glm::vec2& position, const glm::vec2& size) = 0;
+		virtual void SubmitRestorePosition(const glm::vec2& position) = 0;
+		virtual void SubmitRestoreSize(const glm::vec2& size) = 0;
 
 		virtual WindowHandle GetNativeWindow() const = 0;
 		

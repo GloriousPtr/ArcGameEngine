@@ -4,8 +4,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
 
-namespace ArcEngine::Math {
-
+namespace ArcEngine::Math
+{
 	bool DecomposeTransform(const glm::mat4& transform, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale)
 	{
 		// From glm::decompose in matrix_decompose.inl
@@ -63,4 +63,29 @@ namespace ArcEngine::Math {
 		return true;
 	}
 
+	float InverseLerp(float a, float b, float value)
+	{
+		float den = b - a;
+		if (den == 0.0f)
+			return 0.0f;
+		return (value - a) / den;
+	}
+
+	float Lerp(float a, float b, float t)
+	{
+		return (1.0f - t) * a + t * b;
+	}
+
+	float InverseLerpClamped(float a, float b, float value)
+	{
+		float den = b - a;
+		if (den == 0.0f)
+			return 0.0f;
+		return glm::clamp((value - a) / den, 0.0f, 1.0f);
+	}
+
+	float LerpClamped(float a, float b, float t)
+	{
+		return glm::clamp((1.0f - t)* a + t * b, 0.0f, 1.0f);
+	}
 }

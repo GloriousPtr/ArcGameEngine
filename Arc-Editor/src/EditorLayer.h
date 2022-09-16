@@ -35,7 +35,9 @@ namespace ArcEngine
 		static EditorLayer* GetInstance() { return s_Instance; }
 
 	private:
-		void BeginDockspace(const char* name) const;
+		void WindowDragger();
+		void HandleResize();
+		void BeginDockspace(const char* name);
 		void EndDockspace() const;
 		bool OnKeyPressed(const KeyPressedEvent& e);
 		bool OnMouseButtonPressed(const MouseButtonPressedEvent& e) const;
@@ -72,10 +74,17 @@ namespace ArcEngine
 		eastl::vector<Scope<PropertiesPanel>> m_Properties;
 		eastl::vector<Scope<AssetPanel>> m_AssetPanels;
 
-		float m_MenuBarHeight = 10.0f;
-
 		bool m_ShowSceneHierarchyPanel = true;
 		bool m_ShowDemoWindow = false;
+		float m_MenuBarHeight = 10.0f;
+		ImVec2 m_LastMousePosition = ImVec2(0.0f, 0.0f);
+
+		bool m_WindowDragging = false;
+		bool m_TopResizing = false;
+		bool m_LeftResizing = false;
+		bool m_BottomResizing = false;
+		bool m_RightResizing = false;
+		bool m_Resizing = false;
 
 		static EditorLayer* s_Instance;
 	};

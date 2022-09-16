@@ -23,6 +23,17 @@ namespace ArcEngine
 		void SetVSync(bool enabled) override;
 		bool IsVSync() const override;
 
+		bool IsMaximized() override { return m_Maximized; }
+		void Minimize() override;
+		void Maximize() override;
+		void Restore() override;
+		glm::vec2 GetPosition() override;
+		void SetPosition(const glm::vec2& position) override;
+		glm::vec2 GetSize() override;
+		void Resize(const glm::vec2& position, const glm::vec2& size) override;
+		void SubmitRestorePosition(const glm::vec2& position) override;
+		void SubmitRestoreSize(const glm::vec2& size) override;
+
 		inline virtual WindowHandle GetNativeWindow() const { return m_Window; }
 	private:
 		virtual void Init(const WindowProps& props);
@@ -38,10 +49,15 @@ namespace ArcEngine
 			unsigned int Height;
 			bool VSync;
 
+			glm::vec2 RestorePosition;
+			uint32_t RestoreWidth;
+			uint32_t RestoreHeight;
+
 			EventCallbackFn EventCallback;
 		};
 
 		WindowData m_Data;
+		bool m_Maximized = false;
 
 		static uint8_t s_GLFWWindowCount;
 	};
