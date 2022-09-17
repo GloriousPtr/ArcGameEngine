@@ -89,7 +89,7 @@ namespace ArcEngine
 			ImGuiStyle* style = &ImGui::GetStyle();
 
 			style->WindowPadding = ImVec2(4.0f, 4.0f);
-			style->FramePadding = ImVec2(4.0f, 6.0f);
+			style->FramePadding = ImVec2(4.0f, 4.0f);
 			style->TabMinWidthForCloseButton = 0.1f;
 			style->CellPadding = ImVec2(8.0f, 4.0f);
 			style->ItemSpacing = ImVec2(8.0f, 3.0f);
@@ -121,7 +121,7 @@ namespace ArcEngine
 			style->SelectableTextAlign = ImVec2(0.0f, 0.0f);
 			style->DisplaySafeAreaPadding = ImVec2(8.0f, 8.0f);
 
-			UIFramePadding = ImVec2(4.0f, 3.0f);
+			UIFramePadding = ImVec2(4.0f, 4.0f);
 
 			ImGuiColorEditFlags colorEditFlags = ImGuiColorEditFlags_AlphaBar
 				| ImGuiColorEditFlags_AlphaPreviewHalf

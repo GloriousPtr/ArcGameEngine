@@ -35,8 +35,8 @@ namespace ArcEngine
 	void EditorTheme::SetFont()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		float fontSize = 18.0f;
-		float fontSizeSmall = 14.0f;
+		float fontSize = 16.0f;
+		float fontSizeSmall = 12.0f;
 		
 		ImFontConfig iconsConfig;
         iconsConfig.MergeMode = false;

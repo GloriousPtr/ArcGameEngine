@@ -173,7 +173,6 @@ namespace ArcEngine
 				| ImGuiWindowFlags_MenuBar
 				| ImGuiWindowFlags_NoNavFocus;
 
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 			{
 				//////////////////////////////////////////////////////////////////////////
@@ -253,11 +252,14 @@ namespace ArcEngine
 						WindowDragger();
 
 						// Minimize/Maximize/Close buttons
-						ImVec2 region = ImGui::GetContentRegionMax();
+						ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 0.0f });
+						ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
 						ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
 						ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
-						ImVec2 buttonSize = { region.y * 1.5f, region.y };
-						ImGui::SetCursorPosX(region.x - 3.33f * buttonSize.x);
+
+						ImVec2 region = ImGui::GetContentRegionMax();
+						ImVec2 buttonSize = { region.y * 2.0f, region.y };
+						ImGui::SetCursorPosX(region.x - 3.0f * buttonSize.x + ImGui::GetStyle().WindowPadding.x);
 						bool isNormalCursor = ImGui::GetMouseCursor() == ImGuiMouseCursor_Arrow;
 
 						// Minimize Button
@@ -282,7 +284,7 @@ namespace ArcEngine
 						ImGui::PopStyleColor(2);
 
 						ImGui::PopStyleColor();
-						ImGui::PopStyleVar();
+						ImGui::PopStyleVar(3);
 
 						ImGui::EndMenuBar();
 					}
@@ -369,7 +371,7 @@ namespace ArcEngine
 					ImGui::End();
 				}
 			}
-			ImGui::PopStyleVar(2);
+			ImGui::PopStyleVar();
 
 			//////////////////////////////////////////////////////////////////////////
 			// HEIRARCHY /////////////////////////////////////////////////////////////
