@@ -9,6 +9,8 @@
 
 #include "Platform/OpenGL/OpenGLContext.h"
 
+#include "Arc/Core/Input.h"
+
 namespace ArcEngine
 {
 	uint8_t WindowsWindow::s_GLFWWindowCount = 0;
@@ -63,7 +65,6 @@ namespace ArcEngine
 
 			glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
 			m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
-			Maximize();
 			++s_GLFWWindowCount;
 		}
 		m_Context = GraphicsContext::Create(m_Window);
@@ -205,6 +206,8 @@ namespace ArcEngine
 			ARC_PROFILE_CATEGORY("Wait", Profile::Category::Wait);
 			m_Context->SwapBuffers();
 		}
+
+		ARC_CORE_WARN("{}, {}", Input::GetMouseX(), Input::GetMouseY());
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)
@@ -229,39 +232,45 @@ namespace ArcEngine
 		glfwIconifyWindow(m_Window);
 	}
 
-	void WindowsWindow::Maximize()
+	void WindowsWindow::Maximize(const glm::vec2& globalMousePosition)
 	{
-		if (m_Maximized)
-			return;
-
 		int monitorCount;
 		GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
 
-		if (monitorCount <= 0)
+		int x = 0;
+		int y = 0;
+		int width = 1;
+		int height = 1;
+		uint32_t monitorIndex = -1;
+		for (int i = 0; i < monitorCount; ++i)
+		{
+			glfwGetMonitorWorkarea(monitors[i], &x, &y, &width, &height);
+			if (globalMousePosition.x < (float)(x + width) && globalMousePosition.y < (float)(y + height))
+			{
+				monitorIndex = i;
+				break;
+			}
+		}
+
+		if (m_MaximizedMonitor == monitorIndex && monitorIndex < 0)
 			return;
 
-		int x;
-		int y;
-		int width;
-		int height;
-		glfwGetMonitorWorkarea(monitors[0], &x, &y, &width, &height);
-
 		glfwSetWindowPos(m_Window, x, y);
-		glfwSetWindowSize(m_Window, width, height);
-		m_Maximized = true;
+		glfwSetWindowSize(m_Window, width, height - 1);
+		m_MaximizedMonitor = monitorIndex;
 	}
 
 	void WindowsWindow::Restore()
 	{
-		if (m_Maximized)
+		if (m_MaximizedMonitor >= 0)
 		{
-			glfwSetWindowPos(m_Window, m_Data.RestorePosition.x, m_Data.RestorePosition.y);
+			glfwSetWindowPos(m_Window, (int32_t)m_Data.RestorePosition.x, (int32_t)m_Data.RestorePosition.y);
 			glfwSetWindowSize(m_Window, m_Data.RestoreWidth, m_Data.RestoreHeight);
-			m_Maximized = false;
+			m_MaximizedMonitor = -1;
 		}
 	}
 
-	glm::vec2 WindowsWindow::GetPosition()
+	glm::vec2 WindowsWindow::GetPosition() const
 	{
 		int x;
 		int y;
@@ -269,12 +278,7 @@ namespace ArcEngine
 		return glm::vec2((float)x, (float)y);
 	}
 
-	void WindowsWindow::SetPosition(const glm::vec2& position)
-	{
-		glfwSetWindowPos(m_Window, (int)position.x, (int)position.y);
-	}
-
-	glm::vec2 WindowsWindow::GetSize()
+	glm::vec2 WindowsWindow::GetSize() const
 	{
 		int width;
 		int height;
@@ -282,10 +286,35 @@ namespace ArcEngine
 		return { (float)width, (float)height };
 	}
 
+	void WindowsWindow::SetPosition(const glm::vec2& position)
+	{
+		glfwSetWindowPos(m_Window, (int)position.x, (int)position.y);
+	}
+
+	glm::vec4 WindowsWindow::GetMonitorWorkArea(const glm::vec2& globalMousePosition) const
+	{
+		int monitorCount;
+		GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
+
+		int x = 0;
+		int y = 0;
+		int width = 1;
+		int height = 1;
+		for (int i = 0; i < monitorCount; ++i)
+		{
+			glfwGetMonitorWorkarea(monitors[i], &x, &y, &width, &height);
+			if (globalMousePosition.x < (float)(x + width) && globalMousePosition.y < (float)(y + height))
+				return { x, y, width, height };
+		}
+
+		ARC_CORE_ASSERT(false);
+		return { 0, 0, 1, 1 };
+	}
+
 	void WindowsWindow::Resize(const glm::vec2& position, const glm::vec2& size)
 	{
-		glfwSetWindowPos(m_Window, position.x, position.y);
-		glfwSetWindowSize(m_Window, size.x, size.y);
+		glfwSetWindowPos(m_Window, (const int32_t)position.x, (const int32_t)position.y);
+		glfwSetWindowSize(m_Window, (const int32_t)size.x, (const int32_t)size.y);
 	}
 
 	void WindowsWindow::SubmitRestorePosition(const glm::vec2& position)
@@ -295,7 +324,7 @@ namespace ArcEngine
 
 	void WindowsWindow::SubmitRestoreSize(const glm::vec2& size)
 	{
-		m_Data.RestoreWidth = size.x;
-		m_Data.RestoreHeight = size.y;
+		m_Data.RestoreWidth = (const int32_t)size.x;
+		m_Data.RestoreHeight = (const int32_t)size.y;
 	}
 }

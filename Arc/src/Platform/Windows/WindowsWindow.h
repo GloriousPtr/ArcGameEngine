@@ -23,13 +23,16 @@ namespace ArcEngine
 		void SetVSync(bool enabled) override;
 		bool IsVSync() const override;
 
-		bool IsMaximized() override { return m_Maximized; }
+		bool IsMaximized() override { return m_MaximizedMonitor >= 0; }
 		void Minimize() override;
-		void Maximize() override;
+		void Maximize(const glm::vec2& globalMousePosition) override;
 		void Restore() override;
-		glm::vec2 GetPosition() override;
+
+		glm::vec2 GetPosition() const override;
+		glm::vec2 GetSize() const override;
+		glm::vec4 GetMonitorWorkArea(const glm::vec2& globalMousePosition) const;
+
 		void SetPosition(const glm::vec2& position) override;
-		glm::vec2 GetSize() override;
 		void Resize(const glm::vec2& position, const glm::vec2& size) override;
 		void SubmitRestorePosition(const glm::vec2& position) override;
 		void SubmitRestoreSize(const glm::vec2& size) override;
@@ -57,7 +60,7 @@ namespace ArcEngine
 		};
 
 		WindowData m_Data;
-		bool m_Maximized = false;
+		int32_t m_MaximizedMonitor = -1;
 
 		static uint8_t s_GLFWWindowCount;
 	};

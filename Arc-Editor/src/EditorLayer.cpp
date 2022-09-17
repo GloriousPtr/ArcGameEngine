@@ -114,6 +114,7 @@ namespace ArcEngine
 
 		Window& window = m_Application->GetWindow();
 
+		ImVec2 mousePosition = ImGui::GetMousePos();
 		ImVec2 region = ImGui::GetContentRegionMax();
 		ImGui::InvisibleButton("WindowMoveButton", region);
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
@@ -121,24 +122,23 @@ namespace ArcEngine
 			if (window.IsMaximized())
 				window.Restore();
 			else
-				window.Maximize();
+				window.Maximize({mousePosition.x, mousePosition.y});
 		}
 
-		ImVec2 mousePosition = ImGui::GetMousePos();
 		if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))		// Dragging the window
 		{
 			m_WindowDragging = true;
 
 			if (window.IsMaximized())
 			{
-				glm::vec2 oldPosition = window.GetPosition();
-				glm::vec2 oldSize = window.GetSize();
+				glm::vec2 maximizedPosition = window.GetPosition();
+				glm::vec2 maximizedSize = window.GetSize();
 
 				window.Restore();
 
-				float ratio = Math::InverseLerp(oldPosition.x, oldPosition.x + oldSize.x, mousePosition.x);
+				float ratio = Math::InverseLerp(maximizedPosition.x, maximizedPosition.x + maximizedSize.x, mousePosition.x);
 				float xStart = mousePosition.x - window.GetSize().x * ratio;
-				window.SetPosition({ xStart, 0.0f });
+				window.SetPosition({ xStart, maximizedPosition.y });
 			}
 			else
 			{
@@ -152,8 +152,9 @@ namespace ArcEngine
 		{
 			m_WindowDragging = false;
 
-			if (!window.IsMaximized() && mousePosition.y == 0.0f)
-				window.Maximize();
+			glm::vec4 monitorRect = window.GetMonitorWorkArea({ mousePosition.x, mousePosition.y });
+			if (!window.IsMaximized() && mousePosition.y == monitorRect.y)
+				window.Maximize({ mousePosition.x, mousePosition.y });
 			else
 				window.SubmitRestorePosition(window.GetPosition());
 		}
@@ -263,7 +264,7 @@ namespace ArcEngine
 						bool isNormalCursor = ImGui::GetMouseCursor() == ImGuiMouseCursor_Arrow;
 
 						// Minimize Button
-						if (ImGui::Button(ICON_MDI_WINDOW_MINIMIZE, buttonSize) && isNormalCursor)
+						if (ImGui::Button(ICON_MDI_MINUS, buttonSize) && isNormalCursor)
 							m_Application->GetWindow().Minimize();
 
 						// Maximize Button
@@ -271,9 +272,14 @@ namespace ArcEngine
 						{
 							Window& window = m_Application->GetWindow();
 							if (window.IsMaximized())
+							{
 								window.Restore();
+							}
 							else
-								window.Maximize();
+							{
+								ImVec2 mousePosition = ImGui::GetMousePos();
+								window.Maximize({ mousePosition.x, mousePosition.y });
+							}
 						}
 
 						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.909f, 0.066f, 0.137f, 1.0f });
