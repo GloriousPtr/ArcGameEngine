@@ -107,7 +107,7 @@ namespace ArcEngine
 		}
 	}
 
-	void EditorLayer::WindowDragger()
+	void EditorLayer::HandleWindowDrag()
 	{
 		if (m_Resizing)
 			return;
@@ -115,9 +115,7 @@ namespace ArcEngine
 		Window& window = m_Application->GetWindow();
 
 		ImVec2 mousePosition = ImGui::GetMousePos();
-		ImVec2 region = ImGui::GetContentRegionMax();
-		ImGui::InvisibleButton("WindowMoveButton", region);
-		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+		if (ImGui::IsWindowHovered() && ImGui::IsMouseDoubleClicked(0))
 		{
 			if (window.IsMaximized())
 				window.Restore();
@@ -158,8 +156,6 @@ namespace ArcEngine
 			else
 				window.SubmitRestorePosition(window.GetPosition());
 		}
-
-		ImGui::SetItemAllowOverlap();
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -181,6 +177,8 @@ namespace ArcEngine
 				//////////////////////////////////////////////////////////////////////////
 				if (ImGui::BeginViewportSideBar("##PrimaryMenuBar", viewport, ImGuiDir_Up, m_MenuBarHeight, window_flags))
 				{
+					HandleWindowDrag();
+
 					if (ImGui::BeginMenuBar())
 					{
 						if (ImGui::BeginMenu("File"))
@@ -250,8 +248,6 @@ namespace ArcEngine
 							ImGui::EndMenu();
 						}
 
-						WindowDragger();
-
 						// Minimize/Maximize/Close buttons
 						ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 0.0f });
 						ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
@@ -302,11 +298,11 @@ namespace ArcEngine
 				//////////////////////////////////////////////////////////////////////////
 				if (ImGui::BeginViewportSideBar("##SecondaryMenuBar", viewport, ImGuiDir_Up, m_MenuBarHeight, window_flags))
 				{
+					HandleWindowDrag();
+
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 1, 1 });
 					if (ImGui::BeginMenuBar())
 					{
-						WindowDragger();
-
 						ImVec2 region = ImGui::GetContentRegionMax();
 						float frameHeight = ImGui::GetFrameHeight();
 						ImVec2 buttonSize = { frameHeight * 1.5f, frameHeight };

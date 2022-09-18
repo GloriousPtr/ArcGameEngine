@@ -1,10 +1,6 @@
 #include "UI.h"
 
-#include <ArcEngine.h>
-
 #include <glm/gtc/type_ptr.hpp>
-
-#include "EditorTheme.h"
 
 namespace ArcEngine
 {
@@ -455,11 +451,12 @@ namespace ArcEngine
 
 		bool changed = false;
 
-		const ImVec2 buttonSize = { 80, 80 };
-		const ImVec2 xButtonSize = { buttonSize.x / 4.0f, 80 };
-		const ImVec2 tooltipSize = { 300, 300 };
+		float frameHeight = ImGui::GetFrameHeight();
+		const float buttonSize = frameHeight * 3.0f;
+		const ImVec2 xButtonSize = { buttonSize / 4.0f, buttonSize };
+		const float tooltipSize = frameHeight * 11.0f;
 
-		ImGui::SetCursorPos({ ImGui::GetContentRegionMax().x - buttonSize.x - xButtonSize.x, ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y });
+		ImGui::SetCursorPos({ ImGui::GetContentRegionMax().x - buttonSize - xButtonSize.x, ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y });
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
@@ -468,13 +465,13 @@ namespace ArcEngine
 		uint64_t id = overrideTextureID;
 		if (id == 0)
 			id = texture == nullptr ? 0 : texture->GetHRDRendererID();
-		ImGui::ImageButton((ImTextureID)id, buttonSize, { 1, 1 }, { 0, 0 }, 0);
+		ImGui::ImageButton((ImTextureID)id, { buttonSize, buttonSize }, { 1, 1 }, { 0, 0 }, 0);
 		if (texture && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 		{
 			ImGui::BeginTooltip();
 			ImGui::Text(texture->GetPath().c_str());
 			ImGui::Spacing();
-			ImGui::Image((ImTextureID)id, tooltipSize, { 1, 1 }, { 0, 0 });
+			ImGui::Image((ImTextureID)id, { tooltipSize, tooltipSize }, { 1, 1 }, { 0, 0 });
 			ImGui::EndTooltip();
 		}
 		if (ImGui::BeginDragDropTarget())
@@ -512,11 +509,12 @@ namespace ArcEngine
 
 		bool changed = false;
 
-		const ImVec2 buttonSize = { 80, 80 };
-		const ImVec2 xButtonSize = { buttonSize.x / 4.0f, 80 };
-		const ImVec2 tooltipSize = { 300, 300 };
+		float frameHeight = ImGui::GetFrameHeight();
+		const float buttonSize = frameHeight * 3.0f;
+		const ImVec2 xButtonSize = { buttonSize / 4.0f, buttonSize };
+		const float tooltipSize = frameHeight * 11.0f;
 
-		ImGui::SetCursorPos({ ImGui::GetContentRegionMax().x - buttonSize.x - xButtonSize.x, ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y });
+		ImGui::SetCursorPos({ ImGui::GetContentRegionMax().x - buttonSize - xButtonSize.x, ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y });
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
@@ -525,13 +523,13 @@ namespace ArcEngine
 		uint64_t id = overrideTextureID;
 		if (id == 0)
 			id = texture == nullptr ? 0 : texture->GetRendererID();
-		ImGui::ImageButton((ImTextureID)id, buttonSize, { 1, 1 }, { 0, 0 }, 0);
+		ImGui::ImageButton((ImTextureID)id, { buttonSize, buttonSize }, { 1, 1 }, { 0, 0 }, 0);
 		if (texture && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 		{
 			ImGui::BeginTooltip();
 			ImGui::Text(texture->GetPath().c_str());
 			ImGui::Spacing();
-			ImGui::Image((ImTextureID)id, tooltipSize, { 1, 1 }, { 0, 0 });
+			ImGui::Image((ImTextureID)id, { tooltipSize, tooltipSize }, { 1, 1 }, { 0, 0 });
 			ImGui::EndTooltip();
 		}
 		if (ImGui::BeginDragDropTarget())
@@ -847,8 +845,8 @@ namespace ArcEngine
 		
 		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
 
-		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+		float frameHeight = ImGui::GetFrameHeight();
+		ImVec2 buttonSize = { frameHeight + 3.0f, frameHeight };
 
 		ImVec2 innerItemSpacing = ImGui::GetStyle().ItemInnerSpacing;
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, innerItemSpacing);
@@ -946,6 +944,18 @@ namespace ArcEngine
 		ImGui::PopStyleVar();
 
 		return clicked;
+	}
+
+	glm::vec2 UI::GetIconButtonSize(const char* icon, const char* label)
+	{
+		float lineHeight = ImGui::GetTextLineHeight();
+		ImVec2 padding = ImGui::GetStyle().FramePadding;
+
+		float width = ImGui::CalcTextSize(icon).x;
+		width += ImGui::CalcTextSize(label).x;
+		width += padding.x * 2.0f;
+
+		return { width, lineHeight + padding.y * 2.0f };
 	}
 
 	bool UI::ToggleButton(const char* label, bool state, ImVec2 size, float alpha, float pressedAlpha, ImGuiButtonFlags buttonFlags)

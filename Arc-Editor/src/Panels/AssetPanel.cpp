@@ -235,7 +235,7 @@ namespace ArcEngine
 
 				RenderSideView();
 				ImGui::TableNextColumn();
-				RenderBody(m_ThumbnailSize >= 64.0f);
+				RenderBody(m_ThumbnailSize >= 96.0f);
 
 				ImGui::EndTable();
 			}
@@ -252,7 +252,7 @@ namespace ArcEngine
 		if (ImGui::BeginPopup("SettingsPopup"))
 		{
 			UI::BeginProperties(ImGuiTableFlags_SizingStretchSame);
-			UI::Property("Thumbnail Size", m_ThumbnailSize, 63.9f, 256.0f, nullptr, 0.1f, "");
+			UI::Property("Thumbnail Size", m_ThumbnailSize, 95.9f, 256.0f, nullptr, 0.1f, "");
 			UI::EndProperties();
 			ImGui::EndPopup();
 		}
@@ -438,13 +438,15 @@ namespace ArcEngine
 		std::filesystem::path directoryToOpen = "";
 
 		float padding = 4.0f;
-		float cellSize = m_ThumbnailSize + 2 * padding + m_ThumbnailSize * 0.1f;
+		float scaledThumbnailSize = m_ThumbnailSize * ImGui::GetIO().FontGlobalScale;
+		float scaledThumbnailSizeX = scaledThumbnailSize * 0.55f;
+		float cellSize = scaledThumbnailSizeX + 2 * padding + scaledThumbnailSizeX * 0.1f;
 
 		float overlayPaddingY = 6.0f * padding;
 		float thumbnailPadding = overlayPaddingY * 0.5f;
-		float thumbnailSize = m_ThumbnailSize - thumbnailPadding;
+		float thumbnailSize = scaledThumbnailSizeX - thumbnailPadding;
 
-		ImVec2 backgroundThumbnailSize = { m_ThumbnailSize + padding * 2, m_ThumbnailSize * 1.25f + padding * 8 + ImGui::GetTextLineHeight() };
+		ImVec2 backgroundThumbnailSize = { scaledThumbnailSizeX + padding * 2, scaledThumbnailSize + padding * 2 };
 
 		float panelWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ScrollbarSize;
 		int columnCount = (int) (panelWidth / cellSize);
@@ -465,7 +467,7 @@ namespace ArcEngine
 		}
 		else
 		{
-			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { m_ThumbnailSize * 0.05f, m_ThumbnailSize * 0.05f });
+			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { scaledThumbnailSizeX * 0.05f, scaledThumbnailSizeX * 0.05f });
 			flags |= ImGuiTableFlags_PadOuterX | ImGuiTableFlags_SizingFixedFit;
 		}
 
@@ -574,28 +576,25 @@ namespace ArcEngine
 					ImVec4 typeColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 					if (s_TypeColors.find_as(fileType) != s_TypeColors.end())
 						typeColor = s_TypeColors.at(fileType);
-					ImVec2 typeColorFrameSize = { m_ThumbnailSize, m_ThumbnailSize * 0.03f };
+					ImVec2 typeColorFrameSize = { scaledThumbnailSizeX, scaledThumbnailSizeX * 0.03f };
 					ImGui::SetCursorPosX(cursorPos.x + padding);
 					ImGui::Image((ImTextureID)m_WhiteTexture->GetRendererID(), typeColorFrameSize, { 0, 0 }, { 1, 1 }, isDir ? ImVec4(0.0f, 0.0f, 0.0f, 0.0f) : typeColor);
 
 					ImVec2 rectMin = ImGui::GetItemRectMin();
 					ImVec2 rectSize = ImGui::GetItemRectSize();
-					float rectMin_x = rectMin.x + padding * 2.0f;
-					float rectMin_y = rectMin.y + rectSize.y + typeColorFrameSize.y;
-					ImRect clipRect = ImRect({ rectMin_x, rectMin_y }, { rectMin_x - padding * 2.0f + rectSize.x, rectMin_y + m_ThumbnailSize * 0.15f + textSize.y + overlayPaddingY - EditorTheme::SmallFont->FontSize });
-					UI::ClippedText(clipRect.Min, clipRect.Max, filename, nullptr, nullptr, { 0, 0 }, &clipRect, m_ThumbnailSize - padding * 4.0f);
-
+					ImRect clipRect = ImRect({ rectMin.x + padding * 2.0f, rectMin.y + padding * 2.0f },
+						{ rectMin.x + rectSize.x, rectMin.y + scaledThumbnailSizeX - EditorTheme::SmallFont->FontSize - padding * 4.0f });
+					UI::ClippedText(clipRect.Min, clipRect.Max, filename, nullptr, nullptr, { 0, 0 }, &clipRect, scaledThumbnailSizeX - padding * 4.0f);
+					
 					if (!isDir)
 					{
-						ImGui::SetCursorPos({ cursorPos.x + padding * 2.0f, cursorPos.y + m_ThumbnailSize * 1.25f + textSize.y + overlayPaddingY - EditorTheme::SmallFont->FontSize * 0.75f });
+						ImGui::SetCursorPos({ cursorPos.x + padding * 2.0f, cursorPos.y + backgroundThumbnailSize.y - EditorTheme::SmallFont->FontSize - padding * 2.0f });
 						ImGui::BeginDisabled();
 						ImGui::PushFont(EditorTheme::SmallFont);
 						ImGui::TextUnformatted(fileType);
 						ImGui::PopFont();
 						ImGui::EndDisabled();
 					}
-
-					ImGui::SetCursorPosY(ImGui::GetCursorPosY() + textSize.y + padding * 4);
 				}
 				else
 				{

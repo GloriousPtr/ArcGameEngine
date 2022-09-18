@@ -121,7 +121,7 @@ namespace ArcEngine
 			style->SelectableTextAlign = ImVec2(0.0f, 0.0f);
 			style->DisplaySafeAreaPadding = ImVec2(8.0f, 8.0f);
 
-			UIFramePadding = ImVec2(4.0f, 4.0f);
+			UIFramePadding = ImVec2(4.0f, 2.0f);
 
 			ImGuiColorEditFlags colorEditFlags = ImGuiColorEditFlags_AlphaBar
 				| ImGuiColorEditFlags_AlphaPreviewHalf

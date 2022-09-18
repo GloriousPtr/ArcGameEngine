@@ -87,13 +87,8 @@ namespace ArcEngine
 			float lineHeight = ImGui::GetTextLineHeight();
 			ImVec2 padding = ImGui::GetStyle().FramePadding;
 
-			const char* addButtonLabel = "  " ICON_MDI_PLUS "Add  ";
-			ImVec2 addButtonSize = ImGui::CalcTextSize(addButtonLabel);
-			addButtonSize.x += padding.y * 2.0f;
-			addButtonSize.y = lineHeight + padding.y * 2.0f;
-
 			const float filterCursorPosX = ImGui::GetCursorPosX();
-			m_Filter.Draw("###HierarchyFilter", ImGui::GetContentRegionAvail().x - (addButtonSize.x + padding.x * 2.0f));
+			m_Filter.Draw("###HierarchyFilter", ImGui::GetContentRegionAvail().x - (UI::GetIconButtonSize("  " ICON_MDI_PLUS, "Add  ").x + 2.0f * padding.x));
 			
 			ImGui::SameLine();
 

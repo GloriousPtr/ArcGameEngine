@@ -65,7 +65,6 @@ namespace ArcEngine
 
 			auto& component = entity.GetComponent<T>();
 			
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
 			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 			
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
@@ -75,8 +74,9 @@ namespace ArcEngine
 			bool removeComponent = false;
 			if(removable)
 			{
-				ImGui::SameLine(ImGui::GetContentRegionMax().x - lineHeight);
-				if(ImGui::Button(ICON_MDI_SETTINGS, ImVec2{ lineHeight, lineHeight }))
+				float frameHeight = ImGui::GetFrameHeight();
+				ImGui::SameLine(ImGui::GetContentRegionMax().x - frameHeight * 1.2f);
+				if(ImGui::Button(ICON_MDI_SETTINGS, ImVec2{ frameHeight * 1.2f, frameHeight }))
 					ImGui::OpenPopup("ComponentSettings");
 
 				if(ImGui::BeginPopup("ComponentSettings"))
@@ -87,7 +87,6 @@ namespace ArcEngine
 					ImGui::EndPopup();
 				}
 			}
-			ImGui::PopStyleVar();
 
 			if(open)
 			{
@@ -113,20 +112,19 @@ namespace ArcEngine
 
 		const eastl::string* toRemove = nullptr;
 		
+		float frameHeight = ImGui::GetFrameHeight();
+		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+
 		for (const auto* it = component.Classes.begin(); it != component.Classes.end(); ++it)
 		{
 			const eastl::string& className = *it;
 
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
-			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
-
 			bool open = ImGui::TreeNodeEx(it, treeFlags, className.c_str());
 
 			{
-				ImGui::SameLine(ImGui::GetContentRegionMax().x - lineHeight);
-				if (ImGui::Button(ICON_MDI_SETTINGS, ImVec2{ lineHeight, lineHeight }))
+				ImGui::SameLine(ImGui::GetContentRegionMax().x - frameHeight * 1.2f);
+				if (ImGui::Button(ICON_MDI_SETTINGS, ImVec2{ frameHeight * 1.2f, frameHeight }))
 					ImGui::OpenPopup("ComponentSettings");
 
 				if (ImGui::BeginPopup("ComponentSettings"))
@@ -137,7 +135,6 @@ namespace ArcEngine
 					ImGui::EndPopup();
 				}
 			}
-			ImGui::PopStyleVar();
 
 			if (open)
 			{
@@ -323,76 +320,82 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		ImVec2 headerRegion = ImGui::GetContentRegionAvail();
+		ImVec2 framePadding = ImGui::GetStyle().FramePadding;
+
+		ImVec2 headerRegion = ImGui::GetContentRegionMax();
 		headerRegion.y = ImGui::GetFrameHeight();
 		ImGui::BeginChild("PropertiesHeader", headerRegion, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-		if(entity.HasComponent<TagComponent>())
 		{
-			auto& tag = entity.GetComponent<TagComponent>().Tag;
 
-			char buffer[256];
-			memset(buffer, 0, sizeof(buffer));
-			strcpy_s(buffer, tag.c_str());
-			if(ImGui::InputText("##Tag", buffer, sizeof(buffer)))
-				tag = eastl::string(buffer);
-		}
+			float addButtonSizeX = UI::GetIconButtonSize("  " ICON_MDI_PLUS, "Add  ").x;
+			ImVec2 lockButtonSize = ImVec2(headerRegion.y * 1.5f, headerRegion.y);
+			float tagWidth = headerRegion.x - ((addButtonSizeX + framePadding.x * 2.0f) + (lockButtonSize.x + framePadding.x * 2.0f));
 
-		ImGui::SameLine();
-
-		// Add Button
-		{
-			if (UI::IconButton("  " ICON_MDI_PLUS, "Add  "))
-				ImGui::OpenPopup("AddComponentPopup");
-
-			if (ImGui::BeginPopup("AddComponentPopup"))
+			if (entity.HasComponent<TagComponent>())
 			{
-				const float filterCursorPosX = ImGui::GetCursorPosX();
-				m_Filter.Draw("###PropertiesFilter", ImGui::GetContentRegionAvail().x);
+				auto& tag = entity.GetComponent<TagComponent>().Tag;
 
-				if (!m_Filter.IsActive())
-				{
-					ImGui::SameLine();
-					ImGui::SetCursorPosX(filterCursorPosX + ImGui::GetFontSize() * 0.5f);
-					ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
-				}
-
-				DrawAddComponent<SpriteRendererComponent>(entity, ICON_MDI_IMAGE_SIZE_SELECT_ACTUAL " Sprite Renderer", "2D");
-				DrawAddComponent<Rigidbody2DComponent>(entity, ICON_MDI_SOCCER " Rigidbody 2D", "2D");
-				DrawAddComponent<BoxCollider2DComponent>(entity, ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider 2D", "2D");
-				DrawAddComponent<CircleCollider2DComponent>(entity, ICON_MDI_CIRCLE_OUTLINE " Circle Collider 2D", "2D");
-				DrawAddComponent<DistanceJoint2DComponent>(entity, ICON_MDI_VECTOR_LINE " Distance Joint 2D", "2D");
-				DrawAddComponent<SpringJoint2DComponent>(entity, ICON_MDI_VECTOR_LINE " Spring Joint 2D", "2D");
-				DrawAddComponent<HingeJoint2DComponent>(entity, ICON_MDI_ANGLE_ACUTE " Hinge Joint 2D", "2D");
-				DrawAddComponent<SliderJoint2DComponent>(entity, ICON_MDI_VIEW_AGENDA " Slider Joint 2D", "2D");
-				DrawAddComponent<WheelJoint2DComponent>(entity, ICON_MDI_CAR " Wheel Joint 2D", "2D");
-				DrawAddComponent<BuoyancyEffector2DComponent>(entity, ICON_MDI_WATER " Buoyancy Effector 2D", "2D");
-
-				DrawAddComponent<SkyLightComponent>(entity, ICON_MDI_EARTH " Sky Light", "3D");
-				DrawAddComponent<LightComponent>(entity, ICON_MDI_LIGHTBULB " Light", "3D");
-				DrawAddComponent<MeshComponent>(entity, ICON_MDI_VECTOR_SQUARE " Mesh", "3D");
-
-				DrawAddComponent<AudioSourceComponent>(entity, ICON_MDI_VOLUME_MEDIUM " Audio", "Audio");
-				DrawAddComponent<AudioListenerComponent>(entity, ICON_MDI_CIRCLE_SLICE_8 " Audio Listener", "Audio");
-
-				DrawAddComponent<CameraComponent>(entity, ICON_MDI_CAMERA " Camera");
-				DrawAddComponent<ScriptComponent>(entity, ICON_MDI_POUND_BOX " Script");
-
-				ImGui::EndPopup();
+				char buffer[256];
+				memset(buffer, 0, sizeof(buffer));
+				strcpy_s(buffer, tag.c_str());
+				ImGui::SetNextItemWidth(tagWidth);
+				if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
+					tag = eastl::string(buffer);
 			}
-		}
 
-		ImGui::SameLine();
+			ImGui::SameLine();
 
-		// Lock Button
-		{
-			float frameHeight = ImGui::GetFrameHeight();
-			ImVec2 region = ImGui::GetContentRegionMax();
-			ImVec2 lockButtonSize = ImVec2(frameHeight * 1.5f, frameHeight);
-			ImGui::SetCursorPosX(region.x - lockButtonSize.x);
+			// Add Button
+			{
+				if (UI::IconButton("  " ICON_MDI_PLUS, "Add  "))
+					ImGui::OpenPopup("AddComponentPopup");
 
-			const char* icon = m_Locked ? ICON_MDI_LOCK : ICON_MDI_LOCK_OPEN_OUTLINE;
-			if (UI::ToggleButton(icon, m_Locked, lockButtonSize))
-				m_Locked = !m_Locked;
+				if (ImGui::BeginPopup("AddComponentPopup"))
+				{
+					const float filterCursorPosX = ImGui::GetCursorPosX();
+					m_Filter.Draw("###PropertiesFilter", ImGui::GetContentRegionAvail().x);
+
+					if (!m_Filter.IsActive())
+					{
+						ImGui::SameLine();
+						ImGui::SetCursorPosX(filterCursorPosX + ImGui::GetFontSize() * 0.5f);
+						ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
+					}
+
+					DrawAddComponent<SpriteRendererComponent>(entity, ICON_MDI_IMAGE_SIZE_SELECT_ACTUAL " Sprite Renderer", "2D");
+					DrawAddComponent<Rigidbody2DComponent>(entity, ICON_MDI_SOCCER " Rigidbody 2D", "2D");
+					DrawAddComponent<BoxCollider2DComponent>(entity, ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider 2D", "2D");
+					DrawAddComponent<CircleCollider2DComponent>(entity, ICON_MDI_CIRCLE_OUTLINE " Circle Collider 2D", "2D");
+					DrawAddComponent<DistanceJoint2DComponent>(entity, ICON_MDI_VECTOR_LINE " Distance Joint 2D", "2D");
+					DrawAddComponent<SpringJoint2DComponent>(entity, ICON_MDI_VECTOR_LINE " Spring Joint 2D", "2D");
+					DrawAddComponent<HingeJoint2DComponent>(entity, ICON_MDI_ANGLE_ACUTE " Hinge Joint 2D", "2D");
+					DrawAddComponent<SliderJoint2DComponent>(entity, ICON_MDI_VIEW_AGENDA " Slider Joint 2D", "2D");
+					DrawAddComponent<WheelJoint2DComponent>(entity, ICON_MDI_CAR " Wheel Joint 2D", "2D");
+					DrawAddComponent<BuoyancyEffector2DComponent>(entity, ICON_MDI_WATER " Buoyancy Effector 2D", "2D");
+
+					DrawAddComponent<SkyLightComponent>(entity, ICON_MDI_EARTH " Sky Light", "3D");
+					DrawAddComponent<LightComponent>(entity, ICON_MDI_LIGHTBULB " Light", "3D");
+					DrawAddComponent<MeshComponent>(entity, ICON_MDI_VECTOR_SQUARE " Mesh", "3D");
+
+					DrawAddComponent<AudioSourceComponent>(entity, ICON_MDI_VOLUME_MEDIUM " Audio", "Audio");
+					DrawAddComponent<AudioListenerComponent>(entity, ICON_MDI_CIRCLE_SLICE_8 " Audio Listener", "Audio");
+
+					DrawAddComponent<CameraComponent>(entity, ICON_MDI_CAMERA " Camera");
+					DrawAddComponent<ScriptComponent>(entity, ICON_MDI_POUND_BOX " Script");
+
+					ImGui::EndPopup();
+				}
+			}
+
+			ImGui::SameLine();
+
+			// Lock Button
+			{
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + framePadding.x);
+				const char* icon = m_Locked ? ICON_MDI_LOCK : ICON_MDI_LOCK_OPEN_OUTLINE;
+				if (UI::ToggleButton(icon, m_Locked, lockButtonSize))
+					m_Locked = !m_Locked;
+			}
 		}
 		ImGui::EndChild();
 
@@ -817,12 +820,14 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<ScriptComponent>(ICON_MDI_POUND_BOX " Script", entity, [this, &entity](ScriptComponent& component)
+		DrawComponent<ScriptComponent>(ICON_MDI_POUND_BOX " Script", entity, [this, &entity, &framePadding](ScriptComponent& component)
 		{
 			ImGui::Spacing();
-			ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x - 55.0f);
+
+			ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - (UI::GetIconButtonSize("  " ICON_MDI_PLUS, "Add  ").x + framePadding.x * 2.0f));
 			if (UI::IconButton("  " ICON_MDI_PLUS, "Add  "))
 				ImGui::OpenPopup("ScriptAddPopup");
+
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
 			ImGui::Separator();
 			ImGui::Spacing();

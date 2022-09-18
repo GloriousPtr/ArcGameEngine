@@ -206,8 +206,6 @@ namespace ArcEngine
 			ARC_PROFILE_CATEGORY("Wait", Profile::Category::Wait);
 			m_Context->SwapBuffers();
 		}
-
-		ARC_CORE_WARN("{}, {}", Input::GetMouseX(), Input::GetMouseY());
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)

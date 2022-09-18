@@ -35,7 +35,7 @@ namespace ArcEngine
 		static EditorLayer* GetInstance() { return s_Instance; }
 
 	private:
-		void WindowDragger();
+		void HandleWindowDrag();
 		void HandleResize();
 		void BeginDockspace(const char* name);
 		void EndDockspace() const;
