@@ -14,7 +14,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		static eastl::string space = " ";
-		static eastl::string tab = "\t\t\t\t";
+		static eastl::string tab = "\t\t";
 
 		std::string tmp = "###" + std::to_string(s_ID);
 		m_ID = space + icon + space + m_Name + tab + tmp.c_str() + m_Name;

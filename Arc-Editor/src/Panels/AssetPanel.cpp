@@ -582,9 +582,9 @@ namespace ArcEngine
 
 					ImVec2 rectMin = ImGui::GetItemRectMin();
 					ImVec2 rectSize = ImGui::GetItemRectSize();
-					ImRect clipRect = ImRect({ rectMin.x + padding * 2.0f, rectMin.y + padding * 2.0f },
+					ImRect clipRect = ImRect({ rectMin.x + padding * 1.0f, rectMin.y + padding * 2.0f },
 						{ rectMin.x + rectSize.x, rectMin.y + scaledThumbnailSizeX - EditorTheme::SmallFont->FontSize - padding * 4.0f });
-					UI::ClippedText(clipRect.Min, clipRect.Max, filename, nullptr, nullptr, { 0, 0 }, &clipRect, scaledThumbnailSizeX - padding * 4.0f);
+					UI::ClippedText(clipRect.Min, clipRect.Max, filename, nullptr, nullptr, { 0, 0 }, &clipRect, scaledThumbnailSizeX - padding * 2.0f);
 					
 					if (!isDir)
 					{
