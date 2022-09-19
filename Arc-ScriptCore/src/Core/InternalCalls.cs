@@ -12,7 +12,7 @@ namespace ArcEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool Entity_HasComponent(ulong entityID, Type type);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void Entity_GetComponent(ulong entityID, Type type, out IntPtr gcHandle);
+		internal static extern object Entity_GetComponent(ulong entityID, Type type);
 
 		#endregion
 

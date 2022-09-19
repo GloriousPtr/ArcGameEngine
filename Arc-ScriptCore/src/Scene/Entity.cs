@@ -75,9 +75,7 @@ namespace ArcEngine
 			{
 				if (typeof(T).BaseType == typeof(Entity))
 				{
-					InternalCalls.Entity_GetComponent(ID, typeof(T), out IntPtr gcHandle);
-					GCHandle gch = GCHandle.FromIntPtr(gcHandle);
-					return (T)gch.Target;
+					return (T)InternalCalls.Entity_GetComponent(ID, typeof(T));
 				}
 				else
 				{

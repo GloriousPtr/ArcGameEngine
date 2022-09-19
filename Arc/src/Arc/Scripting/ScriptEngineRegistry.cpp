@@ -94,7 +94,7 @@ namespace ArcEngine
 	// Logging ////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
-	void LogMessage(Log::Level level, MonoString* formattedMessage)
+	void Log_LogMessage(Log::Level level, MonoString* formattedMessage)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -121,7 +121,21 @@ namespace ArcEngine
 	// Input //////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
-	void GetMousePosition(glm::vec2* outMousePosition)
+	bool Input_IsKeyPressed(KeyCode key)
+	{
+		ARC_PROFILE_SCOPE();
+
+		return Input::IsKeyPressed(key);
+	}
+
+	bool Input_IsMouseButtonPressed(MouseCode button)
+	{
+		ARC_PROFILE_SCOPE();
+
+		return Input::IsMouseButtonPressed(button);
+	}
+
+	void Input_GetMousePosition(glm::vec2* outMousePosition)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -157,27 +171,34 @@ namespace ArcEngine
 		return s_HasComponentFuncs.at(monoType)(GetEntity(entityID), monoType);
 	}
 
-	void ScriptEngineRegistry::GetComponent(uint64_t entityID, void* type, GCHandle* outHandle)
+	MonoObject* ScriptEngineRegistry::GetComponent(uint64_t entityID, void* type)
 	{
 		ARC_PROFILE_SCOPE();
 
 		MonoType* monoType = mono_reflection_type_get_type((MonoReflectionType*)type);
-		ARC_CORE_ASSERT(s_GetComponentFuncs.find(monoType) != s_GetComponentFuncs.end(), mono_type_get_name(monoType));
-		*outHandle = s_GetComponentFuncs.at(monoType)(GetEntity(entityID), monoType);
+
+		auto it = s_GetComponentFuncs.find(monoType);
+		if (it != s_GetComponentFuncs.end())
+		{
+			if (GCHandle handle = it->second(GetEntity(entityID), monoType))
+				return GCManager::GetReferencedObject(handle);
+		}
+
+		return nullptr;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 	// Transform //////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
-	void GetTransform(uint64_t entityID, TransformComponent* outTransform)
+	void TransformComponent_GetTransform(uint64_t entityID, TransformComponent* outTransform)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outTransform = GetEntity(entityID).GetComponent<TransformComponent>();
 	}
 	
-	void SetTransform(uint64_t entityID, const TransformComponent* inTransform)
+	void TransformComponent_SetTransform(uint64_t entityID, const TransformComponent* inTransform)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -188,7 +209,7 @@ namespace ArcEngine
 	// Tag ////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
-	MonoString* GetTag(uint64_t entityID)
+	MonoString* TagComponent_GetTag(uint64_t entityID)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -196,7 +217,7 @@ namespace ArcEngine
 		return mono_string_new(mono_domain_get(), tag.Tag.c_str());
 	}
 
-	void SetTag(uint64_t entityID, MonoString* tag)
+	void TagComponent_SetTag(uint64_t entityID, MonoString* tag)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -207,28 +228,28 @@ namespace ArcEngine
 	// Sprite Renderer ////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
-	void SpriteRenderer_GetColor(uint64_t entityID, glm::vec4* outTint)
+	void SpriteRendererComponent_GetColor(uint64_t entityID, glm::vec4* outTint)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outTint = GetEntity(entityID).GetComponent<SpriteRendererComponent>().Color;
 	}
 
-	void SpriteRenderer_SetColor(uint64_t entityID, const glm::vec4* tint)
+	void SpriteRendererComponent_SetColor(uint64_t entityID, const glm::vec4* tint)
 	{
 		ARC_PROFILE_SCOPE();
 
 		GetEntity(entityID).GetComponent<SpriteRendererComponent>().Color = *tint;
 	}
 
-	void SpriteRenderer_GetTilingFactor(uint64_t entityID, float* outTiling)
+	void SpriteRendererComponent_GetTilingFactor(uint64_t entityID, float* outTiling)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outTiling = GetEntity(entityID).GetComponent<SpriteRendererComponent>().TilingFactor;
 	}
 
-	void SpriteRenderer_SetTilingFactor(uint64_t entityID, const float* tiling)
+	void SpriteRendererComponent_SetTilingFactor(uint64_t entityID, const float* tiling)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -239,14 +260,14 @@ namespace ArcEngine
 	// Rigidbody 2D ///////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
-	void Rigidbody2D_GetBodyType(uint64_t entityID, int32_t* outType)
+	void Rigidbody2DComponent_GetBodyType(uint64_t entityID, int32_t* outType)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outType = (int32_t)GetEntity(entityID).GetComponent<Rigidbody2DComponent>().Type;
 	}
 
-	void Rigidbody2D_SetBodyType(uint64_t entityID, const int32_t* type)
+	void Rigidbody2DComponent_SetBodyType(uint64_t entityID, const int32_t* type)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -259,14 +280,14 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_GetAutoMass(uint64_t entityID, bool* outAutoMass)
+	void Rigidbody2DComponent_GetAutoMass(uint64_t entityID, bool* outAutoMass)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outAutoMass = GetEntity(entityID).GetComponent<Rigidbody2DComponent>().AutoMass;
 	}
 
-	void Rigidbody2D_SetAutoMass(uint64_t entityID, const bool* autoMass)
+	void Rigidbody2DComponent_SetAutoMass(uint64_t entityID, const bool* autoMass)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -288,14 +309,14 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_GetMass(uint64_t entityID, float* outMass)
+	void Rigidbody2DComponent_GetMass(uint64_t entityID, float* outMass)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outMass = GetEntity(entityID).GetComponent<Rigidbody2DComponent>().Mass;
 	}
 
-	void Rigidbody2D_SetMass(uint64_t entityID, const float* mass)
+	void Rigidbody2DComponent_SetMass(uint64_t entityID, const float* mass)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -317,14 +338,14 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_GetLinearDrag(uint64_t entityID, float* outDrag)
+	void Rigidbody2DComponent_GetLinearDrag(uint64_t entityID, float* outDrag)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outDrag = GetEntity(entityID).GetComponent<Rigidbody2DComponent>().LinearDrag;
 	}
 
-	void Rigidbody2D_SetLinearDrag(uint64_t entityID, const float* drag)
+	void Rigidbody2DComponent_SetLinearDrag(uint64_t entityID, const float* drag)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -337,14 +358,14 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_GetAngularDrag(uint64_t entityID, float* outDrag)
+	void Rigidbody2DComponent_GetAngularDrag(uint64_t entityID, float* outDrag)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outDrag = GetEntity(entityID).GetComponent<Rigidbody2DComponent>().AngularDrag;
 	}
 
-	void Rigidbody2D_SetAngularDrag(uint64_t entityID, const float* drag)
+	void Rigidbody2DComponent_SetAngularDrag(uint64_t entityID, const float* drag)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -357,14 +378,14 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_GetAllowSleep(uint64_t entityID, bool* outState)
+	void Rigidbody2DComponent_GetAllowSleep(uint64_t entityID, bool* outState)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outState = GetEntity(entityID).GetComponent<Rigidbody2DComponent>().AllowSleep;
 	}
 
-	void Rigidbody2D_SetAllowSleep(uint64_t entityID, const bool* state)
+	void Rigidbody2DComponent_SetAllowSleep(uint64_t entityID, const bool* state)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -377,14 +398,14 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_GetAwake(uint64_t entityID, bool* outState)
+	void Rigidbody2DComponent_GetAwake(uint64_t entityID, bool* outState)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outState = GetEntity(entityID).GetComponent<Rigidbody2DComponent>().Awake;
 	}
 
-	void Rigidbody2D_SetAwake(uint64_t entityID, const bool* state)
+	void Rigidbody2DComponent_SetAwake(uint64_t entityID, const bool* state)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -397,14 +418,14 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_GetContinuous(uint64_t entityID, bool* outState)
+	void Rigidbody2DComponent_GetContinuous(uint64_t entityID, bool* outState)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outState = GetEntity(entityID).GetComponent<Rigidbody2DComponent>().Continuous;
 	}
 
-	void Rigidbody2D_SetContinuous(uint64_t entityID, const bool* state)
+	void Rigidbody2DComponent_SetContinuous(uint64_t entityID, const bool* state)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -417,14 +438,14 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_GetFreezeRotation(uint64_t entityID, bool* outState)
+	void Rigidbody2DComponent_GetFreezeRotation(uint64_t entityID, bool* outState)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outState = GetEntity(entityID).GetComponent<Rigidbody2DComponent>().FreezeRotation;
 	}
 
-	void Rigidbody2D_SetFreezeRotation(uint64_t entityID, const bool* state)
+	void Rigidbody2DComponent_SetFreezeRotation(uint64_t entityID, const bool* state)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -437,14 +458,14 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_GetGravityScale(uint64_t entityID, float* outGravityScale)
+	void Rigidbody2DComponent_GetGravityScale(uint64_t entityID, float* outGravityScale)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outGravityScale = GetEntity(entityID).GetComponent<Rigidbody2DComponent>().GravityScale;
 	}
 
-	void Rigidbody2D_SetGravityScale(uint64_t entityID, const bool* gravityScale)
+	void Rigidbody2DComponent_SetGravityScale(uint64_t entityID, const bool* gravityScale)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -457,7 +478,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_ApplyForceAtCenter(uint64_t entityID, const glm::vec2* force)
+	void Rigidbody2DComponent_ApplyForceAtCenter(uint64_t entityID, const glm::vec2* force)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -469,7 +490,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_ApplyForce(uint64_t entityID, const glm::vec2* force, const glm::vec2* point)
+	void Rigidbody2DComponent_ApplyForce(uint64_t entityID, const glm::vec2* force, const glm::vec2* point)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -481,7 +502,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_ApplyLinearImpulse(uint64_t entityID, const glm::vec2* impulse, const glm::vec2* point)
+	void Rigidbody2DComponent_ApplyLinearImpulse(uint64_t entityID, const glm::vec2* impulse, const glm::vec2* point)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -493,7 +514,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_ApplyLinearImpulseAtCenter(uint64_t entityID, const glm::vec2* impulse)
+	void Rigidbody2DComponent_ApplyLinearImpulseAtCenter(uint64_t entityID, const glm::vec2* impulse)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -505,7 +526,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_ApplyAngularImpulse(uint64_t entityID, const float* impulse)
+	void Rigidbody2DComponent_ApplyAngularImpulse(uint64_t entityID, const float* impulse)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -517,7 +538,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_ApplyTorque(uint64_t entityID, const float* torque)
+	void Rigidbody2DComponent_ApplyTorque(uint64_t entityID, const float* torque)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -529,7 +550,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_IsAwake(uint64_t entityID, bool* outAwake)
+	void Rigidbody2DComponent_IsAwake(uint64_t entityID, bool* outAwake)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -545,16 +566,16 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_IsSleeping(uint64_t entityID, bool* outSleeping)
+	void Rigidbody2DComponent_IsSleeping(uint64_t entityID, bool* outSleeping)
 	{
 		ARC_PROFILE_SCOPE();
 
 		bool awake;
-		Rigidbody2D_IsAwake(entityID, &awake);
+		Rigidbody2DComponent_IsAwake(entityID, &awake);
 		*outSleeping = !awake;
 	}
 
-	void Rigidbody2D_MovePosition(uint64_t entityID, const glm::vec2* position)
+	void Rigidbody2DComponent_MovePosition(uint64_t entityID, const glm::vec2* position)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -566,7 +587,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_MoveRotation(uint64_t entityID, const float* angle)
+	void Rigidbody2DComponent_MoveRotation(uint64_t entityID, const float* angle)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -578,7 +599,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_GetVelocity(uint64_t entityID, glm::vec2* outVelocity)
+	void Rigidbody2DComponent_GetVelocity(uint64_t entityID, glm::vec2* outVelocity)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -596,7 +617,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_SetVelocity(uint64_t entityID, const glm::vec2* velocity)
+	void Rigidbody2DComponent_SetVelocity(uint64_t entityID, const glm::vec2* velocity)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -608,7 +629,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_GetAngularVelocity(uint64_t entityID, float* outVelocity)
+	void Rigidbody2DComponent_GetAngularVelocity(uint64_t entityID, float* outVelocity)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -624,7 +645,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_SetAngularVelocity(uint64_t entityID, const float* velocity)
+	void Rigidbody2DComponent_SetAngularVelocity(uint64_t entityID, const float* velocity)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -636,7 +657,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_Sleep(uint64_t entityID)
+	void Rigidbody2DComponent_Sleep(uint64_t entityID)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -648,7 +669,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2D_WakeUp(uint64_t entityID)
+	void Rigidbody2DComponent_WakeUp(uint64_t entityID)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -664,14 +685,14 @@ namespace ArcEngine
 	// Audio Source ////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
-	void AudioSource_GetVolume(uint64_t entityID, float* outVolume)
+	void AudioSourceComponent_GetVolume(uint64_t entityID, float* outVolume)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outVolume = GetEntity(entityID).GetComponent<AudioSourceComponent>().Config.VolumeMultiplier;
 	}
 
-	void AudioSource_SetVolume(uint64_t entityID, const float* volume)
+	void AudioSourceComponent_SetVolume(uint64_t entityID, const float* volume)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -681,14 +702,14 @@ namespace ArcEngine
 			component.Source->SetVolume(*volume);
 	}
 
-	void AudioSource_GetPitch(uint64_t entityID, float* outPitch)
+	void AudioSourceComponent_GetPitch(uint64_t entityID, float* outPitch)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outPitch = GetEntity(entityID).GetComponent<AudioSourceComponent>().Config.PitchMultiplier;
 	}
 
-	void AudioSource_SetPitch(uint64_t entityID, const float* pitch)
+	void AudioSourceComponent_SetPitch(uint64_t entityID, const float* pitch)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -698,28 +719,28 @@ namespace ArcEngine
 			component.Source->SetVolume(*pitch);
 	}
 
-	void AudioSource_GetPlayOnAwake(uint64_t entityID, bool* outPlayOnAwake)
+	void AudioSourceComponent_GetPlayOnAwake(uint64_t entityID, bool* outPlayOnAwake)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outPlayOnAwake = GetEntity(entityID).GetComponent<AudioSourceComponent>().Config.PlayOnAwake;
 	}
 
-	void AudioSource_SetPlayOnAwake(uint64_t entityID, const bool* playOnAwake)
+	void AudioSourceComponent_SetPlayOnAwake(uint64_t entityID, const bool* playOnAwake)
 	{
 		ARC_PROFILE_SCOPE();
 
 		GetEntity(entityID).GetComponent<AudioSourceComponent>().Config.PlayOnAwake = *playOnAwake;
 	}
 
-	void AudioSource_GetLooping(uint64_t entityID, bool* outLooping)
+	void AudioSourceComponent_GetLooping(uint64_t entityID, bool* outLooping)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outLooping = GetEntity(entityID).GetComponent<AudioSourceComponent>().Config.Looping;
 	}
 
-	void AudioSource_SetLooping(uint64_t entityID, const bool* looping)
+	void AudioSourceComponent_SetLooping(uint64_t entityID, const bool* looping)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -729,14 +750,14 @@ namespace ArcEngine
 			component.Source->SetLooping(*looping);
 	}
 
-	void AudioSource_GetSpatialization(uint64_t entityID, bool* outSpatialization)
+	void AudioSourceComponent_GetSpatialization(uint64_t entityID, bool* outSpatialization)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outSpatialization = GetEntity(entityID).GetComponent<AudioSourceComponent>().Config.Spatialization;
 	}
 
-	void AudioSource_SetSpatialization(uint64_t entityID, const bool* spatialization)
+	void AudioSourceComponent_SetSpatialization(uint64_t entityID, const bool* spatialization)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -746,14 +767,14 @@ namespace ArcEngine
 			component.Source->SetSpatialization(*spatialization);
 	}
 
-	void AudioSource_GetAttenuationModel(uint64_t entityID, int* outAttenuationModel)
+	void AudioSourceComponent_GetAttenuationModel(uint64_t entityID, int* outAttenuationModel)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outAttenuationModel = (int) GetEntity(entityID).GetComponent<AudioSourceComponent>().Config.AttenuationModel;
 	}
 
-	void AudioSource_SetAttenuationModel(uint64_t entityID, const int* attenuationModel)
+	void AudioSourceComponent_SetAttenuationModel(uint64_t entityID, const int* attenuationModel)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -763,14 +784,14 @@ namespace ArcEngine
 			component.Source->SetAttenuationModel(component.Config.AttenuationModel);
 	}
 
-	void AudioSource_GetRollOff(uint64_t entityID, float* outRollOff)
+	void AudioSourceComponent_GetRollOff(uint64_t entityID, float* outRollOff)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outRollOff = GetEntity(entityID).GetComponent<AudioSourceComponent>().Config.RollOff;
 	}
 
-	void AudioSource_SetRollOff(uint64_t entityID, const float* rollOff)
+	void AudioSourceComponent_SetRollOff(uint64_t entityID, const float* rollOff)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -780,14 +801,14 @@ namespace ArcEngine
 			component.Source->SetRollOff(*rollOff);
 	}
 
-	void AudioSource_GetMinGain(uint64_t entityID, float* outMinGain)
+	void AudioSourceComponent_GetMinGain(uint64_t entityID, float* outMinGain)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outMinGain = GetEntity(entityID).GetComponent<AudioSourceComponent>().Config.MinGain;
 	}
 
-	void AudioSource_SetMinGain(uint64_t entityID, const float* minGain)
+	void AudioSourceComponent_SetMinGain(uint64_t entityID, const float* minGain)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -797,14 +818,14 @@ namespace ArcEngine
 			component.Source->SetMinGain(*minGain);
 	}
 
-	void AudioSource_GetMaxGain(uint64_t entityID, float* outMaxGain)
+	void AudioSourceComponent_GetMaxGain(uint64_t entityID, float* outMaxGain)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outMaxGain = GetEntity(entityID).GetComponent<AudioSourceComponent>().Config.MaxGain;
 	}
 
-	void AudioSource_SetMaxGain(uint64_t entityID, const float* maxGain)
+	void AudioSourceComponent_SetMaxGain(uint64_t entityID, const float* maxGain)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -814,14 +835,14 @@ namespace ArcEngine
 			component.Source->SetMaxGain(*maxGain);
 	}
 
-	void AudioSource_GetMinDistance(uint64_t entityID, float* outMinDistance)
+	void AudioSourceComponent_GetMinDistance(uint64_t entityID, float* outMinDistance)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outMinDistance = GetEntity(entityID).GetComponent<AudioSourceComponent>().Config.MinDistance;
 	}
 
-	void AudioSource_SetMinDistance(uint64_t entityID, const float* minDistance)
+	void AudioSourceComponent_SetMinDistance(uint64_t entityID, const float* minDistance)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -831,14 +852,14 @@ namespace ArcEngine
 			component.Source->SetMinDistance(*minDistance);
 	}
 
-	void AudioSource_GetMaxDistance(uint64_t entityID, float* outMaxDistance)
+	void AudioSourceComponent_GetMaxDistance(uint64_t entityID, float* outMaxDistance)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outMaxDistance = GetEntity(entityID).GetComponent<AudioSourceComponent>().Config.MaxDistance;
 	}
 
-	void AudioSource_SetMaxDistance(uint64_t entityID, const float* maxDistance)
+	void AudioSourceComponent_SetMaxDistance(uint64_t entityID, const float* maxDistance)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -848,14 +869,14 @@ namespace ArcEngine
 			component.Source->SetMaxDistance(*maxDistance);
 	}
 
-	void AudioSource_GetConeInnerAngle(uint64_t entityID, float* outConeInnerAngle)
+	void AudioSourceComponent_GetConeInnerAngle(uint64_t entityID, float* outConeInnerAngle)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outConeInnerAngle = GetEntity(entityID).GetComponent<AudioSourceComponent>().Config.ConeInnerAngle;
 	}
 
-	void AudioSource_SetConeInnerAngle(uint64_t entityID, const float* coneInnerAngle)
+	void AudioSourceComponent_SetConeInnerAngle(uint64_t entityID, const float* coneInnerAngle)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -865,14 +886,14 @@ namespace ArcEngine
 			component.Source->SetCone(component.Config.ConeInnerAngle, component.Config.ConeOuterAngle, component.Config.ConeOuterGain);
 	}
 
-	void AudioSource_GetConeOuterAngle(uint64_t entityID, float* outConeOuterAngle)
+	void AudioSourceComponent_GetConeOuterAngle(uint64_t entityID, float* outConeOuterAngle)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outConeOuterAngle = GetEntity(entityID).GetComponent<AudioSourceComponent>().Config.ConeOuterAngle;
 	}
 
-	void AudioSource_SetConeOuterAngle(uint64_t entityID, const float* coneOuterAngle)
+	void AudioSourceComponent_SetConeOuterAngle(uint64_t entityID, const float* coneOuterAngle)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -882,14 +903,14 @@ namespace ArcEngine
 			component.Source->SetCone(component.Config.ConeInnerAngle, component.Config.ConeOuterAngle, component.Config.ConeOuterGain);
 	}
 
-	void AudioSource_GetConeOuterGain(uint64_t entityID, float* outConeOuterGain)
+	void AudioSourceComponent_GetConeOuterGain(uint64_t entityID, float* outConeOuterGain)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outConeOuterGain = GetEntity(entityID).GetComponent<AudioSourceComponent>().Config.ConeOuterGain;
 	}
 
-	void AudioSource_SetConeOuterGain(uint64_t entityID, const float* coneOuterGain)
+	void AudioSourceComponent_SetConeOuterGain(uint64_t entityID, const float* coneOuterGain)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -899,7 +920,7 @@ namespace ArcEngine
 			component.Source->SetCone(component.Config.ConeInnerAngle, component.Config.ConeOuterAngle, component.Config.ConeOuterGain);
 	}
 
-	void AudioSource_SetCone(uint64_t entityID, const float* coneInnerAngle, const float* coneOuterAngle, const float* coneOuterGain)
+	void AudioSourceComponent_SetCone(uint64_t entityID, const float* coneInnerAngle, const float* coneOuterAngle, const float* coneOuterGain)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -911,14 +932,14 @@ namespace ArcEngine
 			component.Source->SetCone(component.Config.ConeInnerAngle, component.Config.ConeOuterAngle, component.Config.ConeOuterGain);
 	}
 
-	void AudioSource_GetDopplerFactor(uint64_t entityID, float* outDopplerFactor)
+	void AudioSourceComponent_GetDopplerFactor(uint64_t entityID, float* outDopplerFactor)
 	{
 		ARC_PROFILE_SCOPE();
 
 		*outDopplerFactor = GetEntity(entityID).GetComponent<AudioSourceComponent>().Config.DopplerFactor;
 	}
 
-	void AudioSource_SetDopplerFactor(uint64_t entityID, const float* dopplerFactor)
+	void AudioSourceComponent_SetDopplerFactor(uint64_t entityID, const float* dopplerFactor)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -928,7 +949,7 @@ namespace ArcEngine
 			component.Source->SetDopplerFactor(*dopplerFactor);
 	}
 
-	void AudioSource_IsPlaying(uint64_t entityID, bool* outIsPlaying)
+	void AudioSourceComponent_IsPlaying(uint64_t entityID, bool* outIsPlaying)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -939,7 +960,7 @@ namespace ArcEngine
 			*outIsPlaying = false;
 	}
 
-	void AudioSource_Play(uint64_t entityID)
+	void AudioSourceComponent_Play(uint64_t entityID)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -948,7 +969,7 @@ namespace ArcEngine
 			component.Source->Play();
 	}
 
-	void AudioSource_Pause(uint64_t entityID)
+	void AudioSourceComponent_Pause(uint64_t entityID)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -957,7 +978,7 @@ namespace ArcEngine
 			component.Source->Pause();
 	}
 
-	void AudioSource_UnPause(uint64_t entityID)
+	void AudioSourceComponent_UnPause(uint64_t entityID)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -966,7 +987,7 @@ namespace ArcEngine
 			component.Source->UnPause();
 	}
 
-	void AudioSource_Stop(uint64_t entityID)
+	void AudioSourceComponent_Stop(uint64_t entityID)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -978,6 +999,8 @@ namespace ArcEngine
 	///////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
+
+#define ARC_ADD_INTERNAL_CALL(Name) mono_add_internal_call("ArcEngine.InternalCalls::" #Name, &Name)
 
 	void ScriptEngineRegistry::RegisterInternalCalls()
 	{
@@ -993,113 +1016,113 @@ namespace ArcEngine
 		///////////////////////////////////////////////////////////////
 		// Tag ////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////
-		mono_add_internal_call("ArcEngine.InternalCalls::TagComponent_GetTag", &GetTag);
-		mono_add_internal_call("ArcEngine.InternalCalls::TagComponent_SetTag", &SetTag);
+		ARC_ADD_INTERNAL_CALL(TagComponent_GetTag);
+		ARC_ADD_INTERNAL_CALL(TagComponent_SetTag);
 
 		///////////////////////////////////////////////////////////////
 		// Transform //////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////
-		mono_add_internal_call("ArcEngine.InternalCalls::TransformComponent_GetTransform", &GetTransform);
-		mono_add_internal_call("ArcEngine.InternalCalls::TransformComponent_SetTransform", &SetTransform);
+		ARC_ADD_INTERNAL_CALL(TransformComponent_GetTransform);
+		ARC_ADD_INTERNAL_CALL(TransformComponent_SetTransform);
 
 		///////////////////////////////////////////////////////////////
 		// Input //////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////
-		mono_add_internal_call("ArcEngine.InternalCalls::Input_IsKeyPressed", &Input::IsKeyPressed);
-		mono_add_internal_call("ArcEngine.InternalCalls::Input_IsMouseButtonPressed", &Input::IsMouseButtonPressed);
-		mono_add_internal_call("ArcEngine.InternalCalls::Input_GetMousePosition", &GetMousePosition);
+		ARC_ADD_INTERNAL_CALL(Input_IsKeyPressed);
+		ARC_ADD_INTERNAL_CALL(Input_IsMouseButtonPressed);
+		ARC_ADD_INTERNAL_CALL(Input_GetMousePosition);
 
 		///////////////////////////////////////////////////////////////
 		// Logging ////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////
-		mono_add_internal_call("ArcEngine.InternalCalls::Log_LogMessage", &LogMessage);
+		ARC_ADD_INTERNAL_CALL(Log_LogMessage);
 
 		///////////////////////////////////////////////////////////////
 		// SpriteRenderer /////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////
-		mono_add_internal_call("ArcEngine.InternalCalls::SpriteRendererComponent_GetColor", &SpriteRenderer_GetColor);
-		mono_add_internal_call("ArcEngine.InternalCalls::SpriteRendererComponent_SetColor", &SpriteRenderer_SetColor);
-		mono_add_internal_call("ArcEngine.InternalCalls::SpriteRendererComponent_GetTilingFactor", &SpriteRenderer_GetTilingFactor);
-		mono_add_internal_call("ArcEngine.InternalCalls::SpriteRendererComponent_SetTilingFactor", &SpriteRenderer_SetTilingFactor);
+		ARC_ADD_INTERNAL_CALL(SpriteRendererComponent_GetColor);
+		ARC_ADD_INTERNAL_CALL(SpriteRendererComponent_SetColor);
+		ARC_ADD_INTERNAL_CALL(SpriteRendererComponent_GetTilingFactor);
+		ARC_ADD_INTERNAL_CALL(SpriteRendererComponent_SetTilingFactor);
 
 		///////////////////////////////////////////////////////////////
 		// Rigidbody 2D ///////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_GetBodyType", &Rigidbody2D_GetBodyType);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_SetBodyType", &Rigidbody2D_SetBodyType);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_GetAutoMass", &Rigidbody2D_GetAutoMass);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_SetAutoMass", &Rigidbody2D_SetAutoMass);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_GetMass", &Rigidbody2D_GetMass);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_SetMass", &Rigidbody2D_SetMass);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_GetLinearDrag", &Rigidbody2D_GetLinearDrag);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_SetLinearDrag", &Rigidbody2D_SetLinearDrag);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_GetAngularDrag", &Rigidbody2D_GetAngularDrag);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_SetAngularDrag", &Rigidbody2D_SetAngularDrag);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_GetAllowSleep", &Rigidbody2D_GetAllowSleep);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_SetAllowSleep", &Rigidbody2D_SetAllowSleep);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_GetAwake", &Rigidbody2D_GetAwake);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_SetAwake", &Rigidbody2D_SetAwake);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_GetContinuous", &Rigidbody2D_GetContinuous);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_SetContinuous", &Rigidbody2D_SetContinuous);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_GetFreezeRotation", &Rigidbody2D_GetFreezeRotation);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_SetFreezeRotation", &Rigidbody2D_SetFreezeRotation);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_GetGravityScale", &Rigidbody2D_GetGravityScale);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_SetGravityScale", &Rigidbody2D_SetGravityScale);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_ApplyForceAtCenter", &Rigidbody2D_ApplyForceAtCenter);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_ApplyForce", &Rigidbody2D_ApplyForce);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_ApplyLinearImpulse", &Rigidbody2D_ApplyLinearImpulse);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_ApplyLinearImpulseAtCenter", &Rigidbody2D_ApplyLinearImpulseAtCenter);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_ApplyAngularImpulse", &Rigidbody2D_ApplyAngularImpulse);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_ApplyTorque", &Rigidbody2D_ApplyTorque);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_IsAwake", &Rigidbody2D_IsAwake);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_IsSleeping", &Rigidbody2D_IsSleeping);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_MovePosition", &Rigidbody2D_MovePosition);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_MoveRotation", &Rigidbody2D_MoveRotation);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_GetVelocity", &Rigidbody2D_GetVelocity);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_SetVelocity", &Rigidbody2D_SetVelocity);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_GetAngularVelocity", &Rigidbody2D_GetAngularVelocity);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_SetAngularVelocity", &Rigidbody2D_SetAngularVelocity);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_Sleep", &Rigidbody2D_Sleep);
-		mono_add_internal_call("ArcEngine.InternalCalls::Rigidbody2DComponent_WakeUp", &Rigidbody2D_WakeUp);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetBodyType);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_SetBodyType);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetAutoMass);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_SetAutoMass);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetMass);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_SetMass);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetLinearDrag);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_SetLinearDrag);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetAngularDrag);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_SetAngularDrag);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetAllowSleep);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_SetAllowSleep);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetAwake);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_SetAwake);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetContinuous);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_SetContinuous);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetFreezeRotation);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_SetFreezeRotation);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetGravityScale);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_SetGravityScale);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyForceAtCenter);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyForce);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyLinearImpulse);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyLinearImpulseAtCenter);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyAngularImpulse);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_ApplyTorque);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_IsAwake);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_IsSleeping);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_MovePosition);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_MoveRotation);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetVelocity);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_SetVelocity);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_GetAngularVelocity);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_SetAngularVelocity);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_Sleep);
+		ARC_ADD_INTERNAL_CALL(Rigidbody2DComponent_WakeUp);
 
 		///////////////////////////////////////////////////////////////
 		// Audio Source ///////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_GetVolume", &AudioSource_GetVolume);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_SetVolume", &AudioSource_SetVolume);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_GetPitch", &AudioSource_GetPitch);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_SetPitch", &AudioSource_SetPitch);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_GetPlayOnAwake", &AudioSource_GetPlayOnAwake);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_SetPlayOnAwake", &AudioSource_SetPlayOnAwake);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_GetLooping", &AudioSource_GetLooping);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_SetLooping", &AudioSource_SetLooping);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_GetSpatialization", &AudioSource_GetSpatialization);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_SetSpatialization", &AudioSource_SetSpatialization);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_GetAttenuationModel", &AudioSource_GetAttenuationModel);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_SetAttenuationModel", &AudioSource_SetAttenuationModel);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_GetRollOff", &AudioSource_GetRollOff);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_SetRollOff", &AudioSource_SetRollOff);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_GetMinGain", &AudioSource_GetMinGain);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_SetMinGain", &AudioSource_SetMinGain);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_GetMaxGain", &AudioSource_GetMaxGain);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_SetMaxGain", &AudioSource_SetMaxGain);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_GetMinDistance", &AudioSource_GetMinDistance);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_SetMinDistance", &AudioSource_SetMinDistance);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_GetMaxDistance", &AudioSource_GetMaxDistance);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_SetMaxDistance", &AudioSource_SetMaxDistance);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_GetConeInnerAngle", &AudioSource_GetConeInnerAngle);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_SetConeInnerAngle", &AudioSource_SetConeInnerAngle);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_GetConeOuterAngle", &AudioSource_GetConeOuterAngle);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_SetConeOuterAngle", &AudioSource_SetConeOuterAngle);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_GetConeOuterGain", &AudioSource_GetConeOuterGain);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_SetConeOuterGain", &AudioSource_SetConeOuterGain);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_SetCone", &AudioSource_SetCone);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_GetDopplerFactor", &AudioSource_GetDopplerFactor);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_SetDopplerFactor", &AudioSource_SetDopplerFactor);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_IsPlaying", &AudioSource_IsPlaying);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_Play", &AudioSource_Play);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_Pause", &AudioSource_Pause);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_UnPause", &AudioSource_UnPause);
-		mono_add_internal_call("ArcEngine.InternalCalls::AudioSource_Stop", &AudioSource_Stop);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_GetVolume);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_SetVolume);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_GetPitch);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_SetPitch);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_GetPlayOnAwake);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_SetPlayOnAwake);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_GetLooping);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_SetLooping);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_GetSpatialization);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_SetSpatialization);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_GetAttenuationModel);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_SetAttenuationModel);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_GetRollOff);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_SetRollOff);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_GetMinGain);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_SetMinGain);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_GetMaxGain);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_SetMaxGain);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_GetMinDistance);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_SetMinDistance);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_GetMaxDistance);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_SetMaxDistance);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_GetConeInnerAngle);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_SetConeInnerAngle);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_GetConeOuterAngle);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_SetConeOuterAngle);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_GetConeOuterGain);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_SetConeOuterGain);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_SetCone);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_GetDopplerFactor);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_SetDopplerFactor);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_IsPlaying);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_Play);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_Pause);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_UnPause);
+		ARC_ADD_INTERNAL_CALL(AudioSourceComponent_Stop);
 	}
 }

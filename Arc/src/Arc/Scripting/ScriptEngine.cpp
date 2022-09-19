@@ -664,7 +664,12 @@ namespace ArcEngine
 		m_EntityClass->InvokeMethod(m_Handle, m_OnSensorExit2DMethod, &params);
 	}
 
-	void ScriptInstance::GetFieldValueInternal(const eastl::string& name, void* value) const
+    const GCHandle ScriptInstance::GetHandle() const
+    {
+		return m_Handle;
+    }
+
+    void ScriptInstance::GetFieldValueInternal(const eastl::string& name, void* value) const
 	{
 		ARC_PROFILE_SCOPE();
 

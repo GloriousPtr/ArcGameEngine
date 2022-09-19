@@ -176,7 +176,7 @@ namespace ArcEngine
 			return GetFieldValueStringInternal(fieldName);
 		}
 
-		GCHandle GetHandle() { return m_Handle; }
+		const GCHandle GetHandle() const;
 
 	private:
 		void GetFieldValueInternal(const eastl::string& name, void* value) const;
