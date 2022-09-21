@@ -43,6 +43,7 @@ IncludeDir["EABase"] = "%{wks.location}/Arc/vendor/EABase/include/Common"
 IncludeDir["EASTL"] = "%{wks.location}/Arc/vendor/EASTL/include"
 IncludeDir["miniaudio"] = "%{wks.location}/Arc/vendor/miniaudio"
 IncludeDir["icons"] = "%{wks.location}/Arc/vendor/icons/include"
+IncludeDir["JoltPhysics"] = "%{wks.location}/Arc/vendor/JoltPhysics/JoltPhysics"
 
 LibDir = {}
 filter "configurations:Debug"
@@ -65,6 +66,7 @@ group "Dependencies"
 	include "Arc/vendor/optick"
 	include "Arc/vendor/box2d"
 	include "Arc/vendor/EASTL"
+	include "Arc/vendor/JoltPhysics"
 
 group ""
 

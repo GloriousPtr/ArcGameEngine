@@ -353,6 +353,60 @@ namespace ArcEngine
 		BuoyancyEffector2DComponent(const BuoyancyEffector2DComponent&) = default;
 	};
 
+
+
+
+	struct RigidbodyComponent
+	{
+		enum class BodyType { Static = 0, Kinematic, Dynamic };
+
+		BodyType Type = BodyType::Dynamic;
+		bool AutoMass = true;
+		float Mass = 1.0f;
+		float LinearDrag = 0.0f;
+		float AngularDrag = 0.05f;
+		bool AllowSleep = true;
+		bool Awake = true;
+		bool Continuous = false;
+		float GravityScale = 1.0f;
+
+		void* RuntimeBody = nullptr;
+
+		RigidbodyComponent() = default;
+		RigidbodyComponent(const RigidbodyComponent&) = default;
+	};
+
+	struct BoxColliderComponent
+	{
+		glm::vec3 Size = { 0.5f, 0.5f, 0.5f };
+		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
+		bool IsSensor = false;
+
+		float Density = 1.0f;
+		float Friction = 0.5f;
+		float Restitution = 0.0f;
+
+		BoxColliderComponent() = default;
+		BoxColliderComponent(const BoxColliderComponent&) = default;
+	};
+
+	struct SphereColliderComponent
+	{
+		float Radius = 0.5f;
+		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
+		bool IsSensor = false;
+
+		float Density = 1.0f;
+		float Friction = 0.5f;
+		float Restitution = 0.0f;
+
+		SphereColliderComponent() = default;
+		SphereColliderComponent(const SphereColliderComponent&) = default;
+	};
+
+
+
+
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Script ///////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -401,11 +455,17 @@ namespace ArcEngine
 		TransformComponent,
 		RelationshipComponent,
 		PrefabComponent,
-		SpriteRendererComponent,
 		CameraComponent,
+
+		// 2D
+		SpriteRendererComponent,
+
+		// 3D
 		MeshComponent,
 		SkyLightComponent,
 		LightComponent,
+
+		// 2D Physics
 		Rigidbody2DComponent,
 		BoxCollider2DComponent,
 		CircleCollider2DComponent,
@@ -415,7 +475,15 @@ namespace ArcEngine
 		SliderJoint2DComponent,
 		WheelJoint2DComponent,
 		BuoyancyEffector2DComponent,
+
+		// 3D Physics
+		RigidbodyComponent,
+		BoxColliderComponent,
+		SphereColliderComponent,
+
 		ScriptComponent,
+
+		// Audio
 		AudioSourceComponent,
 		AudioListenerComponent
 	>;

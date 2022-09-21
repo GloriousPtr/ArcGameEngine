@@ -55,6 +55,7 @@ project "Arc"
 		"%{IncludeDir.EASTL}",
 		"%{IncludeDir.miniaudio}",
 		"%{IncludeDir.icons}",
+		"%{IncludeDir.JoltPhysics}",
 	}
 
 	links
@@ -67,6 +68,7 @@ project "Arc"
 		"optick",
 		"box2d",
 		"EASTL",
+		"JoltPhysics",
 		"Arc-ScriptCore",
 		"opengl32.lib",
 

@@ -375,6 +375,9 @@ namespace ArcEngine
 					DrawAddComponent<SkyLightComponent>(entity, ICON_MDI_EARTH " Sky Light", "3D");
 					DrawAddComponent<LightComponent>(entity, ICON_MDI_LIGHTBULB " Light", "3D");
 					DrawAddComponent<MeshComponent>(entity, ICON_MDI_VECTOR_SQUARE " Mesh", "3D");
+					DrawAddComponent<RigidbodyComponent>(entity, ICON_MDI_SOCCER " Rigidbody", "3D");
+					DrawAddComponent<BoxColliderComponent>(entity, ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider", "3D");
+					DrawAddComponent<SphereColliderComponent>(entity, ICON_MDI_CIRCLE_OUTLINE " Sphere Collider", "3D");
 
 					DrawAddComponent<AudioSourceComponent>(entity, ICON_MDI_VOLUME_MEDIUM " Audio", "Audio");
 					DrawAddComponent<AudioListenerComponent>(entity, ICON_MDI_CIRCLE_SLICE_8 " Audio Listener", "Audio");
@@ -817,6 +820,72 @@ namespace ArcEngine
 			UI::Property("Flow Magnitude", component.FlowMagnitude);
 			UI::Property("Flow Angle", component.FlowAngle);
 			UI::EndProperties();
+		});
+
+		DrawComponent<RigidbodyComponent>(ICON_MDI_SOCCER " Rigidbody", entity, [](RigidbodyComponent& component)
+		{
+			UI::BeginProperties();
+
+			const char* bodyTypeStrings[] = { "Static", "Kinematic", "Dynamic" };
+			int bodyType = (int)component.Type;
+			if (UI::Property("Body Type", bodyType, bodyTypeStrings, 3))
+				component.Type = (RigidbodyComponent::BodyType)bodyType;
+
+			if (component.Type == RigidbodyComponent::BodyType::Dynamic)
+			{
+				UI::Property("Auto Mass", component.AutoMass);
+				if (!component.AutoMass)
+					UI::Property("Mass", component.Mass, 0.01f, 10000.0f);
+				UI::Property("Linear Drag", component.LinearDrag);
+				UI::Property("Angular Drag", component.AngularDrag);
+				UI::Property("Gravity Scale", component.GravityScale);
+				UI::Property("Allow Sleep", component.AllowSleep);
+				UI::Property("Awake", component.Awake);
+				UI::Property("Continuous", component.Continuous);
+
+				component.LinearDrag = glm::max(component.LinearDrag, 0.0f);
+				component.AngularDrag = glm::max(component.AngularDrag, 0.0f);
+			}
+
+			UI::EndProperties();
+		});
+
+		DrawComponent<BoxColliderComponent>(ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider", entity, [](BoxColliderComponent& component)
+		{
+			UI::BeginProperties();
+			UI::Property("Size", component.Size);
+			UI::Property("Offset", component.Offset);
+			UI::Property("Is Sensor", component.IsSensor);
+			UI::EndProperties();
+
+			if (!component.IsSensor)
+			{
+				ImGui::Spacing();
+				UI::BeginProperties();
+				UI::Property("Density", component.Density);
+				UI::Property("Friction", component.Friction);
+				UI::Property("Restitution", component.Restitution);
+				UI::EndProperties();
+			}
+		});
+
+		DrawComponent<SphereColliderComponent>(ICON_MDI_CIRCLE_OUTLINE " Sphere Collider", entity, [](SphereColliderComponent& component)
+		{
+			UI::BeginProperties();
+			UI::Property("Radius", component.Radius);
+			UI::Property("Offset", component.Offset);
+			UI::Property("Is Sensor", component.IsSensor);
+			UI::EndProperties();
+
+			if (!component.IsSensor)
+			{
+				ImGui::Spacing();
+				UI::BeginProperties();
+				UI::Property("Density", component.Density);
+				UI::Property("Friction", component.Friction);
+				UI::Property("Restitution", component.Restitution);
+				UI::EndProperties();
+			}
 		});
 
 		DrawComponent<ScriptComponent>(ICON_MDI_POUND_BOX " Script", entity, [this, &entity, &framePadding](ScriptComponent& component)
