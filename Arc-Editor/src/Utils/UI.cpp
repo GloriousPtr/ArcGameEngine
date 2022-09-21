@@ -476,7 +476,7 @@ namespace ArcEngine
 		}
 		if (ImGui::BeginDragDropTarget())
 		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity"))
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 			{
 				const char* path = (const char*)payload->Data;
 				texture = AssetManager::GetTextureCubemap(path);
