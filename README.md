@@ -1,10 +1,10 @@
 # Arc Game Engine
 
 [![Build Status](https://github.com/MohitSethi99/ArcEngine/workflows/build/badge.svg)](https://github.com/MohitSethi99/ArcEngine/actions?workflow=build)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcEngine&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcEngine)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcEngine&metric=bugs)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcEngine)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcEngine&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcEngine)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcEngine&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcEngine)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcGameEngine&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcGameEngine)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcGameEngine&metric=bugs)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcGameEngine)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcGameEngine&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcGameEngine)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcGameEngine&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcGameEngine)
 
 ![Platform](https://img.shields.io/badge/platform-Windows-blue?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/MohitSethi99/ArcEngine?color=blue&style=flat-square)
