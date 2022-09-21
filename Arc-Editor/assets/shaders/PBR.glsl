@@ -22,7 +22,6 @@ uniform mat4 u_Model;
 
 struct VertexOutput
 {
-	vec3 WorldPosition;
 	vec3 Normal;
 	vec2 TexCoord;
 	mat3 WorldNormals;
@@ -34,7 +33,6 @@ layout(location = 0) out VertexOutput Output;
 
 void main()
 {
-	Output.WorldPosition = vec3(u_Model * vec4(a_Position, 1.0));
     Output.TexCoord = a_TexCoord;
     Output.Normal = mat3(u_Model) * a_Normal;
 	Output.WorldNormals = mat3(u_Model) * mat3(a_Tangent, a_Bitangent, a_Normal);
@@ -69,7 +67,6 @@ uniform Properties u_Material;
 
 struct VertexOutput
 {
-	vec3 WorldPosition;
 	vec3 Normal;
 	vec2 TexCoord;
 	mat3 WorldNormals;
