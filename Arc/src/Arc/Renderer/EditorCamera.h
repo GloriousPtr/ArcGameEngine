@@ -14,7 +14,7 @@ namespace ArcEngine
 		EditorCamera() = default;
 		EditorCamera(float fov, float aspectRatio, float nearClip, float farClip);
 		
-		void OnUpdate(Timestep timestep);
+		void OnUpdate([[maybe_unused]] Timestep timestep);
 
 		void SetViewportSize(float width, float height);
 		void SetPosition(const glm::vec3& position) { m_Position = position; }

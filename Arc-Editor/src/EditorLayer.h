@@ -22,9 +22,9 @@ namespace ArcEngine
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
 
-		virtual void OnUpdate(Timestep ts) override;
+		virtual void OnUpdate([[maybe_unused]] Timestep ts) override;
 		virtual void OnImGuiRender() override;
-		virtual void OnEvent(Event& e) override;
+		virtual void OnEvent([[maybe_unused]] Event& e) override;
 
 		void SetContext(EditorContextType type, const void* data, size_t size) { m_SelectedContext.Set(type, data, size); }
 		void ResetContext() { m_SelectedContext.Reset(); }
@@ -39,9 +39,9 @@ namespace ArcEngine
 		void HandleResize();
 		void BeginDockspace(const char* name);
 		void EndDockspace() const;
-		bool OnKeyPressed(const KeyPressedEvent& e);
-		bool OnMouseButtonPressed(const MouseButtonPressedEvent& e) const;
-		bool OnMouseButtonReleased(const MouseButtonReleasedEvent& e) const;
+		bool OnKeyPressed([[maybe_unused]] const KeyPressedEvent& e);
+		bool OnMouseButtonPressed([[maybe_unused]] const MouseButtonPressedEvent& e) const;
+		bool OnMouseButtonReleased([[maybe_unused]] const MouseButtonReleasedEvent& e) const;
 
 		void NewScene();
 		void OpenScene();

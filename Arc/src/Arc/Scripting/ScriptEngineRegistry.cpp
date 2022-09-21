@@ -23,7 +23,7 @@ namespace ArcEngine
 	{
 		([]()
 		{
-			static size_t n = strlen("struct ArcEngine::");
+			constexpr size_t n = eastl::string_view("struct ArcEngine::").size();
 			const char* componentName = n + typeid(Component).name();
 			std::string name = std::string("ArcEngine.") + componentName;
 			MonoType* type = mono_reflection_type_from_name(&name[0], ScriptEngine::GetCoreAssemblyImage());

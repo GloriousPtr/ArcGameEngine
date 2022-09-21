@@ -20,7 +20,7 @@ namespace ArcEngine
 		BasePanel& operator=(const BasePanel& other) = delete;
 		BasePanel& operator=(BasePanel&& other) = delete;
 
-		virtual void OnUpdate(Timestep ts) { /* Not pure virtual */ }
+		virtual void OnUpdate([[maybe_unused]] Timestep ts) { /* Not pure virtual */ }
 		virtual void OnImGuiRender() = 0;
 		
 		const char* GetName() const { return m_Name.c_str(); }

@@ -206,7 +206,7 @@ namespace ArcEngine
 		UpdateDirectoryEntries(s_AssetPath);
 	}
 
-	void AssetPanel::OnUpdate(Timestep ts)
+	void AssetPanel::OnUpdate([[maybe_unused]] Timestep ts)
 	{
 		ARC_PROFILE_SCOPE();
 

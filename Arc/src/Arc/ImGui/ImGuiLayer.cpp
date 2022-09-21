@@ -61,7 +61,7 @@ namespace ArcEngine
 		ImGui::DestroyContext();
 	}
 
-	void ImGuiLayer::OnEvent(Event& e)
+	void ImGuiLayer::OnEvent([[maybe_unused]] Event& e)
 	{
 		if(m_BlockEvents)
 		{

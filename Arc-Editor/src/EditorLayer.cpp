@@ -57,7 +57,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 	}
 
-	void EditorLayer::OnUpdate(Timestep ts)
+	void EditorLayer::OnUpdate([[maybe_unused]] Timestep ts)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -438,7 +438,7 @@ namespace ArcEngine
 			m_WindowDragging = false;
 	}
 
-	void EditorLayer::OnEvent(Event& e)
+	void EditorLayer::OnEvent([[maybe_unused]] Event& e)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -591,7 +591,7 @@ namespace ArcEngine
 		ImGui::End();
 	}
 
-	bool EditorLayer::OnKeyPressed(const KeyPressedEvent& e)
+	bool EditorLayer::OnKeyPressed([[maybe_unused]] const KeyPressedEvent& e)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -652,12 +652,12 @@ namespace ArcEngine
 		return false;
 	}
 
-	bool EditorLayer::OnMouseButtonPressed(const MouseButtonPressedEvent& e) const
+	bool EditorLayer::OnMouseButtonPressed([[maybe_unused]] const MouseButtonPressedEvent& e) const
 	{
 		return false;
 	}
 
-	bool EditorLayer::OnMouseButtonReleased(const MouseButtonReleasedEvent& e) const
+	bool EditorLayer::OnMouseButtonReleased([[maybe_unused]] const MouseButtonReleasedEvent& e) const
 	{
 		return false;
 	}

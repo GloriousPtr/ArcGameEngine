@@ -11,7 +11,7 @@ namespace ArcEngine
 	{
 	}
 
-	void EditorCamera::OnUpdate(Timestep timestep)
+	void EditorCamera::OnUpdate([[maybe_unused]] Timestep timestep)
 	{
 		ARC_PROFILE_SCOPE();
 

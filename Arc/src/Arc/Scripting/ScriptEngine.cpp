@@ -160,7 +160,7 @@ namespace ArcEngine
 
 		//Compile app assembly
 		{
-			const char* command = "dotnet msbuild ../Sandbox/Sandbox.sln"
+			constexpr const char* command = "dotnet msbuild ../Sandbox/Sandbox.sln"
 				" -nologo"																	// no microsoft branding in console
 				" -noconlog"																// no console logs
 				//" -t:rebuild"																// rebuild the project
@@ -181,7 +181,7 @@ namespace ArcEngine
 					{
 						if (buffer)
 						{
-							size_t newLine = strlen(buffer) - 1;
+							size_t newLine = eastl::string_view(buffer).size() - 1;
 							buffer[newLine] = '\0';
 							ARC_APP_ERROR(buffer);
 						}
@@ -206,7 +206,7 @@ namespace ArcEngine
 					{
 						if (buffer)
 						{
-							size_t newLine = strlen(buffer) - 1;
+							size_t newLine = eastl::string_view(buffer).size() - 1;
 							buffer[newLine] = '\0';
 							ARC_APP_WARN(buffer);
 						}

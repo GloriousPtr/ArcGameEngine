@@ -38,8 +38,8 @@ namespace ArcEngine
 		Entity GetEntity(UUID uuid);
 		bool IsRunning() const { return m_IsRunning; }
 
-		void OnUpdateEditor(Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera);
-		void OnUpdateRuntime(Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera = nullptr);
+		void OnUpdateEditor([[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera);
+		void OnUpdateRuntime([[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera = nullptr);
 		void OnRender(const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData);
 		void OnRuntimeStart();
 		void OnRuntimeStop();

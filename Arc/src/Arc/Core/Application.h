@@ -38,7 +38,7 @@ namespace ArcEngine
 		
 	private:
 		void Run();
-		bool OnWindowClose(const WindowCloseEvent& e);
+		bool OnWindowClose([[maybe_unused]] const WindowCloseEvent& e);
 		bool OnWindowResize(const WindowResizeEvent& e);
 		
 		Scope<Window> m_Window;

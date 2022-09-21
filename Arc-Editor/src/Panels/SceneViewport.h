@@ -18,7 +18,7 @@ namespace ArcEngine
 		SceneViewport& operator=(const SceneViewport& other) = delete;
 		SceneViewport& operator=(SceneViewport&& other) = delete;
 
-		virtual void OnUpdate(Timestep timestep) override;
+		virtual void OnUpdate([[maybe_unused]] Timestep timestep) override;
 		virtual void OnImGuiRender() override;
 
 		void OnOverlayRender() const;

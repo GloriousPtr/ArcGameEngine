@@ -14,8 +14,7 @@ namespace ArcEngine
 		if (OnBegin())
 		{
 			static const char* btnTitle = "Reload Assemblies";
-			static const float padding = ImGui::GetStyle().WindowPadding.x;
-			ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(btnTitle).x - padding);
+			ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(btnTitle).x - ImGui::GetStyle().WindowPadding.x);
 
 			if (ImGui::Button(btnTitle))
 				ScriptEngine::ReloadAppDomain();

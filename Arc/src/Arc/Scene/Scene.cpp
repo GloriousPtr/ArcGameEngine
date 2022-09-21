@@ -188,7 +188,7 @@ namespace ArcEngine
 			/* Handle post solve */
 		}
 
-		void OnUpdate(Timestep ts)
+		void OnUpdate([[maybe_unused]] Timestep ts)
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -649,7 +649,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Scene::OnUpdateEditor(Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera)
+	void Scene::OnUpdateEditor([[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera)
 	{
 		ARC_PROFILE_SCOPE();
 		
@@ -662,7 +662,7 @@ namespace ArcEngine
 		OnRender(renderGraphData, cameraData);
 	}
 
-	void Scene::OnUpdateRuntime(Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera)
+	void Scene::OnUpdateRuntime([[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera)
 	{
 		ARC_PROFILE_SCOPE();
 
