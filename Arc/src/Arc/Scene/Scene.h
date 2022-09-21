@@ -14,6 +14,9 @@ namespace ArcEngine
 {
 	class ContactListener;
 	class Entity;
+	struct RigidbodyComponent;
+	struct BoxColliderComponent;
+	struct SphereColliderComponent;
 	struct Rigidbody2DComponent;
 	struct BoxCollider2DComponent;
 	struct CircleCollider2DComponent;
@@ -56,6 +59,9 @@ namespace ArcEngine
 		}
 
 	private:
+		void CreateRigidbody(Entity entity, RigidbodyComponent& component);
+		void CreateBoxCollider(Entity entity, RigidbodyComponent& rb, BoxColliderComponent& bc);
+		void CreateSphereCollider(Entity entity, RigidbodyComponent& rb, SphereColliderComponent& sc);
 		void CreateRigidbody2D(Entity entity, Rigidbody2DComponent& component);
 		void CreateBoxCollider2D(Entity entity, BoxCollider2DComponent& component);
 		void CreateCircleCollider2D(Entity entity, CircleCollider2DComponent& component);

@@ -479,6 +479,57 @@ namespace ArcEngine
 			out << YAML::EndMap; // BuoyancyEffector2DComponent
 		}
 
+		if (entity.HasComponent<RigidbodyComponent>())
+		{
+			out << YAML::Key << "RigidbodyComponent";
+			out << YAML::BeginMap; // RigidbodyComponent
+
+			const auto& rb = entity.GetComponent<RigidbodyComponent>();
+			out << YAML::Key << "Type" << YAML::Value << (int)rb.Type;
+			out << YAML::Key << "AutoMass" << YAML::Value << rb.AutoMass;
+			out << YAML::Key << "Mass" << YAML::Value << rb.Mass;
+			out << YAML::Key << "LinearDrag" << YAML::Value << rb.LinearDrag;
+			out << YAML::Key << "AngularDrag" << YAML::Value << rb.AngularDrag;
+			out << YAML::Key << "AllowSleep" << YAML::Value << rb.AllowSleep;
+			out << YAML::Key << "Awake" << YAML::Value << rb.Awake;
+			out << YAML::Key << "Continuous" << YAML::Value << rb.Continuous;
+			out << YAML::Key << "GravityScale" << YAML::Value << rb.GravityScale;
+
+			out << YAML::EndMap; // RigidbodyComponent
+		}
+
+		if (entity.HasComponent<BoxColliderComponent>())
+		{
+			out << YAML::Key << "BoxColliderComponent";
+			out << YAML::BeginMap; // BoxColliderComponent
+
+			const auto& bc = entity.GetComponent<BoxColliderComponent>();
+			out << YAML::Key << "Size" << YAML::Value << bc.Size;
+			out << YAML::Key << "Offset" << YAML::Value << bc.Offset;
+			out << YAML::Key << "IsSensor" << YAML::Value << bc.IsSensor;
+			out << YAML::Key << "Density" << YAML::Value << bc.Density;
+			out << YAML::Key << "Friction" << YAML::Value << bc.Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << bc.Restitution;
+
+			out << YAML::EndMap; // BoxColliderComponent
+		}
+
+		if (entity.HasComponent<SphereColliderComponent>())
+		{
+			out << YAML::Key << "SphereColliderComponent";
+			out << YAML::BeginMap; // SphereColliderComponent
+
+			const auto& sc = entity.GetComponent<SphereColliderComponent>();
+			out << YAML::Key << "Radius" << YAML::Value << sc.Radius;
+			out << YAML::Key << "Offset" << YAML::Value << sc.Offset;
+			out << YAML::Key << "IsSensor" << YAML::Value << sc.IsSensor;
+			out << YAML::Key << "Density" << YAML::Value << sc.Density;
+			out << YAML::Key << "Friction" << YAML::Value << sc.Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << sc.Restitution;
+
+			out << YAML::EndMap; // SphereColliderComponent
+		}
+
 		if (entity.HasComponent<MeshComponent>())
 		{
 			out << YAML::Key << "MeshComponent";
@@ -875,6 +926,45 @@ namespace ArcEngine
 			TrySet(src.FlipGravity, buoyancyEffector2DComponent["FlipGravity"]);
 			TrySet(src.FlowMagnitude, buoyancyEffector2DComponent["FlowMagnitude"]);
 			TrySet(src.FlowAngle, buoyancyEffector2DComponent["FlowAngle"]);
+		}
+
+		auto rbComponent = entity["RigidbodyComponent"];
+		if (rbComponent)
+		{
+			auto& src = deserializedEntity.AddComponent<RigidbodyComponent>();
+			TrySetEnum(src.Type, rbComponent["Type"]);
+			TrySet(src.AutoMass, rbComponent["AutoMass"]);
+			TrySet(src.Mass, rbComponent["Mass"]);
+			TrySet(src.LinearDrag, rbComponent["LinearDrag"]);
+			TrySet(src.AngularDrag, rbComponent["AngularDrag"]);
+			TrySet(src.AllowSleep, rbComponent["AllowSleep"]);
+			TrySet(src.Awake, rbComponent["Awake"]);
+			TrySet(src.Continuous, rbComponent["Continuous"]);
+			TrySet(src.GravityScale, rbComponent["GravityScale"]);
+		}
+
+		auto bcComponent = entity["BoxColliderComponent"];
+		if (bcComponent)
+		{
+			auto& src = deserializedEntity.AddComponent<BoxColliderComponent>();
+			TrySet(src.Size, bcComponent["Size"]);
+			TrySet(src.Offset, bcComponent["Offset"]);
+			TrySet(src.IsSensor, bcComponent["IsSensor"]);
+			TrySet(src.Density, bcComponent["Density"]);
+			TrySet(src.Friction, bcComponent["Friction"]);
+			TrySet(src.Restitution, bcComponent["Restitution"]);
+		}
+
+		auto scComponent = entity["SphereColliderComponent"];
+		if (scComponent)
+		{
+			auto& src = deserializedEntity.AddComponent<SphereColliderComponent>();
+			TrySet(src.Radius, scComponent["Radius"]);
+			TrySet(src.Offset, scComponent["Offset"]);
+			TrySet(src.IsSensor, scComponent["IsSensor"]);
+			TrySet(src.Density, scComponent["Density"]);
+			TrySet(src.Friction, scComponent["Friction"]);
+			TrySet(src.Restitution, scComponent["Restitution"]);
 		}
 
 		auto meshComponent = entity["MeshComponent"];
