@@ -525,7 +525,6 @@ namespace ArcEngine
 				if (grid)
 				{
 					cursorPos = ImGui::GetCursorPos();
-					ImVec2 textSize = ImGui::CalcTextSize(filename);
 
 					bool highlight = false;
 					const EditorContext& context = EditorLayer::GetInstance()->GetContext();

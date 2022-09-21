@@ -326,7 +326,6 @@ namespace ArcEngine
 		headerRegion.y = ImGui::GetFrameHeight();
 		ImGui::BeginChild("PropertiesHeader", headerRegion, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 		{
-
 			float addButtonSizeX = UI::GetIconButtonSize("  " ICON_MDI_PLUS, "Add  ").x;
 			ImVec2 lockButtonSize = ImVec2(headerRegion.y * 1.5f, headerRegion.y);
 			float tagWidth = headerRegion.x - ((addButtonSizeX + framePadding.x * 2.0f) + (lockButtonSize.x + framePadding.x * 2.0f));

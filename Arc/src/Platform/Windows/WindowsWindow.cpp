@@ -250,7 +250,7 @@ namespace ArcEngine
 			}
 		}
 
-		if (m_MaximizedMonitor == monitorIndex && monitorIndex < 0)
+		if (m_MaximizedMonitor == monitorIndex || monitorIndex < 0)
 			return;
 
 		glfwSetWindowPos(m_Window, x, y);
