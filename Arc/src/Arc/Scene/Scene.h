@@ -24,8 +24,8 @@ namespace ArcEngine
 	class Scene
 	{
 	public:
-		uint32_t VelocityIterations = 8;
-		uint32_t PositionIterations = 3;
+		uint32_t VelocityIterations = 6;
+		uint32_t PositionIterations = 2;
 
 	public:
 		Scene() = default;

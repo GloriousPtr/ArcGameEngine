@@ -749,10 +749,12 @@ namespace ArcEngine
 		/////////////////////////////////////////////////////////////////////
 		// Physics //////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////
+		constexpr float physicsStepRate = 60.0f;
+		constexpr float physicsTs = 1.0f / physicsStepRate;
 		{
 			ARC_PROFILE_CATEGORY("Physics 3D", Profile::Category::Physics);
 
-			Physics3D::Step(ts);
+			Physics3D::Step(physicsTs);
 
 			auto* bodyInterface = Physics3D::GetBodyInterface();
 			auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
@@ -773,8 +775,8 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Physics 2D", Profile::Category::Physics);
 			
-			m_ContactListener->OnUpdate(ts);
-			m_PhysicsWorld2D->Step(ts, VelocityIterations, PositionIterations);
+			m_ContactListener->OnUpdate(physicsTs);
+			m_PhysicsWorld2D->Step(physicsTs, VelocityIterations, PositionIterations);
 
 			auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
 			for (auto e : view)
@@ -790,7 +792,6 @@ namespace ArcEngine
 			/////////////////////////////////////////////////////////////////////
 			// Joints (2D) //////////////////////////////////////////////////////
 			/////////////////////////////////////////////////////////////////////
-			float invdt = 1.0f / ts;
 			auto distanceJointView = m_Registry.view<DistanceJoint2DComponent>();
 			for (auto e : distanceJointView)
 			{
@@ -799,7 +800,7 @@ namespace ArcEngine
 				{
 					b2Joint* j = (b2Joint*)joint.RuntimeJoint;
 					
-					if (j->GetReactionForce(invdt).LengthSquared() > joint.BreakForce * joint.BreakForce)
+					if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce)
 					{
 						m_PhysicsWorld2D->DestroyJoint(j);
 						joint.RuntimeJoint = nullptr;
@@ -815,7 +816,7 @@ namespace ArcEngine
 				{
 					b2Joint* j = (b2Joint*)joint.RuntimeJoint;
 
-					if (j->GetReactionForce(invdt).LengthSquared() > joint.BreakForce * joint.BreakForce)
+					if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce)
 					{
 						m_PhysicsWorld2D->DestroyJoint(j);
 						joint.RuntimeJoint = nullptr;
@@ -831,8 +832,8 @@ namespace ArcEngine
 				{
 					b2Joint* j = (b2Joint*)joint.RuntimeJoint;
 
-					if (j->GetReactionForce(invdt).LengthSquared() > joint.BreakForce * joint.BreakForce
-						|| j->GetReactionTorque(invdt) > joint.BreakTorque)
+					if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce
+						|| j->GetReactionTorque(physicsStepRate) > joint.BreakTorque)
 					{
 						m_PhysicsWorld2D->DestroyJoint(j);
 						joint.RuntimeJoint = nullptr;
@@ -848,8 +849,8 @@ namespace ArcEngine
 				{
 					b2Joint* j = (b2Joint*)joint.RuntimeJoint;
 
-					if (j->GetReactionForce(invdt).LengthSquared() > joint.BreakForce * joint.BreakForce
-						|| j->GetReactionTorque(invdt) > joint.BreakTorque)
+					if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce
+						|| j->GetReactionTorque(physicsStepRate) > joint.BreakTorque)
 					{
 						m_PhysicsWorld2D->DestroyJoint(j);
 						joint.RuntimeJoint = nullptr;
@@ -865,8 +866,8 @@ namespace ArcEngine
 				{
 					b2Joint* j = (b2Joint*)joint.RuntimeJoint;
 
-					if (j->GetReactionForce(invdt).LengthSquared() > joint.BreakForce * joint.BreakForce
-						|| j->GetReactionTorque(invdt) > joint.BreakTorque)
+					if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce
+						|| j->GetReactionTorque(physicsStepRate) > joint.BreakTorque)
 					{
 						m_PhysicsWorld2D->DestroyJoint(j);
 						joint.RuntimeJoint = nullptr;
