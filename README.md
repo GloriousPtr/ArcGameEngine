@@ -31,17 +31,18 @@ git clone --recursive https://github.com/MohitSethi99/ArcEngine.git
 
 Right now, Arc Game Engine is very bare-bones. Its most remarkable features are:
 
-| Feature               | Description                                                              | Status   |
-| -------               | -----------                                                              | ------   |
-| **Scene system**      | Scene-based entity management. Scene serialization with YAML.            | Done ✔️ |
-| **ECS support**       | Entity Component System approach through *entt*.                         | Done ✔️ |
-| **2D Renderer**       | 2D batch renderer supporting OpenGL.                                     | Done ✔️ |
-| **3D Renderer**       | Basic 3D renderer with lighting, IBL and PBR workflow supporting OpenGL. | Done ✔️ |
-| **ImGui support**     | Basic game editor and in-game debug UI using *dear imgui*.               | Done ✔️ |
-| **Shadow Support**    | Soft and Hard shadow support in OpenGL 3D Renderer.                      | Done ✔️ |
-| **2D Physics**        | Basic 2D Physics using *Box2D* with Rigidbody, Box and Circle Collider.	 | Done ✔️ |
-| **Scripting**         | Basic scripting in C# using *mono*.                                      | Done ✔️ |
-| **Audio**             | Basic Sound API with spatialization through *miniaudio*.                 | Done ✔️ |
+| Feature               | Description                                                                           | Status   |
+| -------               | -----------                                                                           | ------   |
+| **Scene system**      | Scene-based entity management. Scene serialization with YAML.                         | Done ✔️ |
+| **ECS support**       | Entity Component System approach through *entt*.                                      | Done ✔️ |
+| **2D Renderer**       | 2D batch renderer supporting OpenGL.                                                  | Done ✔️ |
+| **3D Renderer**       | Basic 3D renderer with lighting, IBL and PBR workflow supporting OpenGL.              | Done ✔️ |
+| **ImGui support**     | Basic game editor and in-game debug UI using *dear imgui*.                            | Done ✔️ |
+| **Shadow Support**    | Soft and Hard shadow support in OpenGL 3D Renderer.                                   | Done ✔️ |
+| **2D Physics**        | 2D Physics using *Box2D* with Rigidbody, Box and Circle Colliders and joints.         | Done ✔️ |
+| **3D Physics**        | Basic 3D Physics using *Jolt Physics* with Rigidbody, Box and Sphere Colliders.   	  | Done ✔️ |
+| **Scripting**         | Basic scripting in C# using *mono*.                                                   | Done ✔️ |
+| **Audio**             | Basic Sound API with spatialization through *miniaudio*.                              | Done ✔️ |
 
 ## Planned Features
 
@@ -49,8 +50,8 @@ Right now, Arc Game Engine is very bare-bones. Its most remarkable features are:
 | -------                | -----------                                               | ------   |
 | **C# API**             | C# API for all the components.                            | WIP 💻  |
 | **Extended 2D Physics**| Extend 2D physics to support more collider types and API. | WIP 💻  |
-| **3D Physics**         | Jolt Physics support for 3D physics.                      | TODO 📋 |
-| **Font**               | Extend the Renderer capabilities so it can draw text.     | TODO 📋 |
+| **Extended 3D Physics**| Extend 3D physics to support more collider types and API. | WIP 💻  |
+| **Font**               | Extend the Renderer capabilities so it can draw text.     | WIP 💻  |
 | **Advanced Audio**     | Advanced Sound API with effects.                          | TODO 📋 |
 | **Asset manager**      | Basic asset handling API.                                 | TODO 📋 |
 | **Direct3D**           | Extend the Renderer to support D3D12.                     | TODO 📋 |
@@ -69,6 +70,7 @@ Arc Game Engine has the following dependencies:
   - [GLFW](https://github.com/glfw/glfw) for OpenGL, OpenGL ES, window creation and input handling. More info at its [website](https://www.glfw.org/).
   - [glm](https://github.com/g-truc//glm) as math(s) library.
   - [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo) for in editor transformation gizmos.
+  - [Jolt Physics](https://github.com/jrouwe/JoltPhysics) for 3D physics.
   - [miniaudio](https://github.com/mackron/miniaudio) for audio.
   - [mono](https://github.com/mono/mono) for C# scripting.
   - [optick](https://github.com/bombomby/optick) for profiling.
