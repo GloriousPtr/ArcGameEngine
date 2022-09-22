@@ -54,15 +54,26 @@ namespace ArcEngine
 					Entity parent = m_Context->CreateEntity(mesh->GetName());
 
 					size_t meshCount = mesh->GetSubmeshCount();
-					for (size_t i = 0; i < meshCount; i++)
+					if (meshCount == 1)
 					{
-						const auto& submesh = mesh->GetSubmesh(i);
-						Entity entity = m_Context->CreateEntity(submesh.Name);
-						entity.SetParent(parent);
-						auto& meshComponent = entity.AddComponent<MeshComponent>();
+						const auto& submesh = mesh->GetSubmesh(0);
+						auto& meshComponent = parent.AddComponent<MeshComponent>();
 						meshComponent.Filepath = path;
 						meshComponent.MeshGeometry = mesh;
-						meshComponent.SubmeshIndex = i;
+						meshComponent.SubmeshIndex = 0;
+					}
+					else
+					{
+						for (size_t i = 0; i < meshCount; i++)
+						{
+							const auto& submesh = mesh->GetSubmesh(i);
+							Entity entity = m_Context->CreateEntity(submesh.Name);
+							entity.SetParent(parent);
+							auto& meshComponent = entity.AddComponent<MeshComponent>();
+							meshComponent.Filepath = path;
+							meshComponent.MeshGeometry = mesh;
+							meshComponent.SubmeshIndex = i;
+						}
 					}
 				}
 			}
