@@ -21,6 +21,12 @@ project "JoltPhysics"
 	includedirs
 	{
 		"JoltPhysics",
+		"%{IncludeDir.optick}"
+	}
+
+	links
+	{
+		"optick"
 	}
 
 	filter "system:windows"

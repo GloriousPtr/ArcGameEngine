@@ -25,6 +25,3 @@
 [submodule "Arc/vendor/GLFW"]
 	path = Arc/vendor/GLFW
 	url = https://github.com/MohitSethi99/glfw.git
-[submodule "Arc/vendor/JoltPhysics/JoltPhysics"]
-	path = Arc/vendor/JoltPhysics/JoltPhysics
-	url = https://github.com/jrouwe/JoltPhysics.git
