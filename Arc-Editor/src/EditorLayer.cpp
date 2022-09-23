@@ -595,26 +595,118 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		// Shortcuts
+		/*
+		HotKeys:
+			Entity:
+				Ctrl+Shift+N		New empty entity
+				Alt+Shift+N			New empty child to selected entity
+
+			Edit:
+				Ctrl+D				Duplicate
+				Del					Delete
+				Ctrl+P				Play
+				Ctrl+Shift+P		Pause
+				Ctrl+Alt+P			Step
+
+			Scene:
+				Ctrl+N				Load new scene
+				Ctrl+O				Open scene
+				Ctrl+S				Save current scene
+				Ctrl+Shift+S		Save current scene as
+		*/
+
+		bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
+		bool ctrl = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
+		bool alt = Input::IsKeyPressed(Key::LeftAlt) || Input::IsKeyPressed(Key::RightAlt);
+
+		switch (e.GetKeyCode())
+		{
+			case Key::D:
+			{
+				if (ctrl && m_SelectedContext.Type == EditorContextType::Entity)
+				{
+					m_ActiveScene->Duplicate(*((Entity*)m_SelectedContext.Data));
+					return true;
+				}
+				break;
+			}
+			case Key::P:
+			{
+				if (ctrl && alt && m_SceneState == SceneState::Pause)
+				{
+					OnSceneUnpause();
+					m_SceneState = SceneState::Step;
+					return true;
+				}
+				break;
+			}
+		}
+
 		if (e.GetRepeatCount() > 0)
 			return false;
 
-		bool control = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
-		bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
 		switch (e.GetKeyCode())
 		{
+			case Key::P:
+			{
+				if (ctrl && shift)
+				{
+					if (m_SceneState == SceneState::Edit)
+					{
+						OnScenePlay();
+						OnScenePause();
+						return true;
+					}
+					if (m_SceneState == SceneState::Play)
+					{
+						OnScenePause();
+						return true;
+					}
+					if (m_SceneState == SceneState::Pause)
+					{
+						OnSceneUnpause();
+						return true;
+					}
+				}
+				if (ctrl)
+				{
+					if (m_SceneState == SceneState::Edit)
+					{
+						OnScenePlay();
+						return true;
+					}
+					
+					OnSceneStop();
+					return true;
+				}
+				break;
+			}
 			case Key::N:
 			{
-				if (control)
+				if (ctrl && shift)
+				{
+					Entity entity = m_ActiveScene->CreateEntity();
+					m_SelectedContext.Set(EditorContextType::Entity, &entity, sizeof(Entity));
+					return true;
+				}
+				if (ctrl)
 				{
 					NewScene();
+					return true;
+				}
+				if (alt && shift && m_SelectedContext.Type == EditorContextType::Entity)
+				{
+					Entity selectedEntity = *((Entity*)m_SelectedContext.Data);
+					Entity child = m_ActiveScene->CreateEntity();
+					child.SetParent(selectedEntity);
+					m_SelectedContext.Set(EditorContextType::Entity, &child, sizeof(Entity));
 					return true;
 				}
 				break;
 			}
 			case Key::O:
 			{
-				if (control)
+				if (ctrl)
 				{
 					OpenScene();
 					return true;
@@ -623,24 +715,24 @@ namespace ArcEngine
 			}
 			case Key::S:
 			{
-				if (control && shift)
+				if (ctrl && shift)
 				{
 					SaveSceneAs();
 					return true;
 				}
-
-				else if (control)
+				if (ctrl)
 				{
 					SaveScene();
 					return true;
 				}
 				break;
 			}
-			case Key::D:
+			case Key::Delete:
 			{
-				if (control && m_SelectedContext.Type == EditorContextType::Entity)
+				if (m_SelectedContext.Type == EditorContextType::Entity)
 				{
-					m_ActiveScene->Duplicate(*((Entity*)m_SelectedContext.Data));
+					m_ActiveScene->DestroyEntity(*((Entity*)m_SelectedContext.Data));
+					m_SelectedContext.Reset();
 					return true;
 				}
 				break;
