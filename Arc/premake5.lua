@@ -57,6 +57,7 @@ project "Arc"
 		"%{IncludeDir.miniaudio}",
 		"%{IncludeDir.icons}",
 		"%{IncludeDir.JoltPhysics}",
+		"%{IncludeDir.tinyobj}",
 	}
 
 	links
