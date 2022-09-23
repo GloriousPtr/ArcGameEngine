@@ -25,6 +25,7 @@ project "Arc"
 		"%{IncludeDir.EASTL}/EASTL.natvis",
 		"%{IncludeDir.glm}/util/glm.natvis",
 		"%{IncludeDir.yaml_cpp}/../src/contrib/yaml-cpp.natvis",
+		"%{IncludeDir.JoltPhysics}/Jolt/Jolt.natvis"
 	}
 
 	defines
