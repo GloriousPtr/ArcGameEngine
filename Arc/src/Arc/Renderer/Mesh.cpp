@@ -228,6 +228,13 @@ namespace ArcEngine
 								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.normal_texname.c_str()));
 								normalMapApplied = true;
 							}
+							else if (!material.bump_texname.empty() &&
+								(name.find("norm") != eastl::string::npos || name.find("Norm") != eastl::string::npos ||
+									name.find("height") != eastl::string::npos || name.find("Height") != eastl::string::npos))
+							{
+								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.bump_texname.c_str()));
+								normalMapApplied = true;
+							}
 
 							if (!material.emissive_texname.empty() &&
 								(name.find("emissi") != eastl::string::npos || name.find("Emissi") != eastl::string::npos))

@@ -115,7 +115,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 24
       CullMode: 1
   - Entity: 12896254358261950236
@@ -132,7 +132,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 23
       CullMode: 1
   - Entity: 2171958093859330569
@@ -149,7 +149,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 22
       CullMode: 1
   - Entity: 12340539741192413070
@@ -166,7 +166,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 21
       CullMode: 1
   - Entity: 9497956432310012474
@@ -183,7 +183,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 20
       CullMode: 1
   - Entity: 6225032001798920303
@@ -200,7 +200,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 19
       CullMode: 1
   - Entity: 11413275653437956207
@@ -217,7 +217,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 18
       CullMode: 1
   - Entity: 13656944375313487358
@@ -234,7 +234,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 17
       CullMode: 1
   - Entity: 2508669298851889244
@@ -251,7 +251,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 16
       CullMode: 1
   - Entity: 5247346448757476093
@@ -268,7 +268,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 15
       CullMode: 1
   - Entity: 13285847275102555933
@@ -285,7 +285,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 14
       CullMode: 1
   - Entity: 7065221905690173654
@@ -302,7 +302,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 13
       CullMode: 1
   - Entity: 16964542492198351252
@@ -319,7 +319,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 12
       CullMode: 1
   - Entity: 14269506995403230443
@@ -336,7 +336,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 11
       CullMode: 1
   - Entity: 13138774069436837992
@@ -353,7 +353,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 10
       CullMode: 1
   - Entity: 16536703140984935075
@@ -370,7 +370,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 9
       CullMode: 1
   - Entity: 4105027073037869382
@@ -387,7 +387,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 8
       CullMode: 1
   - Entity: 575903852694178809
@@ -404,7 +404,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 7
       CullMode: 1
   - Entity: 5036459482807748356
@@ -421,7 +421,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 6
       CullMode: 1
   - Entity: 14653948611369502714
@@ -438,7 +438,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 5
       CullMode: 1
   - Entity: 5794960747746557335
@@ -455,7 +455,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 4
       CullMode: 1
   - Entity: 15751752526908026905
@@ -472,7 +472,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 3
       CullMode: 1
   - Entity: 861998861965754813
@@ -489,7 +489,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 2
       CullMode: 1
   - Entity: 9838241152144991898
@@ -506,7 +506,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 1
       CullMode: 1
   - Entity: 16484834023453057403
@@ -523,7 +523,7 @@ Entities:
       Children:
         {}
     MeshComponent:
-      Filepath: Assets\models\sponza\sponza.assbin
+      Filepath: Assets\models\sponza\sponza.obj
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 1900647786115943484
