@@ -56,7 +56,6 @@ namespace ArcEngine
 					size_t meshCount = mesh->GetSubmeshCount();
 					if (meshCount == 1)
 					{
-						const auto& submesh = mesh->GetSubmesh(0);
 						auto& meshComponent = parent.AddComponent<MeshComponent>();
 						meshComponent.Filepath = path;
 						meshComponent.MeshGeometry = mesh;
@@ -243,8 +242,13 @@ namespace ArcEngine
 			ImGui::PopStyleColor(2);
 
 		// Select
-		if (ImGui::IsItemDeactivated() && ImGui::IsItemHovered() && !ImGui::IsItemToggledOpen())
+		if (!ImGui::IsItemToggledOpen() &&
+			(ImGui::IsItemClicked(ImGuiMouseButton_Left) ||
+				ImGui::IsItemClicked(ImGuiMouseButton_Middle) ||
+				ImGui::IsItemClicked(ImGuiMouseButton_Right)))
+		{
 			EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, &entity, sizeof(entity));
+		}
 
 		// Expand recursively
 		if (ImGui::IsItemToggledOpen() && (ImGui::IsKeyDown(ImGuiKey_LeftAlt) || ImGui::IsKeyDown(ImGuiKey_RightAlt)))
@@ -408,7 +412,7 @@ namespace ArcEngine
 
 	void SceneHierarchyPanel::DrawContextMenu() const
 	{
-		if (ImGui::BeginPopupContextWindow("SceneHierarchyContextWindow"))
+		if (ImGui::BeginPopupContextWindow("SceneHierarchyContextWindow", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
 		{
 			EditorLayer::GetInstance()->ResetContext();
 			Entity toSelect = {};

@@ -640,6 +640,8 @@ namespace ArcEngine
 				}
 				break;
 			}
+			default:
+				break;
 		}
 
 		if (e.GetRepeatCount() > 0)
