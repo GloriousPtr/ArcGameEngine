@@ -720,6 +720,26 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
+		#pragma region Physics3D
+		{
+			ARC_PROFILE_CATEGORY("Physics 3D", Profile::Category::Physics);
+
+			auto* bodyInterface = Physics3D::GetBodyInterface();
+			auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
+			for (auto e : view)
+			{
+				auto [tc, body] = view.get<TransformComponent, RigidbodyComponent>(e);
+				if (body.RuntimeBody)
+				{
+					JPH::Body* rb = (JPH::Body*)body.RuntimeBody;
+					JPH::EActivation activation = bodyInterface->IsActive(rb->GetID()) ? JPH::EActivation::Activate : JPH::EActivation::DontActivate;
+					glm::quat rotation = glm::quat(tc.Rotation);
+					bodyInterface->SetPositionAndRotation(rb->GetID(), { tc.Translation.x, tc.Translation.y, tc.Translation.z }, { rotation.x, rotation.y, rotation.z, rotation.w }, activation);
+				}
+			}
+		}
+		#pragma endregion
+
 		#pragma region Physics2D
 		{
 			ARC_PROFILE_CATEGORY("Physics 2D", Profile::Category::Physics);
@@ -759,7 +779,6 @@ namespace ArcEngine
 
 			Physics3D::Step(physicsTs);
 
-			auto* bodyInterface = Physics3D::GetBodyInterface();
 			auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
 			for (auto e : view)
 			{
