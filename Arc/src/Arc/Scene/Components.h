@@ -353,9 +353,6 @@ namespace ArcEngine
 		BuoyancyEffector2DComponent(const BuoyancyEffector2DComponent&) = default;
 	};
 
-
-
-
 	struct RigidbodyComponent
 	{
 		enum class BodyType { Static = 0, Kinematic, Dynamic };
@@ -370,6 +367,11 @@ namespace ArcEngine
 		bool Continuous = false;
 		float GravityScale = 1.0f;
 
+		bool IsSensor = false;
+
+		float Friction = 0.5f;
+		float Restitution = 0.0f;
+
 		void* RuntimeBody = nullptr;
 
 		RigidbodyComponent() = default;
@@ -380,11 +382,7 @@ namespace ArcEngine
 	{
 		glm::vec3 Size = { 0.5f, 0.5f, 0.5f };
 		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
-		bool IsSensor = false;
-
 		float Density = 1.0f;
-		float Friction = 0.5f;
-		float Restitution = 0.0f;
 
 		BoxColliderComponent() = default;
 		BoxColliderComponent(const BoxColliderComponent&) = default;
@@ -394,18 +392,45 @@ namespace ArcEngine
 	{
 		float Radius = 0.5f;
 		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
-		bool IsSensor = false;
-
 		float Density = 1.0f;
-		float Friction = 0.5f;
-		float Restitution = 0.0f;
-
+		
 		SphereColliderComponent() = default;
 		SphereColliderComponent(const SphereColliderComponent&) = default;
 	};
 
+	struct CapsuleColliderComponent
+	{
+		float Height = 1.0f;
+		float Radius = 0.5f;
+		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
+		float Density = 1.0f;
 
+		CapsuleColliderComponent() = default;
+		CapsuleColliderComponent(const CapsuleColliderComponent&) = default;
+	};
 
+	struct TaperedCapsuleColliderComponent
+	{
+		float Height = 1.0f;
+		float TopRadius = 0.5f;
+		float BottomRadius = 0.5f;
+		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
+		float Density = 1.0f;
+
+		TaperedCapsuleColliderComponent() = default;
+		TaperedCapsuleColliderComponent(const TaperedCapsuleColliderComponent&) = default;
+	};
+
+	struct CylinderColliderComponent
+	{
+		float Height = 1.0f;
+		float Radius = 0.5f;
+		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
+		float Density = 1.0f;
+
+		CylinderColliderComponent() = default;
+		CylinderColliderComponent(const CylinderColliderComponent&) = default;
+	};
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Script ///////////////////////////////////////////////////////////////////////////
@@ -480,6 +505,9 @@ namespace ArcEngine
 		RigidbodyComponent,
 		BoxColliderComponent,
 		SphereColliderComponent,
+		CapsuleColliderComponent,
+		TaperedCapsuleColliderComponent,
+		CylinderColliderComponent,
 
 		ScriptComponent,
 

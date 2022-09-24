@@ -375,6 +375,9 @@ namespace ArcEngine
 					DrawAddComponent<RigidbodyComponent>(entity, ICON_MDI_SOCCER " Rigidbody", "3D");
 					DrawAddComponent<BoxColliderComponent>(entity, ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider", "3D");
 					DrawAddComponent<SphereColliderComponent>(entity, ICON_MDI_CIRCLE_OUTLINE " Sphere Collider", "3D");
+					DrawAddComponent<CapsuleColliderComponent>(entity, ICON_MDI_CIRCLE_OUTLINE " Capsule Collider", "3D");
+					DrawAddComponent<TaperedCapsuleColliderComponent>(entity, ICON_MDI_CIRCLE_OUTLINE " Tapered Capsule Collider", "3D");
+					DrawAddComponent<CylinderColliderComponent>(entity, ICON_MDI_CIRCLE_OUTLINE " Cylinder Collider", "3D");
 
 					DrawAddComponent<AudioSourceComponent>(entity, ICON_MDI_VOLUME_MEDIUM " Audio", "Audio");
 					DrawAddComponent<AudioListenerComponent>(entity, ICON_MDI_CIRCLE_SLICE_8 " Audio Listener", "Audio");
@@ -844,7 +847,17 @@ namespace ArcEngine
 				component.AngularDrag = glm::max(component.AngularDrag, 0.0f);
 			}
 
+			UI::Property("Is Sensor", component.IsSensor);
 			UI::EndProperties();
+
+			if (!component.IsSensor)
+			{
+				ImGui::Spacing();
+				UI::BeginProperties();
+				UI::Property("Friction", component.Friction, 0.0f, 1.0f);
+				UI::Property("Restitution", component.Restitution, 0.0f, 1.0f);
+				UI::EndProperties();
+			}
 		});
 
 		DrawComponent<BoxColliderComponent>(ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider", entity, [](BoxColliderComponent& component)
@@ -852,18 +865,10 @@ namespace ArcEngine
 			UI::BeginProperties();
 			UI::Property("Size", component.Size);
 			UI::Property("Offset", component.Offset);
-			UI::Property("Is Sensor", component.IsSensor);
+			UI::Property("Density", component.Density);
 			UI::EndProperties();
 
-			if (!component.IsSensor)
-			{
-				ImGui::Spacing();
-				UI::BeginProperties();
-				UI::Property("Density", component.Density);
-				UI::Property("Friction", component.Friction);
-				UI::Property("Restitution", component.Restitution);
-				UI::EndProperties();
-			}
+			component.Density = glm::max(component.Density, 0.001f);
 		});
 
 		DrawComponent<SphereColliderComponent>(ICON_MDI_CIRCLE_OUTLINE " Sphere Collider", entity, [](SphereColliderComponent& component)
@@ -871,18 +876,47 @@ namespace ArcEngine
 			UI::BeginProperties();
 			UI::Property("Radius", component.Radius);
 			UI::Property("Offset", component.Offset);
-			UI::Property("Is Sensor", component.IsSensor);
+			UI::Property("Density", component.Density);
 			UI::EndProperties();
 
-			if (!component.IsSensor)
-			{
-				ImGui::Spacing();
-				UI::BeginProperties();
-				UI::Property("Density", component.Density);
-				UI::Property("Friction", component.Friction);
-				UI::Property("Restitution", component.Restitution);
-				UI::EndProperties();
-			}
+			component.Density = glm::max(component.Density, 0.001f);
+		});
+
+		DrawComponent<CapsuleColliderComponent>(ICON_MDI_CIRCLE_OUTLINE " Capsule Collider", entity, [](CapsuleColliderComponent& component)
+		{
+			UI::BeginProperties();
+			UI::Property("Height", component.Height);
+			UI::Property("Radius", component.Radius);
+			UI::Property("Offset", component.Offset);
+			UI::Property("Density", component.Density);
+			UI::EndProperties();
+
+			component.Density = glm::max(component.Density, 0.001f);
+		});
+
+		DrawComponent<TaperedCapsuleColliderComponent>(ICON_MDI_CIRCLE_OUTLINE " Tapered Capsule Collider", entity, [](TaperedCapsuleColliderComponent& component)
+		{
+			UI::BeginProperties();
+			UI::Property("Height", component.Height);
+			UI::Property("Top Radius", component.TopRadius);
+			UI::Property("Bottom Radius", component.BottomRadius);
+			UI::Property("Offset", component.Offset);
+			UI::Property("Density", component.Density);
+			UI::EndProperties();
+
+			component.Density = glm::max(component.Density, 0.001f);
+		});
+
+		DrawComponent<CylinderColliderComponent>(ICON_MDI_CIRCLE_OUTLINE " Cylinder Collider", entity, [](CylinderColliderComponent& component)
+		{
+			UI::BeginProperties();
+			UI::Property("Height", component.Height);
+			UI::Property("Radius", component.Radius);
+			UI::Property("Offset", component.Offset);
+			UI::Property("Density", component.Density);
+			UI::EndProperties();
+
+			component.Density = glm::max(component.Density, 0.001f);
 		});
 
 		DrawComponent<ScriptComponent>(ICON_MDI_POUND_BOX " Script", entity, [this, &entity, &framePadding](ScriptComponent& component)

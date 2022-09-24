@@ -26,6 +26,11 @@
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
+#include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
+#include <Jolt/Physics/Collision/Shape/CylinderShape.h>
+#include <Jolt/Physics/Collision/Shape/TaperedCapsuleShape.h>
+#include <Jolt/Physics/Collision/Shape/StaticCompoundShape.h>
+#include <Jolt/Physics/Collision/Shape/MutableCompoundShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 
@@ -387,6 +392,7 @@ namespace ArcEngine
 
 		m_IsRunning = true;
 
+		#pragma region Physics3D
 		{
 			ARC_PROFILE_CATEGORY("Physics 3D", Profile::Category::Physics);
 
@@ -400,7 +406,9 @@ namespace ArcEngine
 
 			Physics3D::OptimizeBroadPhase();
 		}
+		#pragma endregion
 
+		#pragma region Physics2D
 		{
 			ARC_PROFILE_CATEGORY("Physics 2D", Profile::Category::Physics);
 
@@ -408,9 +416,6 @@ namespace ArcEngine
 			m_ContactListener = new ContactListener(this);
 			m_PhysicsWorld2D->SetContactListener(m_ContactListener);
 
-			/////////////////////////////////////////////////////////////////////
-			// Rigidbody and Colliders (2D) /////////////////////////////////////
-			/////////////////////////////////////////////////////////////////////
 			{
 				auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
 				for (auto e : view)
@@ -420,9 +425,6 @@ namespace ArcEngine
 				}
 			}
 
-			/////////////////////////////////////////////////////////////////////
-			// Joints (2D) //////////////////////////////////////////////////////
-			/////////////////////////////////////////////////////////////////////
 			{
 				auto distanceJointView = m_Registry.view<Rigidbody2DComponent, DistanceJoint2DComponent>();
 				for (auto e : distanceJointView)
@@ -566,11 +568,9 @@ namespace ArcEngine
 				}
 			}
 		}
+		#pragma endregion
 
-
-		/////////////////////////////////////////////////////////////////////
-		// Sound ////////////////////////////////////////////////////////////
-		/////////////////////////////////////////////////////////////////////
+		#pragma region Audio
 		{
 			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio);
 
@@ -606,10 +606,9 @@ namespace ArcEngine
 				}
 			}
 		}
+		#pragma endregion
 
-		/////////////////////////////////////////////////////////////////////
-		// Scripting ////////////////////////////////////////////////////////
-		/////////////////////////////////////////////////////////////////////
+		#pragma region Scripting
 		{
 			ARC_PROFILE_CATEGORY("Script", Profile::Category::Script);
 
@@ -626,6 +625,7 @@ namespace ArcEngine
 					ScriptEngine::GetInstance(entity, className)->InvokeOnCreate();
 			}
 		}
+		#pragma endregion
 	}
 
 	void Scene::OnRuntimeStop()
@@ -634,6 +634,7 @@ namespace ArcEngine
 
 		m_IsRunning = false;
 
+		#pragma region Scripting
 		{
 			ARC_PROFILE_CATEGORY("Script", Profile::Category::Script);
 
@@ -652,10 +653,9 @@ namespace ArcEngine
 				script.Classes.clear();
 			}
 		}
+		#pragma endregion
 
-		/////////////////////////////////////////////////////////////////////
-		// Sound ////////////////////////////////////////////////////////////
-		/////////////////////////////////////////////////////////////////////
+		#pragma region Audio
 		{
 			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio);
 
@@ -667,7 +667,9 @@ namespace ArcEngine
 					ac.Source->Stop();
 			}
 		}
+		#pragma endregion
 
+		#pragma region Physics2D
 		{
 			ARC_PROFILE_CATEGORY("Physics 2D", Profile::Category::Physics);
 
@@ -677,7 +679,9 @@ namespace ArcEngine
 			m_ContactListener = nullptr;
 			m_PhysicsWorld2D = nullptr;
 		}
+		#pragma endregion
 
+		#pragma region Physics3D
 		{
 			ARC_PROFILE_CATEGORY("Physics 3D", Profile::Category::Physics);
 
@@ -696,6 +700,7 @@ namespace ArcEngine
 
 			Physics3D::Shutdown();
 		}
+		#pragma endregion
 	}
 
 	void Scene::OnUpdateEditor([[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera)
@@ -715,42 +720,40 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
+		#pragma region Physics2D
 		{
+			ARC_PROFILE_CATEGORY("Physics 2D", Profile::Category::Physics);
+
+			auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
+			for (auto e : view)
 			{
-				ARC_PROFILE_CATEGORY("Physics 2D", Profile::Category::Physics);
-
-				auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
-				for (auto e : view)
-				{
-					auto [tc, body] = view.get<TransformComponent, Rigidbody2DComponent>(e);
-					b2Body* rb = (b2Body*)body.RuntimeBody;
-					rb->SetTransform(b2Vec2(tc.Translation.x, tc.Translation.y), tc.Rotation.z);
-				}
-			}
-
-			/////////////////////////////////////////////////////////////////////
-			// Scripting ////////////////////////////////////////////////////////
-			/////////////////////////////////////////////////////////////////////
-			{
-				ARC_PROFILE_CATEGORY("Script", Profile::Category::Script);
-
-				auto scriptView = m_Registry.view<ScriptComponent>();
-				for (auto e : scriptView)
-				{
-					const ScriptComponent& script = scriptView.get<ScriptComponent>(e);
-					Entity entity = { e, this };
-
-					for (const auto& className : script.Classes)
-						ScriptEngine::GetInstance(entity, className)->InvokeOnUpdate(ts);
-				}
+				auto [tc, body] = view.get<TransformComponent, Rigidbody2DComponent>(e);
+				b2Body* rb = (b2Body*)body.RuntimeBody;
+				rb->SetTransform(b2Vec2(tc.Translation.x, tc.Translation.y), tc.Rotation.z);
 			}
 		}
+		#pragma endregion
+
+		#pragma region Scripting
+		{
+			ARC_PROFILE_CATEGORY("Script", Profile::Category::Script);
+
+			auto scriptView = m_Registry.view<ScriptComponent>();
+			for (auto e : scriptView)
+			{
+				const ScriptComponent& script = scriptView.get<ScriptComponent>(e);
+				Entity entity = { e, this };
+
+				for (const auto& className : script.Classes)
+					ScriptEngine::GetInstance(entity, className)->InvokeOnUpdate(ts);
+			}
+		}
+		#pragma endregion
 		
-		/////////////////////////////////////////////////////////////////////
-		// Physics //////////////////////////////////////////////////////////
-		/////////////////////////////////////////////////////////////////////
 		constexpr float physicsStepRate = 60.0f;
 		constexpr float physicsTs = 1.0f / physicsStepRate;
+
+		#pragma region Physics3D
 		{
 			ARC_PROFILE_CATEGORY("Physics 3D", Profile::Category::Physics);
 
@@ -771,7 +774,9 @@ namespace ArcEngine
 				}
 			}
 		}
+		#pragma endregion
 
+		#pragma region Physics2D
 		{
 			ARC_PROFILE_CATEGORY("Physics 2D", Profile::Category::Physics);
 			
@@ -789,9 +794,6 @@ namespace ArcEngine
 				transform.Rotation.z = rb->GetAngle();
 			}
 
-			/////////////////////////////////////////////////////////////////////
-			// Joints (2D) //////////////////////////////////////////////////////
-			/////////////////////////////////////////////////////////////////////
 			auto distanceJointView = m_Registry.view<DistanceJoint2DComponent>();
 			for (auto e : distanceJointView)
 			{
@@ -875,10 +877,9 @@ namespace ArcEngine
 				}
 			}
 		}
+		#pragma endregion
 
-		/////////////////////////////////////////////////////////////////////
-		// Sound ////////////////////////////////////////////////////////////
-		/////////////////////////////////////////////////////////////////////
+		#pragma region Audio
 		{
 			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio);
 
@@ -910,11 +911,9 @@ namespace ArcEngine
 				}
 			}
 		}
+		#pragma endregion
 
-		/////////////////////////////////////////////////////////////////////
-		// Rendering ////////////////////////////////////////////////////////
-		/////////////////////////////////////////////////////////////////////
-
+		#pragma region Rendering
 		CameraData cameraData = {};
 		{
 			ARC_PROFILE_CATEGORY("Camera", Profile::Category::Camera);
@@ -940,6 +939,7 @@ namespace ArcEngine
 		}
 
 		OnRender(renderGraphData, cameraData);
+		#pragma endregion
 	}
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
@@ -1032,96 +1032,111 @@ namespace ArcEngine
 
 	void Scene::CreateRigidbody(Entity entity, RigidbodyComponent& component)
 	{
-		if (entity.HasComponent<BoxColliderComponent>())
-			CreateBoxCollider(entity, component, entity.GetComponent<BoxColliderComponent>());
-		else if (entity.HasComponent<SphereColliderComponent>())
-			CreateSphereCollider(entity, component, entity.GetComponent<SphereColliderComponent>());
-	}
+		if (!m_IsRunning)
+			return;
 
-	void Scene::CreateBoxCollider(Entity entity, RigidbodyComponent& rb, BoxColliderComponent& bc)
-	{
-		TransformComponent tc = entity.GetComponent<TransformComponent>();
 		auto* bodyInterface = Physics3D::GetBodyInterface();
+		if (component.RuntimeBody)
+		{
+			bodyInterface->DestroyBody(((JPH::Body*)component.RuntimeBody)->GetID());
+			component.RuntimeBody = nullptr;
+		}
 
-		// Shape
-		glm::vec3 scale = bc.Size * tc.Scale * 2.0f;
-		JPH::BoxShapeSettings boxShapeSettings({ scale.x, scale.y, scale.z });
-		boxShapeSettings.SetDensity(bc.Density);
+		TransformComponent tc = entity.GetComponent<TransformComponent>();
 
-		JPH::ShapeSettings::ShapeResult shapeResult = boxShapeSettings.Create();
-		JPH::ShapeRefC shape = shapeResult.Get();
+		JPH::CompoundShapeSettings* compoundShapeSettings;
+		if (component.Type == RigidbodyComponent::BodyType::Static)
+			compoundShapeSettings = new JPH::StaticCompoundShapeSettings();
+		else
+			compoundShapeSettings = new JPH::StaticCompoundShapeSettings();
+
+		float maxScaleComponent = glm::max(glm::max(tc.Scale.x, tc.Scale.y), tc.Scale.z);
+
+		if (entity.HasComponent<BoxColliderComponent>())
+		{
+			auto& bc = entity.GetComponent<BoxColliderComponent>();
+			
+			glm::vec3 scale = bc.Size * tc.Scale * 2.0f;
+			JPH::BoxShapeSettings shapeSettings({ glm::abs(scale.x), glm::abs(scale.y), glm::abs(scale.z) });
+			shapeSettings.SetDensity(glm::max(0.001f, bc.Density));
+
+			compoundShapeSettings->AddShape({ bc.Offset.x, bc.Offset.y, bc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
+		}
+
+		if (entity.HasComponent<SphereColliderComponent>())
+		{
+			auto& sc = entity.GetComponent<SphereColliderComponent>();
+
+			float radius = 2.0f * sc.Radius * maxScaleComponent;
+			JPH::SphereShapeSettings shapeSettings(glm::max(0.01f, radius));
+			shapeSettings.SetDensity(glm::max(0.001f, sc.Density));
+
+			compoundShapeSettings->AddShape({ sc.Offset.x, sc.Offset.y, sc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
+		}
+
+		if (entity.HasComponent<CapsuleColliderComponent>())
+		{
+			auto& cc = entity.GetComponent<CapsuleColliderComponent>();
+
+			float radius = 2.0f * cc.Radius * maxScaleComponent;
+			JPH::CapsuleShapeSettings shapeSettings(glm::max(0.01f, cc.Height) * 0.5f, glm::max(0.01f, radius));
+			shapeSettings.SetDensity(glm::max(0.001f, cc.Density));
+
+			compoundShapeSettings->AddShape({ cc.Offset.x, cc.Offset.y, cc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
+		}
+
+		if (entity.HasComponent<TaperedCapsuleColliderComponent>())
+		{
+			auto& tcc = entity.GetComponent<TaperedCapsuleColliderComponent>();
+
+			float topRadius = 2.0f * tcc.TopRadius * maxScaleComponent;
+			float bottomRadius = 2.0f * tcc.BottomRadius * maxScaleComponent;
+			JPH::TaperedCapsuleShapeSettings shapeSettings(glm::max(0.01f, tcc.Height) * 0.5f, glm::max(0.01f, topRadius), glm::max(0.01f, bottomRadius));
+			shapeSettings.SetDensity(glm::max(0.001f, tcc.Density));
+
+			compoundShapeSettings->AddShape({ tcc.Offset.x, tcc.Offset.y, tcc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
+		}
+
+		if (entity.HasComponent<CylinderColliderComponent>())
+		{
+			auto& cc = entity.GetComponent<CylinderColliderComponent>();
+
+			float radius = 2.0f * cc.Radius * maxScaleComponent;
+			JPH::CylinderShapeSettings shapeSettings(glm::max(0.01f, cc.Height) * 0.5f, glm::max(0.01f, radius));
+			shapeSettings.SetDensity(glm::max(0.001f, cc.Density));
+
+			compoundShapeSettings->AddShape({ cc.Offset.x, cc.Offset.y, cc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
+		}
 
 		// Body
-		glm::vec3 position = tc.Translation + bc.Offset;
 		glm::quat rotation = glm::quat(tc.Rotation);
-		JPH::BodyCreationSettings bodySettings(shape, { position.x, position.y, position.z }, { rotation.x, rotation.y, rotation.z, rotation.w }, (JPH::EMotionType)rb.Type, Physics3D::Layers::MOVING);
+		JPH::BodyCreationSettings bodySettings(compoundShapeSettings->Create().Get(), {tc.Translation.x, tc.Translation.y, tc.Translation.z}, {rotation.x, rotation.y, rotation.z, rotation.w}, (JPH::EMotionType)component.Type, Physics3D::Layers::MOVING);
 
-		if (!rb.AutoMass)
+		delete compoundShapeSettings;
+
+		if (!component.AutoMass)
 		{
 			JPH::MassProperties massProperties;
-			massProperties.mMass = rb.Mass;
+			massProperties.mMass = glm::max(0.01f, component.Mass);
 			bodySettings.mMassPropertiesOverride = massProperties;
 			bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
 		}
-		bodySettings.mAllowSleeping = rb.AllowSleep;
-		bodySettings.mLinearDamping = rb.LinearDrag;
-		bodySettings.mAngularDamping = rb.AngularDrag;
-		bodySettings.mMotionQuality = rb.Continuous ? JPH::EMotionQuality::LinearCast : JPH::EMotionQuality::Discrete;
-		bodySettings.mGravityFactor = rb.GravityScale;
+		bodySettings.mAllowSleeping = component.AllowSleep;
+		bodySettings.mLinearDamping = glm::max(0.0f, component.LinearDrag);
+		bodySettings.mAngularDamping = glm::max(0.0f, component.AngularDrag);
+		bodySettings.mMotionQuality = component.Continuous ? JPH::EMotionQuality::LinearCast : JPH::EMotionQuality::Discrete;
+		bodySettings.mGravityFactor = component.GravityScale;
 
-		bodySettings.mIsSensor = bc.IsSensor;
-		bodySettings.mFriction = bc.Friction;
-		bodySettings.mRestitution = bc.Restitution;
-
-		JPH::Body* body = bodyInterface->CreateBody(bodySettings);
-
-		JPH::EActivation activation = rb.Awake && rb.Type != RigidbodyComponent::BodyType::Static ? JPH::EActivation::Activate : JPH::EActivation::DontActivate;
-		bodyInterface->AddBody(body->GetID(), activation);
-
-		rb.RuntimeBody = body;
-	}
-
-	void Scene::CreateSphereCollider(Entity entity, RigidbodyComponent& rb, SphereColliderComponent& sc)
-	{
-		TransformComponent tc = entity.GetComponent<TransformComponent>();
-		auto* bodyInterface = Physics3D::GetBodyInterface();
-
-		// Shape
-		float radius = 2.0f * glm::max(glm::max(sc.Radius * tc.Scale.x, sc.Radius * tc.Scale.y), sc.Radius * tc.Scale.z);
-		JPH::SphereShapeSettings sphereShapeSettings(radius);
-		sphereShapeSettings.SetDensity(sc.Density);
-
-		JPH::ShapeSettings::ShapeResult shapeResult = sphereShapeSettings.Create();
-		JPH::ShapeRefC shape = shapeResult.Get();
-
-		// Body
-		glm::vec3 position = tc.Translation + sc.Offset;
-		glm::quat rotation = glm::quat(tc.Rotation);
-		JPH::BodyCreationSettings bodySettings(shape, { position.x, position.y, position.z }, { rotation.x, rotation.y, rotation.z, rotation.w }, (JPH::EMotionType)rb.Type, Physics3D::Layers::MOVING);
-
-		if (!rb.AutoMass)
-		{
-			JPH::MassProperties massProperties = bodySettings.GetMassProperties();
-			massProperties.mMass = rb.Mass;
-			bodySettings.mMassPropertiesOverride = massProperties;
-			bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
-		}
-		bodySettings.mAllowSleeping = rb.AllowSleep;
-		bodySettings.mLinearDamping = rb.LinearDrag;
-		bodySettings.mAngularDamping = rb.AngularDrag;
-		bodySettings.mMotionQuality = rb.Continuous ? JPH::EMotionQuality::LinearCast : JPH::EMotionQuality::Discrete;
-		bodySettings.mGravityFactor = rb.GravityScale;
-
-		bodySettings.mIsSensor = sc.IsSensor;
-		bodySettings.mFriction = sc.Friction;
-		bodySettings.mRestitution = sc.Restitution;
+		bodySettings.mIsSensor = component.IsSensor;
+		bodySettings.mFriction = glm::clamp(component.Friction, 0.0f, 1.0f);
+		bodySettings.mRestitution = glm::clamp(component.Restitution, 0.0f, 1.0f);
 
 		JPH::Body* body = bodyInterface->CreateBody(bodySettings);
 
-		JPH::EActivation activation = rb.Awake && rb.Type != RigidbodyComponent::BodyType::Static ? JPH::EActivation::Activate : JPH::EActivation::DontActivate;
+		JPH::EActivation activation = component.Awake && component.Type != RigidbodyComponent::BodyType::Static ? JPH::EActivation::Activate : JPH::EActivation::DontActivate;
 		bodyInterface->AddBody(body->GetID(), activation);
 
-		rb.RuntimeBody = body;
+		component.RuntimeBody = body;
 	}
 
 	void Scene::CreateRigidbody2D(Entity entity, Rigidbody2DComponent& body)
@@ -1357,16 +1372,40 @@ namespace ArcEngine
 	void Scene::OnComponentAdded<BoxColliderComponent>(Entity entity, BoxColliderComponent& bc)
 	{
 		/* On BoxColliderComponent added */
-		if (IsRunning() && entity.HasComponent<RigidbodyComponent>())
-			CreateBoxCollider(entity, entity.GetComponent<RigidbodyComponent>(), bc);
+		if (entity.HasComponent<RigidbodyComponent>())
+			CreateRigidbody(entity, entity.GetComponent<RigidbodyComponent>());
 	}
 
 	template<>
 	void Scene::OnComponentAdded<SphereColliderComponent>(Entity entity, SphereColliderComponent& sc)
 	{
 		/* On SphereColliderComponent added */
-		if (IsRunning() && entity.HasComponent<RigidbodyComponent>())
-			CreateSphereCollider(entity, entity.GetComponent<RigidbodyComponent>(), sc);
+		if (entity.HasComponent<RigidbodyComponent>())
+			CreateRigidbody(entity, entity.GetComponent<RigidbodyComponent>());
+	}
+
+	template<>
+	void Scene::OnComponentAdded<CapsuleColliderComponent>(Entity entity, CapsuleColliderComponent& sc)
+	{
+		/* On SphereColliderComponent added */
+		if (entity.HasComponent<RigidbodyComponent>())
+			CreateRigidbody(entity, entity.GetComponent<RigidbodyComponent>());
+	}
+
+	template<>
+	void Scene::OnComponentAdded<TaperedCapsuleColliderComponent>(Entity entity, TaperedCapsuleColliderComponent& sc)
+	{
+		/* On SphereColliderComponent added */
+		if (entity.HasComponent<RigidbodyComponent>())
+			CreateRigidbody(entity, entity.GetComponent<RigidbodyComponent>());
+	}
+
+	template<>
+	void Scene::OnComponentAdded<CylinderColliderComponent>(Entity entity, CylinderColliderComponent& sc)
+	{
+		/* On SphereColliderComponent added */
+		if (entity.HasComponent<RigidbodyComponent>())
+			CreateRigidbody(entity, entity.GetComponent<RigidbodyComponent>());
 	}
 
 	template<>
