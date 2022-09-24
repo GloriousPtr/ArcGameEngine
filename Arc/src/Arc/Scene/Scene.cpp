@@ -391,14 +391,14 @@ namespace ArcEngine
 			ARC_PROFILE_CATEGORY("Physics 3D", Profile::Category::Physics);
 
 			Physics3D::Init();
-			auto* bodyInterface = Physics3D::GetBodyInterface();
-
 			auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
 			for (auto e : view)
 			{
 				auto& body = view.get<RigidbodyComponent>(e);
 				CreateRigidbody({ e, this }, body);
 			}
+
+			Physics3D::OptimizeBroadPhase();
 		}
 
 		{

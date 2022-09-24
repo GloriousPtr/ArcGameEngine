@@ -22,5 +22,6 @@ namespace ArcEngine
 		static void Step(float ts);
 
 		static JPH::BodyInterface* GetBodyInterface();
+		static void OptimizeBroadPhase();
 	};
 }

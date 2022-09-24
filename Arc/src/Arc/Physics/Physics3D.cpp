@@ -200,4 +200,9 @@ namespace ArcEngine
 	{
 		return &s_PhysicsSystem->GetBodyInterface();
 	}
+
+	void Physics3D::OptimizeBroadPhase()
+	{
+		s_PhysicsSystem->OptimizeBroadPhase();
+	}
 }
