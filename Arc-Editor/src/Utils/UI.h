@@ -10,7 +10,7 @@ namespace ArcEngine
 	class UI
 	{
 	public:
-		static void BeginProperties(ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_BordersInner
+		static void BeginProperties(ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_BordersInner
 			| ImGuiTableFlags_BordersOuterH);
 		static void EndProperties();
 

@@ -92,7 +92,6 @@ namespace ArcEngine
 			{
 				ARC_PROFILE_SCOPE("UI Function");
 
-				ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().IndentSpacing / 2);
 				uiFunction(component);
 				ImGui::TreePop();
 			}
@@ -139,8 +138,6 @@ namespace ArcEngine
 			if (open)
 			{
 				ARC_PROFILE_SCOPE("UI Function");
-
-				ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().IndentSpacing / 2);
 
 				// Public Fields
 				UI::BeginProperties();

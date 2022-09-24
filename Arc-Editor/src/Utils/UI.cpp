@@ -64,17 +64,15 @@ namespace ArcEngine
 		++s_Counter;
 		_itoa_s(s_Counter, s_IDBuffer + 2, 16, 16);
 
-		ImVec2 cellPadding = ImGui::GetStyle().CellPadding;
-		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { cellPadding.x * 4, cellPadding.y });
-
 		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_PadOuterX;
 		ImGui::BeginTable(s_IDBuffer, 2, tableFlags | flags);
+		ImGui::TableSetupColumn("PropertyName",0 , 0.5f);
+		ImGui::TableSetupColumn("Property", ImGuiTableColumnFlags_WidthStretch);
 	}
 	
 	void UI::EndProperties()
 	{
 		ImGui::EndTable();
-		ImGui::PopStyleVar();
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
