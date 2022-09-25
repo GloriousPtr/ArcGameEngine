@@ -1064,12 +1064,7 @@ namespace ArcEngine
 
 		TransformComponent tc = entity.GetComponent<TransformComponent>();
 
-		JPH::CompoundShapeSettings* compoundShapeSettings;
-		if (component.Type == RigidbodyComponent::BodyType::Static)
-			compoundShapeSettings = new JPH::StaticCompoundShapeSettings();
-		else
-			compoundShapeSettings = new JPH::StaticCompoundShapeSettings();
-
+		JPH::MutableCompoundShapeSettings compoundShapeSettings;
 		float maxScaleComponent = glm::max(glm::max(tc.Scale.x, tc.Scale.y), tc.Scale.z);
 
 		const char* entityName = entity.GetComponent<TagComponent>().Tag.c_str();
@@ -1083,7 +1078,7 @@ namespace ArcEngine
 			JPH::BoxShapeSettings shapeSettings({ glm::abs(scale.x), glm::abs(scale.y), glm::abs(scale.z) }, 0.05f, mat);
 			shapeSettings.SetDensity(glm::max(0.001f, bc.Density));
 
-			compoundShapeSettings->AddShape({ bc.Offset.x, bc.Offset.y, bc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
+			compoundShapeSettings.AddShape({ bc.Offset.x, bc.Offset.y, bc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
 		}
 
 		if (entity.HasComponent<SphereColliderComponent>())
@@ -1095,7 +1090,7 @@ namespace ArcEngine
 			JPH::SphereShapeSettings shapeSettings(glm::max(0.01f, radius), mat);
 			shapeSettings.SetDensity(glm::max(0.001f, sc.Density));
 
-			compoundShapeSettings->AddShape({ sc.Offset.x, sc.Offset.y, sc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
+			compoundShapeSettings.AddShape({ sc.Offset.x, sc.Offset.y, sc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
 		}
 
 		if (entity.HasComponent<CapsuleColliderComponent>())
@@ -1107,7 +1102,7 @@ namespace ArcEngine
 			JPH::CapsuleShapeSettings shapeSettings(glm::max(0.01f, cc.Height) * 0.5f, glm::max(0.01f, radius), mat);
 			shapeSettings.SetDensity(glm::max(0.001f, cc.Density));
 
-			compoundShapeSettings->AddShape({ cc.Offset.x, cc.Offset.y, cc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
+			compoundShapeSettings.AddShape({ cc.Offset.x, cc.Offset.y, cc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
 		}
 
 		if (entity.HasComponent<TaperedCapsuleColliderComponent>())
@@ -1120,7 +1115,7 @@ namespace ArcEngine
 			JPH::TaperedCapsuleShapeSettings shapeSettings(glm::max(0.01f, tcc.Height) * 0.5f, glm::max(0.01f, topRadius), glm::max(0.01f, bottomRadius), mat);
 			shapeSettings.SetDensity(glm::max(0.001f, tcc.Density));
 
-			compoundShapeSettings->AddShape({ tcc.Offset.x, tcc.Offset.y, tcc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
+			compoundShapeSettings.AddShape({ tcc.Offset.x, tcc.Offset.y, tcc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
 		}
 
 		if (entity.HasComponent<CylinderColliderComponent>())
@@ -1132,14 +1127,12 @@ namespace ArcEngine
 			JPH::CylinderShapeSettings shapeSettings(glm::max(0.01f, cc.Height) * 0.5f, glm::max(0.01f, radius), 0.05f, mat);
 			shapeSettings.SetDensity(glm::max(0.001f, cc.Density));
 
-			compoundShapeSettings->AddShape({ cc.Offset.x, cc.Offset.y, cc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
+			compoundShapeSettings.AddShape({ cc.Offset.x, cc.Offset.y, cc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
 		}
 
 		// Body
 		glm::quat rotation = glm::quat(tc.Rotation);
-		JPH::BodyCreationSettings bodySettings(compoundShapeSettings->Create().Get(), {tc.Translation.x, tc.Translation.y, tc.Translation.z}, {rotation.x, rotation.y, rotation.z, rotation.w}, (JPH::EMotionType)component.Type, Physics3D::Layers::MOVING);
-
-		delete compoundShapeSettings;
+		JPH::BodyCreationSettings bodySettings(compoundShapeSettings.Create().Get(), {tc.Translation.x, tc.Translation.y, tc.Translation.z}, {rotation.x, rotation.y, rotation.z, rotation.w}, (JPH::EMotionType)component.Type, Physics3D::Layers::MOVING);
 
 		if (!component.AutoMass)
 		{
