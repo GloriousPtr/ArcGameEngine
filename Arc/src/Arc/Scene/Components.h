@@ -196,9 +196,9 @@ namespace ArcEngine
 		bool IsSensor = false;
 
 		float Density = 1.0f;
-		float Friction = 0.5f;
+		float Friction = 0.2f;
 		float Restitution = 0.0f;
-		float RestitutionThreshold = 0.5f;
+		float RestitutionThreshold = 1.0f;
 
 		void* RuntimeFixture = nullptr;
 
@@ -213,9 +213,9 @@ namespace ArcEngine
 		bool IsSensor = false;
 
 		float Density = 1.0f;
-		float Friction = 0.5f;
+		float Friction = 0.2f;
 		float Restitution = 0.0f;
-		float RestitutionThreshold = 0.5f;
+		float RestitutionThreshold = 1.0f;
 
 		void* RuntimeFixture = nullptr;
 

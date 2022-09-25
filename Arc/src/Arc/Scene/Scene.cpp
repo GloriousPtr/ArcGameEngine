@@ -1189,16 +1189,10 @@ namespace ArcEngine
 			body.RuntimeBody = rb;
 
 			if (entity.HasComponent<BoxCollider2DComponent>())
-			{
-				auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
-				CreateBoxCollider2D(entity, bc2d);
-			}
+				CreateBoxCollider2D(entity, entity.GetComponent<BoxCollider2DComponent>());
 
 			if (entity.HasComponent<CircleCollider2DComponent>())
-			{
-				auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
-				CreateCircleCollider2D(entity, cc2d);
-			}
+				CreateCircleCollider2D(entity, entity.GetComponent<CircleCollider2DComponent>());
 
 			if (!body.AutoMass && body.Mass > 0.01f)
 			{
