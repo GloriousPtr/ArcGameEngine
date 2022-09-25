@@ -849,15 +849,6 @@ namespace ArcEngine
 
 			UI::Property("Is Sensor", component.IsSensor);
 			UI::EndProperties();
-
-			if (!component.IsSensor)
-			{
-				ImGui::Spacing();
-				UI::BeginProperties();
-				UI::Property("Friction", component.Friction, 0.0f, 1.0f);
-				UI::Property("Restitution", component.Restitution, 0.0f, 1.0f);
-				UI::EndProperties();
-			}
 		});
 
 		DrawComponent<BoxColliderComponent>(ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider", entity, [](BoxColliderComponent& component)
@@ -866,6 +857,8 @@ namespace ArcEngine
 			UI::Property("Size", component.Size);
 			UI::Property("Offset", component.Offset);
 			UI::Property("Density", component.Density);
+			UI::Property("Friction", component.Friction, 0.0f, 1.0f);
+			UI::Property("Restitution", component.Restitution, 0.0f, 1.0f);
 			UI::EndProperties();
 
 			component.Density = glm::max(component.Density, 0.001f);
@@ -877,6 +870,8 @@ namespace ArcEngine
 			UI::Property("Radius", component.Radius);
 			UI::Property("Offset", component.Offset);
 			UI::Property("Density", component.Density);
+			UI::Property("Friction", component.Friction, 0.0f, 1.0f);
+			UI::Property("Restitution", component.Restitution, 0.0f, 1.0f);
 			UI::EndProperties();
 
 			component.Density = glm::max(component.Density, 0.001f);
@@ -889,6 +884,8 @@ namespace ArcEngine
 			UI::Property("Radius", component.Radius);
 			UI::Property("Offset", component.Offset);
 			UI::Property("Density", component.Density);
+			UI::Property("Friction", component.Friction, 0.0f, 1.0f);
+			UI::Property("Restitution", component.Restitution, 0.0f, 1.0f);
 			UI::EndProperties();
 
 			component.Density = glm::max(component.Density, 0.001f);
@@ -902,6 +899,8 @@ namespace ArcEngine
 			UI::Property("Bottom Radius", component.BottomRadius);
 			UI::Property("Offset", component.Offset);
 			UI::Property("Density", component.Density);
+			UI::Property("Friction", component.Friction, 0.0f, 1.0f);
+			UI::Property("Restitution", component.Restitution, 0.0f, 1.0f);
 			UI::EndProperties();
 
 			component.Density = glm::max(component.Density, 0.001f);
@@ -914,6 +913,8 @@ namespace ArcEngine
 			UI::Property("Radius", component.Radius);
 			UI::Property("Offset", component.Offset);
 			UI::Property("Density", component.Density);
+			UI::Property("Friction", component.Friction, 0.0f, 1.0f);
+			UI::Property("Restitution", component.Restitution, 0.0f, 1.0f);
 			UI::EndProperties();
 
 			component.Density = glm::max(component.Density, 0.001f);

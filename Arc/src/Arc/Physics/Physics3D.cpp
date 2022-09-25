@@ -16,6 +16,8 @@
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 
+#include "PhysicsMaterial3D.h"
+
 using namespace JPH;
 
 namespace ArcEngine
@@ -93,6 +95,36 @@ namespace ArcEngine
 
 	class Physics3DContactListener : public ContactListener
 	{
+	private:
+		static void	GetFrictionAndRestitution(const Body& inBody, const SubShapeID& inSubShapeID, float& outFriction, float& outRestitution)
+		{
+			// Get the material that corresponds to the sub shape ID
+			const PhysicsMaterial* material = inBody.GetShape()->GetMaterial(inSubShapeID);
+			if (material == PhysicsMaterial::sDefault)
+			{
+				outFriction = inBody.GetFriction();
+				outRestitution = inBody.GetRestitution();
+			}
+			else
+			{
+				const PhysicsMaterial3D* my_material = (PhysicsMaterial3D*)material;
+				outFriction = my_material->Friction;
+				outRestitution = my_material->Restitution;
+			}
+		}
+
+		static void	OverrideContactSettings(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings)
+		{
+			// Get the custom friction and restitution for both bodies
+			float friction1, friction2, restitution1, restitution2;
+			GetFrictionAndRestitution(inBody1, inManifold.mSubShapeID1, friction1, restitution1);
+			GetFrictionAndRestitution(inBody2, inManifold.mSubShapeID2, friction2, restitution2);
+
+			// Use the default formulas for combining friction and restitution
+			ioSettings.mCombinedFriction = sqrt(friction1 * friction2);
+			ioSettings.mCombinedRestitution = max(restitution1, restitution2);
+		}
+
 	public:
 		virtual ValidateResult OnContactValidate(const Body& inBody1, const Body& inBody2, const CollideShapeResult& inCollisionResult) override
 		{
@@ -101,10 +133,12 @@ namespace ArcEngine
 
 		virtual void OnContactAdded(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings) override
 		{
+			OverrideContactSettings(inBody1, inBody2, inManifold, ioSettings);
 		}
 
 		virtual void OnContactPersisted(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings) override
 		{
+			OverrideContactSettings(inBody1, inBody2, inManifold, ioSettings);
 		}
 
 		virtual void OnContactRemoved(const SubShapeIDPair& inSubShapePair) override

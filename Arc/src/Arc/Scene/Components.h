@@ -369,9 +369,6 @@ namespace ArcEngine
 
 		bool IsSensor = false;
 
-		float Friction = 0.5f;
-		float Restitution = 0.0f;
-
 		void* RuntimeBody = nullptr;
 
 		RigidbodyComponent() = default;
@@ -384,6 +381,9 @@ namespace ArcEngine
 		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
 		float Density = 1.0f;
 
+		float Friction = 0.5f;
+		float Restitution = 0.0f;
+
 		BoxColliderComponent() = default;
 		BoxColliderComponent(const BoxColliderComponent&) = default;
 	};
@@ -393,6 +393,9 @@ namespace ArcEngine
 		float Radius = 0.5f;
 		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
 		float Density = 1.0f;
+
+		float Friction = 0.5f;
+		float Restitution = 0.0f;
 		
 		SphereColliderComponent() = default;
 		SphereColliderComponent(const SphereColliderComponent&) = default;
@@ -404,6 +407,9 @@ namespace ArcEngine
 		float Radius = 0.5f;
 		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
 		float Density = 1.0f;
+
+		float Friction = 0.5f;
+		float Restitution = 0.0f;
 
 		CapsuleColliderComponent() = default;
 		CapsuleColliderComponent(const CapsuleColliderComponent&) = default;
@@ -417,6 +423,9 @@ namespace ArcEngine
 		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
 		float Density = 1.0f;
 
+		float Friction = 0.5f;
+		float Restitution = 0.0f;
+
 		TaperedCapsuleColliderComponent() = default;
 		TaperedCapsuleColliderComponent(const TaperedCapsuleColliderComponent&) = default;
 	};
@@ -427,6 +436,9 @@ namespace ArcEngine
 		float Radius = 0.5f;
 		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
 		float Density = 1.0f;
+
+		float Friction = 0.5f;
+		float Restitution = 0.0f;
 
 		CylinderColliderComponent() = default;
 		CylinderColliderComponent(const CylinderColliderComponent&) = default;

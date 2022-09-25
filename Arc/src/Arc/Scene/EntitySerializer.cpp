@@ -495,8 +495,6 @@ namespace ArcEngine
 			out << YAML::Key << "Continuous" << YAML::Value << rb.Continuous;
 			out << YAML::Key << "GravityScale" << YAML::Value << rb.GravityScale;
 			out << YAML::Key << "IsSensor" << YAML::Value << rb.IsSensor;
-			out << YAML::Key << "Friction" << YAML::Value << rb.Friction;
-			out << YAML::Key << "Restitution" << YAML::Value << rb.Restitution;
 
 			out << YAML::EndMap; // RigidbodyComponent
 		}
@@ -510,6 +508,8 @@ namespace ArcEngine
 			out << YAML::Key << "Size" << YAML::Value << bc.Size;
 			out << YAML::Key << "Offset" << YAML::Value << bc.Offset;
 			out << YAML::Key << "Density" << YAML::Value << bc.Density;
+			out << YAML::Key << "Friction" << YAML::Value << bc.Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << bc.Restitution;
 
 			out << YAML::EndMap; // BoxColliderComponent
 		}
@@ -523,6 +523,8 @@ namespace ArcEngine
 			out << YAML::Key << "Radius" << YAML::Value << sc.Radius;
 			out << YAML::Key << "Offset" << YAML::Value << sc.Offset;
 			out << YAML::Key << "Density" << YAML::Value << sc.Density;
+			out << YAML::Key << "Friction" << YAML::Value << sc.Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << sc.Restitution;
 
 			out << YAML::EndMap; // SphereColliderComponent
 		}
@@ -532,11 +534,13 @@ namespace ArcEngine
 			out << YAML::Key << "CapsuleColliderComponent";
 			out << YAML::BeginMap; // CapsuleColliderComponent
 
-			const auto& sc = entity.GetComponent<CapsuleColliderComponent>();
-			out << YAML::Key << "Height" << YAML::Value << sc.Height;
-			out << YAML::Key << "Radius" << YAML::Value << sc.Radius;
-			out << YAML::Key << "Offset" << YAML::Value << sc.Offset;
-			out << YAML::Key << "Density" << YAML::Value << sc.Density;
+			const auto& cc = entity.GetComponent<CapsuleColliderComponent>();
+			out << YAML::Key << "Height" << YAML::Value << cc.Height;
+			out << YAML::Key << "Radius" << YAML::Value << cc.Radius;
+			out << YAML::Key << "Offset" << YAML::Value << cc.Offset;
+			out << YAML::Key << "Density" << YAML::Value << cc.Density;
+			out << YAML::Key << "Friction" << YAML::Value << cc.Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << cc.Restitution;
 
 			out << YAML::EndMap; // CapsuleColliderComponent
 		}
@@ -546,12 +550,14 @@ namespace ArcEngine
 			out << YAML::Key << "TaperedCapsuleColliderComponent";
 			out << YAML::BeginMap; // TaperedCapsuleColliderComponent
 
-			const auto& sc = entity.GetComponent<TaperedCapsuleColliderComponent>();
-			out << YAML::Key << "Height" << YAML::Value << sc.Height;
-			out << YAML::Key << "TopRadius" << YAML::Value << sc.TopRadius;
-			out << YAML::Key << "BottomRadius" << YAML::Value << sc.BottomRadius;
-			out << YAML::Key << "Offset" << YAML::Value << sc.Offset;
-			out << YAML::Key << "Density" << YAML::Value << sc.Density;
+			const auto& tcc = entity.GetComponent<TaperedCapsuleColliderComponent>();
+			out << YAML::Key << "Height" << YAML::Value << tcc.Height;
+			out << YAML::Key << "TopRadius" << YAML::Value << tcc.TopRadius;
+			out << YAML::Key << "BottomRadius" << YAML::Value << tcc.BottomRadius;
+			out << YAML::Key << "Offset" << YAML::Value << tcc.Offset;
+			out << YAML::Key << "Density" << YAML::Value << tcc.Density;
+			out << YAML::Key << "Friction" << YAML::Value << tcc.Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << tcc.Restitution;
 
 			out << YAML::EndMap; // TaperedCapsuleColliderComponent
 		}
@@ -561,11 +567,13 @@ namespace ArcEngine
 			out << YAML::Key << "CylinderColliderComponent";
 			out << YAML::BeginMap; // CylinderColliderComponent
 
-			const auto& sc = entity.GetComponent<CapsuleColliderComponent>();
-			out << YAML::Key << "Height" << YAML::Value << sc.Height;
-			out << YAML::Key << "Radius" << YAML::Value << sc.Radius;
-			out << YAML::Key << "Offset" << YAML::Value << sc.Offset;
-			out << YAML::Key << "Density" << YAML::Value << sc.Density;
+			const auto& cc = entity.GetComponent<CapsuleColliderComponent>();
+			out << YAML::Key << "Height" << YAML::Value << cc.Height;
+			out << YAML::Key << "Radius" << YAML::Value << cc.Radius;
+			out << YAML::Key << "Offset" << YAML::Value << cc.Offset;
+			out << YAML::Key << "Density" << YAML::Value << cc.Density;
+			out << YAML::Key << "Friction" << YAML::Value << cc.Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << cc.Restitution;
 
 			out << YAML::EndMap; // CylinderColliderComponent
 		}
@@ -982,8 +990,6 @@ namespace ArcEngine
 			TrySet(src.Continuous, rbComponent["Continuous"]);
 			TrySet(src.GravityScale, rbComponent["GravityScale"]);
 			TrySet(src.IsSensor, rbComponent["IsSensor"]);
-			TrySet(src.Friction, rbComponent["Friction"]);
-			TrySet(src.Restitution, rbComponent["Restitution"]);
 		}
 
 		auto bcComponent = entity["BoxColliderComponent"];
@@ -993,6 +999,8 @@ namespace ArcEngine
 			TrySet(src.Size, bcComponent["Size"]);
 			TrySet(src.Offset, bcComponent["Offset"]);
 			TrySet(src.Density, bcComponent["Density"]);
+			TrySet(src.Friction, rbComponent["Friction"]);
+			TrySet(src.Restitution, rbComponent["Restitution"]);
 		}
 
 		auto scComponent = entity["SphereColliderComponent"];
@@ -1002,6 +1010,8 @@ namespace ArcEngine
 			TrySet(src.Radius, scComponent["Radius"]);
 			TrySet(src.Offset, scComponent["Offset"]);
 			TrySet(src.Density, scComponent["Density"]);
+			TrySet(src.Friction, rbComponent["Friction"]);
+			TrySet(src.Restitution, rbComponent["Restitution"]);
 		}
 
 		auto ccComponent = entity["CapsuleColliderComponent"];
@@ -1012,6 +1022,8 @@ namespace ArcEngine
 			TrySet(src.Radius, ccComponent["Radius"]);
 			TrySet(src.Offset, ccComponent["Offset"]);
 			TrySet(src.Density, ccComponent["Density"]);
+			TrySet(src.Friction, rbComponent["Friction"]);
+			TrySet(src.Restitution, rbComponent["Restitution"]);
 		}
 
 		auto tccComponent = entity["TaperedCapsuleColliderComponent"];
@@ -1023,6 +1035,8 @@ namespace ArcEngine
 			TrySet(src.BottomRadius, tccComponent["BottomRadius"]);
 			TrySet(src.Offset, tccComponent["Offset"]);
 			TrySet(src.Density, tccComponent["Density"]);
+			TrySet(src.Friction, rbComponent["Friction"]);
+			TrySet(src.Restitution, rbComponent["Restitution"]);
 		}
 
 		auto capsuleComponent = entity["CapsuleColliderComponent"];
@@ -1033,6 +1047,8 @@ namespace ArcEngine
 			TrySet(src.Radius, capsuleComponent["Radius"]);
 			TrySet(src.Offset, capsuleComponent["Offset"]);
 			TrySet(src.Density, capsuleComponent["Density"]);
+			TrySet(src.Friction, rbComponent["Friction"]);
+			TrySet(src.Restitution, rbComponent["Restitution"]);
 		}
 
 		auto meshComponent = entity["MeshComponent"];

@@ -33,6 +33,7 @@
 #include <Jolt/Physics/Collision/Shape/MutableCompoundShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
+#include "Arc/Physics/PhysicsMaterial3D.h"
 
 namespace ArcEngine
 {
@@ -1071,12 +1072,15 @@ namespace ArcEngine
 
 		float maxScaleComponent = glm::max(glm::max(tc.Scale.x, tc.Scale.y), tc.Scale.z);
 
+		const char* entityName = entity.GetComponent<TagComponent>().Tag.c_str();
+
 		if (entity.HasComponent<BoxColliderComponent>())
 		{
 			auto& bc = entity.GetComponent<BoxColliderComponent>();
+			PhysicsMaterial3D* mat = new PhysicsMaterial3D(entityName, JPH::ColorArg(255, 0, 0), bc.Friction, bc.Restitution);
 			
 			glm::vec3 scale = bc.Size * tc.Scale * 2.0f;
-			JPH::BoxShapeSettings shapeSettings({ glm::abs(scale.x), glm::abs(scale.y), glm::abs(scale.z) });
+			JPH::BoxShapeSettings shapeSettings({ glm::abs(scale.x), glm::abs(scale.y), glm::abs(scale.z) }, 0.05f, mat);
 			shapeSettings.SetDensity(glm::max(0.001f, bc.Density));
 
 			compoundShapeSettings->AddShape({ bc.Offset.x, bc.Offset.y, bc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
@@ -1085,9 +1089,10 @@ namespace ArcEngine
 		if (entity.HasComponent<SphereColliderComponent>())
 		{
 			auto& sc = entity.GetComponent<SphereColliderComponent>();
+			PhysicsMaterial3D* mat = new PhysicsMaterial3D(entityName, JPH::ColorArg(255, 0, 0), sc.Friction, sc.Restitution);
 
 			float radius = 2.0f * sc.Radius * maxScaleComponent;
-			JPH::SphereShapeSettings shapeSettings(glm::max(0.01f, radius));
+			JPH::SphereShapeSettings shapeSettings(glm::max(0.01f, radius), mat);
 			shapeSettings.SetDensity(glm::max(0.001f, sc.Density));
 
 			compoundShapeSettings->AddShape({ sc.Offset.x, sc.Offset.y, sc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
@@ -1096,9 +1101,10 @@ namespace ArcEngine
 		if (entity.HasComponent<CapsuleColliderComponent>())
 		{
 			auto& cc = entity.GetComponent<CapsuleColliderComponent>();
+			PhysicsMaterial3D* mat = new PhysicsMaterial3D(entityName, JPH::ColorArg(255, 0, 0), cc.Friction, cc.Restitution);
 
 			float radius = 2.0f * cc.Radius * maxScaleComponent;
-			JPH::CapsuleShapeSettings shapeSettings(glm::max(0.01f, cc.Height) * 0.5f, glm::max(0.01f, radius));
+			JPH::CapsuleShapeSettings shapeSettings(glm::max(0.01f, cc.Height) * 0.5f, glm::max(0.01f, radius), mat);
 			shapeSettings.SetDensity(glm::max(0.001f, cc.Density));
 
 			compoundShapeSettings->AddShape({ cc.Offset.x, cc.Offset.y, cc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
@@ -1107,10 +1113,11 @@ namespace ArcEngine
 		if (entity.HasComponent<TaperedCapsuleColliderComponent>())
 		{
 			auto& tcc = entity.GetComponent<TaperedCapsuleColliderComponent>();
+			PhysicsMaterial3D* mat = new PhysicsMaterial3D(entityName, JPH::ColorArg(255, 0, 0), tcc.Friction, tcc.Restitution);
 
 			float topRadius = 2.0f * tcc.TopRadius * maxScaleComponent;
 			float bottomRadius = 2.0f * tcc.BottomRadius * maxScaleComponent;
-			JPH::TaperedCapsuleShapeSettings shapeSettings(glm::max(0.01f, tcc.Height) * 0.5f, glm::max(0.01f, topRadius), glm::max(0.01f, bottomRadius));
+			JPH::TaperedCapsuleShapeSettings shapeSettings(glm::max(0.01f, tcc.Height) * 0.5f, glm::max(0.01f, topRadius), glm::max(0.01f, bottomRadius), mat);
 			shapeSettings.SetDensity(glm::max(0.001f, tcc.Density));
 
 			compoundShapeSettings->AddShape({ tcc.Offset.x, tcc.Offset.y, tcc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
@@ -1119,9 +1126,10 @@ namespace ArcEngine
 		if (entity.HasComponent<CylinderColliderComponent>())
 		{
 			auto& cc = entity.GetComponent<CylinderColliderComponent>();
+			PhysicsMaterial3D* mat = new PhysicsMaterial3D(entityName, JPH::ColorArg(255, 0, 0), cc.Friction, cc.Restitution);
 
 			float radius = 2.0f * cc.Radius * maxScaleComponent;
-			JPH::CylinderShapeSettings shapeSettings(glm::max(0.01f, cc.Height) * 0.5f, glm::max(0.01f, radius));
+			JPH::CylinderShapeSettings shapeSettings(glm::max(0.01f, cc.Height) * 0.5f, glm::max(0.01f, radius), 0.05f, mat);
 			shapeSettings.SetDensity(glm::max(0.001f, cc.Density));
 
 			compoundShapeSettings->AddShape({ cc.Offset.x, cc.Offset.y, cc.Offset.z }, JPH::Quat::sIdentity(), shapeSettings.Create().Get());
@@ -1147,8 +1155,6 @@ namespace ArcEngine
 		bodySettings.mGravityFactor = component.GravityScale;
 
 		bodySettings.mIsSensor = component.IsSensor;
-		bodySettings.mFriction = glm::clamp(component.Friction, 0.0f, 1.0f);
-		bodySettings.mRestitution = glm::clamp(component.Restitution, 0.0f, 1.0f);
 
 		JPH::Body* body = bodyInterface->CreateBody(bodySettings);
 
