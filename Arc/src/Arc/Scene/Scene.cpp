@@ -1219,7 +1219,7 @@ namespace ArcEngine
 			b2Body* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
 
 			b2PolygonShape boxShape;
-			boxShape.SetAsBox(bc2d.Size.x * transform.Scale.x, bc2d.Size.y * transform.Scale.y);
+			boxShape.SetAsBox(bc2d.Size.x * transform.Scale.x, bc2d.Size.y * transform.Scale.y, { bc2d.Offset.x, bc2d.Offset.y }, 0.0f);
 
 			b2FixtureDef fixtureDef;
 			fixtureDef.shape = &boxShape;
@@ -1246,6 +1246,7 @@ namespace ArcEngine
 
 			b2CircleShape circleShape;
 			circleShape.m_radius = cc2d.Radius * glm::max(transform.Scale.x, transform.Scale.y);
+			circleShape.m_p = { cc2d.Offset.x, cc2d.Offset.y };
 
 			b2FixtureDef fixtureDef;
 			fixtureDef.shape = &circleShape;
