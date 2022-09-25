@@ -649,7 +649,6 @@ namespace ArcEngine
 				UI::Property("Density", component.Density);
 				UI::Property("Friction", component.Friction);
 				UI::Property("Restitution", component.Restitution);
-				UI::Property("Restitution Threshold", component.RestitutionThreshold);
 				UI::EndProperties();
 			}
 		});
@@ -669,7 +668,6 @@ namespace ArcEngine
 				UI::Property("Density", component.Density);
 				UI::Property("Friction", component.Friction);
 				UI::Property("Restitution", component.Restitution);
-				UI::Property("Restitution Threshold", component.RestitutionThreshold);
 				UI::EndProperties();
 			}
 		});

@@ -336,7 +336,6 @@ namespace ArcEngine
 			out << YAML::Key << "Density" << YAML::Value << bc2d.Density;
 			out << YAML::Key << "Friction" << YAML::Value << bc2d.Friction;
 			out << YAML::Key << "Restitution" << YAML::Value << bc2d.Restitution;
-			out << YAML::Key << "RestitutionThreshold" << YAML::Value << bc2d.RestitutionThreshold;
 
 			out << YAML::EndMap; // BoxCollider2DComponent
 		}
@@ -353,7 +352,6 @@ namespace ArcEngine
 			out << YAML::Key << "Density" << YAML::Value << cc2d.Density;
 			out << YAML::Key << "Friction" << YAML::Value << cc2d.Friction;
 			out << YAML::Key << "Restitution" << YAML::Value << cc2d.Restitution;
-			out << YAML::Key << "RestitutionThreshold" << YAML::Value << cc2d.RestitutionThreshold;
 
 			out << YAML::EndMap; // CircleCollider2DComponent
 		}
@@ -863,7 +861,6 @@ namespace ArcEngine
 			TrySet(src.Density, bc2dCpmponent["Density"]);
 			TrySet(src.Friction, bc2dCpmponent["Friction"]);
 			TrySet(src.Restitution, bc2dCpmponent["Restitution"]);
-			TrySet(src.RestitutionThreshold, bc2dCpmponent["RestitutionThreshold"]);
 		}
 
 		auto cc2dCpmponent = entity["CircleCollider2DComponent"];
@@ -876,7 +873,6 @@ namespace ArcEngine
 			TrySet(src.Density, cc2dCpmponent["Density"]);
 			TrySet(src.Friction, cc2dCpmponent["Friction"]);
 			TrySet(src.Restitution, cc2dCpmponent["Restitution"]);
-			TrySet(src.RestitutionThreshold, cc2dCpmponent["RestitutionThreshold"]);
 		}
 
 		auto distJoint2dCpmponent = entity["DistanceJoint2DComponent"];

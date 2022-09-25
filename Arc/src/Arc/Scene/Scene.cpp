@@ -1214,7 +1214,6 @@ namespace ArcEngine
 			fixtureDef.density = bc2d.Density;
 			fixtureDef.friction = bc2d.Friction;
 			fixtureDef.restitution = bc2d.Restitution;
-			fixtureDef.restitutionThreshold = bc2d.RestitutionThreshold;
 
 			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
 			bc2d.RuntimeFixture = fixture;
@@ -1241,7 +1240,6 @@ namespace ArcEngine
 			fixtureDef.density = cc2d.Density;
 			fixtureDef.friction = cc2d.Friction;
 			fixtureDef.restitution = cc2d.Restitution;
-			fixtureDef.restitutionThreshold = cc2d.RestitutionThreshold;
 
 			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
 			cc2d.RuntimeFixture = fixture;
