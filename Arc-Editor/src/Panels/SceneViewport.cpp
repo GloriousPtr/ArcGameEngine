@@ -324,6 +324,8 @@ namespace ArcEngine
 
 		Renderer2D::BeginScene(m_EditorCamera.GetViewProjection());
 		{
+			constexpr glm::vec4 color = glm::vec4(1.0f);
+
 			auto view = m_Scene->GetAllEntitiesWith<TransformComponent, CameraComponent>();
 			for (auto entityHandle : view)
 			{
@@ -348,7 +350,6 @@ namespace ArcEngine
 					}
 				}
 
-				glm::vec4 color = glm::vec4(1.0f);
 				Renderer2D::DrawLine(frustumCorners[0], frustumCorners[1], color);
 				Renderer2D::DrawLine(frustumCorners[0], frustumCorners[2], color);
 				Renderer2D::DrawLine(frustumCorners[0], frustumCorners[4], color);
@@ -365,10 +366,39 @@ namespace ArcEngine
 		}
 
 		{
+			constexpr glm::vec4 color = { 0.32f, 0.53f, 0.78f, 1.0f };
+
 			auto view = m_Scene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
 			for (auto entity : view)
 			{
-				Renderer2D::DrawRect(Entity(entity, m_Scene.get()).GetWorldTransform(), { 0.2f, 0.8f, 0.2f, 1.0f });
+				const auto& [tc, bc] = view.get<TransformComponent, BoxCollider2DComponent>(entity);
+
+				glm::mat4 transform = Entity(entity, m_Scene.get()).GetWorldTransform();
+				transform *= glm::translate(glm::mat4(1.0f), glm::vec3(bc.Offset, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f * bc.Size, 1.0f));
+				Renderer2D::DrawRect(transform, color);
+			}
+		}
+
+		{
+			constexpr glm::vec4 color = { 0.2f, 0.8f, 0.2f, 1.0f };
+
+			auto view = m_Scene->GetAllEntitiesWith<TransformComponent, BoxColliderComponent>();
+			for (auto entity : view)
+			{
+				const auto& [tc, bc] = view.get<TransformComponent, BoxColliderComponent>(entity);
+
+				glm::mat4 transform = Entity(entity, m_Scene.get()).GetWorldTransform();
+				transform *= glm::translate(glm::mat4(1.0f), bc.Offset) * glm::scale(glm::mat4(1.0f), 4.0f * bc.Size);
+
+				glm::mat4 transformFront = glm::translate(transform, glm::vec3(0.0f, 0.0f, bc.Size.z));
+				glm::mat4 transformBack = glm::translate(transform, glm::vec3(0.0f, 0.0f, -bc.Size.z));
+				glm::mat4 transformLeft = glm::translate(transform, glm::vec3(-bc.Size.x, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				glm::mat4 transformRight = glm::translate(transformLeft, glm::vec3(0.0f, 0.0f, 2.0f * bc.Size.x));
+
+				Renderer2D::DrawRect(transformFront, color);
+				Renderer2D::DrawRect(transformBack, color);
+				Renderer2D::DrawRect(transformLeft, color);
+				Renderer2D::DrawRect(transformRight, color);
 			}
 		}
 
