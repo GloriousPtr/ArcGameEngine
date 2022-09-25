@@ -416,7 +416,7 @@ namespace ArcEngine
 			m_PhysicsWorld2D = new b2World({ 0.0f, -9.8f });
 			m_ContactListener = new ContactListener(this);
 			m_PhysicsWorld2D->SetContactListener(m_ContactListener);
-
+			
 			{
 				auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
 				for (auto e : view)
@@ -427,6 +427,7 @@ namespace ArcEngine
 			}
 
 			{
+				const b2Vec2 zero = b2Vec2(0.0f, 0.0f);
 				auto distanceJointView = m_Registry.view<Rigidbody2DComponent, DistanceJoint2DComponent>();
 				for (auto e : distanceJointView)
 				{
@@ -436,20 +437,19 @@ namespace ArcEngine
 					{
 						b2Body* body1 = (b2Body*)body.RuntimeBody;
 						b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
-						b2Vec2 body1Center = body1->GetWorldCenter();
-						b2Vec2 body2Center = body2->GetWorldCenter();
-						b2Vec2 anchor1Pos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
-						b2Vec2 anchor2Pos = { body2Center.x + joint.ConnectedAnchor.x, body2Center.y + joint.ConnectedAnchor.y };
+						
+						b2Vec2 worldAnchorA = body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y });
+						b2Vec2 worldAnchorB = body2->GetWorldPoint({ joint.ConnectedAnchor.x, joint.ConnectedAnchor.y });
 
-						b2DistanceJointDef jointDef;
-						jointDef.Initialize(body1, body2, anchor1Pos, anchor2Pos);
-						jointDef.collideConnected = joint.EnableCollision;
+						b2DistanceJointDef jd;
+						jd.Initialize(body1, body2, worldAnchorA, worldAnchorB);
+						jd.collideConnected = joint.EnableCollision;
 						if (!joint.AutoDistance)
-							jointDef.length = joint.Distance;
-						jointDef.minLength = glm::min(jointDef.length, joint.MinDistance);
-						jointDef.maxLength = jointDef.length + glm::max(joint.MaxDistanceBy, 0.0f);
+							jd.length = joint.Distance;
+						jd.minLength = glm::min(jd.length, joint.MinDistance);
+						jd.maxLength = jd.length + glm::max(joint.MaxDistanceBy, 0.0f);
 
-						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jointDef);
+						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
 					}
 				}
 
@@ -462,21 +462,20 @@ namespace ArcEngine
 					{
 						b2Body* body1 = (b2Body*)body.RuntimeBody;
 						b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
-						b2Vec2 body1Center = body1->GetWorldCenter();
-						b2Vec2 body2Center = body2->GetWorldCenter();
-						b2Vec2 anchor1Pos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
-						b2Vec2 anchor2Pos = { body2Center.x + joint.ConnectedAnchor.x, body2Center.y + joint.ConnectedAnchor.y };
 
-						b2DistanceJointDef jointDef;
-						jointDef.Initialize(body1, body2, anchor1Pos, anchor2Pos);
-						jointDef.collideConnected = joint.EnableCollision;
+						b2Vec2 worldAnchorA = body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y });
+						b2Vec2 worldAnchorB = body2->GetWorldPoint({ joint.ConnectedAnchor.x, joint.ConnectedAnchor.y });
+
+						b2DistanceJointDef jd;
+						jd.Initialize(body1, body2, worldAnchorA, worldAnchorB);
+						jd.collideConnected = joint.EnableCollision;
 						if (!joint.AutoDistance)
-							jointDef.length = joint.Distance;
-						jointDef.minLength = glm::min(jointDef.length, joint.MinDistance);
-						jointDef.maxLength = jointDef.length + glm::max(joint.MaxDistanceBy, 0.0f);
-						b2LinearStiffness(jointDef.stiffness, jointDef.damping, joint.Frequency, joint.DampingRatio, body1, body2);
+							jd.length = joint.Distance;
+						jd.minLength = glm::min(jd.length, joint.MinDistance);
+						jd.maxLength = jd.length + glm::max(joint.MaxDistanceBy, 0.0f);
+						b2LinearStiffness(jd.stiffness, jd.damping, joint.Frequency, joint.DampingRatio, body1, body2);
 
-						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jointDef);
+						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
 					}
 				}
 
@@ -489,20 +488,18 @@ namespace ArcEngine
 					{
 						b2Body* body1 = (b2Body*)body.RuntimeBody;
 						b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
-						b2Vec2 body1Center = body1->GetWorldCenter();
-						b2Vec2 anchorPos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
 
-						b2RevoluteJointDef jointDef;
-						jointDef.Initialize(body1, body2, anchorPos);
-						jointDef.collideConnected = joint.EnableCollision;
-						jointDef.enableLimit = joint.UseLimits;
-						jointDef.lowerAngle = glm::radians(joint.LowerAngle);
-						jointDef.upperAngle = glm::radians(joint.UpperAngle);
-						jointDef.enableMotor = joint.UseMotor;
-						jointDef.motorSpeed = joint.MotorSpeed;
-						jointDef.maxMotorTorque = joint.MaxMotorTorque;
+						b2RevoluteJointDef jd;
+						jd.Initialize(body1, body2, body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y }));
+						jd.collideConnected = joint.EnableCollision;
+						jd.enableLimit = joint.UseLimits;
+						jd.lowerAngle = glm::radians(joint.LowerAngle);
+						jd.upperAngle = glm::radians(joint.UpperAngle);
+						jd.enableMotor = joint.UseMotor;
+						jd.motorSpeed = joint.MotorSpeed;
+						jd.maxMotorTorque = joint.MaxMotorTorque;
 
-						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jointDef);
+						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
 					}
 				}
 
@@ -515,23 +512,21 @@ namespace ArcEngine
 					{
 						b2Body* body1 = (b2Body*)body.RuntimeBody;
 						b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
-						b2Vec2 body1Center = body1->GetWorldCenter();
-						b2Vec2 anchorPos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
 
 						b2Vec2 worldAxis(1.0f, 0.0f);
 
-						b2PrismaticJointDef jointDef;
-						jointDef.Initialize(body1, body2, anchorPos, worldAxis);
-						jointDef.collideConnected = joint.EnableCollision;
-						jointDef.referenceAngle = glm::radians(joint.Angle);
-						jointDef.enableLimit = joint.UseLimits;
-						jointDef.lowerTranslation = joint.LowerTranslation;
-						jointDef.upperTranslation = joint.UpperTranslation;
-						jointDef.enableMotor = joint.UseMotor;
-						jointDef.motorSpeed = joint.MotorSpeed;
-						jointDef.maxMotorForce = joint.MaxMotorForce;
+						b2PrismaticJointDef jd;
+						jd.Initialize(body1, body2, body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y }), worldAxis);
+						jd.collideConnected = joint.EnableCollision;
+						jd.referenceAngle = glm::radians(joint.Angle);
+						jd.enableLimit = joint.UseLimits;
+						jd.lowerTranslation = joint.LowerTranslation;
+						jd.upperTranslation = joint.UpperTranslation;
+						jd.enableMotor = joint.UseMotor;
+						jd.motorSpeed = joint.MotorSpeed;
+						jd.maxMotorForce = joint.MaxMotorForce;
 
-						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jointDef);
+						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
 					}
 				}
 
@@ -544,8 +539,6 @@ namespace ArcEngine
 					{
 						b2Body* body1 = (b2Body*)body.RuntimeBody;
 						b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
-						b2Vec2 body1Center = body1->GetPosition();
-						b2Vec2 anchorPos = { body1Center.x + joint.Anchor.x, body1Center.y + joint.Anchor.y };
 
 						b2Vec2 axis(0.0f, 1.0f);
 
@@ -553,7 +546,7 @@ namespace ArcEngine
 						float omega = 2.0f * b2_pi * joint.Frequency;
 
 						b2WheelJointDef jd;
-						jd.Initialize(body1, body2, anchorPos, axis);
+						jd.Initialize(body1, body2, body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y }), axis);
 						jd.collideConnected = joint.EnableCollision;
 						jd.stiffness = mass * omega * omega;
 						jd.damping = 2.0f * mass * joint.DampingRatio * omega;
