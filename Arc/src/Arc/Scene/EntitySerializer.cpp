@@ -163,7 +163,7 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	inline T TrySetEnum(T& value, YAML::Node& node)
+	inline T TrySetEnum(T& value, const YAML::Node& node)
 	{
 		if (node)
 			value = (T) node.as<int>((int)value);
@@ -744,8 +744,7 @@ namespace ArcEngine
 
 		deserializedEntity.GetComponent<TagComponent>().Enabled = enabled;
 
-		auto transformComponent = entity["TransformComponent"];
-		if (transformComponent)
+		if (const auto& transformComponent = entity["TransformComponent"])
 		{
 			// Entities always have transforms
 			auto& tc = deserializedEntity.GetComponent<TransformComponent>();
@@ -754,8 +753,7 @@ namespace ArcEngine
 			TrySet(tc.Scale, transformComponent["Scale"]);
 		}
 
-		auto relationshipComponent = entity["RelationshipComponent"];
-		if (relationshipComponent)
+		if (const auto& relationshipComponent = entity["RelationshipComponent"])
 		{
 			// Entities always have transforms
 			auto& tc = deserializedEntity.GetComponent<RelationshipComponent>();
@@ -778,8 +776,7 @@ namespace ArcEngine
 			}
 		}
 
-		auto cameraComponent = entity["CameraComponent"];
-		if (cameraComponent)
+		if (const auto& cameraComponent = entity["CameraComponent"])
 		{
 			auto& cc = deserializedEntity.AddComponent<CameraComponent>();
 
@@ -810,8 +807,7 @@ namespace ArcEngine
 			TrySet(cc.FixedAspectRatio, cameraComponent["FixedAspectRatio"]);
 		}
 
-		auto spriteRenderer = entity["SpriteRendererComponent"];
-		if (spriteRenderer)
+		if (const auto& spriteRenderer = entity["SpriteRendererComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
 			TrySet(src.Color, spriteRenderer["Color"]);
@@ -824,8 +820,7 @@ namespace ArcEngine
 				src.Texture = AssetManager::GetTexture2D(texturePath);
 		}
 
-		auto skyLight = entity["SkyLightComponent"];
-		if (skyLight)
+		if (const auto& skyLight = entity["SkyLightComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<SkyLightComponent>();
 			TrySet(src.Intensity, skyLight["Intensity"]);
@@ -837,8 +832,7 @@ namespace ArcEngine
 				src.Texture = AssetManager::GetTextureCubemap(texturePath);
 		}
 
-		auto lightComponent = entity["LightComponent"];
-		if (lightComponent)
+		if (const auto& lightComponent = entity["LightComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<LightComponent>();
 			TrySetEnum(src.Type, lightComponent["Type"]);
@@ -855,8 +849,7 @@ namespace ArcEngine
 				ColorUtils::TempratureToColor(src.Temperature, src.Color);
 		}
 
-		auto rb2dCpmponent = entity["Rigidbody2DComponent"];
-		if (rb2dCpmponent)
+		if (const auto& rb2dCpmponent = entity["Rigidbody2DComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<Rigidbody2DComponent>();
 			TrySetEnum(src.Type, rb2dCpmponent["Type"]);
@@ -871,8 +864,7 @@ namespace ArcEngine
 			TrySet(src.GravityScale, rb2dCpmponent["GravityScale"]);
 		}
 
-		auto bc2dCpmponent = entity["BoxCollider2DComponent"];
-		if (bc2dCpmponent)
+		if (const auto& bc2dCpmponent = entity["BoxCollider2DComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<BoxCollider2DComponent>();
 			TrySet(src.IsSensor, bc2dCpmponent["IsSensor"]);
@@ -883,8 +875,7 @@ namespace ArcEngine
 			TrySet(src.Restitution, bc2dCpmponent["Restitution"]);
 		}
 
-		auto cc2dCpmponent = entity["CircleCollider2DComponent"];
-		if (cc2dCpmponent)
+		if (const auto& cc2dCpmponent = entity["CircleCollider2DComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<CircleCollider2DComponent>();
 			TrySet(src.IsSensor, cc2dCpmponent["IsSensor"]);
@@ -895,8 +886,7 @@ namespace ArcEngine
 			TrySet(src.Restitution, cc2dCpmponent["Restitution"]);
 		}
 
-		auto pc2dCpmponent = entity["PolygonCollider2DComponent"];
-		if (pc2dCpmponent)
+		if (const auto& pc2dCpmponent = entity["PolygonCollider2DComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<PolygonCollider2DComponent>();
 			TrySet(src.IsSensor, pc2dCpmponent["IsSensor"]);
@@ -917,8 +907,7 @@ namespace ArcEngine
 			TrySet(src.Restitution, pc2dCpmponent["Restitution"]);
 		}
 
-		auto distJoint2dCpmponent = entity["DistanceJoint2DComponent"];
-		if (distJoint2dCpmponent)
+		if (const auto& distJoint2dCpmponent = entity["DistanceJoint2DComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<DistanceJoint2DComponent>();
 			TrySet(src.EnableCollision, distJoint2dCpmponent["EnableCollision"]);
@@ -932,25 +921,23 @@ namespace ArcEngine
 			TrySet(src.BreakForce, distJoint2dCpmponent["BreakForce"]);
 		}
 
-		auto springJoint2dCpmponent = entity["SpringJoint2DComponent"];
-		if (springJoint2dCpmponent)
+		if (const auto& springJoint2dCpmponent = entity["SpringJoint2DComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<SpringJoint2DComponent>();
 			TrySet(src.EnableCollision, springJoint2dCpmponent["EnableCollision"]);
 			TrySet(src.ConnectedRigidbody, springJoint2dCpmponent["ConnectedRigidbody"]);
 			TrySet(src.Anchor, springJoint2dCpmponent["Anchor"]);
 			TrySet(src.ConnectedAnchor, springJoint2dCpmponent["ConnectedAnchor"]);
-			TrySet(src.AutoDistance, distJoint2dCpmponent["AutoDistance"]);
-			TrySet(src.Distance, distJoint2dCpmponent["Distance"]);
-			TrySet(src.MinDistance, distJoint2dCpmponent["MinDistance"]);
-			TrySet(src.MaxDistanceBy, distJoint2dCpmponent["MaxDistanceBy"]);
+			TrySet(src.AutoDistance, springJoint2dCpmponent["AutoDistance"]);
+			TrySet(src.Distance, springJoint2dCpmponent["Distance"]);
+			TrySet(src.MinDistance, springJoint2dCpmponent["MinDistance"]);
+			TrySet(src.MaxDistanceBy, springJoint2dCpmponent["MaxDistanceBy"]);
 			TrySet(src.Frequency, springJoint2dCpmponent["Frequency"]);
 			TrySet(src.DampingRatio, springJoint2dCpmponent["DampingRatio"]);
 			TrySet(src.BreakForce, springJoint2dCpmponent["BreakForce"]);
 		}
 
-		auto hingeJoint2dCpmponent = entity["HingeJoint2DComponent"];
-		if (hingeJoint2dCpmponent)
+		if (const auto& hingeJoint2dCpmponent = entity["HingeJoint2DComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<HingeJoint2DComponent>();
 			TrySet(src.EnableCollision, hingeJoint2dCpmponent["EnableCollision"]);
@@ -966,8 +953,7 @@ namespace ArcEngine
 			TrySet(src.BreakTorque, hingeJoint2dCpmponent["BreakTorque"]);
 		}
 
-		auto sliderJoint2dCpmponent = entity["SliderJoint2DComponent"];
-		if (sliderJoint2dCpmponent)
+		if (const auto& sliderJoint2dCpmponent = entity["SliderJoint2DComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<SliderJoint2DComponent>();
 			TrySet(src.EnableCollision, sliderJoint2dCpmponent["EnableCollision"]);
@@ -984,8 +970,7 @@ namespace ArcEngine
 			TrySet(src.BreakTorque, sliderJoint2dCpmponent["BreakTorque"]);
 		}
 
-		auto wheelJoint2dCpmponent = entity["WheelJoint2DComponent"];
-		if (wheelJoint2dCpmponent)
+		if (const auto& wheelJoint2dCpmponent = entity["WheelJoint2DComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<WheelJoint2DComponent>();
 			TrySet(src.EnableCollision, wheelJoint2dCpmponent["EnableCollision"]);
@@ -1003,8 +988,7 @@ namespace ArcEngine
 			TrySet(src.BreakTorque, wheelJoint2dCpmponent["BreakTorque"]);
 		}
 
-		auto buoyancyEffector2DComponent = entity["BuoyancyEffector2DComponent"];
-		if (buoyancyEffector2DComponent)
+		if (const auto& buoyancyEffector2DComponent = entity["BuoyancyEffector2DComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<BuoyancyEffector2DComponent>();
 			TrySet(src.Density, buoyancyEffector2DComponent["Density"]);
@@ -1014,8 +998,7 @@ namespace ArcEngine
 			TrySet(src.FlowAngle, buoyancyEffector2DComponent["FlowAngle"]);
 		}
 
-		auto rbComponent = entity["RigidbodyComponent"];
-		if (rbComponent)
+		if (const auto& rbComponent = entity["RigidbodyComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<RigidbodyComponent>();
 			TrySetEnum(src.Type, rbComponent["Type"]);
@@ -1030,42 +1013,38 @@ namespace ArcEngine
 			TrySet(src.IsSensor, rbComponent["IsSensor"]);
 		}
 
-		auto bcComponent = entity["BoxColliderComponent"];
-		if (bcComponent)
+		if (const auto& bcComponent = entity["BoxColliderComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<BoxColliderComponent>();
 			TrySet(src.Size, bcComponent["Size"]);
 			TrySet(src.Offset, bcComponent["Offset"]);
 			TrySet(src.Density, bcComponent["Density"]);
-			TrySet(src.Friction, rbComponent["Friction"]);
-			TrySet(src.Restitution, rbComponent["Restitution"]);
+			TrySet(src.Friction, bcComponent["Friction"]);
+			TrySet(src.Restitution, bcComponent["Restitution"]);
 		}
 
-		auto scComponent = entity["SphereColliderComponent"];
-		if (scComponent)
+		if (const auto& scComponent = entity["SphereColliderComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<SphereColliderComponent>();
 			TrySet(src.Radius, scComponent["Radius"]);
 			TrySet(src.Offset, scComponent["Offset"]);
 			TrySet(src.Density, scComponent["Density"]);
-			TrySet(src.Friction, rbComponent["Friction"]);
-			TrySet(src.Restitution, rbComponent["Restitution"]);
+			TrySet(src.Friction, scComponent["Friction"]);
+			TrySet(src.Restitution, scComponent["Restitution"]);
 		}
 
-		auto ccComponent = entity["CapsuleColliderComponent"];
-		if (ccComponent)
+		if (const auto& ccComponent = entity["CapsuleColliderComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<CapsuleColliderComponent>();
 			TrySet(src.Height, ccComponent["Height"]);
 			TrySet(src.Radius, ccComponent["Radius"]);
 			TrySet(src.Offset, ccComponent["Offset"]);
 			TrySet(src.Density, ccComponent["Density"]);
-			TrySet(src.Friction, rbComponent["Friction"]);
-			TrySet(src.Restitution, rbComponent["Restitution"]);
+			TrySet(src.Friction, ccComponent["Friction"]);
+			TrySet(src.Restitution, ccComponent["Restitution"]);
 		}
 
-		auto tccComponent = entity["TaperedCapsuleColliderComponent"];
-		if (tccComponent)
+		if (const auto& tccComponent = entity["TaperedCapsuleColliderComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<TaperedCapsuleColliderComponent>();
 			TrySet(src.Height, tccComponent["Height"]);
@@ -1073,24 +1052,22 @@ namespace ArcEngine
 			TrySet(src.BottomRadius, tccComponent["BottomRadius"]);
 			TrySet(src.Offset, tccComponent["Offset"]);
 			TrySet(src.Density, tccComponent["Density"]);
-			TrySet(src.Friction, rbComponent["Friction"]);
-			TrySet(src.Restitution, rbComponent["Restitution"]);
+			TrySet(src.Friction, tccComponent["Friction"]);
+			TrySet(src.Restitution, tccComponent["Restitution"]);
 		}
 
-		auto capsuleComponent = entity["CapsuleColliderComponent"];
-		if (capsuleComponent)
+		if (const auto& ccComponent = entity["CapsuleColliderComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<CapsuleColliderComponent>();
-			TrySet(src.Height, capsuleComponent["Height"]);
-			TrySet(src.Radius, capsuleComponent["Radius"]);
-			TrySet(src.Offset, capsuleComponent["Offset"]);
-			TrySet(src.Density, capsuleComponent["Density"]);
-			TrySet(src.Friction, rbComponent["Friction"]);
-			TrySet(src.Restitution, rbComponent["Restitution"]);
+			TrySet(src.Height, ccComponent["Height"]);
+			TrySet(src.Radius, ccComponent["Radius"]);
+			TrySet(src.Offset, ccComponent["Offset"]);
+			TrySet(src.Density, ccComponent["Density"]);
+			TrySet(src.Friction, ccComponent["Friction"]);
+			TrySet(src.Restitution, ccComponent["Restitution"]);
 		}
 
-		auto meshComponent = entity["MeshComponent"];
-		if (meshComponent)
+		if (const auto& meshComponent = entity["MeshComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<MeshComponent>();
 			TrySet(src.Filepath, meshComponent["Filepath"]);
@@ -1101,8 +1078,7 @@ namespace ArcEngine
 				src.MeshGeometry = AssetManager::GetMesh(src.Filepath);
 		}
 
-		auto scriptComponent = entity["ScriptComponent"];
-		if (scriptComponent)
+		if (const auto& scriptComponent = entity["ScriptComponent"])
 		{
 			auto& sc = deserializedEntity.AddComponent<ScriptComponent>();
 
@@ -1172,8 +1148,7 @@ namespace ArcEngine
 			}
 		}
 
-		auto audioSourceComponent = entity["AudioSourceComponent"];
-		if (audioSourceComponent)
+		if (const auto& audioSourceComponent = entity["AudioSourceComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<AudioSourceComponent>();
 			eastl::string filepath = "";
@@ -1198,8 +1173,7 @@ namespace ArcEngine
 				src.Source = CreateRef<AudioSource>(filepath.c_str());
 		}
 
-		auto audioListenerComponent = entity["AudioListenerComponent"];
-		if (audioListenerComponent)
+		if (const auto& audioListenerComponent = entity["AudioListenerComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<AudioListenerComponent>();
 			TrySet(src.Active, audioListenerComponent["Active"]);
