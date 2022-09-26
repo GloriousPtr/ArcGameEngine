@@ -51,13 +51,51 @@ namespace ArcEngine
 		static bool Property(const char* label, int& value, const char** dropdownStrings, size_t count, const char* tooltip = nullptr);
 
 		// Colors
-		static bool PropertyColor3(const char* label, glm::vec3& color, const char* tooltip = nullptr);
-		static bool PropertyColor4(const char* label, glm::vec4& color, const char* tooltip = nullptr);
+		static bool PropertyColor(const char* label, glm::vec3& color, const char* tooltip = nullptr);
+		static bool PropertyColor(const char* label, glm::vec4& color, const char* tooltip = nullptr);
 		static bool PropertyColor4as3(const char* label, glm::vec4& color, const char* tooltip = nullptr);
 
 		// 2D/3D Textures
 		static bool Property(const char* label, Ref<TextureCubemap>& texture, uint64_t overrideTextureID = 0, const char* tooltip = nullptr);
 		static bool Property(const char* label, Ref<Texture2D>& texture, uint64_t overrideTextureID = 0, const char* tooltip = nullptr);
+
+		// s/byte
+		static bool Property(const char* label, eastl::vector<int8_t>& v, int8_t defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, eastl::vector<uint8_t>& v, uint8_t defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr);
+
+		// u/short
+		static bool Property(const char* label, eastl::vector<int16_t>& v, int16_t defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, eastl::vector<uint16_t>& v, uint16_t defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr);
+
+		// u/int
+		static bool Property(const char* label, eastl::vector<int32_t>& v, int32_t defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, eastl::vector<uint32_t>& v, uint32_t defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr);
+
+		// u/long
+		static bool Property(const char* label, eastl::vector<int64_t>& v, int64_t defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, eastl::vector<uint64_t>& v, uint64_t defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr);
+
+		// Float
+		static bool Property(const char* label, eastl::vector<float>& v, float defaultValue = 0.0f, size_t minElements = 0, const char* tooltip = nullptr);
+
+		// Double
+		static bool Property(const char* label, eastl::vector<double>& v, double defaultValue = 0.0, size_t minElements = 0, const char* tooltip = nullptr);
+
+		// Vec2/3/4
+		static bool Property(const char* label, eastl::vector<glm::vec2>& v, const glm::vec2& defaultValue = glm::vec2(0.0f), size_t minElements = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, eastl::vector<glm::vec3>& v, const glm::vec3& defaultValue = glm::vec3(0.0f), size_t minElements = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue = glm::vec4(0.0f), size_t minElements = 0, const char* tooltip = nullptr);
+
+		// Bool
+		static bool Property(const char* label, eastl::vector<bool>& v, bool defaultValue, size_t minElements = 0, const char* tooltip = nullptr);
+
+		// Colors
+		static bool PropertyColor(const char* label, eastl::vector<glm::vec3>& v, const glm::vec3& defaultValue = glm::vec3(1.0f), size_t minElements = 0, const char* tooltip = nullptr);
+		static bool PropertyColor(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue = glm::vec4(1.0f), size_t minElements = 0, const char* tooltip = nullptr);
+		static bool PropertyColor4as3(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue = glm::vec4(1.0f), size_t minElements = 0, const char* tooltip = nullptr);
+
+
+
 
 		template<typename T>
 		static bool PropertyComponent(const char* label, const char* text, Scene* scene, UUID& entityID, const char* tooltip = nullptr)
@@ -145,6 +183,12 @@ namespace ArcEngine
 
 		static void BeginPropertyGrid(const char* label, const char* tooltip, bool rightAlignNextColumn = true);
 		static void EndPropertyGrid();
+
+		static void BeginProperties3(ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_BordersInner
+			| ImGuiTableFlags_BordersOuterH);
+
+		template<typename T, typename Fn>
+		static bool ListProperty(const char* label, eastl::vector<T>& v, const T& defaultValue, size_t minElements, const char* tooltip, Fn function);
 
 	private:
 		static int s_UIContextID;

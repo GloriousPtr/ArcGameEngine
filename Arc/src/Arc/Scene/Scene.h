@@ -20,6 +20,7 @@ namespace ArcEngine
 	struct Rigidbody2DComponent;
 	struct BoxCollider2DComponent;
 	struct CircleCollider2DComponent;
+	struct PolygonCollider2DComponent;
 	
 	class Scene
 	{
@@ -63,6 +64,7 @@ namespace ArcEngine
 		void CreateRigidbody2D(Entity entity, Rigidbody2DComponent& component);
 		void CreateBoxCollider2D(Entity entity, BoxCollider2DComponent& component);
 		void CreateCircleCollider2D(Entity entity, CircleCollider2DComponent& component);
+		void CreatePolygonCollider2D(Entity entity, PolygonCollider2DComponent& component);
 
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);

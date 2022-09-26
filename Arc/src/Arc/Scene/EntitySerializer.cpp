@@ -330,9 +330,9 @@ namespace ArcEngine
 			out << YAML::BeginMap; // BoxCollider2DComponent
 
 			const auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
+			out << YAML::Key << "IsSensor" << YAML::Value << bc2d.IsSensor;
 			out << YAML::Key << "Size" << YAML::Value << bc2d.Size;
 			out << YAML::Key << "Offset" << YAML::Value << bc2d.Offset;
-			out << YAML::Key << "IsSensor" << YAML::Value << bc2d.IsSensor;
 			out << YAML::Key << "Density" << YAML::Value << bc2d.Density;
 			out << YAML::Key << "Friction" << YAML::Value << bc2d.Friction;
 			out << YAML::Key << "Restitution" << YAML::Value << bc2d.Restitution;
@@ -346,14 +346,34 @@ namespace ArcEngine
 			out << YAML::BeginMap; // CircleCollider2DComponent
 
 			const auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
+			out << YAML::Key << "IsSensor" << YAML::Value << cc2d.IsSensor;
 			out << YAML::Key << "Radius" << YAML::Value << cc2d.Radius;
 			out << YAML::Key << "Offset" << YAML::Value << cc2d.Offset;
-			out << YAML::Key << "IsSensor" << YAML::Value << cc2d.IsSensor;
 			out << YAML::Key << "Density" << YAML::Value << cc2d.Density;
 			out << YAML::Key << "Friction" << YAML::Value << cc2d.Friction;
 			out << YAML::Key << "Restitution" << YAML::Value << cc2d.Restitution;
 
 			out << YAML::EndMap; // CircleCollider2DComponent
+		}
+
+		if (entity.HasComponent<PolygonCollider2DComponent>())
+		{
+			out << YAML::Key << "PolygonCollider2DComponent";
+			out << YAML::BeginMap; // PolygonCollider2DComponent
+
+			const auto& pc2d = entity.GetComponent<PolygonCollider2DComponent>();
+			out << YAML::Key << "IsSensor" << YAML::Value << pc2d.IsSensor;
+			out << YAML::Key << "Offset" << YAML::Value << pc2d.Offset;
+			out << YAML::Key << "Density" << YAML::Value << pc2d.Density;
+			out << YAML::Key << "PointsSize" << YAML::Value << pc2d.Points.size();
+			out << YAML::Key << "Points" << YAML::BeginMap;
+			for (size_t i = 0; i < pc2d.Points.size(); ++i)
+				out << YAML::Key << i << YAML::Key << pc2d.Points[i];
+			out << YAML::EndMap;
+			out << YAML::Key << "Friction" << YAML::Value << pc2d.Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << pc2d.Restitution;
+
+			out << YAML::EndMap; // PolygonCollider2DComponent
 		}
 
 		if (entity.HasComponent<DistanceJoint2DComponent>())
@@ -855,9 +875,9 @@ namespace ArcEngine
 		if (bc2dCpmponent)
 		{
 			auto& src = deserializedEntity.AddComponent<BoxCollider2DComponent>();
+			TrySet(src.IsSensor, bc2dCpmponent["IsSensor"]);
 			TrySet(src.Size, bc2dCpmponent["Size"]);
 			TrySet(src.Offset, bc2dCpmponent["Offset"]);
-			TrySet(src.IsSensor, bc2dCpmponent["IsSensor"]);
 			TrySet(src.Density, bc2dCpmponent["Density"]);
 			TrySet(src.Friction, bc2dCpmponent["Friction"]);
 			TrySet(src.Restitution, bc2dCpmponent["Restitution"]);
@@ -867,12 +887,34 @@ namespace ArcEngine
 		if (cc2dCpmponent)
 		{
 			auto& src = deserializedEntity.AddComponent<CircleCollider2DComponent>();
+			TrySet(src.IsSensor, cc2dCpmponent["IsSensor"]);
 			TrySet(src.Radius, cc2dCpmponent["Radius"]);
 			TrySet(src.Offset, cc2dCpmponent["Offset"]);
-			TrySet(src.IsSensor, cc2dCpmponent["IsSensor"]);
 			TrySet(src.Density, cc2dCpmponent["Density"]);
 			TrySet(src.Friction, cc2dCpmponent["Friction"]);
 			TrySet(src.Restitution, cc2dCpmponent["Restitution"]);
+		}
+
+		auto pc2dCpmponent = entity["PolygonCollider2DComponent"];
+		if (pc2dCpmponent)
+		{
+			auto& src = deserializedEntity.AddComponent<PolygonCollider2DComponent>();
+			TrySet(src.IsSensor, pc2dCpmponent["IsSensor"]);
+			TrySet(src.Offset, pc2dCpmponent["Offset"]);
+			TrySet(src.Density, pc2dCpmponent["Density"]);
+			size_t pointsCount = 0;
+			TrySet(pointsCount, pc2dCpmponent["PointsSize"]);
+			if (pointsCount >= 3)
+				src.Points.clear();
+			auto& points = pc2dCpmponent["Points"];
+			for (size_t i = 0; i < pointsCount; ++i)
+			{
+				glm::vec2 point = glm::vec2(0.0f);
+				TrySet(point, points[i]);
+				src.Points.push_back(point);
+			}
+			TrySet(src.Friction, pc2dCpmponent["Friction"]);
+			TrySet(src.Restitution, pc2dCpmponent["Restitution"]);
 		}
 
 		auto distJoint2dCpmponent = entity["DistanceJoint2DComponent"];

@@ -368,14 +368,41 @@ namespace ArcEngine
 		{
 			constexpr glm::vec4 color = { 0.32f, 0.53f, 0.78f, 1.0f };
 
-			auto view = m_Scene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
-			for (auto entity : view)
+			auto boxColliderView = m_Scene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
+			for (auto entity : boxColliderView)
 			{
-				const auto& [tc, bc] = view.get<TransformComponent, BoxCollider2DComponent>(entity);
+				const auto& [tc, bc] = boxColliderView.get<TransformComponent, BoxCollider2DComponent>(entity);
 
 				glm::mat4 transform = Entity(entity, m_Scene.get()).GetWorldTransform();
 				transform *= glm::translate(glm::mat4(1.0f), glm::vec3(bc.Offset, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f * bc.Size, 1.0f));
 				Renderer2D::DrawRect(transform, color);
+			}
+
+			auto polygonColliderView = m_Scene->GetAllEntitiesWith<TransformComponent, PolygonCollider2DComponent>();
+			for (auto entity : polygonColliderView)
+			{
+				const auto& [tc, pc] = polygonColliderView.get<TransformComponent, PolygonCollider2DComponent>(entity);
+
+				glm::mat4 transform = Entity(entity, m_Scene.get()).GetWorldTransform();
+				glm::vec3 translation = glm::vec3(0.0f);
+				glm::vec3 rotation = glm::vec3(0.0f);
+				glm::vec3 scale = glm::vec3(0.0f);
+				Math::DecomposeTransform(transform, translation, rotation, scale);
+				transform = glm::translate(glm::mat4(1.0f), translation) * glm::toMat4(glm::quat(rotation));
+
+				transform *= glm::translate(glm::mat4(1.0f), glm::vec3(pc.Offset, 0.0f));
+
+				for (size_t i = 0; i < pc.Points.size(); ++i)
+				{
+					glm::vec4 p0 = transform * glm::vec4(pc.Offset + pc.Points[i], 0.0f, 1.0f);
+					glm::vec4 p1 = glm::vec4(0.0f);
+					if (i == pc.Points.size() - 1)
+						p1 = transform * glm::vec4(pc.Offset + pc.Points[0], 0.0f, 1.0f);
+					else
+						p1 = transform * glm::vec4(pc.Offset + pc.Points[i + 1], 0.0f, 1.0f);
+
+					Renderer2D::DrawLine(p0, p1, color);
+				}
 			}
 		}
 

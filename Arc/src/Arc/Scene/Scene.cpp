@@ -1180,6 +1180,9 @@ namespace ArcEngine
 			if (entity.HasComponent<CircleCollider2DComponent>())
 				CreateCircleCollider2D(entity, entity.GetComponent<CircleCollider2DComponent>());
 
+			if (entity.HasComponent<PolygonCollider2DComponent>())
+				CreatePolygonCollider2D(entity, entity.GetComponent<PolygonCollider2DComponent>());
+
 			if (!body.AutoMass && body.Mass > 0.01f)
 			{
 				b2MassData massData = rb->GetMassData();
@@ -1236,6 +1239,37 @@ namespace ArcEngine
 
 			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
 			cc2d.RuntimeFixture = fixture;
+			m_FixtureMap[fixture] = entity;
+		}
+	}
+
+	void Scene::CreatePolygonCollider2D(Entity entity, PolygonCollider2DComponent& pc2d)
+	{
+		ARC_PROFILE_SCOPE();
+
+		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
+		{
+			if (pc2d.Points.size() < 3)
+			{
+				ARC_CORE_ERROR("Cannot create PolygonCollider2D with {} points", pc2d.Points.size());
+				return;
+			}
+
+			const TransformComponent& transform = entity.GetTransform();
+			b2Body* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
+
+			b2PolygonShape shape;
+			shape.Set((const b2Vec2*)pc2d.Points.data(), pc2d.Points.size());
+
+			b2FixtureDef fixtureDef;
+			fixtureDef.shape = &shape;
+			fixtureDef.isSensor = pc2d.IsSensor;
+			fixtureDef.density = pc2d.Density;
+			fixtureDef.friction = pc2d.Friction;
+			fixtureDef.restitution = pc2d.Restitution;
+
+			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
+			pc2d.RuntimeFixture = fixture;
 			m_FixtureMap[fixture] = entity;
 		}
 	}
@@ -1326,6 +1360,13 @@ namespace ArcEngine
 	{
 		/* On CircleCollider2DComponent added */
 		CreateCircleCollider2D(entity, cc2d);
+	}
+
+	template<>
+	void Scene::OnComponentAdded<PolygonCollider2DComponent>(Entity entity, PolygonCollider2DComponent& pc2d)
+	{
+		/* On CircleCollider2DComponent added */
+		CreatePolygonCollider2D(entity, pc2d);
 	}
 
 	template<>

@@ -241,7 +241,7 @@ namespace ArcEngine
 					glm::vec3 v = material->GetData<glm::vec3>(name);
 					if (isColor)
 					{
-						if (UI::PropertyColor3(displayName, v))
+						if (UI::PropertyColor(displayName, v))
 							material->SetData(name, v);
 					}
 					else
@@ -257,7 +257,7 @@ namespace ArcEngine
 					glm::vec4 v = material->GetData<glm::vec4>(name);
 					if (isColor)
 					{
-						if (UI::PropertyColor4(displayName, v))
+						if (UI::PropertyColor(displayName, v))
 							material->SetData(name, v);
 					}
 					else
@@ -362,6 +362,7 @@ namespace ArcEngine
 					DrawAddComponent<Rigidbody2DComponent>(entity, ICON_MDI_SOCCER " Rigidbody 2D", "2D");
 					DrawAddComponent<BoxCollider2DComponent>(entity, ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider 2D", "2D");
 					DrawAddComponent<CircleCollider2DComponent>(entity, ICON_MDI_CIRCLE_OUTLINE " Circle Collider 2D", "2D");
+					DrawAddComponent<PolygonCollider2DComponent>(entity, ICON_MDI_CIRCLE_OUTLINE " Polygon Collider 2D", "2D");
 					DrawAddComponent<DistanceJoint2DComponent>(entity, ICON_MDI_VECTOR_LINE " Distance Joint 2D", "2D");
 					DrawAddComponent<SpringJoint2DComponent>(entity, ICON_MDI_VECTOR_LINE " Spring Joint 2D", "2D");
 					DrawAddComponent<HingeJoint2DComponent>(entity, ICON_MDI_ANGLE_ACUTE " Hinge Joint 2D", "2D");
@@ -468,7 +469,7 @@ namespace ArcEngine
 		DrawComponent<SpriteRendererComponent>(ICON_MDI_IMAGE_SIZE_SELECT_ACTUAL " Sprite Renderer", entity, [](SpriteRendererComponent& component)
 		{
 			UI::BeginProperties();
-			UI::PropertyColor4("Color", component.Color);
+			UI::PropertyColor("Color", component.Color);
 			UI::Property("Tiling Factor", component.TilingFactor);
 			UI::Property("Texture", component.Texture);
 			UI::EndProperties();
@@ -515,8 +516,9 @@ namespace ArcEngine
 			{
 				UI::BeginProperties();
 
-				UI::Property("Submesh Index", component.SubmeshIndex, 0, component.MeshGeometry->GetSubmeshCount() - 1);
-				
+				if (size_t submeshCount = component.MeshGeometry->GetSubmeshCount() > 1)
+					UI::Property("Submesh Index", component.SubmeshIndex, 0, submeshCount - 1);
+
 				const char* cullModeTypeStrings[] = { "Front", "Back", "Double Sided" };
 				int cullMode = (int) component.CullMode;
 				if (UI::Property("Cull Mode", cullMode, cullModeTypeStrings, 3))
@@ -563,7 +565,7 @@ namespace ArcEngine
 			}
 			else
 			{
-				UI::PropertyColor3("Color", component.Color);
+				UI::PropertyColor("Color", component.Color);
 			}
 
 			if (UI::Property("Intensity", component.Intensity) && component.Intensity < 0.0f)
@@ -637,16 +639,16 @@ namespace ArcEngine
 		DrawComponent<BoxCollider2DComponent>(ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider 2D", entity, [](BoxCollider2DComponent& component)
 		{
 			UI::BeginProperties();
+			UI::Property("Is Sensor", component.IsSensor);
 			UI::Property("Size", component.Size);
 			UI::Property("Offset", component.Offset);
-			UI::Property("Is Sensor", component.IsSensor);
+			UI::Property("Density", component.Density);
 			UI::EndProperties();
 			
 			if (!component.IsSensor)
 			{
 				ImGui::Spacing();
 				UI::BeginProperties();
-				UI::Property("Density", component.Density);
 				UI::Property("Friction", component.Friction);
 				UI::Property("Restitution", component.Restitution);
 				UI::EndProperties();
@@ -656,16 +658,36 @@ namespace ArcEngine
 		DrawComponent<CircleCollider2DComponent>(ICON_MDI_CIRCLE_OUTLINE " Circle Collider 2D", entity, [](CircleCollider2DComponent& component)
 		{
 			UI::BeginProperties();
+			UI::Property("Is Sensor", component.IsSensor);
 			UI::Property("Radius", component.Radius);
 			UI::Property("Offset", component.Offset);
-			UI::Property("Is Sensor", component.IsSensor);
+			UI::Property("Density", component.Density);
 			UI::EndProperties();
 			
 			if (!component.IsSensor)
 			{
 				ImGui::Spacing();
 				UI::BeginProperties();
-				UI::Property("Density", component.Density);
+				UI::Property("Friction", component.Friction);
+				UI::Property("Restitution", component.Restitution);
+				UI::EndProperties();
+			}
+		});
+
+		DrawComponent<PolygonCollider2DComponent>(ICON_MDI_CIRCLE_OUTLINE " Polygon Collider 2D", entity, [](PolygonCollider2DComponent& component)
+		{
+			UI::BeginProperties();
+			UI::Property("Is Sensor", component.IsSensor);
+			UI::Property("Offset", component.Offset);
+			UI::Property("Density", component.Density);
+			UI::EndProperties();
+			
+			UI::Property("Points", component.Points, glm::vec3(0.0f), 3);
+
+			if (!component.IsSensor)
+			{
+				ImGui::Spacing();
+				UI::BeginProperties();
 				UI::Property("Friction", component.Friction);
 				UI::Property("Restitution", component.Restitution);
 				UI::EndProperties();

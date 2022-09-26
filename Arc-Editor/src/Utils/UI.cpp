@@ -1,6 +1,7 @@
 #include "UI.h"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <icons/IconsMaterialDesignIcons.h>
 
 namespace ArcEngine
 {
@@ -68,6 +69,21 @@ namespace ArcEngine
 		ImGui::BeginTable(s_IDBuffer, 2, tableFlags | flags);
 		ImGui::TableSetupColumn("PropertyName",0 , 0.5f);
 		ImGui::TableSetupColumn("Property", ImGuiTableColumnFlags_WidthStretch);
+	}
+
+	void UI::BeginProperties3(ImGuiTableFlags flags)
+	{
+		s_IDBuffer[0] = '#';
+		s_IDBuffer[1] = '#';
+		memset(s_IDBuffer + 2, 0, 14);
+		++s_Counter;
+		_itoa_s(s_Counter, s_IDBuffer + 2, 16, 16);
+
+		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_PadOuterX;
+		ImGui::BeginTable(s_IDBuffer, 3, tableFlags | flags);
+		ImGui::TableSetupColumn("PropertyName", 0, 0.5f);
+		ImGui::TableSetupColumn("Property", ImGuiTableColumnFlags_WidthStretch);
+		ImGui::TableSetupColumn("PropertyExtra", 0, 0.1f);
 	}
 	
 	void UI::EndProperties()
@@ -410,7 +426,7 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// Colors ///////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::PropertyColor3(const char* label, glm::vec3& color, const char* tooltip)
+	bool UI::PropertyColor(const char* label, glm::vec3& color, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
 		bool modified = false;
@@ -420,7 +436,7 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::PropertyColor4(const char* label, glm::vec4& color, const char* tooltip)
+	bool UI::PropertyColor(const char* label, glm::vec4& color, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
 		bool modified = false;
@@ -559,6 +575,160 @@ namespace ArcEngine
 		return changed;
 	}
 
+
+
+	template<typename T, typename Fn>
+	bool UI::ListProperty(const char* label, eastl::vector<T>& v, const T& defaultValue, size_t minElements, const char* tooltip, Fn function)
+	{
+		bool modified = false;
+		if (ImGui::TreeNode(label))
+		{
+			BeginProperties3();
+
+			size_t pointsCount = v.size();
+			size_t step = 1u;
+			BeginPropertyGrid("Count", tooltip);
+			ImGui::InputScalar(s_IDBuffer, ImGuiDataType_U64, &pointsCount, &step);
+			ImGui::TableNextColumn();
+			EndPropertyGrid();
+
+			if (pointsCount > v.size())
+			{
+				v.emplace_back(defaultValue);
+				modified = true;
+			}
+			else if (pointsCount < v.size() && minElements < v.size())
+			{
+				v.erase(v.end() - 1);
+				modified = true;
+			}
+
+			uint32_t i = 0;
+			std::string name;
+			T* removeIt = nullptr;
+			for (auto* it = v.begin(); it != v.end(); ++it)
+			{
+				ImGui::PushID(it);
+				name = fmt::format("Point {}", i);
+				function(name.c_str(), v[i]);
+				ImGui::TableNextColumn();
+
+				bool disabled = pointsCount <= minElements;
+				if (disabled)
+					ImGui::BeginDisabled();
+
+				if (ImGui::Button(ICON_MDI_CLOSE))
+					removeIt = it;
+
+				ImGui::PopID();
+
+				if (disabled)
+					ImGui::EndDisabled();
+
+				++i;
+			}
+			EndProperties();
+
+			if (removeIt)
+				v.erase(removeIt);
+
+			ImGui::TreePop();
+		}
+
+		return modified;
+	}
+
+	bool UI::Property(const char* label, eastl::vector<int8_t>& v, int8_t defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, int8_t& value) { UI::Property(name, value); });
+	}
+
+	bool UI::Property(const char* label, eastl::vector<uint8_t>& v, uint8_t defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, uint8_t& value) { UI::Property(name, value); });
+	}
+
+	bool UI::Property(const char* label, eastl::vector<int16_t>& v, int16_t defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, int16_t& value) { UI::Property(name, value); });
+	}
+
+	bool UI::Property(const char* label, eastl::vector<uint16_t>& v, uint16_t defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, uint16_t& value) { UI::Property(name, value); });
+	}
+
+	bool UI::Property(const char* label, eastl::vector<int32_t>& v, int32_t defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, int32_t& value) { UI::Property(name, value); });
+	}
+
+	bool UI::Property(const char* label, eastl::vector<uint32_t>& v, uint32_t defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, uint32_t& value) { UI::Property(name, value); });
+	}
+
+	bool UI::Property(const char* label, eastl::vector<int64_t>& v, int64_t defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, int64_t& value) { UI::Property(name, value); });
+	}
+
+	bool UI::Property(const char* label, eastl::vector<uint64_t>& v, uint64_t defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, uint64_t& value) { UI::Property(name, value); });
+	}
+
+	bool UI::Property(const char* label, eastl::vector<float>& v, float defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, float& value) { UI::Property(name, value); });
+	}
+
+	bool UI::Property(const char* label, eastl::vector<double>& v, double defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, double& value) { UI::Property(name, value); });
+	}
+
+	bool UI::Property(const char* label, eastl::vector<glm::vec2>& v, const glm::vec2& defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec2& value) { UI::Property(name, value); });
+	}
+
+	bool UI::Property(const char* label, eastl::vector<glm::vec3>& v, const glm::vec3& defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec3& value) { UI::Property(name, value); });
+	}
+
+	bool UI::Property(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::Property(name, value); });
+	}
+
+	bool UI::Property(const char* label, eastl::vector<bool>& v, bool defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, bool& value) { UI::Property(name, value); });
+	}
+
+	bool UI::PropertyColor(const char* label, eastl::vector<glm::vec3>& v, const glm::vec3& defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec3& value) { UI::PropertyColor(name, value); });
+	}
+
+	bool UI::PropertyColor(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::PropertyColor(name, value); });
+	}
+
+	bool UI::PropertyColor4as3(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, const char* tooltip)
+	{
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::PropertyColor4as3(name, value); });
+	}
+
+
+
+
+
+
+
 	template<typename T>
 	static void DrawScriptFieldScalar(Entity entity, const eastl::string& className, const eastl::string& fieldName)
 	{
@@ -669,13 +839,13 @@ namespace ArcEngine
 				}
 
 				T value = fieldInstance.GetValue<T>();
-				if (UI::PropertyColor4(field.Name.c_str(), value, tooltip))
+				if (UI::PropertyColor(field.Name.c_str(), value, tooltip))
 					fieldInstance.SetValue(value);
 			}
 			else
 			{
 				T value = field.GetDefaultValue<T>();
-				if (UI::PropertyColor4(field.Name.c_str(), value, tooltip))
+				if (UI::PropertyColor(field.Name.c_str(), value, tooltip))
 				{
 					fieldInstanceMap[fieldName].Type = field.Type;
 					fieldInstanceMap[fieldName].SetValue(value);
@@ -685,7 +855,7 @@ namespace ArcEngine
 		else
 		{
 			T value = scriptInstance->GetFieldValue<T>(field.Name);
-			if (UI::PropertyColor4(field.Name.c_str(), value, tooltip))
+			if (UI::PropertyColor(field.Name.c_str(), value, tooltip))
 				scriptInstance->SetFieldValue<T>(field.Name, value);
 		}
 	}

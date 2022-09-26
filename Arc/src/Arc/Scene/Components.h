@@ -191,9 +191,9 @@ namespace ArcEngine
 
 	struct BoxCollider2DComponent
 	{
+		bool IsSensor = false;
 		glm::vec2 Size = { 0.5f, 0.5f };
 		glm::vec2 Offset = { 0.0f, 0.0f };
-		bool IsSensor = false;
 
 		float Density = 1.0f;
 
@@ -208,9 +208,9 @@ namespace ArcEngine
 
 	struct CircleCollider2DComponent
 	{
+		bool IsSensor = false;
 		float Radius = 0.5f;
 		glm::vec2 Offset = { 0.0f, 0.0f };
-		bool IsSensor = false;
 
 		float Density = 1.0f;
 
@@ -221,6 +221,23 @@ namespace ArcEngine
 
 		CircleCollider2DComponent() = default;
 		CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
+	};
+
+	struct PolygonCollider2DComponent
+	{
+		bool IsSensor = false;
+		glm::vec2 Offset = { 0.0f, 0.0f };
+		eastl::vector<glm::vec2> Points = { { 0.0f, 0.0f }, { 1.0, 0.0f }, { 0.0f, 1.0f } };
+
+		float Density = 1.0f;
+
+		float Friction = 0.2f;
+		float Restitution = 0.0f;
+
+		void* RuntimeFixture = nullptr;
+
+		PolygonCollider2DComponent() = default;
+		PolygonCollider2DComponent(const PolygonCollider2DComponent&) = default;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -506,6 +523,7 @@ namespace ArcEngine
 		Rigidbody2DComponent,
 		BoxCollider2DComponent,
 		CircleCollider2DComponent,
+		PolygonCollider2DComponent,
 		DistanceJoint2DComponent,
 		SpringJoint2DComponent,
 		HingeJoint2DComponent,
