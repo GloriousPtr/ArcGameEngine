@@ -48,13 +48,13 @@ namespace ArcEngine
 		#region PublicMethods
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool HasComponent<T>() where T : IComponent, new()
+		public bool HasComponent<T>() where T : class, IComponent
 		{
 			return InternalCalls.Entity_HasComponent(ID, typeof(T));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public T AddComponent<T>() where T : IComponent, new()
+		public T AddComponent<T>() where T : class, IComponent, new()
 		{
 			if (HasComponent<T>())
 			{
@@ -69,7 +69,7 @@ namespace ArcEngine
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public T GetComponent<T>() where T : IComponent, new()
+		public T GetComponent<T>() where T : class, IComponent, new()
 		{
 			if (HasComponent<T>())
 			{
@@ -85,7 +85,7 @@ namespace ArcEngine
 				}
 			}
 
-			return new T();
+			return null;
 		}
 
 		#endregion
