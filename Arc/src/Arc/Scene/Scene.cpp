@@ -397,177 +397,179 @@ namespace ArcEngine
 
 		m_PhysicsFrameAccumulator = 0.0f;
 
-		#pragma region Physics3D
+		#pragma region Physics
 		{
-			ARC_PROFILE_CATEGORY("Physics 3D", Profile::Category::Physics);
+			ARC_PROFILE_CATEGORY("Physics", Profile::Category::Physics);
 
-			Physics3D::Init();
-			auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
-			for (auto e : view)
+			#pragma region Physics3D
 			{
-				auto [tc, rb] = view.get<TransformComponent, RigidbodyComponent>(e);
-				rb.PreviousTranslation = rb.Translation = tc.Translation;
-				rb.PreviousRotation = rb.Rotation = tc.Rotation;
-				CreateRigidbody({ e, this }, rb);
-			}
-
-			Physics3D::OptimizeBroadPhase();
-		}
-		#pragma endregion
-
-		#pragma region Physics2D
-		{
-			ARC_PROFILE_CATEGORY("Physics 2D", Profile::Category::Physics);
-
-			m_PhysicsWorld2D = new b2World({ 0.0f, -9.8f });
-			m_ContactListener = new ContactListener(this);
-			m_PhysicsWorld2D->SetContactListener(m_ContactListener);
-			
-			{
-				auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
+				Physics3D::Init();
+				auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
 				for (auto e : view)
 				{
-					auto [tc, rb] = view.get<TransformComponent, Rigidbody2DComponent>(e);
-					CreateRigidbody2D({ e, this }, rb);
-					rb.PreviousTranslationRotation = rb.TranslationRotation = { tc.Translation.x, tc.Translation.y, tc.Rotation.z };
+					auto [tc, rb] = view.get<TransformComponent, RigidbodyComponent>(e);
+					rb.PreviousTranslation = rb.Translation = tc.Translation;
+					rb.PreviousRotation = rb.Rotation = tc.Rotation;
+					CreateRigidbody({ e, this }, rb);
 				}
-			}
 
+				Physics3D::OptimizeBroadPhase();
+			}
+			#pragma endregion
+
+			#pragma region Physics2D
 			{
-				const b2Vec2 zero = b2Vec2(0.0f, 0.0f);
-				auto distanceJointView = m_Registry.view<Rigidbody2DComponent, DistanceJoint2DComponent>();
-				for (auto e : distanceJointView)
+				m_PhysicsWorld2D = new b2World({ 0.0f, -9.8f });
+				m_ContactListener = new ContactListener(this);
+				m_PhysicsWorld2D->SetContactListener(m_ContactListener);
+
 				{
-					auto [body, joint] = distanceJointView.get<Rigidbody2DComponent, DistanceJoint2DComponent>(e);
-					Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
-					if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+					auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
+					for (auto e : view)
 					{
-						b2Body* body1 = (b2Body*)body.RuntimeBody;
-						b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
-						
-						b2Vec2 worldAnchorA = body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y });
-						b2Vec2 worldAnchorB = body2->GetWorldPoint({ joint.ConnectedAnchor.x, joint.ConnectedAnchor.y });
-
-						b2DistanceJointDef jd;
-						jd.Initialize(body1, body2, worldAnchorA, worldAnchorB);
-						jd.collideConnected = joint.EnableCollision;
-						if (!joint.AutoDistance)
-							jd.length = joint.Distance;
-						jd.minLength = glm::min(jd.length, joint.MinDistance);
-						jd.maxLength = jd.length + glm::max(joint.MaxDistanceBy, 0.0f);
-
-						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
+						auto [tc, rb] = view.get<TransformComponent, Rigidbody2DComponent>(e);
+						CreateRigidbody2D({ e, this }, rb);
+						rb.PreviousTranslationRotation = rb.TranslationRotation = { tc.Translation.x, tc.Translation.y, tc.Rotation.z };
 					}
 				}
 
-				auto springJointView = m_Registry.view<Rigidbody2DComponent, SpringJoint2DComponent>();
-				for (auto e : springJointView)
 				{
-					auto [body, joint] = springJointView.get<Rigidbody2DComponent, SpringJoint2DComponent>(e);
-					Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
-					if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+					const b2Vec2 zero = b2Vec2(0.0f, 0.0f);
+					auto distanceJointView = m_Registry.view<Rigidbody2DComponent, DistanceJoint2DComponent>();
+					for (auto e : distanceJointView)
 					{
-						b2Body* body1 = (b2Body*)body.RuntimeBody;
-						b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+						auto [body, joint] = distanceJointView.get<Rigidbody2DComponent, DistanceJoint2DComponent>(e);
+						Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
+						if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+						{
+							b2Body* body1 = (b2Body*)body.RuntimeBody;
+							b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
 
-						b2Vec2 worldAnchorA = body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y });
-						b2Vec2 worldAnchorB = body2->GetWorldPoint({ joint.ConnectedAnchor.x, joint.ConnectedAnchor.y });
+							b2Vec2 worldAnchorA = body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y });
+							b2Vec2 worldAnchorB = body2->GetWorldPoint({ joint.ConnectedAnchor.x, joint.ConnectedAnchor.y });
 
-						b2DistanceJointDef jd;
-						jd.Initialize(body1, body2, worldAnchorA, worldAnchorB);
-						jd.collideConnected = joint.EnableCollision;
-						if (!joint.AutoDistance)
-							jd.length = joint.Distance;
-						jd.minLength = glm::min(jd.length, joint.MinDistance);
-						jd.maxLength = jd.length + glm::max(joint.MaxDistanceBy, 0.0f);
-						b2LinearStiffness(jd.stiffness, jd.damping, joint.Frequency, joint.DampingRatio, body1, body2);
+							b2DistanceJointDef jd;
+							jd.Initialize(body1, body2, worldAnchorA, worldAnchorB);
+							jd.collideConnected = joint.EnableCollision;
+							if (!joint.AutoDistance)
+								jd.length = joint.Distance;
+							jd.minLength = glm::min(jd.length, joint.MinDistance);
+							jd.maxLength = jd.length + glm::max(joint.MaxDistanceBy, 0.0f);
 
-						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
+							joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
+						}
 					}
-				}
 
-				auto hingeJointView = m_Registry.view<Rigidbody2DComponent, HingeJoint2DComponent>();
-				for (auto e : hingeJointView)
-				{
-					auto [body, joint] = hingeJointView.get<Rigidbody2DComponent, HingeJoint2DComponent>(e);
-					Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
-					if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+					auto springJointView = m_Registry.view<Rigidbody2DComponent, SpringJoint2DComponent>();
+					for (auto e : springJointView)
 					{
-						b2Body* body1 = (b2Body*)body.RuntimeBody;
-						b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+						auto [body, joint] = springJointView.get<Rigidbody2DComponent, SpringJoint2DComponent>(e);
+						Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
+						if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+						{
+							b2Body* body1 = (b2Body*)body.RuntimeBody;
+							b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
 
-						b2RevoluteJointDef jd;
-						jd.Initialize(body1, body2, body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y }));
-						jd.collideConnected = joint.EnableCollision;
-						jd.enableLimit = joint.UseLimits;
-						jd.lowerAngle = glm::radians(joint.LowerAngle);
-						jd.upperAngle = glm::radians(joint.UpperAngle);
-						jd.enableMotor = joint.UseMotor;
-						jd.motorSpeed = joint.MotorSpeed;
-						jd.maxMotorTorque = joint.MaxMotorTorque;
+							b2Vec2 worldAnchorA = body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y });
+							b2Vec2 worldAnchorB = body2->GetWorldPoint({ joint.ConnectedAnchor.x, joint.ConnectedAnchor.y });
 
-						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
+							b2DistanceJointDef jd;
+							jd.Initialize(body1, body2, worldAnchorA, worldAnchorB);
+							jd.collideConnected = joint.EnableCollision;
+							if (!joint.AutoDistance)
+								jd.length = joint.Distance;
+							jd.minLength = glm::min(jd.length, joint.MinDistance);
+							jd.maxLength = jd.length + glm::max(joint.MaxDistanceBy, 0.0f);
+							b2LinearStiffness(jd.stiffness, jd.damping, joint.Frequency, joint.DampingRatio, body1, body2);
+
+							joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
+						}
 					}
-				}
 
-				auto sliderJointView = m_Registry.view<Rigidbody2DComponent, SliderJoint2DComponent>();
-				for (auto e : sliderJointView)
-				{
-					auto [body, joint] = sliderJointView.get<Rigidbody2DComponent, SliderJoint2DComponent>(e);
-					Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
-					if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+					auto hingeJointView = m_Registry.view<Rigidbody2DComponent, HingeJoint2DComponent>();
+					for (auto e : hingeJointView)
 					{
-						b2Body* body1 = (b2Body*)body.RuntimeBody;
-						b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+						auto [body, joint] = hingeJointView.get<Rigidbody2DComponent, HingeJoint2DComponent>(e);
+						Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
+						if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+						{
+							b2Body* body1 = (b2Body*)body.RuntimeBody;
+							b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
 
-						b2Vec2 worldAxis(1.0f, 0.0f);
+							b2RevoluteJointDef jd;
+							jd.Initialize(body1, body2, body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y }));
+							jd.collideConnected = joint.EnableCollision;
+							jd.enableLimit = joint.UseLimits;
+							jd.lowerAngle = glm::radians(joint.LowerAngle);
+							jd.upperAngle = glm::radians(joint.UpperAngle);
+							jd.enableMotor = joint.UseMotor;
+							jd.motorSpeed = joint.MotorSpeed;
+							jd.maxMotorTorque = joint.MaxMotorTorque;
 
-						b2PrismaticJointDef jd;
-						jd.Initialize(body1, body2, body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y }), worldAxis);
-						jd.collideConnected = joint.EnableCollision;
-						jd.referenceAngle = glm::radians(joint.Angle);
-						jd.enableLimit = joint.UseLimits;
-						jd.lowerTranslation = joint.LowerTranslation;
-						jd.upperTranslation = joint.UpperTranslation;
-						jd.enableMotor = joint.UseMotor;
-						jd.motorSpeed = joint.MotorSpeed;
-						jd.maxMotorForce = joint.MaxMotorForce;
-
-						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
+							joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
+						}
 					}
-				}
 
-				auto wheelJointView = m_Registry.view<Rigidbody2DComponent, WheelJoint2DComponent>();
-				for (auto e : wheelJointView)
-				{
-					auto [body, joint] = wheelJointView.get<Rigidbody2DComponent, WheelJoint2DComponent>(e);
-					Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
-					if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+					auto sliderJointView = m_Registry.view<Rigidbody2DComponent, SliderJoint2DComponent>();
+					for (auto e : sliderJointView)
 					{
-						b2Body* body1 = (b2Body*)body.RuntimeBody;
-						b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+						auto [body, joint] = sliderJointView.get<Rigidbody2DComponent, SliderJoint2DComponent>(e);
+						Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
+						if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+						{
+							b2Body* body1 = (b2Body*)body.RuntimeBody;
+							b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
 
-						b2Vec2 axis(0.0f, 1.0f);
+							b2Vec2 worldAxis(1.0f, 0.0f);
 
-						float mass = body1->GetMass();
-						float omega = 2.0f * b2_pi * joint.Frequency;
+							b2PrismaticJointDef jd;
+							jd.Initialize(body1, body2, body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y }), worldAxis);
+							jd.collideConnected = joint.EnableCollision;
+							jd.referenceAngle = glm::radians(joint.Angle);
+							jd.enableLimit = joint.UseLimits;
+							jd.lowerTranslation = joint.LowerTranslation;
+							jd.upperTranslation = joint.UpperTranslation;
+							jd.enableMotor = joint.UseMotor;
+							jd.motorSpeed = joint.MotorSpeed;
+							jd.maxMotorForce = joint.MaxMotorForce;
 
-						b2WheelJointDef jd;
-						jd.Initialize(body1, body2, body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y }), axis);
-						jd.collideConnected = joint.EnableCollision;
-						jd.stiffness = mass * omega * omega;
-						jd.damping = 2.0f * mass * joint.DampingRatio * omega;
-						jd.enableMotor = joint.UseMotor;
-						jd.motorSpeed = joint.MotorSpeed;
-						jd.maxMotorTorque = joint.MaxMotorTorque;
-						jd.enableLimit = joint.UseLimits;
-						jd.lowerTranslation = joint.LowerTranslation;
-						jd.upperTranslation = joint.UpperTranslation;
+							joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
+						}
+					}
 
-						joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
+					auto wheelJointView = m_Registry.view<Rigidbody2DComponent, WheelJoint2DComponent>();
+					for (auto e : wheelJointView)
+					{
+						auto [body, joint] = wheelJointView.get<Rigidbody2DComponent, WheelJoint2DComponent>(e);
+						Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
+						if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
+						{
+							b2Body* body1 = (b2Body*)body.RuntimeBody;
+							b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+
+							b2Vec2 axis(0.0f, 1.0f);
+
+							float mass = body1->GetMass();
+							float omega = 2.0f * b2_pi * joint.Frequency;
+
+							b2WheelJointDef jd;
+							jd.Initialize(body1, body2, body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y }), axis);
+							jd.collideConnected = joint.EnableCollision;
+							jd.stiffness = mass * omega * omega;
+							jd.damping = 2.0f * mass * joint.DampingRatio * omega;
+							jd.enableMotor = joint.UseMotor;
+							jd.motorSpeed = joint.MotorSpeed;
+							jd.maxMotorTorque = joint.MaxMotorTorque;
+							jd.enableLimit = joint.UseLimits;
+							jd.lowerTranslation = joint.LowerTranslation;
+							jd.upperTranslation = joint.UpperTranslation;
+
+							joint.RuntimeJoint = m_PhysicsWorld2D->CreateJoint(&jd);
+						}
 					}
 				}
 			}
+			#pragma endregion
 		}
 		#pragma endregion
 
@@ -670,36 +672,39 @@ namespace ArcEngine
 		}
 		#pragma endregion
 
-		#pragma region Physics2D
+		#pragma region Physics
 		{
-			ARC_PROFILE_CATEGORY("Physics 2D", Profile::Category::Physics);
+			ARC_PROFILE_CATEGORY("Physics", Profile::Category::Physics);
 
-			m_FixtureMap.clear();
-			delete m_ContactListener;
-			delete m_PhysicsWorld2D;
-			m_ContactListener = nullptr;
-			m_PhysicsWorld2D = nullptr;
-		}
-		#pragma endregion
-
-		#pragma region Physics3D
-		{
-			ARC_PROFILE_CATEGORY("Physics 3D", Profile::Category::Physics);
-
-			auto* bodyInterface = Physics3D::GetBodyInterface();
-			auto view = m_Registry.view<RigidbodyComponent>();
-			for (auto e : view)
+			#pragma region Physics3D
 			{
-				const auto& rb = view.get<RigidbodyComponent>(e);
-				if (rb.RuntimeBody)
-				{
-					JPH::Body* body = (JPH::Body*)rb.RuntimeBody;
-					bodyInterface->RemoveBody(body->GetID());
-					bodyInterface->DestroyBody(body->GetID());
-				}
-			}
 
-			Physics3D::Shutdown();
+				auto* bodyInterface = Physics3D::GetBodyInterface();
+				auto view = m_Registry.view<RigidbodyComponent>();
+				for (auto e : view)
+				{
+					const auto& rb = view.get<RigidbodyComponent>(e);
+					if (rb.RuntimeBody)
+					{
+						JPH::Body* body = (JPH::Body*)rb.RuntimeBody;
+						bodyInterface->RemoveBody(body->GetID());
+						bodyInterface->DestroyBody(body->GetID());
+					}
+				}
+
+				Physics3D::Shutdown();
+			}
+			#pragma endregion
+
+			#pragma region Physics2D
+			{
+				m_FixtureMap.clear();
+				delete m_ContactListener;
+				delete m_PhysicsWorld2D;
+				m_ContactListener = nullptr;
+				m_PhysicsWorld2D = nullptr;
+			}
+			#pragma endregion
 		}
 		#pragma endregion
 	}
@@ -737,196 +742,198 @@ namespace ArcEngine
 		}
 		#pragma endregion
 		
-		// Minimum stable value: 16.0f;
-		constexpr float physicsStepRate = 50.0f;
-		constexpr float physicsTs = 1.0f / physicsStepRate;
-
-		bool stepped = false;
-		m_PhysicsFrameAccumulator += ts;
-
-		while (m_PhysicsFrameAccumulator >= physicsTs)
+		#pragma region Physics
 		{
-			m_ContactListener->OnUpdate(physicsTs);
-			m_PhysicsWorld2D->Step(physicsTs, VelocityIterations, PositionIterations);
+			ARC_PROFILE_CATEGORY("Physics", Profile::Category::Physics);
 
-			Physics3D::Step(physicsTs);
+			// Minimum stable value: 16.0f;
+			constexpr float physicsStepRate = 50.0f;
+			constexpr float physicsTs = 1.0f / physicsStepRate;
 
-			m_PhysicsFrameAccumulator -= physicsTs;
-			stepped = true;
-		}
+			bool stepped = false;
+			m_PhysicsFrameAccumulator += ts;
 
-		float interpolationFactor = m_PhysicsFrameAccumulator / physicsTs;
-
-		#pragma region Physics3D
-		{
-			ARC_PROFILE_CATEGORY("Physics 3D", Profile::Category::Physics);
-
-			auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
-			for (auto e : view)
+			while (m_PhysicsFrameAccumulator >= physicsTs)
 			{
-				auto [tc, rb] = view.get<TransformComponent, RigidbodyComponent>(e);
-				if (!rb.RuntimeBody)
-					continue;
+				m_ContactListener->OnUpdate(physicsTs);
+				m_PhysicsWorld2D->Step(physicsTs, VelocityIterations, PositionIterations);
 
-				JPH::Body* body = (JPH::Body*)rb.RuntimeBody;
+				Physics3D::Step(physicsTs);
 
-				if (!Physics3D::GetBodyInterface()->IsActive(body->GetID()))
-					continue;
+				m_PhysicsFrameAccumulator -= physicsTs;
+				stepped = true;
+			}
 
-				if (rb.Interpolation)
+			float interpolationFactor = m_PhysicsFrameAccumulator / physicsTs;
+
+			#pragma region Physics3D
+			{
+				auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
+				for (auto e : view)
 				{
-					if (stepped)
+					auto [tc, rb] = view.get<TransformComponent, RigidbodyComponent>(e);
+					if (!rb.RuntimeBody)
+						continue;
+
+					JPH::Body* body = (JPH::Body*)rb.RuntimeBody;
+
+					if (!Physics3D::GetBodyInterface()->IsActive(body->GetID()))
+						continue;
+
+					if (rb.Interpolation)
+					{
+						if (stepped)
+						{
+							JPH::Vec3 position = body->GetPosition();
+							JPH::Vec3 rotation = body->GetRotation().GetEulerAngles();
+
+							rb.PreviousTranslation = eastl::move(rb.Translation);
+							rb.PreviousRotation = eastl::move(rb.Rotation);
+							rb.Translation = { position.GetX(), position.GetY(), position.GetZ() };
+							rb.Rotation = glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ());
+						}
+
+						tc.Translation = glm::lerp(rb.PreviousTranslation, rb.Translation, interpolationFactor);
+						tc.Rotation = glm::eulerAngles(glm::slerp(rb.PreviousRotation, rb.Rotation, interpolationFactor));
+					}
+					else
 					{
 						JPH::Vec3 position = body->GetPosition();
 						JPH::Vec3 rotation = body->GetRotation().GetEulerAngles();
 
-						rb.PreviousTranslation = rb.Translation;
-						rb.PreviousRotation = rb.Rotation;
+						rb.PreviousTranslation = eastl::move(rb.Translation);
+						rb.PreviousRotation = eastl::move(rb.Rotation);
 						rb.Translation = { position.GetX(), position.GetY(), position.GetZ() };
 						rb.Rotation = glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ());
+						tc.Translation = rb.Translation;
+						tc.Rotation = glm::eulerAngles(rb.Rotation);
 					}
-
-					tc.Translation = glm::lerp(rb.PreviousTranslation, rb.Translation, interpolationFactor);
-					tc.Rotation = glm::eulerAngles(glm::slerp(rb.PreviousRotation, rb.Rotation, interpolationFactor));
-				}
-				else
-				{
-					JPH::Vec3 position = body->GetPosition();
-					JPH::Vec3 rotation = body->GetRotation().GetEulerAngles();
-
-					rb.PreviousTranslation = rb.Translation;
-					rb.PreviousRotation = rb.Rotation;
-					rb.Translation = { position.GetX(), position.GetY(), position.GetZ() };
-					rb.Rotation = glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ());
-					tc.Translation = rb.Translation;
-					tc.Rotation = glm::eulerAngles(rb.Rotation);
 				}
 			}
-		}
-		#pragma endregion
+			#pragma endregion
 
-		#pragma region Physics2D
-		{
-			ARC_PROFILE_CATEGORY("Physics 2D", Profile::Category::Physics);
-			
-			auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
-			for (auto e : view)
+			#pragma region Physics2D
 			{
-				auto [tc, rb] = view.get<TransformComponent, Rigidbody2DComponent>(e);
-				const b2Body* body = (b2Body*)rb.RuntimeBody;
-
-				if (!body->IsAwake())
-					continue;
-
-				if (rb.Interpolation)
+				auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
+				for (auto e : view)
 				{
-					if (stepped)
+					auto [tc, rb] = view.get<TransformComponent, Rigidbody2DComponent>(e);
+					const b2Body* body = (b2Body*)rb.RuntimeBody;
+
+					if (!body->IsAwake())
+						continue;
+
+					if (rb.Interpolation)
+					{
+						if (stepped)
+						{
+							b2Vec2 position = body->GetPosition();
+							rb.PreviousTranslationRotation = eastl::move(rb.TranslationRotation);
+							rb.TranslationRotation = { position.x, position.y, body->GetAngle() };
+						}
+
+						glm::vec3 lerpedTranslationRotation = glm::lerp(rb.PreviousTranslationRotation, rb.TranslationRotation, interpolationFactor);
+						tc.Translation.x = lerpedTranslationRotation.x;
+						tc.Translation.y = lerpedTranslationRotation.y;
+						tc.Rotation.z = lerpedTranslationRotation.z;
+					}
+					else
 					{
 						b2Vec2 position = body->GetPosition();
+
 						rb.PreviousTranslationRotation = eastl::move(rb.TranslationRotation);
 						rb.TranslationRotation = { position.x, position.y, body->GetAngle() };
+
+						tc.Translation.x = rb.TranslationRotation.x;
+						tc.Translation.y = rb.TranslationRotation.y;
+						tc.Rotation.z = rb.TranslationRotation.z;
 					}
-
-					glm::vec3 lerpedTranslationRotation = glm::lerp(rb.PreviousTranslationRotation, rb.TranslationRotation, interpolationFactor);
-					tc.Translation.x = lerpedTranslationRotation.x;
-					tc.Translation.y = lerpedTranslationRotation.y;
-					tc.Rotation.z = lerpedTranslationRotation.z;
 				}
-				else
+
+				auto distanceJointView = m_Registry.view<DistanceJoint2DComponent>();
+				for (auto e : distanceJointView)
 				{
-					b2Vec2 position = body->GetPosition();
-
-					rb.PreviousTranslationRotation = eastl::move(rb.TranslationRotation);
-					rb.TranslationRotation = { position.x, position.y, body->GetAngle() };
-
-					tc.Translation.x = rb.TranslationRotation.x;
-					tc.Translation.y = rb.TranslationRotation.y;
-					tc.Rotation.z = rb.TranslationRotation.z;
-				}
-			}
-
-			auto distanceJointView = m_Registry.view<DistanceJoint2DComponent>();
-			for (auto e : distanceJointView)
-			{
-				auto& joint = distanceJointView.get<DistanceJoint2DComponent>(e);
-				if (joint.RuntimeJoint)
-				{
-					b2Joint* j = (b2Joint*)joint.RuntimeJoint;
-					
-					if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce)
+					auto& joint = distanceJointView.get<DistanceJoint2DComponent>(e);
+					if (joint.RuntimeJoint)
 					{
-						m_PhysicsWorld2D->DestroyJoint(j);
-						joint.RuntimeJoint = nullptr;
+						b2Joint* j = (b2Joint*)joint.RuntimeJoint;
+
+						if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce)
+						{
+							m_PhysicsWorld2D->DestroyJoint(j);
+							joint.RuntimeJoint = nullptr;
+						}
 					}
 				}
-			}
 
-			auto springJointView = m_Registry.view<SpringJoint2DComponent>();
-			for (auto e : springJointView)
-			{
-				auto& joint = springJointView.get<SpringJoint2DComponent>(e);
-				if (joint.RuntimeJoint)
+				auto springJointView = m_Registry.view<SpringJoint2DComponent>();
+				for (auto e : springJointView)
 				{
-					b2Joint* j = (b2Joint*)joint.RuntimeJoint;
-
-					if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce)
+					auto& joint = springJointView.get<SpringJoint2DComponent>(e);
+					if (joint.RuntimeJoint)
 					{
-						m_PhysicsWorld2D->DestroyJoint(j);
-						joint.RuntimeJoint = nullptr;
+						b2Joint* j = (b2Joint*)joint.RuntimeJoint;
+
+						if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce)
+						{
+							m_PhysicsWorld2D->DestroyJoint(j);
+							joint.RuntimeJoint = nullptr;
+						}
 					}
 				}
-			}
 
-			auto hingeJointView = m_Registry.view<HingeJoint2DComponent>();
-			for (auto e : hingeJointView)
-			{
-				auto& joint = hingeJointView.get<HingeJoint2DComponent>(e);
-				if (joint.RuntimeJoint)
+				auto hingeJointView = m_Registry.view<HingeJoint2DComponent>();
+				for (auto e : hingeJointView)
 				{
-					b2Joint* j = (b2Joint*)joint.RuntimeJoint;
-
-					if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce
-						|| j->GetReactionTorque(physicsStepRate) > joint.BreakTorque)
+					auto& joint = hingeJointView.get<HingeJoint2DComponent>(e);
+					if (joint.RuntimeJoint)
 					{
-						m_PhysicsWorld2D->DestroyJoint(j);
-						joint.RuntimeJoint = nullptr;
+						b2Joint* j = (b2Joint*)joint.RuntimeJoint;
+
+						if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce
+							|| j->GetReactionTorque(physicsStepRate) > joint.BreakTorque)
+						{
+							m_PhysicsWorld2D->DestroyJoint(j);
+							joint.RuntimeJoint = nullptr;
+						}
 					}
 				}
-			}
 
-			auto sliderJointView = m_Registry.view<SliderJoint2DComponent>();
-			for (auto e : sliderJointView)
-			{
-				auto& joint = sliderJointView.get<SliderJoint2DComponent>(e);
-				if (joint.RuntimeJoint)
+				auto sliderJointView = m_Registry.view<SliderJoint2DComponent>();
+				for (auto e : sliderJointView)
 				{
-					b2Joint* j = (b2Joint*)joint.RuntimeJoint;
-
-					if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce
-						|| j->GetReactionTorque(physicsStepRate) > joint.BreakTorque)
+					auto& joint = sliderJointView.get<SliderJoint2DComponent>(e);
+					if (joint.RuntimeJoint)
 					{
-						m_PhysicsWorld2D->DestroyJoint(j);
-						joint.RuntimeJoint = nullptr;
+						b2Joint* j = (b2Joint*)joint.RuntimeJoint;
+
+						if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce
+							|| j->GetReactionTorque(physicsStepRate) > joint.BreakTorque)
+						{
+							m_PhysicsWorld2D->DestroyJoint(j);
+							joint.RuntimeJoint = nullptr;
+						}
 					}
 				}
-			}
 
-			auto wheelJointView = m_Registry.view<WheelJoint2DComponent>();
-			for (auto e : wheelJointView)
-			{
-				auto& joint = wheelJointView.get<WheelJoint2DComponent>(e);
-				if (joint.RuntimeJoint)
+				auto wheelJointView = m_Registry.view<WheelJoint2DComponent>();
+				for (auto e : wheelJointView)
 				{
-					b2Joint* j = (b2Joint*)joint.RuntimeJoint;
-
-					if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce
-						|| j->GetReactionTorque(physicsStepRate) > joint.BreakTorque)
+					auto& joint = wheelJointView.get<WheelJoint2DComponent>(e);
+					if (joint.RuntimeJoint)
 					{
-						m_PhysicsWorld2D->DestroyJoint(j);
-						joint.RuntimeJoint = nullptr;
+						b2Joint* j = (b2Joint*)joint.RuntimeJoint;
+
+						if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce
+							|| j->GetReactionTorque(physicsStepRate) > joint.BreakTorque)
+						{
+							m_PhysicsWorld2D->DestroyJoint(j);
+							joint.RuntimeJoint = nullptr;
+						}
 					}
 				}
 			}
+			#pragma endregion
 		}
 		#pragma endregion
 
