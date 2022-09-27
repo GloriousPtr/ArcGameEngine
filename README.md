@@ -22,7 +22,7 @@ I develop it in my spare time as a personal project, so expect frequent periods 
 
 - Clone Arc Game Engine using git. Make sure you do a ```--recursive``` clone!
 ```
-git clone --recursive https://github.com/MohitSethi99/ArcEngine.git
+git clone --recursive https://github.com/MohitSethi99/ArcGameEngine.git
 ```
 - Arc Game Engine is built in a Windows environment, using Visual Studio 2022.
 - Execute the script `scripts/Win-GenProjects.bat` to generate the solution and project files.

@@ -41,7 +41,7 @@ namespace ArcEngine
 		Default = Layer0
 	};
 
-	static eastl::map<EntityLayer, eastl::string> LayerNamesMap =
+	static const eastl::map<EntityLayer, eastl::string> LayerNamesMap =
 	{
 		{EntityLayer::Layer0,  "Layer0"},
 		{EntityLayer::Layer1,  "Layer1"},

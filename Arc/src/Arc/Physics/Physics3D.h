@@ -3,10 +3,17 @@
 namespace JPH
 {
 	class BodyInterface;
+	class PhysicsSystem;
+	class TempAllocator;
+	class JobSystemThreadPool;
 }
 
 namespace ArcEngine
 {
+	class BPLayerInterfaceImpl;
+	class Physics3DContactListener;
+	class Physics3DBodyActivationListener;
+
 	class Physics3D
 	{
 	public:
@@ -23,5 +30,14 @@ namespace ArcEngine
 
 		static JPH::BodyInterface* GetBodyInterface();
 		static void OptimizeBroadPhase();
+
+	private:
+		static JPH::PhysicsSystem* s_PhysicsSystem;
+		static JPH::TempAllocator* s_TempAllocator;
+		static JPH::JobSystemThreadPool* s_JobSystem;
+
+		static BPLayerInterfaceImpl* s_BPLayerInterface;
+		static Physics3DContactListener* s_ContactListener;
+		static Physics3DBodyActivationListener* s_BodyActivationListener;
 	};
 }

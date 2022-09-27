@@ -60,7 +60,7 @@ namespace ArcEngine
 		}
 
 	private:
-		void CreateRigidbody(Entity entity, RigidbodyComponent& component);
+		void CreateRigidbody(Entity entity, RigidbodyComponent& component) const;
 		void CreateRigidbody2D(Entity entity, Rigidbody2DComponent& component);
 		void CreateBoxCollider2D(Entity entity, BoxCollider2DComponent& component);
 		void CreateCircleCollider2D(Entity entity, CircleCollider2DComponent& component);

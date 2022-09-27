@@ -434,7 +434,6 @@ namespace ArcEngine
 				}
 
 				{
-					const b2Vec2 zero = b2Vec2(0.0f, 0.0f);
 					auto distanceJointView = m_Registry.view<Rigidbody2DComponent, DistanceJoint2DComponent>();
 					for (auto e : distanceJointView)
 					{
@@ -686,7 +685,7 @@ namespace ArcEngine
 					const auto& rb = view.get<RigidbodyComponent>(e);
 					if (rb.RuntimeBody)
 					{
-						JPH::Body* body = (JPH::Body*)rb.RuntimeBody;
+						const JPH::Body* body = (const JPH::Body*)rb.RuntimeBody;
 						bodyInterface->RemoveBody(body->GetID());
 						bodyInterface->DestroyBody(body->GetID());
 					}
@@ -746,7 +745,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Physics", Profile::Category::Physics);
 
-			// Minimum stable value: 16.0f;
+			// Minimum stable value is 16;
 			constexpr float physicsStepRate = 50.0f;
 			constexpr float physicsTs = 1.0f / physicsStepRate;
 
@@ -775,7 +774,7 @@ namespace ArcEngine
 					if (!rb.RuntimeBody)
 						continue;
 
-					JPH::Body* body = (JPH::Body*)rb.RuntimeBody;
+					const JPH::Body* body = (const JPH::Body*)rb.RuntimeBody;
 
 					if (!Physics3D::GetBodyInterface()->IsActive(body->GetID()))
 						continue;
@@ -1088,7 +1087,7 @@ namespace ArcEngine
 		Renderer2D::EndScene(renderGraphData);
 	}
 
-	void Scene::CreateRigidbody(Entity entity, RigidbodyComponent& component)
+	void Scene::CreateRigidbody(Entity entity, RigidbodyComponent& component) const
 	{
 		if (!m_IsRunning)
 			return;
@@ -1100,7 +1099,7 @@ namespace ArcEngine
 			component.RuntimeBody = nullptr;
 		}
 
-		TransformComponent tc = entity.GetComponent<TransformComponent>();
+		const TransformComponent& tc = entity.GetComponent<TransformComponent>();
 
 		JPH::MutableCompoundShapeSettings compoundShapeSettings;
 		float maxScaleComponent = glm::max(glm::max(tc.Scale.x, tc.Scale.y), tc.Scale.z);
@@ -1109,8 +1108,8 @@ namespace ArcEngine
 
 		if (entity.HasComponent<BoxColliderComponent>())
 		{
-			auto& bc = entity.GetComponent<BoxColliderComponent>();
-			PhysicsMaterial3D* mat = new PhysicsMaterial3D(entityName, JPH::ColorArg(255, 0, 0), bc.Friction, bc.Restitution);
+			const auto& bc = entity.GetComponent<BoxColliderComponent>();
+			const auto* mat = new PhysicsMaterial3D(entityName, JPH::ColorArg(255, 0, 0), bc.Friction, bc.Restitution);
 			
 			glm::vec3 scale = bc.Size * tc.Scale * 2.0f;
 			JPH::BoxShapeSettings shapeSettings({ glm::abs(scale.x), glm::abs(scale.y), glm::abs(scale.z) }, 0.05f, mat);
@@ -1121,8 +1120,8 @@ namespace ArcEngine
 
 		if (entity.HasComponent<SphereColliderComponent>())
 		{
-			auto& sc = entity.GetComponent<SphereColliderComponent>();
-			PhysicsMaterial3D* mat = new PhysicsMaterial3D(entityName, JPH::ColorArg(255, 0, 0), sc.Friction, sc.Restitution);
+			const auto& sc = entity.GetComponent<SphereColliderComponent>();
+			const auto* mat = new PhysicsMaterial3D(entityName, JPH::ColorArg(255, 0, 0), sc.Friction, sc.Restitution);
 
 			float radius = 2.0f * sc.Radius * maxScaleComponent;
 			JPH::SphereShapeSettings shapeSettings(glm::max(0.01f, radius), mat);
@@ -1133,8 +1132,8 @@ namespace ArcEngine
 
 		if (entity.HasComponent<CapsuleColliderComponent>())
 		{
-			auto& cc = entity.GetComponent<CapsuleColliderComponent>();
-			PhysicsMaterial3D* mat = new PhysicsMaterial3D(entityName, JPH::ColorArg(255, 0, 0), cc.Friction, cc.Restitution);
+			const auto& cc = entity.GetComponent<CapsuleColliderComponent>();
+			const auto* mat = new PhysicsMaterial3D(entityName, JPH::ColorArg(255, 0, 0), cc.Friction, cc.Restitution);
 
 			float radius = 2.0f * cc.Radius * maxScaleComponent;
 			JPH::CapsuleShapeSettings shapeSettings(glm::max(0.01f, cc.Height) * 0.5f, glm::max(0.01f, radius), mat);
@@ -1145,8 +1144,8 @@ namespace ArcEngine
 
 		if (entity.HasComponent<TaperedCapsuleColliderComponent>())
 		{
-			auto& tcc = entity.GetComponent<TaperedCapsuleColliderComponent>();
-			PhysicsMaterial3D* mat = new PhysicsMaterial3D(entityName, JPH::ColorArg(255, 0, 0), tcc.Friction, tcc.Restitution);
+			const auto& tcc = entity.GetComponent<TaperedCapsuleColliderComponent>();
+			const auto* mat = new PhysicsMaterial3D(entityName, JPH::ColorArg(255, 0, 0), tcc.Friction, tcc.Restitution);
 
 			float topRadius = 2.0f * tcc.TopRadius * maxScaleComponent;
 			float bottomRadius = 2.0f * tcc.BottomRadius * maxScaleComponent;
@@ -1158,8 +1157,8 @@ namespace ArcEngine
 
 		if (entity.HasComponent<CylinderColliderComponent>())
 		{
-			auto& cc = entity.GetComponent<CylinderColliderComponent>();
-			PhysicsMaterial3D* mat = new PhysicsMaterial3D(entityName, JPH::ColorArg(255, 0, 0), cc.Friction, cc.Restitution);
+			const auto& cc = entity.GetComponent<CylinderColliderComponent>();
+			const auto* mat = new PhysicsMaterial3D(entityName, JPH::ColorArg(255, 0, 0), cc.Friction, cc.Restitution);
 
 			float radius = 2.0f * cc.Radius * maxScaleComponent;
 			JPH::CylinderShapeSettings shapeSettings(glm::max(0.01f, cc.Height) * 0.5f, glm::max(0.01f, radius), 0.05f, mat);
@@ -1300,11 +1299,10 @@ namespace ArcEngine
 				return;
 			}
 
-			const TransformComponent& transform = entity.GetTransform();
 			b2Body* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
 
 			b2PolygonShape shape;
-			shape.Set((const b2Vec2*)pc2d.Points.data(), pc2d.Points.size());
+			shape.Set((const b2Vec2*)pc2d.Points.data(), (int32_t)pc2d.Points.size());
 
 			b2FixtureDef fixtureDef;
 			fixtureDef.shape = &shape;

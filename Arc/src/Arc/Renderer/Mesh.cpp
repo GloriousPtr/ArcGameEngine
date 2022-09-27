@@ -87,7 +87,7 @@ namespace ArcEngine
 			auto& materials = reader.GetMaterials();
 			
 			// Loop over shapes
-			for (size_t s = 0; s < shapes.size(); s++)
+			for (const auto& shape : shapes)
 			{
 				eastl::vector<Vertex> vertices;
 				eastl::vector<uint32_t> indices;
@@ -96,15 +96,15 @@ namespace ArcEngine
 				// Loop over faces(polygon)
 				int materialId = -1;
 				size_t index_offset = 0;
-				for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++)
+				for (size_t f = 0; f < shape.mesh.num_face_vertices.size(); f++)
 				{
-					size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
+					size_t fv = size_t(shape.mesh.num_face_vertices[f]);
 
 					// Loop over vertices in the face.
 					for (size_t v = 0; v < fv; v++)
 					{
 						// access to vertex
-						tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
+						tinyobj::index_t idx = shape.mesh.indices[index_offset + v];
 
 						Vertex vertex;
 						vertex.Position.x = attrib.vertices[3 * size_t(idx.vertex_index) + 0];
@@ -122,46 +122,6 @@ namespace ArcEngine
 							vertex.Normal.z = attrib.normals[3 * size_t(idx.normal_index) + 2];
 						}
 
-						/*
-						if (idx.normal_index >= 0)
-						{
-							// Shortcuts for vertices
-							glm::vec3 v0 = { attrib.vertices[3 * size_t(idx.vertex_index + 0) + 0], attrib.vertices[3 * size_t(idx.vertex_index + 0) + 1], attrib.vertices[3 * size_t(idx.vertex_index + 0) + 2] };
-							glm::vec3 v1 = { attrib.vertices[3 * size_t(idx.vertex_index + 1) + 0], attrib.vertices[3 * size_t(idx.vertex_index + 1) + 1], attrib.vertices[3 * size_t(idx.vertex_index + 1) + 2] };
-							glm::vec3 v2 = { attrib.vertices[3 * size_t(idx.vertex_index + 2) + 0], attrib.vertices[3 * size_t(idx.vertex_index + 2) + 1], attrib.vertices[3 * size_t(idx.vertex_index + 2) + 2] };
-
-							glm::vec2 uv0(0.0f);
-							glm::vec2 uv1(0.0f);
-							glm::vec2 uv2(0.0f);
-							// Shortcuts for UVs
-							if (idx.texcoord_index >= 0)
-							{
-								uv0 = { attrib.texcoords[2 * size_t(idx.texcoord_index + 0) + 0], attrib.texcoords[2 * size_t(idx.texcoord_index + 0) + 1] };
-								uv1 = { attrib.texcoords[2 * size_t(idx.texcoord_index + 1) + 0], attrib.texcoords[2 * size_t(idx.texcoord_index + 1) + 1] };
-								uv2 = { attrib.texcoords[2 * size_t(idx.texcoord_index + 2) + 0], attrib.texcoords[2 * size_t(idx.texcoord_index + 2) + 1] };
-							}
-
-							// Edges of the triangle : position delta
-							const auto deltaPos1 = v1 - v0;
-							const auto deltaPos2 = v2 - v0;
-
-							// UV delta
-							const auto deltaUV1 = uv1 - uv0;
-							const auto deltaUV2 = uv2 - uv0;
-
-							const float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-							const auto tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
-							const auto bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
-
-							vertices.emplace_back(tangent.x);
-							vertices.emplace_back(tangent.y);
-							vertices.emplace_back(tangent.z);
-							vertices.emplace_back(bitangent.x);
-							vertices.emplace_back(bitangent.y);
-							vertices.emplace_back(bitangent.z);
-						}
-						*/
-
 						if (uniqueVertices.count(vertex) == 0)
 						{
 							uniqueVertices[vertex] = (uint32_t)(vertices.size());
@@ -169,16 +129,11 @@ namespace ArcEngine
 						}
 
 						indices.push_back(uniqueVertices[vertex]);
-
-						// Optional: vertex colors
-						// tinyobj::real_t red   = attrib.colors[3*size_t(idx.vertex_index)+0];
-						// tinyobj::real_t green = attrib.colors[3*size_t(idx.vertex_index)+1];
-						// tinyobj::real_t blue  = attrib.colors[3*size_t(idx.vertex_index)+2];
 					}
 					index_offset += fv;
 
 					// per-face material
-					materialId = shapes[s].mesh.material_ids[f];
+					materialId = shape.mesh.material_ids[f];
 				}
 
 				Ref<VertexArray> vertexArray = VertexArray::Create();
@@ -196,7 +151,7 @@ namespace ArcEngine
 				Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices.data(), indices.size());
 				vertexArray->SetIndexBuffer(indexBuffer);
 
-				const Submesh& submesh = m_Submeshes.emplace_back(shapes[s].name.c_str(), CreateRef<Material>(), vertexArray);
+				const Submesh& submesh = m_Submeshes.emplace_back(shape.name.c_str(), CreateRef<Material>(), vertexArray);
 
 				if (materialId >= 0)
 				{

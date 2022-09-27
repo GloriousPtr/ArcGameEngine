@@ -18,11 +18,9 @@
 
 #include "PhysicsMaterial3D.h"
 
-using namespace JPH;
-
 namespace ArcEngine
 {
-	static bool Physics3DObjectCanCollide(ObjectLayer inObject1, ObjectLayer inObject2)
+	static bool Physics3DObjectCanCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2)
 	{
 		switch (inObject1)
 		{
@@ -31,19 +29,19 @@ namespace ArcEngine
 			case Physics3D::Layers::MOVING:
 				return true; // Moving collides with everything
 			default:
-				JPH_ASSERT(false);
+				ARC_CORE_ASSERT(false);
 				return false;
 		}
 	};
 
 	namespace BroadPhaseLayers
 	{
-		static constexpr BroadPhaseLayer NON_MOVING(0);
-		static constexpr BroadPhaseLayer MOVING(1);
-		static constexpr uint NUM_LAYERS(2);
+		static constexpr JPH::BroadPhaseLayer NON_MOVING(0);
+		static constexpr JPH::BroadPhaseLayer MOVING(1);
+		static constexpr JPH::uint NUM_LAYERS(2);
 	};
 
-	class BPLayerInterfaceImpl final : public BroadPhaseLayerInterface
+	class BPLayerInterfaceImpl final : public JPH::BroadPhaseLayerInterface
 	{
 	public:
 		BPLayerInterfaceImpl()
@@ -52,14 +50,14 @@ namespace ArcEngine
 			mObjectToBroadPhase[Physics3D::Layers::MOVING] = BroadPhaseLayers::MOVING;
 		}
 
-		virtual uint GetNumBroadPhaseLayers() const override
+		virtual JPH::uint GetNumBroadPhaseLayers() const override
 		{
 			return BroadPhaseLayers::NUM_LAYERS;
 		}
 
-		virtual BroadPhaseLayer GetBroadPhaseLayer(ObjectLayer inLayer) const override
+		virtual JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override
 		{
-			JPH_ASSERT(inLayer < Physics3D::Layers::NUM_LAYERS);
+			ARC_CORE_ASSERT(inLayer < Physics3D::Layers::NUM_LAYERS);
 			return mObjectToBroadPhase[inLayer];
 		}
 
@@ -76,10 +74,10 @@ namespace ArcEngine
 #endif // JPH_EXTERNAL_PROFILE || JPH_PROFILE_ENABLED
 
 	private:
-		BroadPhaseLayer mObjectToBroadPhase[Physics3D::Layers::NUM_LAYERS];
+		JPH::BroadPhaseLayer mObjectToBroadPhase[Physics3D::Layers::NUM_LAYERS];
 	};
 
-	static bool Physics3DBroadPhaseCanCollide(ObjectLayer inLayer1, BroadPhaseLayer inLayer2)
+	static bool Physics3DBroadPhaseCanCollide(JPH::ObjectLayer inLayer1, JPH::BroadPhaseLayer inLayer2)
 	{
 		switch (inLayer1)
 		{
@@ -88,32 +86,32 @@ namespace ArcEngine
 			case Physics3D::Layers::MOVING:
 				return true;
 			default:
-				JPH_ASSERT(false);
+				ARC_CORE_ASSERT(false);
 				return false;
 		}
 	}
 
-	class Physics3DContactListener : public ContactListener
+	class Physics3DContactListener : public JPH::ContactListener
 	{
 	private:
-		static void	GetFrictionAndRestitution(const Body& inBody, const SubShapeID& inSubShapeID, float& outFriction, float& outRestitution)
+		static void	GetFrictionAndRestitution(const JPH::Body& inBody, const JPH::SubShapeID& inSubShapeID, float& outFriction, float& outRestitution)
 		{
 			// Get the material that corresponds to the sub shape ID
-			const PhysicsMaterial* material = inBody.GetShape()->GetMaterial(inSubShapeID);
-			if (material == PhysicsMaterial::sDefault)
+			const JPH::PhysicsMaterial* material = inBody.GetShape()->GetMaterial(inSubShapeID);
+			if (material == JPH::PhysicsMaterial::sDefault)
 			{
 				outFriction = inBody.GetFriction();
 				outRestitution = inBody.GetRestitution();
 			}
 			else
 			{
-				const PhysicsMaterial3D* my_material = (PhysicsMaterial3D*)material;
-				outFriction = my_material->Friction;
-				outRestitution = my_material->Restitution;
+				const PhysicsMaterial3D* phyMaterial = (const PhysicsMaterial3D*)material;
+				outFriction = phyMaterial->Friction;
+				outRestitution = phyMaterial->Restitution;
 			}
 		}
 
-		static void	OverrideContactSettings(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings)
+		static void	OverrideContactSettings(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings)
 		{
 			// Get the custom friction and restitution for both bodies
 			float friction1, friction2, restitution1, restitution2;
@@ -121,71 +119,71 @@ namespace ArcEngine
 			GetFrictionAndRestitution(inBody2, inManifold.mSubShapeID2, friction2, restitution2);
 
 			// Use the default formulas for combining friction and restitution
-			ioSettings.mCombinedFriction = sqrt(friction1 * friction2);
-			ioSettings.mCombinedRestitution = max(restitution1, restitution2);
+			ioSettings.mCombinedFriction = JPH::sqrt(friction1 * friction2);
+			ioSettings.mCombinedRestitution = JPH::max(restitution1, restitution2);
 		}
 
 	public:
-		virtual ValidateResult OnContactValidate(const Body& inBody1, const Body& inBody2, const CollideShapeResult& inCollisionResult) override
+		virtual JPH::ValidateResult OnContactValidate(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::CollideShapeResult& inCollisionResult) override
 		{
-			return ValidateResult::AcceptAllContactsForThisBodyPair;
+			return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
 		}
 
-		virtual void OnContactAdded(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings) override
+		virtual void OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
 		{
 			OverrideContactSettings(inBody1, inBody2, inManifold, ioSettings);
 		}
 
-		virtual void OnContactPersisted(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings) override
+		virtual void OnContactPersisted(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
 		{
 			OverrideContactSettings(inBody1, inBody2, inManifold, ioSettings);
 		}
 
-		virtual void OnContactRemoved(const SubShapeIDPair& inSubShapePair) override
+		virtual void OnContactRemoved(const JPH::SubShapeIDPair& inSubShapePair) override
 		{
+			/* On Collision Exit */
 		}
 	};
 
-	class Physics3DBodyActivationListener : public BodyActivationListener
+	class Physics3DBodyActivationListener : public JPH::BodyActivationListener
 	{
 	public:
-		virtual void OnBodyActivated(const BodyID& inBodyID, uint64 inBodyUserData) override
+		virtual void OnBodyActivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
 		{
+			/* Body Activated */
 		}
 
-		virtual void OnBodyDeactivated(const BodyID& inBodyID, uint64 inBodyUserData) override
+		virtual void OnBodyDeactivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
 		{
+			/* Body Deactivated */
 		}
 	};
 
-	static BPLayerInterfaceImpl* s_BPLayerInterface;
-	static Physics3DContactListener* s_ContactListener;
-	static Physics3DBodyActivationListener* s_BodyActivationListener;
-	static PhysicsSystem* s_PhysicsSystem;
-	static TempAllocator* s_TempAllocator;
-	static JobSystemThreadPool* s_JobSystem;
+	JPH::PhysicsSystem* Physics3D::s_PhysicsSystem;
+	JPH::TempAllocator* Physics3D::s_TempAllocator;
+	JPH::JobSystemThreadPool* Physics3D::s_JobSystem;
+
+	BPLayerInterfaceImpl* Physics3D::s_BPLayerInterface;
+	Physics3DContactListener* Physics3D::s_ContactListener;
+	Physics3DBodyActivationListener* Physics3D::s_BodyActivationListener;
 
 	void Physics3D::Init()
 	{
-		RegisterDefaultAllocator();
+		JPH::RegisterDefaultAllocator();
 
-		// Install callbacks
-//		Trace = TraceImpl;
-//		JPH_IF_ENABLE_ASSERTS(AssertFailed = AssertFailedImpl;)
+		JPH::Factory::sInstance = new JPH::Factory();
 
-		Factory::sInstance = new Factory();
+		JPH::RegisterTypes();
 
-		RegisterTypes();
-
-		s_TempAllocator = new TempAllocatorImpl(10 * 1024 * 1024);
-		s_JobSystem = new JobSystemThreadPool(cMaxPhysicsJobs, cMaxPhysicsBarriers, thread::hardware_concurrency() - 1);
-		const uint cMaxBodies = 65536;
-		const uint cNumBodyMutexes = 0;
-		const uint cMaxBodyPairs = 65536;
-		const uint cMaxContactConstraints = 10240;
+		s_TempAllocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
+		s_JobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, JPH::thread::hardware_concurrency() - 1);
+		const JPH::uint cMaxBodies = 65536;
+		const JPH::uint cNumBodyMutexes = 0;
+		const JPH::uint cMaxBodyPairs = 65536;
+		const JPH::uint cMaxContactConstraints = 10240;
 
 		s_BPLayerInterface = new BPLayerInterfaceImpl();
-		s_PhysicsSystem = new PhysicsSystem();
+		s_PhysicsSystem = new JPH::PhysicsSystem();
 		s_PhysicsSystem->Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, *s_BPLayerInterface, Physics3DBroadPhaseCanCollide, Physics3DObjectCanCollide);
 
 		s_BodyActivationListener = new Physics3DBodyActivationListener();
@@ -215,8 +213,8 @@ namespace ArcEngine
 		delete s_TempAllocator;
 		s_TempAllocator = nullptr;
 
-		delete Factory::sInstance;
-		Factory::sInstance = nullptr;
+		delete JPH::Factory::sInstance;
+		JPH::Factory::sInstance = nullptr;
 	}
 
 	void Physics3D::Step(float physicsTs)
