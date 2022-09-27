@@ -177,16 +177,21 @@ namespace ArcEngine
 		float Mass = 1.0f;
 		float LinearDrag = 0.0f;
 		float AngularDrag = 0.05f;
+		float GravityScale = 1.0f;
 		bool AllowSleep = true;
 		bool Awake = true;
 		bool Continuous = false;
+		bool Interpolation = true;
 		bool FreezeRotation = false;
-		float GravityScale = 1.0f;
 
 		void* RuntimeBody = nullptr;
 
 		Rigidbody2DComponent() = default;
 		Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
+
+		// For interpolation/extrapolation
+		glm::vec3 PreviousTranslationRotation;
+		glm::vec3 TranslationRotation;
 	};
 
 	struct BoxCollider2DComponent
@@ -379,10 +384,11 @@ namespace ArcEngine
 		float Mass = 1.0f;
 		float LinearDrag = 0.0f;
 		float AngularDrag = 0.05f;
+		float GravityScale = 1.0f;
 		bool AllowSleep = true;
 		bool Awake = true;
 		bool Continuous = false;
-		float GravityScale = 1.0f;
+		bool Interpolation = true;
 
 		bool IsSensor = false;
 
@@ -390,6 +396,12 @@ namespace ArcEngine
 
 		RigidbodyComponent() = default;
 		RigidbodyComponent(const RigidbodyComponent&) = default;
+
+		// For interpolation/extrapolation
+		glm::vec3 PreviousTranslation;
+		glm::quat PreviousRotation;
+		glm::vec3 Translation;
+		glm::quat Rotation;
 	};
 
 	struct BoxColliderComponent

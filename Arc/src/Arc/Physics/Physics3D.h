@@ -19,7 +19,7 @@ namespace ArcEngine
 
 		static void Init();
 		static void Shutdown();
-		static void Step(float ts);
+		static void Step(float physicsTs);
 
 		static JPH::BodyInterface* GetBodyInterface();
 		static void OptimizeBroadPhase();

@@ -627,6 +627,7 @@ namespace ArcEngine
 				UI::Property("Allow Sleep", component.AllowSleep);
 				UI::Property("Awake", component.Awake);
 				UI::Property("Continuous", component.Continuous);
+				UI::Property("Interpolation", component.Interpolation);
 				UI::Property("Freeze Rotation", component.FreezeRotation);
 
 				component.LinearDrag = glm::max(component.LinearDrag, 0.0f);
@@ -862,6 +863,7 @@ namespace ArcEngine
 				UI::Property("Allow Sleep", component.AllowSleep);
 				UI::Property("Awake", component.Awake);
 				UI::Property("Continuous", component.Continuous);
+				UI::Property("Interpolation", component.Interpolation);
 
 				component.LinearDrag = glm::max(component.LinearDrag, 0.0f);
 				component.AngularDrag = glm::max(component.AngularDrag, 0.0f);

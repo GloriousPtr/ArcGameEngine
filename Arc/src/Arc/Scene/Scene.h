@@ -25,8 +25,8 @@ namespace ArcEngine
 	class Scene
 	{
 	public:
-		uint32_t VelocityIterations = 6;
-		uint32_t PositionIterations = 2;
+		uint32_t VelocityIterations = 8;
+		uint32_t PositionIterations = 3;
 
 	public:
 		Scene() = default;
@@ -86,5 +86,7 @@ namespace ArcEngine
 
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 		bool m_ViewportDirty = true;
+
+		float m_PhysicsFrameAccumulator = 0.0f;
 	};
 }

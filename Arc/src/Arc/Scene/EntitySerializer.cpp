@@ -315,11 +315,12 @@ namespace ArcEngine
 			out << YAML::Key << "Mass" << YAML::Value << rb2d.Mass;
 			out << YAML::Key << "LinearDrag" << YAML::Value << rb2d.LinearDrag;
 			out << YAML::Key << "AngularDrag" << YAML::Value << rb2d.AngularDrag;
+			out << YAML::Key << "GravityScale" << YAML::Value << rb2d.GravityScale;
 			out << YAML::Key << "AllowSleep" << YAML::Value << rb2d.AllowSleep;
 			out << YAML::Key << "Awake" << YAML::Value << rb2d.Awake;
 			out << YAML::Key << "Continuous" << YAML::Value << rb2d.Continuous;
+			out << YAML::Key << "Interpolation" << YAML::Value << rb2d.Interpolation;
 			out << YAML::Key << "FreezeRotation" << YAML::Value << rb2d.FreezeRotation;
-			out << YAML::Key << "GravityScale" << YAML::Value << rb2d.GravityScale;
 
 			out << YAML::EndMap; // Rigidbody2DComponent
 		}
@@ -508,10 +509,11 @@ namespace ArcEngine
 			out << YAML::Key << "Mass" << YAML::Value << rb.Mass;
 			out << YAML::Key << "LinearDrag" << YAML::Value << rb.LinearDrag;
 			out << YAML::Key << "AngularDrag" << YAML::Value << rb.AngularDrag;
+			out << YAML::Key << "GravityScale" << YAML::Value << rb.GravityScale;
 			out << YAML::Key << "AllowSleep" << YAML::Value << rb.AllowSleep;
 			out << YAML::Key << "Awake" << YAML::Value << rb.Awake;
 			out << YAML::Key << "Continuous" << YAML::Value << rb.Continuous;
-			out << YAML::Key << "GravityScale" << YAML::Value << rb.GravityScale;
+			out << YAML::Key << "Interpolation" << YAML::Value << rb.Interpolation;
 			out << YAML::Key << "IsSensor" << YAML::Value << rb.IsSensor;
 
 			out << YAML::EndMap; // RigidbodyComponent
@@ -857,11 +859,12 @@ namespace ArcEngine
 			TrySet(src.Mass, rb2dCpmponent["Mass"]);
 			TrySet(src.LinearDrag, rb2dCpmponent["LinearDrag"]);
 			TrySet(src.AngularDrag, rb2dCpmponent["AngularDrag"]);
+			TrySet(src.GravityScale, rb2dCpmponent["GravityScale"]);
 			TrySet(src.AllowSleep, rb2dCpmponent["AllowSleep"]);
 			TrySet(src.Awake, rb2dCpmponent["Awake"]);
 			TrySet(src.Continuous, rb2dCpmponent["Continuous"]);
+			TrySet(src.Interpolation, rb2dCpmponent["Interpolation"]);
 			TrySet(src.FreezeRotation, rb2dCpmponent["FreezeRotation"]);
-			TrySet(src.GravityScale, rb2dCpmponent["GravityScale"]);
 		}
 
 		if (const auto& bc2dCpmponent = entity["BoxCollider2DComponent"])
@@ -1006,10 +1009,11 @@ namespace ArcEngine
 			TrySet(src.Mass, rbComponent["Mass"]);
 			TrySet(src.LinearDrag, rbComponent["LinearDrag"]);
 			TrySet(src.AngularDrag, rbComponent["AngularDrag"]);
+			TrySet(src.GravityScale, rbComponent["GravityScale"]);
 			TrySet(src.AllowSleep, rbComponent["AllowSleep"]);
 			TrySet(src.Awake, rbComponent["Awake"]);
 			TrySet(src.Continuous, rbComponent["Continuous"]);
-			TrySet(src.GravityScale, rbComponent["GravityScale"]);
+			TrySet(src.Interpolation, rbComponent["Interpolation"]);
 			TrySet(src.IsSensor, rbComponent["IsSensor"]);
 		}
 

@@ -9,6 +9,8 @@
 #include "Arc/Scripting/ScriptEngine.h"
 
 #include <glm/glm.hpp>
+#include <glm/gtx/compatibility.hpp>
+#include <glm/ext/scalar_constants.hpp>
 #include <glad/glad.h>
 #include <box2d/box2d.h>
 #include <EASTL/set.h>
@@ -393,6 +395,8 @@ namespace ArcEngine
 
 		m_IsRunning = true;
 
+		m_PhysicsFrameAccumulator = 0.0f;
+
 		#pragma region Physics3D
 		{
 			ARC_PROFILE_CATEGORY("Physics 3D", Profile::Category::Physics);
@@ -401,8 +405,10 @@ namespace ArcEngine
 			auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
 			for (auto e : view)
 			{
-				auto& body = view.get<RigidbodyComponent>(e);
-				CreateRigidbody({ e, this }, body);
+				auto [tc, rb] = view.get<TransformComponent, RigidbodyComponent>(e);
+				rb.PreviousTranslation = rb.Translation = tc.Translation;
+				rb.PreviousRotation = rb.Rotation = tc.Rotation;
+				CreateRigidbody({ e, this }, rb);
 			}
 
 			Physics3D::OptimizeBroadPhase();
@@ -421,8 +427,9 @@ namespace ArcEngine
 				auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
 				for (auto e : view)
 				{
-					auto& body = view.get<Rigidbody2DComponent>(e);
-					CreateRigidbody2D({ e, this }, body);
+					auto [tc, rb] = view.get<TransformComponent, Rigidbody2DComponent>(e);
+					CreateRigidbody2D({ e, this }, rb);
+					rb.PreviousTranslationRotation = rb.TranslationRotation = { tc.Translation.x, tc.Translation.y, tc.Rotation.z };
 				}
 			}
 
@@ -714,40 +721,6 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		#pragma region Physics3D
-		{
-			ARC_PROFILE_CATEGORY("Physics 3D", Profile::Category::Physics);
-
-			auto* bodyInterface = Physics3D::GetBodyInterface();
-			auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
-			for (auto e : view)
-			{
-				auto [tc, body] = view.get<TransformComponent, RigidbodyComponent>(e);
-				if (body.RuntimeBody)
-				{
-					JPH::Body* rb = (JPH::Body*)body.RuntimeBody;
-					JPH::EActivation activation = bodyInterface->IsActive(rb->GetID()) ? JPH::EActivation::Activate : JPH::EActivation::DontActivate;
-					glm::quat rotation = glm::quat(tc.Rotation);
-					bodyInterface->SetPositionAndRotation(rb->GetID(), { tc.Translation.x, tc.Translation.y, tc.Translation.z }, { rotation.x, rotation.y, rotation.z, rotation.w }, activation);
-				}
-			}
-		}
-		#pragma endregion
-
-		#pragma region Physics2D
-		{
-			ARC_PROFILE_CATEGORY("Physics 2D", Profile::Category::Physics);
-
-			auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
-			for (auto e : view)
-			{
-				auto [tc, body] = view.get<TransformComponent, Rigidbody2DComponent>(e);
-				b2Body* rb = (b2Body*)body.RuntimeBody;
-				rb->SetTransform(b2Vec2(tc.Translation.x, tc.Translation.y), tc.Rotation.z);
-			}
-		}
-		#pragma endregion
-
 		#pragma region Scripting
 		{
 			ARC_PROFILE_CATEGORY("Script", Profile::Category::Script);
@@ -764,26 +737,69 @@ namespace ArcEngine
 		}
 		#pragma endregion
 		
-		constexpr float physicsStepRate = 60.0f;
+		// Minimum stable value: 16.0f;
+		constexpr float physicsStepRate = 50.0f;
 		constexpr float physicsTs = 1.0f / physicsStepRate;
+
+		bool stepped = false;
+		m_PhysicsFrameAccumulator += ts;
+
+		while (m_PhysicsFrameAccumulator >= physicsTs)
+		{
+			m_ContactListener->OnUpdate(physicsTs);
+			m_PhysicsWorld2D->Step(physicsTs, VelocityIterations, PositionIterations);
+
+			Physics3D::Step(physicsTs);
+
+			m_PhysicsFrameAccumulator -= physicsTs;
+			stepped = true;
+		}
+
+		float interpolationFactor = m_PhysicsFrameAccumulator / physicsTs;
 
 		#pragma region Physics3D
 		{
 			ARC_PROFILE_CATEGORY("Physics 3D", Profile::Category::Physics);
 
-			Physics3D::Step(physicsTs);
-
 			auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
 			for (auto e : view)
 			{
 				auto [tc, rb] = view.get<TransformComponent, RigidbodyComponent>(e);
-				if (rb.RuntimeBody)
+				if (!rb.RuntimeBody)
+					continue;
+
+				JPH::Body* body = (JPH::Body*)rb.RuntimeBody;
+
+				if (!Physics3D::GetBodyInterface()->IsActive(body->GetID()))
+					continue;
+
+				if (rb.Interpolation)
 				{
-					JPH::Body* body = (JPH::Body*)rb.RuntimeBody;
+					if (stepped)
+					{
+						JPH::Vec3 position = body->GetPosition();
+						JPH::Vec3 rotation = body->GetRotation().GetEulerAngles();
+
+						rb.PreviousTranslation = rb.Translation;
+						rb.PreviousRotation = rb.Rotation;
+						rb.Translation = { position.GetX(), position.GetY(), position.GetZ() };
+						rb.Rotation = glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ());
+					}
+
+					tc.Translation = glm::lerp(rb.PreviousTranslation, rb.Translation, interpolationFactor);
+					tc.Rotation = glm::eulerAngles(glm::slerp(rb.PreviousRotation, rb.Rotation, interpolationFactor));
+				}
+				else
+				{
 					JPH::Vec3 position = body->GetPosition();
 					JPH::Vec3 rotation = body->GetRotation().GetEulerAngles();
-					tc.Translation = glm::vec3(position.GetX(), position.GetY(), position.GetZ());
-					tc.Rotation = glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ());
+
+					rb.PreviousTranslation = rb.Translation;
+					rb.PreviousRotation = rb.Rotation;
+					rb.Translation = { position.GetX(), position.GetY(), position.GetZ() };
+					rb.Rotation = glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ());
+					tc.Translation = rb.Translation;
+					tc.Rotation = glm::eulerAngles(rb.Rotation);
 				}
 			}
 		}
@@ -793,18 +809,40 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Physics 2D", Profile::Category::Physics);
 			
-			m_ContactListener->OnUpdate(physicsTs);
-			m_PhysicsWorld2D->Step(physicsTs, VelocityIterations, PositionIterations);
-
 			auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
 			for (auto e : view)
 			{
-				auto [transform, body] = view.get<TransformComponent, Rigidbody2DComponent>(e);
-				const b2Body* rb = (b2Body*)body.RuntimeBody;
-				b2Vec2 position = rb->GetPosition();
-				transform.Translation.x = position.x;
-				transform.Translation.y = position.y;
-				transform.Rotation.z = rb->GetAngle();
+				auto [tc, rb] = view.get<TransformComponent, Rigidbody2DComponent>(e);
+				const b2Body* body = (b2Body*)rb.RuntimeBody;
+
+				if (!body->IsAwake())
+					continue;
+
+				if (rb.Interpolation)
+				{
+					if (stepped)
+					{
+						b2Vec2 position = body->GetPosition();
+						rb.PreviousTranslationRotation = eastl::move(rb.TranslationRotation);
+						rb.TranslationRotation = { position.x, position.y, body->GetAngle() };
+					}
+
+					glm::vec3 lerpedTranslationRotation = glm::lerp(rb.PreviousTranslationRotation, rb.TranslationRotation, interpolationFactor);
+					tc.Translation.x = lerpedTranslationRotation.x;
+					tc.Translation.y = lerpedTranslationRotation.y;
+					tc.Rotation.z = lerpedTranslationRotation.z;
+				}
+				else
+				{
+					b2Vec2 position = body->GetPosition();
+
+					rb.PreviousTranslationRotation = eastl::move(rb.TranslationRotation);
+					rb.TranslationRotation = { position.x, position.y, body->GetAngle() };
+
+					tc.Translation.x = rb.TranslationRotation.x;
+					tc.Translation.y = rb.TranslationRotation.y;
+					tc.Rotation.z = rb.TranslationRotation.z;
+				}
 			}
 
 			auto distanceJointView = m_Registry.view<DistanceJoint2DComponent>();

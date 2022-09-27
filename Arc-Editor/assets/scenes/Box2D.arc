@@ -23,26 +23,23 @@ Entities:
       Mass: 1
       LinearDrag: 0
       AngularDrag: 0.0500000007
+      GravityScale: 1
       AllowSleep: false
       Awake: true
       Continuous: false
+      Interpolation: true
       FreezeRotation: false
-      GravityScale: 1
     BoxCollider2DComponent:
+      IsSensor: false
       Size: [0.5, 0.5]
       Offset: [0, 0]
-      IsSensor: false
       Density: 1
       Friction: 0.5
       Restitution: 0.5
-      RestitutionThreshold: 0.5
     ScriptComponent:
-      ScriptCount: 1
+      ScriptCount: 0
       Scripts:
-        0:
-          Name: Sandbox.Player
-          Fields:
-            Speed: 5
+        {}
   - Entity: 8164303301525394496
     TagComponent:
       Tag: Circle
@@ -66,19 +63,19 @@ Entities:
       Mass: 1
       LinearDrag: 0
       AngularDrag: 0.0500000007
+      GravityScale: 1
       AllowSleep: false
       Awake: true
       Continuous: false
+      Interpolation: true
       FreezeRotation: false
-      GravityScale: 1
     CircleCollider2DComponent:
+      IsSensor: false
       Radius: 0.5
       Offset: [0, 0]
-      IsSensor: false
       Density: 1
       Friction: 0.5
       Restitution: 0.5
-      RestitutionThreshold: 0.5
   - Entity: 2391845101551189660
     TagComponent:
       Tag: Ground
@@ -102,27 +99,27 @@ Entities:
       Mass: 1
       LinearDrag: 0
       AngularDrag: 0.0500000007
+      GravityScale: 1
       AllowSleep: true
       Awake: true
       Continuous: false
+      Interpolation: true
       FreezeRotation: false
-      GravityScale: 1
     BoxCollider2DComponent:
+      IsSensor: false
       Size: [0.5, 0.5]
       Offset: [0, 0]
-      IsSensor: false
       Density: 1
       Friction: 0.5
       Restitution: 0.5
-      RestitutionThreshold: 0.5
   - Entity: 8816232855549296649
     TagComponent:
       Tag: Box
       Enabled: true
     TransformComponent:
       Translation: [7.38603306, 5.3796463, 0]
-      Rotation: [0, 0, 0.92857939]
-      Scale: [0.999999881, 0.999999881, 1]
+      Rotation: [0, 0, 2.37671542]
+      Scale: [0.99999994, 0.99999994, 1]
     RelationshipComponent:
       Parent: 0
       ChildrenCount: 0
@@ -134,23 +131,23 @@ Entities:
       TilingFactor: 1
     Rigidbody2DComponent:
       Type: 2
-      AutoMass: false
+      AutoMass: true
       Mass: 1
       LinearDrag: 0
       AngularDrag: 0.0500000007
-      AllowSleep: false
+      GravityScale: 1
+      AllowSleep: true
       Awake: true
       Continuous: false
+      Interpolation: true
       FreezeRotation: false
-      GravityScale: 1
     BoxCollider2DComponent:
+      IsSensor: false
       Size: [0.5, 0.5]
       Offset: [0, 0]
-      IsSensor: false
       Density: 1
       Friction: 0
       Restitution: 0
-      RestitutionThreshold: 0
   - Entity: 10566615274522482950
     TagComponent:
       Tag: Water
@@ -174,19 +171,19 @@ Entities:
       Mass: 1
       LinearDrag: 0
       AngularDrag: 0.0500000007
+      GravityScale: 1
       AllowSleep: true
       Awake: true
       Continuous: false
+      Interpolation: true
       FreezeRotation: false
-      GravityScale: 1
     BoxCollider2DComponent:
+      IsSensor: true
       Size: [0.5, 0.5]
       Offset: [0, 0]
-      IsSensor: true
       Density: 1
       Friction: 0
       Restitution: 0
-      RestitutionThreshold: 0
     BuoyancyEffector2DComponent:
       Density: 2
       DragMultiplier: 1
@@ -240,16 +237,16 @@ Entities:
       Mass: 1
       LinearDrag: 0
       AngularDrag: 0.0500000007
-      AllowSleep: false
+      GravityScale: 1
+      AllowSleep: true
       Awake: true
       Continuous: false
+      Interpolation: true
       FreezeRotation: false
-      GravityScale: 1
     CircleCollider2DComponent:
+      IsSensor: false
       Radius: 0.5
       Offset: [0, 0]
-      IsSensor: false
       Density: 1
       Friction: 0
       Restitution: 0
-      RestitutionThreshold: 0

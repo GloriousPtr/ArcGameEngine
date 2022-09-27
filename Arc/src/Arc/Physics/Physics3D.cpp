@@ -164,7 +164,6 @@ namespace ArcEngine
 	static PhysicsSystem* s_PhysicsSystem;
 	static TempAllocator* s_TempAllocator;
 	static JobSystemThreadPool* s_JobSystem;
-	static uint64_t s_Steps;
 
 	void Physics3D::Init()
 	{
@@ -194,8 +193,6 @@ namespace ArcEngine
 
 		s_ContactListener = new Physics3DContactListener();
 		s_PhysicsSystem->SetContactListener(s_ContactListener);
-
-		s_Steps = 0;
 	}
 
 	void Physics3D::Shutdown()
@@ -222,12 +219,9 @@ namespace ArcEngine
 		Factory::sInstance = nullptr;
 	}
 
-	void Physics3D::Step(float ts)
+	void Physics3D::Step(float physicsTs)
 	{
-		++s_Steps;
-		const int cCollisionSteps = 1;
-		const int cIntegrationSubSteps = 1;
-		s_PhysicsSystem->Update(ts, cCollisionSteps, cIntegrationSubSteps, s_TempAllocator, s_JobSystem);
+		s_PhysicsSystem->Update(physicsTs, 1, 1, s_TempAllocator, s_JobSystem);
 	}
 
 	JPH::BodyInterface* Physics3D::GetBodyInterface()
