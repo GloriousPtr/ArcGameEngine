@@ -30,10 +30,7 @@ namespace Sandbox
 				dir.x = -1.0f;
 
 			Vector2 velocity = dir * speed;
-			Transform t = m_TransformComponent.transform;
-			t.Translation.x += velocity.x;
-			t.Translation.y += velocity.y;
-			m_TransformComponent.transform = t;
+			m_TransformComponent.translation += new Vector3(velocity.x, velocity.y, 0.0f);
 		}
 	}
 }

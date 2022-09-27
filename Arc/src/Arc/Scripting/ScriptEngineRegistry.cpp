@@ -205,6 +205,48 @@ namespace ArcEngine
 		GetEntity(entityID).GetComponent<TransformComponent>() = *inTransform;
 	}
 
+	void TransformComponent_GetTranslation(uint64_t entityID, glm::vec3* outTranslation)
+	{
+		ARC_PROFILE_SCOPE();
+
+		*outTranslation = GetEntity(entityID).GetComponent<TransformComponent>().Translation;
+	}
+
+	void TransformComponent_SetTranslation(uint64_t entityID, const glm::vec3* inTranslation)
+	{
+		ARC_PROFILE_SCOPE();
+
+		GetEntity(entityID).GetComponent<TransformComponent>().Translation = *inTranslation;
+	}
+
+	void TransformComponent_GetRotation(uint64_t entityID, glm::vec3* outRotation)
+	{
+		ARC_PROFILE_SCOPE();
+
+		*outRotation = GetEntity(entityID).GetComponent<TransformComponent>().Rotation;
+	}
+
+	void TransformComponent_SetRotation(uint64_t entityID, const glm::vec3* inRotation)
+	{
+		ARC_PROFILE_SCOPE();
+
+		GetEntity(entityID).GetComponent<TransformComponent>().Rotation = *inRotation;
+	}
+
+	void TransformComponent_GetScale(uint64_t entityID, glm::vec3* outScale)
+	{
+		ARC_PROFILE_SCOPE();
+
+		*outScale = GetEntity(entityID).GetComponent<TransformComponent>().Scale;
+	}
+
+	void TransformComponent_SetScale(uint64_t entityID, const glm::vec3* inScale)
+	{
+		ARC_PROFILE_SCOPE();
+
+		GetEntity(entityID).GetComponent<TransformComponent>().Scale = *inScale;
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////////
 	// Tag ////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -1024,6 +1066,12 @@ namespace ArcEngine
 		///////////////////////////////////////////////////////////////
 		ARC_ADD_INTERNAL_CALL(TransformComponent_GetTransform);
 		ARC_ADD_INTERNAL_CALL(TransformComponent_SetTransform);
+		ARC_ADD_INTERNAL_CALL(TransformComponent_GetTranslation);
+		ARC_ADD_INTERNAL_CALL(TransformComponent_SetTranslation);
+		ARC_ADD_INTERNAL_CALL(TransformComponent_GetRotation);
+		ARC_ADD_INTERNAL_CALL(TransformComponent_SetRotation);
+		ARC_ADD_INTERNAL_CALL(TransformComponent_GetScale);
+		ARC_ADD_INTERNAL_CALL(TransformComponent_SetScale);
 
 		///////////////////////////////////////////////////////////////
 		// Input //////////////////////////////////////////////////////

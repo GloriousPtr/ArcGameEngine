@@ -1,5 +1,8 @@
 ﻿namespace ArcEngine
 {
+	/// <summary>
+	/// Key codes used for input handling
+	/// </summary>
 	public enum KeyCodes
 	{
 		/* Printable keys */

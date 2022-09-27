@@ -49,7 +49,19 @@ namespace ArcEngine
 		internal static extern void TransformComponent_GetTransform(ulong entityID, out Transform transform);
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void TransformComponent_SetTransform(ulong entityID, ref Transform transform);
-
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void TransformComponent_GetTranslation(ulong entityID, out Vector3 translation);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void TransformComponent_SetTranslation(ulong entityID, ref Vector3 translation);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void TransformComponent_GetRotation(ulong entityID, out Vector3 eulerAngles);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void TransformComponent_SetRotation(ulong entityID, ref Vector3 eulerAngles);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void TransformComponent_GetScale(ulong entityID, out Vector3 scale);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void TransformComponent_SetScale(ulong entityID, ref Vector3 scale);
+		
 		#endregion
 
 		#region SpriteRendererComponent

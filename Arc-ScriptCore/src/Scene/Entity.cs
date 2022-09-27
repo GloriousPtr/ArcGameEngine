@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -13,6 +12,9 @@ namespace ArcEngine
 
 		#region CollisionCallbacks
 
+		/// <summary>
+		/// Holds data for collision events
+		/// </summary>
 		[StructLayout(LayoutKind.Sequential)]
 		public struct CollisionData
 		{
@@ -47,12 +49,22 @@ namespace ArcEngine
 
 		#region PublicMethods
 
+		/// <summary>
+		/// Check for component of Type T.
+		/// </summary>
+		/// <typeparam name="T">Component Type</typeparam>
+		/// <returns>If component is attached to the entity: true, else false.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool HasComponent<T>() where T : class, IComponent
 		{
 			return InternalCalls.Entity_HasComponent(ID, typeof(T));
 		}
 
+		/// <summary>
+		/// Adds the component of Type T to the entity if it's not already attached.
+		/// </summary>
+		/// <typeparam name="T">Component Type</typeparam>
+		/// <returns>If already attached: Newly added component, else already attached component of Type T.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T AddComponent<T>() where T : class, IComponent, new()
 		{
@@ -68,6 +80,11 @@ namespace ArcEngine
 			return component;
 		}
 
+		/// <summary>
+		/// Get the component of Type T.
+		/// </summary>
+		/// <typeparam name="T">Component Type</typeparam>
+		/// <returns>Component of Type T if the game object has one attached, null if it doesn't.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T GetComponent<T>() where T : class, IComponent, new()
 		{

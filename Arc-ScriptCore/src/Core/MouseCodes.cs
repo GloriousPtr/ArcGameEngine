@@ -1,5 +1,8 @@
 ﻿namespace ArcEngine
 {
+	/// <summary>
+	/// Mouse codes for input handling
+	/// </summary>
 	public enum MouseCodes
 	{
 		Button0                = 0,
