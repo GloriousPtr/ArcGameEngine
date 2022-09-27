@@ -30,3 +30,8 @@
 #ifdef ARC_PLATFORM_WINDOWS
 	#include <Windows.h>
 #endif
+
+namespace ArcEngine::Allocation
+{
+	size_t GetSize();
+}

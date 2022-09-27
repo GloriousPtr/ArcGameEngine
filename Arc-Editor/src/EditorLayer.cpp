@@ -343,6 +343,11 @@ namespace ArcEngine
 						ImGui::PopItemFlag();
 						ImGui::PopItemFlag();
 
+						ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - ImGui::CalcTextSize("FPS: XX.XX (XX.XXXXXXms  MEM: XXXX.XXMB").x);
+						float fps = ImGui::GetIO().Framerate;
+						size_t allocatedMemory = m_Application->GetAllocatedMemorySize();
+						ImGui::Text("FPS: %.2f (%.6fms)  MEM: %.2fMB", fps, 1.0f / fps, (float)allocatedMemory / (1024.0f * 1024.0f));
+
 						ImGui::EndMenuBar();
 					}
 					ImGui::PopStyleVar();

@@ -332,7 +332,8 @@ namespace ArcEngine
 				const auto& [tc, cam] = view.get<TransformComponent, CameraComponent>(entityHandle);
 				Entity entity = { entityHandle, m_Scene.get() };
 				const auto inv = glm::inverse(cam.Camera.GetProjection() * glm::inverse(entity.GetWorldTransform()));
-				eastl::vector<glm::vec3> frustumCorners;
+				glm::vec3 frustumCorners[8];
+				int i = 0;
 				for (int x = 0; x < 2; ++x)
 				{
 					for (int y = 0; y < 2; ++y)
@@ -345,7 +346,8 @@ namespace ArcEngine
 							2.0f * (float)y - 1.0f,
 							2.0f * (float)z - 1.0f,
 							1.0f);
-							frustumCorners.emplace_back(glm::vec3(pt) / pt.w);
+							frustumCorners[i] = (glm::vec3(pt) / pt.w);
+							++i;
 						}
 					}
 				}

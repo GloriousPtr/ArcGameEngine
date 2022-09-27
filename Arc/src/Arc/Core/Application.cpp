@@ -72,6 +72,12 @@ namespace ArcEngine
 
 		m_Running = false;
 	}
+
+	size_t Application::GetAllocatedMemorySize()
+	{
+		size_t s = Allocation::GetSize();
+		return s;
+	}
 	
 	void Application::OnEvent(Event& e)
 	{

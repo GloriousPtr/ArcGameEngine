@@ -34,6 +34,8 @@ namespace ArcEngine
 
 		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 
+		size_t GetAllocatedMemorySize();
+
 		inline static Application& Get() { return *s_Instance; }
 		
 	private:

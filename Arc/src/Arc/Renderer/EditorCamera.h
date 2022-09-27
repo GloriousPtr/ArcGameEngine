@@ -36,7 +36,7 @@ namespace ArcEngine
 		float m_Fov = 45.0f;
 		float m_AspectRatio = 1.777f;
 		float m_NearClip = 0.03f;
-		float m_FarClip = 1000.0f;
+		float m_FarClip = 2000.0f;
 
 		glm::vec3 m_Position = glm::vec3(0, 0, -2.5);
 		glm::vec3 m_Forward = glm::vec3(0, 0, 1);
