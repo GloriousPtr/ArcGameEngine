@@ -320,23 +320,24 @@ namespace ArcEngine
 		ImVec2 framePadding = ImGui::GetStyle().FramePadding;
 
 		ImVec2 headerRegion = ImGui::GetContentRegionMax();
-		headerRegion.y = ImGui::GetFrameHeight();
+		float frameHeight = ImGui::GetFrameHeight();
+		headerRegion.y = 2.0f * (frameHeight + framePadding.y);
 		ImGui::BeginChild("PropertiesHeader", headerRegion, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 		{
 			float addButtonSizeX = UI::GetIconButtonSize("  " ICON_MDI_PLUS, "Add  ").x;
-			ImVec2 lockButtonSize = ImVec2(headerRegion.y * 1.5f, headerRegion.y);
+			ImVec2 lockButtonSize = ImVec2(frameHeight * 1.5f, frameHeight);
 			float tagWidth = headerRegion.x - ((addButtonSizeX + framePadding.x * 2.0f) + (lockButtonSize.x + framePadding.x * 2.0f));
+
+			auto& tag = entity.GetComponent<TagComponent>();
 
 			if (entity.HasComponent<TagComponent>())
 			{
-				auto& tag = entity.GetComponent<TagComponent>().Tag;
-
 				char buffer[256];
 				memset(buffer, 0, sizeof(buffer));
-				strcpy_s(buffer, tag.c_str());
+				strcpy_s(buffer, tag.Tag.c_str());
 				ImGui::SetNextItemWidth(tagWidth);
 				if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
-					tag = eastl::string(buffer);
+					tag.Tag = eastl::string(buffer);
 			}
 
 			ImGui::SameLine();
@@ -398,6 +399,26 @@ namespace ArcEngine
 				const char* icon = m_Locked ? ICON_MDI_LOCK : ICON_MDI_LOCK_OPEN_OUTLINE;
 				if (UI::ToggleButton(icon, m_Locked, lockButtonSize))
 					m_Locked = !m_Locked;
+			}
+
+			ImGui::SetNextItemWidth(headerRegion.x - framePadding.x);
+
+			const char* current = LayerNamesMap[tag.Layer].c_str();
+			if (ImGui::BeginCombo("##LayerName", current))
+			{
+				for (auto& l : LayerNamesMap)
+				{
+					bool isSelected = current == l.second;
+					if (ImGui::Selectable(LayerNamesMap[l.first].c_str(), isSelected))
+					{
+						current = LayerNamesMap[l.first].c_str();
+						tag.Layer = l.first;
+					}
+
+					if (isSelected)
+						ImGui::SetItemDefaultFocus();
+				}
+				ImGui::EndCombo();
 			}
 		}
 		ImGui::EndChild();

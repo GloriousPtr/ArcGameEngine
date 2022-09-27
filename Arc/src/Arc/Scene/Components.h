@@ -1,7 +1,7 @@
 #pragma once
 
 #include <assimp/Importer.hpp>
-#include <EASTL/hash_set.h>
+#include <EASTL/map.h>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -19,6 +19,48 @@
 
 namespace ArcEngine
 {
+	enum class EntityLayer
+	{
+		Layer0 =	BIT(0),
+		Layer1 =	BIT(1),
+		Layer2 =	BIT(2),
+		Layer3 =	BIT(3),
+		Layer4 =	BIT(4),
+		Layer5 =	BIT(5),
+		Layer6 =	BIT(6),
+		Layer7 =	BIT(7),
+		Layer8 =	BIT(8),
+		Layer9 =	BIT(9),
+		Layer10 =	BIT(10),
+		Layer11 =	BIT(11),
+		Layer12 =	BIT(12),
+		Layer13 =	BIT(13),
+		Layer14 =	BIT(14),
+		Layer15 =	BIT(15),
+
+		Default = Layer0
+	};
+
+	static eastl::map<EntityLayer, eastl::string> LayerNamesMap =
+	{
+		{EntityLayer::Layer0,  "Layer0"},
+		{EntityLayer::Layer1,  "Layer1"},
+		{EntityLayer::Layer2,  "Layer2"},
+		{EntityLayer::Layer3,  "Layer3"},
+		{EntityLayer::Layer4,  "Layer4"},
+		{EntityLayer::Layer5,  "Layer5"},
+		{EntityLayer::Layer6,  "Layer6"},
+		{EntityLayer::Layer7,  "Layer7"},
+		{EntityLayer::Layer8,  "Layer8"},
+		{EntityLayer::Layer9,  "Layer9"},
+		{EntityLayer::Layer10, "Layer10"},
+		{EntityLayer::Layer11, "Layer11"},
+		{EntityLayer::Layer12, "Layer12"},
+		{EntityLayer::Layer13, "Layer13"},
+		{EntityLayer::Layer14, "Layer14"},
+		{EntityLayer::Layer15, "Layer15"},
+	};
+
 	struct IDComponent
 	{
 		UUID ID;
@@ -33,6 +75,7 @@ namespace ArcEngine
 	struct TagComponent
 	{
 		eastl::string Tag;
+		EntityLayer Layer = EntityLayer::Default;
 		bool Enabled = true;
 
 		bool handled = true;
