@@ -319,7 +319,7 @@ namespace ArcEngine
 
 		ImVec2 framePadding = ImGui::GetStyle().FramePadding;
 
-		ImVec2 headerRegion = ImGui::GetContentRegionMax();
+		ImVec2 headerRegion = ImGui::GetContentRegionAvail();
 		float frameHeight = ImGui::GetFrameHeight();
 		headerRegion.y = 2.0f * (frameHeight + framePadding.y);
 		ImGui::BeginChild("PropertiesHeader", headerRegion, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
