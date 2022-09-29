@@ -404,7 +404,7 @@ namespace ArcEngine
 			ImGui::SetNextItemWidth(headerRegion.x - framePadding.x);
 
 			auto it = Scene::LayerCollisionMask.find(tag.Layer);
-			const char* current = Scene::LayerCollisionMask[it == Scene::LayerCollisionMask.end() ? BIT(0) : tag.Layer].Name.c_str();
+			const char* current = Scene::LayerCollisionMask[it == Scene::LayerCollisionMask.end() ? Scene::DefaultLayer : tag.Layer].Name.c_str();
 			if (ImGui::BeginCombo("##LayerName", current))
 			{
 				for (auto [layer, layerData] : Scene::LayerCollisionMask)

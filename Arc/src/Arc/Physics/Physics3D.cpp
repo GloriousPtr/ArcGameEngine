@@ -17,28 +17,23 @@
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 
 #include "PhysicsMaterial3D.h"
+#include "Arc/Scene/Scene.h"
 
 namespace ArcEngine
 {
 	static bool Physics3DObjectCanCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2)
 	{
-		switch (inObject1)
-		{
-			case Physics3D::Layers::NON_MOVING:
-				return inObject2 == Physics3D::Layers::MOVING; // Non moving only collides with moving
-			case Physics3D::Layers::MOVING:
-				return true; // Moving collides with everything
-			default:
-				ARC_CORE_ASSERT(false);
-				return false;
-		}
+		EntityLayer layer1 = BIT(inObject1);
+		EntityLayer layer2 = BIT(inObject2);
+		return	(layer1 & Scene::LayerCollisionMask.at(layer2).Flags) == layer1 &&
+				(layer2 & Scene::LayerCollisionMask.at(layer1).Flags) == layer2;
 	};
 
 	namespace BroadPhaseLayers
 	{
-		static constexpr JPH::BroadPhaseLayer NON_MOVING(0);
-		static constexpr JPH::BroadPhaseLayer MOVING(1);
-		static constexpr JPH::uint NUM_LAYERS(2);
+		static constexpr JPH::BroadPhaseLayer STATIC(0);
+		static constexpr JPH::BroadPhaseLayer DEFAULT(1);
+		static constexpr JPH::uint NUM_LAYERS = 3;
 	};
 
 	class BPLayerInterfaceImpl final : public JPH::BroadPhaseLayerInterface
@@ -46,8 +41,22 @@ namespace ArcEngine
 	public:
 		BPLayerInterfaceImpl()
 		{
-			mObjectToBroadPhase[Physics3D::Layers::NON_MOVING] = BroadPhaseLayers::NON_MOVING;
-			mObjectToBroadPhase[Physics3D::Layers::MOVING] = BroadPhaseLayers::MOVING;
+			mObjectToBroadPhase[Physics3D::BroadLayer::STATIC]  = BroadPhaseLayers::STATIC;
+			mObjectToBroadPhase[Physics3D::BroadLayer::DEFAULT] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER2]  = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER3]  = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER4]  = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER5]  = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER6]  = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER7]  = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER8]  = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER9]  = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER10] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER11] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER12] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER13] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER14] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER15] = BroadPhaseLayers::DEFAULT;
 		}
 
 		virtual JPH::uint GetNumBroadPhaseLayers() const override
@@ -74,21 +83,15 @@ namespace ArcEngine
 #endif // JPH_EXTERNAL_PROFILE || JPH_PROFILE_ENABLED
 
 	private:
-		JPH::BroadPhaseLayer mObjectToBroadPhase[Physics3D::Layers::NUM_LAYERS];
+		JPH::BroadPhaseLayer mObjectToBroadPhase[Physics3D::BroadLayer::NUM_LAYERS];
 	};
 
 	static bool Physics3DBroadPhaseCanCollide(JPH::ObjectLayer inLayer1, JPH::BroadPhaseLayer inLayer2)
 	{
-		switch (inLayer1)
-		{
-			case Physics3D::Layers::NON_MOVING:
-				return inLayer2 == BroadPhaseLayers::MOVING;
-			case Physics3D::Layers::MOVING:
-				return true;
-			default:
-				ARC_CORE_ASSERT(false);
-				return false;
-		}
+		if (inLayer1 == Physics3D::BroadLayer::STATIC)
+			return inLayer2 != BroadPhaseLayers::STATIC;
+
+		return true;
 	}
 
 	class Physics3DContactListener : public JPH::ContactListener

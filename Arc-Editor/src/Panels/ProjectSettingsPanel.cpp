@@ -30,7 +30,7 @@ namespace ArcEngine
 					float cursorPosY = ImGui::GetCursorPosY();
 					if (UI::IconButton("  " ICON_MDI_PLUS, "Add  "))
 					{
-						EntityLayerData newLayer = { "Layer", 0xFFFFFF };
+						EntityLayerData newLayer = { "Layer", 0xFFFFFF, layerCollisionMask.size() };
 						layerCollisionMask[BIT(layerCollisionMask.size())] = newLayer;
 					}
 
@@ -46,12 +46,31 @@ namespace ArcEngine
 					memcpy(buffer, layerData.Name.data(), size);
 
 					ImGui::PushID(i);
+
+					bool disabled = i <= 1;
+					if (disabled)
+						ImGui::BeginDisabled();
+
 					if (ImGui::InputText("##LayerName", buffer, size))
 						layerData.Name = buffer;
 
-					if (i != 0)
+					if (disabled)
 					{
-						float buttonSize = ImGui::GetFrameHeight();
+						ImGui::EndDisabled();
+						if (i == 0)
+						{
+							ImGui::SameLine();
+							ImGui::Text(ICON_MDI_INFORMATION);
+							if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
+							{
+								ImGui::BeginTooltip();
+								ImGui::TextUnformatted("Entities marked with Static layer will not collide with each other.");
+								ImGui::EndTooltip();
+							}
+						}
+					}
+					else
+					{
 						ImGui::SameLine();
 						if (ImGui::Button(ICON_MDI_CLOSE))
 							deletedLayer = layer;
@@ -112,6 +131,18 @@ namespace ArcEngine
 							on = on && ((colLayer & layerCollisionMask.at(rowLayer).Flags) == colLayer);
 
 							ImGui::PushID(i++);
+
+							bool disabled = c == 0 && r == 0;
+							if (disabled)
+							{
+								if (on)
+								{
+									layerCollisionMask.at(colLayer).Flags &= ~rowLayer;
+									layerCollisionMask.at(rowLayer).Flags &= ~colLayer;
+								}
+								ImGui::BeginDisabled();
+							}
+
 							if (ImGui::Checkbox("##mat", &on))
 							{
 								if (on)
@@ -125,12 +156,17 @@ namespace ArcEngine
 									layerCollisionMask.at(rowLayer).Flags &= ~colLayer;
 								}
 							}
-							if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
+
+							if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay | ImGuiHoveredFlags_AllowWhenDisabled))
 							{
 								ImGui::BeginTooltip();
 								ImGui::Text("%s / %s", rowLayerName, columnLayerName);
 								ImGui::EndTooltip();
 							}
+
+							if (disabled)
+								ImGui::EndDisabled();
+							
 							ImGui::PopID();
 						}
 					}

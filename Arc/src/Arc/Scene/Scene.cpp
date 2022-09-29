@@ -41,10 +41,10 @@ namespace ArcEngine
 {
 	eastl::map<EntityLayer, EntityLayerData> Scene::LayerCollisionMask =
 	{
-		{ BIT(0), {"Default",		0xFFFF } },
-		{ BIT(1), { "Player",		0xFFFF } },
-		{ BIT(2), { "Environment",  0xFFFF } },
-		{ BIT(3), { "Sensor",		0xFFFF } },
+		{ BIT(0), { "Static",		0xFFFF, 0 } },
+		{ BIT(1), { "Default",		0xFFFF, 1 } },
+		{ BIT(2), { "Player",		0xFFFF, 2 } },
+		{ BIT(3), { "Sensor",		0xFFFF, 3 } },
 	};
 
 	class ContactListener : public b2ContactListener
@@ -1182,7 +1182,14 @@ namespace ArcEngine
 
 		// Body
 		glm::quat rotation = glm::quat(tc.Rotation);
-		JPH::BodyCreationSettings bodySettings(compoundShapeSettings.Create().Get(), {tc.Translation.x, tc.Translation.y, tc.Translation.z}, {rotation.x, rotation.y, rotation.z, rotation.w}, (JPH::EMotionType)component.Type, Physics3D::Layers::MOVING);
+		
+		auto layer = entity.GetComponent<TagComponent>().Layer;
+		uint8_t layerIndex = 1;	// Default Layer
+		auto collisionMaskIt = LayerCollisionMask.find(layer);
+		if (collisionMaskIt != LayerCollisionMask.end())
+			layerIndex = collisionMaskIt->second.Index;
+
+		JPH::BodyCreationSettings bodySettings(compoundShapeSettings.Create().Get(), {tc.Translation.x, tc.Translation.y, tc.Translation.z}, {rotation.x, rotation.y, rotation.z, rotation.w}, (JPH::EMotionType)component.Type, layerIndex);
 
 		if (!component.AutoMass)
 		{
@@ -1271,7 +1278,7 @@ namespace ArcEngine
 			auto layer = entity.GetComponent<TagComponent>().Layer;
 			auto collisionMaskIt = LayerCollisionMask.find(layer);
 			if (collisionMaskIt == LayerCollisionMask.end())
-				layer = BIT(0);
+				layer = Scene::DefaultLayer;
 			fixtureDef.filter.categoryBits = layer;
 			fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
 
@@ -1304,7 +1311,7 @@ namespace ArcEngine
 			auto layer = entity.GetComponent<TagComponent>().Layer;
 			auto collisionMaskIt = LayerCollisionMask.find(layer);
 			if (collisionMaskIt == LayerCollisionMask.end())
-				layer = BIT(0);
+				layer = Scene::DefaultLayer;
 			fixtureDef.filter.categoryBits = layer;
 			fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
 
@@ -1341,7 +1348,7 @@ namespace ArcEngine
 			auto layer = entity.GetComponent<TagComponent>().Layer;
 			auto collisionMaskIt = LayerCollisionMask.find(layer);
 			if (collisionMaskIt == LayerCollisionMask.end())
-				layer = BIT(0);
+				layer = Scene::DefaultLayer;
 			fixtureDef.filter.categoryBits = layer;
 			fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
 

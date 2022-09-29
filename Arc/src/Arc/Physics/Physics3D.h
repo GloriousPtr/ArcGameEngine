@@ -17,11 +17,26 @@ namespace ArcEngine
 	class Physics3D
 	{
 	public:
-		struct Layers
+		struct BroadLayer
 		{
-			static constexpr uint8_t NON_MOVING = 0;
-			static constexpr uint8_t MOVING = 1;
-			static constexpr uint8_t NUM_LAYERS = 2;
+			static constexpr uint8_t STATIC  = 0;
+			static constexpr uint8_t DEFAULT = 1;
+			static constexpr uint8_t OTHER2  = 2;
+			static constexpr uint8_t OTHER3  = 3;
+			static constexpr uint8_t OTHER4  = 4;
+			static constexpr uint8_t OTHER5  = 5;
+			static constexpr uint8_t OTHER6  = 6;
+			static constexpr uint8_t OTHER7  = 7;
+			static constexpr uint8_t OTHER8  = 8;
+			static constexpr uint8_t OTHER9  = 9;
+			static constexpr uint8_t OTHER10 = 10;
+			static constexpr uint8_t OTHER11 = 11;
+			static constexpr uint8_t OTHER12 = 12;
+			static constexpr uint8_t OTHER13 = 13;
+			static constexpr uint8_t OTHER14 = 14;
+			static constexpr uint8_t OTHER15 = 15;
+
+			static constexpr uint8_t NUM_LAYERS = 16;
 		};
 
 		static void Init();

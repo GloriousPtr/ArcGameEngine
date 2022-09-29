@@ -32,7 +32,7 @@ namespace ArcEngine
 	struct TagComponent
 	{
 		eastl::string Tag;
-		uint16_t Layer = BIT(0);
+		uint16_t Layer = BIT(1);
 		bool Enabled = true;
 
 		bool handled = true;

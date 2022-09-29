@@ -29,6 +29,7 @@ namespace ArcEngine
 	{
 		eastl::string Name = "Layer";
 		EntityLayer Flags = 0xFFFF;
+		uint8_t Index = 1;
 	};
 
 	class Scene
@@ -37,6 +38,8 @@ namespace ArcEngine
 		uint32_t VelocityIterations = 8;
 		uint32_t PositionIterations = 3;
 
+		static const EntityLayer StaticLayer  = BIT(0);
+		static const EntityLayer DefaultLayer = BIT(1);
 		static eastl::map<EntityLayer, EntityLayerData> LayerCollisionMask;
 
 	public:
