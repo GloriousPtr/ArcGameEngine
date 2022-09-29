@@ -1,5 +1,7 @@
 #pragma once
 
+#include <EASTL/map.h>
+
 #include "Arc/Core/UUID.h"
 #include "Arc/Core/Timestep.h"
 #include "Arc/Renderer/EditorCamera.h"
@@ -22,11 +24,20 @@ namespace ArcEngine
 	struct CircleCollider2DComponent;
 	struct PolygonCollider2DComponent;
 	
+	using EntityLayer = uint16_t;
+	struct EntityLayerData
+	{
+		eastl::string Name = "Layer";
+		EntityLayer Flags = 0xFFFF;
+	};
+
 	class Scene
 	{
 	public:
 		uint32_t VelocityIterations = 8;
 		uint32_t PositionIterations = 3;
+
+		static eastl::map<EntityLayer, EntityLayerData> LayerCollisionMask;
 
 	public:
 		Scene() = default;

@@ -39,6 +39,14 @@
 
 namespace ArcEngine
 {
+	eastl::map<EntityLayer, EntityLayerData> Scene::LayerCollisionMask =
+	{
+		{ BIT(0), {"Default",		0xFFFF } },
+		{ BIT(1), { "Player",		0xFFFF } },
+		{ BIT(2), { "Environment",  0xFFFF } },
+		{ BIT(3), { "Sensor",		0xFFFF } },
+	};
+
 	class ContactListener : public b2ContactListener
 	{
 	public:
@@ -288,6 +296,9 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		Ref<Scene> newScene = CreateRef<Scene>();
+		newScene->VelocityIterations = other->VelocityIterations;
+		newScene->PositionIterations = other->PositionIterations;
+		newScene->LayerCollisionMask = other->LayerCollisionMask;
 
 		newScene->m_ViewportWidth = other->m_ViewportWidth;
 		newScene->m_ViewportHeight = other->m_ViewportHeight;
@@ -296,7 +307,9 @@ namespace ArcEngine
 		for (auto e : view)
 		{
 			auto [id, tag] = view.get<IDComponent, TagComponent>(e);
-			newScene->CreateEntityWithUUID(id.ID, tag.Tag);
+			Entity newEntity = newScene->CreateEntityWithUUID(id.ID, tag.Tag);
+			newEntity.GetComponent<TagComponent>().Enabled = tag.Enabled;
+			newEntity.GetComponent<TagComponent>().Layer = tag.Layer;
 		}
 
 		for (auto e : view)
@@ -745,7 +758,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Physics", Profile::Category::Physics);
 
-			// Minimum stable value is 16;
+			// Minimum stable value is 16.0
 			constexpr float physicsStepRate = 50.0f;
 			constexpr float physicsTs = 1.0f / physicsStepRate;
 
@@ -1255,6 +1268,13 @@ namespace ArcEngine
 			fixtureDef.friction = bc2d.Friction;
 			fixtureDef.restitution = bc2d.Restitution;
 
+			auto layer = entity.GetComponent<TagComponent>().Layer;
+			auto collisionMaskIt = LayerCollisionMask.find(layer);
+			if (collisionMaskIt == LayerCollisionMask.end())
+				layer = BIT(0);
+			fixtureDef.filter.categoryBits = layer;
+			fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
+
 			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
 			bc2d.RuntimeFixture = fixture;
 			m_FixtureMap[fixture] = entity;
@@ -1280,6 +1300,13 @@ namespace ArcEngine
 			fixtureDef.density = cc2d.Density;
 			fixtureDef.friction = cc2d.Friction;
 			fixtureDef.restitution = cc2d.Restitution;
+
+			auto layer = entity.GetComponent<TagComponent>().Layer;
+			auto collisionMaskIt = LayerCollisionMask.find(layer);
+			if (collisionMaskIt == LayerCollisionMask.end())
+				layer = BIT(0);
+			fixtureDef.filter.categoryBits = layer;
+			fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
 
 			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
 			cc2d.RuntimeFixture = fixture;
@@ -1310,6 +1337,13 @@ namespace ArcEngine
 			fixtureDef.density = pc2d.Density;
 			fixtureDef.friction = pc2d.Friction;
 			fixtureDef.restitution = pc2d.Restitution;
+
+			auto layer = entity.GetComponent<TagComponent>().Layer;
+			auto collisionMaskIt = LayerCollisionMask.find(layer);
+			if (collisionMaskIt == LayerCollisionMask.end())
+				layer = BIT(0);
+			fixtureDef.filter.categoryBits = layer;
+			fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
 
 			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
 			pc2d.RuntimeFixture = fixture;

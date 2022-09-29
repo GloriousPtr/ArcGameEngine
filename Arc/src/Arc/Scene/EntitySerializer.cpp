@@ -198,6 +198,7 @@ namespace ArcEngine
 
 			const auto& tc = entity.GetComponent<TagComponent>();
 			out << YAML::Key << "Tag" << YAML::Value << tc.Tag.c_str();
+			out << YAML::Key << "Layer" << YAML::Value << tc.Layer;
 			out << YAML::Key << "Enabled" << YAML::Value << tc.Enabled;
 
 			out << YAML::EndMap; // TagComponent
@@ -726,10 +727,12 @@ namespace ArcEngine
 
 		eastl::string name;
 		bool enabled = true;
+		EntityLayer layer = 0;
 		auto tagComponent = entity["TagComponent"];
 		if (tagComponent)
 		{
 			name = tagComponent["Tag"].as<std::string>().c_str();
+			TrySet(layer, tagComponent["Layer"]);
 			TrySet(enabled, tagComponent["Enabled"]);
 		}
 
@@ -744,7 +747,12 @@ namespace ArcEngine
 		else
 			ARC_CORE_TRACE("Deserialized entity with oldID = {0}, newID = {1}, name = {2}", uuid, (uint64_t)deserializedEntity.GetUUID(), name);
 
-		deserializedEntity.GetComponent<TagComponent>().Enabled = enabled;
+		if (tagComponent)
+		{
+			auto& tc = deserializedEntity.GetComponent<TagComponent>();
+			tc.Layer = layer;
+			tc.Enabled = enabled;
+		}
 
 		if (const auto& transformComponent = entity["TransformComponent"])
 		{

@@ -1196,4 +1196,35 @@ namespace ArcEngine
 			draw_list->AddText(nullptr, 0.0f, pos, ImGui::GetColorU32(ImGuiCol_Text), text, text_display_end, wrap_width, nullptr);
 		}
 	}
+
+	/// Draws vertical text. The position is the bottom left of the text rect.
+	void UI::AddTextVertical(ImDrawList* DrawList, const char* text, ImVec2 pos, ImU32 text_color)
+	{
+		pos.x = IM_ROUND(pos.x);
+		pos.y = IM_ROUND(pos.y);
+		ImFont* font = GImGui->Font;
+		const ImFontGlyph* glyph;
+		char c;
+		ImGuiContext& g = *GImGui;
+		ImVec2 text_size = ImGui::CalcTextSize(text);
+		while ((c = *text++))
+		{
+			glyph = font->FindGlyph(c);
+			if (!glyph) continue;
+
+			DrawList->PrimReserve(6, 4);
+			DrawList->PrimQuadUV(
+				pos + ImVec2(glyph->Y0, -glyph->X0),
+				pos + ImVec2(glyph->Y0, -glyph->X1),
+				pos + ImVec2(glyph->Y1, -glyph->X1),
+				pos + ImVec2(glyph->Y1, -glyph->X0),
+
+				ImVec2(glyph->U0, glyph->V0),
+				ImVec2(glyph->U1, glyph->V0),
+				ImVec2(glyph->U1, glyph->V1),
+				ImVec2(glyph->U0, glyph->V1),
+				text_color);
+			pos.y -= glyph->AdvanceX;
+		}
+	}
 }

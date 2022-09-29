@@ -403,16 +403,17 @@ namespace ArcEngine
 
 			ImGui::SetNextItemWidth(headerRegion.x - framePadding.x);
 
-			const char* current = LayerNamesMap[tag.Layer].c_str();
+			auto it = Scene::LayerCollisionMask.find(tag.Layer);
+			const char* current = Scene::LayerCollisionMask[it == Scene::LayerCollisionMask.end() ? BIT(0) : tag.Layer].Name.c_str();
 			if (ImGui::BeginCombo("##LayerName", current))
 			{
-				for (auto& l : LayerNamesMap)
+				for (auto [layer, layerData] : Scene::LayerCollisionMask)
 				{
-					bool isSelected = current == l.second;
-					if (ImGui::Selectable(LayerNamesMap[l.first].c_str(), isSelected))
+					bool isSelected = current == layerData.Name;
+					if (ImGui::Selectable(Scene::LayerCollisionMask.at(layer).Name.c_str(), isSelected))
 					{
-						current = LayerNamesMap[l.first].c_str();
-						tag.Layer = l.first;
+						current = Scene::LayerCollisionMask.at(layer).Name.c_str();
+						tag.Layer = layer;
 					}
 
 					if (isSelected)
@@ -628,7 +629,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<Rigidbody2DComponent>(ICON_MDI_SOCCER " Rigidbody 2D", entity, [](Rigidbody2DComponent& component)
+		DrawComponent<Rigidbody2DComponent>(ICON_MDI_SOCCER " Rigidbody 2D", entity, [scene = entity.GetScene()](Rigidbody2DComponent& component)
 		{
 			UI::BeginProperties();
 
