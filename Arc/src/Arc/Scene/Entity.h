@@ -73,7 +73,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE();
 
-			ARC_ASSERT(m_Scene->m_EntityMap.find(parent.GetUUID()) != m_Scene->m_EntityMap.end(), "Parent is not in the same scene as entity");
+			ARC_CORE_ASSERT(m_Scene->m_EntityMap.find(parent.GetUUID()) != m_Scene->m_EntityMap.end(), "Parent is not in the same scene as entity");
 			Deparent();
 			
 			auto& rc = GetComponent<RelationshipComponent>();

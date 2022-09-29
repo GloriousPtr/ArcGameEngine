@@ -4,8 +4,6 @@
 #include <EASTL/shared_ptr.h>
 #include <EASTL/unique_ptr.h>
 
-#include "Arc/Core/Log.h"
-#include "Arc/Core/Assert.h"
 #include "Arc/Core/PlatformDetection.h"
 
 #ifdef ARC_DEBUG
@@ -68,3 +66,6 @@ namespace ArcEngine
 		return eastl::make_shared<T>(eastl::forward<Args>(args)...);
 	}
 }
+
+#include "Arc/Core/Log.h"
+#include "Arc/Core/Assert.h"

@@ -66,7 +66,7 @@ namespace ArcEngine
 
 		virtual JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override
 		{
-			ARC_CORE_ASSERT(inLayer < Physics3D::Layers::NUM_LAYERS);
+			ARC_CORE_ASSERT(inLayer < Physics3D::BroadLayer::NUM_LAYERS);
 			return mObjectToBroadPhase[inLayer];
 		}
 
