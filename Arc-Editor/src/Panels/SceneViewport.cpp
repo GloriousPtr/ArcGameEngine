@@ -54,21 +54,18 @@ namespace ArcEngine
 			float pitch = m_EditorCamera.GetPitch();
 
 			bool moved = false;
-			static bool pressed = false;
 			if (ImGui::IsMouseDown(ImGuiMouseButton_Right) && m_ViewportHovered)
 			{
 				ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 				glm::vec2 newMousePosition = *(glm::vec2*)&ImGui::GetMousePos();
 
-				if (!pressed)
+				if (!m_UsingEditorCamera)
 				{
-					pressed = true;
+					m_UsingEditorCamera = true;
 					m_MousePosition = newMousePosition;
 				}
 
-				if (!ImGui::GetIO().WantSetMousePos)
-					ImGui::GetIO().WantSetMousePos = true;
-
+				ImGui::GetIO().WantSetMousePos = true;
 				ImGui::GetIO().MousePos = { m_MousePosition.x, m_MousePosition.y };
 
 				const glm::vec2 change = (newMousePosition - m_MousePosition) * m_MouseSensitivity;
@@ -102,10 +99,7 @@ namespace ArcEngine
 			}
 			else
 			{
-				if (ImGui::GetIO().WantSetMousePos)
-					ImGui::GetIO().WantSetMousePos = false;
-
-				pressed = false;
+				m_UsingEditorCamera = false;
 			}
 
 			m_MoveVelocity += (moved ? 1.0f : -1.0f) * timestep;

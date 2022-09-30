@@ -58,6 +58,7 @@ namespace ArcEngine
 		float m_MoveVelocity = 0.0f;
 
 		bool m_UseEditorCamera = true;
+		bool m_UsingEditorCamera = false;
 		bool m_SimulationRunning = false;
 	};
 }
