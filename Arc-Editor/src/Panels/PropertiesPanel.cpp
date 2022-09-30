@@ -538,7 +538,8 @@ namespace ArcEngine
 			{
 				UI::BeginProperties();
 
-				if (size_t submeshCount = component.MeshGeometry->GetSubmeshCount() > 1)
+				size_t submeshCount = component.MeshGeometry->GetSubmeshCount();
+				if (submeshCount > 1)
 					UI::Property("Submesh Index", component.SubmeshIndex, 0, submeshCount - 1);
 
 				const char* cullModeTypeStrings[] = { "Front", "Back", "Double Sided" };
