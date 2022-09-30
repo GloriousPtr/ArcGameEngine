@@ -55,10 +55,14 @@ namespace ArcEngine
 		explicit Physics2DContactListener(Scene* scene)
 			: m_Scene(scene)
 		{
+			ARC_PROFILE_SCOPE();
+
 		}
 
 		virtual ~Physics2DContactListener()
 		{
+			ARC_PROFILE_SCOPE();
+
 			m_BuoyancyFixtures.clear();
 		}
 
@@ -256,6 +260,8 @@ namespace ArcEngine
 	private:
 		static void	GetFrictionAndRestitution(const JPH::Body& inBody, const JPH::SubShapeID& inSubShapeID, float& outFriction, float& outRestitution)
 		{
+			ARC_PROFILE_SCOPE();
+
 			// Get the material that corresponds to the sub shape ID
 			const JPH::PhysicsMaterial* material = inBody.GetShape()->GetMaterial(inSubShapeID);
 			if (material == JPH::PhysicsMaterial::sDefault)
@@ -273,6 +279,8 @@ namespace ArcEngine
 
 		static void	OverrideContactSettings(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings)
 		{
+			ARC_PROFILE_SCOPE();
+
 			// Get the custom friction and restitution for both bodies
 			float friction1, friction2, restitution1, restitution2;
 			GetFrictionAndRestitution(inBody1, inManifold.mSubShapeID1, friction1, restitution1);
@@ -286,21 +294,29 @@ namespace ArcEngine
 	public:
 		virtual JPH::ValidateResult OnContactValidate(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::CollideShapeResult& inCollisionResult) override
 		{
+			ARC_PROFILE_SCOPE();
+
 			return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
 		}
 
 		virtual void OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
 		{
+			ARC_PROFILE_SCOPE();
+
 			OverrideContactSettings(inBody1, inBody2, inManifold, ioSettings);
 		}
 
 		virtual void OnContactPersisted(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
 		{
+			ARC_PROFILE_SCOPE();
+
 			OverrideContactSettings(inBody1, inBody2, inManifold, ioSettings);
 		}
 
 		virtual void OnContactRemoved(const JPH::SubShapeIDPair& inSubShapePair) override
 		{
+			ARC_PROFILE_SCOPE();
+
 			/* On Collision Exit */
 		}
 	};
@@ -310,11 +326,15 @@ namespace ArcEngine
 	public:
 		virtual void OnBodyActivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
 		{
+			ARC_PROFILE_SCOPE();
+
 			/* Body Activated */
 		}
 
 		virtual void OnBodyDeactivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
 		{
+			ARC_PROFILE_SCOPE();
+
 			/* Body Deactivated */
 		}
 	};
@@ -707,19 +727,30 @@ namespace ArcEngine
 
 		#pragma region Scripting
 		{
-			ARC_PROFILE_CATEGORY("Script", Profile::Category::Script);
+			ARC_PROFILE_CATEGORY("OnCreate", Profile::Category::Script);
 
 			auto scriptView = m_Registry.view<ScriptComponent>();
 			for (auto e : scriptView)
 			{
-				const auto& sc = scriptView.get<ScriptComponent>(e);
 				Entity entity = { e, this };
+				ARC_PROFILE_TAG("Entity", entity.GetTag().data());
+				ARC_PROFILE_TAG("EntityID", entity.GetUUID());
+
+				const auto& sc = scriptView.get<ScriptComponent>(e);
 
 				for (auto& className : sc.Classes)
+				{
+					ARC_PROFILE_TAG("ScriptInstantiate", className.c_str());
+
 					ScriptEngine::CreateInstance(entity, className);
+				}
 
 				for (auto& className : sc.Classes)
+				{
+					ARC_PROFILE_TAG("Script", className.c_str());
+
 					ScriptEngine::GetInstance(entity, className)->InvokeOnCreate();
+				}
 			}
 		}
 		#pragma endregion
@@ -733,16 +764,21 @@ namespace ArcEngine
 
 		#pragma region Scripting
 		{
-			ARC_PROFILE_CATEGORY("Script", Profile::Category::Script);
+			ARC_PROFILE_CATEGORY("OnDestroy", Profile::Category::Script);
 
 			auto scriptView = m_Registry.view<ScriptComponent>();
 			for (auto e : scriptView)
 			{
-				ScriptComponent& script = scriptView.get<ScriptComponent>(e);
 				Entity entity = { e, this };
+				ARC_PROFILE_TAG("Entity", entity.GetTag().data());
+				ARC_PROFILE_TAG("EntityID", entity.GetUUID());
+
+				ScriptComponent& script = scriptView.get<ScriptComponent>(e);
 
 				for (const auto& className : script.Classes)
 				{
+					ARC_PROFILE_TAG("Script", className.c_str());
+
 					ScriptEngine::GetInstance(entity, className)->InvokeOnDestroy();
 					ScriptEngine::RemoveInstance(entity, className);
 				}
@@ -824,16 +860,23 @@ namespace ArcEngine
 
 		#pragma region Scripting
 		{
-			ARC_PROFILE_CATEGORY("Script", Profile::Category::Script);
+			ARC_PROFILE_CATEGORY("OnUpdate", Profile::Category::Script);
 
 			auto scriptView = m_Registry.view<ScriptComponent>();
 			for (auto e : scriptView)
 			{
-				const ScriptComponent& script = scriptView.get<ScriptComponent>(e);
 				Entity entity = { e, this };
+				ARC_PROFILE_TAG("Entity", entity.GetTag().data());
+				ARC_PROFILE_TAG("EntityID", entity.GetUUID());
+
+				const ScriptComponent& script = scriptView.get<ScriptComponent>(e);
 
 				for (const auto& className : script.Classes)
+				{
+					ARC_PROFILE_TAG("Script", className.c_str());
+
 					ScriptEngine::GetInstance(entity, className)->InvokeOnUpdate(ts);
+				}
 			}
 		}
 		#pragma endregion
@@ -1187,6 +1230,10 @@ namespace ArcEngine
 
 	void Scene::CreateRigidbody(Entity entity, RigidbodyComponent& component) const
 	{
+		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
+		ARC_PROFILE_TAG("EntityID", entity.GetUUID());
+
 		if (!m_IsRunning)
 			return;
 
@@ -1302,6 +1349,8 @@ namespace ArcEngine
 	void Scene::CreateRigidbody2D(Entity entity, Rigidbody2DComponent& body)
 	{
 		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
+		ARC_PROFILE_TAG("EntityID", entity.GetUUID());
 
 		if (m_PhysicsWorld2D)
 		{
@@ -1344,6 +1393,8 @@ namespace ArcEngine
 	void Scene::CreateBoxCollider2D(Entity entity, BoxCollider2DComponent& bc2d)
 	{
 		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
+		ARC_PROFILE_TAG("EntityID", entity.GetUUID());
 
 		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
 		{
@@ -1376,6 +1427,8 @@ namespace ArcEngine
 	void Scene::CreateCircleCollider2D(Entity entity, CircleCollider2DComponent& cc2d)
 	{
 		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
+		ARC_PROFILE_TAG("EntityID", entity.GetUUID());
 
 		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
 		{
@@ -1409,6 +1462,8 @@ namespace ArcEngine
 	void Scene::CreatePolygonCollider2D(Entity entity, PolygonCollider2DComponent& pc2d)
 	{
 		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
+		ARC_PROFILE_TAG("EntityID", entity.GetUUID());
 
 		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
 		{

@@ -55,6 +55,7 @@ namespace ArcEngine
 		}
 
 		UUID GetUUID() const { return GetComponent<IDComponent>().ID; }
+		eastl::string_view GetTag() const { return GetComponent<TagComponent>().Tag; }
 		TransformComponent& GetTransform() const { return GetComponent<TransformComponent>(); }
 		RelationshipComponent& GetRelationship() const { return GetComponent<RelationshipComponent>(); }
 		
