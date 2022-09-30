@@ -75,8 +75,8 @@ namespace ArcEngine
 
 			bool aSensor = a->IsSensor();
 			bool bSensor = b->IsSensor();
-			Entity e1 = { m_Scene->m_FixtureMap.at(a), m_Scene };
-			Entity e2 = { m_Scene->m_FixtureMap.at(b), m_Scene };
+			Entity e1 = { (entt::entity)(uint32_t)a->GetUserData().pointer, m_Scene };
+			Entity e2 = { (entt::entity)(uint32_t)b->GetUserData().pointer, m_Scene };
 
 			if (e1.HasComponent<BuoyancyEffector2DComponent>() && aSensor
 				&& !e2.HasComponent<BuoyancyEffector2DComponent>() && b->GetBody()->GetType() == b2_dynamicBody)
@@ -144,8 +144,8 @@ namespace ArcEngine
 			b2Fixture* b = contact->GetFixtureB();
 			bool aSensor = a->IsSensor();
 			bool bSensor = b->IsSensor();
-			Entity e1 = { m_Scene->m_FixtureMap.at(a), m_Scene };
-			Entity e2 = { m_Scene->m_FixtureMap.at(b), m_Scene };
+			Entity e1 = { (entt::entity)(uint32_t)a->GetUserData().pointer, m_Scene };
+			Entity e2 = { (entt::entity)(uint32_t)b->GetUserData().pointer, m_Scene };
 
 			if (e1.HasComponent<BuoyancyEffector2DComponent>() && aSensor
 				&& !e2.HasComponent<BuoyancyEffector2DComponent>() && b->GetBody()->GetType() == b2_dynamicBody)
@@ -230,8 +230,8 @@ namespace ArcEngine
 				b2Fixture* fluid = it->first;
 				b2Fixture* fixture = it->second;
 
-				Entity fluidEntity = { m_Scene->m_FixtureMap.at(fluid), m_Scene };
-				Entity fixtureEntity = { m_Scene->m_FixtureMap.at(fixture), m_Scene };
+				Entity fluidEntity = { (entt::entity)(uint32_t)fluid->GetUserData().pointer, m_Scene};
+				Entity fixtureEntity = { (entt::entity)(uint32_t)fixture->GetUserData().pointer, m_Scene};
 
 				const auto& buoyancyComponent2D = fluidEntity.GetComponent<BuoyancyEffector2DComponent>();
 				PhysicsUtils::HandleBuoyancy(fluid, fixture, m_Scene->m_PhysicsWorld2D->GetGravity(), buoyancyComponent2D.FlipGravity, buoyancyComponent2D.Density, buoyancyComponent2D.DragMultiplier, buoyancyComponent2D.FlowMagnitude, buoyancyComponent2D.FlowAngle);
@@ -710,7 +710,6 @@ namespace ArcEngine
 
 			#pragma region Physics2D
 			{
-				m_FixtureMap.clear();
 				delete m_ContactListener;
 				delete m_PhysicsWorld2D;
 				m_ContactListener = nullptr;
@@ -1274,6 +1273,7 @@ namespace ArcEngine
 			fixtureDef.density = bc2d.Density;
 			fixtureDef.friction = bc2d.Friction;
 			fixtureDef.restitution = bc2d.Restitution;
+			fixtureDef.userData.pointer = (uint32_t)entity;
 
 			auto layer = entity.GetComponent<TagComponent>().Layer;
 			auto collisionMaskIt = LayerCollisionMask.find(layer);
@@ -1284,7 +1284,6 @@ namespace ArcEngine
 
 			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
 			bc2d.RuntimeFixture = fixture;
-			m_FixtureMap[fixture] = entity;
 		}
 	}
 
@@ -1307,6 +1306,7 @@ namespace ArcEngine
 			fixtureDef.density = cc2d.Density;
 			fixtureDef.friction = cc2d.Friction;
 			fixtureDef.restitution = cc2d.Restitution;
+			fixtureDef.userData.pointer = (uint32_t)entity;
 
 			auto layer = entity.GetComponent<TagComponent>().Layer;
 			auto collisionMaskIt = LayerCollisionMask.find(layer);
@@ -1317,7 +1317,6 @@ namespace ArcEngine
 
 			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
 			cc2d.RuntimeFixture = fixture;
-			m_FixtureMap[fixture] = entity;
 		}
 	}
 
@@ -1344,6 +1343,7 @@ namespace ArcEngine
 			fixtureDef.density = pc2d.Density;
 			fixtureDef.friction = pc2d.Friction;
 			fixtureDef.restitution = pc2d.Restitution;
+			fixtureDef.userData.pointer = (uint32_t)entity;
 
 			auto layer = entity.GetComponent<TagComponent>().Layer;
 			auto collisionMaskIt = LayerCollisionMask.find(layer);
@@ -1354,7 +1354,6 @@ namespace ArcEngine
 
 			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
 			pc2d.RuntimeFixture = fixture;
-			m_FixtureMap[fixture] = entity;
 		}
 	}
 

@@ -96,7 +96,6 @@ namespace ArcEngine
 		
 		b2World* m_PhysicsWorld2D = nullptr;
 		ContactListener* m_ContactListener = nullptr;
-		eastl::hash_map<b2Fixture*, entt::entity> m_FixtureMap;
 
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 		bool m_ViewportDirty = true;
