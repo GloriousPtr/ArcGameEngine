@@ -47,24 +47,25 @@ namespace ArcEngine
 		{ BIT(3), { "Sensor",		0xFFFF, 3 } },
 	};
 
-	class ContactListener : public b2ContactListener
+	#pragma region Physics2DListeners
+
+	class Physics2DContactListener : public b2ContactListener
 	{
 	public:
-
-		explicit ContactListener(Scene* scene)
+		explicit Physics2DContactListener(Scene* scene)
 			: m_Scene(scene)
 		{
 		}
 
-		virtual ~ContactListener()
+		virtual ~Physics2DContactListener()
 		{
 			m_BuoyancyFixtures.clear();
 		}
 
-		ContactListener(const ContactListener& other) = delete;
-		ContactListener(ContactListener&& other) = delete;
-		ContactListener& operator=(const ContactListener& other) = delete;
-		ContactListener& operator=(ContactListener&& other) = delete;
+		Physics2DContactListener(const Physics2DContactListener& other) = delete;
+		Physics2DContactListener(Physics2DContactListener&& other) = delete;
+		Physics2DContactListener& operator=(const Physics2DContactListener& other) = delete;
+		Physics2DContactListener& operator=(Physics2DContactListener&& other) = delete;
 
 		virtual void BeginContact(b2Contact* contact) override
 		{
@@ -230,11 +231,12 @@ namespace ArcEngine
 				b2Fixture* fluid = it->first;
 				b2Fixture* fixture = it->second;
 
-				Entity fluidEntity = { (entt::entity)(uint32_t)fluid->GetUserData().pointer, m_Scene};
-				Entity fixtureEntity = { (entt::entity)(uint32_t)fixture->GetUserData().pointer, m_Scene};
+				Entity fluidEntity = { (entt::entity)(uint32_t)fluid->GetUserData().pointer, m_Scene };
+				Entity fixtureEntity = { (entt::entity)(uint32_t)fixture->GetUserData().pointer, m_Scene };
 
 				const auto& buoyancyComponent2D = fluidEntity.GetComponent<BuoyancyEffector2DComponent>();
-				PhysicsUtils::HandleBuoyancy(fluid, fixture, m_Scene->m_PhysicsWorld2D->GetGravity(), buoyancyComponent2D.FlipGravity, buoyancyComponent2D.Density, buoyancyComponent2D.DragMultiplier, buoyancyComponent2D.FlowMagnitude, buoyancyComponent2D.FlowAngle);
+				b2Vec2 gravity = { m_Scene->Gravity.x, m_Scene->Gravity.y };
+				PhysicsUtils::HandleBuoyancy(fluid, fixture, gravity, buoyancyComponent2D.FlipGravity, buoyancyComponent2D.Density, buoyancyComponent2D.DragMultiplier, buoyancyComponent2D.FlowMagnitude, buoyancyComponent2D.FlowAngle);
 				++it;
 			}
 		}
@@ -244,6 +246,80 @@ namespace ArcEngine
 
 		eastl::set<eastl::pair<b2Fixture*, b2Fixture*>> m_BuoyancyFixtures;
 	};
+	
+	#pragma endregion
+
+	#pragma region Physics3DListeners
+
+	class Physics3DContactListener : public JPH::ContactListener
+	{
+	private:
+		static void	GetFrictionAndRestitution(const JPH::Body& inBody, const JPH::SubShapeID& inSubShapeID, float& outFriction, float& outRestitution)
+		{
+			// Get the material that corresponds to the sub shape ID
+			const JPH::PhysicsMaterial* material = inBody.GetShape()->GetMaterial(inSubShapeID);
+			if (material == JPH::PhysicsMaterial::sDefault)
+			{
+				outFriction = inBody.GetFriction();
+				outRestitution = inBody.GetRestitution();
+			}
+			else
+			{
+				const PhysicsMaterial3D* phyMaterial = (const PhysicsMaterial3D*)material;
+				outFriction = phyMaterial->Friction;
+				outRestitution = phyMaterial->Restitution;
+			}
+		}
+
+		static void	OverrideContactSettings(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings)
+		{
+			// Get the custom friction and restitution for both bodies
+			float friction1, friction2, restitution1, restitution2;
+			GetFrictionAndRestitution(inBody1, inManifold.mSubShapeID1, friction1, restitution1);
+			GetFrictionAndRestitution(inBody2, inManifold.mSubShapeID2, friction2, restitution2);
+
+			// Use the default formulas for combining friction and restitution
+			ioSettings.mCombinedFriction = JPH::sqrt(friction1 * friction2);
+			ioSettings.mCombinedRestitution = JPH::max(restitution1, restitution2);
+		}
+
+	public:
+		virtual JPH::ValidateResult OnContactValidate(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::CollideShapeResult& inCollisionResult) override
+		{
+			return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
+		}
+
+		virtual void OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
+		{
+			OverrideContactSettings(inBody1, inBody2, inManifold, ioSettings);
+		}
+
+		virtual void OnContactPersisted(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
+		{
+			OverrideContactSettings(inBody1, inBody2, inManifold, ioSettings);
+		}
+
+		virtual void OnContactRemoved(const JPH::SubShapeIDPair& inSubShapePair) override
+		{
+			/* On Collision Exit */
+		}
+	};
+
+	class Physics3DBodyActivationListener : public JPH::BodyActivationListener
+	{
+	public:
+		virtual void OnBodyActivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
+		{
+			/* Body Activated */
+		}
+
+		virtual void OnBodyDeactivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
+		{
+			/* Body Deactivated */
+		}
+	};
+
+	#pragma endregion
 
 	Scene::~Scene()
 	{
@@ -417,6 +493,12 @@ namespace ArcEngine
 			#pragma region Physics3D
 			{
 				Physics3D::Init();
+				m_BodyActivationListener3D = new Physics3DBodyActivationListener();
+				m_ContactListener3D = new Physics3DContactListener();
+				JPH::PhysicsSystem& physicsSystem = Physics3D::GetPhysicsSystem();
+				physicsSystem.SetBodyActivationListener(m_BodyActivationListener3D);
+				physicsSystem.SetContactListener(m_ContactListener3D);
+
 				auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
 				for (auto e : view)
 				{
@@ -426,15 +508,15 @@ namespace ArcEngine
 					CreateRigidbody({ e, this }, rb);
 				}
 
-				Physics3D::OptimizeBroadPhase();
+				physicsSystem.OptimizeBroadPhase();
 			}
 			#pragma endregion
 
 			#pragma region Physics2D
 			{
-				m_PhysicsWorld2D = new b2World({ 0.0f, -9.8f });
-				m_ContactListener = new ContactListener(this);
-				m_PhysicsWorld2D->SetContactListener(m_ContactListener);
+				m_PhysicsWorld2D = new b2World({ Gravity.x, Gravity.y });
+				m_ContactListener2D = new Physics2DContactListener(this);
+				m_PhysicsWorld2D->SetContactListener(m_ContactListener2D);
 
 				{
 					auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
@@ -690,8 +772,7 @@ namespace ArcEngine
 
 			#pragma region Physics3D
 			{
-
-				auto* bodyInterface = Physics3D::GetBodyInterface();
+				JPH::BodyInterface& bodyInterface = Physics3D::GetPhysicsSystem().GetBodyInterface();
 				auto view = m_Registry.view<RigidbodyComponent>();
 				for (auto e : view)
 				{
@@ -699,20 +780,24 @@ namespace ArcEngine
 					if (rb.RuntimeBody)
 					{
 						const JPH::Body* body = (const JPH::Body*)rb.RuntimeBody;
-						bodyInterface->RemoveBody(body->GetID());
-						bodyInterface->DestroyBody(body->GetID());
+						bodyInterface.RemoveBody(body->GetID());
+						bodyInterface.DestroyBody(body->GetID());
 					}
 				}
 
+				delete m_BodyActivationListener3D;
+				delete m_ContactListener3D;
+				m_BodyActivationListener3D = nullptr;
+				m_ContactListener3D = nullptr;
 				Physics3D::Shutdown();
 			}
 			#pragma endregion
 
 			#pragma region Physics2D
 			{
-				delete m_ContactListener;
+				delete m_ContactListener2D;
 				delete m_PhysicsWorld2D;
-				m_ContactListener = nullptr;
+				m_ContactListener2D = nullptr;
 				m_PhysicsWorld2D = nullptr;
 			}
 			#pragma endregion
@@ -766,7 +851,7 @@ namespace ArcEngine
 
 			while (m_PhysicsFrameAccumulator >= physicsTs)
 			{
-				m_ContactListener->OnUpdate(physicsTs);
+				m_ContactListener2D->OnUpdate(physicsTs);
 				m_PhysicsWorld2D->Step(physicsTs, VelocityIterations, PositionIterations);
 
 				Physics3D::Step(physicsTs);
@@ -779,6 +864,7 @@ namespace ArcEngine
 
 			#pragma region Physics3D
 			{
+				auto& bodyInterface = Physics3D::GetPhysicsSystem().GetBodyInterface();
 				auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
 				for (auto e : view)
 				{
@@ -788,7 +874,7 @@ namespace ArcEngine
 
 					const JPH::Body* body = (const JPH::Body*)rb.RuntimeBody;
 
-					if (!Physics3D::GetBodyInterface()->IsActive(body->GetID()))
+					if (!bodyInterface.IsActive(body->GetID()))
 						continue;
 
 					if (rb.Interpolation)
@@ -1104,10 +1190,10 @@ namespace ArcEngine
 		if (!m_IsRunning)
 			return;
 
-		auto* bodyInterface = Physics3D::GetBodyInterface();
+		auto& bodyInterface = Physics3D::GetPhysicsSystem().GetBodyInterface();
 		if (component.RuntimeBody)
 		{
-			bodyInterface->DestroyBody(((JPH::Body*)component.RuntimeBody)->GetID());
+			bodyInterface.DestroyBody(((JPH::Body*)component.RuntimeBody)->GetID());
 			component.RuntimeBody = nullptr;
 		}
 
@@ -1205,10 +1291,10 @@ namespace ArcEngine
 
 		bodySettings.mIsSensor = component.IsSensor;
 
-		JPH::Body* body = bodyInterface->CreateBody(bodySettings);
+		JPH::Body* body = bodyInterface.CreateBody(bodySettings);
 
 		JPH::EActivation activation = component.Awake && component.Type != RigidbodyComponent::BodyType::Static ? JPH::EActivation::Activate : JPH::EActivation::DontActivate;
-		bodyInterface->AddBody(body->GetID(), activation);
+		bodyInterface.AddBody(body->GetID(), activation);
 
 		component.RuntimeBody = body;
 	}

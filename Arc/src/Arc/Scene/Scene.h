@@ -14,11 +14,15 @@ class b2Fixture;
 
 namespace ArcEngine
 {
-	class ContactListener;
 	class Entity;
+
+	class Physics3DContactListener;
+	class Physics3DBodyActivationListener;
 	struct RigidbodyComponent;
 	struct BoxColliderComponent;
 	struct SphereColliderComponent;
+
+	class Physics2DContactListener;
 	struct Rigidbody2DComponent;
 	struct BoxCollider2DComponent;
 	struct CircleCollider2DComponent;
@@ -37,6 +41,7 @@ namespace ArcEngine
 	public:
 		uint32_t VelocityIterations = 8;
 		uint32_t PositionIterations = 3;
+		glm::vec2 Gravity = { 0.0f, -9.8f };
 
 		static const EntityLayer StaticLayer  = BIT(0);
 		static const EntityLayer DefaultLayer = BIT(1);
@@ -88,14 +93,15 @@ namespace ArcEngine
 		friend class Entity;
 		friend class SceneSerializer;
 		friend class SceneHierarchyPanel;
-		friend class ContactListener;
 
 		entt::registry m_Registry;
 		eastl::hash_map<UUID, entt::entity> m_EntityMap;
 		bool m_IsRunning = false;
-		
+
 		b2World* m_PhysicsWorld2D = nullptr;
-		ContactListener* m_ContactListener = nullptr;
+		Physics2DContactListener* m_ContactListener2D = nullptr;
+		Physics3DContactListener* m_ContactListener3D = nullptr;
+		Physics3DBodyActivationListener* m_BodyActivationListener3D = nullptr;
 
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 		bool m_ViewportDirty = true;

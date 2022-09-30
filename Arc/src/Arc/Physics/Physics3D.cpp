@@ -6,17 +6,11 @@
 // Jolt includes
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Core/Factory.h>
-#include <Jolt/Core/Memory.h>
 #include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Core/JobSystemThreadPool.h>
 #include <Jolt/Physics/PhysicsSettings.h>
 #include <Jolt/Physics/PhysicsSystem.h>
-#include <Jolt/Physics/Collision/Shape/BoxShape.h>
-#include <Jolt/Physics/Collision/Shape/SphereShape.h>
-#include <Jolt/Physics/Body/BodyCreationSettings.h>
-#include <Jolt/Physics/Body/BodyActivationListener.h>
 
-#include "PhysicsMaterial3D.h"
 #include "Arc/Scene/Scene.h"
 
 namespace ArcEngine
@@ -27,6 +21,28 @@ namespace ArcEngine
 		EntityLayer layer2 = BIT(inObject2);
 		return	(layer1 & Scene::LayerCollisionMask.at(layer2).Flags) == layer1 &&
 				(layer2 & Scene::LayerCollisionMask.at(layer1).Flags) == layer2;
+	};
+
+	struct Physics3DLayer
+	{
+		static constexpr uint8_t STATIC = 0;
+		static constexpr uint8_t DEFAULT = 1;
+		static constexpr uint8_t OTHER2 = 2;
+		static constexpr uint8_t OTHER3 = 3;
+		static constexpr uint8_t OTHER4 = 4;
+		static constexpr uint8_t OTHER5 = 5;
+		static constexpr uint8_t OTHER6 = 6;
+		static constexpr uint8_t OTHER7 = 7;
+		static constexpr uint8_t OTHER8 = 8;
+		static constexpr uint8_t OTHER9 = 9;
+		static constexpr uint8_t OTHER10 = 10;
+		static constexpr uint8_t OTHER11 = 11;
+		static constexpr uint8_t OTHER12 = 12;
+		static constexpr uint8_t OTHER13 = 13;
+		static constexpr uint8_t OTHER14 = 14;
+		static constexpr uint8_t OTHER15 = 15;
+
+		static constexpr uint8_t NUM_LAYERS = 16;
 	};
 
 	namespace BroadPhaseLayers
@@ -41,22 +57,22 @@ namespace ArcEngine
 	public:
 		BPLayerInterfaceImpl()
 		{
-			mObjectToBroadPhase[Physics3D::BroadLayer::STATIC]  = BroadPhaseLayers::STATIC;
-			mObjectToBroadPhase[Physics3D::BroadLayer::DEFAULT] = BroadPhaseLayers::DEFAULT;
-			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER2]  = BroadPhaseLayers::DEFAULT;
-			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER3]  = BroadPhaseLayers::DEFAULT;
-			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER4]  = BroadPhaseLayers::DEFAULT;
-			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER5]  = BroadPhaseLayers::DEFAULT;
-			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER6]  = BroadPhaseLayers::DEFAULT;
-			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER7]  = BroadPhaseLayers::DEFAULT;
-			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER8]  = BroadPhaseLayers::DEFAULT;
-			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER9]  = BroadPhaseLayers::DEFAULT;
-			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER10] = BroadPhaseLayers::DEFAULT;
-			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER11] = BroadPhaseLayers::DEFAULT;
-			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER12] = BroadPhaseLayers::DEFAULT;
-			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER13] = BroadPhaseLayers::DEFAULT;
-			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER14] = BroadPhaseLayers::DEFAULT;
-			mObjectToBroadPhase[Physics3D::BroadLayer::OTHER15] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3DLayer::STATIC] = BroadPhaseLayers::STATIC;
+			mObjectToBroadPhase[Physics3DLayer::DEFAULT] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3DLayer::OTHER2] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3DLayer::OTHER3] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3DLayer::OTHER4] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3DLayer::OTHER5] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3DLayer::OTHER6] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3DLayer::OTHER7] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3DLayer::OTHER8] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3DLayer::OTHER9] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3DLayer::OTHER10] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3DLayer::OTHER11] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3DLayer::OTHER12] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3DLayer::OTHER13] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3DLayer::OTHER14] = BroadPhaseLayers::DEFAULT;
+			mObjectToBroadPhase[Physics3DLayer::OTHER15] = BroadPhaseLayers::DEFAULT;
 		}
 
 		virtual JPH::uint GetNumBroadPhaseLayers() const override
@@ -66,7 +82,7 @@ namespace ArcEngine
 
 		virtual JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override
 		{
-			ARC_CORE_ASSERT(inLayer < Physics3D::BroadLayer::NUM_LAYERS);
+			ARC_CORE_ASSERT(inLayer < Physics3DLayer::NUM_LAYERS);
 			return mObjectToBroadPhase[inLayer];
 		}
 
@@ -83,92 +99,22 @@ namespace ArcEngine
 #endif // JPH_EXTERNAL_PROFILE || JPH_PROFILE_ENABLED
 
 	private:
-		JPH::BroadPhaseLayer mObjectToBroadPhase[Physics3D::BroadLayer::NUM_LAYERS];
+		JPH::BroadPhaseLayer mObjectToBroadPhase[Physics3DLayer::NUM_LAYERS];
 	};
 
 	static bool Physics3DBroadPhaseCanCollide(JPH::ObjectLayer inLayer1, JPH::BroadPhaseLayer inLayer2)
 	{
-		if (inLayer1 == Physics3D::BroadLayer::STATIC)
+		if (inLayer1 == Physics3DLayer::STATIC)
 			return inLayer2 != BroadPhaseLayers::STATIC;
 
 		return true;
 	}
-
-	class Physics3DContactListener : public JPH::ContactListener
-	{
-	private:
-		static void	GetFrictionAndRestitution(const JPH::Body& inBody, const JPH::SubShapeID& inSubShapeID, float& outFriction, float& outRestitution)
-		{
-			// Get the material that corresponds to the sub shape ID
-			const JPH::PhysicsMaterial* material = inBody.GetShape()->GetMaterial(inSubShapeID);
-			if (material == JPH::PhysicsMaterial::sDefault)
-			{
-				outFriction = inBody.GetFriction();
-				outRestitution = inBody.GetRestitution();
-			}
-			else
-			{
-				const PhysicsMaterial3D* phyMaterial = (const PhysicsMaterial3D*)material;
-				outFriction = phyMaterial->Friction;
-				outRestitution = phyMaterial->Restitution;
-			}
-		}
-
-		static void	OverrideContactSettings(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings)
-		{
-			// Get the custom friction and restitution for both bodies
-			float friction1, friction2, restitution1, restitution2;
-			GetFrictionAndRestitution(inBody1, inManifold.mSubShapeID1, friction1, restitution1);
-			GetFrictionAndRestitution(inBody2, inManifold.mSubShapeID2, friction2, restitution2);
-
-			// Use the default formulas for combining friction and restitution
-			ioSettings.mCombinedFriction = JPH::sqrt(friction1 * friction2);
-			ioSettings.mCombinedRestitution = JPH::max(restitution1, restitution2);
-		}
-
-	public:
-		virtual JPH::ValidateResult OnContactValidate(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::CollideShapeResult& inCollisionResult) override
-		{
-			return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
-		}
-
-		virtual void OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
-		{
-			OverrideContactSettings(inBody1, inBody2, inManifold, ioSettings);
-		}
-
-		virtual void OnContactPersisted(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
-		{
-			OverrideContactSettings(inBody1, inBody2, inManifold, ioSettings);
-		}
-
-		virtual void OnContactRemoved(const JPH::SubShapeIDPair& inSubShapePair) override
-		{
-			/* On Collision Exit */
-		}
-	};
-
-	class Physics3DBodyActivationListener : public JPH::BodyActivationListener
-	{
-	public:
-		virtual void OnBodyActivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
-		{
-			/* Body Activated */
-		}
-
-		virtual void OnBodyDeactivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
-		{
-			/* Body Deactivated */
-		}
-	};
 
 	JPH::PhysicsSystem* Physics3D::s_PhysicsSystem;
 	JPH::TempAllocator* Physics3D::s_TempAllocator;
 	JPH::JobSystemThreadPool* Physics3D::s_JobSystem;
 
 	BPLayerInterfaceImpl* Physics3D::s_BPLayerInterface;
-	Physics3DContactListener* Physics3D::s_ContactListener;
-	Physics3DBodyActivationListener* Physics3D::s_BodyActivationListener;
 
 	void Physics3D::Init()
 	{
@@ -188,50 +134,34 @@ namespace ArcEngine
 		s_BPLayerInterface = new BPLayerInterfaceImpl();
 		s_PhysicsSystem = new JPH::PhysicsSystem();
 		s_PhysicsSystem->Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, *s_BPLayerInterface, Physics3DBroadPhaseCanCollide, Physics3DObjectCanCollide);
-
-		s_BodyActivationListener = new Physics3DBodyActivationListener();
-		s_PhysicsSystem->SetBodyActivationListener(s_BodyActivationListener);
-
-		s_ContactListener = new Physics3DContactListener();
-		s_PhysicsSystem->SetContactListener(s_ContactListener);
 	}
 
 	void Physics3D::Shutdown()
 	{
-		delete s_ContactListener;
-		s_ContactListener = nullptr;
-
-		delete s_BodyActivationListener;
-		s_BodyActivationListener = nullptr;
-
 		delete s_PhysicsSystem;
-		s_PhysicsSystem = nullptr;
-
 		delete s_BPLayerInterface;
-		s_BPLayerInterface = nullptr;
-
 		delete s_JobSystem;
-		s_JobSystem = nullptr;
-
 		delete s_TempAllocator;
-		s_TempAllocator = nullptr;
-
 		delete JPH::Factory::sInstance;
+
+		s_PhysicsSystem = nullptr;
+		s_BPLayerInterface = nullptr;
+		s_JobSystem = nullptr;
+		s_TempAllocator = nullptr;
 		JPH::Factory::sInstance = nullptr;
 	}
 
 	void Physics3D::Step(float physicsTs)
 	{
+		ARC_CORE_ASSERT(s_PhysicsSystem, "Physics system not initialized");
+
 		s_PhysicsSystem->Update(physicsTs, 1, 1, s_TempAllocator, s_JobSystem);
 	}
 
-	JPH::BodyInterface* Physics3D::GetBodyInterface()
+	JPH::PhysicsSystem& Physics3D::GetPhysicsSystem()
 	{
-		return &s_PhysicsSystem->GetBodyInterface();
-	}
+		ARC_CORE_ASSERT(s_PhysicsSystem, "Physics system not initialized");
 
-	void Physics3D::OptimizeBroadPhase()
-	{
-		s_PhysicsSystem->OptimizeBroadPhase();
+		return *s_PhysicsSystem;
 	}
 }
