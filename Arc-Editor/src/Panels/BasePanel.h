@@ -36,6 +36,6 @@ namespace ArcEngine
 		eastl::string m_ID;
 
 	private:
-		static uint32_t s_ID;
+		static uint32_t s_Count;
 	};
 }

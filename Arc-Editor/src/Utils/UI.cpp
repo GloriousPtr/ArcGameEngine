@@ -1100,9 +1100,10 @@ namespace ArcEngine
 		ImVec2 buttonSize = { width, lineHeight + padding.y * 2.0f };
 
 		const float cursorPosX = ImGui::GetCursorPosX();
-		if (ImGui::Button((eastl::string("##") + label).c_str(), buttonSize))
+		PushID();
+		if (ImGui::Button(label, buttonSize))
 			clicked = true;
-
+		PopID();
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(cursorPosX);

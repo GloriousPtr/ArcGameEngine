@@ -6,19 +6,15 @@
 
 namespace ArcEngine
 {
-	uint32_t BasePanel::s_ID = 0;
+	uint32_t BasePanel::s_Count = 0;
 
 	BasePanel::BasePanel(const char* name, const char* icon, bool defaultShow)
 		: Showing(defaultShow), m_Name(name), m_Icon(icon)
 	{
 		ARC_PROFILE_SCOPE();
 
-		static eastl::string space = " ";
-		static eastl::string tab = "\t\t";
-
-		std::string tmp = "###" + std::to_string(s_ID);
-		m_ID = space + icon + space + m_Name + tab + tmp.c_str() + m_Name;
-		s_ID++;
+		m_ID = fmt::format(" {} {}\t\t###{}{}", icon, name, s_Count, name).c_str();
+		s_Count++;
 	}
 
 	bool BasePanel::OnBegin(ImGuiWindowFlags flags)
