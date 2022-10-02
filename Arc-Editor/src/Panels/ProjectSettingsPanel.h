@@ -1,7 +1,5 @@
 #pragma once
 
-#include <icons/IconsMaterialDesignIcons.h>
-
 #include "BasePanel.h"
 
 namespace ArcEngine
@@ -9,10 +7,7 @@ namespace ArcEngine
 	class ProjectSettingsPanel : public BasePanel
 	{
 	public:
-		ProjectSettingsPanel()
-			: BasePanel("Project Settings", ICON_MDI_SETTINGS)
-		{
-		}
+		ProjectSettingsPanel();
 
 		virtual ~ProjectSettingsPanel() override = default;
 		

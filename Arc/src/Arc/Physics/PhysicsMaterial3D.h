@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/PhysicsMaterialSimple.h>
 
 namespace ArcEngine

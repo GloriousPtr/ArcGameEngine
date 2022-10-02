@@ -138,10 +138,10 @@ namespace ArcEngine
 
 		s_TempAllocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
 		s_JobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, JPH::thread::hardware_concurrency() - 1);
-		const JPH::uint cMaxBodies = 65536;
-		const JPH::uint cNumBodyMutexes = 0;
-		const JPH::uint cMaxBodyPairs = 65536;
-		const JPH::uint cMaxContactConstraints = 10240;
+		constexpr JPH::uint cMaxBodies = 65536;
+		constexpr JPH::uint cNumBodyMutexes = 0;
+		constexpr JPH::uint cMaxBodyPairs = 65536;
+		constexpr JPH::uint cMaxContactConstraints = 10240;
 
 		s_BPLayerInterface = new BPLayerInterfaceImpl();
 		s_PhysicsSystem = new JPH::PhysicsSystem();

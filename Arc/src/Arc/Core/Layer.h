@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Arc/Core/Base.h"
 #include "Arc/Core/Timestep.h"
 #include "Arc/Events/Event.h"
 

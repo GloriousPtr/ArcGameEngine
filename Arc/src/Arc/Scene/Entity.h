@@ -1,11 +1,12 @@
 #pragma once
 
+#include <entt.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "Arc/Core/UUID.h"
+#include "Arc/Debug/Profiler.h"
 #include "Arc/Scene/Components.h"
 #include "Arc/Scene/Scene.h"
-
-#include "entt.hpp"
-#include <glm/gtc/matrix_transform.hpp>
 
 namespace ArcEngine
 {

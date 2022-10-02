@@ -1,6 +1,5 @@
 #pragma once
 
-#include <EASTL/memory.h>
 #include <EASTL/shared_ptr.h>
 #include <EASTL/unique_ptr.h>
 

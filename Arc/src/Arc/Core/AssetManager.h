@@ -1,10 +1,13 @@
 #pragma once
 
-#include "Arc/Renderer/Texture.h"
-#include "Arc/Renderer/Mesh.h"
+#include <EASTL/hash_map.h>
 
 namespace ArcEngine
 {
+	class Mesh;
+	class TextureCubemap;
+	class Texture2D;
+
 	class AssetManager
 	{
 	public:

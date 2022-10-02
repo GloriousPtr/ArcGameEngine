@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sstream>
+
 #include "Arc/Events/Event.h"
 
 namespace ArcEngine

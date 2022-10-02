@@ -2,7 +2,6 @@
 
 #include <EASTL/stack.h>
 #include <imgui/imgui.h>
-#include <icons/IconsMaterialDesignIcons.h>
 
 #include "BasePanel.h"
 

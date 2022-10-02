@@ -1,12 +1,13 @@
 #pragma once
 
 #include "Arc/Core/Window.h"
-#include "Arc/Renderer/GraphicsContext.h"
 
 #include <GLFW/glfw3.h>
 
 namespace ArcEngine
 {
+	class GraphicsContext;
+
 	class WindowsWindow : public Window
 	{
 	public:

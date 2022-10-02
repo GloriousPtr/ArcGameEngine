@@ -4,8 +4,6 @@
 
 #include "Arc/Renderer/Shader.h"
 
-#include <glm/glm.hpp>
-
 namespace ArcEngine
 {
 	class OpenGLShader : public Shader

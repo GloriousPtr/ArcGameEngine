@@ -2,7 +2,6 @@
 
 #include <EASTL/vector.h>
 
-#include "Arc/Core/Base.h"
 #include "Arc/Core/Layer.h"
 
 namespace ArcEngine

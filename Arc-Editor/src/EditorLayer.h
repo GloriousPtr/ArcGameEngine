@@ -2,17 +2,18 @@
 
 #include <ArcEngine.h>
 
-#include "Panels/EditorContext.h"
-#include "Panels/PropertiesPanel.h"
-#include "Panels/SceneViewport.h"
-#include "Panels/BasePanel.h"
-#include "Panels/SceneHierarchyPanel.h"
 #include "Panels/ConsolePanel.h"
-#include "Panels/AssetPanel.h"
+#include "Panels/EditorContext.h"
 #include "Panels/ProjectSettingsPanel.h"
+#include "Panels/SceneHierarchyPanel.h"
 
 namespace ArcEngine
 {
+	class AssetPanel;
+	class PropertiesPanel;
+	class SceneViewport;
+	class BasePanel;
+
 	class EditorLayer : public Layer
 	{
 	public:
@@ -77,7 +78,7 @@ namespace ArcEngine
 		bool m_ShowSceneHierarchyPanel = true;
 		bool m_ShowDemoWindow = false;
 		float m_MenuBarHeight = 10.0f;
-		ImVec2 m_LastMousePosition = ImVec2(0.0f, 0.0f);
+		glm::vec2 m_LastMousePosition;
 
 		bool m_WindowDragging = false;
 		bool m_TopResizing = false;

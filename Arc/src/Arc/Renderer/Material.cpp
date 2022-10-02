@@ -1,9 +1,11 @@
 #include "arcpch.h"
 #include "Material.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Renderer3D.h"
 #include "Shader.h"
-#include <glm/gtc/type_ptr.hpp>
+#include "Texture.h"
 
 namespace ArcEngine
 {
@@ -144,6 +146,21 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		m_Shader->Unbind();
+	}
+
+	Ref<Shader> Material::GetShader() const
+	{
+		return m_Shader;
+	}
+
+	Ref<Texture2D> Material::GetTexture(uint32_t slot)
+	{
+		return m_Textures.at(slot);
+	}
+
+	void Material::SetTexture(uint32_t slot, Ref<Texture2D> texture)
+	{
+		m_Textures[slot] = texture;
 	}
 
 	Material::MaterialData Material::GetData_Internal(const char* name)

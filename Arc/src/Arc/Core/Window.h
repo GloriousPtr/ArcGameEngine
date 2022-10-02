@@ -1,7 +1,5 @@
 #pragma once
 
-#include <sstream>
-
 #include <glm/glm.hpp>
 
 #include "Arc/Core/Base.h"

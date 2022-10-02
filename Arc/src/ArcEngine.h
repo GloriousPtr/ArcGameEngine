@@ -9,12 +9,16 @@
 #include "Arc/Core/Log.h"
 #include "Arc/Core/Assert.h"
 #include "Arc/Core/AssetManager.h"
+#include "Arc/Core/Window.h"
 
 #include "Arc/Core/Timestep.h"
 
 #include "Arc/Core/Input.h"
 #include "Arc/Core/KeyCodes.h"
 #include "Arc/Core/MouseCodes.h"
+#include "Arc/Events/ApplicationEvent.h"
+#include "Arc/Events/KeyEvent.h"
+#include "Arc/Events/MouseEvent.h"
 
 #include "Arc/ImGui/ImGuiLayer.h"
 
@@ -43,3 +47,5 @@
 #include "Arc/Utils/ColorUtils.h"
 #include "Arc/Utils/PlatformUtils.h"
 #include "Arc/Utils/StringUtils.h"
+
+#include <glm/glm.hpp>

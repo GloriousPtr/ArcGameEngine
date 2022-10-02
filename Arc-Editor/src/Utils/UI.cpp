@@ -2,6 +2,8 @@
 
 #include <glm/gtc/type_ptr.hpp>
 #include <icons/IconsMaterialDesignIcons.h>
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui/imgui_internal.h>
 
 namespace ArcEngine
 {
@@ -1202,14 +1204,11 @@ namespace ArcEngine
 	{
 		pos.x = IM_ROUND(pos.x);
 		pos.y = IM_ROUND(pos.y);
-		ImFont* font = GImGui->Font;
-		const ImFontGlyph* glyph;
+		const ImFont* font = GImGui->Font;
 		char c;
-		ImGuiContext& g = *GImGui;
-		ImVec2 text_size = ImGui::CalcTextSize(text);
 		while ((c = *text++))
 		{
-			glyph = font->FindGlyph(c);
+			const ImFontGlyph* glyph = font->FindGlyph(c);
 			if (!glyph) continue;
 
 			DrawList->PrimReserve(6, 4);

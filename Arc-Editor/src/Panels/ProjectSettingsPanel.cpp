@@ -1,12 +1,18 @@
 #include "ProjectSettingsPanel.h"
 
 #include <ArcEngine.h>
+#include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui.h>
 
 #include "../Utils/UI.h"
 
 namespace ArcEngine
 {
+	ProjectSettingsPanel::ProjectSettingsPanel()
+		: BasePanel("Project Settings", ICON_MDI_SETTINGS)
+	{
+	}
+
 	void ProjectSettingsPanel::OnImGuiRender()
 	{
 		ARC_PROFILE_SCOPE();
@@ -47,7 +53,7 @@ namespace ArcEngine
 
 					ImGui::PushID(i);
 
-					bool disabled = i <= 1;
+					const bool disabled = i <= 1;
 					if (disabled)
 						ImGui::BeginDisabled();
 
@@ -90,7 +96,7 @@ namespace ArcEngine
 			if (ImGui::TreeNode("Collision Matrix"))
 			{
 				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 50.0f);
-				int colCount = (int)layerCollisionMask.size() + 1;
+				const int colCount = (int)layerCollisionMask.size() + 1;
 				if (ImGui::BeginTable("table1", colCount, ImGuiTableFlags_SizingFixedFit))
 				{
 					int i = 0;
@@ -119,8 +125,7 @@ namespace ArcEngine
 							if (row == 0 && column != 0)
 							{
 								auto* drawList = ImGui::GetWindowDrawList();
-								ImVec2 r = ImGui::GetCursorScreenPos();
-								UI::AddTextVertical(drawList, columnLayerName, { r.x, r.y }, ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }));
+								UI::AddTextVertical(drawList, columnLayerName, ImGui::GetCursorScreenPos(), ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }));
 								continue;
 							}
 
@@ -130,9 +135,10 @@ namespace ArcEngine
 							bool on = (rowLayer & layerCollisionMask.at(colLayer).Flags) == rowLayer;
 							on = on && ((colLayer & layerCollisionMask.at(rowLayer).Flags) == colLayer);
 
-							ImGui::PushID(i++);
+							ImGui::PushID(i);
+							++i;
 
-							bool disabled = c == 0 && r == 0;
+							const bool disabled = c == 0 && r == 0;
 							if (disabled)
 							{
 								if (on)

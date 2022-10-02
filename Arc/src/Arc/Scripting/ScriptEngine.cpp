@@ -13,6 +13,7 @@
 #endif // ARC_DEBUG
 
 #include "Arc/Scene/Entity.h"
+#include "Arc/Scene/Scene.h"
 #include "MonoUtils.h"
 #include "GCManager.h"
 #include "ScriptEngineRegistry.h"

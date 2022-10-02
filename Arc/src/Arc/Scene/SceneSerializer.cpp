@@ -2,7 +2,7 @@
 #include "Arc/Scene/SceneSerializer.h"
 
 #include "Arc/Scene/Entity.h"
-#include "Arc/Scene/Components.h"
+#include "Arc/Scene/Scene.h"
 #include "EntitySerializer.h"
 
 #include <fstream>

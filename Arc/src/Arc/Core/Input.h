@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include <glm/vec2.hpp>
 
 #include "Arc/Core/KeyCodes.h"
 #include "Arc/Core/MouseCodes.h"

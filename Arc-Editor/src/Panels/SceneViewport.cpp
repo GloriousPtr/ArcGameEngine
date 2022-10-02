@@ -22,8 +22,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const uint32_t width = 1280;
-		const uint32_t height = 720;
+		constexpr uint32_t width = 1280;
+		constexpr uint32_t height = 720;
 		m_RenderGraphData = CreateRef<RenderGraphData>(width, height);
 		m_MiniViewportRenderGraphData = CreateRef<RenderGraphData>(width, height);
 		m_EditorCamera.SetViewportSize(width, height);

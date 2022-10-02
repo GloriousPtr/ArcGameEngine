@@ -75,8 +75,7 @@ namespace ArcEngine
 
 	size_t Application::GetAllocatedMemorySize()
 	{
-		size_t s = Allocation::GetSize();
-		return s;
+		return  Allocation::GetSize();
 	}
 	
 	void Application::OnEvent(Event& e)

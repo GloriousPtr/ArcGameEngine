@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ArcEngine.h>
-#include <icons/IconsMaterialDesignIcons.h>
 
 #include "BasePanel.h"
 
@@ -12,10 +11,7 @@ namespace ArcEngine
 	class SceneHierarchyPanel : public BasePanel
 	{
 	public:
-		explicit SceneHierarchyPanel(const char* name = "Hierarchy")
-			: BasePanel(name, ICON_MDI_VIEW_LIST, true)
-		{
-		}
+		explicit SceneHierarchyPanel(const char* name = "Hierarchy");
 		virtual ~SceneHierarchyPanel() = default;
 
 		SceneHierarchyPanel(const SceneHierarchyPanel& other) = delete;

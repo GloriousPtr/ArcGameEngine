@@ -1,7 +1,5 @@
 #pragma once
 
-#include <xhash>
-
 namespace ArcEngine
 {
 	class UUID

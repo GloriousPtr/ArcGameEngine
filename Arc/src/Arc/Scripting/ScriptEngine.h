@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Arc/Scene/Scene.h"
+#include "Arc/Core/UUID.h"
 
 typedef struct _MonoDomain MonoDomain;
 typedef struct _MonoAssembly MonoAssembly;
@@ -13,6 +13,9 @@ typedef struct _MonoType MonoType;
 
 namespace ArcEngine
 {
+	class Entity;
+	class Scene;
+
 	using GCHandle = void*;
 
 	enum class FieldType

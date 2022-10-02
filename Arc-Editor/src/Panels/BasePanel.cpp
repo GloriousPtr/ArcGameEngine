@@ -1,7 +1,5 @@
 #include "BasePanel.h"
 
-#include <imgui/imgui_internal.h>
-
 #include "../Utils/EditorTheme.h"
 
 namespace ArcEngine
