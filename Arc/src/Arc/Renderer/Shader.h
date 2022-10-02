@@ -31,8 +31,9 @@ namespace ArcEngine
 			case MaterialPropertyType::Float2				: return sizeof(glm::vec2);
 			case MaterialPropertyType::Float3				: return sizeof(glm::vec3);
 			case MaterialPropertyType::Float4				: return sizeof(glm::vec4);
-			default											: return 0;
 		}
+
+		return 0;
 	}
 
 	struct MaterialProperty

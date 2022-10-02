@@ -72,7 +72,6 @@ project "Arc"
 		"EASTL",
 		"JoltPhysics",
 		"Arc-ScriptCore",
-		"opengl32.lib",
 
 		"%{Lib.mono}"
 	}

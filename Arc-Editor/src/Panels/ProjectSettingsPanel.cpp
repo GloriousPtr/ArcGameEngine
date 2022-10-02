@@ -30,7 +30,7 @@ namespace ArcEngine
 					float cursorPosY = ImGui::GetCursorPosY();
 					if (UI::IconButton("  " ICON_MDI_PLUS, "Add  "))
 					{
-						EntityLayerData newLayer = { "Layer", 0xFFFFFF, layerCollisionMask.size() };
+						EntityLayerData newLayer = { "Layer", 0xFFFF, (uint8_t)layerCollisionMask.size() };
 						layerCollisionMask[BIT(layerCollisionMask.size())] = newLayer;
 					}
 

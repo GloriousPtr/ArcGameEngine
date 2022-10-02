@@ -645,8 +645,6 @@ namespace ArcEngine
 				}
 				break;
 			}
-			default:
-				break;
 		}
 
 		if (e.GetRepeatCount() > 0)
@@ -744,8 +742,6 @@ namespace ArcEngine
 				}
 				break;
 			}
-			default:
-				break;
 		}
 
 		return false;

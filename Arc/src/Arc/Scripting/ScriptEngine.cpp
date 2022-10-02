@@ -449,8 +449,6 @@ namespace ArcEngine
 			accessibility = (uint8_t)Accessibility::Public;
 			break;
 		}
-		default:
-			break;
 		}
 
 		return accessibility;

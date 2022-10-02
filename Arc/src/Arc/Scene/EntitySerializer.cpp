@@ -1103,7 +1103,7 @@ namespace ArcEngine
 			{
 				for (size_t i = 0; i < scriptCount; i++)
 				{
-					auto& scriptNode = scripts[i];
+					auto scriptNode = scripts[i];
 					
 					eastl::string scriptName = "";
 					TrySet(scriptName, scriptNode["Name"]);
@@ -1126,7 +1126,7 @@ namespace ArcEngine
 							if (!field.Serializable)
 								continue;
 
-							auto& fieldNode = scriptNode["Fields"][fieldName.c_str()];
+							auto fieldNode = scriptNode["Fields"][fieldName.c_str()];
 							if (fieldNode)
 							{
 								auto& fieldInstance = fieldInstances[fieldName];

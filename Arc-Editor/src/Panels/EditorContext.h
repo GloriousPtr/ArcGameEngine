@@ -12,12 +12,12 @@ namespace ArcEngine
 	struct EditorContext
 	{
 		EditorContextType Type = EditorContextType::None;
-		void* Data = nullptr;
+		char* Data = nullptr;
 
 		void Set(EditorContextType type, const void* data, size_t size)
 		{
 			if (m_Size != 0)
-				delete[m_Size] Data;
+				delete[] Data;
 
 			if (size != 0)
 			{

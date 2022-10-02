@@ -74,7 +74,6 @@ namespace ArcEngine
 			case AttenuationModelType::Inverse:		return ma_attenuation_model_inverse;
 			case AttenuationModelType::Linear:		return ma_attenuation_model_linear;
 			case AttenuationModelType::Exponential: return ma_attenuation_model_exponential;
-			default:								return ma_attenuation_model_none;
 		}
 
 		return ma_attenuation_model_none;

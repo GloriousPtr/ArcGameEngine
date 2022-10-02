@@ -20,7 +20,6 @@ namespace ArcEngine
 			case GL_DEBUG_SEVERITY_MEDIUM:			ARC_CORE_ERROR(message); return;
 			case GL_DEBUG_SEVERITY_LOW:				ARC_CORE_WARN(message); return;
 			case GL_DEBUG_SEVERITY_NOTIFICATION:	ARC_CORE_TRACE(message); return;
-			default:								ARC_CORE_ERROR(message); return;
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown severity level!");

@@ -12,7 +12,6 @@ namespace ArcEngine
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLShader>(filepath);
-			default:						ARC_CORE_ASSERT(false, "Unknown RendererAPI!"); return nullptr;
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -25,7 +24,6 @@ namespace ArcEngine
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLShader>(name, vertexSrc, fragmentSrc);
-			default:						ARC_CORE_ASSERT(false, "Unknown RendererAPI!"); return nullptr;
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -73,14 +71,12 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		eastl::string shaderName;
-		for (auto& it = m_Shaders.begin(); it != m_Shaders.end(); it++)
+		for (auto [name, shader] : m_Shaders)
 		{
-			shaderName = it->first;
-
-			if (m_ShaderPaths.find_as(shaderName) == m_ShaderPaths.end())
+			if (m_ShaderPaths.find_as(name) == m_ShaderPaths.end())
 				continue;
 
-			it->second->Recompile(m_ShaderPaths.at(shaderName));
+			shader->Recompile(m_ShaderPaths.at(name));
 		}
 	}
 

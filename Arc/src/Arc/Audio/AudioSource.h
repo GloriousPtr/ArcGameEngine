@@ -74,7 +74,7 @@ namespace ArcEngine
 
 	private:
 		eastl::string m_Path;
-		Scope<ma_sound> m_Sound = nullptr;
+		Scope<ma_sound> m_Sound;
 		bool m_Spatialization = false;
 	};
 }

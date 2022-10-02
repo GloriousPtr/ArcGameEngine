@@ -1,14 +1,15 @@
 #pragma once
 
 #include <mutex>
+#include "Arc/Core/Log.h"
 
+#include <EASTL/functional.h>
 #include <EASTL/string.h>
 #include <spdlog/details/null_mutex.h>
 #include <spdlog/sinks/base_sink.h>
 
 namespace ArcEngine
 {
-	template<class Mutex>
 	class ExternalConsoleSink : public spdlog::sinks::base_sink<std::mutex>
 	{
 	public:
@@ -17,15 +18,16 @@ namespace ArcEngine
 			eastl::string Buffer;
 			Log::Level Level;
 
-			Message(eastl::string& message, Log::Level level)
+			Message(eastl::string_view message, Log::Level level)
 				: Buffer(message), Level(level)
 			{
 			}
 		};
 
 		explicit ExternalConsoleSink(bool forceFlush = false, uint8_t bufferCapacity = 10)
-			: m_MessageBufferCapacity(forceFlush ? 1 : bufferCapacity), m_MessageBuffer(eastl::vector<Ref<Message>>(forceFlush ? 1 : bufferCapacity))
+			: m_MessageBufferCapacity(forceFlush ? 1 : bufferCapacity)
 		{
+			m_MessageBuffer = eastl::vector<Ref<Message>>(forceFlush ? 1 : bufferCapacity);
 		}
 		ExternalConsoleSink(const ExternalConsoleSink&) = delete;
 		ExternalConsoleSink& operator=(const ExternalConsoleSink&) = delete;
@@ -80,7 +82,6 @@ namespace ArcEngine
 				case spdlog::level::level_enum::warn:			return Log::Level::Warn;
 				case spdlog::level::level_enum::err:			return Log::Level::Error;
 				case spdlog::level::level_enum::critical:		return Log::Level::Critical;
-				default:										return Log::Level::Trace;
 			}
 			return Log::Level::Trace;
 		}
@@ -91,10 +92,4 @@ namespace ArcEngine
 
 		static eastl::function<void(eastl::string, Log::Level)> OnFlush;
 	};
-}
-
-namespace ArcEngine
-{
-	using ExternalConsoleSink_mt = ExternalConsoleSink<std::mutex>;                  // multi-threaded
-	using ExternalConsoleSink_st = ExternalConsoleSink<spdlog::details::null_mutex>; // single threaded
 }

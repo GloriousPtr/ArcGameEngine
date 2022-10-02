@@ -16,7 +16,7 @@ on:
     - cron: '23 17 * * 3'
 jobs:
   build:
-    name: Build for ${{matrix.BUILD_CONFIGURATION}}
+    name: Build for ${{matrix.BUILD_CONFIGURATION}}-${{matrix.COMPILER}}
     runs-on: windows-latest
     strategy:
       matrix:
@@ -24,6 +24,9 @@ jobs:
           - Debug
           - Release
           - Dist
+        COMPILER:
+          - msvc
+          - clang
     env:
       SOLUTION_FILE_PATH: "Arc.sln"
     steps:
@@ -36,7 +39,7 @@ jobs:
         uses: microsoft/setup-msbuild@v1.1
       
       - name: Generate Project Files
-        run: "./scripts/Win-GenProjects.bat"
+        run: "./scripts/Win-GenProjects.bat ${{matrix.COMPILER}}"
       
       - name: Run Build
         run: |

@@ -67,7 +67,7 @@ namespace ArcEngine
 
 		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_PadOuterX;
 		ImGui::BeginTable(s_IDBuffer, 2, tableFlags | flags);
-		ImGui::TableSetupColumn("PropertyName",0 , 0.5f);
+		ImGui::TableSetupColumn("PropertyName", 0, 0.5f);
 		ImGui::TableSetupColumn("Property", ImGuiTableColumnFlags_WidthStretch);
 	}
 
@@ -126,7 +126,7 @@ namespace ArcEngine
 				modified = true;
 			}
 
-			delete[size] buffer;
+			delete[] buffer;
 		}
 
 		EndPropertyGrid();
@@ -1088,6 +1088,8 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	bool UI::IconButton(const char* icon, const char* label, ImVec4 iconColor)
 	{
+		PushID();
+
 		bool clicked = false;
 
 		float lineHeight = ImGui::GetTextLineHeight();
@@ -1097,13 +1099,9 @@ namespace ArcEngine
 		width += ImGui::CalcTextSize(label).x;
 		width += padding.x * 2.0f;
 
-		ImVec2 buttonSize = { width, lineHeight + padding.y * 2.0f };
-
 		const float cursorPosX = ImGui::GetCursorPosX();
-		PushID();
-		if (ImGui::Button(label, buttonSize))
+		if (ImGui::Button(s_IDBuffer, { width, lineHeight + padding.y * 2.0f }))
 			clicked = true;
-		PopID();
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(cursorPosX);
@@ -1111,6 +1109,7 @@ namespace ArcEngine
 		ImGui::SameLine();
 		ImGui::Text(label);
 		ImGui::PopStyleVar();
+		PopID();
 
 		return clicked;
 	}
