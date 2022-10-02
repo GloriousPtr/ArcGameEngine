@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ArcEngine.h>
-#include <icons/IconsMaterialDesignIcons.h>
 
 #include "BasePanel.h"
 #include "EditorContext.h"
@@ -11,10 +10,7 @@ namespace ArcEngine
 	class PropertiesPanel : public BasePanel
 	{
 	public:
-		explicit PropertiesPanel(const char* name = "Properties")
-			: BasePanel(name, ICON_MDI_INFORMATION, true)
-		{
-		}
+		explicit PropertiesPanel(const char* name = "Properties");
 
 		virtual ~PropertiesPanel() override = default;
 

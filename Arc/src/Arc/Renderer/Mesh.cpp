@@ -12,6 +12,9 @@
 #include <glm/gtx/hash.hpp>
 
 #include "Arc/Core/AssetManager.h"
+#include "Arc/Renderer/Material.h"
+#include "Arc/Renderer/Shader.h"
+#include "Arc/Renderer/VertexArray.h"
 #include "Arc/Utils/StringUtils.h"
 
 namespace ArcEngine

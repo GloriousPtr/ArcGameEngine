@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Arc/Core/Base.h"
-#include "VertexArray.h"
-#include "Material.h"
 
 struct aiScene;
 struct aiNode;
@@ -10,6 +8,9 @@ struct aiMesh;
 
 namespace ArcEngine
 {
+	class VertexArray;
+	class Material;
+
 	struct Submesh
 	{
 		eastl::string Name;

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glm/glm.hpp>
-
 namespace ArcEngine::Math
 {
 	constexpr float EPSILON = 1.17549435E-38f;

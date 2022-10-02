@@ -2,10 +2,6 @@
 
 #include "Arc/Core/Layer.h"
 
-#include "Arc/Events/ApplicationEvent.h"
-#include "Arc/Events/KeyEvent.h"
-#include "Arc/Events/MouseEvent.h"
-
 namespace ArcEngine
 {
 	class ImGuiLayer : public Layer
@@ -26,4 +22,3 @@ namespace ArcEngine
 		bool m_BlockEvents = true;
 	};
 }
-

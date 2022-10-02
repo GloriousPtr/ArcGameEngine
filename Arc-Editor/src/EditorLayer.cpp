@@ -9,12 +9,16 @@
 #include <Arc/Scripting/ScriptEngine.h>
 #include <Arc/Utils/PlatformUtils.h>
 #include <Arc/Math/Math.h>
+#include <icons/IconsMaterialDesignIcons.h>
+
+#include "Panels/AssetPanel.h"
+#include "Panels/PropertiesPanel.h"
+#include "Panels/RendererSettingsPanel.h"
+#include "Panels/SceneViewport.h"
+#include "Panels/StatsPanel.h"
 
 #include "Utils/EditorTheme.h"
 #include "Utils/UI.h"
-
-#include "Panels/RendererSettingsPanel.h"
-#include "Panels/StatsPanel.h"
 
 namespace ArcEngine
 {
@@ -140,7 +144,7 @@ namespace ArcEngine
 			}
 			else
 			{
-				ImVec2 change = (mousePosition - m_LastMousePosition);
+				ImVec2 change = (mousePosition - ImVec2(m_LastMousePosition.x, m_LastMousePosition.y));
 				glm::vec2 windowPos = window.GetPosition();
 				glm::vec2 newWindowPos = { change.x + windowPos.x, change.y + windowPos.y };
 				window.SetPosition(newWindowPos);
@@ -345,7 +349,7 @@ namespace ArcEngine
 
 						ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - ImGui::CalcTextSize("FPS: XX.XX (XX.XXXXXXms  MEM: XXXX.XXMB").x);
 						float fps = ImGui::GetIO().Framerate;
-						size_t allocatedMemory = m_Application->GetAllocatedMemorySize();
+						size_t allocatedMemory = Application::GetAllocatedMemorySize();
 						ImGui::Text("FPS: %.2f (%.6fms)  MEM: %.2fMB", fps, 1.0f / fps, (float)allocatedMemory / (1024.0f * 1024.0f));
 
 						ImGui::EndMenuBar();
@@ -438,7 +442,8 @@ namespace ArcEngine
 		}
 		EndDockspace();
 
-		m_LastMousePosition = ImGui::GetMousePos();
+		ImVec2 mousePosition = ImGui::GetMousePos();
+		m_LastMousePosition = { mousePosition.x, mousePosition.y };
 		if (m_WindowDragging && !ImGui::IsMouseDown(0))
 			m_WindowDragging = false;
 	}
@@ -561,7 +566,7 @@ namespace ArcEngine
 			{
 
 				ImVec2 mousePosition = ImGui::GetMousePos();
-				ImVec2 change = mousePosition - m_LastMousePosition;
+				ImVec2 change = mousePosition - ImVec2(m_LastMousePosition.x, m_LastMousePosition.y);
 				glm::vec2 windowPos = window.GetPosition();
 				glm::vec2 windowSize = window.GetSize();
 
@@ -835,7 +840,7 @@ namespace ArcEngine
 		}
 	}
 
-	void ArcEngine::EditorLayer::OnScenePlay()
+	void EditorLayer::OnScenePlay()
 	{
 		ResetContext();
 
@@ -854,7 +859,7 @@ namespace ArcEngine
 		m_Viewports[0]->SetSimulation(true);
 	}
 
-	void ArcEngine::EditorLayer::OnSceneStop()
+	void EditorLayer::OnSceneStop()
 	{
 		ResetContext();
 
@@ -874,7 +879,7 @@ namespace ArcEngine
 		}
 	}
 
-	void ArcEngine::EditorLayer::OnScenePause()
+	void EditorLayer::OnScenePause()
 	{
 		m_SceneState = SceneState::Pause;
 
@@ -882,7 +887,7 @@ namespace ArcEngine
 			m_Viewports[0]->SetSimulation(false);
 	}
 
-	void ArcEngine::EditorLayer::OnSceneUnpause()
+	void EditorLayer::OnSceneUnpause()
 	{
 		m_SceneState = SceneState::Play;
 

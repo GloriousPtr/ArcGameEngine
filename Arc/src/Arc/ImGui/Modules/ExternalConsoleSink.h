@@ -25,9 +25,8 @@ namespace ArcEngine
 		};
 
 		explicit ExternalConsoleSink(bool forceFlush = false, uint8_t bufferCapacity = 10)
-			: m_MessageBufferCapacity(forceFlush ? 1 : bufferCapacity)
+			: m_MessageBufferCapacity(forceFlush ? 1 : bufferCapacity), m_MessageBuffer(eastl::vector<Ref<Message>>(forceFlush ? 1 : bufferCapacity))
 		{
-			m_MessageBuffer = eastl::vector<Ref<Message>>(forceFlush ? 1 : bufferCapacity);
 		}
 		ExternalConsoleSink(const ExternalConsoleSink&) = delete;
 		ExternalConsoleSink& operator=(const ExternalConsoleSink&) = delete;
@@ -66,7 +65,7 @@ namespace ArcEngine
 			if (OnFlush == nullptr)
 				return;
 
-			for (Ref<Message>& msg : m_MessageBuffer)
+			for (const Ref<Message>& msg : m_MessageBuffer)
 				OnFlush(msg->Buffer, msg->Level);
 
 			m_MessagesBuffered = 0;

@@ -1,6 +1,7 @@
 #include "PropertiesPanel.h"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <assimp/Importer.hpp>
@@ -16,6 +17,11 @@
 
 namespace ArcEngine
 {
+	PropertiesPanel::PropertiesPanel(const char* name)
+			: BasePanel(name, ICON_MDI_INFORMATION, true)
+	{
+	}
+
 	void PropertiesPanel::OnImGuiRender()
 	{
 		ARC_PROFILE_SCOPE();
@@ -30,7 +36,7 @@ namespace ArcEngine
 				case EditorContextType::Entity:
 					if (m_Context.Data)
 					{
-						Entity selectedEntity = *((Entity*)m_Context.Data);
+						const Entity selectedEntity = *(Entity*)m_Context.Data;
 						if (selectedEntity && selectedEntity.GetScene())
 							DrawComponents(selectedEntity);
 					}
@@ -38,8 +44,7 @@ namespace ArcEngine
 				case EditorContextType::File:
 					if (m_Context.Data)
 					{
-						const char* selectedFile = (char*)m_Context.Data;
-						DrawFileProperties(selectedFile);
+						DrawFileProperties(m_Context.Data);
 					}
 					break;
 				default:
@@ -57,7 +62,7 @@ namespace ArcEngine
 
 		if(entity.HasComponent<T>())
 		{
-			static const ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen
+			static constexpr ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen
 				| ImGuiTreeNodeFlags_SpanAvailWidth
 				| ImGuiTreeNodeFlags_AllowItemOverlap
 				| ImGuiTreeNodeFlags_Framed
@@ -69,7 +74,7 @@ namespace ArcEngine
 			
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
 
-			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeFlags, name);
+			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeFlags, "%s", name);
 
 			bool removeComponent = false;
 			if(removable)
@@ -103,7 +108,7 @@ namespace ArcEngine
 
 	static void DrawFields(Entity entity, ScriptComponent& component)
 	{
-		static const ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen
+		static constexpr ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen
 			| ImGuiTreeNodeFlags_SpanAvailWidth
 			| ImGuiTreeNodeFlags_AllowItemOverlap
 			| ImGuiTreeNodeFlags_Framed
@@ -119,7 +124,7 @@ namespace ArcEngine
 			const eastl::string& className = *it;
 
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
-			bool open = ImGui::TreeNodeEx(it, treeFlags, className.c_str());
+			bool open = ImGui::TreeNodeEx(it, treeFlags, "%s", className.c_str());
 
 			{
 				ImGui::SameLine(ImGui::GetContentRegionMax().x - frameHeight * 1.2f);
@@ -205,15 +210,15 @@ namespace ArcEngine
 				}
 				case MaterialPropertyType::Int:
 				{
-					int32_t v = material->GetData<int32_t>(name);
+					auto v = material->GetData<int32_t>(name);
 					if (UI::Property(displayName, v))
 						material->SetData(name, v);
 					break;
 				}
 				case MaterialPropertyType::Float:
 				{
-					bool isSlider01 = n.find("01") != eastl::string::npos;
-					float v = material->GetData<float>(name);
+					const bool isSlider01 = n.find("01") != eastl::string::npos;
+					auto v = material->GetData<float>(name);
 					if (isSlider01)
 					{
 						eastl::string displayName2 = displayName;
@@ -230,15 +235,15 @@ namespace ArcEngine
 				}
 				case MaterialPropertyType::Float2:
 				{
-					glm::vec2 v = material->GetData<glm::vec2>(name);
+					auto v = material->GetData<glm::vec2>(name);
 					if (UI::Property(displayName, v))
 						material->SetData(name, v);
 					break;
 				}
 				case MaterialPropertyType::Float3:
 				{
-					bool isColor = n.find("color") != eastl::string::npos || n.find("Color") != eastl::string::npos;
-					glm::vec3 v = material->GetData<glm::vec3>(name);
+					const bool isColor = n.find("color") != eastl::string::npos || n.find("Color") != eastl::string::npos;
+					auto v = material->GetData<glm::vec3>(name);
 					if (isColor)
 					{
 						if (UI::PropertyColor(displayName, v))
@@ -253,8 +258,8 @@ namespace ArcEngine
 				}
 				case MaterialPropertyType::Float4:
 				{
-					bool isColor = n.find("color") != eastl::string::npos || n.find("Color") != eastl::string::npos;
-					glm::vec4 v = material->GetData<glm::vec4>(name);
+					const bool isColor = n.find("color") != eastl::string::npos || n.find("Color") != eastl::string::npos;
+					auto v = material->GetData<glm::vec4>(name);
 					if (isColor)
 					{
 						if (UI::PropertyColor(displayName, v))
@@ -281,7 +286,7 @@ namespace ArcEngine
 
 		Assimp::Importer importer;
 		importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 80.0f);
-		const uint32_t meshImportFlags =
+		constexpr uint32_t meshImportFlags =
 			aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
 			aiProcess_PreTransformVertices |
@@ -307,10 +312,7 @@ namespace ArcEngine
 		eastl::string path = filepath.substr(0, lastDot) + ".assbin";
 		aiReturn ret = exporter.Export(scene, format->id, path.c_str(), meshImportFlags);
 		if (ret != aiReturn_SUCCESS)
-		{
 			ARC_CORE_ERROR("Could not import the file: {0}. Error: {1}", filepath, exporter.GetErrorString());
-			return;
-		}
 	}
 
 	void PropertiesPanel::DrawComponents(Entity entity)
@@ -332,8 +334,7 @@ namespace ArcEngine
 
 			if (entity.HasComponent<TagComponent>())
 			{
-				char buffer[256];
-				memset(buffer, 0, sizeof(buffer));
+				char buffer[256] = {};
 				strcpy_s(buffer, tag.Tag.c_str());
 				ImGui::SetNextItemWidth(tagWidth);
 				if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
@@ -403,7 +404,7 @@ namespace ArcEngine
 
 			ImGui::SetNextItemWidth(headerRegion.x - framePadding.x);
 
-			auto it = Scene::LayerCollisionMask.find(tag.Layer);
+			const auto it = Scene::LayerCollisionMask.find(tag.Layer);
 			const char* current = Scene::LayerCollisionMask[it == Scene::LayerCollisionMask.end() ? Scene::DefaultLayer : tag.Layer].Name.c_str();
 			if (ImGui::BeginCombo("##LayerName", current))
 			{
@@ -524,9 +525,8 @@ namespace ArcEngine
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
-					const char* path = (const char*)payload->Data;
-					component.Filepath = path;
-					component.MeshGeometry = CreateRef<Mesh>(path);
+					component.Filepath = (const char*)payload->Data;
+					component.MeshGeometry = CreateRef<Mesh>(component.Filepath.c_str());
 
 					ImGui::EndDragDropTarget();
 					return;
@@ -548,7 +548,7 @@ namespace ArcEngine
 					component.CullMode = (MeshComponent::CullModeType) cullMode;
 				UI::EndProperties();
 
-				const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed
+				constexpr ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed
 					| ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_FramePadding;
 
 				if (ImGui::TreeNodeEx("Material Properties", treeNodeFlags))
@@ -1121,7 +1121,7 @@ namespace ArcEngine
 			if (m_Scene)
 				m_Scene = nullptr;
 
-			ImGui::Text(name.c_str());
+			ImGui::TextUnformatted(name.c_str());
 		}
 	}
 

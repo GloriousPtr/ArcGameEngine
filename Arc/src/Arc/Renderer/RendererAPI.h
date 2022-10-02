@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Arc/Renderer/VertexArray.h"
-
 #include <glm/glm.hpp>
 
 namespace ArcEngine
 {
+	class VertexArray;
+
 	class RendererAPI
 	{
 	public:

@@ -1,13 +1,6 @@
 #pragma once
 
-#include "Arc/Renderer/Camera.h"
-#include "Arc/Renderer/EditorCamera.h"
-#include "Arc/Scene/Entity.h"
 #include "Arc/Scene/Components.h"
-#include "VertexArray.h"
-#include "Shader.h"
-#include "Texture.h"
-#include "RenderGraphData.h"
 
 struct aiMesh;
 struct aiScene;
@@ -15,6 +8,12 @@ struct aiNode;
 
 namespace ArcEngine
 {
+	class ShaderLibrary;
+	struct Submesh;
+	struct RenderGraphData;
+	class Entity;
+	struct CameraData;
+
 	class Renderer3D
 	{
 	public:

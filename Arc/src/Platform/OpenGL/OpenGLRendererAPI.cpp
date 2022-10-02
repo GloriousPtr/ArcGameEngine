@@ -3,6 +3,8 @@
 
 #include <glad/glad.h>
 
+#include "OpenGLVertexArray.h"
+
 namespace ArcEngine
 {
 	void OpenGLMessageCallback(

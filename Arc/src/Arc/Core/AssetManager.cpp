@@ -1,6 +1,9 @@
 #include "arcpch.h"
 #include "AssetManager.h"
 
+#include "Arc/Renderer/Mesh.h"
+#include "Arc/Renderer/Texture.h"
+
 namespace ArcEngine
 {
 	eastl::hash_map<eastl::string, Ref<Texture2D>> AssetManager::m_Texture2DMap;

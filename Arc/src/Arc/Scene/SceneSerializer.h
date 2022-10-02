@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Arc/Scene/Scene.h"
-
 namespace ArcEngine
 {
+	class Scene;
+
 	class SceneSerializer
 	{
 	public:

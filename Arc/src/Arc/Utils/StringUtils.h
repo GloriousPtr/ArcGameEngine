@@ -1,4 +1,3 @@
-#include "Arc/Core/Base.h"
 #include "Arc/Debug/Profiler.h"
 
 namespace ArcEngine

@@ -1,12 +1,14 @@
 #pragma once
 
 #include <ArcEngine.h>
+#include <Arc/Renderer/EditorCamera.h>
 
 #include "BasePanel.h"
-#include "SceneHierarchyPanel.h"
 
 namespace ArcEngine
 {
+	class SceneHierarchyPanel;
+
 	class SceneViewport : public BasePanel
 	{
 	public:

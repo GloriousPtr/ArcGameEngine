@@ -6,8 +6,6 @@
 #include "Arc/Core/LayerStack.h"
 #include "Arc/Events/ApplicationEvent.h"
 
-#include "Arc/Core/Timestep.h"
-
 #include "Arc/ImGui/ImGuiLayer.h"
 
 int main(int argc, char** argv);
@@ -28,14 +26,13 @@ namespace ArcEngine
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* layer);
 		
-		inline Window& GetWindow() { return *m_Window; }
+		inline Window& GetWindow() const { return *m_Window; }
 
 		void Close();
 
-		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
+		ImGuiLayer* GetImGuiLayer() const { return m_ImGuiLayer; }
 
-		size_t GetAllocatedMemorySize();
-
+		static size_t GetAllocatedMemorySize();
 		inline static Application& Get() { return *s_Instance; }
 		
 	private:

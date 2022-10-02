@@ -1,11 +1,17 @@
 #include "StatsPanel.h"
 
+#include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui.h>
 
 #include "../Utils/UI.h"
 
 namespace ArcEngine
 {
+	StatsPanel::StatsPanel(const char* name)
+		: BasePanel(name, ICON_MDI_INFORMATION_VARIANT, true)
+	{
+	}
+
 	void StatsPanel::OnImGuiRender()
 	{
 		ARC_PROFILE_SCOPE();

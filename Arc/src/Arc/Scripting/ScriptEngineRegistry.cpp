@@ -8,6 +8,7 @@
 #include "Arc/Core/Input.h"
 #include "Arc/Math/Math.h"
 #include "Arc/Scene/Entity.h"
+#include "Arc/Scene/Components.h"
 #include "GCManager.h"
 #include "MonoUtils.h"
 #include "ScriptEngine.h"

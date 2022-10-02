@@ -4,8 +4,6 @@
 
 #include "Arc/Core/Timestep.h"
 
-#include <glm/glm.hpp>
-
 namespace ArcEngine
 {
 	class EditorCamera : public Camera

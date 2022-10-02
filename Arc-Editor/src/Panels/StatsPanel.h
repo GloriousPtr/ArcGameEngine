@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ArcEngine.h>
-#include <icons/IconsMaterialDesignIcons.h>
 
 #include "BasePanel.h"
 
@@ -10,9 +9,7 @@ namespace ArcEngine
 	class StatsPanel : public BasePanel
 	{
 	public:
-		explicit StatsPanel(const char* name = "Stats")
-			: BasePanel(name, ICON_MDI_INFORMATION_VARIANT, true)
-		{}
+		explicit StatsPanel(const char* name = "Stats");
 		~StatsPanel() = default;
 
 		StatsPanel(const StatsPanel& other) = delete;

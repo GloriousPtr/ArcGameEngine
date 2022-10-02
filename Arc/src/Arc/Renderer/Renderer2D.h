@@ -1,13 +1,10 @@
 #pragma once
 
-#include "Arc/Renderer/Texture.h"
-
-#include "Arc/Renderer/Camera.h"
-#include "Arc/Renderer/EditorCamera.h"
-#include "Arc/Renderer/RenderGraphData.h"
-
 namespace ArcEngine
 {
+	class Texture2D;
+	struct RenderGraphData;
+
 	class Renderer2D
 	{
 	public:

@@ -1,8 +1,8 @@
 ﻿#include "SceneHierarchyPanel.h"
 
 #include <Arc/Scene/EntitySerializer.h>
-#include <Arc/Scene/EntitySerializer.h>
 
+#include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
@@ -12,73 +12,9 @@
 
 namespace ArcEngine
 {
-	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
+	SceneHierarchyPanel::SceneHierarchyPanel(const char* name)
+		: BasePanel(name, ICON_MDI_VIEW_LIST, true)
 	{
-		ARC_PROFILE_SCOPE();
-
-		m_Context = context;
-	}
-
-	void SceneHierarchyPanel::DragDropTarget() const
-	{
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
-			{
-				const char* path = (const char*)payload->Data;
-				eastl::string name = StringUtils::GetName(path);
-				eastl::string ext = StringUtils::GetExtension(path);
-
-				if (ext == "prefab")
-				{
-					EntitySerializer::DeserializeEntityAsPrefab(path, *m_Context);
-				}
-				else if (ext == "arc")
-				{
-					EditorLayer::GetInstance()->OpenScene(path);
-				}
-				else if (ext == "hdr")
-				{
-					m_Context->CreateEntity(name).AddComponent<SkyLightComponent>()
-						.Texture = AssetManager::GetTextureCubemap(path);
-				}
-				else if (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp")
-				{
-					m_Context->CreateEntity(name).AddComponent<SpriteRendererComponent>()
-						.Texture = AssetManager::GetTexture2D(path);
-				}
-				else if (ext == "assbin" || ext == "obj" || ext == "fbx")
-				{
-					Ref<Mesh> mesh = AssetManager::GetMesh(path);
-
-					Entity parent = m_Context->CreateEntity(mesh->GetName());
-
-					size_t meshCount = mesh->GetSubmeshCount();
-					if (meshCount == 1)
-					{
-						auto& meshComponent = parent.AddComponent<MeshComponent>();
-						meshComponent.Filepath = path;
-						meshComponent.MeshGeometry = mesh;
-						meshComponent.SubmeshIndex = 0;
-					}
-					else
-					{
-						for (size_t i = 0; i < meshCount; i++)
-						{
-							const auto& submesh = mesh->GetSubmesh(i);
-							Entity entity = m_Context->CreateEntity(submesh.Name);
-							entity.SetParent(parent);
-							auto& meshComponent = entity.AddComponent<MeshComponent>();
-							meshComponent.Filepath = path;
-							meshComponent.MeshGeometry = mesh;
-							meshComponent.SubmeshIndex = i;
-						}
-					}
-				}
-			}
-
-			ImGui::EndDragDropTarget();
-		}
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender()
@@ -304,8 +240,7 @@ namespace ArcEngine
 
 		if (entity == renaming)
 		{
-			char buffer[256];
-			memset(buffer, 0, sizeof(buffer));
+			char buffer[256] = {};
 			size_t minSize = glm::min(sizeof(buffer), tag.size());
 			strncpy_s(buffer, tag.c_str(), minSize);
 			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
@@ -408,6 +343,75 @@ namespace ArcEngine
 			m_DeletedEntity = entity;
 
 		return nodeRect;
+	}
+
+		void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
+	{
+		ARC_PROFILE_SCOPE();
+
+		m_Context = context;
+	}
+
+	void SceneHierarchyPanel::DragDropTarget() const
+	{
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				const char* path = (const char*)payload->Data;
+				eastl::string name = StringUtils::GetName(path);
+				eastl::string ext = StringUtils::GetExtension(path);
+
+				if (ext == "prefab")
+				{
+					EntitySerializer::DeserializeEntityAsPrefab(path, *m_Context);
+				}
+				else if (ext == "arc")
+				{
+					EditorLayer::GetInstance()->OpenScene(path);
+				}
+				else if (ext == "hdr")
+				{
+					m_Context->CreateEntity(name).AddComponent<SkyLightComponent>()
+						.Texture = AssetManager::GetTextureCubemap(path);
+				}
+				else if (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp")
+				{
+					m_Context->CreateEntity(name).AddComponent<SpriteRendererComponent>()
+						.Texture = AssetManager::GetTexture2D(path);
+				}
+				else if (ext == "assbin" || ext == "obj" || ext == "fbx")
+				{
+					Ref<Mesh> mesh = AssetManager::GetMesh(path);
+
+					Entity parent = m_Context->CreateEntity(mesh->GetName());
+
+					size_t meshCount = mesh->GetSubmeshCount();
+					if (meshCount == 1)
+					{
+						auto& meshComponent = parent.AddComponent<MeshComponent>();
+						meshComponent.Filepath = path;
+						meshComponent.MeshGeometry = mesh;
+						meshComponent.SubmeshIndex = 0;
+					}
+					else
+					{
+						for (size_t i = 0; i < meshCount; i++)
+						{
+							const auto& submesh = mesh->GetSubmesh(i);
+							Entity entity = m_Context->CreateEntity(submesh.Name);
+							entity.SetParent(parent);
+							auto& meshComponent = entity.AddComponent<MeshComponent>();
+							meshComponent.Filepath = path;
+							meshComponent.MeshGeometry = mesh;
+							meshComponent.SubmeshIndex = i;
+						}
+					}
+				}
+			}
+
+			ImGui::EndDragDropTarget();
+		}
 	}
 
 	void SceneHierarchyPanel::DrawContextMenu() const

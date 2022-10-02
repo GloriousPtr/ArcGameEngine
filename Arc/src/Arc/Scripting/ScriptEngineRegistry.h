@@ -1,12 +1,14 @@
 #pragma once
 
-#include "Arc/Scene/Components.h"
-
 typedef struct _MonoType MonoType;
 typedef struct _MonoObject MonoObject;
 
 namespace ArcEngine
 {
+	class Entity;
+	template<typename... Component>
+	struct ComponentGroup;
+
 	using GCHandle = void*;
 
 	class ScriptEngineRegistry

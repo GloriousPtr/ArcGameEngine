@@ -15,11 +15,13 @@
 #include <EASTL/utility.h>
 #include <EASTL/algorithm.h>
 #include <EASTL/functional.h>
-
 #include <EASTL/string.h>
 #include <EASTL/array.h>
 #include <EASTL/vector.h>
 #include <EASTL/hash_map.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include "Arc/Core/Base.h"
 

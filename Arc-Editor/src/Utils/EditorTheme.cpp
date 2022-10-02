@@ -1,5 +1,6 @@
 #include "EditorTheme.h"
 
+#include <icons/IconsMaterialDesignIcons.h>
 #include <icons/MaterialDesign.inl>
 
 namespace ArcEngine

@@ -1,11 +1,17 @@
 #include "RendererSettingsPanel.h"
 
-#include "../Utils/UI.h"
-
+#include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui.h>
+
+#include "../Utils/UI.h"
 
 namespace ArcEngine
 {
+	RendererSettingsPanel::RendererSettingsPanel(const char* name)
+		: BasePanel(name, ICON_MDI_GPU)
+	{
+	}
+
 	void RendererSettingsPanel::OnImGuiRender()
 	{
 		ARC_PROFILE_SCOPE();

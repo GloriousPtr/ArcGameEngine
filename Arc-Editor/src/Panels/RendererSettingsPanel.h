@@ -1,8 +1,5 @@
 #pragma once
 
-#include <ArcEngine.h>
-#include <icons/IconsMaterialDesignIcons.h>
-
 #include "BasePanel.h"
 
 namespace ArcEngine
@@ -10,10 +7,7 @@ namespace ArcEngine
 	class RendererSettingsPanel : public BasePanel
 	{
 	public:
-		explicit RendererSettingsPanel(const char* name = "Render Settings")
-			: BasePanel(name, ICON_MDI_GPU)
-		{}
-
+		explicit RendererSettingsPanel(const char* name = "Render Settings");
 		virtual ~RendererSettingsPanel() override = default;
 
 		RendererSettingsPanel(const RendererSettingsPanel& other) = delete;

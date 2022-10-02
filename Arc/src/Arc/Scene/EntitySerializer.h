@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entity.h"
+#include "Arc/Core/UUID.h"
 
 namespace YAML
 {
@@ -10,6 +10,9 @@ namespace YAML
 
 namespace ArcEngine
 {
+	class Entity;
+	class Scene;
+
 	class EntitySerializer
 	{
 	public:

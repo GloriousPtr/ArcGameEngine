@@ -71,7 +71,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		eastl::string shaderName;
-		for (auto [name, shader] : m_Shaders)
+		for (const auto& [name, shader] : m_Shaders)
 		{
 			if (m_ShaderPaths.find_as(name) == m_ShaderPaths.end())
 				continue;

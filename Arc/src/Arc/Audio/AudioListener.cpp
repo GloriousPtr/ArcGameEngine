@@ -11,7 +11,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		ma_engine* engine = (ma_engine*)AudioEngine::GetEngine();
+		auto* engine = (ma_engine*)AudioEngine::GetEngine();
 		ma_engine_listener_set_cone(engine, m_ListenerIndex, glm::radians(config.ConeInnerAngle), glm::radians(config.ConeOuterAngle), config.ConeOuterGain);
 	}
 	
@@ -19,7 +19,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		ma_engine* engine = (ma_engine*)AudioEngine::GetEngine();
+		auto* engine = (ma_engine*)AudioEngine::GetEngine();
 		ma_engine_listener_set_position(engine, m_ListenerIndex, position.x, position.y, position.z);
 
 		static bool setupWorldUp = false;
@@ -34,7 +34,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		ma_engine* engine = (ma_engine*)AudioEngine::GetEngine();
+		auto* engine = (ma_engine*)AudioEngine::GetEngine();
 		ma_engine_listener_set_direction(engine, m_ListenerIndex, forward.x, forward.y, forward.z);
 	}
 
@@ -42,7 +42,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		ma_engine* engine = (ma_engine*)AudioEngine::GetEngine();
+		auto* engine = (ma_engine*)AudioEngine::GetEngine();
 		ma_engine_listener_set_velocity(engine, m_ListenerIndex, velocity.x, velocity.y, velocity.z);
 	}
 }

@@ -1,13 +1,12 @@
 #pragma once
 
+#include <EASTL/hash_map.h>
 #include <EASTL/map.h>
+#include <entt.hpp>
 
 #include "Arc/Core/UUID.h"
 #include "Arc/Core/Timestep.h"
-#include "Arc/Renderer/EditorCamera.h"
-#include "Arc/Renderer/RenderGraphData.h"
 
-#include "entt.hpp"
 
 class b2World;
 class b2Fixture;
@@ -15,6 +14,9 @@ class b2Fixture;
 namespace ArcEngine
 {
 	class Entity;
+	class EditorCamera;
+	struct CameraData;
+	struct RenderGraphData;
 
 	class Physics3DContactListener;
 	class Physics3DBodyActivationListener;
@@ -80,10 +82,10 @@ namespace ArcEngine
 
 	private:
 		void CreateRigidbody(Entity entity, RigidbodyComponent& component) const;
-		void CreateRigidbody2D(Entity entity, Rigidbody2DComponent& component);
-		void CreateBoxCollider2D(Entity entity, BoxCollider2DComponent& component);
-		void CreateCircleCollider2D(Entity entity, CircleCollider2DComponent& component);
-		void CreatePolygonCollider2D(Entity entity, PolygonCollider2DComponent& component);
+		void CreateRigidbody2D(Entity entity, Rigidbody2DComponent& component) const;
+		void CreateBoxCollider2D(Entity entity, BoxCollider2DComponent& component) const;
+		void CreateCircleCollider2D(Entity entity, CircleCollider2DComponent& component) const;
+		void CreatePolygonCollider2D(Entity entity, PolygonCollider2DComponent& component) const;
 
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);

@@ -3,6 +3,7 @@
 #include <ArcEngine.h>
 #include <Arc/Scene/EntitySerializer.h>
 
+#include <icons/IconsMaterialDesignIcons.h>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 #include <filesystem>
@@ -530,8 +531,7 @@ namespace ArcEngine
 					const EditorContext& context = EditorLayer::GetInstance()->GetContext();
 					if (context.IsValid(EditorContextType::File))
 					{
-						const char* path = (char*)context.Data;
-						highlight = path == file.Filepath;
+						highlight = file.Filepath == context.Data;
 					}
 
 					// Background button

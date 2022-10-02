@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EASTL/string.h"
+#include <EASTL/string.h>
 
 // This ignores all warnings raised inside External headers
 #pragma warning(push, 0)

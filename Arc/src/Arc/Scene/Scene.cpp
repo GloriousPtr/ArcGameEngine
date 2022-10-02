@@ -3,35 +3,28 @@
 
 #include "Arc/Physics/Physics3D.h"
 #include "Arc/Physics/PhysicsUtils.h"
+#include "Arc/Renderer/EditorCamera.h"
 #include "Arc/Renderer/Renderer2D.h"
 #include "Arc/Renderer/Renderer3D.h"
+#include "Arc/Renderer/RenderGraphData.h"
 #include "Arc/Scene/Components.h"
+#include "Arc/Scene/Entity.h"
 #include "Arc/Scripting/ScriptEngine.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/compatibility.hpp>
-#include <glm/ext/scalar_constants.hpp>
-#include <glad/glad.h>
 #include <box2d/box2d.h>
 #include <EASTL/set.h>
 
-#include "Entity.h"
-
 // Jolt includes
 #include <Jolt/Jolt.h>
-#include <Jolt/RegisterTypes.h>
-#include <Jolt/Core/Factory.h>
-#include <Jolt/Core/Memory.h>
-#include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Core/JobSystemThreadPool.h>
-#include <Jolt/Physics/PhysicsSettings.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 #include <Jolt/Physics/Collision/Shape/CylinderShape.h>
 #include <Jolt/Physics/Collision/Shape/TaperedCapsuleShape.h>
-#include <Jolt/Physics/Collision/Shape/StaticCompoundShape.h>
 #include <Jolt/Physics/Collision/Shape/MutableCompoundShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
@@ -41,10 +34,10 @@ namespace ArcEngine
 {
 	eastl::map<EntityLayer, EntityLayerData> Scene::LayerCollisionMask =
 	{
-		{ BIT(0), { "Static",		0xFFFF, 0 } },
-		{ BIT(1), { "Default",		0xFFFF, 1 } },
-		{ BIT(2), { "Player",		0xFFFF, 2 } },
-		{ BIT(3), { "Sensor",		0xFFFF, 3 } },
+		{ BIT(0), { "Static",		(uint16_t)0xFFFF, 0 } },
+		{ BIT(1), { "Default",		(uint16_t)0xFFFF, 1 } },
+		{ BIT(2), { "Player",		(uint16_t)0xFFFF, 2 } },
+		{ BIT(3), { "Sensor",		(uint16_t)0xFFFF, 3 } },
 	};
 
 	#pragma region Physics2DListeners
@@ -394,7 +387,6 @@ namespace ArcEngine
 		Ref<Scene> newScene = CreateRef<Scene>();
 		newScene->VelocityIterations = other->VelocityIterations;
 		newScene->PositionIterations = other->PositionIterations;
-		newScene->LayerCollisionMask = other->LayerCollisionMask;
 
 		newScene->m_ViewportWidth = other->m_ViewportWidth;
 		newScene->m_ViewportHeight = other->m_ViewportHeight;
@@ -907,7 +899,7 @@ namespace ArcEngine
 
 			#pragma region Physics3D
 			{
-				auto& bodyInterface = Physics3D::GetPhysicsSystem().GetBodyInterface();
+				const auto& bodyInterface = Physics3D::GetPhysicsSystem().GetBodyInterface();
 				auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
 				for (auto e : view)
 				{
@@ -915,7 +907,7 @@ namespace ArcEngine
 					if (!rb.RuntimeBody)
 						continue;
 
-					const JPH::Body* body = (const JPH::Body*)rb.RuntimeBody;
+					const auto* body = (const JPH::Body*)rb.RuntimeBody;
 
 					if (!bodyInterface.IsActive(body->GetID()))
 						continue;
@@ -1313,7 +1305,7 @@ namespace ArcEngine
 		}
 
 		// Body
-		glm::quat rotation = glm::quat(tc.Rotation);
+		auto rotation = glm::quat(tc.Rotation);
 		
 		auto layer = entity.GetComponent<TagComponent>().Layer;
 		uint8_t layerIndex = 1;	// Default Layer
@@ -1346,7 +1338,7 @@ namespace ArcEngine
 		component.RuntimeBody = body;
 	}
 
-	void Scene::CreateRigidbody2D(Entity entity, Rigidbody2DComponent& body)
+	void Scene::CreateRigidbody2D(Entity entity, Rigidbody2DComponent& component) const
 	{
 		ARC_PROFILE_SCOPE();
 		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
@@ -1357,20 +1349,20 @@ namespace ArcEngine
 			const TransformComponent& transform = entity.GetTransform();
 
 			b2BodyDef def;
-			def.type = (b2BodyType)body.Type;
-			def.linearDamping = glm::max(body.LinearDrag, 0.0f);
-			def.angularDamping = glm::max(body.AngularDrag, 0.0f);
-			def.allowSleep = body.AllowSleep;
-			def.awake = body.Awake;
-			def.fixedRotation = body.FreezeRotation;
-			def.bullet = body.Continuous;
-			def.gravityScale = body.GravityScale;
+			def.type = (b2BodyType)component.Type;
+			def.linearDamping = glm::max(component.LinearDrag, 0.0f);
+			def.angularDamping = glm::max(component.AngularDrag, 0.0f);
+			def.allowSleep = component.AllowSleep;
+			def.awake = component.Awake;
+			def.fixedRotation = component.FreezeRotation;
+			def.bullet = component.Continuous;
+			def.gravityScale = component.GravityScale;
 
 			def.position.Set(transform.Translation.x, transform.Translation.y);
 			def.angle = transform.Rotation.z;
 
 			b2Body* rb = m_PhysicsWorld2D->CreateBody(&def);
-			body.RuntimeBody = rb;
+			component.RuntimeBody = rb;
 
 			if (entity.HasComponent<BoxCollider2DComponent>())
 				CreateBoxCollider2D(entity, entity.GetComponent<BoxCollider2DComponent>());
@@ -1381,16 +1373,16 @@ namespace ArcEngine
 			if (entity.HasComponent<PolygonCollider2DComponent>())
 				CreatePolygonCollider2D(entity, entity.GetComponent<PolygonCollider2DComponent>());
 
-			if (!body.AutoMass && body.Mass > 0.01f)
+			if (!component.AutoMass && component.Mass > 0.01f)
 			{
 				b2MassData massData = rb->GetMassData();
-				massData.mass = body.Mass;
+				massData.mass = component.Mass;
 				rb->SetMassData(&massData);
 			}
 		}
 	}
 
-	void Scene::CreateBoxCollider2D(Entity entity, BoxCollider2DComponent& bc2d)
+	void Scene::CreateBoxCollider2D(Entity entity, BoxCollider2DComponent& component) const
 	{
 		ARC_PROFILE_SCOPE();
 		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
@@ -1399,17 +1391,17 @@ namespace ArcEngine
 		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
 		{
 			const TransformComponent& transform = entity.GetTransform();
-			b2Body* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
+			auto* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
 
 			b2PolygonShape boxShape;
-			boxShape.SetAsBox(bc2d.Size.x * transform.Scale.x, bc2d.Size.y * transform.Scale.y, { bc2d.Offset.x, bc2d.Offset.y }, 0.0f);
+			boxShape.SetAsBox(component.Size.x * transform.Scale.x, component.Size.y * transform.Scale.y, { component.Offset.x, component.Offset.y }, 0.0f);
 
 			b2FixtureDef fixtureDef;
 			fixtureDef.shape = &boxShape;
-			fixtureDef.isSensor = bc2d.IsSensor;
-			fixtureDef.density = bc2d.Density;
-			fixtureDef.friction = bc2d.Friction;
-			fixtureDef.restitution = bc2d.Restitution;
+			fixtureDef.isSensor = component.IsSensor;
+			fixtureDef.density = component.Density;
+			fixtureDef.friction = component.Friction;
+			fixtureDef.restitution = component.Restitution;
 			fixtureDef.userData.pointer = (uint32_t)entity;
 
 			auto layer = entity.GetComponent<TagComponent>().Layer;
@@ -1420,11 +1412,11 @@ namespace ArcEngine
 			fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
 
 			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
-			bc2d.RuntimeFixture = fixture;
+			component.RuntimeFixture = fixture;
 		}
 	}
 
-	void Scene::CreateCircleCollider2D(Entity entity, CircleCollider2DComponent& cc2d)
+	void Scene::CreateCircleCollider2D(Entity entity, CircleCollider2DComponent& component) const
 	{
 		ARC_PROFILE_SCOPE();
 		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
@@ -1433,18 +1425,18 @@ namespace ArcEngine
 		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
 		{
 			const TransformComponent& transform = entity.GetTransform();
-			b2Body* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
+			auto* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
 
 			b2CircleShape circleShape;
-			circleShape.m_radius = cc2d.Radius * glm::max(transform.Scale.x, transform.Scale.y);
-			circleShape.m_p = { cc2d.Offset.x, cc2d.Offset.y };
+			circleShape.m_radius = component.Radius * glm::max(transform.Scale.x, transform.Scale.y);
+			circleShape.m_p = { component.Offset.x, component.Offset.y };
 
 			b2FixtureDef fixtureDef;
 			fixtureDef.shape = &circleShape;
-			fixtureDef.isSensor = cc2d.IsSensor;
-			fixtureDef.density = cc2d.Density;
-			fixtureDef.friction = cc2d.Friction;
-			fixtureDef.restitution = cc2d.Restitution;
+			fixtureDef.isSensor = component.IsSensor;
+			fixtureDef.density = component.Density;
+			fixtureDef.friction = component.Friction;
+			fixtureDef.restitution = component.Restitution;
 			fixtureDef.userData.pointer = (uint32_t)entity;
 
 			auto layer = entity.GetComponent<TagComponent>().Layer;
@@ -1455,11 +1447,11 @@ namespace ArcEngine
 			fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
 
 			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
-			cc2d.RuntimeFixture = fixture;
+			component.RuntimeFixture = fixture;
 		}
 	}
 
-	void Scene::CreatePolygonCollider2D(Entity entity, PolygonCollider2DComponent& pc2d)
+	void Scene::CreatePolygonCollider2D(Entity entity, PolygonCollider2DComponent& component) const
 	{
 		ARC_PROFILE_SCOPE();
 		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
@@ -1467,23 +1459,23 @@ namespace ArcEngine
 
 		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
 		{
-			if (pc2d.Points.size() < 3)
+			if (component.Points.size() < 3)
 			{
-				ARC_CORE_ERROR("Cannot create PolygonCollider2D with {} points", pc2d.Points.size());
+				ARC_CORE_ERROR("Cannot create PolygonCollider2D with {} points", component.Points.size());
 				return;
 			}
 
-			b2Body* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
+			auto* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
 
 			b2PolygonShape shape;
-			shape.Set((const b2Vec2*)pc2d.Points.data(), (int32_t)pc2d.Points.size());
+			shape.Set((const b2Vec2*)component.Points.data(), (int32_t)component.Points.size());
 
 			b2FixtureDef fixtureDef;
 			fixtureDef.shape = &shape;
-			fixtureDef.isSensor = pc2d.IsSensor;
-			fixtureDef.density = pc2d.Density;
-			fixtureDef.friction = pc2d.Friction;
-			fixtureDef.restitution = pc2d.Restitution;
+			fixtureDef.isSensor = component.IsSensor;
+			fixtureDef.density = component.Density;
+			fixtureDef.friction = component.Friction;
+			fixtureDef.restitution = component.Restitution;
 			fixtureDef.userData.pointer = (uint32_t)entity;
 
 			auto layer = entity.GetComponent<TagComponent>().Layer;
@@ -1494,7 +1486,7 @@ namespace ArcEngine
 			fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
 
 			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
-			pc2d.RuntimeFixture = fixture;
+			component.RuntimeFixture = fixture;
 		}
 	}
 

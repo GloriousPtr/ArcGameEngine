@@ -4,6 +4,9 @@
 
 namespace ArcEngine
 {
+	class IndexBuffer;
+	class VertexBuffer;
+
 	class VertexArray
 	{
 	public:

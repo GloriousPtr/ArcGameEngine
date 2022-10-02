@@ -32,4 +32,3 @@ namespace ArcEngine
 		GLenum m_InternalFormat, m_DataFormat;
 	};
 }
-

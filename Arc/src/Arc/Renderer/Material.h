@@ -1,11 +1,14 @@
 #pragma once
 
+#include <EASTL/hash_map.h>
+
 #include "Arc/Core/Base.h"
-#include "Shader.h"
-#include "Texture.h"
 
 namespace ArcEngine
 {
+	class Texture2D;
+	class Shader;
+
 	class Material
 	{
 		using MaterialData = void*;
@@ -20,9 +23,9 @@ namespace ArcEngine
 		void Invalidate();
 		void Bind();
 		void Unbind() const;
-		Ref<Shader> GetShader() const { return m_Shader; }
-		Ref<Texture2D> GetTexture(uint32_t slot) const { return m_Textures.at(slot); }
-		void SetTexture(uint32_t slot, Ref<Texture2D> texture) { m_Textures[slot] = texture; }
+		Ref<Shader> GetShader() const;
+		Ref<Texture2D> GetTexture(uint32_t slot);
+		void SetTexture(uint32_t slot, Ref<Texture2D> texture);
 
 		template<typename T>
 		T GetData(const char* name)

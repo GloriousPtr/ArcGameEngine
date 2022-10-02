@@ -4,6 +4,8 @@
 
 namespace ArcEngine
 {
+	class VertexArray;
+
 	class OpenGLRendererAPI : public RendererAPI
 	{
 	public:
