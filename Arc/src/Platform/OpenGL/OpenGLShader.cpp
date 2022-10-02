@@ -262,7 +262,6 @@ namespace ArcEngine
 			case GL_FLOAT_VEC2:		return MaterialPropertyType::Float2;
 			case GL_FLOAT_VEC3:		return MaterialPropertyType::Float3;
 			case GL_FLOAT_VEC4:		return MaterialPropertyType::Float4;
-			default:				return MaterialPropertyType::None;
 		}
 
 		return MaterialPropertyType::None;

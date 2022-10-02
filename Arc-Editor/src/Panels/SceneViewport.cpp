@@ -57,7 +57,8 @@ namespace ArcEngine
 			if (ImGui::IsMouseDown(ImGuiMouseButton_Right) && m_ViewportHovered)
 			{
 				ImGui::SetMouseCursor(ImGuiMouseCursor_None);
-				glm::vec2 newMousePosition = *(glm::vec2*)&ImGui::GetMousePos();
+				ImVec2 tempMousePos = ImGui::GetMousePos();
+				glm::vec2 newMousePosition = { tempMousePos.x, tempMousePos.y };
 
 				if (!m_UsingEditorCamera)
 				{
@@ -160,7 +161,7 @@ namespace ArcEngine
 					const auto& transform = entity.GetComponent<TransformComponent>();
 					glm::vec3 pos = transform.Translation;
 					pos.z -= 5.0f;
-					auto& view = glm::lookAt(pos, transform.Translation, m_EditorCamera.GetUp());
+					auto view = glm::lookAt(pos, transform.Translation, m_EditorCamera.GetUp());
 					m_EditorCamera.SetPosition(view[3]);
 					m_EditorCamera.SetYaw(90);
 					m_EditorCamera.SetPitch(0);

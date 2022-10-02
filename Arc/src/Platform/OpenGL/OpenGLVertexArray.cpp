@@ -20,7 +20,6 @@ namespace ArcEngine
 			case ShaderDataType::Int3:		return GL_INT;
 			case ShaderDataType::Int4:		return GL_INT;
 			case ShaderDataType::Bool:		return GL_BOOL;
-			default:						ARC_CORE_ASSERT(false, "Unknown ShaderDataType!"); return 0;
 		}
 
 		// To keep the compiler happy

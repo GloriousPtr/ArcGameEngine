@@ -13,7 +13,6 @@ namespace ArcEngine
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLVertexBuffer>(size);
-			default:						ARC_CORE_ASSERT(false, "Unknown RendererAPI!"); return nullptr;
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -26,7 +25,6 @@ namespace ArcEngine
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLVertexBuffer>(verticies, size);
-			default:						ARC_CORE_ASSERT(false, "Unknown RendererAPI!"); return nullptr;
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -39,7 +37,6 @@ namespace ArcEngine
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLIndexBuffer>(indices, (uint32_t)count);
-			default:						ARC_CORE_ASSERT(false, "Unknown RendererAPI!"); return nullptr;
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -52,7 +49,6 @@ namespace ArcEngine
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLUniformBuffer>();
-			default:						ARC_CORE_ASSERT(false, "Unknown RendererAPI!"); return nullptr;
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");

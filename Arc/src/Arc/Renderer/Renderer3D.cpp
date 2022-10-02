@@ -328,8 +328,7 @@ namespace ArcEngine
 				const LightComponent& lightComponent = e.GetComponent<LightComponent>();
 				if (lightComponent.Type == LightComponent::LightType::Directional)
 					continue;
-				TransformComponent transformComponent = e.GetComponent<TransformComponent>();
-				glm::mat4& worldTransform = e.GetWorldTransform();
+				glm::mat4 worldTransform = e.GetWorldTransform();
 			
 				glm::vec4 attenFactors = glm::vec4(
 					lightComponent.Range,
@@ -376,8 +375,7 @@ namespace ArcEngine
 				if (lightComponent.Type != LightComponent::LightType::Directional)
 					continue;
 
-				TransformComponent transformComponent = e.GetComponent<TransformComponent>();
-				glm::mat4& worldTransform = e.GetWorldTransform();
+				glm::mat4 worldTransform = e.GetWorldTransform();
 			
 				// Based off of +Z direction
 				glm::vec4 zDir = worldTransform * glm::vec4(0, 0, 1, 0);

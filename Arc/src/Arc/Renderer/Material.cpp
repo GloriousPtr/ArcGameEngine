@@ -40,14 +40,14 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		delete[m_BufferSizeInBytes] m_Buffer;
+		delete[] m_Buffer;
 	}
 
 	void Material::Invalidate()
 	{
 		ARC_PROFILE_SCOPE();
 
-		delete[m_BufferSizeInBytes] m_Buffer;
+		delete[] m_Buffer;
 
 		m_BufferSizeInBytes = 0;
 		const auto& materialProperties = m_Shader->GetMaterialProperties();

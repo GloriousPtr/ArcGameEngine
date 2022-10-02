@@ -23,13 +23,13 @@ namespace ArcEngine
 		s_MessageBufferRenderFilter |= Log::Level::Error;
 		s_MessageBufferRenderFilter |= Log::Level::Critical;
 
-		ExternalConsoleSink<std::mutex>::SetConsoleSink_HandleFlush([this](const eastl::string& message, Log::Level level){ AddMessage(message, level); });
+		ExternalConsoleSink::SetConsoleSink_HandleFlush([this](const eastl::string& message, Log::Level level){ AddMessage(message, level); });
 		m_MessageBuffer = eastl::vector<Ref<ConsolePanel::Message>>(m_Capacity);
 	}
 
 	ConsolePanel::~ConsolePanel()
 	{
-		ExternalConsoleSink<std::mutex>::SetConsoleSink_HandleFlush(nullptr);
+		ExternalConsoleSink::SetConsoleSink_HandleFlush(nullptr);
 	}
 
 	void ConsolePanel::AddMessage(const eastl::string& message, Log::Level level)
@@ -277,10 +277,8 @@ namespace ArcEngine
 			case Log::Level::Warn:			return "Warning";
 			case Log::Level::Error:			return "Error";
 			case Log::Level::Critical:		return "Critical";
-			default:						return "Unknown name";
 		}
 
-		// To keep the compiler happy
 		return "Unknown name";
 	}
 
@@ -294,10 +292,8 @@ namespace ArcEngine
 			case Log::Level::Warn:			return { 0.80f, 0.80f, 0.20f, 1.00f }; // Yellow
 			case Log::Level::Error:			return { 0.90f, 0.25f, 0.25f, 1.00f }; // Red
 			case Log::Level::Critical:		return { 0.60f, 0.20f, 0.80f, 1.00f }; // Purple
-			default:						return { 1.00f, 1.00f, 1.00f, 1.00f };
 		}
 
-		// To keep the compiler happy
 		return { 1.00f, 1.00f, 1.00f, 1.00f };
 	}
 
@@ -311,10 +307,8 @@ namespace ArcEngine
 			case Log::Level::Warn:				return ICON_MDI_ALERT;
 			case Log::Level::Error:				return ICON_MDI_CLOSE_OCTAGON;
 			case Log::Level::Critical:			return ICON_MDI_ALERT_OCTAGRAM;
-			default:							return "Unknown name";
         }
 
-		// To keep the compiler happy
 		return "Unknown name";
     }
 }

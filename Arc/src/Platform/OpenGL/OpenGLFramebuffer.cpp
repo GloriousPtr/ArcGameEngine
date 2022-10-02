@@ -79,7 +79,6 @@ namespace ArcEngine
 			switch (format)
 			{
 				case ArcEngine::FramebufferTextureFormat::DEPTH24STENCIL8:  return true;
-				default:													return false;
 			}
 
 			return false;

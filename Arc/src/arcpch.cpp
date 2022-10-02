@@ -13,12 +13,6 @@ void operator delete(void* ptr, size_t size) noexcept
 	free(ptr);
 }
 
-void operator delete[](void* ptr, size_t size)
-{
-	g_ArcAllocationSize -= size;
-	free(ptr);
-}
-
 void* operator new[](
 	[[maybe_unused]] size_t size,
 	[[maybe_unused]] const char* pName,
