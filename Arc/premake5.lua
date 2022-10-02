@@ -25,7 +25,20 @@ project "Arc"
 		"%{IncludeDir.EASTL}/EASTL.natvis",
 		"%{IncludeDir.glm}/util/glm.natvis",
 		"%{IncludeDir.yaml_cpp}/../src/contrib/yaml-cpp.natvis",
-		"%{IncludeDir.JoltPhysics}/Jolt/Jolt.natvis"
+		"%{IncludeDir.JoltPhysics}/Jolt/Jolt.natvis",
+
+		"%{IncludeDir.entt}/../natvis/config.natvis",
+		"%{IncludeDir.entt}/../natvis/container.natvis",
+		"%{IncludeDir.entt}/../natvis/core.natvis",
+		"%{IncludeDir.entt}/../natvis/entity.natvis",
+		"%{IncludeDir.entt}/../natvis/graph.natvis",
+		"%{IncludeDir.entt}/../natvis/locator.natvis",
+		"%{IncludeDir.entt}/../natvis/meta.natvis",
+		"%{IncludeDir.entt}/../natvis/platform.natvis",
+		"%{IncludeDir.entt}/../natvis/poly.natvis",
+		"%{IncludeDir.entt}/../natvis/process.natvis",
+		"%{IncludeDir.entt}/../natvis/resource.natvis",
+		"%{IncludeDir.entt}/../natvis/signal.natvis",
 	}
 
 	defines
