@@ -22,14 +22,15 @@ namespace ArcEngine
 		out << YAML::BeginMap;
 		out << YAML::Key << "Scene" << YAML::Value << "Untitled";
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
-		m_Scene->m_Registry.each([this, &out](auto entityID)
+		auto view = m_Scene->m_Registry.view<IDComponent>();
+		for (auto it = view.rbegin(); it != view.rend(); ++it)
 		{
-			Entity entity = { entityID, m_Scene.get() };
+			Entity entity = { *it, m_Scene.get() };
 			if (!entity)
 				return;
 
 			EntitySerializer::SerializeEntity(out, entity);
-		});
+		}
 		out << YAML::EndSeq;
 		out << YAML::EndMap;
 
