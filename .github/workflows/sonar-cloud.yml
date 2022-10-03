@@ -50,7 +50,7 @@ jobs:
       - name: Set up msbuild
         uses: microsoft/setup-msbuild@v1.1
       - name: Generate Project Files
-        run: "./scripts/Win-GenProjects.bat"
+        run: "./scripts/Win-GenProjects.bat msvc"
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
