@@ -269,8 +269,9 @@ namespace ArcEngine
 
 			const auto& spriteRendererComponent = entity.GetComponent<SpriteRendererComponent>();
 			out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.Color;
-			out << YAML::Key << "TexturePath" << YAML::Value << (spriteRendererComponent.Texture ? spriteRendererComponent.Texture->GetPath().c_str() : "");
+			out << YAML::Key << "SortingOrder" << YAML::Value << spriteRendererComponent.SortingOrder;
 			out << YAML::Key << "TilingFactor" << YAML::Value << spriteRendererComponent.TilingFactor;
+			out << YAML::Key << "TexturePath" << YAML::Value << (spriteRendererComponent.Texture ? spriteRendererComponent.Texture->GetPath().c_str() : "");
 
 			out << YAML::EndMap; // SpriteRendererComponent
 		}
@@ -823,6 +824,7 @@ namespace ArcEngine
 		{
 			auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
 			TrySet(src.Color, spriteRenderer["Color"]);
+			TrySet(src.SortingOrder, spriteRenderer["SortingOrder"]);
 			TrySet(src.TilingFactor, spriteRenderer["TilingFactor"]);
 
 			eastl::string texturePath = "";

@@ -75,6 +75,7 @@ namespace ArcEngine
 		void MarkViewportDirty() { m_ViewportDirty = true; }
 		bool IsViewportDirty() const { return m_ViewportDirty; }
 		Entity GetPrimaryCameraEntity();
+		void SortForSprites();
 
 		template<typename... Components>
 		auto GetAllEntitiesWith()

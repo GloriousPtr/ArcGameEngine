@@ -16,8 +16,9 @@ Entities:
         {}
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      TexturePath: Assets\textures\circle.png
+      SortingOrder: 0
       TilingFactor: 1
+      TexturePath: Assets\textures\circle.png
     Rigidbody2DComponent:
       Type: 2
       AutoMass: false
@@ -78,8 +79,9 @@ Entities:
         {}
     SpriteRendererComponent:
       Color: [0.199999988, 0.76510638, 1, 0.53191489]
-      TexturePath: ""
+      SortingOrder: 1
       TilingFactor: 1
+      TexturePath: ""
     Rigidbody2DComponent:
       Type: 1
       AutoMass: true
@@ -121,8 +123,9 @@ Entities:
         {}
     SpriteRendererComponent:
       Color: [0.829181492, 0.646030903, 0.348197222, 1]
-      TexturePath: ""
+      SortingOrder: 0
       TilingFactor: 1
+      TexturePath: ""
     Rigidbody2DComponent:
       Type: 2
       AutoMass: true
@@ -158,8 +161,9 @@ Entities:
         {}
     SpriteRendererComponent:
       Color: [0.297582626, 0.842553198, 0.376429349, 1]
-      TexturePath: ""
+      SortingOrder: 0
       TilingFactor: 1
+      TexturePath: ""
     Rigidbody2DComponent:
       Type: 0
       AutoMass: true
@@ -195,8 +199,9 @@ Entities:
         {}
     SpriteRendererComponent:
       Color: [0.758974373, 0.613406956, 0.202393159, 1]
-      TexturePath: Assets\textures\circle.png
+      SortingOrder: 0
       TilingFactor: 1
+      TexturePath: Assets\textures\circle.png
     Rigidbody2DComponent:
       Type: 2
       AutoMass: true
@@ -232,8 +237,9 @@ Entities:
         {}
     SpriteRendererComponent:
       Color: [0.800000012, 0.228085086, 0.228085086, 1]
-      TexturePath: ""
+      SortingOrder: 0
       TilingFactor: 1
+      TexturePath: ""
     Rigidbody2DComponent:
       Type: 2
       AutoMass: true
@@ -257,3 +263,22 @@ Entities:
       ScriptCount: 0
       Scripts:
         {}
+  - Entity: 10678094010813816488
+    TagComponent:
+      Tag: BG
+      Layer: 2
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [-37.4000015, -25.6000004, 1]
+    RelationshipComponent:
+      Parent: 0
+      ChildrenCount: 0
+      Children:
+        {}
+    SpriteRendererComponent:
+      Color: [0.297097564, 0.273872435, 0.651282072, 1]
+      SortingOrder: -1
+      TilingFactor: 1
+      TexturePath: ""

@@ -75,6 +75,7 @@ namespace ArcEngine
 	{
 		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
 		Ref<Texture2D> Texture = nullptr;
+		int32_t SortingOrder = 0;
 		float TilingFactor = 1.0f;
 
 		SpriteRendererComponent() = default;

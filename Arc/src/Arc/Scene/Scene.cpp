@@ -494,6 +494,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
+		SortForSprites();
+
 		m_IsRunning = true;
 
 		m_PhysicsFrameAccumulator = 0.0f;
@@ -1163,6 +1165,14 @@ namespace ArcEngine
 				return Entity(entity, this);
 		}
 		return {};
+	}
+
+	void Scene::SortForSprites()
+	{
+		m_Registry.sort<SpriteRendererComponent>([](const auto& lhs, const auto& rhs)
+		{
+			return lhs.SortingOrder < rhs.SortingOrder;
+		});
 	}
 
 	void Scene::OnRender(const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData)

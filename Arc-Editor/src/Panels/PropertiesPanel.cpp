@@ -489,12 +489,14 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 		
-		DrawComponent<SpriteRendererComponent>(ICON_MDI_IMAGE_SIZE_SELECT_ACTUAL " Sprite Renderer", entity, [](SpriteRendererComponent& component)
+		DrawComponent<SpriteRendererComponent>(ICON_MDI_IMAGE_SIZE_SELECT_ACTUAL " Sprite Renderer", entity, [&entity](SpriteRendererComponent& component)
 		{
 			UI::BeginProperties();
 			UI::PropertyColor("Color", component.Color);
-			UI::Property("Tiling Factor", component.TilingFactor);
 			UI::Property("Texture", component.Texture);
+			if (UI::Property("Sorting Order", component.SortingOrder))
+				entity.GetScene()->SortForSprites();
+			UI::Property("Tiling Factor", component.TilingFactor);
 			UI::EndProperties();
 		});
 
