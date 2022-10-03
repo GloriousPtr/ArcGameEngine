@@ -18,6 +18,8 @@ namespace ArcEngine
 	struct CameraData;
 	struct RenderGraphData;
 
+	struct TransformComponent;
+
 	class Physics3DContactListener;
 	class Physics3DBodyActivationListener;
 	struct RigidbodyComponent;
@@ -81,11 +83,11 @@ namespace ArcEngine
 		}
 
 	private:
-		void CreateRigidbody(Entity entity, RigidbodyComponent& component) const;
-		void CreateRigidbody2D(Entity entity, Rigidbody2DComponent& component) const;
-		void CreateBoxCollider2D(Entity entity, BoxCollider2DComponent& component) const;
-		void CreateCircleCollider2D(Entity entity, CircleCollider2DComponent& component) const;
-		void CreatePolygonCollider2D(Entity entity, PolygonCollider2DComponent& component) const;
+		void CreateRigidbody(Entity entity, const TransformComponent& transform, RigidbodyComponent& component) const;
+		void CreateRigidbody2D(Entity entity, const TransformComponent& transform, Rigidbody2DComponent& component) const;
+		void CreateBoxCollider2D(Entity entity, const TransformComponent& transform, const Rigidbody2DComponent& rb, BoxCollider2DComponent& component) const;
+		void CreateCircleCollider2D(Entity entity, const TransformComponent& transform, const Rigidbody2DComponent& rb, CircleCollider2DComponent& component) const;
+		void CreatePolygonCollider2D(Entity entity, const TransformComponent& transform, const Rigidbody2DComponent& rb, PolygonCollider2DComponent& component) const;
 
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);

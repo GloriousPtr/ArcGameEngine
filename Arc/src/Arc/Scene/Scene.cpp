@@ -391,7 +391,7 @@ namespace ArcEngine
 		newScene->m_ViewportWidth = other->m_ViewportWidth;
 		newScene->m_ViewportHeight = other->m_ViewportHeight;
 
-		auto view = other->m_Registry.view<IDComponent, TagComponent>();
+		auto view = other->m_Registry.group<>(entt::get<IDComponent, TagComponent>);
 		for (auto e : view)
 		{
 			auto [id, tag] = view.get<IDComponent, TagComponent>(e);
@@ -511,13 +511,13 @@ namespace ArcEngine
 				physicsSystem.SetBodyActivationListener(m_BodyActivationListener3D);
 				physicsSystem.SetContactListener(m_ContactListener3D);
 
-				auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
-				for (auto e : view)
+				auto group = m_Registry.group<>(entt::get<TransformComponent, RigidbodyComponent>);
+				for (auto e : group)
 				{
-					auto [tc, rb] = view.get<TransformComponent, RigidbodyComponent>(e);
+					auto [tc, rb] = group.get<TransformComponent, RigidbodyComponent>(e);
 					rb.PreviousTranslation = rb.Translation = tc.Translation;
 					rb.PreviousRotation = rb.Rotation = tc.Rotation;
-					CreateRigidbody({ e, this }, rb);
+					CreateRigidbody({ e, this }, tc, rb);
 				}
 
 				physicsSystem.OptimizeBroadPhase();
@@ -531,20 +531,20 @@ namespace ArcEngine
 				m_PhysicsWorld2D->SetContactListener(m_ContactListener2D);
 
 				{
-					auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
-					for (auto e : view)
+					auto group = m_Registry.group<>(entt::get<TransformComponent, Rigidbody2DComponent>);
+					for (auto e : group)
 					{
-						auto [tc, rb] = view.get<TransformComponent, Rigidbody2DComponent>(e);
-						CreateRigidbody2D({ e, this }, rb);
+						auto [tc, rb] = group.get<TransformComponent, Rigidbody2DComponent>(e);
+						CreateRigidbody2D({ e, this }, tc, rb);
 						rb.PreviousTranslationRotation = rb.TranslationRotation = { tc.Translation.x, tc.Translation.y, tc.Rotation.z };
 					}
 				}
 
 				{
-					auto distanceJointView = m_Registry.view<Rigidbody2DComponent, DistanceJoint2DComponent>();
-					for (auto e : distanceJointView)
+					auto distanceJointGroup = m_Registry.group<>(entt::get<Rigidbody2DComponent, DistanceJoint2DComponent>);
+					for (auto e : distanceJointGroup)
 					{
-						auto [body, joint] = distanceJointView.get<Rigidbody2DComponent, DistanceJoint2DComponent>(e);
+						auto [body, joint] = distanceJointGroup.get<Rigidbody2DComponent, DistanceJoint2DComponent>(e);
 						Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
 						if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
 						{
@@ -566,7 +566,7 @@ namespace ArcEngine
 						}
 					}
 
-					auto springJointView = m_Registry.view<Rigidbody2DComponent, SpringJoint2DComponent>();
+					auto springJointView = m_Registry.group<>(entt::get<Rigidbody2DComponent, SpringJoint2DComponent>);
 					for (auto e : springJointView)
 					{
 						auto [body, joint] = springJointView.get<Rigidbody2DComponent, SpringJoint2DComponent>(e);
@@ -592,7 +592,7 @@ namespace ArcEngine
 						}
 					}
 
-					auto hingeJointView = m_Registry.view<Rigidbody2DComponent, HingeJoint2DComponent>();
+					auto hingeJointView = m_Registry.group<>(entt::get<Rigidbody2DComponent, HingeJoint2DComponent>);
 					for (auto e : hingeJointView)
 					{
 						auto [body, joint] = hingeJointView.get<Rigidbody2DComponent, HingeJoint2DComponent>(e);
@@ -616,7 +616,7 @@ namespace ArcEngine
 						}
 					}
 
-					auto sliderJointView = m_Registry.view<Rigidbody2DComponent, SliderJoint2DComponent>();
+					auto sliderJointView = m_Registry.group<>(entt::get<Rigidbody2DComponent, SliderJoint2DComponent>);
 					for (auto e : sliderJointView)
 					{
 						auto [body, joint] = sliderJointView.get<Rigidbody2DComponent, SliderJoint2DComponent>(e);
@@ -643,7 +643,7 @@ namespace ArcEngine
 						}
 					}
 
-					auto wheelJointView = m_Registry.view<Rigidbody2DComponent, WheelJoint2DComponent>();
+					auto wheelJointView = m_Registry.group<>(entt::get<Rigidbody2DComponent, WheelJoint2DComponent>);
 					for (auto e : wheelJointView)
 					{
 						auto [body, joint] = wheelJointView.get<Rigidbody2DComponent, WheelJoint2DComponent>(e);
@@ -683,7 +683,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio);
 
-			auto listenerView = m_Registry.view<TransformComponent, AudioListenerComponent>();
+			auto listenerView = m_Registry.group<>(entt::get<TransformComponent, AudioListenerComponent>);
 			for (auto e : listenerView)
 			{
 				auto [tc, ac] = listenerView.get<TransformComponent, AudioListenerComponent>(e);
@@ -699,7 +699,7 @@ namespace ArcEngine
 				}
 			}
 
-			auto sourceView = m_Registry.view<TransformComponent, AudioSourceComponent>();
+			auto sourceView = m_Registry.group<>(entt::get<TransformComponent, AudioSourceComponent>);
 			for (auto e : sourceView)
 			{
 				auto [tc, ac] = sourceView.get<TransformComponent, AudioSourceComponent>(e);
@@ -900,7 +900,7 @@ namespace ArcEngine
 			#pragma region Physics3D
 			{
 				const auto& bodyInterface = Physics3D::GetPhysicsSystem().GetBodyInterface();
-				auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
+				auto view = m_Registry.group<>(entt::get<TransformComponent, RigidbodyComponent>);
 				for (auto e : view)
 				{
 					auto [tc, rb] = view.get<TransformComponent, RigidbodyComponent>(e);
@@ -946,7 +946,7 @@ namespace ArcEngine
 
 			#pragma region Physics2D
 			{
-				auto view = m_Registry.view<TransformComponent, Rigidbody2DComponent>();
+				auto view = m_Registry.group<>(entt::get<TransformComponent, Rigidbody2DComponent>);
 				for (auto e : view)
 				{
 					auto [tc, rb] = view.get<TransformComponent, Rigidbody2DComponent>(e);
@@ -1073,7 +1073,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio);
 
-			auto listenerView = m_Registry.view<TransformComponent, AudioListenerComponent>();
+			auto listenerView = m_Registry.group<>(entt::get<TransformComponent, AudioListenerComponent>);
 			for (auto e : listenerView)
 			{
 				auto [tc, ac] = listenerView.get<TransformComponent, AudioListenerComponent>(e);
@@ -1087,7 +1087,7 @@ namespace ArcEngine
 				}
 			}
 
-			auto sourceView = m_Registry.view<TransformComponent, AudioSourceComponent>();
+			auto sourceView = m_Registry.group<>(entt::get<TransformComponent, AudioSourceComponent>);
 			for (auto e : sourceView)
 			{
 				auto [tc, ac] = sourceView.get<TransformComponent, AudioSourceComponent>(e);
@@ -1220,7 +1220,7 @@ namespace ArcEngine
 		Renderer2D::EndScene(renderGraphData);
 	}
 
-	void Scene::CreateRigidbody(Entity entity, RigidbodyComponent& component) const
+	void Scene::CreateRigidbody(Entity entity, const TransformComponent& transform, RigidbodyComponent& component) const
 	{
 		ARC_PROFILE_SCOPE();
 		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
@@ -1236,10 +1236,8 @@ namespace ArcEngine
 			component.RuntimeBody = nullptr;
 		}
 
-		const TransformComponent& tc = entity.GetComponent<TransformComponent>();
-
 		JPH::MutableCompoundShapeSettings compoundShapeSettings;
-		float maxScaleComponent = glm::max(glm::max(tc.Scale.x, tc.Scale.y), tc.Scale.z);
+		float maxScaleComponent = glm::max(glm::max(transform.Scale.x, transform.Scale.y), transform.Scale.z);
 
 		const char* entityName = entity.GetComponent<TagComponent>().Tag.c_str();
 
@@ -1248,7 +1246,7 @@ namespace ArcEngine
 			const auto& bc = entity.GetComponent<BoxColliderComponent>();
 			const auto* mat = new PhysicsMaterial3D(entityName, JPH::ColorArg(255, 0, 0), bc.Friction, bc.Restitution);
 			
-			glm::vec3 scale = bc.Size * tc.Scale * 2.0f;
+			glm::vec3 scale = bc.Size * transform.Scale * 2.0f;
 			JPH::BoxShapeSettings shapeSettings({ glm::abs(scale.x), glm::abs(scale.y), glm::abs(scale.z) }, 0.05f, mat);
 			shapeSettings.SetDensity(glm::max(0.001f, bc.Density));
 
@@ -1305,7 +1303,7 @@ namespace ArcEngine
 		}
 
 		// Body
-		auto rotation = glm::quat(tc.Rotation);
+		auto rotation = glm::quat(transform.Rotation);
 		
 		auto layer = entity.GetComponent<TagComponent>().Layer;
 		uint8_t layerIndex = 1;	// Default Layer
@@ -1313,7 +1311,7 @@ namespace ArcEngine
 		if (collisionMaskIt != LayerCollisionMask.end())
 			layerIndex = collisionMaskIt->second.Index;
 
-		JPH::BodyCreationSettings bodySettings(compoundShapeSettings.Create().Get(), {tc.Translation.x, tc.Translation.y, tc.Translation.z}, {rotation.x, rotation.y, rotation.z, rotation.w}, (JPH::EMotionType)component.Type, layerIndex);
+		JPH::BodyCreationSettings bodySettings(compoundShapeSettings.Create().Get(), {transform.Translation.x, transform.Translation.y, transform.Translation.z}, {rotation.x, rotation.y, rotation.z, rotation.w}, (JPH::EMotionType)component.Type, layerIndex);
 
 		if (!component.AutoMass)
 		{
@@ -1338,156 +1336,149 @@ namespace ArcEngine
 		component.RuntimeBody = body;
 	}
 
-	void Scene::CreateRigidbody2D(Entity entity, Rigidbody2DComponent& component) const
+	void Scene::CreateRigidbody2D(Entity entity, const TransformComponent& transform, Rigidbody2DComponent& component) const
 	{
 		ARC_PROFILE_SCOPE();
 		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
 		ARC_PROFILE_TAG("EntityID", entity.GetUUID());
 
-		if (m_PhysicsWorld2D)
+		if (!m_PhysicsWorld2D)
+			return;
+
+		b2BodyDef def;
+		def.type = (b2BodyType)component.Type;
+		def.linearDamping = glm::max(component.LinearDrag, 0.0f);
+		def.angularDamping = glm::max(component.AngularDrag, 0.0f);
+		def.allowSleep = component.AllowSleep;
+		def.awake = component.Awake;
+		def.fixedRotation = component.FreezeRotation;
+		def.bullet = component.Continuous;
+		def.gravityScale = component.GravityScale;
+
+		def.position.Set(transform.Translation.x, transform.Translation.y);
+		def.angle = transform.Rotation.z;
+
+		b2Body* rb = m_PhysicsWorld2D->CreateBody(&def);
+		component.RuntimeBody = rb;
+
+		if (entity.HasComponent<BoxCollider2DComponent>())
+			CreateBoxCollider2D(entity, transform, component, entity.GetComponent<BoxCollider2DComponent>());
+
+		if (entity.HasComponent<CircleCollider2DComponent>())
+			CreateCircleCollider2D(entity, transform, component, entity.GetComponent<CircleCollider2DComponent>());
+
+		if (entity.HasComponent<PolygonCollider2DComponent>())
+			CreatePolygonCollider2D(entity, transform, component, entity.GetComponent<PolygonCollider2DComponent>());
+
+		if (!component.AutoMass && component.Mass > 0.01f)
 		{
-			const TransformComponent& transform = entity.GetTransform();
-
-			b2BodyDef def;
-			def.type = (b2BodyType)component.Type;
-			def.linearDamping = glm::max(component.LinearDrag, 0.0f);
-			def.angularDamping = glm::max(component.AngularDrag, 0.0f);
-			def.allowSleep = component.AllowSleep;
-			def.awake = component.Awake;
-			def.fixedRotation = component.FreezeRotation;
-			def.bullet = component.Continuous;
-			def.gravityScale = component.GravityScale;
-
-			def.position.Set(transform.Translation.x, transform.Translation.y);
-			def.angle = transform.Rotation.z;
-
-			b2Body* rb = m_PhysicsWorld2D->CreateBody(&def);
-			component.RuntimeBody = rb;
-
-			if (entity.HasComponent<BoxCollider2DComponent>())
-				CreateBoxCollider2D(entity, entity.GetComponent<BoxCollider2DComponent>());
-
-			if (entity.HasComponent<CircleCollider2DComponent>())
-				CreateCircleCollider2D(entity, entity.GetComponent<CircleCollider2DComponent>());
-
-			if (entity.HasComponent<PolygonCollider2DComponent>())
-				CreatePolygonCollider2D(entity, entity.GetComponent<PolygonCollider2DComponent>());
-
-			if (!component.AutoMass && component.Mass > 0.01f)
-			{
-				b2MassData massData = rb->GetMassData();
-				massData.mass = component.Mass;
-				rb->SetMassData(&massData);
-			}
+			b2MassData massData = rb->GetMassData();
+			massData.mass = component.Mass;
+			rb->SetMassData(&massData);
 		}
 	}
 
-	void Scene::CreateBoxCollider2D(Entity entity, BoxCollider2DComponent& component) const
+	void Scene::CreateBoxCollider2D(Entity entity, const TransformComponent& transform, const Rigidbody2DComponent& rb, BoxCollider2DComponent& component) const
 	{
 		ARC_PROFILE_SCOPE();
 		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
 		ARC_PROFILE_TAG("EntityID", entity.GetUUID());
 
-		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
-		{
-			const TransformComponent& transform = entity.GetTransform();
-			auto* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
+		if (!m_PhysicsWorld2D)
+			return;
 
-			b2PolygonShape boxShape;
-			boxShape.SetAsBox(component.Size.x * transform.Scale.x, component.Size.y * transform.Scale.y, { component.Offset.x, component.Offset.y }, 0.0f);
+		b2PolygonShape boxShape;
+		boxShape.SetAsBox(component.Size.x * transform.Scale.x, component.Size.y * transform.Scale.y, { component.Offset.x, component.Offset.y }, 0.0f);
 
-			b2FixtureDef fixtureDef;
-			fixtureDef.shape = &boxShape;
-			fixtureDef.isSensor = component.IsSensor;
-			fixtureDef.density = component.Density;
-			fixtureDef.friction = component.Friction;
-			fixtureDef.restitution = component.Restitution;
-			fixtureDef.userData.pointer = (uint32_t)entity;
+		b2FixtureDef fixtureDef;
+		fixtureDef.shape = &boxShape;
+		fixtureDef.isSensor = component.IsSensor;
+		fixtureDef.density = component.Density;
+		fixtureDef.friction = component.Friction;
+		fixtureDef.restitution = component.Restitution;
+		fixtureDef.userData.pointer = (uint32_t)entity;
 
-			auto layer = entity.GetComponent<TagComponent>().Layer;
-			auto collisionMaskIt = LayerCollisionMask.find(layer);
-			if (collisionMaskIt == LayerCollisionMask.end())
-				layer = Scene::DefaultLayer;
-			fixtureDef.filter.categoryBits = layer;
-			fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
+		auto layer = entity.GetComponent<TagComponent>().Layer;
+		auto collisionMaskIt = LayerCollisionMask.find(layer);
+		if (collisionMaskIt == LayerCollisionMask.end())
+			layer = Scene::DefaultLayer;
+		fixtureDef.filter.categoryBits = layer;
+		fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
 
-			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
-			component.RuntimeFixture = fixture;
-		}
+		auto* body = (b2Body*)rb.RuntimeBody;
+		b2Fixture* fixture = body->CreateFixture(&fixtureDef);
+		component.RuntimeFixture = fixture;
 	}
 
-	void Scene::CreateCircleCollider2D(Entity entity, CircleCollider2DComponent& component) const
+	void Scene::CreateCircleCollider2D(Entity entity, const TransformComponent& transform, const Rigidbody2DComponent& rb, CircleCollider2DComponent& component) const
 	{
 		ARC_PROFILE_SCOPE();
 		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
 		ARC_PROFILE_TAG("EntityID", entity.GetUUID());
 
-		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
-		{
-			const TransformComponent& transform = entity.GetTransform();
-			auto* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
+		if (!m_PhysicsWorld2D)
+			return;
 
-			b2CircleShape circleShape;
-			circleShape.m_radius = component.Radius * glm::max(transform.Scale.x, transform.Scale.y);
-			circleShape.m_p = { component.Offset.x, component.Offset.y };
+		b2CircleShape circleShape;
+		circleShape.m_radius = component.Radius * glm::max(transform.Scale.x, transform.Scale.y);
+		circleShape.m_p = { component.Offset.x, component.Offset.y };
 
-			b2FixtureDef fixtureDef;
-			fixtureDef.shape = &circleShape;
-			fixtureDef.isSensor = component.IsSensor;
-			fixtureDef.density = component.Density;
-			fixtureDef.friction = component.Friction;
-			fixtureDef.restitution = component.Restitution;
-			fixtureDef.userData.pointer = (uint32_t)entity;
+		b2FixtureDef fixtureDef;
+		fixtureDef.shape = &circleShape;
+		fixtureDef.isSensor = component.IsSensor;
+		fixtureDef.density = component.Density;
+		fixtureDef.friction = component.Friction;
+		fixtureDef.restitution = component.Restitution;
+		fixtureDef.userData.pointer = (uint32_t)entity;
 
-			auto layer = entity.GetComponent<TagComponent>().Layer;
-			auto collisionMaskIt = LayerCollisionMask.find(layer);
-			if (collisionMaskIt == LayerCollisionMask.end())
-				layer = Scene::DefaultLayer;
-			fixtureDef.filter.categoryBits = layer;
-			fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
+		auto layer = entity.GetComponent<TagComponent>().Layer;
+		auto collisionMaskIt = LayerCollisionMask.find(layer);
+		if (collisionMaskIt == LayerCollisionMask.end())
+			layer = Scene::DefaultLayer;
+		fixtureDef.filter.categoryBits = layer;
+		fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
 
-			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
-			component.RuntimeFixture = fixture;
-		}
+		auto* body = (b2Body*)rb.RuntimeBody;
+		b2Fixture* fixture = body->CreateFixture(&fixtureDef);
+		component.RuntimeFixture = fixture;
 	}
 
-	void Scene::CreatePolygonCollider2D(Entity entity, PolygonCollider2DComponent& component) const
+	void Scene::CreatePolygonCollider2D(Entity entity, const TransformComponent& transform, const Rigidbody2DComponent& rb, PolygonCollider2DComponent& component) const
 	{
 		ARC_PROFILE_SCOPE();
 		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
 		ARC_PROFILE_TAG("EntityID", entity.GetUUID());
 
-		if (m_PhysicsWorld2D && entity.HasComponent<Rigidbody2DComponent>())
+		if (!m_PhysicsWorld2D)
+			return;
+
+		if (component.Points.size() < 3)
 		{
-			if (component.Points.size() < 3)
-			{
-				ARC_CORE_ERROR("Cannot create PolygonCollider2D with {} points", component.Points.size());
-				return;
-			}
-
-			auto* rb = (b2Body*)entity.GetComponent<Rigidbody2DComponent>().RuntimeBody;
-
-			b2PolygonShape shape;
-			shape.Set((const b2Vec2*)component.Points.data(), (int32_t)component.Points.size());
-
-			b2FixtureDef fixtureDef;
-			fixtureDef.shape = &shape;
-			fixtureDef.isSensor = component.IsSensor;
-			fixtureDef.density = component.Density;
-			fixtureDef.friction = component.Friction;
-			fixtureDef.restitution = component.Restitution;
-			fixtureDef.userData.pointer = (uint32_t)entity;
-
-			auto layer = entity.GetComponent<TagComponent>().Layer;
-			auto collisionMaskIt = LayerCollisionMask.find(layer);
-			if (collisionMaskIt == LayerCollisionMask.end())
-				layer = Scene::DefaultLayer;
-			fixtureDef.filter.categoryBits = layer;
-			fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
-
-			b2Fixture* fixture = rb->CreateFixture(&fixtureDef);
-			component.RuntimeFixture = fixture;
+			ARC_CORE_ERROR("Cannot create PolygonCollider2D with {} points", component.Points.size());
+			return;
 		}
+
+		b2PolygonShape shape;
+		shape.Set((const b2Vec2*)component.Points.data(), (int32_t)component.Points.size());
+
+		b2FixtureDef fixtureDef;
+		fixtureDef.shape = &shape;
+		fixtureDef.isSensor = component.IsSensor;
+		fixtureDef.density = component.Density;
+		fixtureDef.friction = component.Friction;
+		fixtureDef.restitution = component.Restitution;
+		fixtureDef.userData.pointer = (uint32_t)entity;
+
+		auto layer = entity.GetComponent<TagComponent>().Layer;
+		auto collisionMaskIt = LayerCollisionMask.find(layer);
+		if (collisionMaskIt == LayerCollisionMask.end())
+			layer = Scene::DefaultLayer;
+		fixtureDef.filter.categoryBits = layer;
+		fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
+
+		auto* body = (b2Body*)rb.RuntimeBody;
+		b2Fixture* fixture = body->CreateFixture(&fixtureDef);
+		component.RuntimeFixture = fixture;
 	}
 
 	template<typename T>
@@ -1561,28 +1552,30 @@ namespace ArcEngine
 	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& body)
 	{
 		/* On Rigidbody2DComponent added */
-		CreateRigidbody2D(entity, body);
+		CreateRigidbody2D(entity, entity.GetComponent<TransformComponent>(), body);
 	}
 
 	template<>
 	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& bc2d)
 	{
 		/* On BoxCollider2DComponent added */
-		CreateBoxCollider2D(entity, bc2d);
+		if (entity.HasComponent<Rigidbody2DComponent>())
+			CreateBoxCollider2D(entity, entity.GetComponent<TransformComponent>(), entity.GetComponent<Rigidbody2DComponent>(), bc2d);
 	}
 	
 	template<>
 	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& cc2d)
 	{
-		/* On CircleCollider2DComponent added */
-		CreateCircleCollider2D(entity, cc2d);
+		if (entity.HasComponent<Rigidbody2DComponent>())
+			CreateCircleCollider2D(entity, entity.GetComponent<TransformComponent>(), entity.GetComponent<Rigidbody2DComponent>(), cc2d);
 	}
 
 	template<>
 	void Scene::OnComponentAdded<PolygonCollider2DComponent>(Entity entity, PolygonCollider2DComponent& pc2d)
 	{
 		/* On CircleCollider2DComponent added */
-		CreatePolygonCollider2D(entity, pc2d);
+		if (entity.HasComponent<Rigidbody2DComponent>())
+			CreatePolygonCollider2D(entity, entity.GetComponent<TransformComponent>(), entity.GetComponent<Rigidbody2DComponent>(), pc2d);
 	}
 
 	template<>
@@ -1625,8 +1618,7 @@ namespace ArcEngine
 	void Scene::OnComponentAdded<RigidbodyComponent>(Entity entity, RigidbodyComponent& body)
 	{
 		/* On RigidbodyComponent added */
-		if (IsRunning())
-			CreateRigidbody(entity, body);
+		CreateRigidbody(entity, entity.GetComponent<TransformComponent>(), body);
 	}
 
 	template<>
@@ -1634,7 +1626,7 @@ namespace ArcEngine
 	{
 		/* On BoxColliderComponent added */
 		if (entity.HasComponent<RigidbodyComponent>())
-			CreateRigidbody(entity, entity.GetComponent<RigidbodyComponent>());
+			CreateRigidbody(entity, entity.GetComponent<TransformComponent>(), entity.GetComponent<RigidbodyComponent>());
 	}
 
 	template<>
@@ -1642,7 +1634,7 @@ namespace ArcEngine
 	{
 		/* On SphereColliderComponent added */
 		if (entity.HasComponent<RigidbodyComponent>())
-			CreateRigidbody(entity, entity.GetComponent<RigidbodyComponent>());
+			CreateRigidbody(entity, entity.GetComponent<TransformComponent>(), entity.GetComponent<RigidbodyComponent>());
 	}
 
 	template<>
@@ -1650,7 +1642,7 @@ namespace ArcEngine
 	{
 		/* On SphereColliderComponent added */
 		if (entity.HasComponent<RigidbodyComponent>())
-			CreateRigidbody(entity, entity.GetComponent<RigidbodyComponent>());
+			CreateRigidbody(entity, entity.GetComponent<TransformComponent>(), entity.GetComponent<RigidbodyComponent>());
 	}
 
 	template<>
@@ -1658,7 +1650,7 @@ namespace ArcEngine
 	{
 		/* On SphereColliderComponent added */
 		if (entity.HasComponent<RigidbodyComponent>())
-			CreateRigidbody(entity, entity.GetComponent<RigidbodyComponent>());
+			CreateRigidbody(entity, entity.GetComponent<TransformComponent>(), entity.GetComponent<RigidbodyComponent>());
 	}
 
 	template<>
@@ -1666,7 +1658,7 @@ namespace ArcEngine
 	{
 		/* On SphereColliderComponent added */
 		if (entity.HasComponent<RigidbodyComponent>())
-			CreateRigidbody(entity, entity.GetComponent<RigidbodyComponent>());
+			CreateRigidbody(entity, entity.GetComponent<TransformComponent>(), entity.GetComponent<RigidbodyComponent>());
 	}
 
 	template<>
