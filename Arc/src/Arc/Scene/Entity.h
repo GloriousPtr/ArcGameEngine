@@ -112,10 +112,8 @@ namespace ArcEngine
 
 			const auto& transform = GetTransform();
 			const auto& rc = GetRelationship();
-			glm::mat4 parentTransform = glm::mat4(1.0f);
-			if (rc.Parent != 0)
-				parentTransform = m_Scene->GetEntity(rc.Parent).GetWorldTransform();
-
+			Entity parent = m_Scene->GetEntity(rc.Parent);
+			glm::mat4 parentTransform = parent ? parent.GetWorldTransform() : glm::mat4(1.0f);
 			return parentTransform * glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);
 		}
 
