@@ -94,7 +94,7 @@ project "Arc"
 	filter "configurations:Release"
 		defines "ARC_RELEASE"
 		runtime "Release"
-		optimize "on"
+		optimize "speed"
 		postbuildcommands
 		{
 			'{COPY} "../Arc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
@@ -103,7 +103,7 @@ project "Arc"
 	filter "configurations:Dist"
 		defines "ARC_DIST"
 		runtime "Release"
-		optimize "on"
+		optimize "speed"
 		postbuildcommands
 		{
 			'{COPY} "../Arc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
