@@ -56,6 +56,10 @@ Right now, Arc Game Engine is very bare-bones. Its most remarkable features are:
 | **Asset manager**      | Basic asset handling API.                                 | TODO 📋 |
 | **Direct3D**           | Extend the Renderer to support D3D12.                     | TODO 📋 |
 
+## Feature Showcase
+
+[![Arc Game Engine Showcase](https://github.com/MohitSethi99/ArcEngine/blob/main/.github/resources/VideoThumbnail.png)](https://youtu.be/bUqAVP7_XAw)
+
 ## Dependencies
 
 Arc Game Engine has the following dependencies:
