@@ -1,3 +1,4 @@
+
 #include "arcpch.h"
 #include "Arc/Scene/Scene.h"
 
@@ -391,7 +392,7 @@ namespace ArcEngine
 		newScene->m_ViewportWidth = other->m_ViewportWidth;
 		newScene->m_ViewportHeight = other->m_ViewportHeight;
 
-		auto view = other->m_Registry.group<>(entt::get<IDComponent, TagComponent>);
+		auto view = other->m_Registry.group<IDComponent, TagComponent>();
 		for (auto e : view)
 		{
 			auto [id, tag] = view.get<IDComponent, TagComponent>(e);
@@ -513,10 +514,10 @@ namespace ArcEngine
 				physicsSystem.SetBodyActivationListener(m_BodyActivationListener3D);
 				physicsSystem.SetContactListener(m_ContactListener3D);
 
-				auto group = m_Registry.group<>(entt::get<TransformComponent, RigidbodyComponent>);
+				auto group = m_Registry.group<RigidbodyComponent>(entt::get<TransformComponent>);
 				for (auto e : group)
 				{
-					auto [tc, rb] = group.get<TransformComponent, RigidbodyComponent>(e);
+					auto [rb, tc] = group.get<RigidbodyComponent, TransformComponent>(e);
 					rb.PreviousTranslation = rb.Translation = tc.Translation;
 					rb.PreviousRotation = rb.Rotation = tc.Rotation;
 					CreateRigidbody({ e, this }, tc, rb);
@@ -533,17 +534,17 @@ namespace ArcEngine
 				m_PhysicsWorld2D->SetContactListener(m_ContactListener2D);
 
 				{
-					auto group = m_Registry.group<>(entt::get<TransformComponent, Rigidbody2DComponent>);
+					auto group = m_Registry.group<Rigidbody2DComponent>(entt::get<TransformComponent>);
 					for (auto e : group)
 					{
-						auto [tc, rb] = group.get<TransformComponent, Rigidbody2DComponent>(e);
+						auto [rb, tc] = group.get<Rigidbody2DComponent, TransformComponent>(e);
 						CreateRigidbody2D({ e, this }, tc, rb);
 						rb.PreviousTranslationRotation = rb.TranslationRotation = { tc.Translation.x, tc.Translation.y, tc.Rotation.z };
 					}
 				}
 
 				{
-					auto distanceJointGroup = m_Registry.group<>(entt::get<Rigidbody2DComponent, DistanceJoint2DComponent>);
+					auto distanceJointGroup = m_Registry.group<DistanceJoint2DComponent>(entt::get<Rigidbody2DComponent>);
 					for (auto e : distanceJointGroup)
 					{
 						auto [body, joint] = distanceJointGroup.get<Rigidbody2DComponent, DistanceJoint2DComponent>(e);
@@ -568,7 +569,7 @@ namespace ArcEngine
 						}
 					}
 
-					auto springJointView = m_Registry.group<>(entt::get<Rigidbody2DComponent, SpringJoint2DComponent>);
+					auto springJointView = m_Registry.group<SpringJoint2DComponent>(entt::get<Rigidbody2DComponent>);
 					for (auto e : springJointView)
 					{
 						auto [body, joint] = springJointView.get<Rigidbody2DComponent, SpringJoint2DComponent>(e);
@@ -594,7 +595,7 @@ namespace ArcEngine
 						}
 					}
 
-					auto hingeJointView = m_Registry.group<>(entt::get<Rigidbody2DComponent, HingeJoint2DComponent>);
+					auto hingeJointView = m_Registry.group<HingeJoint2DComponent>(entt::get<Rigidbody2DComponent>);
 					for (auto e : hingeJointView)
 					{
 						auto [body, joint] = hingeJointView.get<Rigidbody2DComponent, HingeJoint2DComponent>(e);
@@ -618,7 +619,7 @@ namespace ArcEngine
 						}
 					}
 
-					auto sliderJointView = m_Registry.group<>(entt::get<Rigidbody2DComponent, SliderJoint2DComponent>);
+					auto sliderJointView = m_Registry.group<SliderJoint2DComponent>(entt::get<Rigidbody2DComponent>);
 					for (auto e : sliderJointView)
 					{
 						auto [body, joint] = sliderJointView.get<Rigidbody2DComponent, SliderJoint2DComponent>(e);
@@ -645,7 +646,7 @@ namespace ArcEngine
 						}
 					}
 
-					auto wheelJointView = m_Registry.group<>(entt::get<Rigidbody2DComponent, WheelJoint2DComponent>);
+					auto wheelJointView = m_Registry.group<WheelJoint2DComponent>(entt::get<Rigidbody2DComponent>);
 					for (auto e : wheelJointView)
 					{
 						auto [body, joint] = wheelJointView.get<Rigidbody2DComponent, WheelJoint2DComponent>(e);
@@ -685,10 +686,10 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio);
 
-			auto listenerView = m_Registry.group<>(entt::get<TransformComponent, AudioListenerComponent>);
+			auto listenerView = m_Registry.group<AudioListenerComponent>(entt::get<TransformComponent>);
 			for (auto e : listenerView)
 			{
-				auto [tc, ac] = listenerView.get<TransformComponent, AudioListenerComponent>(e);
+				auto [ac, tc] = listenerView.get<AudioListenerComponent, TransformComponent>(e);
 				ac.Listener = CreateRef<AudioListener>();
 				if (ac.Active)
 				{
@@ -701,10 +702,10 @@ namespace ArcEngine
 				}
 			}
 
-			auto sourceView = m_Registry.group<>(entt::get<TransformComponent, AudioSourceComponent>);
+			auto sourceView = m_Registry.group<AudioSourceComponent>(entt::get<TransformComponent>);
 			for (auto e : sourceView)
 			{
-				auto [tc, ac] = sourceView.get<TransformComponent, AudioSourceComponent>(e);
+				auto [ac, tc] = sourceView.get<AudioSourceComponent, TransformComponent>(e);
 				if (ac.Source)
 				{
 					const glm::mat4 inverted = glm::inverse(Entity(e, this).GetWorldTransform());
@@ -902,10 +903,10 @@ namespace ArcEngine
 			#pragma region Physics3D
 			{
 				const auto& bodyInterface = Physics3D::GetPhysicsSystem().GetBodyInterface();
-				auto view = m_Registry.group<>(entt::get<TransformComponent, RigidbodyComponent>);
+				auto view = m_Registry.group<RigidbodyComponent>(entt::get<TransformComponent>);
 				for (auto e : view)
 				{
-					auto [tc, rb] = view.get<TransformComponent, RigidbodyComponent>(e);
+					auto [rb, tc] = view.get<RigidbodyComponent, TransformComponent>(e);
 					if (!rb.RuntimeBody)
 						continue;
 
@@ -948,10 +949,10 @@ namespace ArcEngine
 
 			#pragma region Physics2D
 			{
-				auto view = m_Registry.group<>(entt::get<TransformComponent, Rigidbody2DComponent>);
+				auto view = m_Registry.group<Rigidbody2DComponent>(entt::get<TransformComponent>);
 				for (auto e : view)
 				{
-					auto [tc, rb] = view.get<TransformComponent, Rigidbody2DComponent>(e);
+					auto [rb, tc] = view.get<Rigidbody2DComponent, TransformComponent>(e);
 					const b2Body* body = (b2Body*)rb.RuntimeBody;
 
 					if (!body->IsAwake())
@@ -1075,10 +1076,10 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio);
 
-			auto listenerView = m_Registry.group<>(entt::get<TransformComponent, AudioListenerComponent>);
+			auto listenerView = m_Registry.group<AudioListenerComponent>(entt::get<TransformComponent>);
 			for (auto e : listenerView)
 			{
-				auto [tc, ac] = listenerView.get<TransformComponent, AudioListenerComponent>(e);
+				auto [ac, tc] = listenerView.get<AudioListenerComponent, TransformComponent>(e);
 				if (ac.Active)
 				{
 					const glm::mat4 inverted = glm::inverse(Entity(e, this).GetWorldTransform());
@@ -1089,10 +1090,10 @@ namespace ArcEngine
 				}
 			}
 
-			auto sourceView = m_Registry.group<>(entt::get<TransformComponent, AudioSourceComponent>);
+			auto sourceView = m_Registry.group<AudioSourceComponent>(entt::get<TransformComponent>);
 			for (auto e : sourceView)
 			{
-				auto [tc, ac] = sourceView.get<TransformComponent, AudioSourceComponent>(e);
+				auto [ac, tc] = sourceView.get<AudioSourceComponent, TransformComponent>(e);
 				if (ac.Source)
 				{
 					Entity entity = { e, this };
