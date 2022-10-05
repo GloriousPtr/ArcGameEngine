@@ -320,10 +320,11 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		ImVec2 framePadding = ImGui::GetStyle().FramePadding;
+		ImVec2 itemSpacing = ImGui::GetStyle().ItemSpacing;
 
 		ImVec2 headerRegion = ImGui::GetContentRegionAvail();
 		float frameHeight = ImGui::GetFrameHeight();
-		headerRegion.y = 2.0f * (frameHeight + framePadding.y);
+		headerRegion.y = 2.0f * (frameHeight + itemSpacing.y) - itemSpacing.y;
 		ImGui::BeginChild("PropertiesHeader", headerRegion, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 		{
 			float addButtonSizeX = UI::GetIconButtonSize("  " ICON_MDI_PLUS, "Add  ").x;
@@ -360,6 +361,8 @@ namespace ArcEngine
 						ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
 					}
 
+					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
+
 					DrawAddComponent<SpriteRendererComponent>(entity, ICON_MDI_IMAGE_SIZE_SELECT_ACTUAL " Sprite Renderer", "2D");
 					DrawAddComponent<Rigidbody2DComponent>(entity, ICON_MDI_SOCCER " Rigidbody 2D", "2D");
 					DrawAddComponent<BoxCollider2DComponent>(entity, ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider 2D", "2D");
@@ -388,6 +391,7 @@ namespace ArcEngine
 					DrawAddComponent<CameraComponent>(entity, ICON_MDI_CAMERA " Camera");
 					DrawAddComponent<ScriptComponent>(entity, ICON_MDI_POUND_BOX " Script");
 
+					ImGui::PopStyleVar();
 					ImGui::EndPopup();
 				}
 			}
@@ -995,6 +999,7 @@ namespace ArcEngine
 					}
 				}
 
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 				for (const auto& [name, scriptClass] : classes)
 				{
 					bool notFound = eastl::find(component.Classes.begin(), component.Classes.end(), name) == component.Classes.end();
@@ -1006,6 +1011,7 @@ namespace ArcEngine
 						}
 					}
 				}
+				ImGui::PopStyleVar();
 				ImGui::EndPopup();
 			}
 			

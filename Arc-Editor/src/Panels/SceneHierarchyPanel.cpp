@@ -76,17 +76,16 @@ namespace ArcEngine
 					ImGui::PopID();
 				}
 
+				ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 				auto view = m_Context->m_Registry.view<IDComponent>();
 				for (auto it = view.rbegin(); it != view.rend(); it++)
 				{
 					entt::entity e = *it;
-					if (!view.contains(e))
-						break;
-
 					Entity entity = { e, m_Context.get() };
 					if (!entity.GetParent())
 						DrawEntityNode(entity);
 				}
+				ImGui::PopStyleVar();
 
 				DrawContextMenu();
 
@@ -193,6 +192,7 @@ namespace ArcEngine
 		bool entityDeleted = false;
 		bool createChild = false;
 		static Entity renaming = {};
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 		if (ImGui::BeginPopupContextItem())
 		{
 			if (ImGui::MenuItem("Create"))
@@ -204,6 +204,7 @@ namespace ArcEngine
 
 			ImGui::EndPopup();
 		}
+		ImGui::PopStyleVar();
 		ImVec2 verticalLineStart = ImGui::GetCursorScreenPos();
 		verticalLineStart.y -= ImGui::GetFrameHeight() * 0.5f;
 
@@ -416,6 +417,7 @@ namespace ArcEngine
 
 	void SceneHierarchyPanel::DrawContextMenu() const
 	{
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 		if (ImGui::BeginPopupContextWindow("SceneHierarchyContextWindow", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
 		{
 			EditorLayer::GetInstance()->ResetContext();
@@ -464,5 +466,6 @@ namespace ArcEngine
 
 			ImGui::EndPopup();
 		}
+		ImGui::PopStyleVar();
 	}
 }

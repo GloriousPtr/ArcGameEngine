@@ -326,8 +326,9 @@ namespace ArcEngine
 
 		ImGui::SameLine();
 
-		ImGui::Text(ICON_MDI_FOLDER);
+		ImGui::TextUnformatted(ICON_MDI_FOLDER);
 
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.0f, 0.0f, 0.0f, 0.0f });
 		std::filesystem::path current = "";
@@ -347,6 +348,7 @@ namespace ArcEngine
 			}
 		}
 		ImGui::PopStyleColor(2);
+		ImGui::PopStyleVar();
 
 		if (!directoryToOpen.empty())
 			UpdateDirectoryEntries(directoryToOpen);

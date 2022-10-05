@@ -98,10 +98,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 		if (ImGui::Button(ICON_MDI_COGS))
 			ImGui::OpenPopup("SettingsPopup");
-		ImGui::PopStyleColor();
 
 		if (ImGui::BeginPopup("SettingsPopup"))
 		{
@@ -119,6 +117,7 @@ namespace ArcEngine
 		const float cursorPosX = ImGui::GetCursorPosX();
 		m_Filter.Draw("###ConsoleFilter", ImGui::GetContentRegionAvail().x - levelButtonWidths);
 
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 		for(int i = 0; i < 6; i++)
 		{
@@ -150,6 +149,7 @@ namespace ArcEngine
 			Clear();
 
 		ImGui::PopStyleColor();
+		ImGui::PopStyleVar();
 
 		ImGui::GetStyle().ItemSpacing.x = spacing;
 

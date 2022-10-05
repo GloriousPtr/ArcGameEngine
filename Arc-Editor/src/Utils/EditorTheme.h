@@ -25,7 +25,7 @@ namespace ArcEngine
 			colors[ImGuiCol_WindowBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
 			colors[ImGuiCol_ChildBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
 			colors[ImGuiCol_PopupBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-			colors[ImGuiCol_Border] = ImVec4(0.21f, 0.21f, 0.21f, 1.00f);
+			colors[ImGuiCol_Border] = ImVec4(0.275f, 0.275f, 0.275f, 1.00f);
 			colors[ImGuiCol_BorderShadow] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
 			colors[ImGuiCol_FrameBg] = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
 			colors[ImGuiCol_FrameBgHovered] = ImVec4(0.28f, 0.28f, 0.28f, 1.00f);
@@ -98,20 +98,20 @@ namespace ArcEngine
 			style->ScrollbarSize = 14;
 			style->GrabMinSize = 10;
 
-			style->WindowBorderSize = 1;
-			style->ChildBorderSize = 0;
-			style->PopupBorderSize = 1;
-			style->FrameBorderSize = 0;
-			style->TabBorderSize = 0;
+			style->WindowBorderSize = 1.0f;
+			style->ChildBorderSize = 0.0f;
+			style->PopupBorderSize = 1.5f;
+			style->FrameBorderSize = 0.5f;
+			style->TabBorderSize = 0.0f;
 
 			style->WindowRounding = 6.0f;
 			style->ChildRounding = 0.0f;
-			style->FrameRounding = 4.0f;
-			style->PopupRounding = 0.0f;
-			style->ScrollbarRounding = 12.0f;
-			style->GrabRounding = 3.0f;
+			style->FrameRounding = 2.0f;
+			style->PopupRounding = 2.0f;
+			style->ScrollbarRounding = 3.0f;
+			style->GrabRounding = 2.0f;
 			style->LogSliderDeadzone = 4.0f;
-			style->TabRounding = 4.0f;
+			style->TabRounding = 3.0f;
 
 			style->WindowTitleAlign = ImVec2(0.0f, 0.5f);
 			style->WindowMenuButtonPosition = ImGuiDir_None;
@@ -121,6 +121,7 @@ namespace ArcEngine
 			style->DisplaySafeAreaPadding = ImVec2(8.0f, 8.0f);
 
 			UIFramePadding = ImVec2(4.0f, 2.0f);
+			PopupItemSpacing = ImVec2(6.0f, 8.0f);
 
 			ImGuiColorEditFlags colorEditFlags = ImGuiColorEditFlags_AlphaBar
 				| ImGuiColorEditFlags_AlphaPreviewHalf
@@ -139,6 +140,7 @@ namespace ArcEngine
 		static ImVec4 WindowBgAlternativeColor;
 		static ImVec4 AssetIconColor;
 		static ImVec2 UIFramePadding;
+		static ImVec2 PopupItemSpacing;
 
 		static ImFont* DefaultFont;
 		static ImFont* SmallFont;

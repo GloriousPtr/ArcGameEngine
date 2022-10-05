@@ -296,6 +296,7 @@ namespace ArcEngine
 			ImGui::SetItemAllowOverlap();
 			ImGui::SetCursorPos({ startCursorPos.x + windowPadding.x, startCursorPos.y + windowPadding.y });
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 1, 1 });
+			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 			constexpr float alpha = 0.6f;
 			if (UI::ToggleButton(ICON_MDI_ARROW_ALL, m_GizmoType == ImGuizmo::TRANSLATE, { 0, 0 }, alpha, alpha))
 				m_GizmoType = ImGuizmo::TRANSLATE;
@@ -305,7 +306,7 @@ namespace ArcEngine
 			ImGui::SameLine();
 			if (UI::ToggleButton(ICON_MDI_ARROW_EXPAND_ALL, m_GizmoType == ImGuizmo::SCALE, { 0, 0 }, alpha, alpha))
 				m_GizmoType = ImGuizmo::SCALE;
-			ImGui::PopStyleVar();
+			ImGui::PopStyleVar(2);
 
 			OnEnd();
 		}

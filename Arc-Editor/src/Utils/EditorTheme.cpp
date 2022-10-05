@@ -11,6 +11,7 @@ namespace ArcEngine
 	ImVec4 EditorTheme::WindowBgAlternativeColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 	ImVec4 EditorTheme::AssetIconColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 	ImVec2 EditorTheme::UIFramePadding = ImVec2(1.0f, 1.0f);
+	ImVec2 EditorTheme::PopupItemSpacing = ImVec2(1.0f, 1.0f);
 
 	ImFont* EditorTheme::DefaultFont = nullptr;
 	ImFont* EditorTheme::SmallFont = nullptr;

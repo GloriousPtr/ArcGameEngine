@@ -174,6 +174,8 @@ namespace ArcEngine
 				| ImGuiWindowFlags_MenuBar
 				| ImGuiWindowFlags_NoNavFocus;
 
+			ImVec2 windowPadding = ImGui::GetStyle().WindowPadding;
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 			{
 				//////////////////////////////////////////////////////////////////////////
@@ -185,8 +187,12 @@ namespace ArcEngine
 
 					if (ImGui::BeginMenuBar())
 					{
+						ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, windowPadding);
+
 						if (ImGui::BeginMenu("File"))
 						{
+							ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
+
 							if (ImGui::MenuItem("New", "Ctrl+N"))
 								NewScene();
 							if (ImGui::MenuItem("Open..", "Ctrl+O"))
@@ -197,11 +203,15 @@ namespace ArcEngine
 								SaveSceneAs();
 							if (ImGui::MenuItem("Exit"))
 								m_Application->Close();
+
+							ImGui::PopStyleVar();
 							ImGui::EndMenu();
 						}
 
 						if (ImGui::BeginMenu("Window"))
 						{
+							ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
+
 							if (ImGui::BeginMenu("Add"))
 							{
 								if (ImGui::MenuItem("Viewport"))
@@ -218,6 +228,7 @@ namespace ArcEngine
 								{
 									m_AssetPanels.emplace_back(CreateScope<AssetPanel>());
 								}
+								
 								ImGui::EndMenu();
 							}
 							ImGui::MenuItem("Hierarchy", nullptr, &m_ShowSceneHierarchyPanel);
@@ -230,32 +241,42 @@ namespace ArcEngine
 
 							ImGui::MenuItem("ImGui Demo Window", nullptr, &m_ShowDemoWindow);
 
+							ImGui::PopStyleVar();
 							ImGui::EndMenu();
 						}
 
 						if (ImGui::BeginMenu("Shaders"))
 						{
+							ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
+
 							if (ImGui::MenuItem("Reload Shaders"))
 							{
 								Renderer3D::GetShaderLibrary().ReloadAll();
 								Renderer3D::Init();
 							}
 
+							ImGui::PopStyleVar();
 							ImGui::EndMenu();
 						}
 
 						if (ImGui::BeginMenu("Scripting"))
 						{
+							ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
+
 							if (ImGui::MenuItem("Reload Assemblies"))
 								ScriptEngine::ReloadAppDomain();
 
+							ImGui::PopStyleVar();
 							ImGui::EndMenu();
 						}
+
+						ImGui::PopStyleVar();
 
 						// Minimize/Maximize/Close buttons
 						ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 0.0f });
 						ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
 						ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
+						ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 						ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
 
 						ImVec2 region = ImGui::GetContentRegionMax();
@@ -290,7 +311,7 @@ namespace ArcEngine
 						ImGui::PopStyleColor(2);
 
 						ImGui::PopStyleColor();
-						ImGui::PopStyleVar(3);
+						ImGui::PopStyleVar(4);
 
 						ImGui::EndMenuBar();
 					}
@@ -304,6 +325,7 @@ namespace ArcEngine
 				{
 					HandleWindowDrag();
 
+					ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 1, 1 });
 					if (ImGui::BeginMenuBar())
 					{
@@ -354,7 +376,7 @@ namespace ArcEngine
 
 						ImGui::EndMenuBar();
 					}
-					ImGui::PopStyleVar();
+					ImGui::PopStyleVar(2);
 					ImGui::End();
 				}
 
@@ -382,7 +404,7 @@ namespace ArcEngine
 					ImGui::End();
 				}
 			}
-			ImGui::PopStyleVar();
+			ImGui::PopStyleVar(2);
 
 			//////////////////////////////////////////////////////////////////////////
 			// HEIRARCHY /////////////////////////////////////////////////////////////
