@@ -44,8 +44,8 @@ namespace ArcEngine
 
 	struct ScriptEngineData
 	{
-		eastl::string CoreAssemblyPath = "../Sandbox/Assemblies/Arc-ScriptCore.dll";
-		eastl::string AppAssemblyPath = "../Sandbox/Assemblies/Sandbox.dll";
+		eastl::string CoreAssemblyPath = "Resources/Scripts/Arc-ScriptCore.dll";
+		eastl::string AppAssemblyPath = "../Sandbox/Binaries/Sandbox.dll";
 
 		MonoDomain* RootDomain = nullptr;
 		MonoDomain* AppDomain = nullptr;
@@ -134,7 +134,7 @@ namespace ArcEngine
 	void ScriptEngine::LoadClientAssembly()
 	{
 		ARC_PROFILE_SCOPE();
-
+		
 		s_Data->AppAssembly = MonoUtils::LoadMonoAssembly(s_Data->AppAssemblyPath.c_str());
 		s_Data->AppImage = mono_assembly_get_image(s_Data->AppAssembly);
 
@@ -151,6 +151,8 @@ namespace ArcEngine
 	void ScriptEngine::ReloadAppDomain()
 	{
 		ARC_PROFILE_SCOPE();
+
+		system("call \"../vendor/premake/bin/premake5.exe\" --file=\"../Sandbox/premake5.lua\" vs2022");
 
 		if (s_Data->AppDomain)
 		{
@@ -190,10 +192,6 @@ namespace ArcEngine
 
 					fclose(errors);
 				}
-				else
-				{
-					ARC_CORE_ERROR("AssemblyBuildErrors.log not found!");
-				}
 			}
 
 			// Warnings
@@ -214,10 +212,6 @@ namespace ArcEngine
 					}
 
 					fclose(warns);
-				}
-				else
-				{
-					ARC_CORE_ERROR("AssemblyBuildWarnings.log not found!");
 				}
 			}
 		}

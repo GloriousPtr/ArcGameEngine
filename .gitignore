@@ -21,3 +21,6 @@ bin-int/
 *.csproj
 *.user
 **/Assemblies
+Arc-Editor/Resources/Scripts
+**/Binaries
+**/Intermediates

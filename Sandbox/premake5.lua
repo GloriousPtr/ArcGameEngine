@@ -25,8 +25,8 @@ project "Sandbox"
     dotnetframework "4.8"
     csversion "10.0"
 
-    targetdir ("Assemblies")
-	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
+    targetdir ("Binaries")
+	objdir ("Intermediates")
 
     files
     {

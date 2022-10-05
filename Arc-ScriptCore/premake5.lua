@@ -4,8 +4,8 @@ project "Arc-ScriptCore"
     dotnetframework "4.8"
     csversion "10.0"
     
-	targetdir ("%{wks.location}/Arc-Editor/Resources/Scripts")
-	objdir ("%{wks.location}/Arc-Editor/Resources/Scripts/Intermediates")
+	targetdir ("../Arc-Editor/Resources/Scripts")
+	objdir ("../Arc-Editor/Resources/Scripts/Intermediates")
 
     files
     {
