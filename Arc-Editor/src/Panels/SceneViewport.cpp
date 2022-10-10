@@ -74,22 +74,22 @@ namespace ArcEngine
 				pitch = glm::clamp(pitch - change.y, -89.9f, 89.9f);
 
 				glm::vec3 moveDirection = glm::vec3(0.0f);
-				if (ImGui::IsKeyDown(Key::W))
+				if (ImGui::IsKeyDown(ImGuiKey_W))
 				{
 					moved = true;
 					moveDirection += m_EditorCamera.GetForward() * timestep.GetSeconds();
 				}
-				else if (ImGui::IsKeyDown(Key::S))
+				else if (ImGui::IsKeyDown(ImGuiKey_S))
 				{
 					moved = true;
 					moveDirection -= m_EditorCamera.GetForward() * timestep.GetSeconds();
 				}
-				if (ImGui::IsKeyDown(Key::D))
+				if (ImGui::IsKeyDown(ImGuiKey_D))
 				{
 					moved = true;
 					moveDirection += m_EditorCamera.GetRight() * timestep.GetSeconds();
 				}
-				else if (ImGui::IsKeyDown(Key::A))
+				else if (ImGui::IsKeyDown(ImGuiKey_A))
 				{
 					moved = true;
 					moveDirection -= m_EditorCamera.GetRight() * timestep.GetSeconds();
@@ -107,7 +107,7 @@ namespace ArcEngine
 			m_MoveVelocity *= glm::pow(m_MoveDampeningFactor, timestep);
 			if (m_MoveVelocity > 0.0f)
 			{
-				float maxMoveSpeed = m_MaxMoveSpeed * (ImGui::IsKeyDown(Key::LeftShift) ? 3.0f : 1.0f);
+				float maxMoveSpeed = m_MaxMoveSpeed * (ImGui::IsKeyDown(ImGuiKey_LeftShift) ? 3.0f : 1.0f);
 				m_EditorCamera.SetPosition(position + (m_MoveDirection * m_MoveVelocity * maxMoveSpeed));
 			}
 
@@ -138,19 +138,19 @@ namespace ArcEngine
 
 		if (!ImGuizmo::IsUsing() && !ImGui::IsMouseDown(ImGuiMouseButton_Right))
 		{
-			if (ImGui::IsKeyPressed(Key::Q))
+			if (ImGui::IsKeyPressed(ImGuiKey_Q))
 				m_GizmoType = -1;
-			if (ImGui::IsKeyPressed(Key::W))
+			if (ImGui::IsKeyPressed(ImGuiKey_W))
 				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
-			if (ImGui::IsKeyPressed(Key::E))
+			if (ImGui::IsKeyPressed(ImGuiKey_E))
 				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
-			if (ImGui::IsKeyPressed(Key::R))
+			if (ImGui::IsKeyPressed(ImGuiKey_R))
 				m_GizmoType = ImGuizmo::OPERATION::SCALE;
-			if (ImGui::IsKeyPressed(Key::T))
+			if (ImGui::IsKeyPressed(ImGuiKey_T))
 				m_GizmoType = ImGuizmo::OPERATION::BOUNDS;
 		}
 
-		if (ImGui::IsKeyPressed(Key::F) && m_SceneHierarchyPanel)
+		if (ImGui::IsKeyPressed(ImGuiKey_F) && m_SceneHierarchyPanel)
 		{
 			const EditorContext& context = EditorLayer::GetInstance()->GetContext();
 			if (context.IsValid(EditorContextType::Entity))
@@ -240,7 +240,7 @@ namespace ArcEngine
 						glm::mat4 transform = selectedEntity.GetWorldTransform();
 
 						// Snapping
-						const bool snap = ImGui::IsKeyDown(Key::LeftControl);
+						const bool snap = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
 						float snapValue = 0.5f;
 						if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
 							snapValue = 45.0f;
