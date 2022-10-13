@@ -2,11 +2,14 @@
 
 #include <EASTL/hash_map.h>
 #include <EASTL/map.h>
+
+// This ignores all warnings raised inside External headers
+#pragma warning(push, 0)
 #include <entt.hpp>
+#pragma warning(pop)
 
 #include "Arc/Core/UUID.h"
 #include "Arc/Core/Timestep.h"
-
 
 class b2World;
 class b2Fixture;

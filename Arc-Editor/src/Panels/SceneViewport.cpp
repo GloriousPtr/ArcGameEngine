@@ -1,6 +1,5 @@
 #include "SceneViewport.h"
 
-#include <entt.hpp>
 #include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui.h>
 #include <ImGuizmo.h>
