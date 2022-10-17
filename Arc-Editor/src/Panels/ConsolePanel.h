@@ -12,11 +12,11 @@ namespace ArcEngine
 	public:
 		struct Message
 		{
-			eastl::string ID;
+			uint32_t ID;
 			eastl::string Buffer;
 			Log::Level Level;
 
-			Message(const eastl::string& id, const eastl::string& message = "", Log::Level level = Log::Level::Trace);
+			Message(uint32_t id, const eastl::string& message = "", Log::Level level = Log::Level::Trace);
 			void OnImGuiRender() const;
 
 			static const char* GetLevelName(Log::Level level);

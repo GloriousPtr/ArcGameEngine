@@ -36,10 +36,9 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		static uint64_t id = 0;
+		static uint32_t id = 0;
 
-		eastl::string strId = std::to_string(id).c_str();
-		*(m_MessageBuffer.begin() + m_BufferBegin) = CreateRef<Message>(strId, message, level);
+		*(m_MessageBuffer.begin() + m_BufferBegin) = CreateRef<Message>(id, message, level);
 		if (++m_BufferBegin == m_Capacity)
 			m_BufferBegin = 0;
 		if (m_BufferSize < m_Capacity)
@@ -238,7 +237,7 @@ namespace ArcEngine
 		}
 	}
 
-	ConsolePanel::Message::Message(const eastl::string& id, const eastl::string& message, Log::Level level)
+	ConsolePanel::Message::Message(uint32_t id, const eastl::string& message, Log::Level level)
 		: ID(id), Buffer(message), Level(level)
 	{
 		ARC_PROFILE_SCOPE();
@@ -258,13 +257,15 @@ namespace ArcEngine
 		ImGui::Text("%s  %s", levelIcon, Buffer.c_str());
 		ImGui::PopStyleColor();
 
-		if(ImGui::BeginPopupContextItem(ID.c_str()))
+		ImGui::PushID((int)ID);
+		if(ImGui::BeginPopupContextItem("Popup"))
 		{
 			if(ImGui::MenuItem("Copy"))
 				ImGui::SetClipboardText(Buffer.c_str());
 
 			ImGui::EndPopup();
 		}
+		ImGui::PopID();
 	}
 
 	const char* ConsolePanel::Message::GetLevelName(Log::Level level)
