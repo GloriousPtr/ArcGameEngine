@@ -47,7 +47,6 @@ namespace ArcEngine
 		eastl::string CoreAssemblyPath = "Resources/Scripts/Arc-ScriptCore.dll";
 		eastl::string AppAssemblyPath = "../Sandbox/Binaries/Sandbox.dll";
 
-		MonoDomain* RootDomain = nullptr;
 		MonoDomain* AppDomain = nullptr;
 
 		MonoAssembly* CoreAssembly = nullptr;
@@ -70,7 +69,7 @@ namespace ArcEngine
 		EntityInstanceMap EntityRuntimeInstances;
 	};
 
-	static Ref<ScriptEngineData> s_Data;
+	static Scope<ScriptEngineData> s_Data;
 
 	Scene* ScriptEngine::s_CurrentScene = nullptr;
 
@@ -80,7 +79,7 @@ namespace ArcEngine
 
 		mono_set_assemblies_path("mono/lib");
 
-		s_Data = CreateRef<ScriptEngineData>();
+		s_Data = CreateScope<ScriptEngineData>();
 
 		static char* options[] =
 		{
@@ -90,13 +89,15 @@ namespace ArcEngine
 		mono_jit_parse_options(sizeof(options) / sizeof(char*), (char**)options);
 		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
 
-		s_Data->RootDomain = mono_jit_init("ArcJITRuntime");
-		ARC_CORE_ASSERT(s_Data->RootDomain);
-		mono_debug_domain_create(s_Data->RootDomain);
+		MonoDomain* rootDomain = mono_jit_init("ArcJITRuntime");
+		ARC_CORE_ASSERT(rootDomain);
+		mono_debug_domain_create(rootDomain);
+		mono_domain_set(rootDomain, false);
+
 		mono_thread_set_main(mono_thread_current());
 
 		GCManager::Init();
-
+		ScriptEngineRegistry::RegisterInternalCalls();
 		ReloadAppDomain();
 	}
 
@@ -110,7 +111,9 @@ namespace ArcEngine
 
 		GCManager::Shutdown();
 
-		mono_jit_cleanup(s_Data->RootDomain);
+		mono_domain_set(mono_get_root_domain(), false);
+		mono_domain_unload(s_Data->AppDomain);
+		mono_jit_cleanup(mono_get_root_domain());
 	}
 
 	void ScriptEngine::LoadCoreAssembly()
@@ -144,7 +147,6 @@ namespace ArcEngine
 		LoadAssemblyClasses(s_Data->AppAssembly);
 
 		ScriptEngineRegistry::ClearTypes();
-		ScriptEngineRegistry::RegisterInternalCalls();
 		ScriptEngineRegistry::RegisterTypes();
 	}
 
@@ -156,7 +158,7 @@ namespace ArcEngine
 
 		if (s_Data->AppDomain)
 		{
-			mono_domain_set(s_Data->RootDomain, true);
+			mono_domain_set(mono_get_root_domain(), false);
 			mono_domain_unload(s_Data->AppDomain);
 			s_Data->AppDomain = nullptr;
 		}
