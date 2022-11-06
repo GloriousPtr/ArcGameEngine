@@ -44,3 +44,8 @@ jobs:
       - name: Run Build
         run: |
           msbuild /m /p:Configuration=${{matrix.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}} /t:rebuild /nodeReuse:false
+      
+      - uses: actions/upload-artifact@v3
+        with:
+          name: "Arc_${{matrix.COMPILER}}_${{matrix.BUILD_CONFIGURATION}}"
+          path: "${{ github.workspace }}/bin/${{matrix.BUILD_CONFIGURATION}}-windows-x86_64"

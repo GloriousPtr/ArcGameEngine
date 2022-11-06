@@ -4,7 +4,8 @@ project "Arc-Editor"
 	cppdialect "C++17"
 	staticruntime "on"
 
-	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+	binDir = "%{wks.location}/bin/" .. outputdir
+	targetdir ("%{binDir}/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
 	files
@@ -43,6 +44,16 @@ project "Arc-Editor"
 
 	filter "system:windows"
 		systemversion "latest"
+		postbuildcommands
+		{
+			'{COPY} "../Arc-ScriptCore" "%{binDir}"/Arc-ScriptCore',
+			'{COPY} "../vendor" "%{binDir}"/vendor',
+			'{COPY} "../Sandbox" "%{binDir}"/Sandbox',
+			'{COPY} "../Arc-Editor/assets" "%{cfg.targetdir}"/assets',
+			'{COPY} "../Arc-Editor/mono" "%{cfg.targetdir}"/mono',
+			'{COPY} "../Arc-Editor/Resources" "%{cfg.targetdir}"/Resources',
+			'{COPY} "../Arc-Editor/imgui.ini" "%{cfg.targetdir}"',
+		}
 
 	filter "configurations:Debug"
 		defines "ARC_DEBUG"
