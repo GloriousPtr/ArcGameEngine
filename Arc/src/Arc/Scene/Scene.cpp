@@ -1,4 +1,3 @@
-
 #include "arcpch.h"
 #include "Arc/Scene/Scene.h"
 
@@ -1163,7 +1162,7 @@ namespace ArcEngine
 		{
 			const auto& camera = view.get<CameraComponent>(entity);
 			if (camera.Primary)
-				return Entity(entity, this);
+				return { entity, this };
 		}
 		return {};
 	}

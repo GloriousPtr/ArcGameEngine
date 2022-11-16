@@ -25,7 +25,7 @@ namespace ArcEngine
 	EditorLayer* EditorLayer::s_Instance = nullptr;
 
 	EditorLayer::EditorLayer()
-		: Layer("Sandbox2D")
+		: Layer("Arc-Editor")
 	{
 		ARC_CORE_ASSERT(!s_Instance, "Editor Layer already exists!");
 
@@ -168,7 +168,7 @@ namespace ArcEngine
 
 		BeginDockspace("MyDockSpace");
 		{
-			ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
+			auto* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
 			ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar
 				| ImGuiWindowFlags_NoSavedSettings
 				| ImGuiWindowFlags_MenuBar
@@ -407,7 +407,7 @@ namespace ArcEngine
 			ImGui::PopStyleVar(2);
 
 			//////////////////////////////////////////////////////////////////////////
-			// HEIRARCHY /////////////////////////////////////////////////////////////
+			// HIERARCHY /////////////////////////////////////////////////////////////
 			//////////////////////////////////////////////////////////////////////////
 			if (m_ShowSceneHierarchyPanel)
 				m_SceneHierarchyPanel.OnImGuiRender();

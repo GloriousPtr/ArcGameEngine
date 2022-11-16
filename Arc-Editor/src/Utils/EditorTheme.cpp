@@ -46,14 +46,16 @@ namespace ArcEngine
         iconsConfig.OversampleH = iconsConfig.OversampleV = 1;
         iconsConfig.GlyphMinAdvanceX = 4.0f;
         iconsConfig.SizePixels = 12.0f;
-		
-		DefaultFont = io.Fonts->AddFontFromFileTTF("Resources/Fonts/jetbrains-mono/JetBrainsMono-Regular.ttf", fontSize, &iconsConfig);
-		AddIconFont(fontSize);
 
-		SmallFont = io.Fonts->AddFontFromFileTTF("Resources/Fonts/jetbrains-mono/JetBrainsMono-Regular.ttf", fontSizeSmall, &iconsConfig);
+		constexpr const char* regularFontPath	= "Resources/Fonts/jetbrains-mono/JetBrainsMono-Regular.ttf";
+		constexpr const char* boldFontPath		= "Resources/Fonts/jetbrains-mono/JetBrainsMono-Bold.ttf";
+		
+		DefaultFont = io.Fonts->AddFontFromFileTTF(regularFontPath, fontSize, &iconsConfig);
+		AddIconFont(fontSize);
+		SmallFont = io.Fonts->AddFontFromFileTTF(regularFontPath, fontSizeSmall, &iconsConfig);
 		AddIconFont(fontSizeSmall);
 
-		BoldFont = io.Fonts->AddFontFromFileTTF("Resources/Fonts/jetbrains-mono/JetBrainsMono-Bold.ttf", fontSize, &iconsConfig);
+		BoldFont = io.Fonts->AddFontFromFileTTF(boldFontPath, fontSize, &iconsConfig);
 		AddIconFont(fontSize);
 
 		io.Fonts->TexGlyphPadding = 1;
