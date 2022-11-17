@@ -74,11 +74,14 @@ namespace ArcEngine
 			
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
 
-			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeFlags, "%s", name);
+			size_t id = typeid(T).hash_code();
+			bool open = ImGui::TreeNodeEx((void*)id, treeFlags, "%s", name);
 
 			bool removeComponent = false;
 			if(removable)
 			{
+				ImGui::PushID((uint32_t)id);
+
 				float frameHeight = ImGui::GetFrameHeight();
 				ImGui::SameLine(ImGui::GetContentRegionMax().x - frameHeight * 1.2f);
 				if(ImGui::Button(ICON_MDI_SETTINGS, ImVec2{ frameHeight * 1.2f, frameHeight }))
@@ -91,6 +94,8 @@ namespace ArcEngine
 					
 					ImGui::EndPopup();
 				}
+
+				ImGui::PopID();
 			}
 
 			if(open)
@@ -127,17 +132,21 @@ namespace ArcEngine
 			bool open = ImGui::TreeNodeEx(it, treeFlags, "%s", className.c_str());
 
 			{
+				ImGui::PushID((uint32_t)it);
+
 				ImGui::SameLine(ImGui::GetContentRegionMax().x - frameHeight * 1.2f);
 				if (ImGui::Button(ICON_MDI_SETTINGS, ImVec2{ frameHeight * 1.2f, frameHeight }))
-					ImGui::OpenPopup("ComponentSettings");
+					ImGui::OpenPopup("ScriptSettings");
 
-				if (ImGui::BeginPopup("ComponentSettings"))
+				if (ImGui::BeginPopup("ScriptSettings"))
 				{
 					if (ImGui::MenuItem("Remove"))
 						toRemove = it;
 
 					ImGui::EndPopup();
 				}
+
+				ImGui::PopID();
 			}
 
 			if (open)
