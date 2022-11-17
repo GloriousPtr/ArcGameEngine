@@ -9,7 +9,7 @@ namespace ArcEngine
 	class MonoUtils
 	{
 	public:
-		static MonoAssembly* LoadMonoAssembly(const std::filesystem::path& assemblyPath);
+		static MonoAssembly* LoadMonoAssembly(const std::filesystem::path& assemblyPath, bool loadPdb);
 
 		static bool CheckMonoError(MonoError& error);
 		static eastl::string MonoStringToUTF8(MonoString* monoString);

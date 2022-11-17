@@ -62,6 +62,8 @@ namespace ArcEngine
 		MonoClass* TooltipAttribute = nullptr;
 		MonoClass* RangeAttribute = nullptr;
 
+		bool EnableDebugging = true;
+
 		eastl::hash_map<eastl::string, Ref<ScriptClass>> EntityClasses;
 		eastl::hash_map<UUID, eastl::hash_map<eastl::string, eastl::hash_map<eastl::string, ScriptFieldInstance>>> EntityFields;
 
@@ -81,19 +83,24 @@ namespace ArcEngine
 
 		s_Data = CreateScope<ScriptEngineData>();
 
-		static char* options[] =
+		if (s_Data->EnableDebugging)
 		{
-			"--soft-breakpoints",
-			"--debugger-agent=transport=dt_socket,address=127.0.0.1:2550,server=y,suspend=n"
-		};
-		mono_jit_parse_options(sizeof(options) / sizeof(char*), (char**)options);
-		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
+			static char* options[] =
+			{
+				"--debugger-agent=transport=dt_socket,address=127.0.0.1:2550,server=y,suspend=n,loglevel=3,logfile=MonoDebugger.log",
+				"--soft-breakpoints"
+			};
+			mono_jit_parse_options(2, (char**)options);
+			mono_debug_init(MONO_DEBUG_FORMAT_MONO);
+		}
 
 		MonoDomain* rootDomain = mono_jit_init("ArcJITRuntime");
 		ARC_CORE_ASSERT(rootDomain);
-		mono_debug_domain_create(rootDomain);
 		mono_domain_set(rootDomain, false);
 
+		if (s_Data->EnableDebugging)
+			mono_debug_domain_create(rootDomain);
+		
 		mono_thread_set_main(mono_thread_current());
 
 		GCManager::Init();
@@ -120,7 +127,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		s_Data->CoreAssembly = MonoUtils::LoadMonoAssembly(s_Data->CoreAssemblyPath.c_str());
+		s_Data->CoreAssembly = MonoUtils::LoadMonoAssembly(s_Data->CoreAssemblyPath.c_str(), s_Data->EnableDebugging);
 		s_Data->CoreImage = mono_assembly_get_image(s_Data->CoreAssembly);
 
 		s_Data->EntityClass = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "Entity");
@@ -138,7 +145,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 		
-		s_Data->AppAssembly = MonoUtils::LoadMonoAssembly(s_Data->AppAssemblyPath.c_str());
+		s_Data->AppAssembly = MonoUtils::LoadMonoAssembly(s_Data->AppAssemblyPath.c_str(), s_Data->EnableDebugging);
 		s_Data->AppImage = mono_assembly_get_image(s_Data->AppAssembly);
 
 		GCManager::CollectGarbage();
@@ -221,7 +228,6 @@ namespace ArcEngine
 		s_Data->AppDomain = mono_domain_create_appdomain("ScriptRuntime", nullptr);
 		ARC_CORE_ASSERT(s_Data->AppDomain);
 		mono_domain_set(s_Data->AppDomain, true);
-		mono_debug_domain_create(s_Data->AppDomain);
 
 		LoadCoreAssembly();
 		LoadClientAssembly();

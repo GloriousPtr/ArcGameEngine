@@ -40,7 +40,7 @@ project "Sandbox"
 
     filter "configurations:Debug"
         optimize "Off"
-        symbols "Full"
+        symbols "Default"
 
     filter "configurations:Release"
         optimize "On"

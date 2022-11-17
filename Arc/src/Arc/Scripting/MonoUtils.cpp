@@ -2,6 +2,7 @@
 #include "MonoUtils.h"
 
 #include <mono/metadata/assembly.h>
+#include <mono/metadata/mono-debug.h>
 #include <mono/metadata/object.h>
 
 #include "Arc/Core/Filesystem.h"
@@ -9,7 +10,7 @@
 
 namespace ArcEngine
 {
-	MonoAssembly* MonoUtils::LoadMonoAssembly(const std::filesystem::path& assemblyPath)
+	MonoAssembly* MonoUtils::LoadMonoAssembly(const std::filesystem::path& assemblyPath, bool loadPdb)
 	{
 		ScopedBuffer fileBuffer = Filesystem::ReadFileBinary(assemblyPath);
 
@@ -22,6 +23,20 @@ namespace ArcEngine
 			const char* errorMessage = mono_image_strerror(status);
 			ARC_CORE_ERROR("Could not load mono image from assembly.\n{}", errorMessage);
 			return nullptr;
+		}
+
+		ARC_CORE_TRACE("Loaded Assembly Image: {}", assemblyPath);
+		if (loadPdb)
+		{
+			std::filesystem::path pdbPath = assemblyPath;
+			pdbPath.replace_extension(".pdb");
+
+			if (std::filesystem::exists(pdbPath))
+			{
+				ScopedBuffer pdbFileData = Filesystem::ReadFileBinary(pdbPath);
+				mono_debug_open_image_from_memory(image, pdbFileData.As<const mono_byte>(), pdbFileData.Size());
+				ARC_CORE_TRACE("Loaded PDB: {}", pdbPath);
+			}
 		}
 
 		std::string pathString = assemblyPath.string();
