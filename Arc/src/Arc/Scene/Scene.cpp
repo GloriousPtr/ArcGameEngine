@@ -392,9 +392,9 @@ namespace ArcEngine
 		newScene->m_ViewportHeight = other->m_ViewportHeight;
 
 		auto view = other->m_Registry.group<IDComponent, TagComponent>();
-		for (auto e : view)
+		for (auto it = view.rbegin(); it != view.rend(); it++)
 		{
-			auto [id, tag] = view.get<IDComponent, TagComponent>(e);
+			auto [id, tag] = view.get<IDComponent, TagComponent>(*it);
 			Entity newEntity = newScene->CreateEntityWithUUID(id.ID, tag.Tag);
 			newEntity.GetComponent<TagComponent>().Enabled = tag.Enabled;
 			newEntity.GetComponent<TagComponent>().Layer = tag.Layer;
