@@ -9,6 +9,7 @@ namespace ArcEngine
 	class OpenGLTextureCubemap : public TextureCubemap
 	{
 	public:
+		OpenGLTextureCubemap() = default;
 		explicit OpenGLTextureCubemap(const eastl::string& path);
 		virtual ~OpenGLTextureCubemap();
 
@@ -22,6 +23,7 @@ namespace ArcEngine
 		virtual const eastl::string& GetPath() const override { return m_Path; }
 
 		virtual void SetData(void* data, uint32_t size) override;
+		virtual void Invalidate(uint32_t width, uint32_t height, void* data, uint32_t channels) override;
 
 		virtual void Bind(uint32_t slot = 0) const override;
 		virtual void BindIrradianceMap(uint32_t slot) const override;
@@ -29,12 +31,11 @@ namespace ArcEngine
 
 	private:
 		eastl::string m_Path;
-		uint32_t m_Width, m_Height;
-		uint32_t m_HRDRendererID;
-		uint32_t m_RendererID;
-		uint32_t m_IrradianceRendererID;
-		uint32_t m_RadianceRendererID;
+		uint32_t m_Width = 0, m_Height = 0;
+		uint32_t m_HRDRendererID = 0;
+		uint32_t m_RendererID = 0;
+		uint32_t m_IrradianceRendererID = 0;
+		uint32_t m_RadianceRendererID = 0;
 		GLenum m_InternalFormat, m_DataFormat;
 	};
 }
-

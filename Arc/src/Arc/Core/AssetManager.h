@@ -1,6 +1,8 @@
 #pragma once
 
+#include <future>
 #include <EASTL/hash_map.h>
+#include <EASTL/vector.h>
 
 namespace ArcEngine
 {
@@ -22,5 +24,6 @@ namespace ArcEngine
 		static eastl::hash_map<eastl::string, Ref<Texture2D>> m_Texture2DMap;
 		static eastl::hash_map<eastl::string, Ref<TextureCubemap>> m_TextureCubeMap;
 		static eastl::hash_map<eastl::string, Ref<Mesh>> m_MeshMap;
+		static eastl::vector<std::future<void>> m_Futures;
 	};
 }

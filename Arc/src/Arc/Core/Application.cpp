@@ -105,6 +105,8 @@ namespace ArcEngine
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
+			ExecuteMainThreadQueue();
+
 			if(!m_Minimized)
 			{
 				{
@@ -126,6 +128,13 @@ namespace ArcEngine
 			
 			m_Window->OnUpdate();
 		}
+	}
+
+	void Application::SubmitToMainThread(const std::function<void()>& function)
+	{
+		std::scoped_lock<std::mutex> lock(m_MainThreadQueueMutex);
+
+		m_MainThreadQueue.emplace_back(function);
 	}
 
 	bool Application::OnWindowClose([[maybe_unused]] const WindowCloseEvent& e)
@@ -150,5 +159,15 @@ namespace ArcEngine
 		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
 		
 		return false;
+	}
+
+	void Application::ExecuteMainThreadQueue()
+	{
+		std::scoped_lock<std::mutex> lock(m_MainThreadQueueMutex);
+
+		for (auto& func : m_MainThreadQueue)
+			func();
+
+		m_MainThreadQueue.clear();
 	}
 }

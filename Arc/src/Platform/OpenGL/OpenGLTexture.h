@@ -9,6 +9,7 @@ namespace ArcEngine
 	class OpenGLTexture2D : public Texture2D
 	{
 	public:
+		OpenGLTexture2D() = default;
 		OpenGLTexture2D(uint32_t width, uint32_t height);
 		explicit OpenGLTexture2D(const eastl::string& path);
 		virtual ~OpenGLTexture2D();
@@ -22,13 +23,14 @@ namespace ArcEngine
 		virtual const eastl::string& GetPath() const override { return m_Path; }
 
 		virtual void SetData(void* data, uint32_t size) override;
+		virtual void Invalidate(uint32_t width, uint32_t height, void* data, uint32_t channels) override;
 
 		virtual void Bind(uint32_t slot = 0) const override;
 
 	private:
 		eastl::string m_Path;
-		uint32_t m_Width, m_Height;
-		uint32_t m_RendererID;
+		uint32_t m_Width = 0, m_Height = 0;
+		uint32_t m_RendererID = 0;
 		GLenum m_InternalFormat, m_DataFormat;
 	};
 }

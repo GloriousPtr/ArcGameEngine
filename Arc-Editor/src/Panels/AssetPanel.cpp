@@ -509,7 +509,7 @@ namespace ArcEngine
 						else if (!textureCreated)
 						{
 							textureCreated = true;
-							file.Thumbnail = Texture2D::Create(file.Filepath);
+							file.Thumbnail = AssetManager::GetTexture2D(file.Filepath);
 							textureId = file.Thumbnail->GetRendererID();
 						}
 						else
