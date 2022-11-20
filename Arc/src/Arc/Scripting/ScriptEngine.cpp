@@ -391,8 +391,14 @@ namespace ArcEngine
 
 		MonoObject* reference = GCManager::GetReferencedObject(gcHandle);
 		MonoObject* exception;
+		if (!reference)
+		{
+			ARC_APP_CRITICAL("System.NullReferenceException: Object reference not set to an instance of an object.");
+			return gcHandle;
+		}
+
 		mono_runtime_invoke(method, reference, params, &exception);
-		if (exception != nullptr)
+		if (exception)
 		{
 			MonoString* monoString = mono_object_to_string(exception, nullptr);
 			eastl::string ex = MonoUtils::MonoStringToUTF8(monoString);
