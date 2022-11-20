@@ -128,6 +128,7 @@
 //      iter_swap
 //      lexicographical_compare
 //      lexicographical_compare<Compare>
+//      lexicographical_compare_three_way
 //      lower_bound
 //      lower_bound<Compare>
 //      make_heap                                   Found in heap.h
@@ -163,6 +164,8 @@
 //      random_shuffle<Random>
 //      remove
 //      remove_if
+//     +apply_and_remove
+//     +apply_and_remove_if
 //      remove_copy
 //      remove_copy_if
 //     +remove_heap                                 Found in heap.h
@@ -247,6 +250,7 @@
 #include <EASTL/utility.h>
 #include <EASTL/internal/generic_iterator.h>
 #include <EASTL/random.h>
+#include <EASTL/compare.h>
 
 EA_DISABLE_ALL_VC_WARNINGS();
 
@@ -1259,14 +1263,8 @@ namespace eastl
 	inline BidirectionalIterator2 move_and_copy_backward_chooser(BidirectionalIterator1 first, BidirectionalIterator1 last, BidirectionalIterator2 resultEnd)
 	{
 		typedef typename eastl::iterator_traits<BidirectionalIterator1>::iterator_category IIC;
-		typedef typename eastl::iterator_traits<BidirectionalIterator2>::iterator_category OIC;
-		typedef typename eastl::iterator_traits<BidirectionalIterator1>::value_type        value_type_input;
-		typedef typename eastl::iterator_traits<BidirectionalIterator2>::value_type        value_type_output;
 
-		const bool canBeMemmoved = eastl::is_trivially_copyable<value_type_output>::value &&
-								   eastl::is_same<value_type_input, value_type_output>::value &&
-								  (eastl::is_pointer<BidirectionalIterator1>::value || eastl::is_same<IIC, eastl::contiguous_iterator_tag>::value) &&
-								  (eastl::is_pointer<BidirectionalIterator2>::value || eastl::is_same<OIC, eastl::contiguous_iterator_tag>::value);
+		const bool canBeMemmoved = internal::can_be_memmoved_helper<BidirectionalIterator1, BidirectionalIterator2>::value;
 
 		return eastl::move_and_copy_backward_helper<IIC, isMove, canBeMemmoved>::move_or_copy_backward(first, last, resultEnd); // Need to chose based on the input iterator tag and not the output iterator tag, because containers accept input ranges of iterator types different than self.
 	}
@@ -2114,6 +2112,42 @@ namespace eastl
 	}
 
 
+#if defined(EA_COMPILER_HAS_THREE_WAY_COMPARISON)
+
+	/// lexicographical_compare_three_way
+	///
+	/// Returns: The comparison category ordering between both ranges. For the first non-equivalent pair in the ranges,
+	/// the comparison will be returned. Else if the first range is a subset (superset) of the second range, then the
+	/// less (greater) ordering will be returned.
+	///
+	/// Complexity: At most N iterations, where N = min(last1-first1, last2-first2) of the applications
+	/// of the corresponding comparison.
+	///
+	/// Note: If two sequences have the same number of elements and their
+	/// corresponding elements are equivalent, then neither sequence is
+	/// lexicographically less than the other. If one sequence is a prefix
+	/// of the other, then the shorter sequence is lexicographically less
+	/// than the longer sequence. Otherwise, the lexicographical comparison
+	/// of the sequences yields the same result as the comparison of the first
+	/// corresponding pair of elements that are not equivalent.
+	///
+	template <typename InputIterator1, typename InputIterator2, typename Compare>
+	constexpr auto lexicographical_compare_three_way(InputIterator1 first1, InputIterator1 last1,
+	                                                 InputIterator2 first2, InputIterator2 last2,
+	                                                 Compare compare) -> decltype(compare(*first1, *first2))
+	{
+		for (; (first1 != last1) && (first2 != last2); ++first1, ++first2)
+		{
+			if (auto c = compare(*first1, *first2); c != 0)
+				return c;
+		}
+
+		return (first1 != last1) ? std::strong_ordering::greater :
+		       (first2 != last2) ? std::strong_ordering::less :
+				std::strong_ordering::equal;
+	}
+#endif
+
 	/// mismatch
 	///
 	/// Finds the first position where the two ranges [first1, last1) and
@@ -2623,6 +2657,94 @@ namespace eastl
 		{
 			ForwardIterator i(first);
 			return eastl::remove_copy_if<ForwardIterator, ForwardIterator, Predicate>(++i, last, first, predicate);
+		}
+		return first;
+	}
+
+
+	/// apply_and_remove_if
+	///
+	/// Calls the Function function for all elements referred to  my iterator i in the range
+	/// [first, last) for which the following corresponding condition holds:
+	/// predicate(*i) == true
+	/// and then left shift moves potential non-matching elements over it.
+	///
+	/// Returns: a past-the-end iterator for the new end of the range.
+	///
+	/// Complexity: Exactly 'last - first' applications of the corresponding predicate + applies
+	/// function once for every time the condition holds.
+	///
+	/// Note: Since removing is done by shifting (by means of copy move assignment) the elements
+	/// in the range in such a way that the elements that are not to be removed appear in the
+	/// beginning of the range doesn't actually remove it from the given container, the user must call
+	/// the container erase function if the user wants to erase the element
+	/// from the container. I.e. in the same they as for remove_if the excess elements
+	/// are left in a valid but possibly moved from state.
+	///
+	template <typename ForwardIterator, typename Function, typename Predicate>
+	inline ForwardIterator apply_and_remove_if(ForwardIterator first,
+	                                           ForwardIterator last,
+	                                           Function function,
+	                                           Predicate predicate)
+	{
+		first = eastl::find_if(first, last, predicate);
+		if (first != last)
+		{
+			function(*first);
+			for (auto i = next(first); i != last; ++i)
+			{
+				if (predicate(*i))
+				{
+					function(*i);
+					continue;
+				}
+				*first = eastl::move(*i);
+				++first;
+			}
+		}
+		return first;
+	}
+
+
+	/// apply_and_remove
+	///
+	/// Calls the Function function for all elements referred to my iterator i in the range
+	/// [first, last) for which the following corresponding condition holds:
+	/// value == *i
+	/// and then left shift moves potential non-matching elements over it.
+	///
+	/// Returns: a past-the-end iterator for the new end of the range.
+	///
+	/// Complexity: Exactly 'last - first' applications of the corresponding equality test
+	/// + applies function once for every time the condition holds.
+	///
+	/// Note: Since removing is done by shifting (by means of copy move assignment) the elements
+	/// in the range in such a way that the elements that are not to be removed appear in the
+	/// beginning of the range doesn't actually remove it from the given container, the user must call
+	/// the container erase function if the user wants to erase the element
+	/// from the container. I.e. in the same they as for remove_if the excess elements
+	/// are left in a valid but possibly moved from state.
+	///
+	template <typename ForwardIterator, typename Function, typename T>
+	inline ForwardIterator apply_and_remove(ForwardIterator first,
+	                                        ForwardIterator last,
+	                                        Function function,
+	                                        const T& value)
+	{
+		first = eastl::find(first, last, value);
+		if (first != last)
+		{
+			function(*first);
+			for (auto i = next(first); i != last; ++i)
+			{
+				if (value == *i)
+				{
+					function(*i);
+					continue;
+				}
+				*first = eastl::move(*i);
+				++first;
+			}
 		}
 		return first;
 	}
