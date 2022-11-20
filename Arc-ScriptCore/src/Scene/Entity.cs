@@ -88,21 +88,15 @@ namespace ArcEngine
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T GetComponent<T>() where T : class, IComponent, new()
 		{
-			if (HasComponent<T>())
-			{
-				if (typeof(T).BaseType == typeof(Entity))
-				{
-					return (T)InternalCalls.Entity_GetComponent(ID, typeof(T));
-				}
-				else
-				{
-					T component = new T();
-					component.SetEntity(ID);
-					return component;
-				}
-			}
+			if (!HasComponent<T>())
+				return null;
+			
+			if (typeof(T).BaseType == typeof(Entity))
+				return (T)InternalCalls.Entity_GetComponent(ID, typeof(T));
 
-			return null;
+			T component = new T();
+			component.SetEntity(ID);
+			return component;
 		}
 
 		#endregion
