@@ -1,7 +1,6 @@
 name: Build
 on:
   push:
-    branches: [ main ]
     paths-ignore:
       - '.github/resources/**'
       - '**.md'
