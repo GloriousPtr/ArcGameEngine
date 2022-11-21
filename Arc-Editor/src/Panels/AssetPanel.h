@@ -22,6 +22,8 @@ namespace ArcEngine
 		virtual void OnUpdate([[maybe_unused]] Timestep ts) override;
 		virtual void OnImGuiRender() override;
 
+		void Invalidate();
+
 	private:
 		std::pair<bool, uint32_t> DirectoryTreeViewRecursive(const std::filesystem::path& path, uint32_t* count, int* selection_mask, ImGuiTreeNodeFlags flags);
 		void RenderHeader();
@@ -51,6 +53,7 @@ namespace ArcEngine
 			}
 		};
 
+		std::filesystem::path m_AssetsDirectory;
 		std::filesystem::path m_CurrentDirectory;
 		eastl::stack<std::filesystem::path> m_BackStack;
 		eastl::vector<File> m_DirectoryEntries;

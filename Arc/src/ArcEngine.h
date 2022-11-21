@@ -26,6 +26,8 @@
 #include "Arc/Scene/Entity.h"
 #include "Arc/Scene/Components.h"
 
+#include "Arc/Project/Project.h"
+
 //-----Renderer-----------------------------------
 #include "Arc/Renderer/Renderer.h"
 #include "Arc/Renderer/Renderer2D.h"

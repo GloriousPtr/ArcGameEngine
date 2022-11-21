@@ -45,7 +45,7 @@ namespace ArcEngine
 			data = stbi_load(path.data(), &width, &height, &channels, 0);
 		}
 		ARC_CORE_ASSERT(data, "Failed to load image!");
-		Application::Get().SubmitToMainThread([tex, width, height, data, channels]() { tex->Invalidate(width, height, data, channels); stbi_image_free(data); });
+		Application::Get().SubmitToMainThread([tex, path, width, height, data, channels]() { tex->Invalidate(path, width, height, data, channels); stbi_image_free(data); });
 	}
 
 	Ref<Texture2D> AssetManager::GetTexture2D(const eastl::string& path)
@@ -75,7 +75,7 @@ namespace ArcEngine
 			data = stbi_loadf(path.data(), &width, &height, &channels, 0);
 		}
 		ARC_CORE_ASSERT(data, "Failed to load image!");
-		Application::Get().SubmitToMainThread([tex, width, height, data, channels]() { tex->Invalidate(width, height, data, channels); stbi_image_free(data); });
+		Application::Get().SubmitToMainThread([tex, path, width, height, data, channels]() { tex->Invalidate(path, width, height, data, channels); stbi_image_free(data); });
 	}
 
 	Ref<TextureCubemap> AssetManager::GetTextureCubemap(const eastl::string& path)

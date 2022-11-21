@@ -15,7 +15,6 @@ namespace ArcEngine
 	static Ref<Shader> s_RadianceShader;
 
 	OpenGLTextureCubemap::OpenGLTextureCubemap(const eastl::string& path)
-		: m_Path(path)
 	{
 		ARC_PROFILE_SCOPE();
 		
@@ -29,7 +28,7 @@ namespace ArcEngine
 		}
 		ARC_CORE_ASSERT(data, "Failed to load image!");
 		
-		Invalidate(width, height, data, channels);
+		Invalidate(path, width, height, data, channels);
 
 		stbi_image_free(data);
 	}
@@ -50,9 +49,11 @@ namespace ArcEngine
 		
 	}
 
-	void OpenGLTextureCubemap::Invalidate(uint32_t width, uint32_t height, void* data, uint32_t channels)
+	void OpenGLTextureCubemap::Invalidate(const eastl::string_view path, uint32_t width, uint32_t height, void* data, uint32_t channels)
 	{
 		ARC_PROFILE_SCOPE();
+
+		m_Path = path;
 
 		const uint32_t cubemapSize = 2048;
 		const uint32_t irradianceMapSize = 32;

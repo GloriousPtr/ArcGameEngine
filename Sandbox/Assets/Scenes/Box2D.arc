@@ -18,7 +18,7 @@ Entities:
       Color: [1, 1, 1, 1]
       SortingOrder: 0
       TilingFactor: 1
-      TexturePath: Assets\textures\circle.png
+      TexturePath: Textures\circle.png
     Rigidbody2DComponent:
       Type: 2
       AutoMass: false
@@ -201,7 +201,7 @@ Entities:
       Color: [0.758974373, 0.613406956, 0.202393159, 1]
       SortingOrder: 0
       TilingFactor: 1
-      TexturePath: Assets\textures\circle.png
+      TexturePath: Textures\circle.png
     Rigidbody2DComponent:
       Type: 2
       AutoMass: true

@@ -16,8 +16,9 @@ Entities:
         {}
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      TexturePath: ""
+      SortingOrder: 0
       TilingFactor: 1
+      TexturePath: ""
     Rigidbody2DComponent:
       Type: 0
       AutoMass: false
@@ -38,7 +39,7 @@ Entities:
       Friction: 0.5
       Restitution: 0
     AudioSourceComponent:
-      Filepath: Assets\audio\ding.wav
+      Filepath: Audio\ding.wav
       VolumeMultiplier: 1
       PitchMultiplier: 1
       PlayOnAwake: true

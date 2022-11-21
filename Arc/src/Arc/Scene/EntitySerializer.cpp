@@ -7,6 +7,7 @@
 #include "Arc/Audio/AudioListener.h"
 #include "Arc/Audio/AudioSource.h"
 #include "Arc/Core/AssetManager.h"
+#include "Arc/Project/Project.h"
 #include "Arc/Scene/Entity.h"
 #include "Arc/Scene/Components.h"
 #include "Arc/Scene/Scene.h"
@@ -271,7 +272,7 @@ namespace ArcEngine
 			out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.Color;
 			out << YAML::Key << "SortingOrder" << YAML::Value << spriteRendererComponent.SortingOrder;
 			out << YAML::Key << "TilingFactor" << YAML::Value << spriteRendererComponent.TilingFactor;
-			out << YAML::Key << "TexturePath" << YAML::Value << (spriteRendererComponent.Texture ? spriteRendererComponent.Texture->GetPath().c_str() : "");
+			out << YAML::Key << "TexturePath" << YAML::Value << (spriteRendererComponent.Texture ? Project::GetAssetRelativeFileSystemPath(spriteRendererComponent.Texture->GetPath().c_str()).string() : "");
 
 			out << YAML::EndMap; // SpriteRendererComponent
 		}
@@ -282,7 +283,7 @@ namespace ArcEngine
 			out << YAML::BeginMap; // MeshComponent
 
 			const auto& skyLightComponent = entity.GetComponent<SkyLightComponent>();
-			out << YAML::Key << "TexturePath" << YAML::Value << (skyLightComponent.Texture ? skyLightComponent.Texture->GetPath().c_str() : "");
+			out << YAML::Key << "TexturePath" << YAML::Value << (skyLightComponent.Texture ? Project::GetAssetRelativeFileSystemPath(skyLightComponent.Texture->GetPath().c_str()).string() : "");
 			out << YAML::Key << "Intensity" << YAML::Value << skyLightComponent.Intensity;
 			out << YAML::Key << "Rotation" << YAML::Value << skyLightComponent.Rotation;
 
@@ -608,7 +609,7 @@ namespace ArcEngine
 			out << YAML::BeginMap; // MeshComponent
 			
 			const auto& meshComponent = entity.GetComponent<MeshComponent>();
-			out << YAML::Key << "Filepath" << YAML::Value << meshComponent.Filepath.c_str();
+			out << YAML::Key << "Filepath" << YAML::Value << Project::GetAssetRelativeFileSystemPath(meshComponent.Filepath.c_str()).string();
 			out << YAML::Key << "SubmeshIndex" << YAML::Value << meshComponent.SubmeshIndex;
 			out << YAML::Key << "CullMode" << YAML::Value << (int)meshComponent.CullMode;
 			
@@ -684,8 +685,8 @@ namespace ArcEngine
 			out << YAML::BeginMap; // AudioSourceComponent
 
 			const auto& audioSourceComponent = entity.GetComponent<AudioSourceComponent>();
-			const char* f = (audioSourceComponent.Source ? audioSourceComponent.Source->GetPath() : "");
-			out << YAML::Key << "Filepath" << YAML::Value << f;
+			eastl::string f = (audioSourceComponent.Source ? Project::GetAssetRelativeFileSystemPath(audioSourceComponent.Source->GetPath()).string().c_str() : "");
+			out << YAML::Key << "Filepath" << YAML::Value << f.c_str();
 			out << YAML::Key << "VolumeMultiplier" << YAML::Value << audioSourceComponent.Config.VolumeMultiplier;
 			out << YAML::Key << "PitchMultiplier" << YAML::Value << audioSourceComponent.Config.PitchMultiplier;
 			out << YAML::Key << "PlayOnAwake" << YAML::Value << audioSourceComponent.Config.PlayOnAwake;
@@ -829,9 +830,13 @@ namespace ArcEngine
 
 			eastl::string texturePath = "";
 			TrySet(texturePath, spriteRenderer["TexturePath"]);
-			
+
 			if (!texturePath.empty())
-				src.Texture = AssetManager::GetTexture2D(texturePath);
+			{
+				std::filesystem::path path = texturePath.c_str();
+				path = Project::GetAssetFileSystemPath(path);
+				src.Texture = AssetManager::GetTexture2D(path.string().c_str());
+			}
 		}
 
 		if (const auto& skyLight = entity["SkyLightComponent"])
@@ -843,7 +848,11 @@ namespace ArcEngine
 			eastl::string texturePath = "";
 			TrySet(texturePath, skyLight["TexturePath"]);
 			if (!texturePath.empty())
-				src.Texture = AssetManager::GetTextureCubemap(texturePath);
+			{
+				std::filesystem::path path = texturePath.c_str();
+				path = Project::GetAssetFileSystemPath(path);
+				src.Texture = AssetManager::GetTextureCubemap(path.string().c_str());
+			}
 		}
 
 		if (const auto& lightComponent = entity["LightComponent"])
@@ -1091,7 +1100,12 @@ namespace ArcEngine
 			TrySetEnum(src.CullMode, meshComponent["CullMode"]);
 
 			if (!src.Filepath.empty())
+			{
+				std::filesystem::path path = src.Filepath.c_str();
+				path = Project::GetAssetFileSystemPath(path);
+				src.Filepath = path.string().c_str();
 				src.MeshGeometry = AssetManager::GetMesh(src.Filepath);
+			}
 		}
 
 		if (const auto& scriptComponent = entity["ScriptComponent"])
@@ -1186,7 +1200,11 @@ namespace ArcEngine
 			TrySet(src.Config.DopplerFactor, audioSourceComponent["DopplerFactor"]);
 
 			if (!filepath.empty())
-				src.Source = CreateRef<AudioSource>(filepath.c_str());
+			{
+				std::filesystem::path path = filepath.c_str();
+				path = Project::GetAssetFileSystemPath(path);
+				src.Source = CreateRef<AudioSource>(path.string().c_str());
+			}
 		}
 
 		if (const auto& audioListenerComponent = entity["AudioListenerComponent"])

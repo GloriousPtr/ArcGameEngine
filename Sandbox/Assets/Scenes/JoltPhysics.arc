@@ -3,6 +3,7 @@ Entities:
   - Entity: 7924704810687730180
     TagComponent:
       Tag: Camera
+      Layer: 0
       Enabled: true
     TransformComponent:
       Translation: [0, 2.43823433, 17.7286148]
@@ -27,6 +28,7 @@ Entities:
   - Entity: 17837761170342484294
     TagComponent:
       Tag: Cube
+      Layer: 0
       Enabled: true
     TransformComponent:
       Translation: [0, 8.14545631, 0]
@@ -43,24 +45,26 @@ Entities:
       Mass: 1
       LinearDrag: 0
       AngularDrag: 0.0500000007
+      GravityScale: 1
       AllowSleep: true
       Awake: true
       Continuous: false
-      GravityScale: 1
+      Interpolation: true
+      IsSensor: false
     BoxColliderComponent:
       Size: [0.5, 0.5, 0.5]
       Offset: [0, 0, 0]
-      IsSensor: false
       Density: 1
       Friction: 0.5
       Restitution: 0.5
     MeshComponent:
-      Filepath: Assets\models\Primitives\Cube.fbx
+      Filepath: Models\Primitives\Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 1304237688638990982
     TagComponent:
       Tag: Light
+      Layer: 0
       Enabled: true
     TransformComponent:
       Translation: [0, 0, 0]
@@ -84,6 +88,7 @@ Entities:
   - Entity: 13079083868139151945
     TagComponent:
       Tag: Ground
+      Layer: 0
       Enabled: true
     TransformComponent:
       Translation: [0, 0, 0]
@@ -100,24 +105,26 @@ Entities:
       Mass: 1
       LinearDrag: 0
       AngularDrag: 0.0500000007
+      GravityScale: 1
       AllowSleep: true
       Awake: true
       Continuous: false
-      GravityScale: 1
+      Interpolation: true
+      IsSensor: false
     BoxColliderComponent:
       Size: [0.5, 0.5, 0.5]
       Offset: [0, 0, 0]
-      IsSensor: false
       Density: 1
       Friction: 0.5
       Restitution: 0
     MeshComponent:
-      Filepath: Assets\models\Primitives\Cube.fbx
+      Filepath: Models\Primitives\Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 4444126669705181132
     TagComponent:
       Tag: Cubemap
+      Layer: 0
       Enabled: true
     TransformComponent:
       Translation: [0, 0, 0]
@@ -129,6 +136,6 @@ Entities:
       Children:
         {}
     SkyLightComponent:
-      TexturePath: Assets\textures\Cubemap.hdr
+      TexturePath: Textures\Cubemap.hdr
       Intensity: 0.699999988
       Rotation: 0

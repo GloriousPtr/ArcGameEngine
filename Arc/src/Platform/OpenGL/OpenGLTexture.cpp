@@ -24,7 +24,6 @@ namespace ArcEngine
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const eastl::string& path)
-		: m_Path(path)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -38,7 +37,7 @@ namespace ArcEngine
 		}
 		ARC_CORE_ASSERT(data, "Failed to load image!");
 		
-		Invalidate(width, height, data, channels);
+		Invalidate(path, width, height, data, channels);
 
 		stbi_image_free(data);
 	}
@@ -58,9 +57,11 @@ namespace ArcEngine
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
 	}
 
-	void OpenGLTexture2D::Invalidate(uint32_t width, uint32_t height, void* data, uint32_t channels)
+	void OpenGLTexture2D::Invalidate(const eastl::string_view path, uint32_t width, uint32_t height, void* data, uint32_t channels)
 	{
 		ARC_PROFILE_SCOPE();
+
+		m_Path = path;
 
 		if (m_RendererID)
 			glDeleteTextures(1, &m_RendererID);

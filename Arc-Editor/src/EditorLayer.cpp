@@ -5,6 +5,7 @@
 #include <imgui/imgui_internal.h>
 
 #include <ArcEngine.h>
+#include <Arc/Project/ProjectSerializer.h>
 #include <Arc/Scene/SceneSerializer.h>
 #include <Arc/Scripting/ScriptEngine.h>
 #include <Arc/Utils/PlatformUtils.h>
@@ -50,7 +51,9 @@ namespace ArcEngine
 		m_Viewports[0]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
 		
 		m_Properties.emplace_back(CreateScope<PropertiesPanel>());
-		m_AssetPanels.emplace_back(CreateScope<AssetPanel>());
+
+		if (Project::GetActive().get())
+			m_AssetPanels.emplace_back(CreateScope<AssetPanel>());
 
 		m_Panels.emplace_back(CreateScope<RendererSettingsPanel>());
 		m_Panels.emplace_back(CreateScope<StatsPanel>());
@@ -201,6 +204,10 @@ namespace ArcEngine
 								SaveScene();
 							if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
 								SaveSceneAs();
+							if (ImGui::MenuItem("New Project", nullptr))
+								NewProject();
+							if (ImGui::MenuItem("Open Project", nullptr))
+								OpenProject();
 							if (ImGui::MenuItem("Exit"))
 								m_Application->Close();
 
@@ -224,11 +231,13 @@ namespace ArcEngine
 								{
 									m_Properties.emplace_back(CreateScope<PropertiesPanel>());
 								}
+								ImGui::BeginDisabled(!Project::GetActive().get());
 								if (ImGui::MenuItem("Assets"))
 								{
 									m_AssetPanels.emplace_back(CreateScope<AssetPanel>());
 								}
-								
+								ImGui::EndDisabled();
+
 								ImGui::EndMenu();
 							}
 							ImGui::MenuItem("Hierarchy", nullptr, &m_ShowSceneHierarchyPanel);
@@ -782,6 +791,42 @@ namespace ArcEngine
 	bool EditorLayer::OnMouseButtonReleased([[maybe_unused]] const MouseButtonReleasedEvent& e) const
 	{
 		return false;
+	}
+
+	void EditorLayer::NewProject()
+	{
+		Project::New();
+	}
+
+	void EditorLayer::OpenProject(const std::filesystem::path& path)
+	{
+		if (Project::Load(path))
+		{
+			auto startScenePath = Project::GetAssetFileSystemPath(Project::GetActive()->GetConfig().StartScene);
+			OpenScene(startScenePath.string().c_str());
+
+			if (m_AssetPanels.empty())
+			{
+				m_AssetPanels.push_back(CreateScope<AssetPanel>());
+			}
+			else
+			{
+				for (auto& assetPanel : m_AssetPanels)
+					assetPanel->Invalidate();
+			}
+		}
+	}
+
+	void EditorLayer::OpenProject()
+	{
+		eastl::string filepath = FileDialogs::OpenFile("Arc Scene (*.arcproj)\0*.arcproj\0");
+		if (!filepath.empty())
+			OpenProject(filepath.c_str());
+	}
+
+	void EditorLayer::SaveProject()
+	{
+		// Project::SaveActive();
 	}
 
 	void EditorLayer::NewScene()

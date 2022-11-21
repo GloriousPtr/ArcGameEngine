@@ -14,8 +14,6 @@
 
 namespace ArcEngine
 {
-	static const std::filesystem::path s_AssetPath = "Assets";
-
 	static const eastl::hash_map<eastl::string, eastl::string> s_FileTypes =
 	{
 		{ "png",	"Texture" },
@@ -203,8 +201,9 @@ namespace ArcEngine
 		m_DirectoryIcon = Texture2D::Create("Resources/Icons/ContentBrowser/DirectoryIcon.png");
 		m_FileIcon = Texture2D::Create("Resources/Icons/ContentBrowser/FileIcon.png");
 
-		m_CurrentDirectory = s_AssetPath;
-		UpdateDirectoryEntries(s_AssetPath);
+		m_AssetsDirectory = Project::GetAssetDirectory();
+		m_CurrentDirectory = m_AssetsDirectory;
+		UpdateDirectoryEntries(m_CurrentDirectory);
 	}
 
 	void AssetPanel::OnUpdate([[maybe_unused]] Timestep ts)
@@ -244,6 +243,13 @@ namespace ArcEngine
 		}
 	}
 
+	void AssetPanel::Invalidate()
+	{
+		m_AssetsDirectory = Project::GetAssetDirectory();
+		m_CurrentDirectory = m_AssetsDirectory;
+		UpdateDirectoryEntries(m_CurrentDirectory);
+	}
+
 	void AssetPanel::RenderHeader()
 	{
 		ARC_PROFILE_SCOPE();
@@ -274,7 +280,7 @@ namespace ArcEngine
 		// Back button
 		{
 			bool disabledBackButton = false;
-			if (m_CurrentDirectory == std::filesystem::path(s_AssetPath))
+			if (m_CurrentDirectory == m_AssetsDirectory)
 				disabledBackButton = true;
 
 			if (disabledBackButton)
@@ -337,8 +343,10 @@ namespace ArcEngine
 		{
 			current /= path;
 			ImGui::SameLine();
-			const char* folderName = StringUtils::GetName(path.string().c_str()).c_str();
-			if (ImGui::Button(folderName))
+			eastl::string folderName = StringUtils::GetName(path.string().c_str());
+			if (folderName.empty())
+				folderName = "Assets";
+			if (ImGui::Button(folderName.c_str()))
 				directoryToOpen = current;
 
 			if (m_CurrentDirectory != current)
@@ -377,7 +385,7 @@ namespace ArcEngine
 			ImGui::TableNextColumn();
 
 			ImGuiTreeNodeFlags nodeFlags = treeNodeFlags;
-			const bool selected = m_CurrentDirectory == s_AssetPath && selectionMask == 0;
+			const bool selected = m_CurrentDirectory == m_AssetsDirectory && selectionMask == 0;
 			if (selected)
 			{
 				nodeFlags |= ImGuiTreeNodeFlags_Selected;
@@ -389,12 +397,12 @@ namespace ArcEngine
 				ImGui::PushStyleColor(ImGuiCol_HeaderHovered, EditorTheme::HeaderHoveredColor);
 			}
 
-			bool opened = ImGui::TreeNodeEx(s_AssetPath.c_str(), nodeFlags, "");
+			bool opened = ImGui::TreeNodeEx(m_AssetsDirectory.string().c_str(), nodeFlags, "");
 			ImGui::PopStyleColor(selected ? 2 : 1);
 
 			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
 			{
-				UpdateDirectoryEntries(s_AssetPath);
+				UpdateDirectoryEntries(m_AssetsDirectory);
 				selectionMask = 0;
 			}
 			const char* folderIcon = opened ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
@@ -408,10 +416,10 @@ namespace ArcEngine
 			if (opened)
 			{
 				uint32_t count = 0;
-				for (const auto& entry : std::filesystem::recursive_directory_iterator(s_AssetPath))
+				for (const auto& entry : std::filesystem::recursive_directory_iterator(m_AssetsDirectory))
 					count++;
 
-				const auto [isClicked, clickedNode] = DirectoryTreeViewRecursive(s_AssetPath, &count, &selectionMask, treeNodeFlags);
+				const auto [isClicked, clickedNode] = DirectoryTreeViewRecursive(m_AssetsDirectory, &count, &selectionMask, treeNodeFlags);
 
 				if (isClicked)
 				{
@@ -648,7 +656,7 @@ namespace ArcEngine
 		for (auto& directoryEntry : std::filesystem::directory_iterator(directory))
 		{
 			const auto& path = directoryEntry.path();
-			auto relativePath = std::filesystem::relative(path, s_AssetPath);
+			auto relativePath = std::filesystem::relative(path, m_AssetsDirectory);
 			eastl::string filename = relativePath.filename().string().c_str();
 			m_DirectoryEntries.emplace_back(filename, path.string().c_str(), StringUtils::GetExtension(filename.c_str()), directoryEntry, nullptr, directoryEntry.is_directory());
 		}
