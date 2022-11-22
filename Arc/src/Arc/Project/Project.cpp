@@ -20,6 +20,13 @@ namespace ArcEngine
 		{
 			project->m_ProjectDirectory = path.parent_path();
 			s_ActiveProject = project;
+
+			if (!std::filesystem::exists(GetAssetDirectory()))
+				std::filesystem::create_directory(GetAssetDirectory());
+
+			if (!std::filesystem::exists(GetScriptModuleDirectory()))
+				std::filesystem::create_directory(GetScriptModuleDirectory());
+
 			return s_ActiveProject;
 		}
 

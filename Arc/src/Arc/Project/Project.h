@@ -14,8 +14,8 @@ namespace ArcEngine
 
 		std::filesystem::path StartScene;
 
-		std::filesystem::path AssetDirectory;
-		std::filesystem::path ScriptModulePath;
+		std::filesystem::path AssetDirectory = "Assets";
+		std::filesystem::path ScriptModulePath = "Binaries";
 	};
 
 	class Project
