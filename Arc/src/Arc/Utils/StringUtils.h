@@ -32,5 +32,15 @@ namespace ArcEngine
 			lastSlash = lastSlash == eastl::string::npos ? 0 : lastSlash + 1;
 			return filepath.substr(lastSlash, filepath.size());
 		}
+
+		inline static void ReplaceString(eastl::string& subject, const eastl::string& search, const eastl::string& replace)
+		{
+			size_t pos = 0;
+			while ((pos = subject.find(search, pos)) != std::string::npos)
+			{
+				subject.replace(pos, search.length(), replace);
+				pos += replace.length();
+			}
+		}
 	};
 }

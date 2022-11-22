@@ -1,6 +1,8 @@
 #include "arcpch.h"
 #include "Project.h"
 
+#include "Arc/Core/Filesystem.h"
+#include "Arc/Utils/StringUtils.h"
 #include "ProjectSerializer.h"
 
 namespace ArcEngine
@@ -26,6 +28,15 @@ namespace ArcEngine
 
 			if (!std::filesystem::exists(GetScriptModuleDirectory()))
 				std::filesystem::create_directory(GetScriptModuleDirectory());
+
+			std::filesystem::path premakeFilepath = GetProjectDirectory() / "premake5.lua";
+			if (!std::filesystem::exists(premakeFilepath))
+			{
+				eastl::string buffer;
+				Filesystem::ReadFileText("Resources/Templates/PremakeProjectTemplate.txt", buffer);
+				StringUtils::ReplaceString(buffer, "{PROJECT_NAME}", s_ActiveProject->GetConfig().Name);
+				Filesystem::WriteFileText(premakeFilepath, buffer);
+			}
 
 			return s_ActiveProject;
 		}
