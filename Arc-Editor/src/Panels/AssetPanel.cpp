@@ -337,16 +337,14 @@ namespace ArcEngine
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.0f, 0.0f, 0.0f, 0.0f });
-		std::filesystem::path current = "";
+		std::filesystem::path current = m_AssetsDirectory.parent_path();
 		std::filesystem::path directoryToOpen = "";
-		for (auto& path : m_CurrentDirectory)
+		std::filesystem::path currentDirectory = std::filesystem::relative(m_CurrentDirectory, current);
+		for (auto& path : currentDirectory)
 		{
 			current /= path;
 			ImGui::SameLine();
-			eastl::string folderName = StringUtils::GetName(path.string().c_str());
-			if (folderName.empty())
-				folderName = "Assets";
-			if (ImGui::Button(folderName.c_str()))
+			if (ImGui::Button(path.filename().string().c_str()))
 				directoryToOpen = current;
 
 			if (m_CurrentDirectory != current)
@@ -359,7 +357,7 @@ namespace ArcEngine
 		ImGui::PopStyleVar();
 
 		if (!directoryToOpen.empty())
-			UpdateDirectoryEntries(directoryToOpen);
+			UpdateDirectoryEntries(m_AssetsDirectory / directoryToOpen);
 	}
 
 	void AssetPanel::RenderSideView()
