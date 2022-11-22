@@ -13,7 +13,7 @@ namespace ArcEngine
 		Buffer() = default;
 		Buffer(uint64_t size) {	Allocate(size); }
 
-		static Buffer Cope(Buffer other)
+		static Buffer Copy(Buffer other)
 		{
 			Buffer result = Buffer(other.Size);
 			memcpy_s(result.Data, result.Size, other.Data, other.Size);
