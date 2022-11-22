@@ -12,6 +12,7 @@
 #include <mono/metadata/debug-helpers.h>
 #endif // ARC_DEBUG
 
+#include "Arc/Project/Project.h"
 #include "Arc/Scene/Entity.h"
 #include "Arc/Scene/Scene.h"
 #include "MonoUtils.h"
@@ -44,9 +45,6 @@ namespace ArcEngine
 
 	struct ScriptEngineData
 	{
-		eastl::string CoreAssemblyPath = "Resources/Scripts/Arc-ScriptCore.dll";
-		eastl::string AppAssemblyPath = "../Sandbox/Binaries/Sandbox.dll";
-
 		MonoDomain* AppDomain = nullptr;
 
 		MonoAssembly* CoreAssembly = nullptr;
@@ -127,7 +125,13 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		s_Data->CoreAssembly = MonoUtils::LoadMonoAssembly(s_Data->CoreAssemblyPath.c_str(), s_Data->EnableDebugging);
+		auto project = Project::GetActive();
+		if (!project)
+			return;
+
+		constexpr const char* coreAssemblyName = "Arc-ScriptCore.dll";
+		auto path = Project::GetScriptModuleDirectory() / coreAssemblyName;
+		s_Data->CoreAssembly = MonoUtils::LoadMonoAssembly(path.string().c_str(), s_Data->EnableDebugging);
 		s_Data->CoreImage = mono_assembly_get_image(s_Data->CoreAssembly);
 
 		s_Data->EntityClass = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "Entity");
@@ -145,7 +149,13 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 		
-		s_Data->AppAssembly = MonoUtils::LoadMonoAssembly(s_Data->AppAssemblyPath.c_str(), s_Data->EnableDebugging);
+		auto project = Project::GetActive();
+		if (!project)
+			return;
+
+		eastl::string clientAssemblyName = project->GetConfig().Name + ".dll";
+		auto path = Project::GetScriptModuleDirectory() / clientAssemblyName.c_str();
+		s_Data->AppAssembly = MonoUtils::LoadMonoAssembly(path, s_Data->EnableDebugging);
 		s_Data->AppImage = mono_assembly_get_image(s_Data->AppAssembly);
 
 		GCManager::CollectGarbage();
@@ -157,72 +167,91 @@ namespace ArcEngine
 		ScriptEngineRegistry::RegisterTypes();
 	}
 
-	void ScriptEngine::ReloadAppDomain()
+	void ScriptEngine::ReloadAppDomain(bool rebuild)
 	{
 		ARC_PROFILE_SCOPE();
 
-		system("call \"../vendor/premake/bin/premake5.exe\" --file=\"../Sandbox/premake5.lua\" vs2022");
+		std::chrono::high_resolution_clock::time_point begin = std::chrono::high_resolution_clock::now();
+		if (rebuild)
+		{
+			if (!Project::GetActive())
+				return;
+
+			// Premake build
+			std::filesystem::path projectPath = Project::GetProjectDirectory();
+			{
+				std::string premakeCommand = "call \"../vendor/premake/bin/premake5.exe\" --file=";
+				premakeCommand += (projectPath / "premake5.lua").string();
+				premakeCommand += " vs2022";
+				system(premakeCommand.c_str());
+			}
+
+			//Compile app assembly
+			{
+				std::string buildCommand = "dotnet msbuild ";
+				buildCommand += (projectPath / (std::string(Project::GetActive()->GetConfig().Name.c_str()) + ".sln")).string();
+				buildCommand += " -nologo"																	// no microsoft branding in console
+								" -noconlog"																// no console logs
+								//" -t:rebuild"																// rebuild the project
+								" -m"																		// multiprocess build
+								" -flp1:Verbosity=minimal;logfile=AssemblyBuildErrors.log;errorsonly"		// dump errors in AssemblyBuildErrors.log file
+								" -flp2:Verbosity=minimal;logfile=AssemblyBuildWarnings.log;warningsonly";	// dump warnings in AssemblyBuildWarnings.log file
+				
+				system(buildCommand.c_str());
+
+				// Errors
+				{
+					FILE* errors = fopen("AssemblyBuildErrors.log", "r");
+
+					char buffer[4096];
+					if (errors != nullptr)
+					{
+						while (fgets(buffer, sizeof(buffer), errors))
+						{
+							if (buffer)
+							{
+								size_t newLine = eastl::string_view(buffer).size() - 1;
+								buffer[newLine] = '\0';
+								ARC_APP_ERROR(buffer);
+							}
+						}
+
+						fclose(errors);
+					}
+				}
+
+				// Warnings
+				{
+					FILE* warns = fopen("AssemblyBuildWarnings.log", "r");
+
+					char buffer[1024];
+					if (warns != nullptr)
+					{
+						while (fgets(buffer, sizeof(buffer), warns))
+						{
+							if (buffer)
+							{
+								size_t newLine = eastl::string_view(buffer).size() - 1;
+								buffer[newLine] = '\0';
+								ARC_APP_WARN(buffer);
+							}
+						}
+
+						fclose(warns);
+					}
+				}
+			}
+
+			std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+			auto timeTaken = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+			ARC_CORE_INFO("Compile time: {0}ms", timeTaken);
+		}
 
 		if (s_Data->AppDomain)
 		{
 			mono_domain_set(mono_get_root_domain(), false);
 			mono_domain_unload(s_Data->AppDomain);
 			s_Data->AppDomain = nullptr;
-		}
-
-		//Compile app assembly
-		{
-			constexpr const char* command = "dotnet msbuild ../Sandbox/Sandbox.sln"
-				" -nologo"																	// no microsoft branding in console
-				" -noconlog"																// no console logs
-				//" -t:rebuild"																// rebuild the project
-				" -m"																		// multiprocess build
-				" -flp1:Verbosity=minimal;logfile=AssemblyBuildErrors.log;errorsonly"		// dump errors in AssemblyBuildErrors.log file
-				" -flp2:Verbosity=minimal;logfile=AssemblyBuildWarnings.log;warningsonly";	// dump warnings in AssemblyBuildWarnings.log file
-
-			system(command);
-
-			// Errors
-			{
-				FILE* errors = fopen("AssemblyBuildErrors.log", "r");
-
-				char buffer[4096];
-				if (errors != nullptr)
-				{
-					while (fgets(buffer, sizeof(buffer), errors))
-					{
-						if (buffer)
-						{
-							size_t newLine = eastl::string_view(buffer).size() - 1;
-							buffer[newLine] = '\0';
-							ARC_APP_ERROR(buffer);
-						}
-					}
-
-					fclose(errors);
-				}
-			}
-
-			// Warnings
-			{
-				FILE* warns = fopen("AssemblyBuildWarnings.log", "r");
-
-				char buffer[1024];
-				if (warns != nullptr)
-				{
-					while (fgets(buffer, sizeof(buffer), warns))
-					{
-						if (buffer)
-						{
-							size_t newLine = eastl::string_view(buffer).size() - 1;
-							buffer[newLine] = '\0';
-							ARC_APP_WARN(buffer);
-						}
-					}
-
-					fclose(warns);
-				}
-			}
 		}
 
 		s_Data->AppDomain = mono_domain_create_appdomain("ScriptRuntime", nullptr);

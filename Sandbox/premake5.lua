@@ -50,6 +50,6 @@ project "Sandbox"
         optimize "Full"
         symbols "Off"
 
-group "Hazel"
+group "Arc"
     include (ArcRootDir .. "/Arc-ScriptCore")
 group ""

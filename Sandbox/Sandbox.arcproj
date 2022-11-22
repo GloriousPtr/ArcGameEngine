@@ -2,4 +2,4 @@ Project:
   Name: Sandbox
   StartScene: "Scenes/Box2D.arc"
   AssetDirectory: "Assets"
-  ScriptModulePath: "Scripts/Binaries/Sandbox.dll"
+  ScriptModulePath: "Binaries"

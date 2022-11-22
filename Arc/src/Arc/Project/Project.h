@@ -33,6 +33,12 @@ namespace ArcEngine
 			return GetProjectDirectory() / s_ActiveProject->m_Config.AssetDirectory;
 		}
 
+		static std::filesystem::path GetScriptModuleDirectory()
+		{
+			ARC_CORE_ASSERT(s_ActiveProject);
+			return GetProjectDirectory() / s_ActiveProject->m_Config.ScriptModulePath;
+		}
+
 		static std::filesystem::path GetAssetFileSystemPath(const std::filesystem::path& path)
 		{
 			ARC_CORE_ASSERT(s_ActiveProject);
