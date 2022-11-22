@@ -22,7 +22,7 @@ project "Arc"
 		"vendor/ImGuizmo/ImGuizmo.h",
 		"vendor/ImGuizmo/ImGuizmo.cpp",
 
-		"%{IncludeDir.EASTL}/EASTL.natvis",
+		"%{IncludeDir.EASTL}/../doc/EASTL.natvis",
 		"%{IncludeDir.glm}/util/glm.natvis",
 		"%{IncludeDir.yaml_cpp}/../src/contrib/yaml-cpp.natvis",
 		"%{IncludeDir.JoltPhysics}/Jolt/Jolt.natvis"
