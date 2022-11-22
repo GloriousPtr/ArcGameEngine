@@ -146,7 +146,7 @@ namespace ArcEngine
 			if (ImGui::IsKeyPressed(ImGuiKey_R))
 				m_GizmoType = ImGuizmo::OPERATION::SCALE;
 			if (ImGui::IsKeyPressed(ImGuiKey_T))
-				m_GizmoType = ImGuizmo::OPERATION::BOUNDS;
+				m_GizmoType = ImGuizmo::OPERATION::UNIVERSAL;
 		}
 
 		if (ImGui::IsKeyPressed(ImGuiKey_F) && m_SceneHierarchyPanel)

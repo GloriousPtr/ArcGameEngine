@@ -7,9 +7,6 @@
 [submodule "Arc/vendor/yaml-cpp"]
 	path = Arc/vendor/yaml-cpp
 	url = https://github.com/TheCherno/yaml-cpp.git
-[submodule "Arc/vendor/ImGuizmo"]
-	path = Arc/vendor/ImGuizmo
-	url = https://github.com/TheCherno/ImGuizmo.git
 [submodule "Arc/vendor/optick"]
 	path = Arc/vendor/optick
 	url = https://github.com/MohitSethi99/optick.git
