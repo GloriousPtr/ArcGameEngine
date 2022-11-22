@@ -1,0 +1,9 @@
+/[Bb]inaries/
+/[Ii]ntermediates/
+
+# Visual Studio files and folder
+.vs/
+*.sln
+*.csproj
+*.csproj.user
+*.ini
