@@ -183,6 +183,7 @@ namespace ArcEngine
 			{
 				std::string premakeCommand = "call \"../vendor/premake/bin/premake5.exe\" --file=";
 				premakeCommand += (projectPath / "premake5.lua").string();
+				premakeCommand += " --scripts=" + std::filesystem::current_path().string();
 				premakeCommand += " vs2022";
 				system(premakeCommand.c_str());
 			}
