@@ -59,7 +59,7 @@ namespace ArcEngine
 		void OnSceneUnpause();
 	private:
 
-		Application* m_Application;
+		Application* m_Application = nullptr;
 		Ref<Scene> m_ActiveScene;
 		Ref<Scene> m_EditorScene;
 		Ref<Scene> m_RuntimeScene;
@@ -81,8 +81,8 @@ namespace ArcEngine
 
 		bool m_ShowSceneHierarchyPanel = true;
 		bool m_ShowDemoWindow = false;
-		float m_MenuBarHeight = 10.0f;
-		glm::vec2 m_LastMousePosition;
+		float m_TopMenuBarHeight = 6.0f;
+		glm::vec2 m_LastMousePosition = glm::vec2(0.0f);
 
 		bool m_WindowDragging = false;
 		bool m_TopResizing = false;

@@ -179,13 +179,17 @@ namespace ArcEngine
 
 			bool openNewProjectModalPopup = false;
 			ImVec2 windowPadding = ImGui::GetStyle().WindowPadding;
+			float frameHeight = ImGui::GetFrameHeight();
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 			{
 				//////////////////////////////////////////////////////////////////////////
 				// PRIMARY TOP MENU BAR //////////////////////////////////////////////////
 				//////////////////////////////////////////////////////////////////////////
-				if (ImGui::BeginViewportSideBar("##PrimaryMenuBar", viewport, ImGuiDir_Up, m_MenuBarHeight, window_flags))
+				ImVec2 framePadding = ImGui::GetStyle().FramePadding;
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { framePadding.x, 6.5f });
+				m_TopMenuBarHeight = ImGui::GetFrameHeight();
+				if (ImGui::BeginViewportSideBar("##PrimaryMenuBar", viewport, ImGuiDir_Up, m_TopMenuBarHeight, window_flags))
 				{
 					HandleWindowDrag();
 
@@ -282,15 +286,30 @@ namespace ArcEngine
 
 						ImGui::PopStyleVar();
 
+						ImVec2 region = ImGui::GetContentRegionMax();
+						ImVec2 buttonSize = { region.y * 1.6f, region.y };
+
+						ImGui::PushStyleColor(ImGuiCol_Button, { 0.05f, 0.05f, 0.05f, 1.0f });
+						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.05f, 0.05f, 0.05f, 1.0f });
+						ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0.05f, 0.05f, 0.05f, 1.0f });
+						ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+						if (auto project = Project::GetActive())
+						{
+							const eastl::string& projectName = project->GetConfig().Name;
+							ImVec2 textSize = ImGui::CalcTextSize(projectName.c_str());
+							ImGui::SetCursorPos(ImVec2(region.x - 4.0f * buttonSize.x - textSize.x - 100.0f + ImGui::GetStyle().WindowPadding.x, ImGui::GetCursorPosY() - 2.0f));
+							ImGui::Button(projectName.c_str(), { textSize.x + 100.0f, buttonSize.y });
+						}
+						ImGui::PopStyleVar();
+						ImGui::PopStyleColor(3);
+
 						// Minimize/Maximize/Close buttons
 						ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 0.0f });
 						ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
 						ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
 						ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 						ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
-
-						ImVec2 region = ImGui::GetContentRegionMax();
-						ImVec2 buttonSize = { region.y * 2.0f, region.y };
+						
 						ImGui::SetCursorPosX(region.x - 3.0f * buttonSize.x + ImGui::GetStyle().WindowPadding.x);
 						bool isNormalCursor = ImGui::GetMouseCursor() == ImGuiMouseCursor_Arrow;
 
@@ -327,11 +346,12 @@ namespace ArcEngine
 					}
 					ImGui::End();
 				}
+				ImGui::PopStyleVar();
 
 				//////////////////////////////////////////////////////////////////////////
 				// SECONDARY TOP BAR /////////////////////////////////////////////////////
 				//////////////////////////////////////////////////////////////////////////
-				if (ImGui::BeginViewportSideBar("##SecondaryMenuBar", viewport, ImGuiDir_Up, m_MenuBarHeight, window_flags))
+				if (ImGui::BeginViewportSideBar("##SecondaryMenuBar", viewport, ImGuiDir_Up, frameHeight, window_flags))
 				{
 					HandleWindowDrag();
 
@@ -340,7 +360,6 @@ namespace ArcEngine
 					if (ImGui::BeginMenuBar())
 					{
 						ImVec2 region = ImGui::GetContentRegionMax();
-						float frameHeight = ImGui::GetFrameHeight();
 						ImVec2 buttonSize = { frameHeight * 1.5f, frameHeight };
 						ImGui::SetCursorPosX(region.x * 0.5f - 3 * 0.5f * buttonSize.x);
 
@@ -383,7 +402,7 @@ namespace ArcEngine
 						float fps = ImGui::GetIO().Framerate;
 						size_t allocatedMemory = Application::GetAllocatedMemorySize();
 						ImGui::Text("FPS: %.2f (%.3fms)  MEM: %.2fMB", fps, 1000.0f / fps, (float)allocatedMemory / (1024.0f * 1024.0f));
-
+						
 						ImGui::EndMenuBar();
 					}
 					ImGui::PopStyleVar(2);
@@ -393,7 +412,7 @@ namespace ArcEngine
 				//////////////////////////////////////////////////////////////////////////
 				// BOTTOM MENU BAR ///////////////////////////////////////////////////////
 				//////////////////////////////////////////////////////////////////////////
-				if (ImGui::BeginViewportSideBar("##StatusBar", viewport, ImGuiDir_Down, m_MenuBarHeight, window_flags))
+				if (ImGui::BeginViewportSideBar("##StatusBar", viewport, ImGuiDir_Down, frameHeight, window_flags))
 				{
 					if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 						m_ConsolePanel.SetFocus();
@@ -415,7 +434,7 @@ namespace ArcEngine
 				}
 			}
 			ImGui::PopStyleVar(2);
-
+			
 			//////////////////////////////////////////////////////////////////////////
 			// HIERARCHY /////////////////////////////////////////////////////////////
 			//////////////////////////////////////////////////////////////////////////
@@ -585,13 +604,13 @@ namespace ArcEngine
 			ImGui::PopStyleVar(2);
 
 		// DockSpace
-		m_MenuBarHeight = ImGui::GetFrameHeight();
 
-		float topMenuBarCount = 2.0f;
-		float bottomMenuBarCount = 1.0f;
-		float dockSpaceOffsetY = ImGui::GetCursorPosY() + (topMenuBarCount - 1.0f) * m_MenuBarHeight;
+		float frameHeight = ImGui::GetFrameHeight();
+		float menuBarSize = 1.0f * frameHeight;
+		float bottomMenuBarSize = 1.0f * frameHeight;
+		float dockSpaceOffsetY = ImGui::GetCursorPosY() + menuBarSize + (m_TopMenuBarHeight - frameHeight);
 
-		ImVec2 dockSpaceSize = ImVec2(viewport->Size.x, viewport->Size.y - ((topMenuBarCount + bottomMenuBarCount) * m_MenuBarHeight));
+		ImVec2 dockSpaceSize = ImVec2(viewport->Size.x, viewport->Size.y - (menuBarSize + bottomMenuBarSize + (m_TopMenuBarHeight - frameHeight)));
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		float minWinSizeX = style.WindowMinSize.x;
