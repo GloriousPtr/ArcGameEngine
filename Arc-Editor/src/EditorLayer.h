@@ -44,10 +44,9 @@ namespace ArcEngine
 		bool OnMouseButtonPressed([[maybe_unused]] const MouseButtonPressedEvent& e) const;
 		bool OnMouseButtonReleased([[maybe_unused]] const MouseButtonReleasedEvent& e) const;
 
-		void NewProject();
 		void OpenProject(const std::filesystem::path& path);
 		void OpenProject();
-		void SaveProject();
+		void SaveProject(const std::filesystem::path& path);
 
 		void NewScene();
 		void OpenScene();

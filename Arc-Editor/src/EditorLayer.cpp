@@ -177,6 +177,7 @@ namespace ArcEngine
 				| ImGuiWindowFlags_MenuBar
 				| ImGuiWindowFlags_NoNavFocus;
 
+			bool openNewProjectModalPopup = false;
 			ImVec2 windowPadding = ImGui::GetStyle().WindowPadding;
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -205,7 +206,7 @@ namespace ArcEngine
 							if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
 								SaveSceneAs();
 							if (ImGui::MenuItem("New Project", nullptr))
-								NewProject();
+								openNewProjectModalPopup = true;
 							if (ImGui::MenuItem("Open Project", nullptr))
 								OpenProject();
 							if (ImGui::MenuItem("Exit"))
@@ -465,6 +466,60 @@ namespace ArcEngine
 
 			if (m_ProjectSettingsPanel.Showing)
 				m_ProjectSettingsPanel.OnImGuiRender();
+
+			if (openNewProjectModalPopup)
+			{
+				openNewProjectModalPopup = false;
+				ImGui::OpenPopup("New Project");
+			}
+			ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+			if (ImGui::BeginPopupModal("New Project", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+			{
+				static eastl::string prjName = "";
+				static eastl::string folderPath = "";
+
+				constexpr size_t size = 256;
+				char buffer[size];
+				memcpy(buffer, prjName.data(), size);
+				ImGui::TextUnformatted("Project Name");
+				if (ImGui::InputText("##ProjectName", buffer, size))
+					prjName = buffer;
+
+				memcpy(buffer, folderPath.data(), size);
+				ImGui::TextUnformatted("Location");
+				if (ImGui::InputText("##ProjectLocation", buffer, size))
+					folderPath = buffer;
+				ImGui::SameLine();
+				if (ImGui::Button(ICON_MDI_FOLDER))
+					folderPath = FileDialogs::OpenFolder().c_str();
+
+				ImGui::Separator();
+
+				ImGui::SetItemDefaultFocus();
+				if (ImGui::Button("OK", ImVec2(120, 0)))
+				{
+					if (!prjName.empty() && !folderPath.empty())
+					{
+						Project::New();
+						Project::GetActive()->GetConfig().Name = prjName.c_str();
+						std::filesystem::path projectDirPath = std::filesystem::path(folderPath.c_str()) / prjName.c_str();
+						if (!std::filesystem::exists(projectDirPath))
+							std::filesystem::create_directories(projectDirPath);
+
+						std::filesystem::path projectPath = projectDirPath / (prjName + ".arcproj").c_str();
+						SaveProject(projectPath);
+						OpenProject(projectPath);
+						ImGui::CloseCurrentPopup();
+					}
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Cancel", ImVec2(120, 0)))
+				{
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
 
 			if (m_ShowDemoWindow)
 				ImGui::ShowDemoWindow(&m_ShowDemoWindow);
@@ -793,11 +848,6 @@ namespace ArcEngine
 		return false;
 	}
 
-	void EditorLayer::NewProject()
-	{
-		Project::New();
-	}
-
 	void EditorLayer::OpenProject(const std::filesystem::path& path)
 	{
 		if (Project::Load(path))
@@ -829,9 +879,9 @@ namespace ArcEngine
 			OpenProject(filepath.c_str());
 	}
 
-	void EditorLayer::SaveProject()
+	void EditorLayer::SaveProject(const std::filesystem::path& path)
 	{
-		// Project::SaveActive();
+		Project::SaveActive(path);
 	}
 
 	void EditorLayer::NewScene()
