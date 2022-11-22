@@ -1,10 +1,10 @@
 #include "arcpch.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
-#include <fstream>
 #include <glad/glad.h>
-
 #include <glm/gtc/type_ptr.hpp>
+
+#include "Arc/Core/Filesystem.h"
 
 typedef uint32_t GLenum;
 
@@ -27,7 +27,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 		
-		eastl::string source = ReadFile(filepath);
+		eastl::string source;
+		Filesystem::ReadFileText(filepath.c_str(), source);
 		auto shaderSources = PreProcess(source);
 		Compile(shaderSources);
 		
@@ -63,7 +64,8 @@ namespace ArcEngine
 
 		glDeleteProgram(m_RendererID);
 
-		eastl::string source = ReadFile(filepath);
+		eastl::string source;
+		Filesystem::ReadFileText(filepath.c_str(), source);
 		auto shaderSources = PreProcess(source);
 		Compile(shaderSources);
 	}
@@ -195,35 +197,6 @@ namespace ArcEngine
 		int location = glGetUniformLocation(m_RendererID, name.c_str());
 		m_UniformLocationCache.emplace(name, location);
 		return location;
-	}
-
-	eastl::string OpenGLShader::ReadFile(const eastl::string& filepath) const
-	{
-		ARC_PROFILE_SCOPE();
-		
-		eastl::string result;
-		std::ifstream in(filepath.c_str(), std::ios::in | std::ios::binary); // ifstream closes itself due to RAII
-		if (in)
-		{
-			in.seekg(0, std::ios::end);
-			const size_t size = in.tellg();
-			if (size != -1)
-			{
-				result.resize(size);
-				in.seekg(0, std::ios::beg);
-				in.read(&result[0], size);
-			}
-			else
-			{
-				ARC_CORE_ERROR("Could not read from file '{0}'", filepath);
-			}
-		}
-		else
-		{
-			ARC_CORE_ERROR("Could not open file '{0}'", filepath);
-		}
-
-		return result;
 	}
 
 	eastl::unordered_map<GLenum, eastl::string> OpenGLShader::PreProcess(const eastl::string& source) const

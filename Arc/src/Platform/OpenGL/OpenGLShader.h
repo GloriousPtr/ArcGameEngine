@@ -48,7 +48,6 @@ namespace ArcEngine
 
 	private:
 		int GetLocation(const eastl::string& name);
-		eastl::string ReadFile(const eastl::string& filepath) const;
 		eastl::unordered_map<uint32_t, eastl::string> PreProcess(const eastl::string& source) const;
 		void Compile(const eastl::unordered_map<uint32_t, eastl::string>& shaderSources);
 
