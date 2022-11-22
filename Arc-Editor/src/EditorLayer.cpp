@@ -803,8 +803,12 @@ namespace ArcEngine
 		if (Project::Load(path))
 		{
 			ScriptEngine::ReloadAppDomain();
-			auto startScenePath = Project::GetAssetFileSystemPath(Project::GetActive()->GetConfig().StartScene);
-			OpenScene(startScenePath.string().c_str());
+
+			if (!Project::GetActive()->GetConfig().StartScene.empty())
+			{
+				auto startScenePath = Project::GetAssetFileSystemPath(Project::GetActive()->GetConfig().StartScene);
+				OpenScene(startScenePath.string().c_str());
+			}
 
 			if (m_AssetPanels.empty())
 			{
