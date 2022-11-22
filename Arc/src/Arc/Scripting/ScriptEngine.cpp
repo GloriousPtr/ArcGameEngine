@@ -117,7 +117,8 @@ namespace ArcEngine
 		GCManager::Shutdown();
 
 		mono_domain_set(mono_get_root_domain(), false);
-		mono_domain_unload(s_Data->AppDomain);
+		if (s_Data->AppDomain)
+			mono_domain_unload(s_Data->AppDomain);
 		mono_jit_cleanup(mono_get_root_domain());
 	}
 
