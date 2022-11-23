@@ -28,7 +28,7 @@ namespace ArcEngine
 		}
 		ARC_CORE_ASSERT(data, "Failed to load image!");
 		
-		Invalidate(path, width, height, data, channels);
+		InvalidateImpl(path, width, height, data, channels);
 
 		stbi_image_free(data);
 	}
@@ -50,6 +50,34 @@ namespace ArcEngine
 	}
 
 	void OpenGLTextureCubemap::Invalidate(const eastl::string_view path, uint32_t width, uint32_t height, void* data, uint32_t channels)
+	{
+		ARC_PROFILE_SCOPE();
+
+		InvalidateImpl(path, width, height, data, channels);
+	}
+
+	void OpenGLTextureCubemap::Bind(uint32_t slot) const
+	{
+		ARC_PROFILE_SCOPE();
+		
+		glBindTextureUnit(slot, m_RendererID);
+	}
+
+	void OpenGLTextureCubemap::BindIrradianceMap(uint32_t slot) const
+	{
+		ARC_PROFILE_SCOPE();
+
+		glBindTextureUnit(slot, m_IrradianceRendererID);
+	}
+
+	void OpenGLTextureCubemap::BindRadianceMap(uint32_t slot) const
+	{
+		ARC_PROFILE_SCOPE();
+
+		glBindTextureUnit(slot, m_RadianceRendererID);
+	}
+
+	void OpenGLTextureCubemap::InvalidateImpl(const eastl::string_view path, uint32_t width, uint32_t height, void* data, uint32_t channels)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -226,26 +254,5 @@ namespace ArcEngine
 
 		glDeleteFramebuffers(1, &captureFBO);
 		glDeleteRenderbuffers(1, &captureRBO);
-	}
-
-	void OpenGLTextureCubemap::Bind(uint32_t slot) const
-	{
-		ARC_PROFILE_SCOPE();
-		
-		glBindTextureUnit(slot, m_RendererID);
-	}
-
-	void OpenGLTextureCubemap::BindIrradianceMap(uint32_t slot) const
-	{
-		ARC_PROFILE_SCOPE();
-
-		glBindTextureUnit(slot, m_IrradianceRendererID);
-	}
-
-	void OpenGLTextureCubemap::BindRadianceMap(uint32_t slot) const
-	{
-		ARC_PROFILE_SCOPE();
-
-		glBindTextureUnit(slot, m_RadianceRendererID);
 	}
 }

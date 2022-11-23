@@ -11,7 +11,7 @@ namespace ArcEngine
 		uint64_t Size = 0;
 
 		Buffer() = default;
-		Buffer(uint64_t size) {	Allocate(size); }
+		explicit Buffer(uint64_t size) { Allocate(size); }
 
 		static Buffer Copy(Buffer other)
 		{
@@ -48,7 +48,7 @@ namespace ArcEngine
 		{
 		}
 
-		ScopedBuffer(uint64_t size)
+		explicit ScopedBuffer(uint64_t size)
 			: m_Buffer(size)
 		{
 		}
@@ -56,7 +56,7 @@ namespace ArcEngine
 		~ScopedBuffer() { m_Buffer.Release(); }
 
 		uint8_t* Data() { return m_Buffer.Data; }
-		uint64_t Size() { return m_Buffer.Size; }
+		uint64_t Size() const { return m_Buffer.Size; }
 
 		template<typename T>
 		T* As() { return m_Buffer.As<T>(); }

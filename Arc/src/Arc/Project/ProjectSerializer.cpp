@@ -11,7 +11,7 @@ namespace ArcEngine
 	{
 	}
 
-	bool ProjectSerializer::Serialize(const std::filesystem::path& filepath)
+	bool ProjectSerializer::Serialize(const std::filesystem::path& filepath) const
 	{
 		const auto& config = m_Project->GetConfig();
 
@@ -36,7 +36,7 @@ namespace ArcEngine
 		return true;
 	}
 
-	bool ProjectSerializer::Deserialize(const std::filesystem::path& filepath)
+	bool ProjectSerializer::Deserialize(const std::filesystem::path& filepath) const
 	{
 		auto& config = m_Project->GetConfig();
 

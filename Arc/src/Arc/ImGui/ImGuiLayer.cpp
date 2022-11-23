@@ -41,8 +41,7 @@ namespace ArcEngine
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
-		Application& app = Application::Get();
-		GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 
 		// Setup Platform/Renderer bindings
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -104,8 +103,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 		
 		ImGuiIO& io = ImGui::GetIO();
-		Application& app = Application::Get();
-		io.DisplaySize = ImVec2((float)app.GetWindow().GetWidth(), (float)app.GetWindow().GetHeight());
+		const Window& window = Application::Get().GetWindow();
+		io.DisplaySize = ImVec2((float)window.GetWidth(), window.GetHeight());
 
 		{
 			ARC_PROFILE_SCOPE("ImGui::End::Render");

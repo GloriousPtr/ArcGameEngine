@@ -91,7 +91,7 @@ namespace ArcEngine
 		void CreateRigidbody2D(Entity entity, const TransformComponent& transform, Rigidbody2DComponent& component) const;
 		void CreateBoxCollider2D(Entity entity, const TransformComponent& transform, const Rigidbody2DComponent& rb, BoxCollider2DComponent& component) const;
 		void CreateCircleCollider2D(Entity entity, const TransformComponent& transform, const Rigidbody2DComponent& rb, CircleCollider2DComponent& component) const;
-		void CreatePolygonCollider2D(Entity entity, const TransformComponent& transform, const Rigidbody2DComponent& rb, PolygonCollider2DComponent& component) const;
+		void CreatePolygonCollider2D(Entity entity, const Rigidbody2DComponent& rb, PolygonCollider2DComponent& component) const;
 
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);

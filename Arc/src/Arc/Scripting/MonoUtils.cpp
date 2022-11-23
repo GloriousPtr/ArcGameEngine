@@ -34,7 +34,7 @@ namespace ArcEngine
 			if (std::filesystem::exists(pdbPath))
 			{
 				ScopedBuffer pdbFileData = Filesystem::ReadFileBinary(pdbPath);
-				mono_debug_open_image_from_memory(image, pdbFileData.As<const mono_byte>(), pdbFileData.Size());
+				mono_debug_open_image_from_memory(image, pdbFileData.As<const mono_byte>(), (int32_t)pdbFileData.Size());
 				ARC_CORE_TRACE("Loaded PDB: {}", pdbPath);
 			}
 		}

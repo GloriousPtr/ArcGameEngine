@@ -1378,7 +1378,7 @@ namespace ArcEngine
 			CreateCircleCollider2D(entity, transform, component, entity.GetComponent<CircleCollider2DComponent>());
 
 		if (entity.HasComponent<PolygonCollider2DComponent>())
-			CreatePolygonCollider2D(entity, transform, component, entity.GetComponent<PolygonCollider2DComponent>());
+			CreatePolygonCollider2D(entity, component, entity.GetComponent<PolygonCollider2DComponent>());
 
 		if (!component.AutoMass && component.Mass > 0.01f)
 		{
@@ -1453,7 +1453,7 @@ namespace ArcEngine
 		component.RuntimeFixture = fixture;
 	}
 
-	void Scene::CreatePolygonCollider2D(Entity entity, const TransformComponent& transform, const Rigidbody2DComponent& rb, PolygonCollider2DComponent& component) const
+	void Scene::CreatePolygonCollider2D(Entity entity, const Rigidbody2DComponent& rb, PolygonCollider2DComponent& component) const
 	{
 		ARC_PROFILE_SCOPE();
 		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
@@ -1585,7 +1585,7 @@ namespace ArcEngine
 	{
 		/* On CircleCollider2DComponent added */
 		if (entity.HasComponent<Rigidbody2DComponent>())
-			CreatePolygonCollider2D(entity, entity.GetComponent<TransformComponent>(), entity.GetComponent<Rigidbody2DComponent>(), pc2d);
+			CreatePolygonCollider2D(entity, entity.GetComponent<Rigidbody2DComponent>(), pc2d);
 	}
 
 	template<>

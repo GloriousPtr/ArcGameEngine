@@ -46,7 +46,7 @@ namespace ArcEngine
 
 		void OpenProject(const std::filesystem::path& path);
 		void OpenProject();
-		void SaveProject(const std::filesystem::path& path);
+		void SaveProject(const std::filesystem::path& path) const;
 
 		void NewScene();
 		void OpenScene();

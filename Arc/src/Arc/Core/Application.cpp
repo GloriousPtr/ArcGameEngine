@@ -165,7 +165,7 @@ namespace ArcEngine
 	{
 		std::scoped_lock<std::mutex> lock(m_MainThreadQueueMutex);
 
-		for (auto& func : m_MainThreadQueue)
+		for (const auto& func : m_MainThreadQueue)
 			func();
 
 		m_MainThreadQueue.clear();

@@ -37,7 +37,7 @@ namespace ArcEngine
 		}
 		ARC_CORE_ASSERT(data, "Failed to load image!");
 		
-		Invalidate(path, width, height, data, channels);
+		InvalidateImpl(path, width, height, data, channels);
 
 		stbi_image_free(data);
 	}
@@ -58,6 +58,20 @@ namespace ArcEngine
 	}
 
 	void OpenGLTexture2D::Invalidate(const eastl::string_view path, uint32_t width, uint32_t height, void* data, uint32_t channels)
+	{
+		ARC_PROFILE_SCOPE();
+
+		InvalidateImpl(path, width, height, data, channels);
+	}
+
+	void OpenGLTexture2D::Bind(uint32_t slot) const
+	{
+		ARC_PROFILE_SCOPE();
+		
+		glBindTextureUnit(slot, m_RendererID);
+	}
+
+	void OpenGLTexture2D::InvalidateImpl(const eastl::string_view path, uint32_t width, uint32_t height, void* data, uint32_t channels)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -109,12 +123,5 @@ namespace ArcEngine
 
 		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_Width, m_Height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-
-	void OpenGLTexture2D::Bind(uint32_t slot) const
-	{
-		ARC_PROFILE_SCOPE();
-		
-		glBindTextureUnit(slot, m_RendererID);
 	}
 }

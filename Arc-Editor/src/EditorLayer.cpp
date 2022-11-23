@@ -487,10 +487,8 @@ namespace ArcEngine
 				m_ProjectSettingsPanel.OnImGuiRender();
 
 			if (openNewProjectModalPopup)
-			{
-				openNewProjectModalPopup = false;
 				ImGui::OpenPopup("New Project");
-			}
+
 			ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 			if (ImGui::BeginPopupModal("New Project", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
@@ -885,7 +883,7 @@ namespace ArcEngine
 			}
 			else
 			{
-				for (auto& assetPanel : m_AssetPanels)
+				for (const auto& assetPanel : m_AssetPanels)
 					assetPanel->Invalidate();
 			}
 		}
@@ -898,7 +896,7 @@ namespace ArcEngine
 			OpenProject(filepath.c_str());
 	}
 
-	void EditorLayer::SaveProject(const std::filesystem::path& path)
+	void EditorLayer::SaveProject(const std::filesystem::path& path) const
 	{
 		Project::SaveActive(path);
 	}

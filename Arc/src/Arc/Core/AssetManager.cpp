@@ -61,7 +61,6 @@ namespace ArcEngine
 		return texture;
 	}
 
-	static std::mutex mtx;
 	static void LoadTextureCubemap(TextureCubemap* tex, const eastl::string_view path)
 	{
 		ARC_PROFILE_THREAD("IO Thread");

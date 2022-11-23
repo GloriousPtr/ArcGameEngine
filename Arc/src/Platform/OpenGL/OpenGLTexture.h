@@ -28,6 +28,9 @@ namespace ArcEngine
 		virtual void Bind(uint32_t slot = 0) const override;
 
 	private:
+		void InvalidateImpl(const eastl::string_view path, uint32_t width, uint32_t height, void* data, uint32_t channels);
+
+	private:
 		eastl::string m_Path;
 		uint32_t m_Width = 0, m_Height = 0;
 		uint32_t m_RendererID = 0;

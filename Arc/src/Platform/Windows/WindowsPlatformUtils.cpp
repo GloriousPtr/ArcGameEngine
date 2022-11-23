@@ -1,7 +1,7 @@
 #include "arcpch.h"
 #include "Arc/Utils/PlatformUtils.h"
 
-#include <shlobj_core.h>
+#include <ShlObj_core.h>
 #include <commdlg.h>
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -16,14 +16,14 @@ namespace ArcEngine
 		WCHAR szTitle[MAX_PATH];
 		BROWSEINFO bi;
 		bi.hwndOwner = glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow());
-		bi.pidlRoot = NULL;
+		bi.pidlRoot = nullptr;
 		bi.pszDisplayName = szTitle;
 		bi.lpszTitle = L"Select a folder containing the response file";
 		bi.ulFlags = BIF_RETURNONLYFSDIRS;
-		bi.lpfn = NULL;
+		bi.lpfn = nullptr;
 		bi.lParam = 0;
-		LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
-		if (pidl != NULL)
+		const LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
+		if (pidl)
 		{
 			if (SHGetPathFromIDList(pidl, szTitle))
 			{
