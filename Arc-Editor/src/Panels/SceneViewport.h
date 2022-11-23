@@ -48,6 +48,7 @@ namespace ArcEngine
 		glm::vec2 m_ViewportBounds[2];
 
 		int m_GizmoType = -1;
+		int m_GizmoMode = 0;
 
 		SceneHierarchyPanel* m_SceneHierarchyPanel = nullptr;
 
