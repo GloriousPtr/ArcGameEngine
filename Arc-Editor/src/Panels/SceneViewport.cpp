@@ -55,20 +55,17 @@ namespace ArcEngine
 			bool moved = false;
 			if (ImGui::IsMouseDown(ImGuiMouseButton_Right) && m_ViewportHovered)
 			{
-				ImGui::SetMouseCursor(ImGuiMouseCursor_None);
-				ImVec2 tempMousePos = ImGui::GetMousePos();
-				glm::vec2 newMousePosition = { tempMousePos.x, tempMousePos.y };
+				glm::vec2 newMousePosition = Input::GetMousePosition();
 
 				if (!m_UsingEditorCamera)
 				{
 					m_UsingEditorCamera = true;
-					m_MousePosition = newMousePosition;
+					m_LockedMousePosition = newMousePosition;
 				}
 
-				ImGui::GetIO().WantSetMousePos = true;
-				ImGui::GetIO().MousePos = { m_MousePosition.x, m_MousePosition.y };
+				Input::SetMousePosition(m_LockedMousePosition);
 
-				const glm::vec2 change = (newMousePosition - m_MousePosition) * m_MouseSensitivity;
+				const glm::vec2 change = (newMousePosition - m_LockedMousePosition) * m_MouseSensitivity;
 				yaw += change.x;
 				pitch = glm::clamp(pitch - change.y, -89.9f, 89.9f);
 
