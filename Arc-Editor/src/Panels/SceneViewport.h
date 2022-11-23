@@ -53,12 +53,12 @@ namespace ArcEngine
 		SceneHierarchyPanel* m_SceneHierarchyPanel = nullptr;
 
 		glm::vec2 m_LockedMousePosition = glm::vec2(0.0f);
-		float m_MouseSensitivity = 0.05f;
-
-		float m_MaxMoveSpeed = 2.0f;
-		float m_MoveDampeningFactor = 0.000001f;
-		glm::vec3 m_MoveDirection = glm::vec3(0.0f);
-		float m_MoveVelocity = 0.0f;
+		float m_MouseSensitivity = 1.0f;
+		float m_MaxMoveSpeed = 10.0f;
+		float m_TranslationDampening = 0.6f;
+		float m_RotationDampening = 0.3f;
+		glm::vec3 m_TranslationVelocity = glm::vec3(0.0f);
+		glm::vec2 m_RotationVelocity = glm::vec2(0.0f);
 
 		bool m_UseEditorCamera = true;
 		bool m_UsingEditorCamera = false;

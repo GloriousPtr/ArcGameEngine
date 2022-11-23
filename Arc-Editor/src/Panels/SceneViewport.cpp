@@ -49,12 +49,15 @@ namespace ArcEngine
 		if (!m_SimulationRunning && m_UseEditorCamera)
 		{
 			const glm::vec3& position = m_EditorCamera.GetPosition();
-			float yaw = m_EditorCamera.GetYaw();
-			float pitch = m_EditorCamera.GetPitch();
+			const glm::vec2 yawPitch = glm::vec2(m_EditorCamera.GetYaw(), m_EditorCamera.GetPitch());
+
+			glm::vec3 finalPosition = position;
+			glm::vec2 finalYawPitch = yawPitch;
 
 			bool moved = false;
 			if (ImGui::IsMouseDown(ImGuiMouseButton_Right) && m_ViewportHovered)
 			{
+				ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 				glm::vec2 newMousePosition = Input::GetMousePosition();
 
 				if (!m_UsingEditorCamera)
@@ -66,49 +69,42 @@ namespace ArcEngine
 				Input::SetMousePosition(m_LockedMousePosition);
 
 				const glm::vec2 change = (newMousePosition - m_LockedMousePosition) * m_MouseSensitivity;
-				yaw += change.x;
-				pitch = glm::clamp(pitch - change.y, -89.9f, 89.9f);
+				finalYawPitch.x += change.x;
+				finalYawPitch.y = glm::clamp(finalYawPitch.y - change.y, -89.9f, 89.9f);
 
-				glm::vec3 moveDirection = glm::vec3(0.0f);
+				float maxMoveSpeed = m_MaxMoveSpeed * (ImGui::IsKeyDown(ImGuiKey_LeftShift) ? 3.0f : 1.0f);
 				if (ImGui::IsKeyDown(ImGuiKey_W))
 				{
 					moved = true;
-					moveDirection += m_EditorCamera.GetForward() * timestep.GetSeconds();
+					finalPosition += m_EditorCamera.GetForward() * maxMoveSpeed;
 				}
 				else if (ImGui::IsKeyDown(ImGuiKey_S))
 				{
 					moved = true;
-					moveDirection -= m_EditorCamera.GetForward() * timestep.GetSeconds();
+					finalPosition -= m_EditorCamera.GetForward() * maxMoveSpeed;
 				}
 				if (ImGui::IsKeyDown(ImGuiKey_D))
 				{
 					moved = true;
-					moveDirection += m_EditorCamera.GetRight() * timestep.GetSeconds();
+					finalPosition += m_EditorCamera.GetRight() * maxMoveSpeed;
 				}
 				else if (ImGui::IsKeyDown(ImGuiKey_A))
 				{
 					moved = true;
-					moveDirection -= m_EditorCamera.GetRight() * timestep.GetSeconds();
+					finalPosition -= m_EditorCamera.GetRight() * maxMoveSpeed;
 				}
-
-				if (glm::length2(moveDirection) > Math::EPSILON)
-					m_MoveDirection = glm::normalize(moveDirection);
 			}
 			else
 			{
 				m_UsingEditorCamera = false;
 			}
 
-			m_MoveVelocity += (moved ? 1.0f : -1.0f) * timestep;
-			m_MoveVelocity *= glm::pow(m_MoveDampeningFactor, timestep);
-			if (m_MoveVelocity > 0.0f)
-			{
-				float maxMoveSpeed = m_MaxMoveSpeed * (ImGui::IsKeyDown(ImGuiKey_LeftShift) ? 3.0f : 1.0f);
-				m_EditorCamera.SetPosition(position + (m_MoveDirection * m_MoveVelocity * maxMoveSpeed));
-			}
+			glm::vec3 dampedPosition = Math::SmoothDamp(position, finalPosition, m_TranslationVelocity, m_TranslationDampening, 10000.0f, timestep);
+			glm::vec2 dampedYawPitch = Math::SmoothDamp(yawPitch, finalYawPitch, m_RotationVelocity, m_RotationDampening, 1000.0f, timestep);
 
-			m_EditorCamera.SetYaw(yaw);
-			m_EditorCamera.SetPitch(pitch);
+			m_EditorCamera.SetPosition(dampedPosition);
+			m_EditorCamera.SetYaw(dampedYawPitch.x);
+			m_EditorCamera.SetPitch(dampedYawPitch.y);
 
 			m_EditorCamera.OnUpdate(timestep);
 		}
