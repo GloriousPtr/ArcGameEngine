@@ -1024,6 +1024,7 @@ namespace ArcEngine
 		// X
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
@@ -1031,7 +1032,7 @@ namespace ArcEngine
 			if (ImGui::Button("X", buttonSize))
 				values.x = resetValue;
 			ImGui::PopFont();
-			ImGui::PopStyleColor(3);
+			ImGui::PopStyleColor(4);
 
 			ImGui::SameLine();
 			ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
@@ -1044,6 +1045,7 @@ namespace ArcEngine
 		// Y
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
@@ -1051,8 +1053,7 @@ namespace ArcEngine
 			if (ImGui::Button("Y", buttonSize))
 				values.y = resetValue;
 			ImGui::PopFont();
-
-			ImGui::PopStyleColor(3);
+			ImGui::PopStyleColor(4);
 
 			ImGui::SameLine();
 			ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
@@ -1065,6 +1066,7 @@ namespace ArcEngine
 		// Z
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
@@ -1072,7 +1074,7 @@ namespace ArcEngine
 			if (ImGui::Button("Z", buttonSize))
 				values.z = resetValue;
 			ImGui::PopFont();
-			ImGui::PopStyleColor(3);
+			ImGui::PopStyleColor(4);
 
 			ImGui::SameLine();
 			ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");

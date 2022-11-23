@@ -8,6 +8,7 @@
 #include <icons/IconsMaterialDesignIcons.h>
 
 #include "../Utils/UI.h"
+#include "../Utils/EditorTheme.h"
 
 namespace ArcEngine
 {
@@ -253,8 +254,10 @@ namespace ArcEngine
 
 		glm::vec4 c = GetRenderColor(Level);
 		ImGui::PushStyleColor(ImGuiCol_Text, { c.r, c.g, c.b, c.a });
+		ImGui::PushFont(EditorTheme::BoldFont);
 		auto levelIcon = GetLevelIcon(Level);
 		ImGui::Text("%s  %s", levelIcon, Buffer.c_str());
+		ImGui::PopFont();
 		ImGui::PopStyleColor();
 
 		ImGui::PushID((int)ID);
@@ -287,10 +290,10 @@ namespace ArcEngine
 	{
 		switch (level)
 		{
-			case Log::Level::Trace:			return { 0.75f, 0.75f, 0.75f, 1.00f }; // White-ish gray
-			case Log::Level::Info:			return { 0.20f, 0.80f, 0.20f, 1.00f }; // Green
+			case Log::Level::Trace:			return *(glm::vec4*)(&EditorTheme::TextColor); // Grey
+			case Log::Level::Info:			return { 0.10f, 0.60f, 0.10f, 1.00f }; // Green
 			case Log::Level::Debug:			return { 0.00f, 0.50f, 0.50f, 1.00f }; // Cyan
-			case Log::Level::Warn:			return { 0.80f, 0.80f, 0.20f, 1.00f }; // Yellow
+			case Log::Level::Warn:			return { 0.60f, 0.60f, 0.10f, 1.00f }; // Yellow
 			case Log::Level::Error:			return { 0.90f, 0.25f, 0.25f, 1.00f }; // Red
 			case Log::Level::Critical:		return { 0.60f, 0.20f, 0.80f, 1.00f }; // Purple
 		}

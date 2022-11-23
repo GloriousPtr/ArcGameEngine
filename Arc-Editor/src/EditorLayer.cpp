@@ -213,6 +213,15 @@ namespace ArcEngine
 								openNewProjectModalPopup = true;
 							if (ImGui::MenuItem("Open Project", nullptr))
 								OpenProject();
+							if (ImGui::BeginMenu("Theme"))
+							{
+								if (ImGui::MenuItem("Light"))
+									EditorTheme::ApplyTheme(false);
+								if (ImGui::MenuItem("Dark"))
+									EditorTheme::ApplyTheme(true);
+
+								ImGui::EndMenu();
+							}
 							if (ImGui::MenuItem("Exit"))
 								m_Application->Close();
 
@@ -289,9 +298,9 @@ namespace ArcEngine
 						ImVec2 region = ImGui::GetContentRegionMax();
 						ImVec2 buttonSize = { region.y * 1.6f, region.y };
 
-						ImGui::PushStyleColor(ImGuiCol_Button, { 0.05f, 0.05f, 0.05f, 1.0f });
-						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.05f, 0.05f, 0.05f, 1.0f });
-						ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0.05f, 0.05f, 0.05f, 1.0f });
+						ImGui::PushStyleColor(ImGuiCol_Button, EditorTheme::WindowBgAlternativeColor);
+						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, EditorTheme::WindowBgAlternativeColor);
+						ImGui::PushStyleColor(ImGuiCol_ButtonActive, EditorTheme::WindowBgAlternativeColor);
 						ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 						if (auto project = Project::GetActive())
 						{
@@ -424,7 +433,9 @@ namespace ArcEngine
 						{
 							glm::vec4 color = ConsolePanel::Message::GetRenderColor(message->Level);
 							ImGui::PushStyleColor(ImGuiCol_Text, { color.r, color.g, color.b, color.a });
+							ImGui::PushFont(EditorTheme::BoldFont);
 							ImGui::TextUnformatted(message->Buffer.c_str());
+							ImGui::PopFont();
 							ImGui::PopStyleColor();
 						}
 						ImGui::EndMenuBar();
