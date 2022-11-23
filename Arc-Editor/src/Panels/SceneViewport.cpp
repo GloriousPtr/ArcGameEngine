@@ -217,54 +217,93 @@ namespace ArcEngine
 			if (m_SceneHierarchyPanel)
 				m_SceneHierarchyPanel->DragDropTarget();
 
-			// Gizmos
-			if (m_ViewportHovered && m_SceneHierarchyPanel && m_GizmoType != -1 && !m_SimulationRunning)
+			if (!m_SimulationRunning)
 			{
-				ARC_PROFILE_SCOPE("Transform Gizmos");
+				// Transform Gizmos
+				ImGuizmo::SetOrthographic(false);
+				ImGuizmo::SetDrawlist();
+				ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
 
-				EditorContext context = EditorLayer::GetInstance()->GetContext();
-				if (context.IsValid(EditorContextType::Entity))
+				if (m_ViewportHovered && m_SceneHierarchyPanel && m_GizmoType != -1)
 				{
-					Entity selectedEntity = *((Entity*)context.Data);
-					if (selectedEntity)
+					ARC_PROFILE_SCOPE("Transform Gizmos");
+
+					EditorContext context = EditorLayer::GetInstance()->GetContext();
+					if (context.IsValid(EditorContextType::Entity))
 					{
-						ImGuizmo::SetOrthographic(false);
-						ImGuizmo::SetDrawlist();
-
-						ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
-
-						const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
-						const glm::mat4& cameraView = m_EditorCamera.GetViewMatrix();
-						// Entity Transform
-						auto& tc = selectedEntity.GetComponent<TransformComponent>();
-						const auto& rc = selectedEntity.GetComponent<RelationshipComponent>();
-						glm::mat4 transform = selectedEntity.GetWorldTransform();
-
-						// Snapping
-						const bool snap = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
-						float snapValue = 0.5f;
-						if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
-							snapValue = 45.0f;
-
-						float snapValues[3] = { snapValue, snapValue, snapValue };
-						float bounds[6] = {-1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f};
-
-						ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), (ImGuizmo::OPERATION)m_GizmoType, (ImGuizmo::MODE)m_GizmoMode,
-							glm::value_ptr(transform), nullptr,	snap ? snapValues : nullptr, (ImGuizmo::OPERATION)m_GizmoType == ImGuizmo::OPERATION::BOUNDS ? bounds : nullptr, snap ? snapValues : nullptr);
-
-						if (m_ViewportHovered && ImGuizmo::IsUsing())
+						Entity selectedEntity = *((Entity*)context.Data);
+						if (selectedEntity)
 						{
-							const glm::mat4& parentWorldTransform = rc.Parent != 0 ? selectedEntity.GetParent().GetWorldTransform() : glm::mat4(1.0f);
-							glm::vec3 translation, rotation, scale;
-							Math::DecomposeTransform(glm::inverse(parentWorldTransform) * transform, translation, rotation, scale);
+							const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
+							const glm::mat4& cameraView = m_EditorCamera.GetViewMatrix();
+							// Entity Transform
+							auto& tc = selectedEntity.GetComponent<TransformComponent>();
+							const auto& rc = selectedEntity.GetComponent<RelationshipComponent>();
+							glm::mat4 transform = selectedEntity.GetWorldTransform();
 
-							tc.Translation = translation;
-							const glm::vec3 deltaRotation = rotation - tc.Rotation;
-							tc.Rotation += deltaRotation;
-							tc.Scale = scale;
+							// Snapping
+							const bool snap = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
+							float snapValue = 0.5f;
+							if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+								snapValue = 45.0f;
+
+							float snapValues[3] = { snapValue, snapValue, snapValue };
+							float bounds[6] = { -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f };
+
+							ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), (ImGuizmo::OPERATION)m_GizmoType, (ImGuizmo::MODE)m_GizmoMode,
+								glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr, (ImGuizmo::OPERATION)m_GizmoType == ImGuizmo::OPERATION::BOUNDS ? bounds : nullptr, snap ? snapValues : nullptr);
+
+							if (m_ViewportHovered && ImGuizmo::IsUsing())
+							{
+								const glm::mat4& parentWorldTransform = rc.Parent != 0 ? selectedEntity.GetParent().GetWorldTransform() : glm::mat4(1.0f);
+								glm::vec3 translation, rotation, scale;
+								Math::DecomposeTransform(glm::inverse(parentWorldTransform) * transform, translation, rotation, scale);
+
+								tc.Translation = translation;
+								const glm::vec3 deltaRotation = rotation - tc.Rotation;
+								tc.Rotation += deltaRotation;
+								tc.Scale = scale;
+							}
 						}
 					}
 				}
+
+				// Cubeview
+				glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
+				ImGuizmo::ViewManipulate(glm::value_ptr(cameraView), 8.0f, ImVec2(m_ViewportBounds[1].x - 128, m_ViewportBounds[0].y), ImVec2(128, 128), 0x10101010);
+				const glm::mat4 inverted = glm::inverse(cameraView);
+				const glm::vec3 direction = -glm::vec3(inverted[2]);
+				float yaw = glm::degrees(glm::atan(direction.z, direction.x));
+				float pitch = glm::degrees(glm::asin(direction.y));
+				m_EditorCamera.SetPitch(pitch);
+				m_EditorCamera.SetYaw(yaw);
+
+				// Buttons
+				ImGui::SetItemAllowOverlap();
+				ImGui::SetCursorPos({ startCursorPos.x + windowPadding.x, startCursorPos.y + windowPadding.y });
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 1, 1 });
+				ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+				float frameHeight = 1.3f * ImGui::GetFrameHeight();
+				ImVec2 buttonSize = { frameHeight, frameHeight };
+				constexpr float alpha = 0.6f;
+				if (UI::ToggleButton(ICON_MDI_ARROW_ALL, m_GizmoType == ImGuizmo::TRANSLATE, buttonSize, alpha, alpha))
+					m_GizmoType = ImGuizmo::TRANSLATE;
+				ImGui::SameLine();
+				if (UI::ToggleButton(ICON_MDI_ROTATE_3D, m_GizmoType == ImGuizmo::ROTATE, buttonSize, alpha, alpha))
+					m_GizmoType = ImGuizmo::ROTATE;
+				ImGui::SameLine();
+				if (UI::ToggleButton(ICON_MDI_ARROW_EXPAND, m_GizmoType == ImGuizmo::SCALE, buttonSize, alpha, alpha))
+					m_GizmoType = ImGuizmo::SCALE;
+				ImGui::SameLine();
+				if (UI::ToggleButton(ICON_MDI_ARROW_EXPAND_ALL, m_GizmoType == ImGuizmo::UNIVERSAL, buttonSize, alpha, alpha))
+					m_GizmoType = ImGuizmo::UNIVERSAL;
+				ImGui::SameLine();
+				if (UI::ToggleButton(ICON_MDI_VECTOR_SQUARE, m_GizmoType == ImGuizmo::BOUNDS, buttonSize, alpha, alpha))
+					m_GizmoType = ImGuizmo::BOUNDS;
+				ImGui::SameLine();
+				if (UI::ToggleButton(m_GizmoMode == ImGuizmo::WORLD ? ICON_MDI_EARTH : ICON_MDI_EARTH_OFF, m_GizmoMode == ImGuizmo::WORLD, buttonSize, alpha, alpha))
+					m_GizmoMode = m_GizmoMode == ImGuizmo::LOCAL ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
+				ImGui::PopStyleVar(2);
 			}
 
 			// Showing mini camera viewport if selected entity has a CameraComponent
@@ -294,33 +333,6 @@ namespace ArcEngine
 					ImGui::Image((ImTextureID)textureId, ImVec2{ miniViewportSize.x, miniViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
 				}
 			}
-
-			// Buttons
-			ImGui::SetItemAllowOverlap();
-			ImGui::SetCursorPos({ startCursorPos.x + windowPadding.x, startCursorPos.y + windowPadding.y });
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 1, 1 });
-			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
-			float frameHeight = 1.3f * ImGui::GetFrameHeight();
-			ImVec2 buttonSize = { frameHeight, frameHeight };
-			constexpr float alpha = 0.6f;
-			if (UI::ToggleButton(ICON_MDI_ARROW_ALL, m_GizmoType == ImGuizmo::TRANSLATE, buttonSize, alpha, alpha))
-				m_GizmoType = ImGuizmo::TRANSLATE;
-			ImGui::SameLine();
-			if (UI::ToggleButton(ICON_MDI_ROTATE_3D, m_GizmoType == ImGuizmo::ROTATE, buttonSize, alpha, alpha))
-				m_GizmoType = ImGuizmo::ROTATE;
-			ImGui::SameLine();
-			if (UI::ToggleButton(ICON_MDI_ARROW_EXPAND, m_GizmoType == ImGuizmo::SCALE, buttonSize, alpha, alpha))
-				m_GizmoType = ImGuizmo::SCALE;
-			ImGui::SameLine();
-			if (UI::ToggleButton(ICON_MDI_ARROW_EXPAND_ALL, m_GizmoType == ImGuizmo::UNIVERSAL, buttonSize, alpha, alpha))
-				m_GizmoType = ImGuizmo::UNIVERSAL;
-			ImGui::SameLine();
-			if (UI::ToggleButton(ICON_MDI_VECTOR_SQUARE, m_GizmoType == ImGuizmo::BOUNDS, buttonSize, alpha, alpha))
-				m_GizmoType = ImGuizmo::BOUNDS;
-			ImGui::SameLine();
-			if (UI::ToggleButton(m_GizmoMode == ImGuizmo::WORLD ? ICON_MDI_EARTH : ICON_MDI_EARTH_OFF, m_GizmoMode == ImGuizmo::WORLD, buttonSize, alpha, alpha))
-				m_GizmoMode = m_GizmoMode == ImGuizmo::LOCAL ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
-			ImGui::PopStyleVar(2);
 
 			OnEnd();
 		}
