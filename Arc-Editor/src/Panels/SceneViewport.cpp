@@ -213,11 +213,12 @@ namespace ArcEngine
 			if (!m_SimulationRunning)
 			{
 				// Transform Gizmos
+				ImGuizmo::SetID((int)(uint64_t)&m_ID);
 				ImGuizmo::SetOrthographic(false);
 				ImGuizmo::SetDrawlist();
 				ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
 
-				if (m_ViewportHovered && m_SceneHierarchyPanel && m_GizmoType != -1)
+				if (m_SceneHierarchyPanel && m_GizmoType != -1)
 				{
 					ARC_PROFILE_SCOPE("Transform Gizmos");
 
@@ -246,7 +247,7 @@ namespace ArcEngine
 							ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), (ImGuizmo::OPERATION)m_GizmoType, (ImGuizmo::MODE)m_GizmoMode,
 								glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr, (ImGuizmo::OPERATION)m_GizmoType == ImGuizmo::OPERATION::BOUNDS ? bounds : nullptr, snap ? snapValues : nullptr);
 
-							if (m_ViewportHovered && ImGuizmo::IsUsing())
+							if (ImGuizmo::IsUsing())
 							{
 								const glm::mat4& parentWorldTransform = rc.Parent != 0 ? selectedEntity.GetParent().GetWorldTransform() : glm::mat4(1.0f);
 								glm::vec3 translation, rotation, scale;
@@ -263,13 +264,18 @@ namespace ArcEngine
 
 				// Cubeview
 				glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
-				ImGuizmo::ViewManipulate(glm::value_ptr(cameraView), 8.0f, ImVec2(m_ViewportBounds[1].x - 128, m_ViewportBounds[0].y), ImVec2(128, 128), 0x10101010);
-				const glm::mat4 inverted = glm::inverse(cameraView);
-				const glm::vec3 direction = -glm::vec3(inverted[2]);
-				float yaw = glm::degrees(glm::atan(direction.z, direction.x));
-				float pitch = glm::degrees(glm::asin(direction.y));
-				m_EditorCamera.SetPitch(pitch);
-				m_EditorCamera.SetYaw(yaw);
+				glm::mat4 cameraProj = m_EditorCamera.GetProjectionMatrix();
+				ImGuizmo::ViewManipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProj), ImGuizmo::OPERATION::ROTATE_SCREEN, ImGuizmo::MODE::WORLD, glm::value_ptr(m_CubeViewMatrix), 8.0f,
+					ImVec2(m_ViewportBounds[1].x - 128, m_ViewportBounds[0].y), ImVec2(128, 128), 0x10101010);
+				if (m_ViewportFocused)
+				{
+					const glm::mat4 inverted = glm::inverse(cameraView);
+					const glm::vec3 direction = -glm::vec3(inverted[2]);
+					float yaw = glm::degrees(glm::atan(direction.z, direction.x));
+					float pitch = glm::degrees(glm::asin(direction.y));
+					m_EditorCamera.SetPitch(pitch);
+					m_EditorCamera.SetYaw(yaw);	
+				}
 
 				// Buttons
 				ImGui::SetItemAllowOverlap();
