@@ -14,7 +14,7 @@ Entities:
         0: 1915948797792870540
         1: 3975782313366516989
     SkyLightComponent:
-      TexturePath: Assets\textures\Cubemap.hdr
+      TexturePath: Textures\Cubemap.hdr
       Intensity: 0.699999988
   - Entity: 1915948797792870540
     TagComponent:
