@@ -114,57 +114,6 @@ namespace ArcEngine
 		}
 	}
 
-	void EditorLayer::HandleWindowDrag()
-	{
-		if (m_Resizing)
-			return;
-
-		Window& window = m_Application->GetWindow();
-
-		ImVec2 mousePosition = ImGui::GetMousePos();
-		if (ImGui::IsWindowHovered() && ImGui::IsMouseDoubleClicked(0))
-		{
-			if (window.IsMaximized())
-				window.Restore();
-			else
-				window.Maximize({mousePosition.x, mousePosition.y});
-		}
-
-		if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))		// Dragging the window
-		{
-			m_WindowDragging = true;
-
-			if (window.IsMaximized())
-			{
-				glm::vec2 maximizedPosition = window.GetPosition();
-				glm::vec2 maximizedSize = window.GetSize();
-
-				window.Restore();
-
-				float ratio = Math::InverseLerp(maximizedPosition.x, maximizedPosition.x + maximizedSize.x, mousePosition.x);
-				float xStart = mousePosition.x - window.GetSize().x * ratio;
-				window.SetPosition({ xStart, maximizedPosition.y });
-			}
-			else
-			{
-				ImVec2 change = (mousePosition - ImVec2(m_LastMousePosition.x, m_LastMousePosition.y));
-				glm::vec2 windowPos = window.GetPosition();
-				glm::vec2 newWindowPos = { change.x + windowPos.x, change.y + windowPos.y };
-				window.SetPosition(newWindowPos);
-			}
-		}
-		else if (m_WindowDragging && ImGui::IsItemDeactivated())	// Dropped the window
-		{
-			m_WindowDragging = false;
-
-			glm::vec4 monitorRect = window.GetMonitorWorkArea({ mousePosition.x, mousePosition.y });
-			if (!window.IsMaximized() && mousePosition.y == monitorRect.y)
-				window.Maximize({ mousePosition.x, mousePosition.y });
-			else
-				window.SubmitRestorePosition(window.GetPosition());
-		}
-	}
-
 	void EditorLayer::OnImGuiRender()
 	{
 		ARC_PROFILE_SCOPE();
@@ -191,8 +140,6 @@ namespace ArcEngine
 				m_TopMenuBarHeight = ImGui::GetFrameHeight();
 				if (ImGui::BeginViewportSideBar("##PrimaryMenuBar", viewport, ImGuiDir_Up, m_TopMenuBarHeight, window_flags))
 				{
-					HandleWindowDrag();
-
 					if (ImGui::BeginMenuBar())
 					{
 						ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, windowPadding);
@@ -298,6 +245,11 @@ namespace ArcEngine
 						ImVec2 region = ImGui::GetContentRegionMax();
 						ImVec2 buttonSize = { region.y * 1.6f, region.y };
 
+						ImVec2 windowGrabAreaStart = ImGui::GetCursorPos();
+						float buttonStartRegion = region.x - 3.0f * buttonSize.x + ImGui::GetStyle().WindowPadding.x;
+						glm::vec4 windowGrabArea = glm::vec4(windowGrabAreaStart.x, windowGrabAreaStart.y, buttonStartRegion, windowGrabAreaStart.y + frameHeight);
+						m_Application->GetWindow().SetTitleBarRect(windowGrabArea);
+
 						ImGui::PushStyleColor(ImGuiCol_Button, EditorTheme::WindowBgAlternativeColor);
 						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, EditorTheme::WindowBgAlternativeColor);
 						ImGui::PushStyleColor(ImGuiCol_ButtonActive, EditorTheme::WindowBgAlternativeColor);
@@ -319,7 +271,7 @@ namespace ArcEngine
 						ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 						ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
 						
-						ImGui::SetCursorPosX(region.x - 3.0f * buttonSize.x + ImGui::GetStyle().WindowPadding.x);
+						ImGui::SetCursorPosX(buttonStartRegion);
 						bool isNormalCursor = ImGui::GetMouseCursor() == ImGuiMouseCursor_Arrow;
 
 						// Minimize Button
@@ -331,14 +283,9 @@ namespace ArcEngine
 						{
 							Window& window = m_Application->GetWindow();
 							if (window.IsMaximized())
-							{
 								window.Restore();
-							}
 							else
-							{
-								ImVec2 mousePosition = ImGui::GetMousePos();
-								window.Maximize({ mousePosition.x, mousePosition.y });
-							}
+								window.Maximize();
 						}
 
 						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.909f, 0.066f, 0.137f, 1.0f });
@@ -353,6 +300,7 @@ namespace ArcEngine
 
 						ImGui::EndMenuBar();
 					}
+
 					ImGui::End();
 				}
 				ImGui::PopStyleVar();
@@ -362,8 +310,6 @@ namespace ArcEngine
 				//////////////////////////////////////////////////////////////////////////
 				if (ImGui::BeginViewportSideBar("##SecondaryMenuBar", viewport, ImGuiDir_Up, frameHeight, window_flags))
 				{
-					HandleWindowDrag();
-
 					ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 1, 1 });
 					if (ImGui::BeginMenuBar())
@@ -574,8 +520,6 @@ namespace ArcEngine
 
 	void EditorLayer::BeginDockspace(const char* name)
 	{
-		HandleResize();
-
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen_persistant = true;
 		bool opt_fullscreen = opt_fullscreen_persistant;
@@ -635,79 +579,6 @@ namespace ArcEngine
 
 		style.WindowMinSize.x = minWinSizeX;
 		style.WindowMinSize.y = minWinSizeY;
-	}
-
-	void EditorLayer::HandleResize()
-	{
-		const ImGuiViewport* viewport = ImGui::GetMainViewport();
-		Window& window = m_Application->GetWindow();
-		if (!m_WindowDragging && !window.IsMaximized())
-		{
-			ImVec2 mousePos = ImGui::GetMousePos();
-			constexpr float delta = 6.0f;
-			bool top = glm::abs(mousePos.y - viewport->Pos.y) <= delta;
-			bool left = glm::abs(mousePos.x - viewport->Pos.x) <= delta;
-			bool bottom = glm::abs(viewport->Pos.y + viewport->Size.y - mousePos.y) <= delta;
-			bool right = glm::abs(viewport->Pos.x + viewport->Size.x - mousePos.x) <= delta;
-
-			if ((top && left) || (bottom && right))
-				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNWSE);
-			else if ((top && right) || (bottom && left))
-				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNESW);
-			else if (top || bottom)
-				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
-			else if (left || right)
-				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-
-			if (top)
-				m_TopResizing = true;
-			if (left)
-				m_LeftResizing = true;
-			if (bottom)
-				m_BottomResizing = true;
-			if (right)
-				m_RightResizing = true;
-
-			if (m_LeftResizing || m_RightResizing || m_TopResizing || m_BottomResizing)
-			{
-				if (ImGui::IsMouseClicked(0))
-					m_Resizing = true;
-				else if (!ImGui::IsMouseDown(0))
-					m_Resizing = m_TopResizing = m_LeftResizing = m_BottomResizing = m_RightResizing = false;
-			}
-
-			if (ImGui::IsMouseDragging(0) && m_Resizing)
-			{
-
-				ImVec2 mousePosition = ImGui::GetMousePos();
-				ImVec2 change = mousePosition - ImVec2(m_LastMousePosition.x, m_LastMousePosition.y);
-				glm::vec2 windowPos = window.GetPosition();
-				glm::vec2 windowSize = window.GetSize();
-
-				if (m_TopResizing)
-				{
-					windowSize.y -= change.y;
-					windowPos.y += change.y;
-				}
-				if (m_LeftResizing)
-				{
-					windowSize.x -= change.x;
-					windowPos.x += change.x;
-				}
-				if (m_BottomResizing)
-				{
-					windowSize.y += change.y;
-				}
-				if (m_RightResizing)
-				{
-					windowSize.x += change.x;
-				}
-
-				window.Resize(windowPos, windowSize);
-				window.SubmitRestorePosition(windowPos);
-				window.SubmitRestoreSize(windowSize);
-			}
-		}
 	}
 
 	void EditorLayer::EndDockspace() const

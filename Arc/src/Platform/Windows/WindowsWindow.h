@@ -24,19 +24,11 @@ namespace ArcEngine
 		void SetVSync(bool enabled) override;
 		bool IsVSync() const override;
 
-		bool IsMaximized() override { return m_MaximizedMonitor >= 0; }
+		bool IsMaximized() override { return glfwGetWindowAttrib(m_Window, GLFW_MAXIMIZED); }
 		void Minimize() override;
-		void Maximize(const glm::vec2& globalMousePosition) override;
+		void Maximize() override;
 		void Restore() override;
-
-		glm::vec2 GetPosition() const override;
-		glm::vec2 GetSize() const override;
-		glm::vec4 GetMonitorWorkArea(const glm::vec2& globalMousePosition) const;
-
-		void SetPosition(const glm::vec2& position) override;
-		void Resize(const glm::vec2& position, const glm::vec2& size) override;
-		void SubmitRestorePosition(const glm::vec2& position) override;
-		void SubmitRestoreSize(const glm::vec2& size) override;
+		void SetTitleBarRect(const glm::vec4& rect) override;
 
 		inline virtual WindowHandle GetNativeWindow() const { return m_Window; }
 	private:
@@ -53,15 +45,12 @@ namespace ArcEngine
 			unsigned int Height;
 			bool VSync;
 
-			glm::vec2 RestorePosition;
-			uint32_t RestoreWidth;
-			uint32_t RestoreHeight;
+			glm::vec4 GrabAreaRect;
 
 			EventCallbackFn EventCallback;
 		};
 
 		WindowData m_Data;
-		int32_t m_MaximizedMonitor = -1;
 
 		static uint8_t s_GLFWWindowCount;
 	};

@@ -41,9 +41,6 @@ namespace ArcEngine
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
 		m_Data.Height = props.Height;
-		m_Data.RestoreWidth = props.Width;
-		m_Data.RestoreHeight = props.Height;
-		m_Data.RestorePosition = { 0.0f, 0.0f };
 		
 		ARC_CORE_INFO("Creating window {0} ({1}, {2})", props.Title, props.Width, props.Height);
 		
@@ -63,10 +60,12 @@ namespace ArcEngine
 					glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 			#endif
 
-			glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+			glfwWindowHint(GLFW_TITLEBAR, GLFW_FALSE);
 			m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 			++s_GLFWWindowCount;
 		}
+
+		Maximize();
 		m_Context = GraphicsContext::Create(m_Window);
 		m_Context->Init();
 		
@@ -180,6 +179,16 @@ namespace ArcEngine
 			MouseMovedEvent event((float)xPos, (float)yPos);
 			data.EventCallback(event);
 		});
+
+		glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, int xPos, int yPos, int* hit)
+		{
+			const WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			if ((data.GrabAreaRect.x < xPos && xPos < data.GrabAreaRect.z) &&
+				(data.GrabAreaRect.y < yPos && yPos < data.GrabAreaRect.w))
+			{
+				*hit = 1;
+			}
+		});
 	}
 
 	void WindowsWindow::Shutdown()
@@ -230,99 +239,18 @@ namespace ArcEngine
 		glfwIconifyWindow(m_Window);
 	}
 
-	void WindowsWindow::Maximize(const glm::vec2& globalMousePosition)
+	void WindowsWindow::Maximize()
 	{
-		int monitorCount;
-		GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
-
-		int x = 0;
-		int y = 0;
-		int width = 1;
-		int height = 1;
-		uint32_t monitorIndex = -1;
-		for (int i = 0; i < monitorCount; ++i)
-		{
-			glfwGetMonitorWorkarea(monitors[i], &x, &y, &width, &height);
-			if (globalMousePosition.x < (float)(x + width) && globalMousePosition.y < (float)(y + height))
-			{
-				monitorIndex = i;
-				break;
-			}
-		}
-
-		if (m_MaximizedMonitor == monitorIndex || monitorIndex < 0)
-			return;
-
-		glfwSetWindowPos(m_Window, x, y);
-		glfwSetWindowSize(m_Window, width, height - 1);
-		m_MaximizedMonitor = monitorIndex;
+		glfwMaximizeWindow(m_Window);
 	}
 
 	void WindowsWindow::Restore()
 	{
-		if (m_MaximizedMonitor >= 0)
-		{
-			glfwSetWindowPos(m_Window, (int32_t)m_Data.RestorePosition.x, (int32_t)m_Data.RestorePosition.y);
-			glfwSetWindowSize(m_Window, m_Data.RestoreWidth, m_Data.RestoreHeight);
-			m_MaximizedMonitor = -1;
-		}
+		glfwRestoreWindow(m_Window);
 	}
 
-	glm::vec2 WindowsWindow::GetPosition() const
+	void WindowsWindow::SetTitleBarRect(const glm::vec4& rect)
 	{
-		int x;
-		int y;
-		glfwGetWindowPos(m_Window, &x, &y);
-		return glm::vec2((float)x, (float)y);
-	}
-
-	glm::vec2 WindowsWindow::GetSize() const
-	{
-		int width;
-		int height;
-		glfwGetWindowSize(m_Window, &width, &height);
-		return { (float)width, (float)height };
-	}
-
-	void WindowsWindow::SetPosition(const glm::vec2& position)
-	{
-		glfwSetWindowPos(m_Window, (int)position.x, (int)position.y);
-	}
-
-	glm::vec4 WindowsWindow::GetMonitorWorkArea(const glm::vec2& globalMousePosition) const
-	{
-		int monitorCount;
-		GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
-
-		int x = 0;
-		int y = 0;
-		int width = 1;
-		int height = 1;
-		for (int i = 0; i < monitorCount; ++i)
-		{
-			glfwGetMonitorWorkarea(monitors[i], &x, &y, &width, &height);
-			if (globalMousePosition.x < (float)(x + width) && globalMousePosition.y < (float)(y + height))
-				return { x, y, width, height };
-		}
-
-		ARC_CORE_ASSERT(false);
-		return { 0, 0, 1, 1 };
-	}
-
-	void WindowsWindow::Resize(const glm::vec2& position, const glm::vec2& size)
-	{
-		glfwSetWindowPos(m_Window, (const int32_t)position.x, (const int32_t)position.y);
-		glfwSetWindowSize(m_Window, (const int32_t)size.x, (const int32_t)size.y);
-	}
-
-	void WindowsWindow::SubmitRestorePosition(const glm::vec2& position)
-	{
-		m_Data.RestorePosition = position;
-	}
-
-	void WindowsWindow::SubmitRestoreSize(const glm::vec2& size)
-	{
-		m_Data.RestoreWidth = (const int32_t)size.x;
-		m_Data.RestoreHeight = (const int32_t)size.y;
+		m_Data.GrabAreaRect = rect;
 	}
 }

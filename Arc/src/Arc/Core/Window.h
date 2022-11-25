@@ -40,17 +40,9 @@ namespace ArcEngine
 
 		virtual bool IsMaximized() = 0;
 		virtual void Minimize() = 0;
-		virtual void Maximize(const glm::vec2& globalMousePosition) = 0;
+		virtual void Maximize() = 0;
 		virtual void Restore() = 0;
-
-		virtual glm::vec2 GetPosition() const = 0;
-		virtual glm::vec2 GetSize() const = 0;
-		virtual glm::vec4 GetMonitorWorkArea(const glm::vec2& globalMousePosition) const = 0;
-
-		virtual void SetPosition(const glm::vec2& position) = 0;
-		virtual void Resize(const glm::vec2& position, const glm::vec2& size) = 0;
-		virtual void SubmitRestorePosition(const glm::vec2& position) = 0;
-		virtual void SubmitRestoreSize(const glm::vec2& size) = 0;
+		virtual void SetTitleBarRect(const glm::vec4& rect) = 0;
 
 		virtual WindowHandle GetNativeWindow() const = 0;
 		

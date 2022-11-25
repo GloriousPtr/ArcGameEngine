@@ -19,4 +19,6 @@
 [submodule "Arc/vendor/imgui"]
 	path = Arc/vendor/imgui
 	url = https://github.com/MohitSethi99/imgui.git
-
+[submodule "Arc/vendor/GLFW"]
+	path = Arc/vendor/GLFW
+	url = https://github.com/MohitSethi99/glfw.git
