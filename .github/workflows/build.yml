@@ -25,7 +25,7 @@ jobs:
           - Dist
         COMPILER:
           - msvc
-          - clang
+          #- clang
     env:
       SOLUTION_FILE_PATH: "Arc.sln"
     steps:
