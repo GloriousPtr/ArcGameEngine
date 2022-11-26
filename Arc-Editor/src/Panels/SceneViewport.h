@@ -60,6 +60,7 @@ namespace ArcEngine
 		glm::vec3 m_TranslationVelocity = glm::vec3(0.0f);
 		glm::vec2 m_RotationVelocity = glm::vec2(0.0f);
 		glm::mat4 m_CubeViewMatrix = glm::mat4(1.0f);
+		glm::vec2 m_GizmoPosition = glm::vec2(1.0f);
 
 		bool m_UseEditorCamera = true;
 		bool m_UsingEditorCamera = false;

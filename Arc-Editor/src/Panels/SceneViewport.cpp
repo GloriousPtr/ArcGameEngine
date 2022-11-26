@@ -9,6 +9,7 @@
 #include "Arc/Math/Math.h"
 #include "../EditorLayer.h"
 #include "../Utils/UI.h"
+#include "../Utils/EditorTheme.h"
 
 namespace ArcEngine
 {
@@ -157,7 +158,7 @@ namespace ArcEngine
 		ImVec2 windowPadding = ImGui::GetStyle().WindowPadding;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		if (OnBegin())
+		if (OnBegin(ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))
 		{
 			ImVec2 startCursorPos = ImGui::GetCursorPos();
 
@@ -246,32 +247,57 @@ namespace ArcEngine
 					m_EditorCamera.SetYaw(yaw);	
 				}
 
-				// Buttons
-				ImGui::SetItemAllowOverlap();
-				ImGui::SetCursorPos({ startCursorPos.x + windowPadding.x, startCursorPos.y + windowPadding.y });
-				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 1, 1 });
-				ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+				// Transform Gizmos Button Group
 				float frameHeight = 1.3f * ImGui::GetFrameHeight();
+				ImVec2 framePadding = ImGui::GetStyle().FramePadding;
 				ImVec2 buttonSize = { frameHeight, frameHeight };
-				constexpr float alpha = 0.6f;
-				if (UI::ToggleButton(ICON_MDI_ARROW_ALL, m_GizmoType == ImGuizmo::TRANSLATE, buttonSize, alpha, alpha))
-					m_GizmoType = ImGuizmo::TRANSLATE;
-				ImGui::SameLine();
-				if (UI::ToggleButton(ICON_MDI_ROTATE_3D, m_GizmoType == ImGuizmo::ROTATE, buttonSize, alpha, alpha))
-					m_GizmoType = ImGuizmo::ROTATE;
-				ImGui::SameLine();
-				if (UI::ToggleButton(ICON_MDI_ARROW_EXPAND, m_GizmoType == ImGuizmo::SCALE, buttonSize, alpha, alpha))
-					m_GizmoType = ImGuizmo::SCALE;
-				ImGui::SameLine();
-				if (UI::ToggleButton(ICON_MDI_ARROW_EXPAND_ALL, m_GizmoType == ImGuizmo::UNIVERSAL, buttonSize, alpha, alpha))
-					m_GizmoType = ImGuizmo::UNIVERSAL;
-				ImGui::SameLine();
-				if (UI::ToggleButton(ICON_MDI_VECTOR_SQUARE, m_GizmoType == ImGuizmo::BOUNDS, buttonSize, alpha, alpha))
-					m_GizmoType = ImGuizmo::BOUNDS;
-				ImGui::SameLine();
-				if (UI::ToggleButton(m_GizmoMode == ImGuizmo::WORLD ? ICON_MDI_EARTH : ICON_MDI_EARTH_OFF, m_GizmoMode == ImGuizmo::WORLD, buttonSize, alpha, alpha))
-					m_GizmoMode = m_GizmoMode == ImGuizmo::LOCAL ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
-				ImGui::PopStyleVar(2);
+				float buttonCount = 6.0f;
+				ImVec2 gizmoPosition = { m_ViewportBounds[0].x + m_GizmoPosition.x, m_ViewportBounds[0].y + m_GizmoPosition.y };
+				ImRect bb(gizmoPosition.x, gizmoPosition.y, gizmoPosition.x + buttonSize.x + 8, gizmoPosition.y + (buttonSize.y + 2) * (buttonCount + 0.5f));
+				ImVec4 frameColor = ImGui::GetStyleColorVec4(ImGuiCol_Tab);
+				frameColor.w = 0.5f;
+				ImGui::RenderFrame(bb.Min, bb.Max, ImGui::GetColorU32(frameColor), false, ImGui::GetStyle().FrameRounding);
+				glm::vec2 tempGizmoPosition = m_GizmoPosition;
+
+				ImGui::SetCursorPos({ startCursorPos.x + tempGizmoPosition.x + framePadding.x, startCursorPos.y + tempGizmoPosition.y });
+				ImGui::BeginGroup();
+				{
+					ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 1, 1 });
+
+					ImVec2 draggerCursorPos = ImGui::GetCursorPos();
+					ImGui::SetCursorPosX(draggerCursorPos.x + framePadding.x);
+					ImGui::TextUnformatted(ICON_MDI_DOTS_HORIZONTAL);
+					ImVec2 draggerSize = ImGui::CalcTextSize(ICON_MDI_DOTS_HORIZONTAL);
+					draggerSize.x *= 2.0f;
+					ImGui::SetCursorPos(draggerCursorPos);
+					ImGui::InvisibleButton("GizmoDragger", draggerSize);
+					static ImVec2 lastMousePosition = ImGui::GetMousePos();
+					ImVec2 mousePos = ImGui::GetMousePos();
+					if (ImGui::IsItemActive())
+					{
+						m_GizmoPosition.x += mousePos.x - lastMousePosition.x;
+						m_GizmoPosition.y += mousePos.y - lastMousePosition.y;
+					}
+					lastMousePosition = mousePos;
+
+					constexpr float alpha = 0.6f;
+					if (UI::ToggleButton(ICON_MDI_AXIS_ARROW, m_GizmoType == ImGuizmo::TRANSLATE, buttonSize, alpha, alpha))
+						m_GizmoType = ImGuizmo::TRANSLATE;
+					if (UI::ToggleButton(ICON_MDI_ROTATE_3D, m_GizmoType == ImGuizmo::ROTATE, buttonSize, alpha, alpha))
+						m_GizmoType = ImGuizmo::ROTATE;
+					if (UI::ToggleButton(ICON_MDI_ARROW_EXPAND, m_GizmoType == ImGuizmo::SCALE, buttonSize, alpha, alpha))
+						m_GizmoType = ImGuizmo::SCALE;
+					if (UI::ToggleButton(ICON_MDI_VECTOR_SQUARE, m_GizmoType == ImGuizmo::BOUNDS, buttonSize, alpha, alpha))
+						m_GizmoType = ImGuizmo::BOUNDS;
+					if (UI::ToggleButton(ICON_MDI_ARROW_EXPAND_ALL, m_GizmoType == ImGuizmo::UNIVERSAL, buttonSize, alpha, alpha))
+						m_GizmoType = ImGuizmo::UNIVERSAL;
+					if (UI::ToggleButton(m_GizmoMode == ImGuizmo::WORLD ? ICON_MDI_EARTH : ICON_MDI_EARTH_OFF, m_GizmoMode == ImGuizmo::WORLD, buttonSize, alpha, alpha))
+						m_GizmoMode = m_GizmoMode == ImGuizmo::LOCAL ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
+
+					ImGui::PopStyleVar(2);
+				}
+				ImGui::EndGroup();
 			}
 
 			// Showing mini camera viewport if selected entity has a CameraComponent
