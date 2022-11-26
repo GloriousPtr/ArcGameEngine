@@ -6,6 +6,7 @@
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
+#include <comdef.h>
 
 #include "Arc/Core/Application.h"
 
@@ -27,9 +28,16 @@ namespace ArcEngine
 		{
 			if (SHGetPathFromIDList(pidl, szTitle))
 			{
-				std::wstring ws(szTitle);
-				std::string str(ws.begin(), ws.end());
-				return eastl::string(str.c_str());
+				_bstr_t b(szTitle);
+				const char* c = b;
+				return c;
+
+				size_t size = std::wcstombs(nullptr, szTitle, 0);
+				char* mbstr = new char[size];
+				size = std::wcstombs(mbstr, szTitle, size);
+				eastl::string result(mbstr);
+				delete[] mbstr;
+				return result;
 			}
 		}
 		return eastl::string();

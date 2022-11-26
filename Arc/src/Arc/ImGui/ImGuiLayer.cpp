@@ -104,7 +104,7 @@ namespace ArcEngine
 		
 		ImGuiIO& io = ImGui::GetIO();
 		const Window& window = Application::Get().GetWindow();
-		io.DisplaySize = ImVec2((float)window.GetWidth(), window.GetHeight());
+		io.DisplaySize = ImVec2((float)window.GetWidth(), (float)window.GetHeight());
 
 		{
 			ARC_PROFILE_SCOPE("ImGui::End::Render");
