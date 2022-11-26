@@ -51,11 +51,9 @@ namespace ArcEngine
 		{
 			const glm::vec3& position = m_EditorCamera.GetPosition();
 			const glm::vec2 yawPitch = glm::vec2(m_EditorCamera.GetYaw(), m_EditorCamera.GetPitch());
-
 			glm::vec3 finalPosition = position;
 			glm::vec2 finalYawPitch = yawPitch;
 
-			bool moved = false;
 			if (ImGui::IsMouseDown(ImGuiMouseButton_Right) && m_ViewportHovered)
 			{
 				ImGui::SetMouseCursor(ImGuiMouseCursor_None);
@@ -75,25 +73,13 @@ namespace ArcEngine
 
 				float maxMoveSpeed = m_MaxMoveSpeed * (ImGui::IsKeyDown(ImGuiKey_LeftShift) ? 3.0f : 1.0f);
 				if (ImGui::IsKeyDown(ImGuiKey_W))
-				{
-					moved = true;
 					finalPosition += m_EditorCamera.GetForward() * maxMoveSpeed;
-				}
 				else if (ImGui::IsKeyDown(ImGuiKey_S))
-				{
-					moved = true;
 					finalPosition -= m_EditorCamera.GetForward() * maxMoveSpeed;
-				}
 				if (ImGui::IsKeyDown(ImGuiKey_D))
-				{
-					moved = true;
 					finalPosition += m_EditorCamera.GetRight() * maxMoveSpeed;
-				}
 				else if (ImGui::IsKeyDown(ImGuiKey_A))
-				{
-					moved = true;
 					finalPosition -= m_EditorCamera.GetRight() * maxMoveSpeed;
-				}
 			}
 			else
 			{
@@ -102,13 +88,47 @@ namespace ArcEngine
 
 			glm::vec3 dampedPosition = Math::SmoothDamp(position, finalPosition, m_TranslationVelocity, m_TranslationDampening, 10000.0f, timestep);
 			glm::vec2 dampedYawPitch = Math::SmoothDamp(yawPitch, finalYawPitch, m_RotationVelocity, m_RotationDampening, 1000.0f, timestep);
-
 			m_EditorCamera.SetPosition(dampedPosition);
 			m_EditorCamera.SetYaw(dampedYawPitch.x);
 			m_EditorCamera.SetPitch(dampedYawPitch.y);
-
-			m_EditorCamera.OnUpdate(timestep);
 		}
+
+		// Change transform gizmo
+		if (m_ViewportHovered && !ImGuizmo::IsUsing() && !ImGui::IsMouseDown(ImGuiMouseButton_Right))
+		{
+			if (ImGui::IsKeyPressed(ImGuiKey_Q))
+				m_GizmoType = -1;
+			if (ImGui::IsKeyPressed(ImGuiKey_W))
+				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			if (ImGui::IsKeyPressed(ImGuiKey_E))
+				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			if (ImGui::IsKeyPressed(ImGuiKey_R))
+				m_GizmoType = ImGuizmo::OPERATION::SCALE;
+			if (ImGui::IsKeyPressed(ImGuiKey_T))
+				m_GizmoType = ImGuizmo::OPERATION::BOUNDS;
+			if (ImGui::IsKeyPressed(ImGuiKey_Y))
+				m_GizmoType = ImGuizmo::OPERATION::UNIVERSAL;
+		}
+
+		// Entity picking
+		if (ImGui::IsMouseClicked(0) && m_ViewportHovered && !ImGuizmo::IsUsing() && !ImGuizmo::IsOver())
+		{
+			// Mouse Picking
+			auto [mx, my] = ImGui::GetMousePos();
+			mx -= m_ViewportBounds[0].x;
+			my -= m_ViewportBounds[0].y;
+			const int viewportWidth = (int)(m_ViewportBounds[1].x - m_ViewportBounds[0].x);
+			const int viewportHeight = (int)(m_ViewportBounds[1].y - m_ViewportBounds[0].y);
+			my = (float)viewportHeight - my;
+			const int mouseX = (int)mx;
+			const int mouseY = (int)my;
+			if(mouseX >= 0 && mouseY >= 0 && mouseX < viewportWidth && mouseY < viewportHeight)
+			{
+				// TODO: Scene GetEntity or use raycast for selection
+			}
+		}
+
+		m_EditorCamera.OnUpdate(timestep);
 
 		// Update scene
 		m_RenderGraphData->RenderPassTarget->Bind();
@@ -128,58 +148,6 @@ namespace ArcEngine
 		}
 
 		m_RenderGraphData->RenderPassTarget->Unbind();
-
-		if (!ImGuizmo::IsUsing() && !ImGui::IsMouseDown(ImGuiMouseButton_Right))
-		{
-			if (ImGui::IsKeyPressed(ImGuiKey_Q))
-				m_GizmoType = -1;
-			if (ImGui::IsKeyPressed(ImGuiKey_W))
-				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
-			if (ImGui::IsKeyPressed(ImGuiKey_E))
-				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
-			if (ImGui::IsKeyPressed(ImGuiKey_R))
-				m_GizmoType = ImGuizmo::OPERATION::SCALE;
-			if (ImGui::IsKeyPressed(ImGuiKey_T))
-				m_GizmoType = ImGuizmo::OPERATION::UNIVERSAL;
-			if (ImGui::IsKeyPressed(ImGuiKey_Y))
-				m_GizmoType = ImGuizmo::OPERATION::BOUNDS;
-		}
-
-		if (ImGui::IsKeyPressed(ImGuiKey_F) && m_SceneHierarchyPanel)
-		{
-			const EditorContext& context = EditorLayer::GetInstance()->GetContext();
-			if (context.IsValid(EditorContextType::Entity))
-			{
-				Entity entity = *((Entity*)context.Data);
-				if (entity)
-				{
-					const auto& transform = entity.GetComponent<TransformComponent>();
-					glm::vec3 pos = transform.Translation;
-					pos.z -= 5.0f;
-					auto view = glm::lookAt(pos, transform.Translation, m_EditorCamera.GetUp());
-					m_EditorCamera.SetPosition(view[3]);
-					m_EditorCamera.SetYaw(90);
-					m_EditorCamera.SetPitch(0);
-				}
-			}
-		}
-
-		if (ImGui::IsMouseClicked(0) && m_ViewportHovered && !ImGuizmo::IsUsing() && !ImGuizmo::IsOver())
-		{
-			// Mouse Picking
-			auto [mx, my] = ImGui::GetMousePos();
-			mx -= m_ViewportBounds[0].x;
-			my -= m_ViewportBounds[0].y;
-			const int viewportWidth = (int)(m_ViewportBounds[1].x - m_ViewportBounds[0].x);
-			const int viewportHeight = (int)(m_ViewportBounds[1].y - m_ViewportBounds[0].y);
-			my = (float)viewportHeight - my;
-			const int mouseX = (int)mx;
-			const int mouseY = (int)my;
-			if(mouseX >= 0 && mouseY >= 0 && mouseX < viewportWidth && mouseY < viewportHeight)
-			{
-				// TODO: Scene GetEntity or use raycast for selection
-			}
-		}
 	}
 
 	void SceneViewport::OnImGuiRender()
@@ -316,11 +284,13 @@ namespace ArcEngine
 				Entity selectedEntity = *((Entity*)context.Data);
 				if (selectedEntity && selectedEntity.HasComponent<CameraComponent>())
 				{
-					CameraData cameraData;
-					cameraData.View = glm::inverse(selectedEntity.GetWorldTransform());
-					cameraData.Projection = selectedEntity.GetComponent<CameraComponent>().Camera.GetProjection();
-					cameraData.ViewProjection = cameraData.Projection * cameraData.View;
-					cameraData.Position = selectedEntity.GetTransform().Translation;
+					CameraData cameraData =
+					{
+						glm::inverse(selectedEntity.GetWorldTransform()),
+						selectedEntity.GetComponent<CameraComponent>().Camera.GetProjection(),
+						cameraData.Projection * cameraData.View,
+						selectedEntity.GetTransform().Translation
+					};
 
 					m_MiniViewportRenderGraphData->RenderPassTarget->Bind();
 					m_Scene->OnRender(m_MiniViewportRenderGraphData, cameraData);
