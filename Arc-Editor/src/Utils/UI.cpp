@@ -1183,22 +1183,17 @@ namespace ArcEngine
 
 		const ImVec2* clip_min = clip_rect ? &clip_rect->Min : &pos_min;
 		const ImVec2* clip_max = clip_rect ? &clip_rect->Max : &pos_max;
-		bool need_clipping = (pos.x + text_size.x >= clip_max->x) || (pos.y + text_size.y >= clip_max->y);
-		if (clip_rect) // If we had no explicit clipping rectangle then pos==clip_min
-			need_clipping |= (pos.x < clip_min->x) || (pos.y < clip_min->y);
+
 		// Align whole block. We should defer that to the better rendering function when we'll have support for individual line alignment.
-		if (align.x > 0.0f) pos.x = ImMax(pos.x, pos.x + (pos_max.x - pos.x - text_size.x) * align.x);
-		if (align.y > 0.0f) pos.y = ImMax(pos.y, pos.y + (pos_max.y - pos.y - text_size.y) * align.y);
+		if (align.x > 0.0f)
+			pos.x = ImMax(pos.x, pos.x + (pos_max.x - pos.x - text_size.x) * align.x);
+
+		if (align.y > 0.0f)
+			pos.y = ImMax(pos.y, pos.y + (pos_max.y - pos.y - text_size.y) * align.y);
+
 		// Render
-		if (need_clipping)
-		{
-			ImVec4 fine_clip_rect(clip_min->x, clip_min->y, clip_max->x, clip_max->y);
-			draw_list->AddText(nullptr, 0.0f, pos, ImGui::GetColorU32(ImGuiCol_Text), text, text_display_end, wrap_width, &fine_clip_rect);
-		}
-		else
-		{
-			draw_list->AddText(nullptr, 0.0f, pos, ImGui::GetColorU32(ImGuiCol_Text), text, text_display_end, wrap_width, nullptr);
-		}
+		ImVec4 fine_clip_rect(clip_min->x, clip_min->y, clip_max->x, clip_max->y);
+		draw_list->AddText(nullptr, 0.0f, pos, ImGui::GetColorU32(ImGuiCol_Text), text, text_display_end, wrap_width, &fine_clip_rect);
 	}
 
 	/// Draws vertical text. The position is the bottom left of the text rect.
