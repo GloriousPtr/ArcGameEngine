@@ -620,8 +620,12 @@ namespace ArcEngine
 			else if (component.Type == LightComponent::LightType::Spot)
 			{
 				UI::Property("Range", component.Range);
-				UI::Property("Outer Cut-Off Angle", component.OuterCutOffAngle, 1.0f, 90.0f);
-				UI::Property("Cut-Off Angle", component.CutOffAngle, 1.0f, 90.0f);
+				float degrees = glm::degrees(component.OuterCutOffAngle);
+				if (UI::Property("Outer Cut-Off Angle", degrees, 1.0f, 90.0f))
+					component.OuterCutOffAngle = glm::radians(degrees);
+				degrees = glm::degrees(component.CutOffAngle);
+				if (UI::Property("Cut-Off Angle", degrees, 1.0f, 90.0f))
+					component.CutOffAngle = glm::radians(degrees);
 
 				if (component.Range < 0.1f)
 					component.Range = 0.1f;
@@ -785,9 +789,13 @@ namespace ArcEngine
 			if (component.UseLimits)
 			{
 				ImGui::Indent();
-				UI::Property("Lower Angle", component.LowerAngle, 0.0f, 359.0f);
+				float degrees = glm::degrees(component.LowerAngle);
+				if (UI::Property("Lower Angle", degrees, 0.0f, 359.0f))
+					component.LowerAngle = glm::radians(degrees);
 				component.UpperAngle = glm::max(component.LowerAngle, component.UpperAngle);
-				UI::Property("Upper Angle", component.UpperAngle, component.LowerAngle, 359.9f);
+				degrees = glm::degrees(component.UpperAngle);
+				if (UI::Property("Upper Angle", degrees, glm::degrees(component.LowerAngle), 359.9f))
+					component.UpperAngle = glm::radians(degrees);
 				ImGui::Unindent();
 			}
 
@@ -812,7 +820,9 @@ namespace ArcEngine
 			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", "Rigidbody 2D", entity.GetScene(), component.ConnectedRigidbody, nullptr);
 			UI::Property("Anchor", component.Anchor);
 
-			UI::Property("Angle", component.Angle);
+			float degrees = glm::degrees(component.Angle);
+			if (UI::Property("Angle", degrees))
+				component.Angle = glm::radians(degrees);
 			UI::Property("Use Limits", component.UseLimits);
 			if (component.UseLimits)
 			{
@@ -877,7 +887,9 @@ namespace ArcEngine
 			UI::Property("Drag Multiplier", component.DragMultiplier);
 			UI::Property("Flip Gravity", component.FlipGravity);
 			UI::Property("Flow Magnitude", component.FlowMagnitude);
-			UI::Property("Flow Angle", component.FlowAngle);
+			float degrees = glm::degrees(component.FlowAngle);
+			if (UI::Property("Flow Angle", degrees))
+				component.FlowAngle = glm::radians(degrees);
 			UI::EndProperties();
 		});
 
@@ -1083,8 +1095,12 @@ namespace ArcEngine
 				UI::Property("Max Gain", config.MaxGain);
 				UI::Property("Min Distance", config.MinDistance);
 				UI::Property("Max Distance", config.MaxDistance);
-				UI::Property("Cone Inner Angle", config.ConeInnerAngle);
-				UI::Property("Cone Outer Angle", config.ConeOuterAngle);
+				float degrees = glm::degrees(config.ConeInnerAngle);
+				if (UI::Property("Cone Inner Angle", degrees))
+					config.ConeInnerAngle = glm::radians(degrees);
+				degrees = glm::degrees(config.ConeOuterAngle);
+				if (UI::Property("Cone Outer Angle", degrees))
+					config.ConeOuterAngle = glm::radians(degrees);
 				UI::Property("Cone Outer Gain", config.ConeOuterGain);
 				UI::Property("Doppler Factor", config.DopplerFactor);
 				ImGui::Unindent();
@@ -1106,8 +1122,12 @@ namespace ArcEngine
 			auto& config = component.Config;
 			UI::BeginProperties();
 			UI::Property("Active", component.Active);
-			UI::Property("Cone Inner Angle", config.ConeInnerAngle);
-			UI::Property("Cone Outer Angle", config.ConeOuterAngle);
+			float degrees = glm::degrees(config.ConeInnerAngle);
+			if (UI::Property("Cone Inner Angle", degrees))
+				config.ConeInnerAngle = glm::radians(degrees);
+			degrees = glm::degrees(config.ConeOuterAngle);
+			if (UI::Property("Cone Outer Angle", degrees))
+				config.ConeOuterAngle = glm::radians(degrees);
 			UI::Property("Cone Outer Gain", config.ConeOuterGain);
 			UI::EndProperties();
 		});

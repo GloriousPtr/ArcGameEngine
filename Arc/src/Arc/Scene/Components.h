@@ -135,8 +135,8 @@ namespace ArcEngine
 		float Intensity = 20.0f;
 
 		float Range = 1.0f;
-		float CutOffAngle = 12.5f;
-		float OuterCutOffAngle = 17.5f;
+		float CutOffAngle = glm::radians(12.5f);
+		float OuterCutOffAngle = glm::radians(17.5f);
 		
 		ShadowQualityType ShadowQuality = ShadowQualityType::UltraSoft;
 
@@ -297,8 +297,8 @@ namespace ArcEngine
 		glm::vec2 Anchor = glm::vec2(0.0f);
 
 		bool UseLimits = false;
-		float LowerAngle = 0.0f;
-		float UpperAngle = 359.0f;
+		float LowerAngle = glm::radians(0.0f);
+		float UpperAngle = glm::radians(359.0f);
 		
 		bool UseMotor = false;
 		float MotorSpeed = 5.0f;
@@ -370,7 +370,7 @@ namespace ArcEngine
 		bool FlipGravity = false;
 
 		float FlowMagnitude = 0.0f;
-		float FlowAngle = 0.0f;
+		float FlowAngle = glm::radians(0.0f);
 
 		BuoyancyEffector2DComponent() = default;
 		BuoyancyEffector2DComponent(const BuoyancyEffector2DComponent&) = default;

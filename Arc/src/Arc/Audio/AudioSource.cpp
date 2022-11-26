@@ -103,7 +103,7 @@ namespace ArcEngine
 			ma_sound_set_min_distance(sound, config.MinDistance);
 			ma_sound_set_max_distance(sound, config.MaxDistance);
 
-			ma_sound_set_cone(sound, glm::radians(config.ConeInnerAngle), glm::radians(config.ConeOuterAngle), config.ConeOuterGain);
+			ma_sound_set_cone(sound, config.ConeInnerAngle, config.ConeOuterAngle, config.ConeOuterGain);
 			ma_sound_set_doppler_factor(sound, glm::max(config.DopplerFactor, 0.0f));
 		}
 		else
@@ -190,7 +190,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		ma_sound_set_cone(m_Sound.get(), glm::radians(innerAngle), glm::radians(outerAngle), outerGain);
+		ma_sound_set_cone(m_Sound.get(), innerAngle, outerAngle, outerGain);
 	}
 
 	void AudioSource::SetDopplerFactor(const float factor) const

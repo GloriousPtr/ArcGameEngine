@@ -29,8 +29,8 @@ namespace ArcEngine
 		float MinDistance = 0.3f;
 		float MaxDistance = 1000.0f;
 
-		float ConeInnerAngle = 360.0f;
-		float ConeOuterAngle = 360.0f;
+		float ConeInnerAngle = glm::radians(360.0f);
+		float ConeOuterAngle = glm::radians(360.0f);
 		float ConeOuterGain = 0.0f;
 
 		float DopplerFactor = 1.0f;

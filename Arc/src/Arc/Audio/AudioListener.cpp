@@ -12,7 +12,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		auto* engine = (ma_engine*)AudioEngine::GetEngine();
-		ma_engine_listener_set_cone(engine, m_ListenerIndex, glm::radians(config.ConeInnerAngle), glm::radians(config.ConeOuterAngle), config.ConeOuterGain);
+		ma_engine_listener_set_cone(engine, m_ListenerIndex, config.ConeInnerAngle, config.ConeOuterAngle, config.ConeOuterGain);
 	}
 	
 	void AudioListener::SetPosition(const glm::vec3& position) const

@@ -172,7 +172,7 @@ namespace ArcEngine
 			return c;
 		}
 
-		static void HandleBuoyancy(b2Fixture* fluid, b2Fixture* fixture, b2Vec2 gravity, bool flipGravity, float density, float dragMultiplier, float flowMagnitude, float flowAngle)
+		static void HandleBuoyancy(b2Fixture* fluid, b2Fixture* fixture, b2Vec2 gravity, bool flipGravity, float density, float dragMultiplier, float flowMagnitude, float flowAngleInRadians)
 		{
 			ARC_PROFILE_SCOPE();
 			
@@ -187,8 +187,7 @@ namespace ArcEngine
 				b2Vec2 buoyancyForce = displacedMass * gravityMultiplier * -gravity;
 				fixture->GetBody()->ApplyForce(buoyancyForce, centroid, true);
 
-				float radians = glm::radians(flowAngle);
-				b2Vec2 flowForce = flowMagnitude * b2Vec2(glm::cos(radians), glm::sin(radians));
+				b2Vec2 flowForce = flowMagnitude * b2Vec2(glm::cos(flowAngleInRadians), glm::sin(flowAngleInRadians));
 				fixture->GetBody()->ApplyForceToCenter(flowForce, true);
 
 				//apply drag separately for each polygon edge

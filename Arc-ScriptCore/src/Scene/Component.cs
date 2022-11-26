@@ -415,11 +415,11 @@ namespace ArcEngine
 		public void MovePosition(Vector2 position) => InternalCalls.Rigidbody2DComponent_MovePosition(entityID, ref position);
 
 		/// <summary>
-		/// Rotates the Rigidbody to angle (given in degrees).
+		/// Rotates the Rigidbody to angle (given in radians).
 		/// </summary>
-		/// <param name="rotation">Target angle (in degrees)</param>
+		/// <param name="rotationRadians">Target angle (in radians)</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void MoveRotation(float rotation) => InternalCalls.Rigidbody2DComponent_MoveRotation(entityID, ref rotation);
+		public void MoveRotation(float rotationRadians) => InternalCalls.Rigidbody2DComponent_MoveRotation(entityID, ref rotationRadians);
 
 		/// <summary>
 		/// Make the Rigidbody "sleep".
@@ -624,7 +624,7 @@ namespace ArcEngine
 		}
 
 		/// <summary>
-		/// Sets the inner angle (in degrees) of a 3d stereo or multichannel sound in speaker space.
+		/// Sets the inner angle (in radians) of a 3d stereo or multichannel sound in speaker space.
 		/// </summary>
 		public float coneInnerAngle
 		{
@@ -639,7 +639,7 @@ namespace ArcEngine
 		}
 
 		/// <summary>
-		/// Sets the outer angle (in degrees) of a 3d stereo or multichannel sound in speaker space.
+		/// Sets the outer angle (in radians) of a 3d stereo or multichannel sound in speaker space.
 		/// </summary>
 		public float coneOuterAngle
 		{

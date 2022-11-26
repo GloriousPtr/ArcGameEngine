@@ -630,7 +630,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Rigidbody2DComponent_MoveRotation(uint64_t entityID, const float* angle)
+	void Rigidbody2DComponent_MoveRotation(uint64_t entityID, const float* angleRadians)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -638,7 +638,7 @@ namespace ArcEngine
 		if (component.RuntimeBody)
 		{
 			b2Body* body = (b2Body*)component.RuntimeBody;
-			body->SetTransform(body->GetPosition(), glm::radians(*angle));
+			body->SetTransform(body->GetPosition(), *angleRadians);
 		}
 	}
 

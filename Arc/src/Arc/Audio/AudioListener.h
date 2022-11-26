@@ -6,8 +6,8 @@ namespace ArcEngine
 {
 	struct AudioListenerConfig
 	{
-		float ConeInnerAngle = 360.0f;
-		float ConeOuterAngle = 360.0f;
+		float ConeInnerAngle = glm::radians(360.0f);
+		float ConeOuterAngle = glm::radians(360.0f);
 		float ConeOuterGain = 0.0f;
 	};
 

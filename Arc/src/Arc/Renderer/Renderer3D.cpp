@@ -335,8 +335,8 @@ namespace ArcEngine
 			
 				glm::vec4 attenFactors = glm::vec4(
 					lightComponent.Range,
-					glm::cos(glm::radians(lightComponent.CutOffAngle)),
-					glm::cos(glm::radians(lightComponent.OuterCutOffAngle)),
+					glm::cos(lightComponent.CutOffAngle),
+					glm::cos(lightComponent.OuterCutOffAngle),
 					static_cast<uint32_t>(lightComponent.Type));
 				// Based off of +Z direction
 				glm::vec4 zDir = worldTransform * glm::vec4(0, 0, 1, 0);

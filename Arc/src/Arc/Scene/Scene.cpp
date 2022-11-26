@@ -608,8 +608,8 @@ namespace ArcEngine
 							jd.Initialize(body1, body2, body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y }));
 							jd.collideConnected = joint.EnableCollision;
 							jd.enableLimit = joint.UseLimits;
-							jd.lowerAngle = glm::radians(joint.LowerAngle);
-							jd.upperAngle = glm::radians(joint.UpperAngle);
+							jd.lowerAngle = joint.LowerAngle;
+							jd.upperAngle = joint.UpperAngle;
 							jd.enableMotor = joint.UseMotor;
 							jd.motorSpeed = joint.MotorSpeed;
 							jd.maxMotorTorque = joint.MaxMotorTorque;
@@ -633,7 +633,7 @@ namespace ArcEngine
 							b2PrismaticJointDef jd;
 							jd.Initialize(body1, body2, body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y }), worldAxis);
 							jd.collideConnected = joint.EnableCollision;
-							jd.referenceAngle = glm::radians(joint.Angle);
+							jd.referenceAngle = joint.Angle;
 							jd.enableLimit = joint.UseLimits;
 							jd.lowerTranslation = joint.LowerTranslation;
 							jd.upperTranslation = joint.UpperTranslation;

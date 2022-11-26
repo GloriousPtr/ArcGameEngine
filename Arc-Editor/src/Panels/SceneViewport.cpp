@@ -2,6 +2,7 @@
 
 #include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
 #include <ImGuizmo.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -271,8 +272,8 @@ namespace ArcEngine
 				{
 					const glm::mat4 inverted = glm::inverse(cameraView);
 					const glm::vec3 direction = -glm::vec3(inverted[2]);
-					float yaw = glm::degrees(glm::atan(direction.z, direction.x));
-					float pitch = glm::degrees(glm::asin(direction.y));
+					float yaw = glm::atan(direction.z, direction.x);
+					float pitch = glm::asin(direction.y);
 					m_EditorCamera.SetPitch(pitch);
 					m_EditorCamera.SetYaw(yaw);	
 				}
