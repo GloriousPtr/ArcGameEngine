@@ -329,16 +329,13 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		ImVec2 framePadding = ImGui::GetStyle().FramePadding;
-		ImVec2 itemSpacing = ImGui::GetStyle().ItemSpacing;
-
-		ImVec2 headerRegion = ImGui::GetContentRegionAvail();
 		float frameHeight = ImGui::GetFrameHeight();
-		headerRegion.y = 2.0f * (frameHeight + itemSpacing.y) - itemSpacing.y;
-		ImGui::BeginChild("PropertiesHeader", headerRegion, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
 		{
+			float regionX = ImGui::GetContentRegionAvail().x;
 			float addButtonSizeX = UI::GetIconButtonSize("  " ICON_MDI_PLUS, "Add  ").x;
 			ImVec2 lockButtonSize = ImVec2(frameHeight * 1.5f, frameHeight);
-			float tagWidth = headerRegion.x - ((addButtonSizeX + framePadding.x * 2.0f) + (lockButtonSize.x + framePadding.x * 2.0f));
+			float tagWidth = regionX - ((addButtonSizeX + framePadding.x * 2.0f) + (lockButtonSize.x + framePadding.x * 2.0f));
 
 			auto& tag = entity.GetComponent<TagComponent>();
 
@@ -415,7 +412,7 @@ namespace ArcEngine
 					m_Locked = !m_Locked;
 			}
 
-			ImGui::SetNextItemWidth(headerRegion.x - framePadding.x);
+			ImGui::SetNextItemWidth(regionX - framePadding.x);
 
 			const auto it = Scene::LayerCollisionMask.find(tag.Layer);
 			const char* current = Scene::LayerCollisionMask[it == Scene::LayerCollisionMask.end() ? Scene::DefaultLayer : tag.Layer].Name.c_str();
@@ -436,7 +433,6 @@ namespace ArcEngine
 				ImGui::EndCombo();
 			}
 		}
-		ImGui::EndChild();
 
 		ImGui::BeginChild("PropertiesBody");
 		DrawComponent<TransformComponent>(ICON_MDI_VECTOR_LINE " Transform", entity, [](TransformComponent& component)
