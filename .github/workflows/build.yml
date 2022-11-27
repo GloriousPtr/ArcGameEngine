@@ -25,7 +25,7 @@ jobs:
           - Dist
         COMPILER:
           - msvc
-          #- clang
+          - clang
     env:
       SOLUTION_FILE_PATH: "Arc.sln"
     steps:
@@ -36,9 +36,20 @@ jobs:
 
       - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v1.1
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Dependencies
+        run: "pip3 install requests"
       
       - name: Generate Project Files
-        run: "./scripts/Win-GenProjects.bat ${{matrix.COMPILER}}"
+        run: |
+          cd scripts
+          python Setup.py ${{matrix.COMPILER}}
+          cd ..
       
       - name: Run Build
         run: |
