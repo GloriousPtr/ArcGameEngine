@@ -181,25 +181,25 @@ namespace ArcEngine
 			// Premake build
 			std::filesystem::path projectPath = Project::GetProjectDirectory();
 			{
-				std::string premakeCommand = "call \"../vendor/premake/bin/premake5.exe\" --file=";
-				premakeCommand += (projectPath / "premake5.lua").string();
+				std::string premakeCommand = R"(call "../vendor/premake/bin/premake5.exe" --file=")";
+				premakeCommand += (projectPath / R"(premake5.lua")").string();
 				premakeCommand += " --scripts=" + std::filesystem::current_path().string();
 				premakeCommand += " vs2022";
-				system(premakeCommand.c_str());
+				std::system(premakeCommand.c_str());
 			}
 
 			//Compile app assembly
 			{
-				std::string buildCommand = "dotnet msbuild ";
-				buildCommand += (projectPath / (std::string(Project::GetActive()->GetConfig().Name.c_str()) + ".sln")).string();
-				buildCommand += " -nologo"																	// no microsoft branding in console
+				std::string solutionPath = (projectPath / (std::string(Project::GetActive()->GetConfig().Name.c_str()) + ".sln")).string();
+				std::string buildCommand = "dotnet msbuild \"";
+				buildCommand += solutionPath;
+				buildCommand += "\" -nologo"																	// no microsoft branding in console
 								" -noconlog"																// no console logs
 								//" -t:rebuild"																// rebuild the project
 								" -m"																		// multiprocess build
 								" -flp1:Verbosity=minimal;logfile=AssemblyBuildErrors.log;errorsonly"		// dump errors in AssemblyBuildErrors.log file
 								" -flp2:Verbosity=minimal;logfile=AssemblyBuildWarnings.log;warningsonly";	// dump warnings in AssemblyBuildWarnings.log file
-				
-				system(buildCommand.c_str());
+				std::system(buildCommand.c_str());
 
 				// Errors
 				{
