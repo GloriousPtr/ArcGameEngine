@@ -67,6 +67,7 @@ project "Arc"
 		"%{IncludeDir.icons}",
 		"%{IncludeDir.JoltPhysics}",
 		"%{IncludeDir.tinyobj}",
+		"%{IncludeDir.tinygltf}",
 	}
 
 	links

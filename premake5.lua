@@ -42,6 +42,7 @@ IncludeDir["miniaudio"] = "%{wks.location}/Arc/vendor/miniaudio"
 IncludeDir["icons"] = "%{wks.location}/Arc/vendor/icons/include"
 IncludeDir["JoltPhysics"] = "%{wks.location}/Arc/vendor/JoltPhysics/JoltPhysics"
 IncludeDir["tinyobj"] = "%{wks.location}/Arc/vendor/tinyobj"
+IncludeDir["tinygltf"] = "%{wks.location}/Arc/vendor/tinygltf"
 
 LibDir = {}
 filter "configurations:Debug"
