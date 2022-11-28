@@ -609,7 +609,8 @@ namespace ArcEngine
 			out << YAML::BeginMap; // MeshComponent
 			
 			const auto& meshComponent = entity.GetComponent<MeshComponent>();
-			out << YAML::Key << "Filepath" << YAML::Value << Project::GetAssetRelativeFileSystemPath(meshComponent.Filepath.c_str()).string();
+			std::string filepath = meshComponent.MeshGeometry ? Project::GetAssetRelativeFileSystemPath(meshComponent.MeshGeometry->GetFilepath()).string() : "";
+			out << YAML::Key << "Filepath" << YAML::Value << filepath;
 			out << YAML::Key << "SubmeshIndex" << YAML::Value << meshComponent.SubmeshIndex;
 			out << YAML::Key << "CullMode" << YAML::Value << (int)meshComponent.CullMode;
 			
@@ -1095,16 +1096,16 @@ namespace ArcEngine
 		if (const auto& meshComponent = entity["MeshComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<MeshComponent>();
-			TrySet(src.Filepath, meshComponent["Filepath"]);
+			eastl::string filepath = "";
+			TrySet(filepath, meshComponent["Filepath"]);
 			TrySet(src.SubmeshIndex, meshComponent["SubmeshIndex"]);
 			TrySetEnum(src.CullMode, meshComponent["CullMode"]);
 
-			if (!src.Filepath.empty())
+			if (!filepath.empty())
 			{
-				std::filesystem::path path = src.Filepath.c_str();
+				std::filesystem::path path = filepath.c_str();
 				path = Project::GetAssetFileSystemPath(path);
-				src.Filepath = path.string().c_str();
-				src.MeshGeometry = AssetManager::GetMesh(src.Filepath);
+				src.MeshGeometry = AssetManager::GetMesh(path.string().c_str());
 			}
 		}
 

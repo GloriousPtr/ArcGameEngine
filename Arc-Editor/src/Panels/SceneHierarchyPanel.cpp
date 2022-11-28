@@ -391,7 +391,6 @@ namespace ArcEngine
 					if (meshCount == 1)
 					{
 						auto& meshComponent = parent.AddComponent<MeshComponent>();
-						meshComponent.Filepath = path;
 						meshComponent.MeshGeometry = mesh;
 						meshComponent.SubmeshIndex = 0;
 					}
@@ -403,7 +402,6 @@ namespace ArcEngine
 							Entity entity = m_Context->CreateEntity(submesh.Name);
 							entity.SetParent(parent);
 							auto& meshComponent = entity.AddComponent<MeshComponent>();
-							meshComponent.Filepath = path;
 							meshComponent.MeshGeometry = mesh;
 							meshComponent.SubmeshIndex = i;
 						}

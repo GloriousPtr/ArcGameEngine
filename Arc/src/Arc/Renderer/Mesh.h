@@ -35,13 +35,11 @@ namespace ArcEngine
 		Submesh& GetSubmesh(size_t index);
 		size_t GetSubmeshCount() const { return m_Submeshes.size(); }
 		const char* GetName() const { return m_Name.c_str(); }
-
-	private:
-		void ProcessNode(const aiNode* node, const aiScene* scene, const char* filepath);
-		void ProcessMesh(const aiMesh* mesh, const aiScene* scene, const char* filepath, const char* nodeName);
+		const char* GetFilepath() const { return m_Filepath.c_str(); }
 
 	private:
 		eastl::string m_Name;
+		eastl::string m_Filepath;
 		eastl::vector<Submesh> m_Submeshes;
 	};
 }

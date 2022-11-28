@@ -4,10 +4,6 @@
 #include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
-#include <assimp/Importer.hpp>
-#include <assimp/Exporter.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 #include <Arc/Scene/EntitySerializer.h>
 
@@ -132,7 +128,7 @@ namespace ArcEngine
 			bool open = ImGui::TreeNodeEx(it, treeFlags, "%s", className.c_str());
 
 			{
-				ImGui::PushID((uint32_t)it);
+				ImGui::PushID((int)(uint64_t)it);
 
 				ImGui::SameLine(ImGui::GetContentRegionMax().x - frameHeight * 1.2f);
 				if (ImGui::Button(ICON_MDI_SETTINGS, ImVec2{ frameHeight * 1.2f, frameHeight }))
@@ -287,41 +283,6 @@ namespace ArcEngine
 		}
 
 		UI::EndProperties();
-	}
-
-	static void WriteMesh(const eastl::string& filepath)
-	{
-		ARC_PROFILE_SCOPE();
-
-		Assimp::Importer importer;
-		importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 80.0f);
-		constexpr uint32_t meshImportFlags =
-			aiProcess_CalcTangentSpace |
-			aiProcess_Triangulate |
-			aiProcess_PreTransformVertices |
-			aiProcess_SortByPType |
-			aiProcess_GenNormals |
-			aiProcess_GenUVCoords |
-	        aiProcess_OptimizeMeshes |
-			aiProcess_JoinIdenticalVertices |
-			aiProcess_GlobalScale |
-			aiProcess_ImproveCacheLocality |
-	        aiProcess_ValidateDataStructure;
-
-		const aiScene *scene = importer.ReadFile(filepath.c_str(), meshImportFlags);
-		if (!scene)
-		{
-			ARC_CORE_ERROR("Could not import the file: {0}. Error: {1}", filepath, importer.GetErrorString());
-			return;
-		}
-
-		Assimp::Exporter exporter;
-		const aiExportFormatDesc* format = exporter.GetExportFormatDescription(0);
-		auto lastDot = filepath.find_last_of(".");
-		eastl::string path = filepath.substr(0, lastDot) + ".assbin";
-		aiReturn ret = exporter.Export(scene, format->id, path.c_str(), meshImportFlags);
-		if (ret != aiReturn_SUCCESS)
-			ARC_CORE_ERROR("Could not import the file: {0}. Error: {1}", filepath, exporter.GetErrorString());
 	}
 
 	void PropertiesPanel::DrawComponents(Entity entity)
@@ -511,23 +472,11 @@ namespace ArcEngine
 
 		DrawComponent<MeshComponent>(ICON_MDI_VECTOR_SQUARE " Mesh", entity, [](MeshComponent& component)
 		{
-			if(ImGui::Button("Import"))
-			{
-				eastl::string filepath = FileDialogs::OpenFile("Mesh (*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
-				if (!filepath.empty())
-				{
-					component.Filepath = filepath;
-					WriteMesh(filepath.c_str());
-					return;
-				}
-			}
-			ImGui::SameLine();
-			if(ImGui::Button(component.MeshGeometry ? component.MeshGeometry->GetName() : "null"))
+			if (ImGui::Button(component.MeshGeometry ? component.MeshGeometry->GetFilepath() : "null", { ImGui::GetContentRegionAvail().x, ImGui::GetFrameHeight() }))
 			{
 				eastl::string filepath = FileDialogs::OpenFile("Mesh (*.assbin)\0*.assbin\0(*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
 				if (!filepath.empty())
 				{
-					component.Filepath = filepath;
 					component.MeshGeometry = CreateRef<Mesh>(filepath.c_str());
 					return;
 				}
@@ -536,9 +485,7 @@ namespace ArcEngine
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
-					component.Filepath = (const char*)payload->Data;
-					component.MeshGeometry = CreateRef<Mesh>(component.Filepath.c_str());
-
+					component.MeshGeometry = CreateRef<Mesh>((const char*)payload->Data);
 					ImGui::EndDragDropTarget();
 					return;
 				}

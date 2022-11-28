@@ -1,6 +1,5 @@
 #pragma once
 
-#include <assimp/Importer.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -100,7 +99,6 @@ namespace ArcEngine
 	{
 		enum class CullModeType { Unknown = -1, Front, Back, DoubleSided };
 
-		eastl::string Filepath;
 		Ref<Mesh> MeshGeometry = nullptr;
 		size_t SubmeshIndex = 0;
 		CullModeType CullMode = CullModeType::Back;
