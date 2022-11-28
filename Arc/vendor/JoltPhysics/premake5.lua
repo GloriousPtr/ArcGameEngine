@@ -1,6 +1,7 @@
 project "JoltPhysics"
 	kind "StaticLib"
 	language "C++"
+	staticruntime "off"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -32,13 +33,11 @@ project "JoltPhysics"
 	filter "system:windows"
 		systemversion "latest"
 		cppdialect "C++17"
-		staticruntime "On"
 
 	filter "system:linux"
 		pic "On"
 		systemversion "latest"
 		cppdialect "C++17"
-		staticruntime "On"
 
 	filter "configurations:Debug"
 		runtime "Debug"

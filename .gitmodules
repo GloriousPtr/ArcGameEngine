@@ -4,9 +4,6 @@
 [submodule "Arc/vendor/glm"]
 	path = Arc/vendor/glm
 	url = https://github.com/g-truc/glm.git
-[submodule "Arc/vendor/yaml-cpp"]
-	path = Arc/vendor/yaml-cpp
-	url = https://github.com/TheCherno/yaml-cpp.git
 [submodule "Arc/vendor/optick"]
 	path = Arc/vendor/optick
 	url = https://github.com/MohitSethi99/optick.git
@@ -22,3 +19,6 @@
 [submodule "Arc/vendor/GLFW"]
 	path = Arc/vendor/GLFW
 	url = https://github.com/MohitSethi99/glfw.git
+[submodule "Arc/vendor/yaml-cpp"]
+	path = Arc/vendor/yaml-cpp
+	url = https://github.com/MohitSethi99/yaml-cpp.git
