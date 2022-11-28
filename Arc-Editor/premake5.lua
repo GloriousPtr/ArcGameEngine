@@ -30,7 +30,6 @@ project "Arc-Editor"
 		"%{IncludeDir.optick}",
 		"%{IncludeDir.EABase}",
 		"%{IncludeDir.EASTL}",
-		"%{IncludeDir.miniaudio}",
 		"%{IncludeDir.icons}",
 	}
 
