@@ -345,9 +345,8 @@ namespace ArcEngine
 			constexpr glm::vec4 color = glm::vec4(1.0f);
 
 			auto view = m_Scene->GetAllEntitiesWith<TransformComponent, CameraComponent>();
-			for (auto entityHandle : view)
+			for (auto &&[entityHandle, tc, cam] : view.each())
 			{
-				const auto& [tc, cam] = view.get<TransformComponent, CameraComponent>(entityHandle);
 				Entity entity = { entityHandle, m_Scene.get() };
 				const auto inv = glm::inverse(cam.Camera.GetProjection() * glm::inverse(entity.GetWorldTransform()));
 				glm::vec3 frustumCorners[8];
@@ -389,20 +388,16 @@ namespace ArcEngine
 			constexpr glm::vec4 color = { 0.32f, 0.53f, 0.78f, 1.0f };
 
 			auto boxColliderView = m_Scene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
-			for (auto entity : boxColliderView)
+			for (auto &&[entity, tc, bc] : boxColliderView.each())
 			{
-				const auto& [tc, bc] = boxColliderView.get<TransformComponent, BoxCollider2DComponent>(entity);
-
 				glm::mat4 transform = Entity(entity, m_Scene.get()).GetWorldTransform();
 				transform *= glm::translate(glm::mat4(1.0f), glm::vec3(bc.Offset, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f * bc.Size, 1.0f));
 				Renderer2D::DrawRect(transform, color);
 			}
 
 			auto polygonColliderView = m_Scene->GetAllEntitiesWith<TransformComponent, PolygonCollider2DComponent>();
-			for (auto entity : polygonColliderView)
+			for (auto &&[entity, tc, pc] : polygonColliderView.each())
 			{
-				const auto& [tc, pc] = polygonColliderView.get<TransformComponent, PolygonCollider2DComponent>(entity);
-
 				glm::mat4 transform = Entity(entity, m_Scene.get()).GetWorldTransform();
 				glm::vec3 translation = glm::vec3(0.0f);
 				glm::vec3 rotation = glm::vec3(0.0f);
@@ -430,10 +425,8 @@ namespace ArcEngine
 			constexpr glm::vec4 color = { 0.2f, 0.8f, 0.2f, 1.0f };
 
 			auto view = m_Scene->GetAllEntitiesWith<TransformComponent, BoxColliderComponent>();
-			for (auto entity : view)
+			for (auto &&[entity, tc, bc] : view.each())
 			{
-				const auto& [tc, bc] = view.get<TransformComponent, BoxColliderComponent>(entity);
-
 				glm::mat4 transform = Entity(entity, m_Scene.get()).GetWorldTransform();
 				transform *= glm::translate(glm::mat4(1.0f), bc.Offset) * glm::scale(glm::mat4(1.0f), 4.0f * bc.Size);
 

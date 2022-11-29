@@ -511,7 +511,10 @@ namespace ArcEngine
 
 				if (ImGui::TreeNodeEx("Material Properties", treeNodeFlags))
 				{
-					DrawMaterialProperties(component.MeshGeometry->GetSubmesh(component.SubmeshIndex).Mat);
+					if (component.MeshGeometry->GetSubmeshCount() > 0)
+					{
+						DrawMaterialProperties(component.MeshGeometry->GetSubmesh(component.SubmeshIndex).Mat);
+					}
 					ImGui::TreePop();
 				}
 			}
