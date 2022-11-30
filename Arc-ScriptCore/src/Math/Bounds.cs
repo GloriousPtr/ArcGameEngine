@@ -1,7 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace ArcEngine
 {
+	[DebuggerDisplay("Min: {min}, Max: {max}")]
 	[StructLayout(LayoutKind.Sequential)]
 	public struct Bounds
 	{

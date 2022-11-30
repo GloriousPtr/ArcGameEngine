@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -6,7 +7,8 @@ using System.Runtime.InteropServices;
 
 namespace ArcEngine
 {
-	public class Entity : IComponent
+	[DebuggerDisplay("ID: {ID}, Name: {GetTag()}")]
+	public class Entity : IComponent, IEquatable<Entity>
 	{
 		internal ulong ID { get; private set; }
 
@@ -99,6 +101,8 @@ namespace ArcEngine
 			return component;
 		}
 
+		public string GetTag() => GetComponent<TagComponent>().tag;
+
 		#endregion
 
 		#region CollisionHandlingMethods
@@ -126,6 +130,13 @@ namespace ArcEngine
 		{
 			ID = id;
 		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool operator ==(Entity lhs, Entity rhs) => lhs.ID == rhs.ID;
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool operator !=(Entity lhs, Entity rhs) => !(lhs.ID == rhs.ID);
+
+		bool IEquatable<Entity>.Equals(Entity other) => other is Entity && other.ID == ID;
 
 		#endregion
 	}

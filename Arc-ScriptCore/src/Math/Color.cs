@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace ArcEngine
 {
+	[DebuggerDisplay("[{r}, {g}, {b}, {a}]")]
 	[StructLayout(LayoutKind.Sequential)]
 	public struct Color : IEquatable<Color>
 	{

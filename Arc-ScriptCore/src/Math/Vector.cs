@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace ArcEngine
 {
+	[DebuggerDisplay("[{x}, {y}]")]
 	[StructLayout(LayoutKind.Sequential)]
 	public struct Vector2 : IEquatable<Vector2>
 	{
@@ -106,6 +108,7 @@ namespace ArcEngine
 		}
 	}
 
+	[DebuggerDisplay("[{x}, {y}, {z}]")]
 	[StructLayout(LayoutKind.Sequential)]
 	public struct Vector3 : IEquatable<Vector3>
 	{
@@ -228,6 +231,7 @@ namespace ArcEngine
 		public bool Equals(Vector3 other) => x == other.x && y == other.y && z == other.z;
 	}
 
+	[DebuggerDisplay("[{x}, {y}, {z}, {w}]")]
 	[StructLayout(LayoutKind.Sequential)]
 	public struct Vector4 : IEquatable<Vector4>
 	{
