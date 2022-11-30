@@ -16,3 +16,6 @@
 *.log
 Arc-Editor/Resources/Scripts
 !/Arc-Editor/imgui.ini
+
+# Cache
+.[Cc]ache/
