@@ -721,14 +721,14 @@ namespace ArcEngine
 				ARC_PROFILE_TAG("Entity", entity.GetTag().data());
 				ARC_PROFILE_TAG("EntityID", entity.GetUUID());
 
-				for (auto& className : sc.Classes)
+				for (const auto& className : sc.Classes)
 				{
 					ARC_PROFILE_TAG("ScriptInstantiate", className.c_str());
 
 					ScriptEngine::CreateInstance(entity, className);
 				}
 
-				for (auto& className : sc.Classes)
+				for (const auto& className : sc.Classes)
 				{
 					ARC_PROFILE_TAG("Script", className.c_str());
 

@@ -183,8 +183,8 @@ namespace ArcEngine
 		glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, int xPos, int yPos, int* hit)
 		{
 			const WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-			if ((data.GrabAreaRect.x < xPos && xPos < data.GrabAreaRect.z) &&
-				(data.GrabAreaRect.y < yPos && yPos < data.GrabAreaRect.w))
+			if ((data.GrabAreaRect.x < (float)xPos && (float)xPos < data.GrabAreaRect.z) &&
+				(data.GrabAreaRect.y < (float)yPos && (float)yPos < data.GrabAreaRect.w))
 			{
 				*hit = 1;
 			}

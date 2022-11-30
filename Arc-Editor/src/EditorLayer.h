@@ -36,7 +36,7 @@ namespace ArcEngine
 		static EditorLayer* GetInstance() { return s_Instance; }
 
 	private:
-		void BeginDockspace(const char* name);
+		void BeginDockspace(const char* name) const;
 		void EndDockspace() const;
 		bool OnKeyPressed([[maybe_unused]] const KeyPressedEvent& e);
 		bool OnMouseButtonPressed([[maybe_unused]] const MouseButtonPressedEvent& e) const;
@@ -81,13 +81,6 @@ namespace ArcEngine
 		bool m_ShowDemoWindow = false;
 		float m_TopMenuBarHeight = 6.0f;
 		glm::vec2 m_LastMousePosition = glm::vec2(0.0f);
-
-		bool m_WindowDragging = false;
-		bool m_TopResizing = false;
-		bool m_LeftResizing = false;
-		bool m_BottomResizing = false;
-		bool m_RightResizing = false;
-		bool m_Resizing = false;
 
 		static EditorLayer* s_Instance;
 	};

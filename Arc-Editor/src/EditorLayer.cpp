@@ -504,8 +504,6 @@ namespace ArcEngine
 
 		ImVec2 mousePosition = ImGui::GetMousePos();
 		m_LastMousePosition = { mousePosition.x, mousePosition.y };
-		if (m_WindowDragging && !ImGui::IsMouseDown(0))
-			m_WindowDragging = false;
 	}
 
 	void EditorLayer::OnEvent([[maybe_unused]] Event& e)
@@ -518,7 +516,7 @@ namespace ArcEngine
 		dispatcher.Dispatch<MouseButtonReleasedEvent>(ARC_BIND_EVENT_FN(EditorLayer::OnMouseButtonReleased));
 	}
 
-	void EditorLayer::BeginDockspace(const char* name)
+	void EditorLayer::BeginDockspace(const char* name) const
 	{
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen_persistant = true;

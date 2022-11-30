@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -8,7 +9,7 @@ using System.Runtime.InteropServices;
 namespace ArcEngine
 {
 	[DebuggerDisplay("ID: {ID}, Name: {GetTag()}")]
-	public class Entity : IComponent, IEquatable<Entity>
+	public class Entity : IComponent, IEqualityComparer<Entity>
 	{
 		internal ulong ID { get; private set; }
 
@@ -131,14 +132,31 @@ namespace ArcEngine
 			ID = id;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool operator ==(Entity lhs, Entity rhs) => lhs.ID == rhs.ID;
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool operator !=(Entity lhs, Entity rhs) => !(lhs.ID == rhs.ID);
-
-		bool IEquatable<Entity>.Equals(Entity other) => other is Entity && other.ID == ID;
-
 		#endregion
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool operator ==(Entity lhs, Entity rhs) => lhs?.ID == rhs?.ID;
+		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool operator !=(Entity lhs, Entity rhs) => lhs?.ID != rhs?.ID;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override bool Equals(object o) => (o as Entity) == this;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override int GetHashCode() => ID.GetHashCode();
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public int GetHashCode(Entity entity) => entity.ID.GetHashCode();
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool Equals(Entity x, Entity y)
+		{
+			if (ReferenceEquals(x, null)) return false;
+			if (ReferenceEquals(y, null)) return false;
+			if (x.GetType() != y.GetType()) return false;
+			return x?.ID == y?.ID;
+		}
 	}
 }
 

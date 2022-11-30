@@ -89,7 +89,6 @@ namespace ArcEngine
 			}
 			else
 			{
-				ImVec4* colors = ImGui::GetStyle().Colors;
 				colors[ImGuiCol_Text] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
 				colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
 				colors[ImGuiCol_WindowBg] = ImVec4(0.94f, 0.94f, 0.94f, 1.00f);

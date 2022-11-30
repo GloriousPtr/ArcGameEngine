@@ -140,7 +140,7 @@ namespace ArcEngine
 		float sqDist = change_x * change_x + change_y * change_y;
 		if (sqDist > maxChangeSq)
 		{
-			float mag = (float)glm::sqrt(sqDist);
+			float mag = glm::sqrt(sqDist);
 			change_x = change_x / mag * maxChange;
 			change_y = change_y / mag * maxChange;
 		}
@@ -200,7 +200,7 @@ namespace ArcEngine
 		float sqrmag = change_x * change_x + change_y * change_y + change_z * change_z;
 		if (sqrmag > maxChangeSq)
 		{
-			float mag = (float)glm::sqrt(sqrmag);
+			float mag = glm::sqrt(sqrmag);
 			change_x = change_x / mag * maxChange;
 			change_y = change_y / mag * maxChange;
 			change_z = change_z / mag * maxChange;

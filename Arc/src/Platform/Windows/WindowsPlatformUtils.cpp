@@ -23,7 +23,7 @@ namespace ArcEngine
 		bi.ulFlags = BIF_RETURNONLYFSDIRS;
 		bi.lpfn = nullptr;
 		bi.lParam = 0;
-		const LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
+		const auto* pidl = SHBrowseForFolder(&bi);
 		if (pidl)
 		{
 			if (SHGetPathFromIDList(pidl, szTitle))
@@ -31,13 +31,6 @@ namespace ArcEngine
 				_bstr_t b(szTitle);
 				const char* c = b;
 				return c;
-
-				size_t size = std::wcstombs(nullptr, szTitle, 0);
-				char* mbstr = new char[size];
-				size = std::wcstombs(mbstr, szTitle, size);
-				eastl::string result(mbstr);
-				delete[] mbstr;
-				return result;
 			}
 		}
 		return eastl::string();

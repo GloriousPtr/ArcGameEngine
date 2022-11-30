@@ -202,7 +202,6 @@ namespace ArcEngine
 							const glm::mat4& cameraView = m_EditorCamera.GetViewMatrix();
 							// Entity Transform
 							auto& tc = selectedEntity.GetComponent<TransformComponent>();
-							const auto& rc = selectedEntity.GetComponent<RelationshipComponent>();
 							glm::mat4 transform = selectedEntity.GetWorldTransform();
 
 							// Snapping

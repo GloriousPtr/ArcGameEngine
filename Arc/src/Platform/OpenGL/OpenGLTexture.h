@@ -23,12 +23,12 @@ namespace ArcEngine
 		virtual const eastl::string& GetPath() const override { return m_Path; }
 
 		virtual void SetData(void* data, uint32_t size) override;
-		virtual void Invalidate(const eastl::string_view path, uint32_t width, uint32_t height, void* data, uint32_t channels) override;
+		virtual void Invalidate(const eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels) override;
 
 		virtual void Bind(uint32_t slot = 0) const override;
 
 	private:
-		void InvalidateImpl(const eastl::string_view path, uint32_t width, uint32_t height, void* data, uint32_t channels);
+		void InvalidateImpl(const eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels);
 
 	private:
 		eastl::string m_Path;
