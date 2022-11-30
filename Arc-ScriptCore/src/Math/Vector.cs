@@ -17,6 +17,11 @@ namespace ArcEngine
 		public static Vector2 one => new Vector2(1.0f);
 		public static Vector2 zero => new Vector2(0.0f);
 
+		public static Vector2 up		{ [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return new Vector2( 0.0f,  1.0f); } }
+		public static Vector2 down		{ [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return new Vector2( 0.0f, -1.0f); } }
+		public static Vector2 right		{ [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return new Vector2( 1.0f,  0.0f); } }
+		public static Vector2 left		{ [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return new Vector2(-1.0f,  0.0f); } }
+
 		#region Constructors
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -108,12 +113,18 @@ namespace ArcEngine
 		public float y;
 		public float z;
 
-		public float magnitude => (float)Math.Sqrt(x * x + y * y + z * z);
-		public float sqrMagnitude => x * x + y * y + z * z;
-		public Vector3 normalized => this / magnitude;
+		public float magnitude { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return (float)Math.Sqrt(x * x + y * y + z * z); } }
+		public float sqrMagnitude { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return x * x + y * y + z * z; } }
+		public Vector3 normalized { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return this / magnitude; } }
 
-		public static Vector3 one => new Vector3(1.0f);
-		public static Vector3 zero => new Vector3(0.0f);
+		public static Vector3 one		{ [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return new Vector3(1.0f); } }
+		public static Vector3 zero		{ [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return new Vector3(0.0f); } }
+		public static Vector3 forward	{ [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return new Vector3( 0.0f,  0.0f,  1.0f); } }
+		public static Vector3 backward	{ [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return new Vector3( 0.0f,  0.0f, -1.0f); } }
+		public static Vector3 up		{ [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return new Vector3( 0.0f,  1.0f,  0.0f); } }
+		public static Vector3 down		{ [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return new Vector3( 0.0f, -1.0f,  0.0f); } }
+		public static Vector3 right		{ [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return new Vector3( 1.0f,  0.0f,  0.0f); } }
+		public static Vector3 left		{ [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return new Vector3(-1.0f,  0.0f,  0.0f); } }
 
 		#region Constructors
 
@@ -214,10 +225,7 @@ namespace ArcEngine
 		public static Vector3 LerpUnclamped(Vector3 a, Vector3 b, float t) => Mathfs.Lerp(a, b, new Vector3(t));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Equals(Vector3 other)
-		{
-			return x == other.x && y == other.y && z == other.z;
-		}
+		public bool Equals(Vector3 other) => x == other.x && y == other.y && z == other.z;
 	}
 
 	[StructLayout(LayoutKind.Sequential)]

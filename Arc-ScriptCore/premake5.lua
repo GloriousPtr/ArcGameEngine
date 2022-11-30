@@ -12,6 +12,11 @@ project "Arc-ScriptCore"
         "src/**.cs"
     }
 
+    links
+    {
+        "Microsoft.Bcl.HashCode"
+    }
+
     filter "configurations:Debug"
         optimize "Off"
         symbols "Default"
