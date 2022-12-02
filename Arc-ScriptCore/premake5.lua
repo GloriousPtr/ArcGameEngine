@@ -17,6 +17,16 @@ project "Arc-ScriptCore"
         "Microsoft.Bcl.HashCode"
     }
 
+    nuget
+    {
+        "JetBrains.Annotations:2022.3.1"
+    }
+
+    defines
+    {
+        "JETBRAINS_ANNOTATIONS"
+    }
+
     filter "configurations:Debug"
         optimize "Off"
         symbols "Default"
