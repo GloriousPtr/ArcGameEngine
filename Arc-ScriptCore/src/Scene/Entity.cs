@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 
 #pragma warning disable IDE0051
 
 namespace ArcEngine
 {
 	[DebuggerDisplay("ID: {ID}, Name: {GetTag()}")]
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public class Entity : IComponent, IEqualityComparer<Entity>
 	{
 		internal ulong ID { get; private set; }

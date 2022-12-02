@@ -1,8 +1,11 @@
-﻿namespace ArcEngine
+﻿using JetBrains.Annotations;
+
+namespace ArcEngine
 {
 	/// <summary>
 	/// Key codes used for input handling
 	/// </summary>
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public enum KeyCodes
 	{
 		/* Printable keys */

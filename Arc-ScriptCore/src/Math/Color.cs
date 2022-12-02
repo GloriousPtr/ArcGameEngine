@@ -2,10 +2,12 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 
 namespace ArcEngine
 {
 	[DebuggerDisplay("[{r}, {g}, {b}, {a}]")]
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	[StructLayout(LayoutKind.Sequential)]
 	public struct Color : IEquatable<Color>
 	{

@@ -1,7 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 
 namespace ArcEngine
 {
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public interface IComponent
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -10,6 +12,7 @@ namespace ArcEngine
 		internal void SetEntity(ulong id);
 	}
 
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public abstract class Component : IComponent
 	{
 		internal ulong entityID;
@@ -24,6 +27,7 @@ namespace ArcEngine
 	/// <summary>
 	/// Contains name of the entity.
 	/// </summary>
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public class TagComponent : Component
 	{
 		/// <summary>
@@ -41,6 +45,7 @@ namespace ArcEngine
 	/// <summary>
 	/// Transform Component, has Translation, Rotation and Scale information.
 	/// </summary>
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public class TransformComponent : Component
 	{
 		/// <summary>
@@ -107,6 +112,7 @@ namespace ArcEngine
 	/// <summary>
 	/// Renders a sprite
 	/// </summary>
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public class SpriteRendererComponent : Component
 	{
 		/// <summary>
@@ -143,6 +149,7 @@ namespace ArcEngine
 	/// <summary>
 	/// Rigidbody physics component for 2D sprites.
 	/// </summary>
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public class Rigidbody2DComponent : Component
 	{
 		/// <summary>
@@ -437,6 +444,7 @@ namespace ArcEngine
 	/// <summary>
 	/// A representation of audio sources in 3D.
 	/// </summary>
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public class AudioSourceComponent : Component
 	{
 		/// <summary>

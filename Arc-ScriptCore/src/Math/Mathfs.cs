@@ -32,10 +32,12 @@
 using System;
 using System.Linq; // used for arbitrary count min/max functions, so it's safe and won't allocate garbage don't worry~
 using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 
 namespace ArcEngine {
 
 	/// <summary>The core math helper class. It has functions mostly for single values, but also vector helpers</summary>
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public static class Mathfs {
 
 		const MethodImplOptions INLINE = MethodImplOptions.AggressiveInlining;

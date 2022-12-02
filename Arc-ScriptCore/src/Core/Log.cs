@@ -1,10 +1,12 @@
 ﻿using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 
 namespace ArcEngine
 {
 	/// <summary>
 	/// Class to handle logging
 	/// </summary>
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public static class Log
 	{
 		internal enum LogLevel

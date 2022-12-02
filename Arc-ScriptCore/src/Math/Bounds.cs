@@ -1,10 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 
 namespace ArcEngine
 {
-	[DebuggerDisplay("Min: {min}, Max: {max}")]
 	[StructLayout(LayoutKind.Sequential)]
+	[DebuggerDisplay("Min: {min}, Max: {max}")]
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public struct Bounds
 	{
 		public Vector3 center;

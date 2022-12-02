@@ -1,10 +1,12 @@
 ﻿// by Freya Holmér (https://github.com/FreyaHolmer/Mathfs)
 
 using static ArcEngine.Mathfs;
+using JetBrains.Annotations;
 
 namespace ArcEngine {
 
 	/// <summary>Various methods for generating random stuff (like, actually things of the category randomization, not, "various items")</summary>
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public static class Random {
 
 		private static System.Random ArcRandom = new();

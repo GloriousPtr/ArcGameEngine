@@ -2,10 +2,12 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 
 namespace ArcEngine
 {
 	[DebuggerDisplay("[{x}, {y}, {z}, {w}]")]
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	[StructLayout(LayoutKind.Sequential)]
 	public struct Quaternion : IEquatable<Quaternion>
 	{

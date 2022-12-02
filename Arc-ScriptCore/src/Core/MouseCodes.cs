@@ -1,8 +1,11 @@
-﻿namespace ArcEngine
+﻿using JetBrains.Annotations;
+
+namespace ArcEngine
 {
 	/// <summary>
 	/// Mouse codes for input handling
 	/// </summary>
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public enum MouseCodes
 	{
 		Button0                = 0,

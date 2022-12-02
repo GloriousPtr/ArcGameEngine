@@ -1,9 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 
 namespace ArcEngine
 {
 	[DebuggerDisplay("Min: {min}, Max: {max}")]
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	[StructLayout(LayoutKind.Explicit)]
 	public struct Rect
 	{

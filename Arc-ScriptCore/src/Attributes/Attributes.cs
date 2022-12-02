@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 
 namespace ArcEngine
 {
@@ -8,6 +9,7 @@ namespace ArcEngine
 	/// Use this attribute to mark internal/private fields to be serialized.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Field)]
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public class SerializeFieldAttribute : Attribute { }
 
 	/// <summary>
@@ -15,6 +17,7 @@ namespace ArcEngine
 	/// This attribute doesn't change the serialization behavior.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Field)]
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public class HideInPropertiesAttribute : Attribute { }
 
 	/// <summary>
@@ -23,12 +26,14 @@ namespace ArcEngine
 	/// This attribute doesn't change the serialization behavior.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Field)]
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public class ShowInPropertiesAttribute : Attribute { }
 
 	/// <summary>
 	/// Adds a header before the field
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Field)]
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public class HeaderAttribute : Attribute
 	{
 		internal string Message;
@@ -48,6 +53,7 @@ namespace ArcEngine
 	/// Shows the tooltip when mouse is hovered over the field.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Field)]
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public class TooltipAttribute : Attribute
 	{
 		internal string Message;
@@ -65,6 +71,7 @@ namespace ArcEngine
 	/// Use this attribute to make a number type variable (byte, ubyte, short, ushort, int, uint, long, ulong, float, double) in a script be restricted to a specific range.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Field)]
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public class RangeAttribute : Attribute
 	{
 		internal float Min;

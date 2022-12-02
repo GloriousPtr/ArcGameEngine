@@ -1,10 +1,12 @@
 ﻿using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 
 namespace ArcEngine
 {
 	/// <summary>
 	/// Provides input state of the game.
 	/// </summary>
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public static class Input
 	{
 		/// <summary>

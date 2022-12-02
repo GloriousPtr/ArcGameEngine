@@ -22,14 +22,16 @@
 	SOFTWARE.
 */
 // Modified to work with ArcEngine
-﻿// by Freya Holmér (https://github.com/FreyaHolmer/Mathfs)
+// by Freya Holmér (https://github.com/FreyaHolmer/Mathfs)
 
 using System;
 using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 
 namespace ArcEngine {
 
 	/// <summary>Various extensions for floats, vectors and colors</summary>
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public static class MathfsExtensions {
 
 		const MethodImplOptions INLINE = MethodImplOptions.AggressiveInlining;

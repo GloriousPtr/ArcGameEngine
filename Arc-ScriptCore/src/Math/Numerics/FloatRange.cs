@@ -24,9 +24,12 @@
 // Modified to work with ArcEngine
 // by Freya Holmér (https://github.com/FreyaHolmer/Mathfs)
 
+using JetBrains.Annotations;
+
 namespace ArcEngine {
 
 	/// <summary>A value range between two values a and b</summary>
+	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public readonly struct FloatRange {
 
 		/// <summary>The unit interval of 0 to 1</summary>
