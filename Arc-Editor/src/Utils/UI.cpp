@@ -740,7 +740,7 @@ namespace ArcEngine
 		T min = (T)field.Min;
 		T max = (T)field.Max;
 
-		ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
+		const ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
@@ -783,7 +783,7 @@ namespace ArcEngine
 		const ScriptField& field = fieldMap.at(fieldName);
 		const char* tooltip = field.Tooltip.empty() ? nullptr : field.Tooltip.c_str();
 
-		ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
+		const ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
@@ -826,7 +826,7 @@ namespace ArcEngine
 		const ScriptField& field = fieldMap.at(fieldName);
 		const char* tooltip = field.Tooltip.empty() ? nullptr : field.Tooltip.c_str();
 
-		ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
+		const ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
@@ -868,7 +868,7 @@ namespace ArcEngine
 		const ScriptField& field = fieldMap.at(fieldName);
 		const char* tooltip = field.Tooltip.empty() ? nullptr : field.Tooltip.c_str();
 
-		ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
+		const ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());

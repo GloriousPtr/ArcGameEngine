@@ -143,7 +143,7 @@ namespace ArcEngine
 		public static bool operator !=(Entity lhs, Entity rhs) => lhs?.ID != rhs?.ID;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override bool Equals(object o) => (o as Entity) == this;
+		public override bool Equals(object obj) => (obj as Entity) == this;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override int GetHashCode() => ID.GetHashCode();
