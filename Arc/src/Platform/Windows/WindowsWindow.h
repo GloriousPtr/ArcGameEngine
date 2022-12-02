@@ -12,15 +12,15 @@ namespace ArcEngine
 	{
 	public:
 		explicit WindowsWindow(const WindowProps& props);
-		virtual ~WindowsWindow();
+		~WindowsWindow() override;
 		
 		void OnUpdate() override;
-		
-		inline unsigned int GetWidth() const override { return m_Data.Width; }
-		inline unsigned int GetHeight() const override { return m_Data.Height; }
+
+		unsigned int GetWidth() const override { return m_Data.Width; }
+		unsigned int GetHeight() const override { return m_Data.Height; }
 
 		// Window attributes
-		inline void SetEventCallBack(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
+		void SetEventCallBack(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
 		void SetVSync(bool enabled) override;
 		bool IsVSync() const override;
 
@@ -30,10 +30,11 @@ namespace ArcEngine
 		void Restore() override;
 		void SetTitleBarRect(const glm::vec4& rect) override;
 
-		inline virtual WindowHandle GetNativeWindow() const { return m_Window; }
+		WindowHandle GetNativeWindow() const override { return m_Window; }
 	private:
-		virtual void Init(const WindowProps& props);
-		virtual void Shutdown();
+		void Init(const WindowProps& props);
+		void Shutdown();
+
 	private:
 		GLFWwindow* m_Window;
 		Scope<GraphicsContext> m_Context;

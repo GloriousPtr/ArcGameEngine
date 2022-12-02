@@ -26,7 +26,7 @@ namespace ArcEngine
 
 	public:
 		explicit ConsolePanel(const char* name = "Console");
-		virtual ~ConsolePanel() override;
+		~ConsolePanel() override;
 
 		ConsolePanel(const ConsolePanel& other) = delete;
 		ConsolePanel(ConsolePanel&& other) = delete;
@@ -38,7 +38,7 @@ namespace ArcEngine
 		void Clear();
 		void SetFocus() const;
 
-		virtual void OnImGuiRender() override;
+		void OnImGuiRender() override;
 
 	private:
 		void ImGuiRenderHeader();

@@ -10,7 +10,7 @@ namespace ArcEngine
 		enum class ProjectionType { Perspective = 0, Orthographic = 1 };
 	public:
 		SceneCamera();
-		virtual ~SceneCamera() = default;
+		~SceneCamera() override = default;
 
 		void SetPerspective(float verticalFov, float nearClip, float farClip);
 		void SetOrthographic(float size, float nearClip, float farClip);

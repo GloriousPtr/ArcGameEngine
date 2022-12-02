@@ -9,13 +9,13 @@ namespace ArcEngine
 	public:
 		ProjectSettingsPanel();
 
-		virtual ~ProjectSettingsPanel() override = default;
+		~ProjectSettingsPanel() override = default;
 		
 		ProjectSettingsPanel(const ProjectSettingsPanel& other) = delete;
 		ProjectSettingsPanel(ProjectSettingsPanel&& other) = delete;
 		ProjectSettingsPanel& operator=(const ProjectSettingsPanel& other) = delete;
 		ProjectSettingsPanel& operator=(ProjectSettingsPanel&& other) = delete;
 
-		virtual void OnImGuiRender() override;
+		void OnImGuiRender() override;
 	};
 }

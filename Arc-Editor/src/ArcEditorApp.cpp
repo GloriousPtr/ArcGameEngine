@@ -14,7 +14,7 @@ namespace ArcEngine
 			PushLayer(new EditorLayer());
 		}
 
-		virtual ~ArcEditor() override = default;
+		~ArcEditor() override = default;
 	};
 
 	Application* CreateApplication()

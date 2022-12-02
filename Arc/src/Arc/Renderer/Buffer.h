@@ -117,8 +117,8 @@ namespace ArcEngine
 		virtual const BufferLayout& GetLayout() const = 0;
 		virtual void SetLayout(const BufferLayout& layout) = 0;
 		
-		static Ref<VertexBuffer> Create(const size_t size);
-		static Ref<VertexBuffer> Create(const float* verticies, const size_t size);
+		static Ref<VertexBuffer> Create(size_t size);
+		static Ref<VertexBuffer> Create(const float* verticies, size_t size);
 	};
 
 	class IndexBuffer
@@ -131,7 +131,7 @@ namespace ArcEngine
 
 		virtual uint32_t GetCount() const = 0;
 
-		static Ref<IndexBuffer> Create(const uint32_t* indices, const size_t count);
+		static Ref<IndexBuffer> Create(const uint32_t* indices, size_t count);
 	};
 
 	class UniformBuffer

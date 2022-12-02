@@ -643,7 +643,7 @@ namespace ArcEngine
 		GCManager::ReleaseObjectReference(m_Handle);
 	}
 
-	void ScriptInstance::InvokeOnCreate()
+	void ScriptInstance::InvokeOnCreate() const
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -651,7 +651,7 @@ namespace ArcEngine
 			m_ScriptClass->InvokeMethod(m_Handle, m_OnCreateMethod);
 	}
 
-	void ScriptInstance::InvokeOnUpdate(float ts)
+	void ScriptInstance::InvokeOnUpdate(float ts) const
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -662,7 +662,7 @@ namespace ArcEngine
 		}
 	}
 
-	void ScriptInstance::InvokeOnDestroy()
+	void ScriptInstance::InvokeOnDestroy() const
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -670,7 +670,7 @@ namespace ArcEngine
 			m_ScriptClass->InvokeMethod(m_Handle, m_OnDestroyMethod);
 	}
 
-	void ScriptInstance::InvokeOnCollisionEnter2D(Collision2DData& other)
+	void ScriptInstance::InvokeOnCollisionEnter2D(Collision2DData& other) const
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -678,7 +678,7 @@ namespace ArcEngine
 		m_EntityClass->InvokeMethod(m_Handle, m_OnCollisionEnter2DMethod, &params);
 	}
 
-	void ScriptInstance::InvokeOnCollisionExit2D(Collision2DData& other)
+	void ScriptInstance::InvokeOnCollisionExit2D(Collision2DData& other) const
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -686,7 +686,7 @@ namespace ArcEngine
 		m_EntityClass->InvokeMethod(m_Handle, m_OnCollisionExit2DMethod, &params);
 	}
 
-	void ScriptInstance::InvokeOnSensorEnter2D(Collision2DData& other)
+	void ScriptInstance::InvokeOnSensorEnter2D(Collision2DData& other) const
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -694,7 +694,7 @@ namespace ArcEngine
 		m_EntityClass->InvokeMethod(m_Handle, m_OnSensorEnter2DMethod, &params);
 	}
 
-	void ScriptInstance::InvokeOnSensorExit2D(Collision2DData& other)
+	void ScriptInstance::InvokeOnSensorExit2D(Collision2DData& other) const
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -715,7 +715,7 @@ namespace ArcEngine
 		mono_field_get_value(GCManager::GetReferencedObject(m_Handle), classField, value);
 	}
 
-	void ScriptInstance::SetFieldValueInternal(const eastl::string& name, const void* value)
+	void ScriptInstance::SetFieldValueInternal(const eastl::string& name, const void* value) const
 	{
 		ARC_PROFILE_SCOPE();
 

@@ -152,13 +152,13 @@ namespace ArcEngine
 
 		~ScriptInstance();
 
-		void InvokeOnCreate();
-		void InvokeOnUpdate(float ts);
-		void InvokeOnDestroy();
-		void InvokeOnCollisionEnter2D(Collision2DData& other);
-		void InvokeOnCollisionExit2D(Collision2DData& other);
-		void InvokeOnSensorEnter2D(Collision2DData& other);
-		void InvokeOnSensorExit2D(Collision2DData& other);
+		void InvokeOnCreate() const;
+		void InvokeOnUpdate(float ts) const;
+		void InvokeOnDestroy() const;
+		void InvokeOnCollisionEnter2D(Collision2DData& other) const;
+		void InvokeOnCollisionExit2D(Collision2DData& other) const;
+		void InvokeOnSensorEnter2D(Collision2DData& other) const;
+		void InvokeOnSensorExit2D(Collision2DData& other) const;
 
 		template<typename T>
 		T GetFieldValue(const eastl::string& fieldName) const
@@ -169,7 +169,7 @@ namespace ArcEngine
 		}
 
 		template<typename T>
-		void SetFieldValue(const eastl::string& fieldName, const T& value)
+		void SetFieldValue(const eastl::string& fieldName, const T& value) const
 		{
 			SetFieldValueInternal(fieldName, &value);
 		}
@@ -183,7 +183,7 @@ namespace ArcEngine
 
 	private:
 		void GetFieldValueInternal(const eastl::string& name, void* value) const;
-		void SetFieldValueInternal(const eastl::string& name, const void* value);
+		void SetFieldValueInternal(const eastl::string& name, const void* value) const;
 		eastl::string GetFieldValueStringInternal(const eastl::string& name) const;
 
 	private:

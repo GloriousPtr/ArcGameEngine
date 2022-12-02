@@ -8,13 +8,13 @@ namespace ArcEngine
 	{
 	public:
 		explicit RendererSettingsPanel(const char* name = "Render Settings");
-		virtual ~RendererSettingsPanel() override = default;
+		~RendererSettingsPanel() override = default;
 
 		RendererSettingsPanel(const RendererSettingsPanel& other) = delete;
 		RendererSettingsPanel(RendererSettingsPanel&& other) = delete;
 		RendererSettingsPanel& operator=(const RendererSettingsPanel& other) = delete;
 		RendererSettingsPanel& operator=(RendererSettingsPanel&& other) = delete;
 
-		virtual void OnImGuiRender() override;
+		void OnImGuiRender() override;
 	};
 }

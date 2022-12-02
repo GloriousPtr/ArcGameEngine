@@ -566,7 +566,7 @@ namespace ArcEngine
 						EditorLayer::GetInstance()->ResetContext();
 					}
 
-					// Forground Image
+					// Foreground Image
 					ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
 					ImGui::SetItemAllowOverlap();
 					ImGui::Image((ImTextureID)m_WhiteTexture->GetRendererID(), { backgroundThumbnailSize.x - padding * 2.0f, backgroundThumbnailSize.y - padding * 2.0f }, { 0, 0 }, { 1, 1 }, EditorTheme::WindowBgAlternativeColor);

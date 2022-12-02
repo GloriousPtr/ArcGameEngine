@@ -12,23 +12,23 @@ namespace ArcEngine
 		OpenGLTexture2D() = default;
 		OpenGLTexture2D(uint32_t width, uint32_t height);
 		explicit OpenGLTexture2D(const eastl::string& path);
-		virtual ~OpenGLTexture2D();
+		~OpenGLTexture2D() override;
 
 		OpenGLTexture2D(const OpenGLTexture2D& other) = default;
 		OpenGLTexture2D(OpenGLTexture2D&& other) = default;
-		
-		virtual uint32_t GetWidth() const override { return m_Width; }
-		virtual uint32_t GetHeight() const override { return m_Height; }
-		virtual uint64_t GetRendererID() const override { return m_RendererID; }
-		virtual const eastl::string& GetPath() const override { return m_Path; }
 
-		virtual void SetData(void* data, uint32_t size) override;
-		virtual void Invalidate(const eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels) override;
+		uint32_t GetWidth() const override { return m_Width; }
+		uint32_t GetHeight() const override { return m_Height; }
+		uint64_t GetRendererID() const override { return m_RendererID; }
+		const eastl::string& GetPath() const override { return m_Path; }
 
-		virtual void Bind(uint32_t slot = 0) const override;
+		void SetData(void* data, uint32_t size) override;
+		void Invalidate(eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels) override;
+
+		void Bind(uint32_t slot = 0) const override;
 
 	private:
-		void InvalidateImpl(const eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels);
+		void InvalidateImpl(eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels);
 
 	private:
 		eastl::string m_Path;

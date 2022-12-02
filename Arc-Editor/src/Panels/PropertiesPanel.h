@@ -12,14 +12,14 @@ namespace ArcEngine
 	public:
 		explicit PropertiesPanel(const char* name = "Properties");
 
-		virtual ~PropertiesPanel() override = default;
+		~PropertiesPanel() override = default;
 
 		PropertiesPanel(const PropertiesPanel& other) = delete;
 		PropertiesPanel(PropertiesPanel&& other) = delete;
 		PropertiesPanel& operator=(const PropertiesPanel& other) = delete;
 		PropertiesPanel& operator=(PropertiesPanel&& other) = delete;
 
-		virtual void OnImGuiRender() override;
+		void OnImGuiRender() override;
 
 		void SetContext(const EditorContext context)
 		{

@@ -7,6 +7,7 @@
 #include "Renderer.h"
 #include "RenderGraphData.h"
 #include "Framebuffer.h"
+#include "Arc/Renderer/VertexArray.h"
 #include "Arc/Renderer/Material.h"
 
 #include "Arc/Scene/Entity.h"
@@ -246,7 +247,7 @@ namespace ArcEngine
 		s_Meshes.emplace_back(transform, submesh, cullMode);
 	}
 
-	void Renderer3D::Flush(Ref<RenderGraphData> renderGraphData)
+	void Renderer3D::Flush(const Ref<RenderGraphData>& renderGraphData)
 	{
 		ARC_PROFILE_SCOPE();
 		
@@ -259,7 +260,7 @@ namespace ArcEngine
 		s_Meshes.clear();
 	}
 
-	void Renderer3D::FXAAPass(const Ref<RenderGraphData> renderGraphData)
+	void Renderer3D::FXAAPass(const Ref<RenderGraphData>& renderGraphData)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -408,7 +409,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Renderer3D::CompositePass(const Ref<RenderGraphData> renderGraphData)
+	void Renderer3D::CompositePass(const Ref<RenderGraphData>& renderGraphData)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -440,7 +441,7 @@ namespace ArcEngine
 		DrawQuad();
 	}
 
-	void Renderer3D::BloomPass(const Ref<RenderGraphData> renderGraphData)
+	void Renderer3D::BloomPass(const Ref<RenderGraphData>& renderGraphData)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -521,7 +522,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Renderer3D::LightingPass(const Ref<RenderGraphData> renderGraphData)
+	void Renderer3D::LightingPass(const Ref<RenderGraphData>& renderGraphData)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -585,7 +586,7 @@ namespace ArcEngine
 		DrawQuad();
 	}
 
-	void Renderer3D::RenderPass(const Ref<Framebuffer> renderTarget)
+	void Renderer3D::RenderPass(const Ref<Framebuffer>& renderTarget)
 	{
 		ARC_PROFILE_SCOPE();
 

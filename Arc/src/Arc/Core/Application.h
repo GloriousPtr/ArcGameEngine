@@ -27,8 +27,8 @@ namespace ArcEngine
 
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* layer);
-		
-		inline Window& GetWindow() const { return *m_Window; }
+
+		Window& GetWindow() const { return *m_Window; }
 
 		void Close();
 

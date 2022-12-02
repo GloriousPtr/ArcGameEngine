@@ -52,7 +52,7 @@ namespace ArcEngine
 
 		}
 
-		virtual ~Physics2DContactListener()
+		~Physics2DContactListener() override
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -64,7 +64,7 @@ namespace ArcEngine
 		Physics2DContactListener& operator=(const Physics2DContactListener& other) = delete;
 		Physics2DContactListener& operator=(Physics2DContactListener&& other) = delete;
 
-		virtual void BeginContact(b2Contact* contact) override
+		void BeginContact(b2Contact* contact) override
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -134,7 +134,7 @@ namespace ArcEngine
 			}
 		}
 
-		virtual void EndContact(b2Contact* contact) override
+		void EndContact(b2Contact* contact) override
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -203,14 +203,14 @@ namespace ArcEngine
 			}
 		}
 
-		virtual void PreSolve(b2Contact* contact, const b2Manifold* oldManifold) override
+		void PreSolve(b2Contact* contact, const b2Manifold* oldManifold) override
 		{
 			ARC_PROFILE_SCOPE();
 
 			/* Handle pre solve */
 		}
 
-		virtual void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) override
+		void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) override
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -229,8 +229,6 @@ namespace ArcEngine
 				b2Fixture* fixture = it->second;
 
 				Entity fluidEntity = { (entt::entity)(uint32_t)fluid->GetUserData().pointer, m_Scene };
-				Entity fixtureEntity = { (entt::entity)(uint32_t)fixture->GetUserData().pointer, m_Scene };
-
 				const auto& buoyancyComponent2D = fluidEntity.GetComponent<BuoyancyEffector2DComponent>();
 				b2Vec2 gravity = { m_Scene->Gravity.x, m_Scene->Gravity.y };
 				PhysicsUtils::HandleBuoyancy(fluid, fixture, gravity, buoyancyComponent2D.FlipGravity, buoyancyComponent2D.Density, buoyancyComponent2D.DragMultiplier, buoyancyComponent2D.FlowMagnitude, buoyancyComponent2D.FlowAngle);
@@ -285,28 +283,28 @@ namespace ArcEngine
 		}
 
 	public:
-		virtual JPH::ValidateResult OnContactValidate(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::CollideShapeResult& inCollisionResult) override
+		JPH::ValidateResult OnContactValidate(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::CollideShapeResult& inCollisionResult) override
 		{
 			ARC_PROFILE_SCOPE();
 
 			return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
 		}
 
-		virtual void OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
+		void OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
 		{
 			ARC_PROFILE_SCOPE();
 
 			OverrideContactSettings(inBody1, inBody2, inManifold, ioSettings);
 		}
 
-		virtual void OnContactPersisted(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
+		void OnContactPersisted(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
 		{
 			ARC_PROFILE_SCOPE();
 
 			OverrideContactSettings(inBody1, inBody2, inManifold, ioSettings);
 		}
 
-		virtual void OnContactRemoved(const JPH::SubShapeIDPair& inSubShapePair) override
+		void OnContactRemoved(const JPH::SubShapeIDPair& inSubShapePair) override
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -317,14 +315,14 @@ namespace ArcEngine
 	class Physics3DBodyActivationListener : public JPH::BodyActivationListener
 	{
 	public:
-		virtual void OnBodyActivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
+		void OnBodyActivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
 		{
 			ARC_PROFILE_SCOPE();
 
 			/* Body Activated */
 		}
 
-		virtual void OnBodyDeactivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
+		void OnBodyDeactivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -823,13 +821,16 @@ namespace ArcEngine
 	void Scene::OnUpdateEditor([[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera)
 	{
 		ARC_PROFILE_SCOPE();
-		
-		CameraData cameraData = {};
-		cameraData.View = camera.GetViewMatrix();
-		cameraData.Projection = camera.GetProjectionMatrix();
-		cameraData.ViewProjection = cameraData.Projection * cameraData.View;
-		cameraData.Position = camera.GetPosition();
 
+		const glm::mat4& view = camera.GetViewMatrix();
+		const glm::mat4& proj = camera.GetProjectionMatrix();
+		CameraData cameraData =
+		{
+			view,
+			proj,
+			proj * view * cameraData.View,
+			camera.GetPosition()
+		};
 		OnRender(renderGraphData, cameraData);
 	}
 

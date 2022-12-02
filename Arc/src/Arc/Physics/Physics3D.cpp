@@ -79,14 +79,14 @@ namespace ArcEngine
 			mObjectToBroadPhase[Physics3DLayer::OTHER15] = BroadPhaseLayers::DEFAULT;
 		}
 
-		virtual JPH::uint GetNumBroadPhaseLayers() const override
+		JPH::uint GetNumBroadPhaseLayers() const override
 		{
 			ARC_PROFILE_SCOPE();
 
 			return BroadPhaseLayers::NUM_LAYERS;
 		}
 
-		virtual JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override
+		JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -95,7 +95,7 @@ namespace ArcEngine
 		}
 
 #if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
-		virtual const char* GetBroadPhaseLayerName(BroadPhaseLayer inLayer) const override
+		const char* GetBroadPhaseLayerName(BroadPhaseLayer inLayer) const override
 		{
 			switch ((BroadPhaseLayer::Type)inLayer)
 			{

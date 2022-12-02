@@ -49,7 +49,7 @@ namespace ArcEngine
 		
 	}
 
-	void OpenGLTextureCubemap::Invalidate(const eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels)
+	void OpenGLTextureCubemap::Invalidate(eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -77,7 +77,7 @@ namespace ArcEngine
 		glBindTextureUnit(slot, m_RadianceRendererID);
 	}
 
-	void OpenGLTextureCubemap::InvalidateImpl(const eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels)
+	void OpenGLTextureCubemap::InvalidateImpl(eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels)
 	{
 		ARC_PROFILE_SCOPE();
 

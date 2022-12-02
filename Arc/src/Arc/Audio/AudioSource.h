@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glm/vec3.hpp>
-
 struct ma_sound;
 
 namespace ArcEngine
@@ -55,18 +53,18 @@ namespace ArcEngine
 
 		void SetConfig(const AudioSourceConfig& config);
 
-		void SetVolume(const float volume) const;
-		void SetPitch(const float pitch) const;
-		void SetLooping(const bool state) const;
-		void SetSpatialization(const bool state);
-		void SetAttenuationModel(const AttenuationModelType type) const;
-		void SetRollOff(const float rollOff) const;
-		void SetMinGain(const float minGain) const;
-		void SetMaxGain(const float maxGain) const;
-		void SetMinDistance(const float minDistance) const;
-		void SetMaxDistance(const float maxDistance) const;
-		void SetCone(const float innerAngle, const float outerAngle, const float outerGain) const;
-		void SetDopplerFactor(const float factor) const;
+		void SetVolume(float volume) const;
+		void SetPitch(float pitch) const;
+		void SetLooping(bool state) const;
+		void SetSpatialization(bool state);
+		void SetAttenuationModel(AttenuationModelType type) const;
+		void SetRollOff(float rollOff) const;
+		void SetMinGain(float minGain) const;
+		void SetMaxGain(float maxGain) const;
+		void SetMinDistance(float minDistance) const;
+		void SetMaxDistance(float maxDistance) const;
+		void SetCone(float innerAngle, float outerAngle, float outerGain) const;
+		void SetDopplerFactor(float factor) const;
 
 		void SetPosition(const glm::vec3& position) const;
 		void SetDirection(const glm::vec3& forward) const;

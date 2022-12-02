@@ -30,7 +30,7 @@ namespace ArcEngine
 		}
 		ExternalConsoleSink(const ExternalConsoleSink&) = delete;
 		ExternalConsoleSink& operator=(const ExternalConsoleSink&) = delete;
-		virtual ~ExternalConsoleSink() = default;
+		~ExternalConsoleSink() override = default;
 
 		static void SetConsoleSink_HandleFlush(eastl::function<void(eastl::string, Log::Level)> func)
 		{

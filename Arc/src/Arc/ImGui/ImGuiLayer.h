@@ -8,11 +8,11 @@ namespace ArcEngine
 	{
 	public:
 		ImGuiLayer();
-		~ImGuiLayer() = default;
+		~ImGuiLayer() override = default;
 
-		virtual void OnAttach() override;
-		virtual void OnDetach() override;
-		virtual void OnEvent([[maybe_unused]] Event& e) override;
+		void OnAttach() override;
+		void OnDetach() override;
+		void OnEvent([[maybe_unused]] Event& e) override;
 
 		void Begin() const;
 		void End() const;

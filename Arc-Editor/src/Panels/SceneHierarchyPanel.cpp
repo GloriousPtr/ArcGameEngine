@@ -78,7 +78,7 @@ namespace ArcEngine
 
 				ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 				auto view = m_Context->m_Registry.view<IDComponent>();
-				for (auto it = view.rbegin(); it != view.rend(); it++)
+				for (auto it = view.rbegin(); it != view.rend(); ++it)
 				{
 					entt::entity e = *it;
 					Entity entity = { e, m_Context.get() };

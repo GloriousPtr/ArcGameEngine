@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Arc/Debug/Profiler.h"
 
 namespace ArcEngine

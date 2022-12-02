@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glm/vec3.hpp>
-
 namespace ArcEngine
 {
 	struct AudioListenerConfig
@@ -15,7 +13,6 @@ namespace ArcEngine
 	{
 	public:
 		AudioListener() = default;
-		~AudioListener() = default;
 
 		void SetConfig(const AudioListenerConfig& config) const;
 		void SetPosition(const glm::vec3& position) const;

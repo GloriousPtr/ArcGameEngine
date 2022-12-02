@@ -9,7 +9,6 @@
 #include "Arc/Math/Math.h"
 #include "../EditorLayer.h"
 #include "../Utils/UI.h"
-#include "../Utils/EditorTheme.h"
 
 namespace ArcEngine
 {
@@ -35,7 +34,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE(m_ID.c_str());
 
 		if (FramebufferSpecification spec = m_RenderGraphData->CompositePassTarget->GetSpecification();
-			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
+			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized fb is invalid
 			(spec.Width != (uint32_t)m_ViewportSize.x || spec.Height != (uint32_t)m_ViewportSize.y))
 		{
 			m_MiniViewportRenderGraphData->Resize((uint32_t)(m_ViewportSize.x * m_MiniViewportSizeMultiplier), (uint32_t)(m_ViewportSize.y * m_MiniViewportSizeMultiplier));

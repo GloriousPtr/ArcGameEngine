@@ -12,15 +12,15 @@ namespace ArcEngine
 	public:
 		explicit AssetPanel(const char* name = "Assets");
 
-		virtual ~AssetPanel() override = default;
+		~AssetPanel() override = default;
 
 		AssetPanel(const AssetPanel& other) = delete;
 		AssetPanel(AssetPanel&& other) = delete;
 		AssetPanel& operator=(const AssetPanel& other) = delete;
 		AssetPanel& operator=(AssetPanel&& other) = delete;
 
-		virtual void OnUpdate([[maybe_unused]] Timestep ts) override;
-		virtual void OnImGuiRender() override;
+		void OnUpdate([[maybe_unused]] Timestep ts) override;
+		void OnImGuiRender() override;
 
 		void Invalidate();
 

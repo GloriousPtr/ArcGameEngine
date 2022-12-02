@@ -12,14 +12,14 @@ namespace ArcEngine
 	{
 	public:
 		explicit SceneHierarchyPanel(const char* name = "Hierarchy");
-		virtual ~SceneHierarchyPanel() = default;
+		~SceneHierarchyPanel() override = default;
 
 		SceneHierarchyPanel(const SceneHierarchyPanel& other) = delete;
 		SceneHierarchyPanel(SceneHierarchyPanel&& other) = delete;
 		SceneHierarchyPanel& operator=(const SceneHierarchyPanel& other) = delete;
 		SceneHierarchyPanel& operator=(SceneHierarchyPanel&& other) = delete;
 
-		virtual void OnImGuiRender() override;
+		void OnImGuiRender() override;
 
 		void SetContext(const Ref<Scene>& context);
 

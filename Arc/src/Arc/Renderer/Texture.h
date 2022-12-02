@@ -17,7 +17,7 @@ namespace ArcEngine
 		virtual const eastl::string& GetPath() const = 0;
 
 		virtual void SetData(TextureData data, uint32_t size) = 0;
-		virtual void Invalidate(const eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels) = 0;
+		virtual void Invalidate(eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels) = 0;
 		
 		virtual void Bind(uint32_t slot = 0) const = 0;
 

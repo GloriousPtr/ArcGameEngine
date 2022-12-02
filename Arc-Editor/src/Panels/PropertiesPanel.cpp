@@ -595,7 +595,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<Rigidbody2DComponent>(ICON_MDI_SOCCER " Rigidbody 2D", entity, [scene = entity.GetScene()](Rigidbody2DComponent& component)
+		DrawComponent<Rigidbody2DComponent>(ICON_MDI_SOCCER " Rigidbody 2D", entity, [](Rigidbody2DComponent& component)
 		{
 			UI::BeginProperties();
 
@@ -1014,8 +1014,6 @@ namespace ArcEngine
 			UI::EndProperties();
 
 			ImGui::Spacing();
-			ImVec2 region = ImGui::GetContentRegionAvail();
-			region.y = ImGui::GetFrameHeight();
 			if (ImGui::Button(ICON_MDI_PLAY "Play ")&& component.Source)
 				component.Source->Play();
 			ImGui::SameLine();

@@ -9,7 +9,6 @@
 #include "Arc/Scene/SceneCamera.h"
 #include "Arc/Renderer/Buffer.h"
 #include "Arc/Renderer/Material.h"
-#include "Arc/Renderer/VertexArray.h"
 #include "Arc/Renderer/Framebuffer.h"
 #include "Arc/Renderer/Mesh.h"
 #include "Arc/Audio/AudioSource.h"

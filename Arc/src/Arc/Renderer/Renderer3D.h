@@ -45,12 +45,12 @@ namespace ArcEngine
 	private:
 		static void SetupCameraData();
 		static void SetupLightsData();
-		static void Flush(const Ref<RenderGraphData> renderGraphData);
-		static void FXAAPass(const Ref<RenderGraphData> renderGraphData);
-		static void CompositePass(const Ref<RenderGraphData> renderGraphData);
-		static void BloomPass(const Ref<RenderGraphData> renderGraphData);
-		static void LightingPass(const Ref<RenderGraphData> renderGraphData);
-		static void RenderPass(const Ref<Framebuffer> renderTarget);
+		static void Flush(const Ref<RenderGraphData>& renderGraphData);
+		static void FXAAPass(const Ref<RenderGraphData>& renderGraphData);
+		static void CompositePass(const Ref<RenderGraphData>& renderGraphData);
+		static void BloomPass(const Ref<RenderGraphData>& renderGraphData);
+		static void LightingPass(const Ref<RenderGraphData>& renderGraphData);
+		static void RenderPass(const Ref<Framebuffer>& renderTarget);
 		static void ShadowMapPass();
 
 	private:

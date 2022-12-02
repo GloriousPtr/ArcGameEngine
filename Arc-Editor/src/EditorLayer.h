@@ -18,14 +18,14 @@ namespace ArcEngine
 	{
 	public:
 		EditorLayer();
-		virtual ~EditorLayer() override = default;
-		
-		virtual void OnAttach() override;
-		virtual void OnDetach() override;
+		~EditorLayer() override = default;
 
-		virtual void OnUpdate([[maybe_unused]] Timestep ts) override;
-		virtual void OnImGuiRender() override;
-		virtual void OnEvent([[maybe_unused]] Event& e) override;
+		void OnAttach() override;
+		void OnDetach() override;
+
+		void OnUpdate([[maybe_unused]] Timestep ts) override;
+		void OnImGuiRender() override;
+		void OnEvent([[maybe_unused]] Event& e) override;
 
 		void SetContext(EditorContextType type, const void* data, size_t size) { m_SelectedContext.Set(type, data, size); }
 		void ResetContext() { m_SelectedContext.Reset(); }
@@ -55,8 +55,8 @@ namespace ArcEngine
 		void OnSceneStop();
 		void OnScenePause();
 		void OnSceneUnpause();
-	private:
 
+	private:
 		Application* m_Application = nullptr;
 		Ref<Scene> m_ActiveScene;
 		Ref<Scene> m_EditorScene;

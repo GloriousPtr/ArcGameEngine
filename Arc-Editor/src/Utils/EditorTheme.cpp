@@ -13,7 +13,7 @@ namespace ArcEngine
 	{
 		ImGuiIO& io = ImGui::GetIO();
 
-		static const ImWchar icons_ranges[] = { ICON_MIN_MDI, ICON_MAX_MDI, 0 };
+		static constexpr ImWchar icons_ranges[] = { ICON_MIN_MDI, ICON_MAX_MDI, 0 };
 		ImFontConfig iconsConfig;
 		// merge in icons from Font Awesome
 		iconsConfig.MergeMode = true;

@@ -46,7 +46,9 @@ namespace ArcEngine
 		}
 
 		mono_gc_collect(mono_gc_max_generation());
-		while (mono_gc_pending_finalizers());
+		while (mono_gc_pending_finalizers())
+		{
+		}
 
 		delete s_GCState;
 		s_GCState = nullptr;

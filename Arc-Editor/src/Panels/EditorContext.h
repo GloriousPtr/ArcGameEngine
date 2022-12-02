@@ -16,8 +16,7 @@ namespace ArcEngine
 
 		void Set(EditorContextType type, const void* data, size_t size)
 		{
-			if (m_Size != 0)
-				delete[] Data;
+			delete[] Data;
 
 			if (size != 0)
 			{
