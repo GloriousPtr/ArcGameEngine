@@ -41,4 +41,9 @@ project "EASTL"
 
 	filter "configurations:Release"
 		runtime "Release"
-		optimize "on"
+		optimize "speed"
+
+    filter "configurations:Dist"
+		runtime "Release"
+		optimize "speed"
+        symbols "off"

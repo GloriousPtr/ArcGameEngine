@@ -73,6 +73,7 @@ project "Arc-Editor"
 		defines "ARC_DIST"
 		runtime "Release"
         optimize "speed"
+		symbols "off"
 		postbuildcommands
 		{
 			'{COPY} "../Arc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
