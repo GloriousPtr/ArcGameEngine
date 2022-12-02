@@ -9,17 +9,13 @@ project "Arc-ScriptCore"
 
     files
     {
-        "src/**.cs"
+        "src/**.cs",
+        "vendor/**cs",
     }
 
     links
     {
         "Microsoft.Bcl.HashCode"
-    }
-
-    nuget
-    {
-        "JetBrains.Annotations:2022.3.1"
     }
 
     defines
