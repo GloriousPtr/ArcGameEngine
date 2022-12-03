@@ -74,6 +74,7 @@ namespace ArcEngine
 	struct ScriptFieldInstance
 	{
 		FieldType Type = FieldType::Unknown;
+		static constexpr size_t MaxSize = 16;
 
 		ScriptFieldInstance()
 		{
@@ -83,26 +84,27 @@ namespace ArcEngine
 		template<typename T>
 		T GetValue() const
 		{
-			static_assert(sizeof(T) <= 16, "Type too large");
+			static_assert(sizeof(T) <= MaxSize, "Type too large");
 			return *(const T*)m_Buffer;
 		}
 
 		template<typename T>
 		void SetValue(const T& value)
 		{
-			static_assert(sizeof(T) <= 16, "Type too large");
+			static_assert(sizeof(T) <= MaxSize, "Type too large");
 			memcpy(m_Buffer, &value, sizeof(T));
 		}
 
-		void SetValueString(const char* value)
+		void SetValueString(eastl::string_view value)
 		{
-			memcpy(m_Buffer, value, sizeof(m_Buffer));
+			if (value.size() < MaxSize)
+				memcpy(m_Buffer, value.data(), MaxSize);
 		}
 
 		const void* GetBuffer() const { return m_Buffer; }
 
 	private:
-		char m_Buffer[16];
+		char m_Buffer[MaxSize];
 	};
 
 	class ScriptClass

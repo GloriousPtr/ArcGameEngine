@@ -884,7 +884,7 @@ namespace ArcEngine
 
 				eastl::string value = (const char*)fieldInstance.GetBuffer();
 				if (UI::Property(field.DisplayName.c_str(), value, tooltip))
-					fieldInstance.SetValueString(value.c_str());
+					fieldInstance.SetValueString(value);
 			}
 			else
 			{
@@ -892,7 +892,7 @@ namespace ArcEngine
 				if (UI::Property(field.DisplayName.c_str(), value, tooltip))
 				{
 					fieldInstanceMap[fieldName].Type = field.Type;
-					fieldInstanceMap[fieldName].SetValueString(value.c_str());
+					fieldInstanceMap[fieldName].SetValueString(value);
 				}
 			}
 		}
