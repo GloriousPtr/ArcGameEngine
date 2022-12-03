@@ -755,13 +755,13 @@ namespace ArcEngine
 				}
 
 				T value = fieldInstance.GetValue<T>();
-				if (UI::Property(field.Name.c_str(), value, min, max, tooltip))
+				if (UI::Property(field.DisplayName.c_str(), value, min, max, tooltip))
 					fieldInstance.SetValue(value);
 			}
 			else
 			{
 				T value = field.GetDefaultValue<T>();
-				if (UI::Property(field.Name.c_str(), value, min, max, tooltip))
+				if (UI::Property(field.DisplayName.c_str(), value, min, max, tooltip))
 				{
 					fieldInstanceMap[fieldName].Type = field.Type;
 					fieldInstanceMap[fieldName].SetValue(value);
@@ -771,7 +771,7 @@ namespace ArcEngine
 		else
 		{
 			T value = scriptInstance->GetFieldValue<T>(field.Name);
-			if (UI::Property(field.Name.c_str(), value, min, max, tooltip))
+			if (UI::Property(field.DisplayName.c_str(), value, min, max, tooltip))
 				scriptInstance->SetFieldValue<T>(field.Name, value);
 		}
 	}
@@ -798,13 +798,13 @@ namespace ArcEngine
 				}
 
 				T value = fieldInstance.GetValue<T>();
-				if (UI::Property(field.Name.c_str(), value, tooltip))
+				if (UI::Property(field.DisplayName.c_str(), value, tooltip))
 					fieldInstance.SetValue(value);
 			}
 			else
 			{
 				T value = field.GetDefaultValue<T>();
-				if (UI::Property(field.Name.c_str(), value, tooltip))
+				if (UI::Property(field.DisplayName.c_str(), value, tooltip))
 				{
 					fieldInstanceMap[fieldName].Type = field.Type;
 					fieldInstanceMap[fieldName].SetValue(value);
@@ -814,7 +814,7 @@ namespace ArcEngine
 		else
 		{
 			T value = scriptInstance->GetFieldValue<T>(field.Name);
-			if (UI::Property(field.Name.c_str(), value, tooltip))
+			if (UI::Property(field.DisplayName.c_str(), value, tooltip))
 				scriptInstance->SetFieldValue<T>(field.Name, value);
 		}
 	}
@@ -841,13 +841,13 @@ namespace ArcEngine
 				}
 
 				T value = fieldInstance.GetValue<T>();
-				if (UI::PropertyColor(field.Name.c_str(), value, tooltip))
+				if (UI::PropertyColor(field.DisplayName.c_str(), value, tooltip))
 					fieldInstance.SetValue(value);
 			}
 			else
 			{
 				T value = field.GetDefaultValue<T>();
-				if (UI::PropertyColor(field.Name.c_str(), value, tooltip))
+				if (UI::PropertyColor(field.DisplayName.c_str(), value, tooltip))
 				{
 					fieldInstanceMap[fieldName].Type = field.Type;
 					fieldInstanceMap[fieldName].SetValue(value);
@@ -857,7 +857,7 @@ namespace ArcEngine
 		else
 		{
 			T value = scriptInstance->GetFieldValue<T>(field.Name);
-			if (UI::PropertyColor(field.Name.c_str(), value, tooltip))
+			if (UI::PropertyColor(field.DisplayName.c_str(), value, tooltip))
 				scriptInstance->SetFieldValue<T>(field.Name, value);
 		}
 	}
@@ -883,13 +883,13 @@ namespace ArcEngine
 				}
 
 				eastl::string value = (const char*)fieldInstance.GetBuffer();
-				if (UI::Property(field.Name.c_str(), value, tooltip))
+				if (UI::Property(field.DisplayName.c_str(), value, tooltip))
 					fieldInstance.SetValueString(value.c_str());
 			}
 			else
 			{
 				eastl::string value = field.DefaultValue;
-				if (UI::Property(field.Name.c_str(), value, tooltip))
+				if (UI::Property(field.DisplayName.c_str(), value, tooltip))
 				{
 					fieldInstanceMap[fieldName].Type = field.Type;
 					fieldInstanceMap[fieldName].SetValueString(value.c_str());
@@ -899,7 +899,7 @@ namespace ArcEngine
 		else
 		{
 			eastl::string value = scriptInstance->GetFieldValueString(field.Name);
-			if (UI::Property(field.Name.c_str(), value, tooltip))
+			if (UI::Property(field.DisplayName.c_str(), value, tooltip))
 				scriptInstance->SetFieldValue<const char*>(field.Name, value.c_str());
 		}
 	}

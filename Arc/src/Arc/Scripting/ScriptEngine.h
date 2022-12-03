@@ -44,6 +44,7 @@ namespace ArcEngine
 	struct ScriptField
 	{
 		eastl::string Name = "";
+		eastl::string DisplayName = "";
 		FieldType Type = FieldType::Unknown;
 		MonoClassField* Field = nullptr;
 

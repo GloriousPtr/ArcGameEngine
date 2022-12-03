@@ -573,6 +573,12 @@ namespace ArcEngine
 
 			auto& scriptField = m_FieldsMap[fieldName];
 			scriptField.Name = fieldName;
+			if (scriptField.Name.size() > 1 && scriptField.Name[0] == '_')
+				scriptField.DisplayName = &scriptField.Name[1];
+			else if (scriptField.Name.size() > 2 && scriptField.Name[1] == '_')
+				scriptField.DisplayName = &scriptField.Name[2];
+			else
+				scriptField.DisplayName = scriptField.Name;
 			scriptField.Type = type;
 			scriptField.Field = monoField;
 			scriptField.Serializable = serializable;
