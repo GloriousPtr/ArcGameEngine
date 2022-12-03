@@ -828,7 +828,7 @@ namespace ArcEngine
 		{
 			view,
 			proj,
-			proj * view * cameraData.View,
+			proj * view,
 			camera.GetPosition()
 		};
 		OnRender(renderGraphData, cameraData);
