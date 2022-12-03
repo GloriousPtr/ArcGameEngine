@@ -187,6 +187,9 @@ namespace ArcEngine
 				ImGuizmo::SetDrawlist();
 				ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
 
+				glm::mat4 cameraView = m_EditorCamera.GetView();
+				glm::mat4 cameraProjection = m_EditorCamera.GetProjection();
+
 				if (m_SceneHierarchyPanel && m_GizmoType != -1)
 				{
 					ARC_PROFILE_SCOPE("Transform Gizmos");
@@ -197,8 +200,6 @@ namespace ArcEngine
 						Entity selectedEntity = *((Entity*)context.Data);
 						if (selectedEntity)
 						{
-							const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
-							const glm::mat4& cameraView = m_EditorCamera.GetViewMatrix();
 							// Entity Transform
 							auto& tc = selectedEntity.GetComponent<TransformComponent>();
 							glm::mat4 transform = selectedEntity.GetWorldTransform();
@@ -232,9 +233,7 @@ namespace ArcEngine
 				}
 
 				// Cubeview
-				glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
-				glm::mat4 cameraProj = m_EditorCamera.GetProjectionMatrix();
-				ImGuizmo::ViewManipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProj), ImGuizmo::OPERATION::ROTATE_SCREEN, ImGuizmo::MODE::WORLD, glm::value_ptr(m_CubeViewMatrix), 8.0f,
+				ImGuizmo::ViewManipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), ImGuizmo::OPERATION::ROTATE_SCREEN, ImGuizmo::MODE::WORLD, glm::value_ptr(m_CubeViewMatrix), 8.0f,
 					ImVec2(m_ViewportBounds[1].x - 128, m_ViewportBounds[0].y), ImVec2(128, 128), 0x10101010);
 				if (m_ViewportFocused)
 				{
@@ -309,11 +308,13 @@ namespace ArcEngine
 				Entity selectedEntity = *((Entity*)context.Data);
 				if (selectedEntity && selectedEntity.HasComponent<CameraComponent>())
 				{
+					const glm::mat4 view = glm::inverse(selectedEntity.GetWorldTransform());
+					const glm::mat4 proj = selectedEntity.GetComponent<CameraComponent>().Camera.GetProjection();
 					CameraData cameraData =
 					{
-						glm::inverse(selectedEntity.GetWorldTransform()),
-						selectedEntity.GetComponent<CameraComponent>().Camera.GetProjection(),
-						cameraData.Projection * cameraData.View,
+						view,
+						proj,
+						proj * view,
 						selectedEntity.GetTransform().Translation
 					};
 

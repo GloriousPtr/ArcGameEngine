@@ -822,13 +822,11 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const glm::mat4& view = camera.GetViewMatrix();
-		const glm::mat4& proj = camera.GetProjectionMatrix();
 		CameraData cameraData =
 		{
-			view,
-			proj,
-			proj * view,
+			camera.GetView(),
+			camera.GetProjection(),
+			camera.GetViewProjection(),
 			camera.GetPosition()
 		};
 		OnRender(renderGraphData, cameraData);
@@ -1098,9 +1096,9 @@ namespace ArcEngine
 			}
 			else
 			{
-				cameraData.View = overrideCamera->GetViewMatrix();
-				cameraData.Projection = overrideCamera->GetProjectionMatrix();
-				cameraData.ViewProjection = cameraData.Projection * cameraData.View;
+				cameraData.View = overrideCamera->GetView();
+				cameraData.Projection = overrideCamera->GetProjection();
+				cameraData.ViewProjection = overrideCamera->GetViewProjection();
 				cameraData.Position = overrideCamera->GetPosition();
 			}
 		}
