@@ -17,7 +17,7 @@ namespace ArcEngine
 		void Bind() const override;
 		void Unbind() const override;
 
-		void SetData(const BufferData data, uint32_t size) override;
+		void SetData(const void* data, uint32_t size) override;
 
 		const BufferLayout& GetLayout() const override { return m_Layout; }
 		void SetLayout(const BufferLayout& layout) override { m_Layout = layout; }
@@ -58,11 +58,11 @@ namespace ArcEngine
 		void Bind() const override;
 		void Unbind() const override;
 
-		void SetData(const BufferData data, uint32_t offset, uint32_t size) override;
+		void SetData(const void* data, uint32_t offset, uint32_t size) override;
 		void SetLayout(const BufferLayout& layout, uint32_t blockIndex, uint32_t count) override;
 
 	private:
-		uint32_t m_RendererID;
+		uint32_t m_RendererID = 0;
 		BufferLayout m_Layout;
 	};
 }

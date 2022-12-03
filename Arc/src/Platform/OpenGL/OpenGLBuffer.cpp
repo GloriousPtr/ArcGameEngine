@@ -49,7 +49,7 @@ namespace ArcEngine
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	void OpenGLVertexBuffer::SetData(const BufferData data, uint32_t size)
+	void OpenGLVertexBuffer::SetData(const void* data, uint32_t size)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -126,7 +126,7 @@ namespace ArcEngine
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
-	void OpenGLUniformBuffer::SetData(const BufferData data, uint32_t offset, uint32_t size)
+	void OpenGLUniformBuffer::SetData(const void* data, uint32_t offset, uint32_t size)
 	{
 		ARC_PROFILE_SCOPE();
 

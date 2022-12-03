@@ -31,9 +31,6 @@ namespace ArcEngine
 	Ref<UniformBuffer> Renderer3D::s_UbPointLights;
 	Ref<UniformBuffer> Renderer3D::s_UbDirectionalLights;
 
-	glm::mat4 Renderer3D::s_CameraView;
-	glm::mat4 Renderer3D::s_CameraProjection;
-	glm::vec3 Renderer3D::s_CameraPosition;
 	Entity Renderer3D::s_Skylight;
 	eastl::vector<Entity> Renderer3D::s_SceneLights;
 
@@ -93,6 +90,9 @@ namespace ArcEngine
 
 		s_Shader->Bind();
 		s_Shader->SetUniformBlock("Camera", 0);
+
+		s_CubemapShader->Bind();
+		s_CubemapShader->SetUniformBlock("Camera", 0);
 
 		s_LightingShader->Bind();
 		s_LightingShader->SetUniformBlock("Camera", 0);
@@ -200,15 +200,11 @@ namespace ArcEngine
 	void Renderer3D::BeginScene(const CameraData& cameraData, Entity cubemap, eastl::vector<Entity>&& lights)
 	{
 		ARC_PROFILE_SCOPE();
-		
-		s_CameraView = cameraData.View;
-		s_CameraProjection = cameraData.Projection;
-		s_CameraPosition = cameraData.Position;
 
 		s_Skylight = cubemap;
 		s_SceneLights = eastl::move(lights);
 
-		SetupCameraData();
+		SetupCameraData(cameraData);
 		SetupLightsData();
 	}
 
@@ -289,24 +285,13 @@ namespace ArcEngine
 		return s_Stats;
 	}
 
-	void Renderer3D::SetupCameraData()
+	void Renderer3D::SetupCameraData(const CameraData& cameraData)
 	{
 		ARC_PROFILE_SCOPE();
 
+		static_assert(sizeof(CameraData) == sizeof(glm::mat4) * 3 + sizeof(glm::vec3));
 		s_UbCamera->Bind();
-
-		uint32_t offset = 0;
-
-		s_UbCamera->SetData((void*)glm::value_ptr(s_CameraView), offset, sizeof(glm::mat4));
-		offset += sizeof(glm::mat4);
-
-		s_UbCamera->SetData((void*)glm::value_ptr(s_CameraProjection), offset, sizeof(glm::mat4));
-		offset += sizeof(glm::mat4);
-
-		s_UbCamera->SetData((void*)glm::value_ptr(s_CameraProjection * s_CameraView), offset, sizeof(glm::mat4));
-		offset += sizeof(glm::mat4);
-		
-		s_UbCamera->SetData((void*)glm::value_ptr(s_CameraPosition), offset, sizeof(glm::vec4));
+		s_UbCamera->SetData(&cameraData, 0, sizeof(CameraData));
 	}
 
 	void Renderer3D::SetupLightsData()
@@ -323,7 +308,7 @@ namespace ArcEngine
 			};
 
 			uint32_t numLights = 0;
-			const uint32_t size = sizeof(PointLightData);
+			constexpr uint32_t size = sizeof(PointLightData);
 
 			s_UbPointLights->Bind();
 
@@ -369,7 +354,7 @@ namespace ArcEngine
 			};
 
 			uint32_t numLights = 0;
-			const uint32_t size = sizeof(DirectionalLightData);
+			constexpr uint32_t size = sizeof(DirectionalLightData);
 
 			s_UbDirectionalLights->Bind();
 
@@ -613,8 +598,6 @@ namespace ArcEngine
 
 					skylightComponent->Texture->Bind(0);
 					s_CubemapShader->Bind();
-					s_CubemapShader->SetMat4("u_View", s_CameraView);
-					s_CubemapShader->SetMat4("u_Projection", s_CameraProjection);
 					s_CubemapShader->SetFloat("u_Intensity", skylightIntensity);
 					s_CubemapShader->SetFloat("u_Rotation", skylightRotation);
 

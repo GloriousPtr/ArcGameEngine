@@ -15,7 +15,7 @@ layout (std140, binding = 0) uniform Camera
     mat4 u_Projection;
     mat4 u_ViewProjection;
 
-    vec4 u_CameraPosition;
+    vec3 u_CameraPosition;
 };
 
 uniform mat4 u_Model;

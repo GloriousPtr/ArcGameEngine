@@ -43,7 +43,7 @@ namespace ArcEngine
 		static Statistics GetStats();
 
 	private:
-		static void SetupCameraData();
+		static void SetupCameraData(const CameraData& cameraData);
 		static void SetupLightsData();
 		static void Flush(const Ref<RenderGraphData>& renderGraphData);
 		static void FXAAPass(const Ref<RenderGraphData>& renderGraphData);
@@ -84,9 +84,6 @@ namespace ArcEngine
 		static Ref<UniformBuffer> s_UbPointLights;
 		static Ref<UniformBuffer> s_UbDirectionalLights;
 
-		static glm::mat4 s_CameraView;
-		static glm::mat4 s_CameraProjection;
-		static glm::vec3 s_CameraPosition;
 		static Entity s_Skylight;
 		static eastl::vector<Entity> s_SceneLights;
 

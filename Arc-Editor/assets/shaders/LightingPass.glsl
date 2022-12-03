@@ -10,16 +10,14 @@ layout (std140, binding = 0) uniform Camera
     mat4 u_Projection;
     mat4 u_ViewProjection;
 
-    vec4 u_CameraPosition;
+    vec3 u_CameraPosition;
 };
 
 layout(location = 0) out vec2 v_TexCoord;
-layout(location = 1) out vec3 v_CameraPosition;
 
 void main()
 {
 	v_TexCoord = a_TexCoord;
-    v_CameraPosition = u_CameraPosition.xyz;
 	gl_Position = vec4(a_Position, 1.0);
 }
 
@@ -27,7 +25,6 @@ void main()
 #version 450 core
 
 layout(location = 0) in vec2 v_TexCoord;
-layout(location = 1) in vec3 v_CameraPosition;
 
 layout(location = 0) out vec4 o_FragColor;
 
@@ -43,7 +40,7 @@ layout (std140, binding = 0) uniform Camera
     mat4 u_Projection;
     mat4 u_ViewProjection;
 
-    vec4 u_CameraPosition;
+    vec3 u_CameraPosition;
 };
 
 struct PointLight
@@ -363,7 +360,7 @@ void main()
 
 	vec4 emission = texture(u_Emission, v_TexCoord);
 
-	m_Params.View = normalize(v_CameraPosition - m_Params.WorldPos);
+	m_Params.View = normalize(u_CameraPosition - m_Params.WorldPos);
 	m_Params.NdotV = max(dot(m_Params.Normal, m_Params.View), 0.0);
 
     vec3 F0 = vec3(0.04);

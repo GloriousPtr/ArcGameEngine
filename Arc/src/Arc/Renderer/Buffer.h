@@ -4,8 +4,6 @@
 
 namespace ArcEngine
 {
-	using BufferData = void*;
-
 	enum class ShaderDataType
 	{
 		None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Bool
@@ -112,7 +110,7 @@ namespace ArcEngine
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
-		virtual void SetData(const BufferData data, uint32_t size) = 0;
+		virtual void SetData(const void* data, uint32_t size) = 0;
 		
 		virtual const BufferLayout& GetLayout() const = 0;
 		virtual void SetLayout(const BufferLayout& layout) = 0;
@@ -141,7 +139,7 @@ namespace ArcEngine
 
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
-		virtual void SetData(const BufferData data, uint32_t offset, uint32_t size) = 0;
+		virtual void SetData(const void* data, uint32_t offset, uint32_t size) = 0;
 		virtual void SetLayout(const BufferLayout& layout, uint32_t blockIndex, uint32_t count = 1) = 0;
 
 		static Ref<UniformBuffer> Create();
