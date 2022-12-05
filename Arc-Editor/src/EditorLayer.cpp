@@ -616,9 +616,9 @@ namespace ArcEngine
 		{
 			case Key::D:
 			{
-				if (ctrl && m_SelectedContext.Type == EditorContextType::Entity)
+				if (ctrl && m_SelectedContext.GetType() == EditorContextType::Entity)
 				{
-					m_ActiveScene->Duplicate(*((Entity*)m_SelectedContext.Data));
+					m_ActiveScene->Duplicate(*m_SelectedContext.As<Entity>());
 					return true;
 				}
 				break;
@@ -687,11 +687,10 @@ namespace ArcEngine
 					NewScene();
 					return true;
 				}
-				if (alt && shift && m_SelectedContext.Type == EditorContextType::Entity)
+				if (alt && shift && m_SelectedContext.GetType() == EditorContextType::Entity)
 				{
-					Entity selectedEntity = *((Entity*)m_SelectedContext.Data);
 					Entity child = m_ActiveScene->CreateEntity();
-					child.SetParent(selectedEntity);
+					child.SetParent(*m_SelectedContext.As<Entity>());
 					m_SelectedContext.Set(EditorContextType::Entity, &child, sizeof(Entity));
 					return true;
 				}
@@ -722,9 +721,9 @@ namespace ArcEngine
 			}
 			case Key::Delete:
 			{
-				if (m_SelectedContext.Type == EditorContextType::Entity)
+				if (m_SelectedContext.GetType() == EditorContextType::Entity)
 				{
-					m_ActiveScene->DestroyEntity(*((Entity*)m_SelectedContext.Data));
+					m_ActiveScene->DestroyEntity(*m_SelectedContext.As<Entity>());
 					m_SelectedContext.Reset();
 					return true;
 				}

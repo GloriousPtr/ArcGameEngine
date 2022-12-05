@@ -537,9 +537,9 @@ namespace ArcEngine
 
 					bool highlight = false;
 					const EditorContext& context = EditorLayer::GetInstance()->GetContext();
-					if (context.IsValid(EditorContextType::File))
+					if (context.IsValid(EditorContextType::File) && context)
 					{
-						highlight = file.Filepath == context.Data;
+						highlight = file.Filepath == context.As<char>();
 					}
 
 					// Background button

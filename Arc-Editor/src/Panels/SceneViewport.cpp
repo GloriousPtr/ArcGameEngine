@@ -195,9 +195,9 @@ namespace ArcEngine
 					ARC_PROFILE_SCOPE("Transform Gizmos");
 
 					EditorContext context = EditorLayer::GetInstance()->GetContext();
-					if (context.IsValid(EditorContextType::Entity))
+					if (context.IsValid(EditorContextType::Entity) && context)
 					{
-						Entity selectedEntity = *((Entity*)context.Data);
+						Entity selectedEntity = *context.As<Entity>();
 						if (selectedEntity)
 						{
 							// Entity Transform
@@ -305,7 +305,7 @@ namespace ArcEngine
 			{
 				ARC_PROFILE_SCOPE("MiniViewport");
 
-				Entity selectedEntity = *((Entity*)context.Data);
+				Entity selectedEntity = *context.As<Entity>();
 				if (selectedEntity && selectedEntity.HasComponent<CameraComponent>())
 				{
 					const glm::mat4 view = glm::inverse(selectedEntity.GetWorldTransform());

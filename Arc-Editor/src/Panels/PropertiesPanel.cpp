@@ -25,28 +25,28 @@ namespace ArcEngine
 		if (OnBegin())
 		{
 			const EditorContext& context = EditorLayer::GetInstance()->GetContext();
-			switch (context.Type)
+			if (m_Context)
 			{
-				case EditorContextType::None:
-					break;
-				case EditorContextType::Entity:
-					if (m_Context.Data)
+				switch (context.GetType())
+				{
+					case EditorContextType::None:
+						break;
+					case EditorContextType::Entity:
 					{
-						const Entity selectedEntity = *(Entity*)m_Context.Data;
+						const Entity selectedEntity = *m_Context.As<Entity>();
 						if (selectedEntity && selectedEntity.GetScene())
 							DrawComponents(selectedEntity);
+						break;
 					}
-					break;
-				case EditorContextType::File:
-					if (m_Context.Data)
+					case EditorContextType::File:
 					{
-						DrawFileProperties(m_Context.Data);
+						DrawFileProperties(m_Context.As<char>());
+						break;
 					}
-					break;
-				default:
-					break;
+					default:
+						break;
+				}
 			}
-
 			OnEnd();
 		}
 	}

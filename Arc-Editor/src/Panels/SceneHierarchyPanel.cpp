@@ -105,7 +105,7 @@ namespace ArcEngine
 			if (m_DeletedEntity)
 			{
 				const EditorContext& context = EditorLayer::GetInstance()->GetContext();
-				if (context.IsValid(EditorContextType::Entity) && *((Entity*)context.Data) == m_DeletedEntity)
+				if (context.IsValid(EditorContextType::Entity) && *context.As<Entity>() == m_DeletedEntity)
 					EditorLayer::GetInstance()->ResetContext();
 
 				m_Context->DestroyEntity(m_DeletedEntity);
@@ -142,7 +142,7 @@ namespace ArcEngine
 		}
 
 		const EditorContext& context = EditorLayer::GetInstance()->GetContext();
-		Entity selectedEntity = (context.IsValid(EditorContextType::Entity) ? *((Entity*)context.Data) : Entity({}));
+		Entity selectedEntity = (context.IsValid(EditorContextType::Entity) ? *context.As<Entity>() : Entity({}));
 
 		ImGuiTreeNodeFlags flags = (selectedEntity == entity ? ImGuiTreeNodeFlags_Selected : 0);
 		flags |= ImGuiTreeNodeFlags_OpenOnArrow;

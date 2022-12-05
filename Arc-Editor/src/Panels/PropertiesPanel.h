@@ -21,9 +21,9 @@ namespace ArcEngine
 
 		void OnImGuiRender() override;
 
-		void SetContext(const EditorContext context)
+		void SetContext(const EditorContext& context)
 		{
-			if (m_Locked && m_Context.Data)
+			if ((m_Locked && m_Context) || context == m_Context)
 				return;
 
 			m_Context = context;
