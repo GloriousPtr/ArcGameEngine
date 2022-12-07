@@ -822,6 +822,10 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
+		auto particleSystemView = m_Registry.view<TransformComponent, ParticleSystemComponent>();
+		for (auto&& [e, tc, psc] : particleSystemView.each())
+			psc.System.OnUpdate(ts, tc.Translation);
+
 		CameraData cameraData =
 		{
 			camera.GetView(),
@@ -1190,6 +1194,13 @@ namespace ArcEngine
 
 		Renderer2D::BeginScene(cameraData.ViewProjection);
 		{
+			ARC_PROFILE_SCOPE("Submit Particle Data");
+
+			auto particleSystemView = m_Registry.view<ParticleSystemComponent>();
+			for (auto&& [e, psc] : particleSystemView.each())
+				psc.System.OnRender();
+		}
+		{
 			ARC_PROFILE_SCOPE("Submit 2D Data");
 
 			auto view = m_Registry.view<SpriteRendererComponent>();
@@ -1527,6 +1538,12 @@ namespace ArcEngine
 	void Scene::OnComponentAdded<LightComponent>(Entity entity, LightComponent& component)
 	{
 		/* On LightComponent added */
+	}
+
+	template<>
+	void Scene::OnComponentAdded<ParticleSystemComponent>(Entity entity, ParticleSystemComponent& component)
+	{
+		/* On ParticleSystemComponent added */
 	}
 
 	template<>

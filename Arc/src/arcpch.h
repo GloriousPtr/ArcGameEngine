@@ -19,6 +19,8 @@
 #include <EASTL/array.h>
 #include <EASTL/vector.h>
 #include <EASTL/hash_map.h>
+#include <EASTL/fixed_vector.h>
+#include <EASTL/fixed_hash_map.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>

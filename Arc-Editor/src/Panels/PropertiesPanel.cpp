@@ -355,6 +355,7 @@ namespace ArcEngine
 					DrawAddComponent<AudioSourceComponent>(entity, ICON_MDI_VOLUME_MEDIUM " Audio", "Audio");
 					DrawAddComponent<AudioListenerComponent>(entity, ICON_MDI_CIRCLE_SLICE_8 " Audio Listener", "Audio");
 
+					DrawAddComponent<ParticleSystemComponent>(entity, ICON_MDI_LAMP " Particle System");
 					DrawAddComponent<CameraComponent>(entity, ICON_MDI_CAMERA " Camera");
 					DrawAddComponent<ScriptComponent>(entity, ICON_MDI_POUND_BOX " Script");
 
@@ -592,6 +593,46 @@ namespace ArcEngine
 				ImGui::Image((ImTextureID)textureID, ImVec2{ 256, 256 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 			}
 
+			UI::EndProperties();
+		});
+
+		DrawComponent<ParticleSystemComponent>(ICON_MDI_LAMP " Particle System", entity, [](ParticleSystemComponent& component)
+		{
+			auto& props = component.System.GetProperties();
+			
+			UI::BeginProperties();
+			UI::Property("Lifetime", props.Lifetime);
+			UI::Property("Gravity Modifier", props.GravityModifier);
+			UI::Property("Spawn Time", props.SpawnTime);
+			UI::Property("Spawn Rate", props.SpawnRate);
+			UI::Property("Position Start", props.PositionStart);
+			UI::Property("Position End", props.PositionEnd);
+			UI::EndProperties();
+
+			ImGui::Separator();
+
+			UI::BeginProperties();
+			UI::Property("Velocity Start", props.VelocityStart);
+			UI::Property("Velocity End", props.VelocityEnd);
+			UI::Property("Force Start", props.ForceStart);
+			UI::Property("Force End", props.ForceEnd);
+			UI::EndProperties();
+
+			ImGui::Separator();
+
+			UI::BeginProperties();
+			UI::Property("Rotation Start", props.RotationStart);
+			UI::Property("Rotation End", props.RotationEnd);
+			UI::Property("Size Start", props.SizeStart);
+			UI::Property("Size End", props.SizeEnd);
+			UI::EndProperties();
+
+			ImGui::Separator();
+
+			UI::BeginProperties();
+			UI::PropertyColor("Color Start", props.ColorStart);
+			UI::PropertyColor("Color End", props.ColorEnd);
+			UI::Property("Texture", props.Texture);
 			UI::EndProperties();
 		});
 

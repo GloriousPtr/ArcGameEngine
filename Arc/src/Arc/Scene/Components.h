@@ -4,15 +4,16 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+#include "Arc/Audio/AudioListener.h"
+#include "Arc/Audio/AudioSource.h"
 #include "Arc/Core/UUID.h"
+#include "Arc/Renderer/Buffer.h"
+#include "Arc/Renderer/Framebuffer.h"
+#include "Arc/Renderer/Material.h"
+#include "Arc/Renderer/Mesh.h"
+#include "Arc/Renderer/ParticleSystem.h"
 #include "Arc/Renderer/Texture.h"
 #include "Arc/Scene/SceneCamera.h"
-#include "Arc/Renderer/Buffer.h"
-#include "Arc/Renderer/Material.h"
-#include "Arc/Renderer/Framebuffer.h"
-#include "Arc/Renderer/Mesh.h"
-#include "Arc/Audio/AudioSource.h"
-#include "Arc/Audio/AudioListener.h"
 
 namespace ArcEngine
 {
@@ -160,6 +161,14 @@ namespace ArcEngine
 			spec.Height = 2048;
 			ShadowMapFramebuffer = Framebuffer::Create(spec);
 		}
+	};
+
+	struct ParticleSystemComponent
+	{
+		ParticleSystem System;
+
+		ParticleSystemComponent() = default;
+		ParticleSystemComponent(const ParticleSystemComponent&) = default;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -528,6 +537,8 @@ namespace ArcEngine
 		MeshComponent,
 		SkyLightComponent,
 		LightComponent,
+
+		ParticleSystemComponent,
 
 		// 2D Physics
 		Rigidbody2DComponent,
