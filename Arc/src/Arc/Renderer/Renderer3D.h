@@ -1,5 +1,7 @@
 #pragma once
 
+#include <EASTL/fixed_vector.h>
+
 #include "Arc/Scene/Components.h"
 
 struct aiMesh;
@@ -17,8 +19,8 @@ namespace ArcEngine
 	class Renderer3D
 	{
 	public:
-		const static uint32_t MAX_NUM_LIGHTS = 200;
-		const static uint32_t MAX_NUM_DIR_LIGHTS = 3;
+		static constexpr uint32_t MAX_NUM_LIGHTS = 200;
+		static constexpr uint32_t MAX_NUM_DIR_LIGHTS = 3;
 
 		static void Init();
 		static void Shutdown();
@@ -68,7 +70,7 @@ namespace ArcEngine
 
 		static Statistics s_Stats;
 		static ShaderLibrary s_ShaderLibrary;
-		static eastl::vector<MeshData> s_Meshes;
+		static eastl::fixed_vector<Renderer3D::MeshData, 100000> s_Meshes;
 		static Ref<Texture2D> s_BRDFLutTexture;
 		static Ref<Shader> s_Shader;
 		static Ref<Shader> s_LightingShader;

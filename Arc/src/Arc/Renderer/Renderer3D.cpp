@@ -15,7 +15,7 @@
 namespace ArcEngine
 {
 	Renderer3D::Statistics Renderer3D::s_Stats;
-	eastl::vector<Renderer3D::MeshData> Renderer3D::s_Meshes;
+	eastl::fixed_vector<Renderer3D::MeshData, 100000> Renderer3D::s_Meshes;
 	Ref<Texture2D> Renderer3D::s_BRDFLutTexture;
 	Ref<Shader> Renderer3D::s_Shader;
 	Ref<Shader> Renderer3D::s_LightingShader;

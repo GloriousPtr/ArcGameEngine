@@ -137,6 +137,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		delete[] s_Data.QuadVertexBufferBase;
+		delete[] s_Data.LineVertexBufferBase;
 	}
 
 	void Renderer2D::BeginScene(const glm::mat4& viewProjection)

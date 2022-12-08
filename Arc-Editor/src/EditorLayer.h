@@ -47,7 +47,6 @@ namespace ArcEngine
 		void SaveProject(const std::filesystem::path& path) const;
 
 		void NewScene();
-		void OpenScene();
 		void SaveScene();
 		void SaveSceneAs();
 
@@ -70,13 +69,13 @@ namespace ArcEngine
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		ConsolePanel m_ConsolePanel;
-		ProjectSettingsPanel m_ProjectSettingsPanel;
 
 		eastl::vector<Scope<BasePanel>> m_Panels;
 		eastl::vector<Scope<SceneViewport>> m_Viewports;
 		eastl::vector<Scope<PropertiesPanel>> m_Properties;
 		eastl::vector<Scope<AssetPanel>> m_AssetPanels;
 
+		bool m_ShowNewProjectModal = false;
 		bool m_ShowSceneHierarchyPanel = true;
 		bool m_ShowDemoWindow = false;
 		float m_TopMenuBarHeight = 6.0f;

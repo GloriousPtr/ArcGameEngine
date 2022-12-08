@@ -55,8 +55,11 @@ namespace ArcEngine
 		if (Project::GetActive().get())
 			m_AssetPanels.emplace_back(CreateScope<AssetPanel>());
 
+		m_Panels.emplace_back(CreateScope<ProjectSettingsPanel>());
 		m_Panels.emplace_back(CreateScope<RendererSettingsPanel>());
 		m_Panels.emplace_back(CreateScope<StatsPanel>());
+
+		OpenProject();
 	}
 
 	void EditorLayer::OnDetach()
@@ -126,7 +129,6 @@ namespace ArcEngine
 				| ImGuiWindowFlags_MenuBar
 				| ImGuiWindowFlags_NoNavFocus;
 
-			bool openNewProjectModalPopup = false;
 			ImVec2 windowPadding = ImGui::GetStyle().WindowPadding;
 			float frameHeight = ImGui::GetFrameHeight();
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
@@ -148,18 +150,18 @@ namespace ArcEngine
 						{
 							ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 
-							if (ImGui::MenuItem("New", "Ctrl+N"))
+							if (ImGui::MenuItem("New Scene", "Ctrl+N"))
 								NewScene();
-							if (ImGui::MenuItem("Open..", "Ctrl+O"))
-								OpenScene();
-							if (ImGui::MenuItem("Save...", "Ctrl+S"))
+							if (ImGui::MenuItem("Save Scene", "Ctrl+S"))
 								SaveScene();
-							if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+							if (ImGui::MenuItem("Save Scene As...", "Ctrl+Shift+S"))
 								SaveSceneAs();
-							if (ImGui::MenuItem("New Project", nullptr))
-								openNewProjectModalPopup = true;
-							if (ImGui::MenuItem("Open Project", nullptr))
+							ImGui::Separator();
+							if (ImGui::MenuItem("New Project", "Ctrl+Alt+N"))
+								m_ShowNewProjectModal = true;
+							if (ImGui::MenuItem("Open Project", "Ctrl+Alt+O"))
 								OpenProject();
+							ImGui::Separator();
 							if (ImGui::BeginMenu("Theme"))
 							{
 								if (ImGui::MenuItem("Light"))
@@ -201,14 +203,14 @@ namespace ArcEngine
 
 								ImGui::EndMenu();
 							}
+							ImGui::Separator();
 							ImGui::MenuItem("Hierarchy", nullptr, &m_ShowSceneHierarchyPanel);
-
-							ImGui::MenuItem(m_ProjectSettingsPanel.GetName(), nullptr, &m_ProjectSettingsPanel.Showing);
 							ImGui::MenuItem(m_ConsolePanel.GetName(), nullptr, &m_ConsolePanel.Showing);
 
 							for (const auto& panel : m_Panels)
 								ImGui::MenuItem(panel->GetName(), nullptr, &panel->Showing);
 
+							ImGui::Separator();
 							ImGui::MenuItem("ImGui Demo Window", nullptr, &m_ShowDemoWindow);
 
 							ImGui::PopStyleVar();
@@ -440,11 +442,11 @@ namespace ArcEngine
 			if (m_ConsolePanel.Showing)
 				m_ConsolePanel.OnImGuiRender();
 
-			if (m_ProjectSettingsPanel.Showing)
-				m_ProjectSettingsPanel.OnImGuiRender();
-
-			if (openNewProjectModalPopup)
+			if (m_ShowNewProjectModal)
+			{
+				m_ShowNewProjectModal = false;
 				ImGui::OpenPopup("New Project");
+			}
 
 			ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
@@ -603,9 +605,10 @@ namespace ArcEngine
 
 			Scene:
 				Ctrl+N				Load new scene
-				Ctrl+O				Open scene
 				Ctrl+S				Save current scene
 				Ctrl+Shift+S		Save current scene as
+				Ctrl+Alt+N			New project
+				Ctrl+Alt+O			Open project
 		*/
 
 		bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
@@ -676,6 +679,11 @@ namespace ArcEngine
 			}
 			case Key::N:
 			{
+				if (ctrl && alt)
+				{
+					m_ShowNewProjectModal = true;
+					return true;
+				}
 				if (ctrl && shift)
 				{
 					Entity entity = m_ActiveScene->CreateEntity();
@@ -698,9 +706,9 @@ namespace ArcEngine
 			}
 			case Key::O:
 			{
-				if (ctrl)
+				if (ctrl && alt)
 				{
-					OpenScene();
+					OpenProject();
 					return true;
 				}
 				break;
@@ -823,15 +831,6 @@ namespace ArcEngine
 		SceneSerializer serializer(m_ActiveScene);
 		serializer.Deserialize(filepath);
 		m_ScenePath = filepath;
-	}
-
-	void EditorLayer::OpenScene()
-	{
-		eastl::string filepath = FileDialogs::OpenFile("Arc Scene (*.arc)\0*.arc\0");
-		if (!filepath.empty())
-		{
-			OpenScene(filepath.c_str());
-		}
 	}
 	
 	void EditorLayer::SaveScene()

@@ -206,6 +206,7 @@ namespace ArcEngine
 		}
 		ImGui::PopStyleVar();
 		ImVec2 verticalLineStart = ImGui::GetCursorScreenPos();
+		verticalLineStart.x -= 0.5f;
 		verticalLineStart.y -= ImGui::GetFrameHeight() * 0.5f;
 
 		// Drag Drop
@@ -314,6 +315,7 @@ namespace ArcEngine
 				ImDrawList* drawList = ImGui::GetWindowDrawList();
 
 				ImVec2 verticalLineEnd = verticalLineStart;
+				constexpr float lineThickness = 1.5f;
 
 				for (size_t i = 0; i < childrenSize; i++)
 				{
@@ -323,11 +325,11 @@ namespace ArcEngine
 					const ImRect childRect = DrawEntityNode(child, createChild, depth + 1, forceExpandTree, isPartOfPrefab);
 
 					const float midpoint = (childRect.Min.y + childRect.Max.y) / 2.0f;
-					drawList->AddLine(ImVec2(verticalLineStart.x, midpoint), ImVec2(verticalLineStart.x + HorizontalTreeLineSize, midpoint), treeLineColor);
+					drawList->AddLine(ImVec2(verticalLineStart.x, midpoint), ImVec2(verticalLineStart.x + HorizontalTreeLineSize, midpoint), treeLineColor, lineThickness);
 					verticalLineEnd.y = midpoint;
 				}
 
-				drawList->AddLine(verticalLineStart, verticalLineEnd, treeLineColor);
+				drawList->AddLine(verticalLineStart, verticalLineEnd, treeLineColor, lineThickness);
 			}
 
 			if (opened && childrenSize > 0)

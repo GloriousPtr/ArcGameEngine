@@ -159,6 +159,10 @@ namespace ArcEngine
 		{
 			ImGuiStyle* style = &ImGui::GetStyle();
 
+			style->AntiAliasedFill = true;
+			style->AntiAliasedLines = true;
+			style->AntiAliasedLinesUseTex = true;
+
 			style->WindowPadding = ImVec2(4.0f, 4.0f);
 			style->FramePadding = ImVec2(4.0f, 4.0f);
 			style->TabMinWidthForCloseButton = 0.1f;
