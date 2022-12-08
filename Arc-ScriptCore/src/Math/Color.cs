@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 
 namespace ArcEngine
 {
-	[DebuggerDisplay("[{r}, {g}, {b}, {a}]")]
+	[DebuggerDisplay("{ToHtmlStringRGBA()} [{r}, {g}, {b}, {a}]")]
 	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	[StructLayout(LayoutKind.Sequential)]
 	public struct Color : IEquatable<Color>
@@ -60,6 +60,12 @@ namespace ArcEngine
 
 		[MethodImpl(INLINE)]
 		public override string ToString() { return "Color(" + r + ", " + g + ", " + b + ", " + a + ")"; }
+
+		[MethodImpl(INLINE)]
+		public string ToHtmlStringRGBA() => $"#{Mathfs.RoundToInt(r * 255.0f):X2}{Mathfs.RoundToInt(g * 255.0f):X2}{Mathfs.RoundToInt(b * 255.0f):X2}{Mathfs.RoundToInt(a * 255.0f):X2}";
+
+		[MethodImpl(INLINE)]
+		public string ToHtmlStringRGB() => $"#{Mathfs.RoundToInt(r * 255.0f):X2}{Mathfs.RoundToInt(g * 255.0f):X2}{Mathfs.RoundToInt(b * 255.0f):X2}";
 
 		[MethodImpl(INLINE)]
 		public bool Equals(Color other)
