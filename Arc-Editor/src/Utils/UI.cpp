@@ -1,6 +1,5 @@
 #include "UI.h"
 
-#include <glm/gtc/type_ptr.hpp>
 #include <icons/IconsMaterialDesignIcons.h>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
@@ -143,17 +142,11 @@ namespace ArcEngine
 	bool UI::Property(const char* label, int8_t& value, int8_t min, int8_t max, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
+		bool modified;
 		if (max > min)
-		{
-			if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_S8, &value, &min, &max))
-				modified = true;
-		}
+			modified = ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_S8, &value, &min, &max);
 		else
-		{
-			if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_S8, &value))
-				modified = true;
-		}
+			modified = ImGui::DragScalar(s_IDBuffer, ImGuiDataType_S8, &value);
 
 		EndPropertyGrid();
 		return modified;
@@ -162,17 +155,11 @@ namespace ArcEngine
 	bool UI::Property(const char* label, uint8_t& value, uint8_t min, uint8_t max, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
+		bool modified;
 		if (max > min)
-		{
-			if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_U8, &value, &min, &max))
-				modified = true;
-		}
+			modified = ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_U8, &value, &min, &max);
 		else
-		{
-			if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_U8, &value))
-				modified = true;
-		}
+			modified = ImGui::DragScalar(s_IDBuffer, ImGuiDataType_U8, &value);
 		EndPropertyGrid();
 		return modified;
 	}
@@ -184,17 +171,11 @@ namespace ArcEngine
 	bool UI::Property(const char* label, int16_t& value, int16_t min, int16_t max, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
+		bool modified;
 		if (max > min)
-		{
-			if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_S16, &value, &min, &max))
-				modified = true;
-		}
+			modified = ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_S16, &value, &min, &max);
 		else
-		{
-			if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_S16, &value))
-				modified = true;
-		}
+			modified = ImGui::DragScalar(s_IDBuffer, ImGuiDataType_S16, &value);
 		EndPropertyGrid();
 		return modified;
 	}
@@ -202,17 +183,11 @@ namespace ArcEngine
 	bool UI::Property(const char* label, uint16_t& value, uint16_t min, uint16_t max, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
+		bool modified;
 		if (max > min)
-		{
-			if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_U16, &value, &min, &max))
-				modified = true;
-		}
+			modified = ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_U16, &value, &min, &max);
 		else
-		{
-			if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_U16, &value))
-				modified = true;
-		}
+			modified = ImGui::DragScalar(s_IDBuffer, ImGuiDataType_U16, &value);
 		EndPropertyGrid();
 		return modified;
 	}
@@ -224,17 +199,11 @@ namespace ArcEngine
 	bool UI::Property(const char* label, int32_t& value, int32_t min, int32_t max, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
+		bool modified;
 		if (max > min)
-		{
-			if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_S32, &value, &min, &max))
-				modified = true;
-		}
+			modified = ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_S32, &value, &min, &max);
 		else
-		{
-			if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_S32, &value))
-				modified = true;
-		}
+			modified = ImGui::DragScalar(s_IDBuffer, ImGuiDataType_S32, &value);
 		EndPropertyGrid();
 		return modified;
 	}
@@ -242,17 +211,11 @@ namespace ArcEngine
 	bool UI::Property(const char* label, uint32_t& value, uint32_t min, uint32_t max, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
+		bool modified;
 		if (max > min)
-		{
-			if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_U32, &value, &min, &max))
-				modified = true;
-		}
+			modified = ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_U32, &value, &min, &max);
 		else
-		{
-			if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_U32, &value))
-				modified = true;
-		}
+			modified = ImGui::DragScalar(s_IDBuffer, ImGuiDataType_U32, &value);
 		EndPropertyGrid();
 		return modified;
 	}
@@ -264,17 +227,11 @@ namespace ArcEngine
 	bool UI::Property(const char* label, int64_t& value, int64_t min, int64_t max, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
+		bool modified;
 		if (max > min)
-		{
-			if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_S64, &value, &min, &max))
-				modified = true;
-		}
+			modified = ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_S64, &value, &min, &max);
 		else
-		{
-			if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_S64, &value))
-				modified = true;
-		}
+			modified = ImGui::DragScalar(s_IDBuffer, ImGuiDataType_S64, &value);
 		EndPropertyGrid();
 		return modified;
 	}
@@ -282,17 +239,11 @@ namespace ArcEngine
 	bool UI::Property(const char* label, uint64_t& value, uint64_t min, uint64_t max, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
+		bool modified;
 		if (max > min)
-		{
-			if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_U64, &value, &min, &max))
-				modified = true;
-		}
+			modified = ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_U64, &value, &min, &max);
 		else
-		{
-			if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_U64, &value))
-				modified = true;
-		}
+			modified = ImGui::DragScalar(s_IDBuffer, ImGuiDataType_U64, &value);
 		EndPropertyGrid();
 		return modified;
 	}
@@ -304,17 +255,11 @@ namespace ArcEngine
 	bool UI::Property(const char* label, float& value, float min, float max, const char* tooltip, float delta, const char* fmt)
 	{
 		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
+		bool modified;
 		if (max > min)
-		{
-			if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_Float, &value, &min, &max, fmt))
-				modified = true;
-		}
+			modified = ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_Float, &value, &min, &max, fmt);
 		else
-		{
-			if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_Float, &value, delta, nullptr, nullptr, fmt))
-				modified = true;
-		}
+			modified = ImGui::DragScalar(s_IDBuffer, ImGuiDataType_Float, &value, delta, nullptr, nullptr, fmt);
 		EndPropertyGrid();
 		return modified;
 	}
@@ -326,55 +271,14 @@ namespace ArcEngine
 	bool UI::Property(const char* label, double& value, double min, double max, const char* tooltip, float delta, const char* fmt)
 	{
 		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
+		bool modified;
 		if (max > min)
-		{
-			if (ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_Double, &value, &min, &max, fmt))
-				modified = true;
-		}
+			modified = ImGui::SliderScalar(s_IDBuffer, ImGuiDataType_Double, &value, &min, &max, fmt);
 		else
-		{
-			if (ImGui::DragScalar(s_IDBuffer, ImGuiDataType_Double, &value, delta, nullptr, nullptr, fmt))
-				modified = true;
-		}
+			modified = ImGui::DragScalar(s_IDBuffer, ImGuiDataType_Double, &value, delta, nullptr, nullptr, fmt);
 		EndPropertyGrid();
 		return modified;
 	}
-
-	//////////////////////////////////////////////////////////////////////////////////////////////
-	/// Vec2/3/4 /////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool UI::Property(const char* label, glm::vec2& value, const char* tooltip, float delta)
-	{
-		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
-		if (ImGui::DragFloat2(s_IDBuffer, glm::value_ptr(value), delta))
-			modified = true;
-		EndPropertyGrid();
-		return modified;
-	}
-
-	bool UI::Property(const char* label, glm::vec3& value, const char* tooltip, float delta)
-	{
-		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
-		if (ImGui::DragFloat3(s_IDBuffer, glm::value_ptr(value), delta))
-			modified = true;
-		EndPropertyGrid();
-		return modified;
-	}
-
-	bool UI::Property(const char* label, glm::vec4& value, const char* tooltip, float delta)
-	{
-		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
-		if (ImGui::DragFloat4(s_IDBuffer, glm::value_ptr(value), delta))
-			modified = true;
-		EndPropertyGrid();
-		return modified;
-	}
-
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// Bool /////////////////////////////////////////////////////////////////////////////////////
@@ -382,9 +286,7 @@ namespace ArcEngine
 	bool UI::Property(const char* label, bool& flag, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
-		if (ImGui::Checkbox(s_IDBuffer, &flag))
-			modified = true;
+		bool modified = ImGui::Checkbox(s_IDBuffer, &flag);
 		EndPropertyGrid();
 		return modified;
 	}
@@ -424,39 +326,6 @@ namespace ArcEngine
 		return modified;
 	}
 
-
-	//////////////////////////////////////////////////////////////////////////////////////////////
-	/// Colors ///////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::PropertyColor(const char* label, glm::vec3& color, const char* tooltip)
-	{
-		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
-		if (ImGui::ColorEdit3(s_IDBuffer, glm::value_ptr(color)))
-			modified = true;
-		EndPropertyGrid();
-		return modified;
-	}
-
-	bool UI::PropertyColor(const char* label, glm::vec4& color, const char* tooltip)
-	{
-		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
-		if (ImGui::ColorEdit4(s_IDBuffer, glm::value_ptr(color)))
-			modified = true;
-		EndPropertyGrid();
-		return modified;
-	}
-
-	bool UI::PropertyColor4as3(const char* label, glm::vec4& color, const char* tooltip)
-	{
-		BeginPropertyGrid(label, tooltip);
-		bool modified = false;
-		if (ImGui::ColorEdit3(s_IDBuffer, glm::value_ptr(color)))
-			modified = true;
-		EndPropertyGrid();
-		return modified;
-	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// 2D/3D Textures ///////////////////////////////////////////////////////////////////////////
@@ -687,22 +556,22 @@ namespace ArcEngine
 
 	bool UI::Property(const char* label, eastl::vector<double>& v, double defaultValue, size_t minElements, const char* tooltip)
 	{
-		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, double& value) { UI::Property(name, value); });
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, double& value) { Property(name, value); });
 	}
 
 	bool UI::Property(const char* label, eastl::vector<glm::vec2>& v, const glm::vec2& defaultValue, size_t minElements, const char* tooltip)
 	{
-		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec2& value) { UI::Property(name, value); });
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec2& value) { PropertyVector(name, value); });
 	}
 
 	bool UI::Property(const char* label, eastl::vector<glm::vec3>& v, const glm::vec3& defaultValue, size_t minElements, const char* tooltip)
 	{
-		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec3& value) { UI::Property(name, value); });
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec3& value) { PropertyVector(name, value); });
 	}
 
 	bool UI::Property(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, const char* tooltip)
 	{
-		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::Property(name, value); });
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::PropertyVector(name, value); });
 	}
 
 	bool UI::Property(const char* label, eastl::vector<bool>& v, bool defaultValue, size_t minElements, const char* tooltip)
@@ -712,17 +581,17 @@ namespace ArcEngine
 
 	bool UI::PropertyColor(const char* label, eastl::vector<glm::vec3>& v, const glm::vec3& defaultValue, size_t minElements, const char* tooltip)
 	{
-		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec3& value) { UI::PropertyColor(name, value); });
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec3& value) { UI::PropertyVector(name, value, true); });
 	}
 
 	bool UI::PropertyColor(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, const char* tooltip)
 	{
-		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::PropertyColor(name, value); });
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::PropertyVector(name, value, true); });
 	}
 
 	bool UI::PropertyColor4as3(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, const char* tooltip)
 	{
-		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::PropertyColor4as3(name, value); });
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::PropertyVector(name, value, true, false); });
 	}
 
 
@@ -820,7 +689,7 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	static void DrawScriptFieldColor(Entity entity, const eastl::string& className, const eastl::string& fieldName)
+	static void DrawScriptFieldVector(Entity entity, const eastl::string& className, const eastl::string& fieldName, bool color = false)
 	{
 		const auto& fieldMap = ScriptEngine::GetFieldMap(className.c_str());
 		const ScriptField& field = fieldMap.at(fieldName);
@@ -841,13 +710,13 @@ namespace ArcEngine
 				}
 
 				T value = fieldInstance.GetValue<T>();
-				if (UI::PropertyColor(field.DisplayName.c_str(), value, tooltip))
+				if (UI::PropertyVector(field.DisplayName.c_str(), value, color, true, tooltip))
 					fieldInstance.SetValue(value);
 			}
 			else
 			{
 				T value = field.GetDefaultValue<T>();
-				if (UI::PropertyColor(field.DisplayName.c_str(), value, tooltip))
+				if (UI::PropertyVector(field.DisplayName.c_str(), value, color, true, tooltip))
 				{
 					fieldInstanceMap[fieldName].Type = field.Type;
 					fieldInstanceMap[fieldName].SetValue(value);
@@ -857,7 +726,7 @@ namespace ArcEngine
 		else
 		{
 			T value = scriptInstance->GetFieldValue<T>(field.Name);
-			if (UI::PropertyColor(field.DisplayName.c_str(), value, tooltip))
+			if (UI::PropertyVector(field.DisplayName.c_str(), value, color, true, tooltip))
 				scriptInstance->SetFieldValue<T>(field.Name, value);
 		}
 	}
@@ -977,22 +846,22 @@ namespace ArcEngine
 			}
 			case FieldType::Vector2:
 			{
-				DrawScriptField<glm::vec2>(entity, className, fieldName);
+				DrawScriptFieldVector<glm::vec2>(entity, className, fieldName);
 				break;
 			}
 			case FieldType::Vector3:
 			{
-				DrawScriptField<glm::vec3>(entity, className, fieldName);
+				DrawScriptFieldVector<glm::vec3>(entity, className, fieldName);
 				break;
 			}
 			case FieldType::Vector4:
 			{
-				DrawScriptField<glm::vec4>(entity, className, fieldName);
+				DrawScriptFieldVector<glm::vec4>(entity, className, fieldName);
 				break;
 			}
 			case FieldType::Color:
 			{
-				DrawScriptFieldColor<glm::vec4>(entity, className, fieldName);
+				DrawScriptFieldVector<glm::vec4>(entity, className, fieldName, true);
 				break;
 			}
 			default:
@@ -1094,8 +963,6 @@ namespace ArcEngine
 	{
 		PushID();
 
-		bool clicked = false;
-
 		float lineHeight = ImGui::GetTextLineHeight();
 		ImVec2 padding = ImGui::GetStyle().FramePadding;
 
@@ -1104,8 +971,7 @@ namespace ArcEngine
 		width += padding.x * 2.0f;
 
 		const float cursorPosX = ImGui::GetCursorPosX();
-		if (ImGui::Button(s_IDBuffer, { width, lineHeight + padding.y * 2.0f }))
-			clicked = true;
+		bool clicked = ImGui::Button(s_IDBuffer, { width, lineHeight + padding.y * 2.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(cursorPosX);

@@ -2,7 +2,8 @@
 
 #include <ArcEngine.h>
 
-#include "imgui/imgui.h"
+#include <glm/gtc/type_ptr.hpp>
+#include <imgui/imgui.h>
 
 struct ImRect;
 
@@ -41,20 +42,32 @@ namespace ArcEngine
 		static bool Property(const char* label, double& value, double min = 0.0, double max = 0.0, const char* tooltip = nullptr, float delta = 0.1f, const char* fmt = "%.6f");
 
 		// Vec2/3/4
-		static bool Property(const char* label, glm::vec2& value, const char* tooltip = nullptr, float delta = 0.1f);
-		static bool Property(const char* label, glm::vec3& value, const char* tooltip = nullptr, float delta = 0.1f);
-		static bool Property(const char* label, glm::vec4& value, const char* tooltip = nullptr, float delta = 0.1f);
+		template<typename T>
+		static bool PropertyVector(const char* label, T& value, bool color = false, bool showAlpha = true, const char* tooltip = nullptr, float delta = 0.1f)
+		{
+			BeginPropertyGrid(label, tooltip);
+			bool modified = false;
+			int componentCount = value.length();
+			if (componentCount >= 3 && color)
+			{
+				if (showAlpha)
+					modified = ImGui::ColorEdit4(s_IDBuffer, glm::value_ptr(value));
+				else
+					modified = ImGui::ColorEdit3(s_IDBuffer, glm::value_ptr(value));
+			}
+			else
+			{
+				modified = ImGui::DragScalarN(s_IDBuffer, ImGuiDataType_Float, glm::value_ptr(value), componentCount, delta);
+			}
+			EndPropertyGrid();
+			return modified;
+		}
 
 		// Bool
 		static bool Property(const char* label, bool& flag, const char* tooltip = nullptr);
 
 		// Dropdown
 		static bool Property(const char* label, int& value, const char** dropdownStrings, size_t count, const char* tooltip = nullptr);
-
-		// Colors
-		static bool PropertyColor(const char* label, glm::vec3& color, const char* tooltip = nullptr);
-		static bool PropertyColor(const char* label, glm::vec4& color, const char* tooltip = nullptr);
-		static bool PropertyColor4as3(const char* label, glm::vec4& color, const char* tooltip = nullptr);
 
 		// 2D/3D Textures
 		static bool Property(const char* label, Ref<TextureCubemap>& texture, uint64_t overrideTextureID = 0, const char* tooltip = nullptr);

@@ -1,25 +1,45 @@
 #include "arcpch.h"
 #include "ParticleSystem.h"
-#include <glm/gtx/compatibility.hpp>
+#include <glm/gtx/norm.hpp>
 
 #include "Arc/Renderer/Renderer2D.h"
 
 namespace ArcEngine
 {
-	void ParticleSystem::OnUpdate(Timestep ts, const glm::vec3& spawnPosition)
+	void ParticleSystem::OnUpdate(Timestep ts, const glm::vec3& position)
 	{
+		ARC_PROFILE_SCOPE();
+
 		if (m_Particles.empty())
 			m_Particles.resize(10000);
 
-		const float dt = ts;
+		const float simTs = ts * m_Properties.SimulationSpeed;
 
-		m_SpawnTime += dt;
-		if (m_SpawnTime >= m_Properties.SpawnTime)
+		// Emit particles in unit time
+		m_SpawnTime += simTs;
+		if (m_SpawnTime >= 1.0f / (float)m_Properties.RateOverTime)
 		{
 			m_SpawnTime = 0.0f;
-			Emit(spawnPosition, m_Properties.SpawnRate);
+			Emit(position, 1);
+		}
+
+		// Emit particles over unit distance
+		if (glm::distance2(m_LastSpawnedPosition, position) > 1.0f)
+		{
+			m_LastSpawnedPosition = position;
+			Emit(position, m_Properties.RateOverDistance);
+		}
+
+		// Emit bursts of particles over time
+		m_BurstTime += simTs;
+		if (m_BurstTime >= m_Properties.BurstTime)
+		{
+			m_BurstTime = 0.0f;
+			Emit(position, m_Properties.BurstCount);
 		}
 		
+		// Simulate
+		m_ActiveParticleCount = 0;
 		for (auto& particle : m_Particles)
 		{
 			if (!particle.Active)
@@ -31,33 +51,62 @@ namespace ArcEngine
 				continue;
 			}
 
-			particle.LifeRemaining -= ts;
+			particle.LifeRemaining -= simTs;
 
-			float t = particle.LifeRemaining / m_Properties.Lifetime;
-			glm::vec3 velocity = glm::lerp(m_Properties.VelocityEnd, m_Properties.VelocityStart, t);
-			glm::vec3 force = glm::lerp(m_Properties.ForceEnd, m_Properties.ForceStart, t);
+			float t = glm::clamp(particle.LifeRemaining / m_Properties.StartLifetime, 0.0f, 1.0f);
 			
-			force.y += m_Properties.GravityModifier * -9.8f;
-			velocity += force * dt;
+			glm::vec3 velocity = m_Properties.StartVelocity;
+			if (m_Properties.VelocityOverLifetime.Enabled)
+				velocity *= m_Properties.VelocityOverLifetime.Evaluate(t);
 
-			particle.Position += velocity * dt;
+			glm::vec3 force(0.0f);
+			if (m_Properties.ForceOverLifetime.Enabled)
+				force = m_Properties.ForceOverLifetime.Evaluate(t);
+
+			force.y += m_Properties.GravityModifier * -9.8f;
+			velocity += force * simTs;
+
+			float velocityMagnitude = glm::length(velocity);
+			
+			// Color
+			particle.Color = m_Properties.StartColor;
+			if (m_Properties.ColorOverLifetime.Enabled)
+				particle.Color *= m_Properties.ColorOverLifetime.Evaluate(t);
+			if (m_Properties.ColorBySpeed.Enabled)
+				particle.Color *= m_Properties.ColorBySpeed.Evaluate(velocityMagnitude);
+
+			// Size
+			particle.Size = m_Properties.StartSize;
+			if (m_Properties.SizeOverLifetime.Enabled)
+				particle.Size *= m_Properties.SizeOverLifetime.Evaluate(t);
+			if (m_Properties.SizeBySpeed.Enabled)
+				particle.Size *= m_Properties.SizeBySpeed.Evaluate(velocityMagnitude);
+
+			// Rotation
+			particle.Rotation = m_Properties.StartRotation;
+			if (m_Properties.RotationOverLifetime.Enabled)
+				particle.Rotation += m_Properties.RotationOverLifetime.Evaluate(t);
+			if (m_Properties.RotationBySpeed.Enabled)
+				particle.Rotation += m_Properties.RotationBySpeed.Evaluate(velocityMagnitude);
+
+			particle.Position += velocity * simTs;
+			++m_ActiveParticleCount;
 		}
 	}
 
 	void ParticleSystem::OnRender()
 	{
+		ARC_PROFILE_SCOPE();
+
 		for (const auto& particle : m_Particles)
 		{
 			if (particle.LifeRemaining <= 0.0f)
 				continue;
 
-			float t = particle.LifeRemaining / m_Properties.Lifetime;
-			glm::vec4 color = glm::lerp(m_Properties.ColorEnd, m_Properties.ColorStart, t);
-			glm::quat rotation = glm::slerp(glm::quat(m_Properties.RotationEnd), glm::quat(m_Properties.RotationStart), t);
-			glm::vec3 size = glm::lerp(m_Properties.SizeEnd, m_Properties.SizeStart, t);
+			float t = particle.LifeRemaining / m_Properties.StartLifetime;
 
-			glm::mat4 transform = glm::translate(glm::mat4(1.0f), particle.Position) * glm::mat4(rotation) * glm::scale(glm::mat4(1.0f), size);
-			Renderer2D::DrawQuad(transform, m_Properties.Texture, color);
+			glm::mat4 transform = glm::translate(glm::mat4(1.0f), particle.Position) * glm::mat4(glm::quat(particle.Rotation)) * glm::scale(glm::mat4(1.0f), particle.Size);
+			Renderer2D::DrawQuad(transform, m_Properties.Texture, particle.Color);
 		}
 	}
 
@@ -67,9 +116,14 @@ namespace ArcEngine
 		return min + r * (max - min);
 	}
 
-	void ParticleSystem::Emit(const glm::vec3& position, uint32_t count)
+	void ParticleSystem::Emit(const glm::vec3& position, uint16_t count)
 	{
-		for (size_t i = 0; i < count; ++i)
+		ARC_PROFILE_SCOPE();
+
+		if (m_ActiveParticleCount >= m_Properties.MaxParticles)
+			return;
+
+		for (uint16_t i = 0; i < count; ++i)
 		{
 			if (++m_PoolIndex >= 10000)
 				m_PoolIndex = 0;
@@ -81,7 +135,7 @@ namespace ArcEngine
 			particle.Position.y += RandomFloat(m_Properties.PositionStart.y, m_Properties.PositionEnd.y);
 			particle.Position.z += RandomFloat(m_Properties.PositionStart.z, m_Properties.PositionEnd.z);
 
-			particle.LifeRemaining = m_Properties.Lifetime;
+			particle.LifeRemaining = m_Properties.StartLifetime;
 			particle.Active = true;
 		}
 	}

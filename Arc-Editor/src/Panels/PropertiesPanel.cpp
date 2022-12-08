@@ -3,6 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui.h>
+#include <ImGuizmo/ImGradient.h>
 #include <imgui/imgui_internal.h>
 
 #include <Arc/Scene/EntitySerializer.h>
@@ -241,7 +242,7 @@ namespace ArcEngine
 				case MaterialPropertyType::Float2:
 				{
 					auto v = material->GetData<glm::vec2>(name);
-					if (UI::Property(displayName, v))
+					if (UI::PropertyVector(displayName, v))
 						material->SetData(name, v);
 					break;
 				}
@@ -249,32 +250,16 @@ namespace ArcEngine
 				{
 					const bool isColor = n.find("color") != eastl::string::npos || n.find("Color") != eastl::string::npos;
 					auto v = material->GetData<glm::vec3>(name);
-					if (isColor)
-					{
-						if (UI::PropertyColor(displayName, v))
-							material->SetData(name, v);
-					}
-					else
-					{
-						if (UI::Property(displayName, v))
-							material->SetData(name, v);
-					}
+					if (UI::PropertyVector(displayName, v, isColor))
+						material->SetData(name, v);
 					break;
 				}
 				case MaterialPropertyType::Float4:
 				{
 					const bool isColor = n.find("color") != eastl::string::npos || n.find("Color") != eastl::string::npos;
 					auto v = material->GetData<glm::vec4>(name);
-					if (isColor)
-					{
-						if (UI::PropertyColor(displayName, v))
+					if (UI::PropertyVector(displayName, v, isColor))
 							material->SetData(name, v);
-					}
-					else
-					{
-						if (UI::Property(displayName, v))
-							material->SetData(name, v);
-					}
 					break;
 				}
 				default:
@@ -283,6 +268,79 @@ namespace ArcEngine
 		}
 
 		UI::EndProperties();
+	}
+
+	template<typename T>
+	static void DrawParticleOverLifetimeModule(eastl::string_view moduleName, OverLifetimeModule<T>& module, bool color = false, bool rotation = false)
+	{
+		static constexpr ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen
+			| ImGuiTreeNodeFlags_SpanAvailWidth
+			| ImGuiTreeNodeFlags_AllowItemOverlap
+			| ImGuiTreeNodeFlags_Framed
+			| ImGuiTreeNodeFlags_FramePadding;
+
+		if (ImGui::TreeNodeEx(moduleName.data(), treeFlags, "%s", moduleName.data()))
+		{
+			UI::BeginProperties();
+			UI::Property("Enabled", module.Enabled);
+
+			if (rotation)
+			{
+				T degrees = glm::degrees(module.Start);
+				if (UI::PropertyVector("Start", degrees))
+					module.Start = glm::radians(degrees);
+
+				degrees = glm::degrees(module.End);
+				if (UI::PropertyVector("End", degrees))
+					module.End = glm::radians(degrees);
+			}
+			else
+			{
+				UI::PropertyVector("Start", module.Start, color);
+				UI::PropertyVector("End", module.End, color);
+			}
+
+			UI::EndProperties();
+
+			ImGui::TreePop();
+		}
+	}
+
+	template<typename T>
+	static void DrawParticleBySpeedModule(eastl::string_view moduleName, BySpeedModule<T>& module, bool color = false, bool rotation = false)
+	{
+		static constexpr ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen
+			| ImGuiTreeNodeFlags_SpanAvailWidth
+			| ImGuiTreeNodeFlags_AllowItemOverlap
+			| ImGuiTreeNodeFlags_Framed
+			| ImGuiTreeNodeFlags_FramePadding;
+
+		if (ImGui::TreeNodeEx(moduleName.data(), treeFlags, "%s", moduleName.data()))
+		{
+			UI::BeginProperties();
+			UI::Property("Enabled", module.Enabled);
+
+			if (rotation)
+			{
+				T degrees = glm::degrees(module.Start);
+				if (UI::PropertyVector("Start", degrees))
+					module.Start = glm::radians(degrees);
+
+				degrees = glm::degrees(module.End);
+				if (UI::PropertyVector("End", degrees))
+					module.End = glm::radians(degrees);
+			}
+			else
+			{
+				UI::PropertyVector("Start", module.Start, color);
+				UI::PropertyVector("End", module.End, color);
+			}
+
+			UI::Property("Min Speed", module.MinSpeed);
+			UI::Property("Max Speed", module.MaxSpeed);
+			UI::EndProperties();
+			ImGui::TreePop();
+		}
 	}
 
 	void PropertiesPanel::DrawComponents(Entity entity)
@@ -463,7 +521,7 @@ namespace ArcEngine
 		DrawComponent<SpriteRendererComponent>(ICON_MDI_IMAGE_SIZE_SELECT_ACTUAL " Sprite Renderer", entity, [&entity](SpriteRendererComponent& component)
 		{
 			UI::BeginProperties();
-			UI::PropertyColor("Color", component.Color);
+			UI::PropertyVector("Color", component.Color, true);
 			UI::Property("Texture", component.Texture);
 			if (UI::Property("Sorting Order", component.SortingOrder))
 				entity.GetScene()->SortForSprites();
@@ -550,7 +608,7 @@ namespace ArcEngine
 			}
 			else
 			{
-				UI::PropertyColor("Color", component.Color);
+				UI::PropertyVector("Color", component.Color, true);
 			}
 
 			if (UI::Property("Intensity", component.Intensity) && component.Intensity < 0.0f)
@@ -601,39 +659,36 @@ namespace ArcEngine
 			auto& props = component.System.GetProperties();
 			
 			UI::BeginProperties();
-			UI::Property("Lifetime", props.Lifetime);
+			UI::Property("Start Lifetime", props.StartLifetime);
+			UI::PropertyVector("Start Velocity", props.StartVelocity);
+			UI::PropertyVector("Start Color", props.StartColor, true);
+			UI::PropertyVector("Start Size", props.StartSize);
+			UI::PropertyVector("Start Rotation", props.StartRotation);
 			UI::Property("Gravity Modifier", props.GravityModifier);
-			UI::Property("Spawn Time", props.SpawnTime);
-			UI::Property("Spawn Rate", props.SpawnRate);
-			UI::Property("Position Start", props.PositionStart);
-			UI::Property("Position End", props.PositionEnd);
+			UI::Property("Simulation Speed", props.SimulationSpeed);
+			UI::Property("Max Particles", props.MaxParticles);
 			UI::EndProperties();
 
 			ImGui::Separator();
 
 			UI::BeginProperties();
-			UI::Property("Velocity Start", props.VelocityStart);
-			UI::Property("Velocity End", props.VelocityEnd);
-			UI::Property("Force Start", props.ForceStart);
-			UI::Property("Force End", props.ForceEnd);
-			UI::EndProperties();
-
-			ImGui::Separator();
-
-			UI::BeginProperties();
-			UI::Property("Rotation Start", props.RotationStart);
-			UI::Property("Rotation End", props.RotationEnd);
-			UI::Property("Size Start", props.SizeStart);
-			UI::Property("Size End", props.SizeEnd);
-			UI::EndProperties();
-
-			ImGui::Separator();
-
-			UI::BeginProperties();
-			UI::PropertyColor("Color Start", props.ColorStart);
-			UI::PropertyColor("Color End", props.ColorEnd);
+			UI::Property("Rate Over Time", props.RateOverTime);
+			UI::Property("Rate Over Distance", props.RateOverDistance);
+			UI::Property("Burst Count", props.BurstCount);
+			UI::Property("Burst Time", props.BurstTime);
+			UI::PropertyVector("Position Start", props.PositionStart);
+			UI::PropertyVector("Position End", props.PositionEnd);
 			UI::Property("Texture", props.Texture);
 			UI::EndProperties();
+
+			DrawParticleOverLifetimeModule("Velocity Over Lifetime", props.VelocityOverLifetime);
+			DrawParticleOverLifetimeModule("Force Over Lifetime", props.ForceOverLifetime);
+			DrawParticleOverLifetimeModule("Color Over Lifetime", props.ColorOverLifetime, true);
+			DrawParticleBySpeedModule("Color By Speed", props.ColorBySpeed, true);
+			DrawParticleOverLifetimeModule("Size Over Lifetime", props.SizeOverLifetime);
+			DrawParticleBySpeedModule("Size By Speed", props.SizeBySpeed);
+			DrawParticleOverLifetimeModule("Rotation Over Lifetime", props.RotationOverLifetime, false, true);
+			DrawParticleBySpeedModule("Rotation By Speed", props.RotationBySpeed, false, true);
 		});
 
 		DrawComponent<Rigidbody2DComponent>(ICON_MDI_SOCCER " Rigidbody 2D", entity, [](Rigidbody2DComponent& component)
@@ -670,8 +725,8 @@ namespace ArcEngine
 		{
 			UI::BeginProperties();
 			UI::Property("Is Sensor", component.IsSensor);
-			UI::Property("Size", component.Size);
-			UI::Property("Offset", component.Offset);
+			UI::PropertyVector("Size", component.Size);
+			UI::PropertyVector("Offset", component.Offset);
 			UI::Property("Density", component.Density);
 			UI::EndProperties();
 			
@@ -690,7 +745,7 @@ namespace ArcEngine
 			UI::BeginProperties();
 			UI::Property("Is Sensor", component.IsSensor);
 			UI::Property("Radius", component.Radius);
-			UI::Property("Offset", component.Offset);
+			UI::PropertyVector("Offset", component.Offset);
 			UI::Property("Density", component.Density);
 			UI::EndProperties();
 			
@@ -708,7 +763,7 @@ namespace ArcEngine
 		{
 			UI::BeginProperties();
 			UI::Property("Is Sensor", component.IsSensor);
-			UI::Property("Offset", component.Offset);
+			UI::PropertyVector("Offset", component.Offset);
 			UI::Property("Density", component.Density);
 			UI::EndProperties();
 			
@@ -729,8 +784,8 @@ namespace ArcEngine
 			UI::BeginProperties();
 			UI::Property("Enable Collision", component.EnableCollision);
 			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", "Rigidbody 2D", entity.GetScene(), component.ConnectedRigidbody, nullptr);
-			UI::Property("Anchor", component.Anchor);
-			UI::Property("Connected Anchor", component.ConnectedAnchor);
+			UI::PropertyVector("Anchor", component.Anchor);
+			UI::PropertyVector("Connected Anchor", component.ConnectedAnchor);
 			UI::Property("Auto Distance", component.AutoDistance);
 			if (!component.AutoDistance)
 				UI::Property("Distance", component.Distance);
@@ -748,8 +803,8 @@ namespace ArcEngine
 			UI::BeginProperties();
 			UI::Property("Enable Collision", component.EnableCollision);
 			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", "Rigidbody 2D", entity.GetScene(), component.ConnectedRigidbody, nullptr);
-			UI::Property("Anchor", component.Anchor);
-			UI::Property("Connected Anchor", component.ConnectedAnchor);
+			UI::PropertyVector("Anchor", component.Anchor);
+			UI::PropertyVector("Connected Anchor", component.ConnectedAnchor);
 			UI::Property("Auto Distance", component.AutoDistance);
 			if (!component.AutoDistance)
 				UI::Property("Distance", component.Distance);
@@ -770,7 +825,7 @@ namespace ArcEngine
 			UI::BeginProperties();
 			UI::Property("Enable Collision", component.EnableCollision);
 			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", "Rigidbody 2D", entity.GetScene(), component.ConnectedRigidbody, nullptr);
-			UI::Property("Anchor", component.Anchor);
+			UI::PropertyVector("Anchor", component.Anchor);
 
 			UI::Property("Use Limits", component.UseLimits);
 			if (component.UseLimits)
@@ -805,7 +860,7 @@ namespace ArcEngine
 			UI::BeginProperties();
 			UI::Property("Enable Collision", component.EnableCollision);
 			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", "Rigidbody 2D", entity.GetScene(), component.ConnectedRigidbody, nullptr);
-			UI::Property("Anchor", component.Anchor);
+			UI::PropertyVector("Anchor", component.Anchor);
 
 			float degrees = glm::degrees(component.Angle);
 			if (UI::Property("Angle", degrees))
@@ -839,7 +894,7 @@ namespace ArcEngine
 			UI::BeginProperties();
 			UI::Property("Enable Collision", component.EnableCollision);
 			UI::PropertyComponent<Rigidbody2DComponent>("Connected Rigidbody 2D", "Rigidbody 2D", entity.GetScene(), component.ConnectedRigidbody, nullptr);
-			UI::Property("Anchor", component.Anchor);
+			UI::PropertyVector("Anchor", component.Anchor);
 
 			UI::Property("Frequency", component.Frequency);
 			UI::Property("Damping Ratio", component.DampingRatio);
@@ -913,8 +968,8 @@ namespace ArcEngine
 		DrawComponent<BoxColliderComponent>(ICON_MDI_CHECKBOX_BLANK_OUTLINE " Box Collider", entity, [](BoxColliderComponent& component)
 		{
 			UI::BeginProperties();
-			UI::Property("Size", component.Size);
-			UI::Property("Offset", component.Offset);
+			UI::PropertyVector("Size", component.Size);
+			UI::PropertyVector("Offset", component.Offset);
 			UI::Property("Density", component.Density);
 			UI::Property("Friction", component.Friction, 0.0f, 1.0f);
 			UI::Property("Restitution", component.Restitution, 0.0f, 1.0f);
@@ -927,7 +982,7 @@ namespace ArcEngine
 		{
 			UI::BeginProperties();
 			UI::Property("Radius", component.Radius);
-			UI::Property("Offset", component.Offset);
+			UI::PropertyVector("Offset", component.Offset);
 			UI::Property("Density", component.Density);
 			UI::Property("Friction", component.Friction, 0.0f, 1.0f);
 			UI::Property("Restitution", component.Restitution, 0.0f, 1.0f);
@@ -941,7 +996,7 @@ namespace ArcEngine
 			UI::BeginProperties();
 			UI::Property("Height", component.Height);
 			UI::Property("Radius", component.Radius);
-			UI::Property("Offset", component.Offset);
+			UI::PropertyVector("Offset", component.Offset);
 			UI::Property("Density", component.Density);
 			UI::Property("Friction", component.Friction, 0.0f, 1.0f);
 			UI::Property("Restitution", component.Restitution, 0.0f, 1.0f);
@@ -956,7 +1011,7 @@ namespace ArcEngine
 			UI::Property("Height", component.Height);
 			UI::Property("Top Radius", component.TopRadius);
 			UI::Property("Bottom Radius", component.BottomRadius);
-			UI::Property("Offset", component.Offset);
+			UI::PropertyVector("Offset", component.Offset);
 			UI::Property("Density", component.Density);
 			UI::Property("Friction", component.Friction, 0.0f, 1.0f);
 			UI::Property("Restitution", component.Restitution, 0.0f, 1.0f);
@@ -970,7 +1025,7 @@ namespace ArcEngine
 			UI::BeginProperties();
 			UI::Property("Height", component.Height);
 			UI::Property("Radius", component.Radius);
-			UI::Property("Offset", component.Offset);
+			UI::PropertyVector("Offset", component.Offset);
 			UI::Property("Density", component.Density);
 			UI::Property("Friction", component.Friction, 0.0f, 1.0f);
 			UI::Property("Restitution", component.Restitution, 0.0f, 1.0f);

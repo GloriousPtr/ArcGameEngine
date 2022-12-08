@@ -822,9 +822,15 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		auto particleSystemView = m_Registry.view<TransformComponent, ParticleSystemComponent>();
-		for (auto&& [e, tc, psc] : particleSystemView.each())
-			psc.System.OnUpdate(ts, tc.Translation);
+		#pragma region VFX
+		{
+			ARC_PROFILE_CATEGORY("VFX", Profile::Category::VFX);
+
+			auto particleSystemView = m_Registry.view<TransformComponent, ParticleSystemComponent>();
+			for (auto&& [e, tc, psc] : particleSystemView.each())
+				psc.System.OnUpdate(ts, tc.Translation);
+		}
+		#pragma endregion
 
 		CameraData cameraData =
 		{
@@ -1082,6 +1088,16 @@ namespace ArcEngine
 		}
 		#pragma endregion
 
+		#pragma region VFX
+		{
+			ARC_PROFILE_CATEGORY("VFX", Profile::Category::VFX);
+
+			auto particleSystemView = m_Registry.view<TransformComponent, ParticleSystemComponent>();
+			for (auto&& [e, tc, psc] : particleSystemView.each())
+				psc.System.OnUpdate(ts, tc.Translation);
+		}
+		#pragma endregion
+
 		#pragma region Rendering
 		CameraData cameraData = {};
 		{
@@ -1106,6 +1122,8 @@ namespace ArcEngine
 				cameraData.Position = overrideCamera->GetPosition();
 			}
 		}
+
+		
 
 		OnRender(renderGraphData, cameraData);
 		#pragma endregion
