@@ -6,50 +6,72 @@
 
 namespace ArcEngine
 {
+	ParticleSystem::ParticleSystem()
+		: m_Particles(10000)
+	{
+		if (m_Properties.PlayOnAwake)
+			Play();
+	}
+
+	void ParticleSystem::Play()
+	{
+		m_SystemTime = 0.0f;
+		m_Playing = true;
+	}
+
+	void ParticleSystem::Stop(bool force)
+	{
+		if (force)
+		{
+			for (auto& particle : m_Particles)
+				particle.LifeRemaining = 0.0f;
+		}
+
+		m_SystemTime = m_Properties.StartDelay + m_Properties.Duration;
+		m_Playing = false;
+	}
+
 	void ParticleSystem::OnUpdate(Timestep ts, const glm::vec3& position)
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (m_Particles.empty())
-			m_Particles.resize(10000);
-
 		const float simTs = ts * m_Properties.SimulationSpeed;
 
-		// Emit particles in unit time
-		m_SpawnTime += simTs;
-		if (m_SpawnTime >= 1.0f / (float)m_Properties.RateOverTime)
+		if (m_Playing && !m_Properties.Looping)
+			m_SystemTime += simTs;
+		float delay = m_Properties.StartDelay;
+		if (m_Playing && (m_Properties.Looping || (m_SystemTime <= delay + m_Properties.Duration && m_SystemTime > delay)))
 		{
-			m_SpawnTime = 0.0f;
-			Emit(position, 1);
-		}
+			// Emit particles in unit time
+			m_SpawnTime += simTs;
+			if (m_SpawnTime >= 1.0f / (float)m_Properties.RateOverTime)
+			{
+				m_SpawnTime = 0.0f;
+				Emit(position, 1);
+			}
 
-		// Emit particles over unit distance
-		if (glm::distance2(m_LastSpawnedPosition, position) > 1.0f)
-		{
-			m_LastSpawnedPosition = position;
-			Emit(position, m_Properties.RateOverDistance);
-		}
+			// Emit particles over unit distance
+			if (glm::distance2(m_LastSpawnedPosition, position) > 1.0f)
+			{
+				m_LastSpawnedPosition = position;
+				Emit(position, m_Properties.RateOverDistance);
+			}
 
-		// Emit bursts of particles over time
-		m_BurstTime += simTs;
-		if (m_BurstTime >= m_Properties.BurstTime)
-		{
-			m_BurstTime = 0.0f;
-			Emit(position, m_Properties.BurstCount);
+			// Emit bursts of particles over time
+			m_BurstTime += simTs;
+			if (m_BurstTime >= m_Properties.BurstTime)
+			{
+				m_BurstTime = 0.0f;
+				Emit(position, m_Properties.BurstCount);
+			}
 		}
 		
 		// Simulate
 		m_ActiveParticleCount = 0;
 		for (auto& particle : m_Particles)
 		{
-			if (!particle.Active)
-				continue;
-
 			if (particle.LifeRemaining <= 0.0f)
-			{
-				particle.Active = false;
 				continue;
-			}
 
 			particle.LifeRemaining -= simTs;
 
@@ -103,8 +125,6 @@ namespace ArcEngine
 			if (particle.LifeRemaining <= 0.0f)
 				continue;
 
-			float t = particle.LifeRemaining / m_Properties.StartLifetime;
-
 			glm::mat4 transform = glm::translate(glm::mat4(1.0f), particle.Position) * glm::mat4(glm::quat(particle.Rotation)) * glm::scale(glm::mat4(1.0f), particle.Size);
 			Renderer2D::DrawQuad(transform, m_Properties.Texture, particle.Color);
 		}
@@ -136,7 +156,6 @@ namespace ArcEngine
 			particle.Position.z += RandomFloat(m_Properties.PositionStart.z, m_Properties.PositionEnd.z);
 
 			particle.LifeRemaining = m_Properties.StartLifetime;
-			particle.Active = true;
 		}
 	}
 }

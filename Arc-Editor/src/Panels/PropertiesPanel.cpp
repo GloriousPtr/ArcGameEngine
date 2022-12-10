@@ -656,9 +656,27 @@ namespace ArcEngine
 
 		DrawComponent<ParticleSystemComponent>(ICON_MDI_LAMP " Particle System", entity, [](ParticleSystemComponent& component)
 		{
-			auto& props = component.System.GetProperties();
-			
+			auto& props = component.System->GetProperties();
+
+			ImGui::Text("Active Particles Count: %u", component.System->GetActiveParticleCount());
+			ImGui::BeginDisabled(props.Looping);
+			if (ImGui::Button(ICON_MDI_PLAY))
+				component.System->Play();
+			ImGui::SameLine();
+			if (ImGui::Button(ICON_MDI_STOP))
+				component.System->Stop();
+			ImGui::EndDisabled();
+
+			ImGui::Separator();
+
 			UI::BeginProperties();
+			UI::Property("Duration", props.Duration);
+			if (UI::Property("Looping", props.Looping))
+			{
+				if (props.Looping)
+					component.System->Play();
+			}
+			UI::Property("Start Delay", props.StartDelay);
 			UI::Property("Start Lifetime", props.StartLifetime);
 			UI::PropertyVector("Start Velocity", props.StartVelocity);
 			UI::PropertyVector("Start Color", props.StartColor, true);
@@ -666,6 +684,7 @@ namespace ArcEngine
 			UI::PropertyVector("Start Rotation", props.StartRotation);
 			UI::Property("Gravity Modifier", props.GravityModifier);
 			UI::Property("Simulation Speed", props.SimulationSpeed);
+			UI::Property("Play On Awake", props.PlayOnAwake);
 			UI::Property("Max Particles", props.MaxParticles);
 			UI::EndProperties();
 

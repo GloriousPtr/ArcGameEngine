@@ -165,10 +165,19 @@ namespace ArcEngine
 
 	struct ParticleSystemComponent
 	{
-		ParticleSystem System;
+		Ref<ParticleSystem> System = nullptr;
 
-		ParticleSystemComponent() = default;
-		ParticleSystemComponent(const ParticleSystemComponent&) = default;
+		ParticleSystemComponent()
+			: System(CreateRef<ParticleSystem>())
+		{
+		}
+
+		ParticleSystemComponent(const ParticleSystemComponent& other)
+			: System(CreateRef<ParticleSystem>())
+		{
+			ParticleProperties props = other.System->GetProperties();
+			System->GetProperties() = props;
+		}
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////

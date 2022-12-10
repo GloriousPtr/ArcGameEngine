@@ -708,6 +708,20 @@ namespace ArcEngine
 		}
 		#pragma endregion
 
+		#pragma region VFX
+		{
+			ARC_PROFILE_SCOPE("Submit Particle Data");
+
+			auto particleSystemView = m_Registry.view<ParticleSystemComponent>();
+			for (auto&& [e, psc] : particleSystemView.each())
+			{	if (psc.System->GetProperties().PlayOnAwake)
+					psc.System->Play();
+				else
+					psc.System->Stop(true);
+			}
+		}
+		#pragma endregion
+
 		#pragma region Scripting
 		{
 			ARC_PROFILE_CATEGORY("OnCreate", Profile::Category::Script);
@@ -828,7 +842,7 @@ namespace ArcEngine
 
 			auto particleSystemView = m_Registry.view<TransformComponent, ParticleSystemComponent>();
 			for (auto&& [e, tc, psc] : particleSystemView.each())
-				psc.System.OnUpdate(ts, tc.Translation);
+				psc.System->OnUpdate(ts, tc.Translation);
 		}
 		#pragma endregion
 
@@ -1094,7 +1108,7 @@ namespace ArcEngine
 
 			auto particleSystemView = m_Registry.view<TransformComponent, ParticleSystemComponent>();
 			for (auto&& [e, tc, psc] : particleSystemView.each())
-				psc.System.OnUpdate(ts, tc.Translation);
+				psc.System->OnUpdate(ts, tc.Translation);
 		}
 		#pragma endregion
 
@@ -1216,7 +1230,7 @@ namespace ArcEngine
 
 			auto particleSystemView = m_Registry.view<ParticleSystemComponent>();
 			for (auto&& [e, psc] : particleSystemView.each())
-				psc.System.OnRender();
+				psc.System->OnRender();
 		}
 		{
 			ARC_PROFILE_SCOPE("Submit 2D Data");

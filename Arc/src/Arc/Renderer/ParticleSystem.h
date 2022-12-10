@@ -12,22 +12,11 @@ namespace ArcEngine
 {
 	struct Particle
 	{
-		glm::vec3 Position;
-		glm::vec3 Rotation;
-		glm::vec3 Size;
-		glm::vec4 Color;
-		float LifeRemaining;
-		bool Active;
-
-		Particle()
-			: Position(glm::vec3(0.0f)), Color(glm::vec4(1.0f)), LifeRemaining(0.0f), Active(false)
-		{
-		}
-
-		Particle(const glm::vec3& position, const glm::vec4 color, float life, bool active)
-			: Position(position), Color(color), LifeRemaining(life), Active(active)
-		{
-		}
+		glm::vec3 Position = glm::vec3(0.0f);
+		glm::vec3 Rotation = glm::vec3(0.0f);
+		glm::vec3 Size = glm::vec3(1.0f);
+		glm::vec4 Color = glm::vec4(1.0f);
+		float LifeRemaining = 0.0f;
 	};
 
 	template<typename T>
@@ -38,6 +27,7 @@ namespace ArcEngine
 		bool Enabled = false;
 
 		OverLifetimeModule()
+			: Start(), End()
 		{
 		}
 
@@ -62,6 +52,7 @@ namespace ArcEngine
 		bool Enabled = false;
 
 		BySpeedModule()
+			: Start(), End()
 		{
 		}
 
@@ -115,26 +106,35 @@ namespace ArcEngine
 	class ParticleSystem
 	{
 	public:
-		ParticleSystem() = default;
+		ParticleSystem();
 		~ParticleSystem() = default;
 
+		void Play();
+		void Stop(bool force = false);
 		void OnUpdate(Timestep ts, const glm::vec3& position);
 		void OnRender();
 
 		ParticleProperties& GetProperties() { return m_Properties; }
+		const ParticleProperties& GetProperties() const { return m_Properties; }
+
+		uint32_t GetActiveParticleCount() const { return m_ActiveParticleCount; }
 
 	private:
 		void Emit(const glm::vec3& position, uint16_t count = 1);
 
 	private:
-		ParticleProperties m_Properties;
-		eastl::fixed_vector<Particle, 1000> m_Particles;
+		eastl::fixed_vector<Particle, 10000> m_Particles;
 		uint32_t m_PoolIndex = 0;
+		ParticleProperties m_Properties;
 
+		float m_SystemTime = 0.0f;
 		float m_BurstTime = 0.0f;
 		float m_SpawnTime = 0.0f;
 		glm::vec3 m_LastSpawnedPosition = glm::vec3(0.0f);
 
 		uint32_t m_ActiveParticleCount = 0;
+		bool m_Playing = false;
+
+		friend class Renderer2D;
 	};
 }
