@@ -714,7 +714,8 @@ namespace ArcEngine
 
 			auto particleSystemView = m_Registry.view<ParticleSystemComponent>();
 			for (auto&& [e, psc] : particleSystemView.each())
-			{	if (psc.System->GetProperties().PlayOnAwake)
+			{
+				if (psc.System->GetProperties().PlayOnAwake)
 					psc.System->Play();
 				else
 					psc.System->Stop(true);

@@ -271,7 +271,7 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	static void DrawParticleOverLifetimeModule(eastl::string_view moduleName, OverLifetimeModule<T>& module, bool color = false, bool rotation = false)
+	static void DrawParticleOverLifetimeModule(eastl::string_view moduleName, OverLifetimeModule<T>& propertyModule, bool color = false, bool rotation = false)
 	{
 		static constexpr ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen
 			| ImGuiTreeNodeFlags_SpanAvailWidth
@@ -282,22 +282,22 @@ namespace ArcEngine
 		if (ImGui::TreeNodeEx(moduleName.data(), treeFlags, "%s", moduleName.data()))
 		{
 			UI::BeginProperties();
-			UI::Property("Enabled", module.Enabled);
+			UI::Property("Enabled", propertyModule.Enabled);
 
 			if (rotation)
 			{
-				T degrees = glm::degrees(module.Start);
+				T degrees = glm::degrees(propertyModule.Start);
 				if (UI::PropertyVector("Start", degrees))
-					module.Start = glm::radians(degrees);
+					propertyModule.Start = glm::radians(degrees);
 
-				degrees = glm::degrees(module.End);
+				degrees = glm::degrees(propertyModule.End);
 				if (UI::PropertyVector("End", degrees))
-					module.End = glm::radians(degrees);
+					propertyModule.End = glm::radians(degrees);
 			}
 			else
 			{
-				UI::PropertyVector("Start", module.Start, color);
-				UI::PropertyVector("End", module.End, color);
+				UI::PropertyVector("Start", propertyModule.Start, color);
+				UI::PropertyVector("End", propertyModule.End, color);
 			}
 
 			UI::EndProperties();
@@ -307,7 +307,7 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	static void DrawParticleBySpeedModule(eastl::string_view moduleName, BySpeedModule<T>& module, bool color = false, bool rotation = false)
+	static void DrawParticleBySpeedModule(eastl::string_view moduleName, BySpeedModule<T>& propertyModule, bool color = false, bool rotation = false)
 	{
 		static constexpr ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen
 			| ImGuiTreeNodeFlags_SpanAvailWidth
@@ -318,26 +318,26 @@ namespace ArcEngine
 		if (ImGui::TreeNodeEx(moduleName.data(), treeFlags, "%s", moduleName.data()))
 		{
 			UI::BeginProperties();
-			UI::Property("Enabled", module.Enabled);
+			UI::Property("Enabled", propertyModule.Enabled);
 
 			if (rotation)
 			{
-				T degrees = glm::degrees(module.Start);
+				T degrees = glm::degrees(propertyModule.Start);
 				if (UI::PropertyVector("Start", degrees))
-					module.Start = glm::radians(degrees);
+					propertyModule.Start = glm::radians(degrees);
 
-				degrees = glm::degrees(module.End);
+				degrees = glm::degrees(propertyModule.End);
 				if (UI::PropertyVector("End", degrees))
-					module.End = glm::radians(degrees);
+					propertyModule.End = glm::radians(degrees);
 			}
 			else
 			{
-				UI::PropertyVector("Start", module.Start, color);
-				UI::PropertyVector("End", module.End, color);
+				UI::PropertyVector("Start", propertyModule.Start, color);
+				UI::PropertyVector("End", propertyModule.End, color);
 			}
 
-			UI::Property("Min Speed", module.MinSpeed);
-			UI::Property("Max Speed", module.MaxSpeed);
+			UI::Property("Min Speed", propertyModule.MinSpeed);
+			UI::Property("Max Speed", propertyModule.MaxSpeed);
 			UI::EndProperties();
 			ImGui::TreePop();
 		}
