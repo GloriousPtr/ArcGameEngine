@@ -309,6 +309,74 @@ namespace ArcEngine
 			out << YAML::EndMap; // LightComponent
 		}
 
+		if (entity.HasComponent<ParticleSystemComponent>())
+		{
+			out << YAML::Key << "ParticleSystemComponent";
+			out << YAML::BeginMap; // ParticleSystemComponent
+
+			const auto& particleProps = entity.GetComponent<ParticleSystemComponent>().System->GetProperties();
+			out << YAML::Key << "Duration" << YAML::Value << particleProps.Duration;
+			out << YAML::Key << "Looping" << YAML::Value << particleProps.Looping;
+			out << YAML::Key << "StartDelay" << YAML::Value << particleProps.StartDelay;
+			out << YAML::Key << "StartLifetime" << YAML::Value << particleProps.StartLifetime;
+			out << YAML::Key << "StartVelocity" << YAML::Value << particleProps.StartVelocity;
+			out << YAML::Key << "StartColor" << YAML::Value << particleProps.StartColor;
+			out << YAML::Key << "StartSize" << YAML::Value << particleProps.StartSize;
+			out << YAML::Key << "StartRotation" << YAML::Value << particleProps.StartRotation;
+			out << YAML::Key << "GravityModifier" << YAML::Value << particleProps.GravityModifier;
+			out << YAML::Key << "SimulationSpeed" << YAML::Value << particleProps.SimulationSpeed;
+			out << YAML::Key << "PlayOnAwake" << YAML::Value << particleProps.PlayOnAwake;
+			out << YAML::Key << "MaxParticles" << YAML::Value << particleProps.MaxParticles;
+			out << YAML::Key << "RateOverTime" << YAML::Value << particleProps.RateOverTime;
+			out << YAML::Key << "RateOverDistance" << YAML::Value << particleProps.RateOverDistance;
+			out << YAML::Key << "BurstCount" << YAML::Value << particleProps.BurstCount;
+			out << YAML::Key << "BurstTime" << YAML::Value << particleProps.BurstTime;
+			out << YAML::Key << "PositionStart" << YAML::Value << particleProps.PositionStart;
+			out << YAML::Key << "PositionEnd" << YAML::Value << particleProps.PositionEnd;
+
+			out << YAML::Key << "VelocityOverLifetime.Start" << YAML::Value << particleProps.VelocityOverLifetime.Start;
+			out << YAML::Key << "VelocityOverLifetime.End" << YAML::Value << particleProps.VelocityOverLifetime.End;
+			out << YAML::Key << "VelocityOverLifetime.Enabled" << YAML::Value << particleProps.VelocityOverLifetime.Enabled;
+
+			out << YAML::Key << "ForceOverLifetime.Start" << YAML::Value << particleProps.ForceOverLifetime.Start;
+			out << YAML::Key << "ForceOverLifetime.End" << YAML::Value << particleProps.ForceOverLifetime.End;
+			out << YAML::Key << "ForceOverLifetime.Enabled" << YAML::Value << particleProps.ForceOverLifetime.Enabled;
+
+			out << YAML::Key << "ColorOverLifetime.Start" << YAML::Value << particleProps.ColorOverLifetime.Start;
+			out << YAML::Key << "ColorOverLifetime.End" << YAML::Value << particleProps.ColorOverLifetime.End;
+			out << YAML::Key << "ColorOverLifetime.Enabled" << YAML::Value << particleProps.ColorOverLifetime.Enabled;
+
+			out << YAML::Key << "ColorBySpeed.Start" << YAML::Value << particleProps.ColorBySpeed.Start;
+			out << YAML::Key << "ColorBySpeed.End" << YAML::Value << particleProps.ColorBySpeed.End;
+			out << YAML::Key << "ColorBySpeed.MinSpeed" << YAML::Value << particleProps.ColorBySpeed.MinSpeed;
+			out << YAML::Key << "ColorBySpeed.MaxSpeed" << YAML::Value << particleProps.ColorBySpeed.MaxSpeed;
+			out << YAML::Key << "ColorBySpeed.Enabled" << YAML::Value << particleProps.ColorBySpeed.Enabled;
+
+			out << YAML::Key << "SizeOverLifetime.Start" << YAML::Value << particleProps.SizeOverLifetime.Start;
+			out << YAML::Key << "SizeOverLifetime.End" << YAML::Value << particleProps.SizeOverLifetime.End;
+			out << YAML::Key << "SizeOverLifetime.Enabled" << YAML::Value << particleProps.SizeOverLifetime.Enabled;
+
+			out << YAML::Key << "SizeBySpeed.Start" << YAML::Value << particleProps.SizeBySpeed.Start;
+			out << YAML::Key << "SizeBySpeed.End" << YAML::Value << particleProps.SizeBySpeed.End;
+			out << YAML::Key << "SizeBySpeed.MinSpeed" << YAML::Value << particleProps.SizeBySpeed.MinSpeed;
+			out << YAML::Key << "SizeBySpeed.MaxSpeed" << YAML::Value << particleProps.SizeBySpeed.MaxSpeed;
+			out << YAML::Key << "SizeBySpeed.Enabled" << YAML::Value << particleProps.SizeBySpeed.Enabled;
+
+			out << YAML::Key << "RotationOverLifetime.Start" << YAML::Value << particleProps.RotationOverLifetime.Start;
+			out << YAML::Key << "RotationOverLifetime.End" << YAML::Value << particleProps.RotationOverLifetime.End;
+			out << YAML::Key << "RotationOverLifetime.Enabled" << YAML::Value << particleProps.RotationOverLifetime.Enabled;
+
+			out << YAML::Key << "RotationBySpeed.Start" << YAML::Value << particleProps.RotationBySpeed.Start;
+			out << YAML::Key << "RotationBySpeed.End" << YAML::Value << particleProps.RotationBySpeed.End;
+			out << YAML::Key << "RotationBySpeed.MinSpeed" << YAML::Value << particleProps.RotationBySpeed.MinSpeed;
+			out << YAML::Key << "RotationBySpeed.MaxSpeed" << YAML::Value << particleProps.RotationBySpeed.MaxSpeed;
+			out << YAML::Key << "RotationBySpeed.Enabled" << YAML::Value << particleProps.RotationBySpeed.Enabled;
+
+			out << YAML::Key << "TexturePath" << YAML::Value << particleProps.Texture->GetPath().c_str();
+
+			out << YAML::EndMap; // ParticleSystemComponent
+		}
+
 		if (entity.HasComponent<Rigidbody2DComponent>())
 		{
 			out << YAML::Key << "Rigidbody2DComponent";
@@ -871,6 +939,76 @@ namespace ArcEngine
 
 			if (src.UseColorTemperatureMode)
 				ColorUtils::TempratureToColor(src.Temperature, src.Color);
+		}
+
+		if (const auto& psComponent = entity["ParticleSystemComponent"])
+		{
+			auto& props = deserializedEntity.AddComponent<ParticleSystemComponent>().System->GetProperties();
+			TrySet(props.Duration, psComponent["Duration"]);
+			TrySet(props.Looping, psComponent["Looping"]);
+			TrySet(props.StartDelay, psComponent["StartDelay"]);
+			TrySet(props.StartLifetime, psComponent["StartLifetime"]);
+			TrySet(props.StartVelocity, psComponent["StartVelocity"]);
+			TrySet(props.StartColor, psComponent["StartColor"]);
+			TrySet(props.StartSize, psComponent["StartSize"]);
+			TrySet(props.StartRotation, psComponent["StartRotation"]);
+			TrySet(props.GravityModifier, psComponent["GravityModifier"]);
+			TrySet(props.SimulationSpeed, psComponent["SimulationSpeed"]);
+			TrySet(props.PlayOnAwake, psComponent["PlayOnAwake"]);
+			TrySet(props.MaxParticles, psComponent["MaxParticles"]);
+			TrySet(props.RateOverTime, psComponent["RateOverTime"]);
+			TrySet(props.RateOverDistance, psComponent["RateOverDistance"]);
+			TrySet(props.BurstCount, psComponent["BurstCount"]);
+			TrySet(props.BurstTime, psComponent["BurstTime"]);
+			TrySet(props.PositionStart, psComponent["PositionStart"]);
+			TrySet(props.PositionEnd, psComponent["PositionEnd"]);
+
+			TrySet(props.VelocityOverLifetime.Start, psComponent["VelocityOverLifetime.Start"]);
+			TrySet(props.VelocityOverLifetime.End, psComponent["VelocityOverLifetime.End"]);
+			TrySet(props.VelocityOverLifetime.Enabled, psComponent["VelocityOverLifetime.Enabled"]);
+
+			TrySet(props.ForceOverLifetime.Start, psComponent["ForceOverLifetime.Start"]);
+			TrySet(props.ForceOverLifetime.End, psComponent["ForceOverLifetime.End"]);
+			TrySet(props.ForceOverLifetime.Enabled, psComponent["ForceOverLifetime.Enabled"]);
+
+			TrySet(props.ColorOverLifetime.Start, psComponent["ColorOverLifetime.Start"]);
+			TrySet(props.ColorOverLifetime.End, psComponent["ColorOverLifetime.End"]);
+			TrySet(props.ColorOverLifetime.Enabled, psComponent["ColorOverLifetime.Enabled"]);
+
+			TrySet(props.ColorBySpeed.Start, psComponent["ColorBySpeed.Start"]);
+			TrySet(props.ColorBySpeed.End, psComponent["ColorBySpeed.End"]);
+			TrySet(props.ColorBySpeed.MinSpeed, psComponent["ColorBySpeed.MinSpeed"]);
+			TrySet(props.ColorBySpeed.MaxSpeed, psComponent["ColorBySpeed.MaxSpeed"]);
+			TrySet(props.ColorBySpeed.Enabled, psComponent["ColorBySpeed.Enabled"]);
+
+			TrySet(props.SizeOverLifetime.Start, psComponent["SizeOverLifetime.Start"]);
+			TrySet(props.SizeOverLifetime.End, psComponent["SizeOverLifetime.End"]);
+			TrySet(props.SizeOverLifetime.Enabled, psComponent["SizeOverLifetime.Enabled"]);
+
+			TrySet(props.SizeBySpeed.Start, psComponent["SizeBySpeed.Start"]);
+			TrySet(props.SizeBySpeed.End, psComponent["SizeBySpeed.End"]);
+			TrySet(props.SizeBySpeed.MinSpeed, psComponent["SizeBySpeed.MinSpeed"]);
+			TrySet(props.SizeBySpeed.MaxSpeed, psComponent["SizeBySpeed.MaxSpeed"]);
+			TrySet(props.SizeBySpeed.Enabled, psComponent["SizeBySpeed.Enabled"]);
+
+			TrySet(props.RotationOverLifetime.Start, psComponent["RotationOverLifetime.Start"]);
+			TrySet(props.RotationOverLifetime.End, psComponent["RotationOverLifetime.End"]);
+			TrySet(props.RotationOverLifetime.Enabled, psComponent["RotationOverLifetime.Enabled"]);
+
+			TrySet(props.RotationBySpeed.Start, psComponent["RotationBySpeed.Start"]);
+			TrySet(props.RotationBySpeed.End, psComponent["RotationBySpeed.End"]);
+			TrySet(props.RotationBySpeed.MinSpeed, psComponent["RotationBySpeed.MinSpeed"]);
+			TrySet(props.RotationBySpeed.MaxSpeed, psComponent["RotationBySpeed.MaxSpeed"]);
+			TrySet(props.RotationBySpeed.Enabled, psComponent["RotationBySpeed.Enabled"]);
+
+			eastl::string texturePath = "";
+			TrySet(texturePath, psComponent["TexturePath"]);
+			if (!texturePath.empty())
+			{
+				std::filesystem::path path = texturePath.c_str();
+				path = Project::GetAssetFileSystemPath(path);
+				props.Texture = AssetManager::GetTexture2D(path.string().c_str());
+			}
 		}
 
 		if (const auto& rb2dCpmponent = entity["Rigidbody2DComponent"])
