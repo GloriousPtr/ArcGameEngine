@@ -249,7 +249,7 @@ namespace ArcEngine
 
 						ImVec2 windowGrabAreaStart = ImGui::GetCursorPos();
 						float buttonStartRegion = region.x - 3.0f * buttonSize.x + ImGui::GetStyle().WindowPadding.x;
-						glm::vec4 windowGrabArea = glm::vec4(windowGrabAreaStart.x, windowGrabAreaStart.y, buttonStartRegion, windowGrabAreaStart.y + frameHeight);
+						glm::vec4 windowGrabArea = glm::vec4(windowGrabAreaStart.x, windowGrabAreaStart.y - windowPadding.y, buttonStartRegion, windowGrabAreaStart.y + frameHeight + windowPadding.y);
 						m_Application->GetWindow().SetTitleBarRect(windowGrabArea);
 
 						ImGui::PushStyleColor(ImGuiCol_Button, EditorTheme::WindowBgAlternativeColor);
