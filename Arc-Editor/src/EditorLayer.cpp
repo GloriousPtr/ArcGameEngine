@@ -729,7 +729,7 @@ namespace ArcEngine
 			}
 			case Key::Delete:
 			{
-				if (m_SelectedContext.GetType() == EditorContextType::Entity)
+				if (GImGui->ActiveId == 0 && m_SelectedContext.GetType() == EditorContextType::Entity)
 				{
 					m_ActiveScene->DestroyEntity(*m_SelectedContext.As<Entity>());
 					m_SelectedContext.Reset();
