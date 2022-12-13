@@ -182,12 +182,7 @@ namespace ArcEngine
 
 		glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, int xPos, int yPos, int* hit)
 		{
-			const WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-			if ((data.GrabAreaRect.x < (float)xPos && (float)xPos < data.GrabAreaRect.z) &&
-				(data.GrabAreaRect.y < (float)yPos && (float)yPos < data.GrabAreaRect.w))
-			{
-				*hit = 1;
-			}
+			*hit = ((WindowData*)glfwGetWindowUserPointer(window))->OverTitlebar ? 1 : 0;
 		});
 	}
 
@@ -249,8 +244,8 @@ namespace ArcEngine
 		glfwRestoreWindow(m_Window);
 	}
 
-	void WindowsWindow::SetTitleBarRect(const glm::vec4& rect)
+	void WindowsWindow::RegisterOverTitlebar(bool value)
 	{
-		m_Data.GrabAreaRect = rect;
+		m_Data.OverTitlebar = value;
 	}
 }

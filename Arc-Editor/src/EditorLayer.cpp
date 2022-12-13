@@ -121,6 +121,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
+		m_Application->GetWindow().RegisterOverTitlebar(false);
+
 		BeginDockspace("MyDockSpace");
 		{
 			auto* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
@@ -250,7 +252,9 @@ namespace ArcEngine
 						ImVec2 windowGrabAreaStart = ImGui::GetCursorPos();
 						float buttonStartRegion = region.x - 3.0f * buttonSize.x + ImGui::GetStyle().WindowPadding.x;
 						glm::vec4 windowGrabArea = glm::vec4(windowGrabAreaStart.x, windowGrabAreaStart.y - windowPadding.y, buttonStartRegion, windowGrabAreaStart.y + frameHeight + windowPadding.y);
-						m_Application->GetWindow().SetTitleBarRect(windowGrabArea);
+						ImGui::InvisibleButton("TitlebarGrab1", { buttonStartRegion - windowGrabAreaStart.x, frameHeight + windowPadding.y });
+						if (ImGui::IsItemHovered())
+							m_Application->GetWindow().RegisterOverTitlebar(true);
 
 						ImGui::PushStyleColor(ImGuiCol_Button, EditorTheme::WindowBgAlternativeColor);
 						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, EditorTheme::WindowBgAlternativeColor);
@@ -317,9 +321,17 @@ namespace ArcEngine
 					if (ImGui::BeginMenuBar())
 					{
 						ImVec2 region = ImGui::GetContentRegionMax();
-						ImVec2 buttonSize = { frameHeight * 1.5f, frameHeight };
-						ImGui::SetCursorPosX(region.x * 0.5f - 3 * 0.5f * buttonSize.x);
 
+						ImVec2 buttonSize = { frameHeight * 1.5f, frameHeight };
+						constexpr uint8_t buttonCount = 3;
+						float buttonStartPositionX = region.x * 0.5f - buttonCount * 0.5f * buttonSize.x;
+
+						ImGui::InvisibleButton("TitlebarGrab2", { buttonStartPositionX - buttonSize.x * 0.25f, region.y });
+						if (ImGui::IsItemHovered())
+							m_Application->GetWindow().RegisterOverTitlebar(true);
+						ImGui::SetItemAllowOverlap();
+
+						ImGui::SetCursorPosX(buttonStartPositionX);
 						//Play Button
 						bool highlight = m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
 						const char* icon = m_SceneState == SceneState::Edit ? ICON_MDI_PLAY : ICON_MDI_STOP;
@@ -354,6 +366,11 @@ namespace ArcEngine
 
 						ImGui::PopItemFlag();
 						ImGui::PopItemFlag();
+
+						ImGui::InvisibleButton("TitlebarGrab3", region);
+						if (ImGui::IsItemHovered())
+							m_Application->GetWindow().RegisterOverTitlebar(true);
+						ImGui::SetItemAllowOverlap();
 
 						ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - ImGui::CalcTextSize("FPS: XX.XX (XX.XXXms  MEM: XXXX.XXMB").x);
 						float fps = ImGui::GetIO().Framerate;

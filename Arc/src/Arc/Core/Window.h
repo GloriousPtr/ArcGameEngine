@@ -42,7 +42,7 @@ namespace ArcEngine
 		virtual void Minimize() = 0;
 		virtual void Maximize() = 0;
 		virtual void Restore() = 0;
-		virtual void SetTitleBarRect(const glm::vec4& rect) = 0;
+		virtual void RegisterOverTitlebar(bool value) = 0;
 
 		virtual WindowHandle GetNativeWindow() const = 0;
 		

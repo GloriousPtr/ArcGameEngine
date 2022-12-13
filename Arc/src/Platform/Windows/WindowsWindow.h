@@ -28,7 +28,7 @@ namespace ArcEngine
 		void Minimize() override;
 		void Maximize() override;
 		void Restore() override;
-		void SetTitleBarRect(const glm::vec4& rect) override;
+		void RegisterOverTitlebar(bool value) override;
 
 		WindowHandle GetNativeWindow() const override { return m_Window; }
 	private:
@@ -46,7 +46,7 @@ namespace ArcEngine
 			unsigned int Height;
 			bool VSync;
 
-			glm::vec4 GrabAreaRect;
+			bool OverTitlebar = false;
 
 			EventCallbackFn EventCallback;
 		};
