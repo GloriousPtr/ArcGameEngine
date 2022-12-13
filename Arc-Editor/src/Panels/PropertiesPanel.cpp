@@ -25,10 +25,9 @@ namespace ArcEngine
 
 		if (OnBegin())
 		{
-			const EditorContext& context = EditorLayer::GetInstance()->GetContext();
 			if (m_Context)
 			{
-				switch (context.GetType())
+				switch (m_Context.GetType())
 				{
 					case EditorContextType::None:
 						break;
@@ -37,6 +36,8 @@ namespace ArcEngine
 						const Entity selectedEntity = *m_Context.As<Entity>();
 						if (selectedEntity && selectedEntity.GetScene())
 							DrawComponents(selectedEntity);
+						else if (m_Locked)
+							m_Locked = false;
 						break;
 					}
 					case EditorContextType::File:
