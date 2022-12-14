@@ -17,6 +17,19 @@ namespace ArcEngine
 	{
 	}
 
+	void SceneHierarchyPanel::OnUpdate(Timestep ts)
+	{
+		const EditorContext& context = EditorLayer::GetInstance()->GetContext();
+		m_SelectedEntity = (context.IsValid(EditorContextType::Entity) ? *context.As<Entity>() : Entity({}));
+
+		if (ImGui::IsKeyPressed(ImGuiKey_F2))
+		{
+			const EditorContext& context = EditorLayer::GetInstance()->GetContext();
+			if (context.IsValid(EditorContextType::Entity))
+				m_RenamingEntity = *context.As<Entity>();
+		}
+	}
+
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
 		ARC_PROFILE_SCOPE();
@@ -41,7 +54,13 @@ namespace ArcEngine
 			if (UI::IconButton("  " ICON_MDI_PLUS, "Add  "))
 				ImGui::OpenPopup("SceneHierarchyContextWindow");
 
-			DrawContextMenu();
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
+			if (ImGui::BeginPopupContextWindow("SceneHierarchyContextWindow", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
+			{
+				DrawContextMenu();
+				ImGui::EndPopup();
+			}
+			ImGui::PopStyleVar();
 
 			if (!m_Filter.IsActive())
 			{
@@ -87,7 +106,14 @@ namespace ArcEngine
 				}
 				ImGui::PopStyleVar();
 
-				DrawContextMenu();
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
+				if (ImGui::BeginPopupContextWindow("SceneHierarchyContextWindow", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
+				{
+					EditorLayer::GetInstance()->ResetContext();
+					DrawContextMenu();
+					ImGui::EndPopup();
+				}
+				ImGui::PopStyleVar();
 
 				ImGui::EndTable();
 
@@ -117,7 +143,7 @@ namespace ArcEngine
 		ImGui::PopStyleVar();
 	}
 
-	ImRect SceneHierarchyPanel::DrawEntityNode(Entity entity, bool skipChildren, uint32_t depth, bool forceExpandTree, bool isPartOfPrefab)
+	ImRect SceneHierarchyPanel::DrawEntityNode(Entity entity, uint32_t depth, bool forceExpandTree, bool isPartOfPrefab)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -141,10 +167,9 @@ namespace ArcEngine
 			return { 0, 0, 0, 0 };
 		}
 
-		const EditorContext& context = EditorLayer::GetInstance()->GetContext();
-		Entity selectedEntity = (context.IsValid(EditorContextType::Entity) ? *context.As<Entity>() : Entity({}));
+		
 
-		ImGuiTreeNodeFlags flags = (selectedEntity == entity ? ImGuiTreeNodeFlags_Selected : 0);
+		ImGuiTreeNodeFlags flags = (m_SelectedEntity == entity ? ImGuiTreeNodeFlags_Selected : 0);
 		flags |= ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanFullWidth;
 		flags |= ImGuiTreeNodeFlags_FramePadding;
@@ -154,7 +179,7 @@ namespace ArcEngine
 			flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 		}
 
-		bool highlight = selectedEntity == entity;
+		bool highlight = m_SelectedEntity == entity;
 		if (highlight)
 		{
 			ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, ImGui::GetColorU32(EditorTheme::HeaderSelectedColor));
@@ -167,7 +192,7 @@ namespace ArcEngine
 		
 		if (!isPartOfPrefab)
 			isPartOfPrefab = entity.HasComponent<PrefabComponent>();
-		bool prefabColorApplied = isPartOfPrefab && entity != selectedEntity;
+		bool prefabColorApplied = isPartOfPrefab && entity != m_SelectedEntity;
 		if (prefabColorApplied)
 			ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::HeaderSelectedColor);
 
@@ -190,21 +215,27 @@ namespace ArcEngine
 			forceExpandTree = opened;
 
 		bool entityDeleted = false;
-		bool createChild = false;
-		static Entity renaming = {};
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 		if (ImGui::BeginPopupContextItem())
 		{
-			if (ImGui::MenuItem("Create"))
-				createChild = true;
-			if (ImGui::MenuItem("Rename"))
-				renaming = entity;
-			if (ImGui::MenuItem("Delete Entity"))
+			if (m_SelectedEntity != entity)
+				EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, &entity, sizeof(entity));
+
+			if (ImGui::MenuItem("Rename", "F2"))
+				m_RenamingEntity = entity;
+			if (ImGui::MenuItem("Duplicate", "Ctrl+D"))
+				m_Context->Duplicate(entity);
+			if (ImGui::MenuItem("Delete", "Del"))
 				entityDeleted = true;
 
+			ImGui::Separator();
+
+			DrawContextMenu();
+			
 			ImGui::EndPopup();
 		}
 		ImGui::PopStyleVar();
+		
 		ImVec2 verticalLineStart = ImGui::GetCursorScreenPos();
 		verticalLineStart.x -= 0.5f;
 		verticalLineStart.y -= ImGui::GetFrameHeight() * 0.5f;
@@ -240,16 +271,26 @@ namespace ArcEngine
 			}
 		}
 
-		if (entity == renaming)
+		if (entity == m_RenamingEntity)
 		{
+			static bool renaming = false;
+			if (!renaming)
+			{
+				renaming = true;
+				ImGui::SetKeyboardFocusHere();
+			}
+
 			char buffer[256] = {};
 			size_t minSize = glm::min(sizeof(buffer), tag.size());
 			strncpy_s(buffer, tag.c_str(), minSize);
 			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
 				tag = eastl::string(buffer);
 
-			if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
-				renaming = {};
+			if (ImGui::IsItemDeactivated())
+			{
+				renaming = false;
+				m_RenamingEntity = {};
+			}
 		}
 
 		ImGui::TableNextColumn();
@@ -288,7 +329,7 @@ namespace ArcEngine
 		// Open
 		const ImRect nodeRect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
 		{
-			if (opened && !skipChildren && !entityDeleted)
+			if (opened && !entityDeleted)
 			{
 				ImColor treeLineColor = ImColor(128, 128, 128, 128);
 
@@ -322,7 +363,7 @@ namespace ArcEngine
 					UUID childId = entity.GetRelationship().Children[i];
 					Entity child = m_Context->GetEntity(childId);
 					const float HorizontalTreeLineSize = child.GetRelationship().Children.empty() ? 18.0f : 9.0f; //chosen arbitrarily
-					const ImRect childRect = DrawEntityNode(child, createChild, depth + 1, forceExpandTree, isPartOfPrefab);
+					const ImRect childRect = DrawEntityNode(child, depth + 1, forceExpandTree, isPartOfPrefab);
 
 					const float midpoint = (childRect.Min.y + childRect.Max.y) / 2.0f;
 					drawList->AddLine(ImVec2(verticalLineStart.x, midpoint), ImVec2(verticalLineStart.x + HorizontalTreeLineSize, midpoint), treeLineColor, lineThickness);
@@ -337,18 +378,13 @@ namespace ArcEngine
 		}
 
 		// PostProcess Actions
-		if (createChild)
-		{
-			Entity e = m_Context->CreateEntity();
-			e.SetParent(entity);
-		}
 		if(entityDeleted)
 			m_DeletedEntity = entity;
 
 		return nodeRect;
 	}
 
-		void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
+	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -417,55 +453,101 @@ namespace ArcEngine
 
 	void SceneHierarchyPanel::DrawContextMenu() const
 	{
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
-		if (ImGui::BeginPopupContextWindow("SceneHierarchyContextWindow", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
-		{
+		bool hasContext = m_SelectedEntity;
+
+		if (!hasContext)
 			EditorLayer::GetInstance()->ResetContext();
-			Entity toSelect = {};
-			if (ImGui::BeginMenu("Create"))
+
+		Entity toSelect = {};
+		if (ImGui::MenuItem("Empty Entity"))
+		{
+			toSelect = m_Context->CreateEntity("EmptyEntity");
+		}
+		if (ImGui::BeginMenu("2D"))
+		{
+			if (ImGui::MenuItem("Sprite"))
 			{
-				if (ImGui::MenuItem("Empty Entity"))
-				{
-					toSelect = m_Context->CreateEntity("Empty Entity");
-				}
-				else if (ImGui::MenuItem("Camera"))
-				{
-					toSelect = m_Context->CreateEntity("Camera");
-					toSelect.AddComponent<CameraComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-				else if (ImGui::MenuItem("Sprite"))
-				{
-					toSelect = m_Context->CreateEntity("Sprite");
-					toSelect.AddComponent<SpriteRendererComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-				else if (ImGui::MenuItem("Mesh"))
-				{
-					toSelect = m_Context->CreateEntity("Mesh");
-					toSelect.AddComponent<MeshComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-				else if (ImGui::MenuItem("Sky Light"))
-				{
-					toSelect = m_Context->CreateEntity("Sky Light");
-					toSelect.AddComponent<SkyLightComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-				else if (ImGui::MenuItem("Light"))
-				{
-					toSelect = m_Context->CreateEntity("Light");
-					toSelect.AddComponent<LightComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::EndPopup();
+				toSelect = m_Context->CreateEntity("Sprite");
+				toSelect.AddComponent<SpriteRendererComponent>();
+				ImGui::CloseCurrentPopup();
 			}
 
-			if (toSelect)
-				EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, &toSelect, sizeof(toSelect));
-
-			ImGui::EndPopup();
+			ImGui::EndMenu();
 		}
-		ImGui::PopStyleVar();
+		if (ImGui::BeginMenu("3D"))
+		{
+			if (ImGui::MenuItem("Mesh"))
+			{
+				toSelect = m_Context->CreateEntity("Mesh");
+				toSelect.AddComponent<MeshComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Light"))
+		{
+			if (ImGui::MenuItem("Sky Light"))
+			{
+				toSelect = m_Context->CreateEntity("SkyLight");
+				toSelect.AddComponent<SkyLightComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::MenuItem("Directional Light"))
+			{
+				toSelect = m_Context->CreateEntity("DirectionalLight");
+				toSelect.AddComponent<LightComponent>().Type = LightComponent::LightType::Directional;
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::MenuItem("Point Light"))
+			{
+				toSelect = m_Context->CreateEntity("PointLight");
+				toSelect.AddComponent<LightComponent>().Type = LightComponent::LightType::Point;
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::MenuItem("Spot Light"))
+			{
+				toSelect = m_Context->CreateEntity("SpotLight");
+				toSelect.AddComponent<LightComponent>().Type = LightComponent::LightType::Spot;
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Audio"))
+		{
+			if (ImGui::MenuItem("Audio Source"))
+			{
+				toSelect = m_Context->CreateEntity("AudioSource");
+				toSelect.AddComponent<AudioSourceComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::MenuItem("Audio Listener"))
+			{
+				toSelect = m_Context->CreateEntity("AudioListener");
+				toSelect.AddComponent<AudioListenerComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndMenu();
+		}
+		if (ImGui::MenuItem("Particle System"))
+		{
+			toSelect = m_Context->CreateEntity("ParticleSystem");
+			toSelect.AddComponent<ParticleSystemComponent>();
+			ImGui::CloseCurrentPopup();
+		}
+		if (ImGui::MenuItem("Camera"))
+		{
+			toSelect = m_Context->CreateEntity("Camera");
+			toSelect.AddComponent<CameraComponent>();
+			ImGui::CloseCurrentPopup();
+		}
+
+		if (hasContext && toSelect)
+			toSelect.SetParent(m_SelectedEntity);
+
+		if (toSelect)
+			EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, &toSelect, sizeof(toSelect));
 	}
 }

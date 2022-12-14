@@ -104,6 +104,8 @@ namespace ArcEngine
 			}
 		}
 
+		m_SceneHierarchyPanel.OnUpdate(ts);
+
 		bool useEditorCamera = m_SceneState == SceneState::Edit || m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
 		for (const auto& panel : m_Viewports)
 		{
