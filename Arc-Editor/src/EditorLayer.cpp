@@ -94,6 +94,16 @@ namespace ArcEngine
 			}
 		}
 
+		// Remove unused asset panels
+		for (const Scope<AssetPanel>* it = m_AssetPanels.begin(); it != m_AssetPanels.end(); it++)
+		{
+			if (!it->get()->Showing)
+			{
+				m_AssetPanels.erase(it);
+				break;
+			}
+		}
+
 		bool useEditorCamera = m_SceneState == SceneState::Edit || m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
 		for (const auto& panel : m_Viewports)
 		{
