@@ -111,19 +111,21 @@ namespace ArcEngine
 								continue;
 
 							int r = row - 1;
-							EntityLayer rowLayer = BIT(r);
-							const char* rowLayerName = layerCollisionMask.at(rowLayer).Name.c_str();
 							if (column == 0 && row != 0)
 							{
+								EntityLayer rowLayer = BIT(r);
+								const char* rowLayerName = layerCollisionMask.at(rowLayer).Name.c_str();
+
 								ImGui::TextUnformatted(rowLayerName);
 								continue;
 							}
 
 							int c = colCount - 1 - column;
-							EntityLayer colLayer = BIT(c);
-							const char* columnLayerName = layerCollisionMask.at(colLayer).Name.c_str();
 							if (row == 0 && column != 0)
 							{
+								EntityLayer colLayer = BIT(c);
+								const char* columnLayerName = layerCollisionMask.at(colLayer).Name.c_str();
+
 								auto* drawList = ImGui::GetWindowDrawList();
 								UI::AddTextVertical(drawList, columnLayerName, ImGui::GetCursorScreenPos(), ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }));
 								continue;
@@ -131,6 +133,11 @@ namespace ArcEngine
 
 							if (c < r)
 								continue;
+
+							EntityLayer rowLayer = BIT(r);
+							EntityLayer colLayer = BIT(c);
+							const char* rowLayerName = layerCollisionMask.at(rowLayer).Name.c_str();
+							const char* columnLayerName = layerCollisionMask.at(colLayer).Name.c_str();
 
 							bool on = (rowLayer & layerCollisionMask.at(colLayer).Flags) == rowLayer;
 							on = on && ((colLayer & layerCollisionMask.at(rowLayer).Flags) == colLayer);
