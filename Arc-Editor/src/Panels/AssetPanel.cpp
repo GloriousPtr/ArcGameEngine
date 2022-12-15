@@ -212,6 +212,18 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		m_ElapsedTime += ts;
+
+		if (ImGui::IsKeyPressed(ImGuiKey_Delete) && GImGui->ActiveId == 0)
+		{
+			const EditorContext& context = EditorLayer::GetInstance()->GetContext();
+			if (context.IsValid(EditorContextType::File))
+			{
+				const std::filesystem::path path = context.As<char>();
+				std::filesystem::remove_all(path);
+				EditorLayer::GetInstance()->ResetContext();
+				Refresh();
+			}
+		}
 	}
 
 	void AssetPanel::OnImGuiRender()
