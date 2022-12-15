@@ -76,7 +76,7 @@ namespace ArcEngine
 	void FileDialogs::OpenFolderAndSelectItem(const char* path)
 	{
 		_bstr_t widePath(path);
-		if (ITEMIDLIST* pidl = ILCreateFromPath(widePath))
+		if (LPITEMIDLIST pidl = ILCreateFromPath(widePath))
 		{
 			SHOpenFolderAndSelectItems(pidl, 0, nullptr, 0);
 			ILFree(pidl);
