@@ -676,8 +676,7 @@ namespace ArcEngine
 		if (!directoryToDelete.empty())
 		{
 			std::filesystem::remove_all(directoryToDelete);
-			if (directoryToDelete.extension() == "cs")
-				ScriptEngine::ReloadAppDomain();
+			EditorLayer::GetInstance()->ResetContext();
 			Refresh();
 		}
 
@@ -731,7 +730,6 @@ namespace ArcEngine
 				{
 					Filesystem::WriteFileText(context / "Script.cs", "using ArcEngine;");
 					Refresh();
-					ScriptEngine::ReloadAppDomain();
 					ImGui::CloseCurrentPopup();
 				}
 				ImGui::EndMenu();
