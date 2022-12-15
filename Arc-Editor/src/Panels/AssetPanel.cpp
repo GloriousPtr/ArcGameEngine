@@ -555,7 +555,7 @@ namespace ArcEngine
 
 					bool highlight = false;
 					const EditorContext& context = EditorLayer::GetInstance()->GetContext();
-					if (context.IsValid(EditorContextType::File) && context)
+					if (context.IsValid(EditorContextType::File))
 					{
 						highlight = file.Filepath == context.As<char>();
 					}

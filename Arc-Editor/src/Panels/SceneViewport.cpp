@@ -195,7 +195,7 @@ namespace ArcEngine
 					ARC_PROFILE_SCOPE("Transform Gizmos");
 
 					EditorContext context = EditorLayer::GetInstance()->GetContext();
-					if (context.IsValid(EditorContextType::Entity) && context)
+					if (context.IsValid(EditorContextType::Entity))
 					{
 						Entity selectedEntity = *context.As<Entity>();
 						if (selectedEntity)
