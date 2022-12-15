@@ -94,7 +94,7 @@ namespace ArcEngine
 		}
 
 		// Change transform gizmo
-		if (m_ViewportHovered && !ImGuizmo::IsUsing() && !ImGui::IsMouseDown(ImGuiMouseButton_Right))
+		if (GImGui->ActiveId == 0 && !ImGuizmo::IsUsing() && !ImGui::IsMouseDown(ImGuiMouseButton_Right))
 		{
 			if (ImGui::IsKeyPressed(ImGuiKey_Q))
 				m_GizmoType = -1;
