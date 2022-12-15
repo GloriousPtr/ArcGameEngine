@@ -11,6 +11,7 @@
 #include "../EditorLayer.h"
 #include "../Utils/UI.h"
 #include "../Utils/EditorTheme.h"
+#include "Arc/Core/Filesystem.h"
 
 namespace ArcEngine
 {
@@ -203,7 +204,7 @@ namespace ArcEngine
 
 		m_AssetsDirectory = Project::GetAssetDirectory();
 		m_CurrentDirectory = m_AssetsDirectory;
-		UpdateDirectoryEntries(m_CurrentDirectory);
+		Refresh();
 	}
 
 	void AssetPanel::OnUpdate([[maybe_unused]] Timestep ts)
@@ -236,9 +237,10 @@ namespace ArcEngine
 				RenderSideView();
 				ImGui::TableNextColumn();
 				RenderBody(m_ThumbnailSize >= 96.0f);
-
+				
 				ImGui::EndTable();
 			}
+
 			OnEnd();
 		}
 	}
@@ -247,7 +249,7 @@ namespace ArcEngine
 	{
 		m_AssetsDirectory = Project::GetAssetDirectory();
 		m_CurrentDirectory = m_AssetsDirectory;
-		UpdateDirectoryEntries(m_CurrentDirectory);
+		Refresh();
 	}
 
 	void AssetPanel::RenderHeader()
@@ -445,6 +447,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		std::filesystem::path directoryToOpen = "";
+		std::filesystem::path directoryToDelete = "";
 
 		float padding = 4.0f;
 		float scaledThumbnailSize = m_ThumbnailSize * ImGui::GetIO().FontGlobalScale;
@@ -485,7 +488,7 @@ namespace ArcEngine
 		ImGui::InvisibleButton("##DragDropTargetAssetPanelBody", region);
 		
 		if (DragDropTarget(m_CurrentDirectory.string().c_str()))
-			UpdateDirectoryEntries(m_CurrentDirectory);
+			Refresh();
 		ImGui::SetItemAllowOverlap();
 		ImGui::SetCursorPos(cursorPos);
 
@@ -531,6 +534,9 @@ namespace ArcEngine
 
 				ImGui::TableNextColumn();
 
+				const auto& path = file.DirectoryEntry.path();
+				std::string strPath = path.string();
+
 				if (grid)
 				{
 					cursorPos = ImGui::GetCursorPos();
@@ -548,10 +554,28 @@ namespace ArcEngine
 					bool const clicked = UI::ToggleButton(id.c_str(), highlight, backgroundThumbnailSize, 0.0f, 1.0f);
 					if (m_ElapsedTime > 0.25f && clicked)
 					{
-						const auto& path = m_CurrentDirectory / file.DirectoryEntry.path().filename();
-						std::string strPath = path.string();
 						EditorLayer::GetInstance()->SetContext(EditorContextType::File, (void*)strPath.c_str(), sizeof(char) * (strPath.length() + 1));
 					}
+					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
+					if (ImGui::BeginPopupContextItem())
+					{
+						if (ImGui::MenuItem("Delete"))
+						{
+							directoryToDelete = path;
+							ImGui::CloseCurrentPopup();
+						}
+						if (ImGui::MenuItem("Rename"))
+						{
+							ImGui::CloseCurrentPopup();
+						}
+
+						ImGui::Separator();
+
+						DrawContextMenuItems(path, isDir);
+						ImGui::EndPopup();
+					}
+					ImGui::PopStyleVar();
+
 					if (isDir)
 						DragDropTarget(file.Filepath.c_str());
 
@@ -562,7 +586,7 @@ namespace ArcEngine
 
 					if (isDir && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 					{
-						directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
+						directoryToOpen = path;
 						EditorLayer::GetInstance()->ResetContext();
 					}
 
@@ -615,7 +639,7 @@ namespace ArcEngine
 						anyItemHovered = true;
 
 					if (isDir && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-						directoryToOpen = m_CurrentDirectory / file.DirectoryEntry.path().filename();
+						directoryToOpen = path;
 
 					DragDropFrom(file.Filepath.c_str());
 
@@ -632,6 +656,15 @@ namespace ArcEngine
 				ImGui::PopID();
 			}
 
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
+			if (ImGui::BeginPopupContextWindow("AssetPanelHierarchyContextWindow", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
+			{
+				EditorLayer::GetInstance()->ResetContext();
+				DrawContextMenuItems(m_CurrentDirectory, true);
+				ImGui::EndPopup();
+			}
+			ImGui::PopStyleVar();
+
 			ImGui::EndTable();
 
 			if (!anyItemHovered && ImGui::IsItemClicked())
@@ -639,6 +672,14 @@ namespace ArcEngine
 		}
 
 		ImGui::PopStyleVar();
+
+		if (!directoryToDelete.empty())
+		{
+			std::filesystem::remove_all(directoryToDelete);
+			if (directoryToDelete.extension() == "cs")
+				ScriptEngine::ReloadAppDomain();
+			Refresh();
+		}
 
 		if (!directoryToOpen.empty())
 			UpdateDirectoryEntries(directoryToOpen);
@@ -656,9 +697,71 @@ namespace ArcEngine
 			const auto& path = directoryEntry.path();
 			auto relativePath = std::filesystem::relative(path, m_AssetsDirectory);
 			eastl::string filename = relativePath.filename().string().c_str();
-			m_DirectoryEntries.emplace_back(filename, path.string().c_str(), StringUtils::GetExtension(filename.c_str()), directoryEntry, nullptr, directoryEntry.is_directory());
+			eastl::string extension = relativePath.extension().string().c_str();
+			m_DirectoryEntries.emplace_back(filename, path.string().c_str(), extension, directoryEntry, nullptr, directoryEntry.is_directory());
 		}
 
 		m_ElapsedTime = 0.0f;
+	}
+
+	void AssetPanel::DrawContextMenuItems(const std::filesystem::path& context, bool isDir)
+	{
+		std::string contextPath = context.string();
+		if (isDir)
+		{
+			if (ImGui::BeginMenu("Create"))
+			{
+				if (ImGui::MenuItem("Folder"))
+				{
+					int i = 0;
+					bool created = false;
+					std::string newFolderPath;
+					while (!created)
+					{
+						std::string folderName = "New Folder" + (i == 0 ? "" : fmt::format(" ({})", i));
+						newFolderPath = (context / folderName).string();
+						created = std::filesystem::create_directory(newFolderPath);
+						++i;
+					}
+					Refresh();
+					EditorLayer::GetInstance()->SetContext(EditorContextType::File, newFolderPath.c_str(), sizeof(char) * (newFolderPath.length() + 1));
+					ImGui::CloseCurrentPopup();
+				}
+				if (ImGui::MenuItem("C# Script"))
+				{
+					Filesystem::WriteFileText(context / "Script.cs", "using ArcEngine;");
+					Refresh();
+					ScriptEngine::ReloadAppDomain();
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndMenu();
+			}
+		}
+		if (ImGui::MenuItem("Show in Explorer"))
+		{
+			FileDialogs::OpenFolderAndSelectItem(contextPath.c_str());
+			ImGui::CloseCurrentPopup();
+		}
+		if (ImGui::MenuItem("Open"))
+		{
+			FileDialogs::OpenFileWithProgram(contextPath.c_str());
+			ImGui::CloseCurrentPopup();
+		}
+		if (ImGui::MenuItem("Copy Path"))
+		{
+			ImGui::SetClipboardText(contextPath.c_str());
+			ImGui::CloseCurrentPopup();
+		}
+		if (ImGui::MenuItem("Refresh"))
+		{
+			Refresh();
+			ImGui::CloseCurrentPopup();
+		}
+		if (ImGui::MenuItem("Open C# Project"))
+		{
+			if (Project::GetActive())
+				FileDialogs::OpenSolutionWithVS(Project::GetSolutionPath().string().c_str());
+			ImGui::CloseCurrentPopup();
+		}
 	}
 }

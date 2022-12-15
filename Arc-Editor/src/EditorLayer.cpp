@@ -263,7 +263,6 @@ namespace ArcEngine
 
 						ImVec2 windowGrabAreaStart = ImGui::GetCursorPos();
 						float buttonStartRegion = region.x - 3.0f * buttonSize.x + ImGui::GetStyle().WindowPadding.x;
-						glm::vec4 windowGrabArea = glm::vec4(windowGrabAreaStart.x, windowGrabAreaStart.y - windowPadding.y, buttonStartRegion, windowGrabAreaStart.y + frameHeight + windowPadding.y);
 						ImGui::InvisibleButton("TitlebarGrab1", { buttonStartRegion - windowGrabAreaStart.x, frameHeight + windowPadding.y });
 						if (ImGui::IsItemHovered())
 							m_Application->GetWindow().RegisterOverTitlebar(true);
@@ -274,7 +273,7 @@ namespace ArcEngine
 						ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 						if (auto project = Project::GetActive())
 						{
-							const eastl::string& projectName = project->GetConfig().Name;
+							const std::string& projectName = project->GetConfig().Name;
 							ImVec2 textSize = ImGui::CalcTextSize(projectName.c_str());
 							ImGui::SetCursorPos(ImVec2(region.x - 4.0f * buttonSize.x - textSize.x - 100.0f + ImGui::GetStyle().WindowPadding.x, ImGui::GetCursorPosY() - 2.0f));
 							ImGui::Button(projectName.c_str(), { textSize.x + 100.0f, buttonSize.y });

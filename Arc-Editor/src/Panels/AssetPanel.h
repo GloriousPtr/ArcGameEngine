@@ -30,6 +30,9 @@ namespace ArcEngine
 		void RenderSideView();
 		void RenderBody(bool grid);
 		void UpdateDirectoryEntries(const std::filesystem::path& directory);
+		void Refresh() { UpdateDirectoryEntries(m_CurrentDirectory); }
+
+		void DrawContextMenuItems(const std::filesystem::path& context, bool isDir);
 
 	private:
 		struct File

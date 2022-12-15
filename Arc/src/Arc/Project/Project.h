@@ -10,7 +10,7 @@ namespace ArcEngine
 {
 	struct ProjectConfig
 	{
-		eastl::string Name = "Untitled";
+		std::string Name = "Untitled";
 
 		std::filesystem::path StartScene;
 
@@ -49,6 +49,12 @@ namespace ArcEngine
 		{
 			ARC_CORE_ASSERT(s_ActiveProject);
 			return std::filesystem::relative(path, GetAssetDirectory());
+		}
+
+		static std::filesystem::path GetSolutionPath()
+		{
+			ARC_CORE_ASSERT(s_ActiveProject);
+			return GetProjectDirectory() / (s_ActiveProject->GetConfig().Name + ".sln");
 		}
 
 		ProjectConfig& GetConfig() { return m_Config; }

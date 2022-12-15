@@ -154,8 +154,8 @@ namespace ArcEngine
 		if (!project)
 			return;
 
-		eastl::string clientAssemblyName = project->GetConfig().Name + ".dll";
-		auto path = Project::GetScriptModuleDirectory() / clientAssemblyName.c_str();
+		std::string clientAssemblyName = project->GetConfig().Name + ".dll";
+		auto path = Project::GetScriptModuleDirectory() / clientAssemblyName;
 		s_Data->AppAssembly = MonoUtils::LoadMonoAssembly(path, s_Data->EnableDebugging);
 		s_Data->AppImage = mono_assembly_get_image(s_Data->AppAssembly);
 
@@ -190,9 +190,8 @@ namespace ArcEngine
 
 			//Compile app assembly
 			{
-				std::string solutionPath = (projectPath / (std::string(Project::GetActive()->GetConfig().Name.c_str()) + ".sln")).string();
 				std::string buildCommand = "dotnet msbuild \"";
-				buildCommand += solutionPath;
+				buildCommand += Project::GetSolutionPath().string();
 				buildCommand += "\" -nologo"																	// no microsoft branding in console
 								" -noconlog"																// no console logs
 								//" -t:rebuild"																// rebuild the project

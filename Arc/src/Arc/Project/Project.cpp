@@ -34,7 +34,7 @@ namespace ArcEngine
 			{
 				eastl::string buffer;
 				Filesystem::ReadFileText("Resources/Templates/PremakeProjectTemplate.txt", buffer);
-				StringUtils::ReplaceString(buffer, "{PROJECT_NAME}", s_ActiveProject->GetConfig().Name);
+				StringUtils::ReplaceString(buffer, "{PROJECT_NAME}", s_ActiveProject->GetConfig().Name.c_str());
 				Filesystem::WriteFileText(premakeFilepath, buffer);
 			}
 
