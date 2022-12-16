@@ -17,8 +17,6 @@ workspace "Sandbox"
         "MultiProcessorCompile"
     }
 
-outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-
 project "Sandbox"
     kind "SharedLib"
     language "C#"
@@ -35,7 +33,7 @@ project "Sandbox"
 
     links
     {
-        "Arc-ScriptCore"
+        ArcRootDir .. "Arc-ScriptCore"
     }
 
     filter "configurations:Debug"
@@ -50,6 +48,7 @@ project "Sandbox"
         optimize "Full"
         symbols "Off"
 
-group "Arc"
-    include (ArcRootDir .. "/Arc-ScriptCore")
+group "Dependencies"
+	include (ArcRootDir .. "Arc-ScriptCore")
+
 group ""

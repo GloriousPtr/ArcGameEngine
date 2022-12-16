@@ -1,0 +1,2133 @@
+// Created by Microsoft (R) C/C++ Compiler Version 14.34.31937.0 (1a57eefc).
+//
+// C:\Users\mohit\AppData\Local\JetBrains\Transient\ReSharperPlatformVs17\v222_61d9f4f5\SolutionCaches\_Arc.-987683724.00\cppgen\-48887987\dte80.tlh
+//
+// C++ source equivalent of Win32 type library 1a31287a-4d7d-413e-8e32-3b374931bd89
+// compiler-generated file - DO NOT EDIT!
+
+//
+// Cross-referenced type libraries:
+//
+//  #import "C:\Program Files (x86)\Common Files\Microsoft Shared\MSEnv\dte80a.olb"
+//
+#pragma once
+#pragma pack(push, 8)
+
+#include <comdef.h>
+
+namespace EnvDTE80 {
+
+	//
+	// Forward references and typedefs
+	//
+
+	struct __declspec(uuid("1a31287a-4d7d-413e-8e32-3b374931bd89"))
+		/* LIBID */ __EnvDTE80;
+	struct __declspec(uuid("7eaa857b-2356-494b-9e13-0f6eefa86e43"))
+		/* dual interface */ Commands2;
+	enum vsCommandControlType;
+	struct __declspec(uuid("111522ab-f439-4d85-9a36-1716da4da114"))
+		/* dual interface */ SourceControl2;
+	struct __declspec(uuid("544a6477-be0b-42ed-b47b-553ed8c5f22c"))
+		/* dual interface */ SourceControlBindings;
+	enum vsSourceControlCheckOutOptions;
+	struct __declspec(uuid("f49a191f-7258-493b-9310-5f7771ddf3d7"))
+		/* dual interface */ ErrorItem;
+	struct __declspec(uuid("dcf93a30-d013-42f4-8aee-9f5ba215fb8b"))
+		/* dual interface */ ErrorItems;
+	struct __declspec(uuid("7bf84ef1-8246-498a-a127-2ea37824fda1"))
+		/* dual interface */ ErrorList;
+	enum vsBuildErrorLevel;
+	struct __declspec(uuid("80f4779b-835d-4873-8356-2f34a759a514"))
+		/* dual interface */ CodeAttributeArgument;
+	enum vsCMFunction2;
+	enum vsCMElement2;
+	enum vsCMTypeRef2;
+	enum vsCMParseStatus;
+	enum vsCMClassKind;
+	enum vsCMDataTypeKind;
+	enum vsCMChangeKind;
+	enum vsCMInheritanceKind;
+	enum vsCMParameterKind;
+	enum vsCMOverrideKind;
+	enum vsCMConstKind;
+	enum vsCMPropertyKind;
+	struct __declspec(uuid("ce615bd2-8ed5-4f0c-a7b6-4a299d8801fd"))
+		/* dual interface */ CodeEvent;
+	struct __declspec(uuid("f03dcce8-233b-43d7-a66b-a66efc1f85c3"))
+		/* dual interface */ CodeElement2;
+	struct __declspec(uuid("0c9a256e-0ff9-4d4a-88e6-304acf78225f"))
+		/* dual interface */ CodeImport;
+	struct __declspec(uuid("a65964df-3a07-45eb-882a-dd04602016b9"))
+		/* dual interface */ FileCodeModel2;
+	struct __declspec(uuid("99b9cd0e-6c89-4bc4-bba2-ffd3529d3acb"))
+		/* dual interface */ CodeModel2;
+	struct __declspec(uuid("295adcd4-b052-49ee-934e-c6b36862a7c6"))
+		/* dual interface */ CodeClass2;
+	struct __declspec(uuid("35cd9e36-7c96-4429-968f-c0c350cb1a47"))
+		/* dual interface */ CodeParameter2;
+	struct __declspec(uuid("7e20cd35-8689-466d-8ea0-a863b7ea5db9"))
+		/* dual interface */ CodeFunction2;
+	struct __declspec(uuid("35187e2a-e5f6-4f89-a4ce-da254640855b"))
+		/* dual interface */ CodeAttribute2;
+	struct __declspec(uuid("f747a8a0-01b1-4da2-9259-0d5a0cb4c049"))
+		/* dual interface */ CodeVariable2;
+	struct __declspec(uuid("3b1b24ef-dd8e-4c98-8799-4efac80080e9"))
+		/* dual interface */ CodeDelegate2;
+	struct __declspec(uuid("f6dc1a01-e65a-404b-8b6d-9cdd603db4ed"))
+		/* dual interface */ CodeStruct2;
+	struct __declspec(uuid("860ab609-8af2-4434-b4dd-a43dee31b017"))
+		/* dual interface */ CodeInterface2;
+	struct __declspec(uuid("9883c07a-fa07-4ce7-bd8e-01e1a3f3a3f7"))
+		/* dual interface */ CodeTypeRef2;
+	struct __declspec(uuid("33770c02-21b7-4224-a577-6877bdba60ea"))
+		/* dual interface */ CodeProperty2;
+	struct __declspec(uuid("4ea8090e-d289-4d56-98cd-c48dd2853b2e"))
+		/* dispinterface */ _dispCodeModelEvents;
+	struct /* coclass */ CodeModelEvents;
+	struct __declspec(uuid("66adc510-0ca2-475d-a343-57192bce38bf"))
+		/* interface */ _CodeModelEvents;
+	struct __declspec(uuid("c6e28776-b7ff-421f-8c18-57f82e447704"))
+		/* dual interface */ _CodeModelEventsRoot;
+	struct __declspec(uuid("8b5e2bfd-4642-4efe-8af4-0b2da9aaa23c"))
+		/* dual interface */ Debugger2;
+	enum dbgMinidumpOption;
+	struct __declspec(uuid("c977eaed-9e6c-4122-9d28-9d5eae2bdc33"))
+		/* dual interface */ Transport;
+	struct __declspec(uuid("9f998c5e-549e-4c74-9fd8-b3a93d85a248"))
+		/* dual interface */ Engines;
+	struct __declspec(uuid("8cea6d39-ebee-4de9-b282-b5cece9c9861"))
+		/* dual interface */ Engine;
+	struct __declspec(uuid("ea47c3d9-fd41-4402-bdc6-7f07d0c8e3fc"))
+		/* dual interface */ Transports;
+	struct __declspec(uuid("95ac1923-6eaa-427c-b43e-6274a8ca6c95"))
+		/* dual interface */ Process2;
+	struct __declspec(uuid("fbc8d85a-e449-4cb3-b026-f7808deb7792"))
+		/* dual interface */ Breakpoint2;
+	enum dbgEventReason2;
+	enum dbgProcessState;
+	enum dbgExpressionEvaluationState;
+	struct __declspec(uuid("7d04c01d-bb7a-47e8-92eb-e914cd61366b"))
+		/* dispinterface */ _dispDebuggerProcessEvents;
+	struct __declspec(uuid("c2eb9070-38b3-404d-bed8-2d5f5d971df5"))
+		/* dual interface */ _DebuggerProcessEventsRoot;
+	struct __declspec(uuid("ce9ddba3-b23b-4c53-bb3e-5471659289d1"))
+		/* interface */ _DebuggerProcessEvents;
+	struct /* coclass */ DebuggerProcessEvents;
+	struct __declspec(uuid("73ffa13f-ad72-4154-be77-d4288f2e4fc5"))
+		/* dispinterface */ _dispDebuggerExpressionEvaluationEvents;
+	struct __declspec(uuid("6973a466-e09c-4195-9ae8-07b7aaff7d85"))
+		/* interface */ _DebuggerExpressionEvaluationEvents;
+	struct __declspec(uuid("45ae9835-6090-4cca-97e0-5ea9a5608fbe"))
+		/* dual interface */ _DebuggerExpressionEvaluationEventsRoot;
+	struct /* coclass */ DebuggerExpressionEvaluationEvents;
+	struct __declspec(uuid("19ac6f68-3019-4d65-8d98-404dfb96b8e2"))
+		/* dual interface */ ToolWindows;
+	enum vsCommandStyle;
+	struct __declspec(uuid("31efb5b1-c655-4ada-bb52-3ed87fb2a4ae"))
+		/* dual interface */ Windows2;
+	struct __declspec(uuid("25731932-3283-4ae0-b7cf-f4691b8be523"))
+		/* dual interface */ Window2;
+	enum vsThemeColors;
+	struct __declspec(uuid("2ee1e9fa-0afe-4348-a89f-ed9cb45c99cf"))
+		/* dual interface */ DTE2;
+	struct __declspec(uuid("c7b4bcc9-e23e-400c-8821-c85b6b31369e"))
+		/* dual interface */ WindowVisibilityEventsRoot;
+	struct __declspec(uuid("84de07bc-43a2-4275-bcf9-d207d20e49ed"))
+		/* dual interface */ _WindowVisibilityEvents;
+	struct __declspec(uuid("94259e4b-a44a-4b77-b18f-f2cc9a601d03"))
+		/* dispinterface */ _dispWindowVisibilityEvents;
+	struct /* coclass */ WindowVisibilityEvents;
+	struct __declspec(uuid("d7eade3f-bd19-4422-9c4c-85a02535437c"))
+		/* dual interface */ _TextDocumentKeyPressEventsRoot;
+	struct __declspec(uuid("505b7600-8fcc-487c-9e4f-c7fd0b5fb690"))
+		/* dual interface */ _TextDocumentKeyPressEvents;
+	struct __declspec(uuid("4b57c85e-5100-4caf-9301-4544b85c7945"))
+		/* dispinterface */ _dispTextDocumentKeyPressEvents;
+	struct /* coclass */ TextDocumentKeyPressEvents;
+	struct __declspec(uuid("827be7dc-1817-4171-a8ff-aab3854913bf"))
+		/* interface */ _PublishEvents;
+	struct __declspec(uuid("a0b40b93-9311-410f-b210-1f65bafb0e27"))
+		/* dispinterface */ _dispPublishEvents;
+	struct /* coclass */ PublishEvents;
+	struct __declspec(uuid("bed31e8c-f845-4397-af13-6b82a6996c0d"))
+		/* dual interface */ Events2;
+	struct __declspec(uuid("fa238614-fbb1-4314-a7f7-49ae8bb6c6ba"))
+		/* dual interface */ Solution2;
+	struct __declspec(uuid("f8f69788-267c-4408-8967-74f26108c438"))
+		/* dual interface */ SolutionFolder;
+	struct __declspec(uuid("b820f931-645a-473f-8246-922cf069e1fe"))
+		/* dual interface */ TaskItems2;
+	struct __declspec(uuid("136afa9f-f243-4abb-a8f8-4c2d26c47163"))
+		/* dual interface */ EditPoint2;
+	struct __declspec(uuid("12133bc2-390a-4b30-ad5b-504c1d1c89e7"))
+		/* interface */ IVsExtensibility2;
+	struct __declspec(uuid("b85f43c4-c765-4984-ae3d-695e8cd8e992"))
+		/* dual interface */ IInternalExtenderProvider;
+	enum vsFindOptions2;
+	struct __declspec(uuid("01568308-5b2a-4f30-8d0a-e10ee0f28f4a"))
+		/* dual interface */ Find2;
+	struct __declspec(uuid("c8f4f9cc-b7e5-4458-bce3-e1542468f26b"))
+		/* dual interface */ LifetimeInformation;
+	struct __declspec(uuid("82c9dbf2-1da8-4ed6-a5ec-8b876b46317c"))
+		/* dual interface */ ToolBoxItem2;
+	struct __declspec(uuid("a64715cb-85d7-41c3-8e71-2302d4eebc34"))
+		/* dual interface */ ToolBoxTab2;
+	enum vsIncrementalSearchResult;
+	struct __declspec(uuid("c5bee6d8-ed45-4317-96bf-97eb88ea3a07"))
+		/* dual interface */ IncrementalSearch;
+	struct __declspec(uuid("ace19c7b-a0ac-4089-94fd-749cf4380e1f"))
+		/* dual interface */ TextPane2;
+	struct __declspec(uuid("1099aaa6-4169-430d-9f57-0b4c76624b3b"))
+		/* dual interface */ SolutionConfiguration2;
+	struct __declspec(uuid("c508b13c-06c5-40c7-b405-d327d4f8e268"))
+		/* interface */ IVsProfferCommands2;
+	enum vsPublishState;
+	struct __declspec(uuid("c2516e4b-5d69-459d-b539-c95a71c4fa3d"))
+		/* dual interface */ SolutionBuild2;
+
+	//
+	// Smart pointer typedef declarations
+	//
+
+	_COM_SMARTPTR_TYPEDEF(Commands2, __uuidof(Commands2));
+	_COM_SMARTPTR_TYPEDEF(SourceControlBindings, __uuidof(SourceControlBindings));
+	_COM_SMARTPTR_TYPEDEF(SourceControl2, __uuidof(SourceControl2));
+	_COM_SMARTPTR_TYPEDEF(CodeAttributeArgument, __uuidof(CodeAttributeArgument));
+	_COM_SMARTPTR_TYPEDEF(CodeEvent, __uuidof(CodeEvent));
+	_COM_SMARTPTR_TYPEDEF(CodeElement2, __uuidof(CodeElement2));
+	_COM_SMARTPTR_TYPEDEF(CodeImport, __uuidof(CodeImport));
+	_COM_SMARTPTR_TYPEDEF(FileCodeModel2, __uuidof(FileCodeModel2));
+	_COM_SMARTPTR_TYPEDEF(CodeModel2, __uuidof(CodeModel2));
+	_COM_SMARTPTR_TYPEDEF(CodeClass2, __uuidof(CodeClass2));
+	_COM_SMARTPTR_TYPEDEF(CodeParameter2, __uuidof(CodeParameter2));
+	_COM_SMARTPTR_TYPEDEF(CodeFunction2, __uuidof(CodeFunction2));
+	_COM_SMARTPTR_TYPEDEF(CodeAttribute2, __uuidof(CodeAttribute2));
+	_COM_SMARTPTR_TYPEDEF(CodeVariable2, __uuidof(CodeVariable2));
+	_COM_SMARTPTR_TYPEDEF(CodeDelegate2, __uuidof(CodeDelegate2));
+	_COM_SMARTPTR_TYPEDEF(CodeStruct2, __uuidof(CodeStruct2));
+	_COM_SMARTPTR_TYPEDEF(CodeInterface2, __uuidof(CodeInterface2));
+	_COM_SMARTPTR_TYPEDEF(CodeTypeRef2, __uuidof(CodeTypeRef2));
+	_COM_SMARTPTR_TYPEDEF(CodeProperty2, __uuidof(CodeProperty2));
+	_COM_SMARTPTR_TYPEDEF(_dispCodeModelEvents, __uuidof(_dispCodeModelEvents));
+	_COM_SMARTPTR_TYPEDEF(_CodeModelEvents, __uuidof(_CodeModelEvents));
+	_COM_SMARTPTR_TYPEDEF(_CodeModelEventsRoot, __uuidof(_CodeModelEventsRoot));
+	_COM_SMARTPTR_TYPEDEF(_dispDebuggerProcessEvents, __uuidof(_dispDebuggerProcessEvents));
+	_COM_SMARTPTR_TYPEDEF(_DebuggerProcessEventsRoot, __uuidof(_DebuggerProcessEventsRoot));
+	_COM_SMARTPTR_TYPEDEF(_DebuggerProcessEvents, __uuidof(_DebuggerProcessEvents));
+	_COM_SMARTPTR_TYPEDEF(_dispDebuggerExpressionEvaluationEvents, __uuidof(_dispDebuggerExpressionEvaluationEvents));
+	_COM_SMARTPTR_TYPEDEF(_DebuggerExpressionEvaluationEvents, __uuidof(_DebuggerExpressionEvaluationEvents));
+	_COM_SMARTPTR_TYPEDEF(_DebuggerExpressionEvaluationEventsRoot, __uuidof(_DebuggerExpressionEvaluationEventsRoot));
+	_COM_SMARTPTR_TYPEDEF(Windows2, __uuidof(Windows2));
+	_COM_SMARTPTR_TYPEDEF(Window2, __uuidof(Window2));
+	_COM_SMARTPTR_TYPEDEF(WindowVisibilityEventsRoot, __uuidof(WindowVisibilityEventsRoot));
+	_COM_SMARTPTR_TYPEDEF(_WindowVisibilityEvents, __uuidof(_WindowVisibilityEvents));
+	_COM_SMARTPTR_TYPEDEF(_dispWindowVisibilityEvents, __uuidof(_dispWindowVisibilityEvents));
+	_COM_SMARTPTR_TYPEDEF(_TextDocumentKeyPressEventsRoot, __uuidof(_TextDocumentKeyPressEventsRoot));
+	_COM_SMARTPTR_TYPEDEF(_TextDocumentKeyPressEvents, __uuidof(_TextDocumentKeyPressEvents));
+	_COM_SMARTPTR_TYPEDEF(_dispTextDocumentKeyPressEvents, __uuidof(_dispTextDocumentKeyPressEvents));
+	_COM_SMARTPTR_TYPEDEF(_PublishEvents, __uuidof(_PublishEvents));
+	_COM_SMARTPTR_TYPEDEF(_dispPublishEvents, __uuidof(_dispPublishEvents));
+	_COM_SMARTPTR_TYPEDEF(Events2, __uuidof(Events2));
+	_COM_SMARTPTR_TYPEDEF(Solution2, __uuidof(Solution2));
+	_COM_SMARTPTR_TYPEDEF(SolutionFolder, __uuidof(SolutionFolder));
+	_COM_SMARTPTR_TYPEDEF(TaskItems2, __uuidof(TaskItems2));
+	_COM_SMARTPTR_TYPEDEF(EditPoint2, __uuidof(EditPoint2));
+	_COM_SMARTPTR_TYPEDEF(IVsExtensibility2, __uuidof(IVsExtensibility2));
+	_COM_SMARTPTR_TYPEDEF(IInternalExtenderProvider, __uuidof(IInternalExtenderProvider));
+	_COM_SMARTPTR_TYPEDEF(Find2, __uuidof(Find2));
+	_COM_SMARTPTR_TYPEDEF(LifetimeInformation, __uuidof(LifetimeInformation));
+	_COM_SMARTPTR_TYPEDEF(ToolBoxItem2, __uuidof(ToolBoxItem2));
+	_COM_SMARTPTR_TYPEDEF(ToolBoxTab2, __uuidof(ToolBoxTab2));
+	_COM_SMARTPTR_TYPEDEF(IncrementalSearch, __uuidof(IncrementalSearch));
+	_COM_SMARTPTR_TYPEDEF(TextPane2, __uuidof(TextPane2));
+	_COM_SMARTPTR_TYPEDEF(SolutionConfiguration2, __uuidof(SolutionConfiguration2));
+	_COM_SMARTPTR_TYPEDEF(IVsProfferCommands2, __uuidof(IVsProfferCommands2));
+	_COM_SMARTPTR_TYPEDEF(SolutionBuild2, __uuidof(SolutionBuild2));
+	_COM_SMARTPTR_TYPEDEF(ErrorItem, __uuidof(ErrorItem));
+	_COM_SMARTPTR_TYPEDEF(ErrorItems, __uuidof(ErrorItems));
+	_COM_SMARTPTR_TYPEDEF(ErrorList, __uuidof(ErrorList));
+	_COM_SMARTPTR_TYPEDEF(ToolWindows, __uuidof(ToolWindows));
+	_COM_SMARTPTR_TYPEDEF(DTE2, __uuidof(DTE2));
+	_COM_SMARTPTR_TYPEDEF(Debugger2, __uuidof(Debugger2));
+	_COM_SMARTPTR_TYPEDEF(Transport, __uuidof(Transport));
+	_COM_SMARTPTR_TYPEDEF(Transports, __uuidof(Transports));
+	_COM_SMARTPTR_TYPEDEF(Process2, __uuidof(Process2));
+	_COM_SMARTPTR_TYPEDEF(Breakpoint2, __uuidof(Breakpoint2));
+	_COM_SMARTPTR_TYPEDEF(Engines, __uuidof(Engines));
+	_COM_SMARTPTR_TYPEDEF(Engine, __uuidof(Engine));
+
+	//
+	// Type library items
+	//
+
+	enum __declspec(uuid("765724fe-dde5-422a-a008-198376c7b641"))
+		vsCommandControlType
+	{
+		vsCommandControlTypeButton = 2,
+		vsCommandControlTypeDropDownCombo = 32,
+		vsCommandControlTypeMRUCombo = 64,
+		vsCommandControlTypeMRUButton = 8192
+	};
+
+	struct __declspec(uuid("7eaa857b-2356-494b-9e13-0f6eefa86e43"))
+		Commands2 : Commands
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall AddNamedCommand2(
+			/*[in]*/ struct AddIn* AddInInstance,
+			/*[in]*/ BSTR Name,
+			/*[in]*/ BSTR ButtonText,
+			/*[in]*/ BSTR Tooltip,
+			/*[in]*/ VARIANT_BOOL MSOButton,
+			/*[in]*/ VARIANT Bitmap,
+			/*[in]*/ SAFEARRAY** ContextUIGUIDs,
+			/*[in]*/ long vsCommandStatusValue,
+			/*[in]*/ long CommandStyleFlags,
+			/*[in]*/ enum vsCommandControlType ControlType,
+			/*[out,retval]*/ struct Command** pVal) = 0;
+		virtual HRESULT __stdcall UpdateCommandUI(
+			VARIANT_BOOL PerformImmediately) = 0;
+	};
+
+	struct __declspec(uuid("544a6477-be0b-42ed-b47b-553ed8c5f22c"))
+		SourceControlBindings : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_DTE(
+			/*[out,retval]*/ struct _DTE** pDTE) = 0;
+		virtual HRESULT __stdcall get_Parent(
+			/*[out,retval]*/ struct SourceControl** ppSourceControl) = 0;
+		virtual HRESULT __stdcall get_ServerName(
+			/*[out,retval]*/ BSTR* lpbstrSeverName) = 0;
+		virtual HRESULT __stdcall get_LocalBinding(
+			/*[out,retval]*/ BSTR* lpbstrLocalPath) = 0;
+		virtual HRESULT __stdcall get_ServerBinding(
+			/*[out,retval]*/ BSTR* lpbstrServerLocation) = 0;
+		virtual HRESULT __stdcall get_ProviderName(
+			/*[out,retval]*/ BSTR* lpbstrProviderName) = 0;
+		virtual HRESULT __stdcall get_ProviderRegKey(
+			/*[out,retval]*/ BSTR* lpbstrProviderRegKey) = 0;
+	};
+
+	enum __declspec(uuid("4eee3a14-18aa-4244-9745-6e3f35d7fc4b"))
+		vsSourceControlCheckOutOptions
+	{
+		vsSourceControlCheckOutOptionLatestVersion = 0,
+		vsSourceControlCheckOutOptionLocalVersion = 1
+	};
+
+	struct __declspec(uuid("111522ab-f439-4d85-9a36-1716da4da114"))
+		SourceControl2 : SourceControl
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall GetBindings(
+			/*[in]*/ BSTR ItemPath,
+			/*[out,retval]*/ struct SourceControlBindings** ppVal) = 0;
+		virtual HRESULT __stdcall CheckOutItem2(
+			/*[in]*/ BSTR ItemName,
+			/*[in]*/ enum vsSourceControlCheckOutOptions Flags,
+			/*[out,retval]*/ VARIANT_BOOL* pfCheckedOut) = 0;
+		virtual HRESULT __stdcall CheckOutItems2(
+			/*[in]*/ SAFEARRAY** ItemNames,
+			/*[in]*/ enum vsSourceControlCheckOutOptions Flags,
+			/*[out,retval]*/ VARIANT_BOOL* pfCheckedOut) = 0;
+		virtual HRESULT __stdcall UndoExcludeItem(
+			/*[in]*/ BSTR ProjectFile,
+			/*[in]*/ BSTR ItemName) = 0;
+		virtual HRESULT __stdcall UndoExcludeItems(
+			/*[in]*/ BSTR ProjectFile,
+			/*[in]*/ SAFEARRAY** ItemNames) = 0;
+	};
+
+	enum __declspec(uuid("e71fe63b-b6d9-47a0-9577-963c84aecce0"))
+		vsBuildErrorLevel
+	{
+		vsBuildErrorLevelLow = 1,
+		vsBuildErrorLevelMedium = 2,
+		vsBuildErrorLevelHigh = 4
+	};
+
+	struct __declspec(uuid("80f4779b-835d-4873-8356-2f34a759a514"))
+		CodeAttributeArgument : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_DTE(
+			/*[out,retval]*/ struct _DTE** DTEObject) = 0;
+		virtual HRESULT __stdcall get_Collection(
+			/*[out,retval]*/ struct CodeElements** ppCollection) = 0;
+		virtual HRESULT __stdcall get_Name(
+			/*[out,retval]*/ BSTR* pVal) = 0;
+		virtual HRESULT __stdcall put_Name(
+			BSTR pVal) = 0;
+		virtual HRESULT __stdcall get_FullName(
+			/*[out,retval]*/ BSTR* pVal) = 0;
+		virtual HRESULT __stdcall get_ProjectItem(
+			/*[out,retval]*/ struct ProjectItem** pProjItem) = 0;
+		virtual HRESULT __stdcall get_Kind(
+			/*[out,retval]*/ enum vsCMElement* pCodeEltKind) = 0;
+		virtual HRESULT __stdcall get_IsCodeType(
+			/*[out,retval]*/ VARIANT_BOOL* pIsCodeType) = 0;
+		virtual HRESULT __stdcall get_InfoLocation(
+			/*[out,retval]*/ enum vsCMInfoLocation* pInfoLocation) = 0;
+		virtual HRESULT __stdcall get_Children(
+			/*[out,retval]*/ struct CodeElements** ppCodeElements) = 0;
+		virtual HRESULT __stdcall get_Language(
+			/*[out,retval]*/ BSTR* pLanguage) = 0;
+		virtual HRESULT __stdcall get_StartPoint(
+			/*[out,retval]*/ struct TextPoint** ppTextPoint) = 0;
+		virtual HRESULT __stdcall get_EndPoint(
+			/*[out,retval]*/ struct TextPoint** ppTextPoint) = 0;
+		virtual HRESULT __stdcall get_ExtenderNames(
+			/*[out,retval]*/ VARIANT* ExtenderNames) = 0;
+		virtual HRESULT __stdcall get_Extender(
+			BSTR ExtenderName,
+			/*[out,retval]*/ IDispatch** Extender) = 0;
+		virtual HRESULT __stdcall get_ExtenderCATID(
+			/*[out,retval]*/ BSTR* pRetval) = 0;
+		virtual HRESULT __stdcall GetStartPoint(
+			/*[in]*/ enum vsCMPart Part,
+			/*[out,retval]*/ struct TextPoint** ppTextPoint) = 0;
+		virtual HRESULT __stdcall GetEndPoint(
+			/*[in]*/ enum vsCMPart Part,
+			/*[out,retval]*/ struct TextPoint** ppTextPoint) = 0;
+		virtual HRESULT __stdcall get_Value(
+			/*[out,retval]*/ BSTR* Value) = 0;
+		virtual HRESULT __stdcall put_Value(
+			BSTR Value) = 0;
+		virtual HRESULT __stdcall Delete() = 0;
+	};
+	const LPSTR vsCMLanguageJSharp = (char*)"{E6FDF8BF-F3D1-11D4-8576-0002A516ECE8}";
+
+	enum __declspec(uuid("d3c30b7b-11ad-4693-b1a8-e20a36c1c9f1"))
+		vsCMFunction2
+	{
+		vsCMFunctionAddHandler = 131072,
+		vsCMFunctionRemoveHandler = 262144,
+		vsCMFunctionRaiseEvent = 524288
+	};
+
+	enum __declspec(uuid("7edbc54f-4b70-4b72-a422-5e57555dbd06"))
+		vsCMElement2
+	{
+		vsCMElementUnknown = 40,
+		vsCMElementAttributeArgument = 41
+	};
+
+	enum __declspec(uuid("7fb3c569-7faf-4070-82aa-04b18b8bbad1"))
+		vsCMTypeRef2
+	{
+		vsCMTypeRefUnsignedChar = 17,
+		vsCMTypeRefUnsignedShort = 18,
+		vsCMTypeRefUnsignedInt = 19,
+		vsCMTypeRefUnsignedLong = 20,
+		vsCMTypeRefReference = 21,
+		vsCMTypeRefMCBoxedReference = 22,
+		vsCMTypeRefSByte = 23
+	};
+
+	enum __declspec(uuid("a49fb892-ee3a-411e-8bd4-bb4ac6ae6608"))
+		vsCMParseStatus
+	{
+		vsCMParseStatusError = 1,
+		vsCMParseStatusComplete = 2
+	};
+
+	enum __declspec(uuid("dbdf9319-8fcc-4950-a50d-1e6fb5490869"))
+		vsCMClassKind
+	{
+		vsCMClassKindMainClass = 1,
+		vsCMClassKindBlueprint = 2,
+		vsCMClassKindPartialClass = 4,
+		vsCMClassKindModule = 8
+	};
+
+	enum __declspec(uuid("dbdf931a-8fcc-4950-a50d-1e6fb5490869"))
+		vsCMDataTypeKind
+	{
+		vsCMDataTypeKindMain = 1,
+		vsCMDataTypeKindBlueprint = 2,
+		vsCMDataTypeKindPartial = 4,
+		vsCMDataTypeKindModule = 8
+	};
+
+	enum __declspec(uuid("81dd2950-b7e7-4d51-bfd7-11b086738f6e"))
+		vsCMChangeKind
+	{
+		vsCMChangeKindRename = 1,
+		vsCMChangeKindUnknown = 2,
+		vsCMChangeKindSignatureChange = 4,
+		vsCMChangeKindTypeRefChange = 8,
+		vsCMChangeKindBaseChange = 16,
+		vsCMChangeKindArgumentChange = 32
+	};
+
+	enum __declspec(uuid("c4541dab-d314-452d-9760-30a615f0dc26"))
+		vsCMInheritanceKind
+	{
+		vsCMInheritanceKindNone = 0,
+		vsCMInheritanceKindAbstract = 1,
+		vsCMInheritanceKindSealed = 2,
+		vsCMInheritanceKindNew = 4
+	};
+
+	enum __declspec(uuid("2366aef3-ba49-4a96-b4a1-b8bf1acb2600"))
+		vsCMParameterKind
+	{
+		vsCMParameterKindNone = 0,
+		vsCMParameterKindIn = 1,
+		vsCMParameterKindRef = 2,
+		vsCMParameterKindOut = 4,
+		vsCMParameterKindOptional = 8,
+		vsCMParameterKindParamArray = 16
+	};
+
+	enum __declspec(uuid("3e30c32d-9e8d-4919-8cc4-c3d75879bc52"))
+		vsCMOverrideKind
+	{
+		vsCMOverrideKindNone = 0,
+		vsCMOverrideKindAbstract = 1,
+		vsCMOverrideKindVirtual = 2,
+		vsCMOverrideKindOverride = 4,
+		vsCMOverrideKindNew = 8,
+		vsCMOverrideKindSealed = 16
+	};
+
+	enum __declspec(uuid("4438eed0-e747-49ac-8d22-00f26b18755d"))
+		vsCMConstKind
+	{
+		vsCMConstKindNone = 0,
+		vsCMConstKindConst = 1,
+		vsCMConstKindReadOnly = 2
+	};
+
+	enum __declspec(uuid("e24a10bd-9a40-43a3-9db9-afaf05d74704"))
+		vsCMPropertyKind
+	{
+		vsCMPropertyKindReadWrite = 0,
+		vsCMPropertyKindReadOnly = 1,
+		vsCMPropertyKindWriteOnly = 2
+	};
+
+	struct __declspec(uuid("ce615bd2-8ed5-4f0c-a7b6-4a299d8801fd"))
+		CodeEvent : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_DTE(
+			/*[out,retval]*/ struct _DTE** DTEObject) = 0;
+		virtual HRESULT __stdcall get_Collection(
+			/*[out,retval]*/ struct CodeElements** ppCollection) = 0;
+		virtual HRESULT __stdcall get_Name(
+			/*[out,retval]*/ BSTR* pVal) = 0;
+		virtual HRESULT __stdcall put_Name(
+			BSTR pVal) = 0;
+		virtual HRESULT __stdcall get_FullName(
+			/*[out,retval]*/ BSTR* pVal) = 0;
+		virtual HRESULT __stdcall get_ProjectItem(
+			/*[out,retval]*/ struct ProjectItem** pProjItem) = 0;
+		virtual HRESULT __stdcall get_Kind(
+			/*[out,retval]*/ enum vsCMElement* pCodeEltKind) = 0;
+		virtual HRESULT __stdcall get_IsCodeType(
+			/*[out,retval]*/ VARIANT_BOOL* pIsCodeType) = 0;
+		virtual HRESULT __stdcall get_InfoLocation(
+			/*[out,retval]*/ enum vsCMInfoLocation* pInfoLocation) = 0;
+		virtual HRESULT __stdcall get_Children(
+			/*[out,retval]*/ struct CodeElements** ppCodeElements) = 0;
+		virtual HRESULT __stdcall get_Language(
+			/*[out,retval]*/ BSTR* pLanguage) = 0;
+		virtual HRESULT __stdcall get_StartPoint(
+			/*[out,retval]*/ struct TextPoint** ppTextPoint) = 0;
+		virtual HRESULT __stdcall get_EndPoint(
+			/*[out,retval]*/ struct TextPoint** ppTextPoint) = 0;
+		virtual HRESULT __stdcall get_ExtenderNames(
+			/*[out,retval]*/ VARIANT* ExtenderNames) = 0;
+		virtual HRESULT __stdcall get_Extender(
+			BSTR ExtenderName,
+			/*[out,retval]*/ IDispatch** Extender) = 0;
+		virtual HRESULT __stdcall get_ExtenderCATID(
+			/*[out,retval]*/ BSTR* pRetval) = 0;
+		virtual HRESULT __stdcall GetStartPoint(
+			/*[in]*/ enum vsCMPart Part,
+			/*[out,retval]*/ struct TextPoint** ppTextPoint) = 0;
+		virtual HRESULT __stdcall GetEndPoint(
+			/*[in]*/ enum vsCMPart Part,
+			/*[out,retval]*/ struct TextPoint** ppTextPoint) = 0;
+		virtual HRESULT __stdcall get_Parent(
+			/*[out,retval]*/ IDispatch** ParentObject) = 0;
+		virtual HRESULT __stdcall put_Access(
+			enum vsCMAccess Access) = 0;
+		virtual HRESULT __stdcall get_Access(
+			/*[out,retval]*/ enum vsCMAccess* Access) = 0;
+		virtual HRESULT __stdcall get_Attributes(
+			/*[out,retval]*/ struct CodeElements** ppMembers) = 0;
+		virtual HRESULT __stdcall get_DocComment(
+			/*[out,retval]*/ BSTR* pDocComment) = 0;
+		virtual HRESULT __stdcall put_DocComment(
+			BSTR pDocComment) = 0;
+		virtual HRESULT __stdcall get_Comment(
+			/*[out,retval]*/ BSTR* pComment) = 0;
+		virtual HRESULT __stdcall put_Comment(
+			BSTR pComment) = 0;
+		virtual HRESULT __stdcall AddAttribute(
+			BSTR Name,
+			BSTR Value,
+			VARIANT Position,
+			/*[out,retval]*/ struct CodeAttribute** ppCodeAttribute) = 0;
+		virtual HRESULT __stdcall get_Adder(
+			/*[out,retval]*/ struct CodeFunction** ppCodeFunction) = 0;
+		virtual HRESULT __stdcall put_Adder(
+			struct CodeFunction* ppCodeFunction) = 0;
+		virtual HRESULT __stdcall get_Remover(
+			/*[out,retval]*/ struct CodeFunction** ppCodeFunction) = 0;
+		virtual HRESULT __stdcall put_Remover(
+			struct CodeFunction* ppCodeFunction) = 0;
+		virtual HRESULT __stdcall get_Thrower(
+			/*[out,retval]*/ struct CodeFunction** ppCodeFunction) = 0;
+		virtual HRESULT __stdcall put_Thrower(
+			struct CodeFunction* ppCodeFunction) = 0;
+		virtual HRESULT __stdcall get_IsPropertyStyleEvent(
+			/*[out,retval]*/ VARIANT_BOOL* vbIsPropertyStyle) = 0;
+		virtual HRESULT __stdcall get_Prototype(
+			/*[in]*/ long Flags,
+			/*[out,retval]*/ BSTR* pFullName) = 0;
+		virtual HRESULT __stdcall get_Type(
+			/*[out,retval]*/ struct CodeTypeRef** ppCodeTypeRef) = 0;
+		virtual HRESULT __stdcall put_Type(
+			struct CodeTypeRef* ppCodeTypeRef) = 0;
+		virtual HRESULT __stdcall get_OverrideKind(
+			/*[out,retval]*/ enum vsCMOverrideKind* Kind) = 0;
+		virtual HRESULT __stdcall put_OverrideKind(
+			enum vsCMOverrideKind Kind) = 0;
+		virtual HRESULT __stdcall get_IsShared(
+			/*[out,retval]*/ VARIANT_BOOL* pIsShared) = 0;
+		virtual HRESULT __stdcall put_IsShared(
+			VARIANT_BOOL pIsShared) = 0;
+	};
+
+	struct __declspec(uuid("f03dcce8-233b-43d7-a66b-a66efc1f85c3"))
+		CodeElement2 : CodeElement
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_ElementID(
+			/*[out,retval]*/ BSTR* ID) = 0;
+		virtual HRESULT __stdcall RenameSymbol(
+			BSTR NewName) = 0;
+	};
+
+	struct __declspec(uuid("0c9a256e-0ff9-4d4a-88e6-304acf78225f"))
+		CodeImport : CodeElement
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_Namespace(
+			/*[out,retval]*/ BSTR* Name) = 0;
+		virtual HRESULT __stdcall put_Namespace(
+			BSTR Name) = 0;
+		virtual HRESULT __stdcall get_Alias(
+			/*[out,retval]*/ BSTR* Alias) = 0;
+		virtual HRESULT __stdcall put_Alias(
+			BSTR Alias) = 0;
+		virtual HRESULT __stdcall get_Parent(
+			/*[out,retval]*/ IDispatch** ParentObject) = 0;
+	};
+
+	struct __declspec(uuid("a65964df-3a07-45eb-882a-dd04602016b9"))
+		FileCodeModel2 : FileCodeModel
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall Synchronize() = 0;
+		virtual HRESULT __stdcall get_ParseStatus(
+			/*[out,retval]*/ enum vsCMParseStatus* Status) = 0;
+		virtual HRESULT __stdcall AddImport(
+			BSTR Name,
+			/*[in]*/ VARIANT Position,
+			/*[in]*/ BSTR Alias,
+			/*[out,retval]*/ struct CodeImport** ppImport) = 0;
+		virtual HRESULT __stdcall BeginBatch() = 0;
+		virtual HRESULT __stdcall EndBatch() = 0;
+		virtual HRESULT __stdcall get_IsBatchOpen(
+			/*[out,retval]*/ VARIANT_BOOL* Open) = 0;
+		virtual HRESULT __stdcall ElementFromID(
+			BSTR ID,
+			/*[out,retval]*/ struct CodeElement** ppElement) = 0;
+	};
+
+	struct __declspec(uuid("99b9cd0e-6c89-4bc4-bba2-ffd3529d3acb"))
+		CodeModel2 : CodeModel
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall Synchronize() = 0;
+		virtual HRESULT __stdcall DotNetNameFromLanguageSpecific(
+			BSTR LanguageName,
+			/*[out,retval]*/ BSTR* DotNETName) = 0;
+		virtual HRESULT __stdcall LanguageSpecificNameFromDotNet(
+			BSTR DotNETName,
+			/*[out,retval]*/ BSTR* LanguageName) = 0;
+		virtual HRESULT __stdcall ElementFromID(
+			BSTR ID,
+			/*[out,retval]*/ struct CodeElement** pElement) = 0;
+	};
+
+	struct __declspec(uuid("295adcd4-b052-49ee-934e-c6b36862a7c6"))
+		CodeClass2 : CodeClass
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_ClassKind(
+			/*[out,retval]*/ enum vsCMClassKind* Kind) = 0;
+		virtual HRESULT __stdcall put_ClassKind(
+			enum vsCMClassKind Kind) = 0;
+		virtual HRESULT __stdcall get_PartialClasses(
+			/*[out,retval]*/ struct CodeElements** Elements) = 0;
+		virtual HRESULT __stdcall get_DataTypeKind(
+			/*[out,retval]*/ enum vsCMDataTypeKind* Kind) = 0;
+		virtual HRESULT __stdcall put_DataTypeKind(
+			enum vsCMDataTypeKind Kind) = 0;
+		virtual HRESULT __stdcall get_Parts(
+			/*[out,retval]*/ struct CodeElements** Elements) = 0;
+		virtual HRESULT __stdcall get_InheritanceKind(
+			/*[out,retval]*/ enum vsCMInheritanceKind* Kind) = 0;
+		virtual HRESULT __stdcall put_InheritanceKind(
+			enum vsCMInheritanceKind Kind) = 0;
+		virtual HRESULT __stdcall get_IsGeneric(
+			/*[out,retval]*/ VARIANT_BOOL* pIsGeneric) = 0;
+		virtual HRESULT __stdcall AddEvent(
+			BSTR Name,
+			BSTR FullDelegateName,
+			/*[in]*/ VARIANT_BOOL CreatePropertyStyleEvent,
+			VARIANT Location,
+			enum vsCMAccess Access,
+			/*[out,retval]*/ struct CodeEvent** ppEvent) = 0;
+		virtual HRESULT __stdcall get_IsShared(
+			/*[out,retval]*/ VARIANT_BOOL* pIsShared) = 0;
+		virtual HRESULT __stdcall put_IsShared(
+			VARIANT_BOOL pIsShared) = 0;
+	};
+
+	struct __declspec(uuid("35cd9e36-7c96-4429-968f-c0c350cb1a47"))
+		CodeParameter2 : CodeParameter
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_ParameterKind(
+			/*[out,retval]*/ enum vsCMParameterKind* Kind) = 0;
+		virtual HRESULT __stdcall put_ParameterKind(
+			enum vsCMParameterKind Kind) = 0;
+		virtual HRESULT __stdcall get_DefaultValue(
+			/*[out,retval]*/ BSTR* Value) = 0;
+		virtual HRESULT __stdcall put_DefaultValue(
+			BSTR Value) = 0;
+	};
+
+	struct __declspec(uuid("7e20cd35-8689-466d-8ea0-a863b7ea5db9"))
+		CodeFunction2 : CodeFunction
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_OverrideKind(
+			/*[out,retval]*/ enum vsCMOverrideKind* Kind) = 0;
+		virtual HRESULT __stdcall put_OverrideKind(
+			enum vsCMOverrideKind Kind) = 0;
+		virtual HRESULT __stdcall get_IsGeneric(
+			/*[out,retval]*/ VARIANT_BOOL* pIsGeneric) = 0;
+	};
+
+	struct __declspec(uuid("35187e2a-e5f6-4f89-a4ce-da254640855b"))
+		CodeAttribute2 : CodeAttribute
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_Target(
+			/*[out,retval]*/ BSTR* Target) = 0;
+		virtual HRESULT __stdcall put_Target(
+			BSTR Target) = 0;
+		virtual HRESULT __stdcall AddArgument(
+			BSTR Value,
+			/*[in]*/ VARIANT Name,
+			/*[in]*/ VARIANT Position,
+			/*[out,retval]*/ struct CodeAttributeArgument** Argument) = 0;
+		virtual HRESULT __stdcall get_Arguments(
+			/*[out,retval]*/ struct CodeElements** ppCodeAttributeArguments) = 0;
+	};
+
+	struct __declspec(uuid("f747a8a0-01b1-4da2-9259-0d5a0cb4c049"))
+		CodeVariable2 : CodeVariable
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_ConstKind(
+			/*[out,retval]*/ enum vsCMConstKind* Kind) = 0;
+		virtual HRESULT __stdcall put_ConstKind(
+			enum vsCMConstKind Kind) = 0;
+		virtual HRESULT __stdcall get_IsGeneric(
+			/*[out,retval]*/ VARIANT_BOOL* pIsGeneric) = 0;
+	};
+
+	struct __declspec(uuid("3b1b24ef-dd8e-4c98-8799-4efac80080e9"))
+		CodeDelegate2 : CodeDelegate
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_IsGeneric(
+			/*[out,retval]*/ VARIANT_BOOL* pIsGeneric) = 0;
+	};
+
+	struct __declspec(uuid("f6dc1a01-e65a-404b-8b6d-9cdd603db4ed"))
+		CodeStruct2 : CodeStruct
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_IsGeneric(
+			/*[out,retval]*/ VARIANT_BOOL* pIsGeneric) = 0;
+		virtual HRESULT __stdcall AddEvent(
+			BSTR Name,
+			BSTR FullDelegateName,
+			/*[in]*/ VARIANT_BOOL CreatePropertyStyleEvent,
+			VARIANT Position,
+			enum vsCMAccess Access,
+			/*[out,retval]*/ struct CodeEvent** ppEvent) = 0;
+		virtual HRESULT __stdcall get_DataTypeKind(
+			/*[out,retval]*/ enum vsCMDataTypeKind* Kind) = 0;
+		virtual HRESULT __stdcall put_DataTypeKind(
+			enum vsCMDataTypeKind Kind) = 0;
+		virtual HRESULT __stdcall get_Parts(
+			/*[out,retval]*/ struct CodeElements** Elements) = 0;
+	};
+
+	struct __declspec(uuid("860ab609-8af2-4434-b4dd-a43dee31b017"))
+		CodeInterface2 : CodeInterface
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_IsGeneric(
+			/*[out,retval]*/ VARIANT_BOOL* pIsGeneric) = 0;
+		virtual HRESULT __stdcall AddEvent(
+			BSTR Name,
+			BSTR FullDelegateName,
+			/*[in]*/ VARIANT_BOOL CreatePropertyStyleEvent,
+			VARIANT Position,
+			enum vsCMAccess Access,
+			/*[out,retval]*/ struct CodeEvent** ppEvent) = 0;
+		virtual HRESULT __stdcall get_DataTypeKind(
+			/*[out,retval]*/ enum vsCMDataTypeKind* Kind) = 0;
+		virtual HRESULT __stdcall put_DataTypeKind(
+			enum vsCMDataTypeKind Kind) = 0;
+		virtual HRESULT __stdcall get_Parts(
+			/*[out,retval]*/ struct CodeElements** Elements) = 0;
+	};
+
+	struct __declspec(uuid("9883c07a-fa07-4ce7-bd8e-01e1a3f3a3f7"))
+		CodeTypeRef2 : CodeTypeRef
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_IsGeneric(
+			/*[out,retval]*/ VARIANT_BOOL* pIsGeneric) = 0;
+	};
+
+	struct __declspec(uuid("33770c02-21b7-4224-a577-6877bdba60ea"))
+		CodeProperty2 : CodeProperty
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_Parameters(
+			/*[out,retval]*/ struct CodeElements** ppMembers) = 0;
+		virtual HRESULT __stdcall AddParameter(
+			BSTR Name,
+			VARIANT Type,
+			VARIANT Position,
+			/*[out,retval]*/ struct CodeParameter** ppCodeParameter) = 0;
+		virtual HRESULT __stdcall get_IsGeneric(
+			/*[out,retval]*/ VARIANT_BOOL* pIsGeneric) = 0;
+		virtual HRESULT __stdcall get_OverrideKind(
+			/*[out,retval]*/ enum vsCMOverrideKind* Kind) = 0;
+		virtual HRESULT __stdcall put_OverrideKind(
+			enum vsCMOverrideKind Kind) = 0;
+		virtual HRESULT __stdcall get_IsShared(
+			/*[out,retval]*/ VARIANT_BOOL* pIsShared) = 0;
+		virtual HRESULT __stdcall put_IsShared(
+			VARIANT_BOOL pIsShared) = 0;
+		virtual HRESULT __stdcall get_IsDefault(
+			/*[out,retval]*/ VARIANT_BOOL* pIsDefault) = 0;
+		virtual HRESULT __stdcall put_IsDefault(
+			VARIANT_BOOL pIsDefault) = 0;
+		virtual HRESULT __stdcall get_Parent2(
+			/*[out,retval]*/ struct CodeElement** pParent) = 0;
+		virtual HRESULT __stdcall RemoveParameter(
+			VARIANT Element) = 0;
+		virtual HRESULT __stdcall get_ReadWrite(
+			/*[out,retval]*/ enum vsCMPropertyKind* pPropertyKind) = 0;
+	};
+
+	struct __declspec(uuid("4ea8090e-d289-4d56-98cd-c48dd2853b2e"))
+		_dispCodeModelEvents : IDispatch
+	{};
+
+	struct __declspec(uuid("b2fa9979-35eb-4ca2-b467-7370152e53b7"))
+		CodeModelEvents;
+	// [ default ] interface _CodeModelEvents
+	// [ default, source ] dispinterface _dispCodeModelEvents
+
+	struct __declspec(uuid("66adc510-0ca2-475d-a343-57192bce38bf"))
+		_CodeModelEvents : IDispatch
+	{};
+
+	struct __declspec(uuid("c6e28776-b7ff-421f-8c18-57f82e447704"))
+		_CodeModelEventsRoot : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_CodeModelEvents(
+			/*[in]*/ struct CodeElement* CodeElementFilter,
+			/*[out,retval]*/ IDispatch** ppdisp) = 0;
+	};
+
+	enum __declspec(uuid("4232c43a-589b-44bc-8931-ed79c6a7ca2b"))
+		dbgMinidumpOption
+	{
+		dbgMinidumpNormal = 1,
+		dbgMinidumpFull = 2
+	};
+
+	enum __declspec(uuid("ecd94eec-ebf9-45b2-b072-1624241c7c0b"))
+		dbgEventReason2
+	{
+		dbgEventReason2None = 1,
+		dbgEventReason2Go = 2,
+		dbgEventReason2AttachProgram = 3,
+		dbgEventReason2DetachProgram = 4,
+		dbgEventReason2LaunchProgram = 5,
+		dbgEventReason2EndProgram = 6,
+		dbgEventReason2StopDebugging = 7,
+		dbgEventReason2Step = 8,
+		dbgEventReason2Breakpoint = 9,
+		dbgEventReason2ExceptionThrown = 10,
+		dbgEventReason2ExceptionNotHandled = 11,
+		dbgEventReason2UserBreak = 12,
+		dbgEventReason2ContextSwitch = 13,
+		dbgEventReason2Evaluation = 14,
+		dbgEventReason2UnwindFromException = 15
+	};
+
+	enum __declspec(uuid("0c57dfec-8424-4c1a-a43c-ea7922446232"))
+		dbgProcessState
+	{
+		dbgProcessStateRun = 1,
+		dbgProcessStateStop = 2
+	};
+
+	enum __declspec(uuid("f8305f32-f656-4353-a49b-6bb20c6fd263"))
+		dbgExpressionEvaluationState
+	{
+		dbgExpressionEvaluationStateStart = 1,
+		dbgExpressionEvaluationStateStop = 2
+	};
+
+	struct __declspec(uuid("7d04c01d-bb7a-47e8-92eb-e914cd61366b"))
+		_dispDebuggerProcessEvents : IDispatch
+	{};
+
+	struct __declspec(uuid("c2eb9070-38b3-404d-bed8-2d5f5d971df5"))
+		_DebuggerProcessEventsRoot : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_DebuggerProcessEvents(
+			/*[out,retval]*/ IDispatch** disp) = 0;
+	};
+
+	struct __declspec(uuid("ce9ddba3-b23b-4c53-bb3e-5471659289d1"))
+		_DebuggerProcessEvents : IDispatch
+	{};
+
+	struct __declspec(uuid("d14b8b85-e4a8-42f8-b486-8a14dc74adeb"))
+		DebuggerProcessEvents;
+	// [ default ] interface _DebuggerProcessEvents
+	// [ default, source ] dispinterface _dispDebuggerProcessEvents
+
+	struct __declspec(uuid("73ffa13f-ad72-4154-be77-d4288f2e4fc5"))
+		_dispDebuggerExpressionEvaluationEvents : IDispatch
+	{};
+
+	struct __declspec(uuid("6973a466-e09c-4195-9ae8-07b7aaff7d85"))
+		_DebuggerExpressionEvaluationEvents : IDispatch
+	{};
+
+	struct __declspec(uuid("45ae9835-6090-4cca-97e0-5ea9a5608fbe"))
+		_DebuggerExpressionEvaluationEventsRoot : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_DebuggerExpressionEvaluationEvents(
+			/*[out,retval]*/ IDispatch** disp) = 0;
+	};
+
+	struct __declspec(uuid("1aa6b3e4-42f7-4396-80fa-76728d1b824c"))
+		DebuggerExpressionEvaluationEvents;
+	// [ default ] interface _DebuggerExpressionEvaluationEvents
+	// [ default, source ] dispinterface _dispDebuggerExpressionEvaluationEvents
+	const LPSTR vsContextGuidSolutionBuilding = (char*)"{ADFC4E60-0397-11D1-9F4E-00A0C911004F}";
+	const LPSTR vsContextGuidDebugging = (char*)"{ADFC4E61-0397-11D1-9F4E-00A0C911004F}";
+	const LPSTR vsContextGuidUIHierarchyDragging = (char*)"{B706F393-2E5B-49E7-9E2E-B1825F639B63}";
+	const LPSTR vsContextGuidFullScreenMode = (char*)"{ADFC4E62-0397-11D1-9F4E-00A0C911004F}";
+	const LPSTR vsContextGuidDesignMode = (char*)"{ADFC4E63-0397-11D1-9F4E-00A0C911004F}";
+	const LPSTR vsContextGuidNoSolution = (char*)"{ADFC4E64-0397-11D1-9F4E-00A0C911004F}";
+	const LPSTR vsContextGuidSolutionExists = (char*)"{F1536EF8-92EC-443C-9ED7-FDADF150DA82}";
+	const LPSTR vsContextGuidEmptySolution = (char*)"{ADFC4E65-0397-11D1-9F4E-00A0C911004F}";
+	const LPSTR vsContextGuidSolutionHasSingleProject = (char*)"{ADFC4E66-0397-11D1-9F4E-00A0C911004F}";
+	const LPSTR vsContextGuidSolutionHasMultipleProjects = (char*)"{93694FA0-0397-11D1-9F4E-00A0C911004F}";
+	const LPSTR vsContextGuidCodeWindow = (char*)"{8FE2DF1D-E0DA-4EBE-9D5C-415D40E487B5}";
+	const LPSTR vsContextGuidNotBuildingAndNotDebugging = (char*)"{48EA4A80-F14E-4107-88FA-8D0016F30B9C}";
+	const LPSTR vsContextGuidSolutionOrProjectUpgrading = (char*)"{EF4F870B-7B85-4F29-9D15-CE1ABFBE733B}";
+	const LPSTR vsContextGuidDataSourceWindowSupported = (char*)"{95C314C4-660B-4627-9F82-1BAF1C764BBF}";
+	const LPSTR vsContextGuidDataSourceWindowAutoVisible = (char*)"{2E78870D-AC7C-4460-A4A1-3FE37D00EF81}";
+	const LPSTR vsContextGuidWindowsFormsDesigner = (char*)"{BA09E2AF-9DF2-4068-B2F0-4C7E5CC19E2F}";
+	const LPSTR vsContextGuidToolboxInitialized = (char*)"{DC5DB425-F0FD-4403-96A1-F475CDBA9EE0}";
+	const LPSTR vsContextGuidSolutionExistsAndNotBuildingAndNotDebugging = (char*)"{D0E4DEEC-1B53-4CDA-8559-D454583AD23B}";
+	const LPSTR vsContextGuidTextEditor = (char*)"{8B382828-6202-11D1-8870-0000F87579D2}";
+	const LPSTR vsContextGuidXMLTextEditor = (char*)"{F6819A78-A205-47B5-BE1C-675B3C7F0B8E}";
+	const LPSTR vsContextGuidCSSTextEditor = (char*)"{A764E898-518D-11D2-9A89-00C04F79EFC3}";
+	const LPSTR vsContextGuidHTMLSourceEditor = (char*)"{58E975A0-F8FE-11D2-A6AE-00104BCC7269}";
+	const LPSTR vsContextGuidHTMLDesignView = (char*)"{CB3FCFEA-03DF-11D1-81D2-00A0C91BBEE3}";
+	const LPSTR vsContextGuidHTMLSourceView = (char*)"{CB3FCFEB-03DF-11D1-81D2-00A0C91BBEE3}";
+	const LPSTR vsContextGuidHTMLCodeView = (char*)"{4C01CBEE-FB8C-4ED0-8EC0-68348C52822E}";
+	const LPSTR vsContextGuidFrames = (char*)"{CB3FCFEC-03DF-11D1-81D2-00A0C91BBEE3}";
+	const LPSTR vsContextGuidSchema = (char*)"{E6631B5B-2EAB-41E8-82FD-6469645C76C9}";
+	const LPSTR vsContextGuidData = (char*)"{F482F8AF-1E66-4760-919E-964707265994}";
+	const LPSTR vsContextGuidKindStartPage = (char*)"{387CB18D-6153-4156-9257-9AC3F9207BBE}";
+	const LPSTR vsContextGuidCommunityWindow = (char*)"{96DB1F3B-0E7A-4406-B73E-C6F0A2C67B97}";
+	const LPSTR vsContextGuidDeviceExplorer = (char*)"{B65E9355-A4C7-4855-96BB-1D3EC8514E8F}";
+	const LPSTR vsContextGuidBookmarks = (char*)"{A0C5197D-0AC7-4B63-97CD-8872A789D233}";
+	const LPSTR vsContextGuidApplicationBrowser = (char*)"{399832EA-70A8-4AE7-9B99-3C0850DAD152}";
+	const LPSTR vsContextGuidFavorites = (char*)"{57DC5D59-11C2-4955-A7B4-D7699D677E93}";
+	const LPSTR vsContextGuidErrorList = (char*)"{D78612C7-9962-4B83-95D9-268046DAD23A}";
+	const LPSTR vsContextGuidHelpSearch = (char*)"{46C87F81-5A06-43A8-9E25-85D33BAC49F8}";
+	const LPSTR vsContextGuidHelpIndex = (char*)"{73F6DD58-437E-11D3-B88E-00C04F79F802}";
+	const LPSTR vsContextGuidHelpContents = (char*)"{4A791147-19E4-11D3-B86B-00C04F79F802}";
+	const LPSTR vsContextGuidCallBrowser = (char*)"{5415EA3A-D813-4948-B51E-562082CE0887}";
+	const LPSTR vsContextGuidCodeDefinition = (char*)"{588470CC-84F8-4A57-9AC4-86BCA0625FF4}";
+	const LPSTR vsContextGuidTaskList = (char*)"{4A9B7E51-AA16-11D0-A8C5-00A0C921A4D2}";
+	const LPSTR vsContextGuidToolbox = (char*)"{B1E99781-AB81-11D0-B683-00AA00A3EE26}";
+	const LPSTR vsContextGuidCallStack = (char*)"{0504FF91-9D61-11D0-A794-00A0C9110051}";
+	const LPSTR vsContextGuidThread = (char*)"{E62CE6A0-B439-11D0-A79D-00A0C9110051}";
+	const LPSTR vsContextGuidLocals = (char*)"{4A18F9D0-B838-11D0-93EB-00A0C90F2734}";
+	const LPSTR vsContextGuidAutoLocals = (char*)"{F2E84780-2AF1-11D1-A7FA-00A0C9110051}";
+	const LPSTR vsContextGuidWatch = (char*)"{90243340-BD7A-11D0-93EF-00A0C90F2734}";
+	const LPSTR vsContextGuidProperties = (char*)"{EEFA5220-E298-11D0-8F78-00A0C9110057}";
+	const LPSTR vsContextGuidSolutionExplorer = (char*)"{3AE79031-E1BC-11D0-8F78-00A0C9110057}";
+	const LPSTR vsContextGuidOutput = (char*)"{34E76E81-EE4A-11D0-AE2E-00A0C90FFFC3}";
+	const LPSTR vsContextGuidObjectBrowser = (char*)"{269A02DC-6AF8-11D3-BDC4-00C04F688E50}";
+	const LPSTR vsContextGuidMacroExplorer = (char*)"{07CD18B4-3BA1-11D2-890A-0060083196C6}";
+	const LPSTR vsContextGuidDynamicHelp = (char*)"{66DBA47C-61DF-11D2-AA79-00C04F990343}";
+	const LPSTR vsContextGuidClassView = (char*)"{C9C0AE26-AA77-11D2-B3F0-0000F87570EE}";
+	const LPSTR vsContextGuidResourceView = (char*)"{2D7728C2-DE0A-45B5-99AA-89B609DFDE73}";
+	const LPSTR vsContextGuidDocumentOutline = (char*)"{25F7E850-FFA1-11D0-B63F-00A0C922E851}";
+	const LPSTR vsContextGuidServerExplorer = (char*)"{74946827-37A0-11D2-A273-00C04F8EF4FF}";
+	const LPSTR vsContextGuidCommandWindow = (char*)"{28836128-FC2C-11D2-A433-00C04F72D18A}";
+	const LPSTR vsContextGuidFindSymbol = (char*)"{53024D34-0EF5-11D3-87E0-00C04F7971A5}";
+	const LPSTR vsContextGuidFindSymbolResults = (char*)"{68487888-204A-11D3-87EB-00C04F7971A5}";
+	const LPSTR vsContextGuidFindReplace = (char*)"{CF2DDC32-8CAD-11D2-9302-005345000000}";
+	const LPSTR vsContextGuidFindResults1 = (char*)"{0F887920-C2B6-11D2-9375-0080C747D9A0}";
+	const LPSTR vsContextGuidFindResults2 = (char*)"{0F887921-C2B6-11D2-9375-0080C747D9A0}";
+	const LPSTR vsContextGuidMainWindow = (char*)"{9DDABE98-1D02-11D3-89A1-00C04F688DDE}";
+	const LPSTR vsContextGuidLinkedWindowFrame = (char*)"{9DDABE99-1D02-11D3-89A1-00C04F688DDE}";
+	const LPSTR vsContextGuidWebBrowser = (char*)"{E8B06F52-6D01-11D2-AA7D-00C04F990343}";
+	const LPSTR vsWindowKindKindStartPage = (char*)"{387CB18D-6153-4156-9257-9AC3F9207BBE}";
+	const LPSTR vsWindowKindCommunityWindow = (char*)"{96DB1F3B-0E7A-4406-B73E-C6F0A2C67B97}";
+	const LPSTR vsWindowKindDeviceExplorer = (char*)"{B65E9355-A4C7-4855-96BB-1D3EC8514E8F}";
+	const LPSTR vsWindowKindBookmarks = (char*)"{A0C5197D-0AC7-4B63-97CD-8872A789D233}";
+	const LPSTR vsWindowKindApplicationBrowser = (char*)"{399832EA-70A8-4AE7-9B99-3C0850DAD152}";
+	const LPSTR vsWindowKindFavorites = (char*)"{57DC5D59-11C2-4955-A7B4-D7699D677E93}";
+	const LPSTR vsWindowKindErrorList = (char*)"{D78612C7-9962-4B83-95D9-268046DAD23A}";
+	const LPSTR vsWindowKindHelpSearch = (char*)"{46C87F81-5A06-43A8-9E25-85D33BAC49F8}";
+	const LPSTR vsWindowKindHelpIndex = (char*)"{73F6DD58-437E-11D3-B88E-00C04F79F802}";
+	const LPSTR vsWindowKindHelpContents = (char*)"{4A791147-19E4-11D3-B86B-00C04F79F802}";
+	const LPSTR vsWindowKindCallBrowser = (char*)"{5415EA3A-D813-4948-B51E-562082CE0887}";
+	const LPSTR vsWindowKindCodeDefinition = (char*)"{588470CC-84F8-4A57-9AC4-86BCA0625FF4}";
+	const LPSTR vsWindowKindImmediate = (char*)"{28836128-FC2C-11D2-A433-00C04F72D18A}";
+	const LPSTR vsProjectKindSolutionFolder = (char*)"{66A26720-8FB5-11D2-AA7E-00C04F688DDE}";
+
+	enum __declspec(uuid("6fb22721-008a-41a0-b4a9-23a7ab2a02b7"))
+		vsCommandStyle
+	{
+		vsCommandStylePict = 1,
+		vsCommandStyleText = 2,
+		vsCommandStylePictAndText = 3,
+		vsCommandStyleComboNoAutoComplete = 64,
+		vsCommandStyleComboCaseSensitive = 128
+	};
+
+	struct __declspec(uuid("31efb5b1-c655-4ada-bb52-3ed87fb2a4ae"))
+		Windows2 : Windows
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall CreateToolWindow2(
+			struct AddIn* Addin,
+			BSTR Assembly,
+			BSTR Class,
+			BSTR Caption,
+			BSTR GuidPosition,
+			/*[in,out]*/ IDispatch** ControlObject,
+			/*[out,retval]*/ struct Window** ppwindowOut) = 0;
+	};
+
+	struct __declspec(uuid("25731932-3283-4ae0-b7cf-f4691b8be523"))
+		Window2 : Window
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_CommandBars(
+			/*[out,retval]*/ IDispatch** ppcbs) = 0;
+	};
+
+	enum __declspec(uuid("2c23ef05-01a5-4684-ac27-4efd8d840ba9"))
+		vsThemeColors
+	{
+		vsThemeColorAccentBorder = 5,
+		vsThemeColorAccentDark = 6,
+		vsThemeColorAccentLight = 7,
+		vsThemeColorAccentMedium = 8,
+		vsThemeColorAccentPale = 9,
+		vsThemeColorCommandbarBorder = 10,
+		vsThemeColorCommandbarDraghandle = 11,
+		vsThemeColorCommandbarDraghandleShadow = 12,
+		vsThemeColorCommandbarGradientBegin = 13,
+		vsThemeColorCommandbarGradientEnd = 14,
+		vsThemeColorCommandbarGradientMiddle = 15,
+		vsThemeColorCommandbarHover = 16,
+		vsThemeColorCommandbarHoveroverSelected = 17,
+		vsThemeColorCommandbarHoveroverSelectedicon = 18,
+		vsThemeColorCommandbarSelected = 19,
+		vsThemeColorCommandbarShadow = 20,
+		vsThemeColorCommandbarTextActive = 21,
+		vsThemeColorCommandbarTextHover = 22,
+		vsThemeColorCommandbarTextInactive = 23,
+		vsThemeColorCommandbarTextSelected = 24,
+		vsThemeColorControlEditHintText = 25,
+		vsThemeColorControlEditRequiredBackground = 26,
+		vsThemeColorControlEditRequiredHintText = 27,
+		vsThemeColorControlLinkText = 28,
+		vsThemeColorControlLinkTextHover = 29,
+		vsThemeColorControlLinkTextPressed = 30,
+		vsThemeColorControlOutline = 31,
+		vsThemeColorDebuggerDatatipActiveBackground = 32,
+		vsThemeColorDebuggerDatatipActiveBorder = 33,
+		vsThemeColorDebuggerDatatipActiveHighlight = 34,
+		vsThemeColorDebuggerDatatipActiveHighlightText = 35,
+		vsThemeColorDebuggerDatatipActiveSeparator = 36,
+		vsThemeColorDebuggerDatatipActiveText = 37,
+		vsThemeColorDebuggerDatatipInactiveBackground = 38,
+		vsThemeColorDebuggerDatatipInactiveBorder = 39,
+		vsThemeColorDebuggerDatatipInactiveHighlight = 40,
+		vsThemeColorDebuggerDatatipInactiveHighlightText = 41,
+		vsThemeColorDebuggerDatatipInactiveSeparator = 42,
+		vsThemeColorDebuggerDatatipInactiveText = 43,
+		vsThemeColorDesignerBackground = 44,
+		vsThemeColorDesignerSelectionDots = 45,
+		vsThemeColorDesignerTray = 46,
+		vsThemeColorDesignerWatermark = 47,
+		vsThemeColorEnvironmentBackground = 48,
+		vsThemeColorEnvironmentBackgroundGradientBegin = 49,
+		vsThemeColorEnvironmentBackgroundGradientEnd = 50,
+		vsThemeColorFileTabBorder = 51,
+		vsThemeColorFileTabChannelBackground = 52,
+		vsThemeColorFileTabGradientDark = 53,
+		vsThemeColorFileTabGradientLight = 54,
+		vsThemeColorFileTabSelectedBackground = 55,
+		vsThemeColorFileTabSelectedBorder = 56,
+		vsThemeColorFileTabSelectedText = 57,
+		vsThemeColorFileTabText = 58,
+		vsThemeColorFormSmartTagActiontagBorder = 59,
+		vsThemeColorFormSmartTagActiontagFill = 60,
+		vsThemeColorFormSmartTagObjecttagBorder = 61,
+		vsThemeColorFormSmartTagObjecttagFill = 62,
+		vsThemeColorGridHeadingBackground = 63,
+		vsThemeColorGridHeadingText = 64,
+		vsThemeColorGridLine = 65,
+		vsThemeColorHelpHowDoIPaneBackground = 66,
+		vsThemeColorHelpHowDoIPaneBorder = 67,
+		vsThemeColorHelpHowDoIPaneLink = 68,
+		vsThemeColorHelpHowDoIPaneText = 69,
+		vsThemeColorHelpHowDoITaskBackground = 70,
+		vsThemeColorHelpHowDoITaskLink = 71,
+		vsThemeColorHelpHowDoITaskText = 72,
+		vsThemeColorHelpSearchBackground = 73,
+		vsThemeColorHelpSearchBorder = 74,
+		vsThemeColorHelpSearchFitlerBackground = 75,
+		vsThemeColorHelpSearchFitlerBorder = 76,
+		vsThemeColorHelpSearchGradientBegin = 77,
+		vsThemeColorHelpSearchGradientEnd = 78,
+		vsThemeColorHelpSearchNavigationDisabled = 79,
+		vsThemeColorHelpSearchNavigationEnabled = 80,
+		vsThemeColorHelpSearchPanelRules = 81,
+		vsThemeColorHelpSearchProviderBackground = 82,
+		vsThemeColorHelpSearchProviderIcon = 83,
+		vsThemeColorHelpSearchProviderText = 84,
+		vsThemeColorHelpSearchResultLinkSelected = 85,
+		vsThemeColorHelpSearchResultLinkUnselected = 86,
+		vsThemeColorHelpSearchResultSelectedBackground = 87,
+		vsThemeColorHelpSearchResultSelectedText = 88,
+		vsThemeColorHelpSearchText = 89,
+		vsThemeColorPanelBorder = 90,
+		vsThemeColorPanelGradientDark = 91,
+		vsThemeColorPanelGradientLight = 92,
+		vsThemeColorPanelHoveroverCloseBorder = 93,
+		vsThemeColorPanelHoveroverCloseFill = 94,
+		vsThemeColorPanelHyperlink = 95,
+		vsThemeColorPanelHyperlinkHover = 96,
+		vsThemeColorPanelHyperlinkPressed = 97,
+		vsThemeColorPanelSeparator = 98,
+		vsThemeColorPanelSubGroupSeparator = 99,
+		vsThemeColorPanelText = 100,
+		vsThemeColorPanelTitlebar = 101,
+		vsThemeColorPanelTitlebarText = 102,
+		vsThemeColorPanelTitlebarUnselected = 103,
+		vsThemeColorProjectDesignerBackgroundGradientBegin = 104,
+		vsThemeColorProjectDesignerBackgroundGradientEnd = 105,
+		vsThemeColorProjectDesignerBorderOutside = 106,
+		vsThemeColorProjectDesignerBorderInside = 107,
+		vsThemeColorProjectDesignerContentsBackground = 108,
+		vsThemeColorProjectDesignerTabBackgroundGradientBegin = 109,
+		vsThemeColorProjectDesignerTabBackgroundGradientEnd = 110,
+		vsThemeColorProjectDesignerTabSelectedInsideborder = 111,
+		vsThemeColorProjectDesignerTabSelectedBorder = 112,
+		vsThemeColorProjectDesignerTabSelectedHighlight1 = 113,
+		vsThemeColorProjectDesignerTabSelectedHighlight2 = 114,
+		vsThemeColorProjectDesignerTabSelectedBackground = 115,
+		vsThemeColorProjectDesignerTabSepBottomGradientBegin = 116,
+		vsThemeColorProjectDesignerTabSepBottomGradientEnd = 117,
+		vsThemeColorProjectDesignerTabSepTopGradientBegin = 118,
+		vsThemeColorProjectDesignerTabSepTopGradientEnd = 119,
+		vsThemeColorScreentipBorder = 120,
+		vsThemeColorScreentipBackground = 121,
+		vsThemeColorScreentipText = 122,
+		vsThemeColorSidebarBackground = 123,
+		vsThemeColorSidebarGradientdark = 124,
+		vsThemeColorSidebarGradientlight = 125,
+		vsThemeColorSidebarText = 126,
+		vsThemeColorSmartTagBorder = 127,
+		vsThemeColorSmartTagFill = 128,
+		vsThemeColorSmartTagHoverBorder = 129,
+		vsThemeColorSmartTagHoverFill = 130,
+		vsThemeColorSmartTagHoverText = 131,
+		vsThemeColorSmartTagText = 132,
+		vsThemeColorSnaplines = 133,
+		vsThemeColorSnaplinesTextBaseline = 134,
+		vsThemeColorTasklistGridlines = 135,
+		vsThemeColorTitlebarActive = 136,
+		vsThemeColorTitlebarActiveGradientBegin = 137,
+		vsThemeColorTitlebarActiveGradientEnd = 138,
+		vsThemeColorTitlebarActiveText = 139,
+		vsThemeColorTitlebarInactive = 140,
+		vsThemeColorTitlebarInactiveGradientBegin = 141,
+		vsThemeColorTitlebarInactiveGradientEnd = 142,
+		vsThemeColorTitlebarInactiveText = 143,
+		vsThemeColorToolboxBackground = 144,
+		vsThemeColorToolboxDivider = 145,
+		vsThemeColorToolboxGradientDark = 146,
+		vsThemeColorToolboxGradientLight = 147,
+		vsThemeColorToolboxHeadingAccent = 148,
+		vsThemeColorToolboxHeadingBegin = 149,
+		vsThemeColorToolboxHeadingEnd = 150,
+		vsThemeColorToolboxIconHighlight = 151,
+		vsThemeColorToolboxIconShadow = 152,
+		vsThemeColorToolWindowBackground = 153,
+		vsThemeColorToolWindowBorder = 154,
+		vsThemeColorToolWindowTabSelectedtab = 155,
+		vsThemeColorToolWindowTabBorder = 156,
+		vsThemeColorToolWindowTabGradientBegin = 157,
+		vsThemeColorToolWindowTabGradientEnd = 158,
+		vsThemeColorToolWindowTabText = 159,
+		vsThemeColorToolWindowTabSelectedtext = 160,
+		vsThemeColorWizardOrientationPanelBackground = 161,
+		vsThemeColorWizardOrientationPanelText = 162
+	};
+
+	struct __declspec(uuid("c7b4bcc9-e23e-400c-8821-c85b6b31369e"))
+		WindowVisibilityEventsRoot : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_WindowVisibilityEvents(
+			/*[in]*/ struct Window* WindowFilter,
+			/*[out,retval]*/ IDispatch** ppdisp) = 0;
+	};
+
+	struct __declspec(uuid("84de07bc-43a2-4275-bcf9-d207d20e49ed"))
+		_WindowVisibilityEvents : IDispatch
+	{};
+
+	struct __declspec(uuid("94259e4b-a44a-4b77-b18f-f2cc9a601d03"))
+		_dispWindowVisibilityEvents : IDispatch
+	{};
+
+	struct __declspec(uuid("8b7e04ad-b109-4b96-8ba3-2f348813f238"))
+		WindowVisibilityEvents;
+	// [ default ] interface _WindowVisibilityEvents
+	// [ default, source ] dispinterface _dispWindowVisibilityEvents
+
+	struct __declspec(uuid("d7eade3f-bd19-4422-9c4c-85a02535437c"))
+		_TextDocumentKeyPressEventsRoot : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_TextDocumentKeyPressEvents(
+			/*[in]*/ struct TextDocument* TextDocument,
+			/*[out,retval]*/ IDispatch** ppdisp) = 0;
+	};
+
+	struct __declspec(uuid("505b7600-8fcc-487c-9e4f-c7fd0b5fb690"))
+		_TextDocumentKeyPressEvents : IDispatch
+	{};
+
+	struct __declspec(uuid("4b57c85e-5100-4caf-9301-4544b85c7945"))
+		_dispTextDocumentKeyPressEvents : IDispatch
+	{};
+
+	struct __declspec(uuid("e7532a4e-ab9e-41df-bb9a-7c764677e5c3"))
+		TextDocumentKeyPressEvents;
+	// [ default ] interface _TextDocumentKeyPressEvents
+	// [ default, source ] dispinterface _dispTextDocumentKeyPressEvents
+
+	struct __declspec(uuid("827be7dc-1817-4171-a8ff-aab3854913bf"))
+		_PublishEvents : IDispatch
+	{};
+
+	struct __declspec(uuid("a0b40b93-9311-410f-b210-1f65bafb0e27"))
+		_dispPublishEvents : IDispatch
+	{};
+
+	struct __declspec(uuid("045448ea-e8c1-4122-ac7b-d96d8e5c6e5b"))
+		PublishEvents;
+	// [ default ] interface _PublishEvents
+	// [ default, source ] dispinterface _dispPublishEvents
+
+	struct __declspec(uuid("bed31e8c-f845-4397-af13-6b82a6996c0d"))
+		Events2 : Events
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_ProjectItemsEvents(
+			/*[out,retval]*/ struct _ProjectItemsEvents** ppProjectItemsEvents) = 0;
+		virtual HRESULT __stdcall get_ProjectsEvents(
+			/*[out,retval]*/ struct _ProjectsEvents** ppProjectsEvents) = 0;
+		virtual HRESULT __stdcall get_TextDocumentKeyPressEvents(
+			/*[in]*/ struct TextDocument* TextDocument,
+			/*[out,retval]*/ struct _TextDocumentKeyPressEvents** ppEditorKeyPressEvents) = 0;
+		virtual HRESULT __stdcall get_CodeModelEvents(
+			/*[in]*/ struct CodeElement* Reserved,
+			/*[out,retval]*/ struct _CodeModelEvents** ppdisp) = 0;
+		virtual HRESULT __stdcall get_WindowVisibilityEvents(
+			/*[in]*/ struct Window* WindowFilter,
+			/*[out,retval]*/ struct _WindowVisibilityEvents** ppdisp) = 0;
+		virtual HRESULT __stdcall get_DebuggerProcessEvents(
+			/*[out,retval]*/ struct _DebuggerProcessEvents** ppDebuggerProcessEvents) = 0;
+		virtual HRESULT __stdcall get_DebuggerExpressionEvaluationEvents(
+			/*[out,retval]*/ struct _DebuggerExpressionEvaluationEvents** ppDebuggerExpressionEvalutionEvents) = 0;
+		virtual HRESULT __stdcall get_PublishEvents(
+			/*[out,retval]*/ struct _PublishEvents** ppPublishEvents) = 0;
+	};
+
+	struct __declspec(uuid("fa238614-fbb1-4314-a7f7-49ae8bb6c6ba"))
+		Solution2 : _Solution
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall AddSolutionFolder(
+			BSTR Name,
+			/*[out,retval]*/ struct Project** pProject) = 0;
+		virtual HRESULT __stdcall GetProjectTemplate(
+			BSTR TemplateName,
+			BSTR Language,
+			/*[out,retval]*/ BSTR* pFullPath) = 0;
+		virtual HRESULT __stdcall GetProjectItemTemplate(
+			BSTR TemplateName,
+			BSTR Language,
+			/*[out,retval]*/ BSTR* pFullPath) = 0;
+	};
+
+	struct __declspec(uuid("f8f69788-267c-4408-8967-74f26108c438"))
+		SolutionFolder : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_DTE(
+			/*[out,retval]*/ struct _DTE** pDTE) = 0;
+		virtual HRESULT __stdcall get_Parent(
+			/*[out,retval]*/ struct Project** ppProject) = 0;
+		virtual HRESULT __stdcall AddSolutionFolder(
+			BSTR Name,
+			/*[out,retval]*/ struct Project** pProject) = 0;
+		virtual HRESULT __stdcall AddFromFile(
+			/*[in]*/ BSTR FileName,
+			/*[out,retval]*/ struct Project** ppProject) = 0;
+		virtual HRESULT __stdcall AddFromTemplate(
+			/*[in]*/ BSTR FileName,
+			/*[in]*/ BSTR Destination,
+			/*[in]*/ BSTR ProjectName,
+			/*[out,retval]*/ struct Project** ppProject) = 0;
+		virtual HRESULT __stdcall get_Hidden(
+			/*[out,retval]*/ VARIANT_BOOL* pHidden) = 0;
+		virtual HRESULT __stdcall put_Hidden(
+			VARIANT_BOOL pHidden) = 0;
+	};
+
+	struct __declspec(uuid("b820f931-645a-473f-8246-922cf069e1fe"))
+		TaskItems2 : TaskItems
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall Add2(
+			/*[in]*/ BSTR Category,
+			/*[in]*/ BSTR SubCategory,
+			/*[in]*/ BSTR Description,
+			/*[in]*/ long Priority,
+			/*[in]*/ VARIANT Icon,
+			/*[in]*/ VARIANT_BOOL Checkable,
+			/*[in]*/ BSTR File,
+			/*[in]*/ long Line,
+			/*[in]*/ VARIANT_BOOL CanUserDelete,
+			/*[in]*/ VARIANT_BOOL FlushItem,
+			/*[in]*/ VARIANT_BOOL AutoNavigate,
+			/*[out,retval]*/ struct TaskItem** pTaskItem) = 0;
+	};
+
+	struct __declspec(uuid("136afa9f-f243-4abb-a8f8-4c2d26c47163"))
+		EditPoint2 : EditPoint
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall InsertNewLine(
+			/*[in]*/ long Count) = 0;
+	};
+
+	struct __declspec(uuid("12133bc2-390a-4b30-ad5b-504c1d1c89e7"))
+		IVsExtensibility2 : IVsExtensibility
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall FireProjectsEvent_ItemAdded(
+			/*[in]*/ struct Project* Project) = 0;
+		virtual HRESULT __stdcall FireProjectsEvent_ItemRemoved(
+			/*[in]*/ struct Project* Project) = 0;
+		virtual HRESULT __stdcall FireProjectsEvent_ItemRenamed(
+			/*[in]*/ struct Project* Project,
+			/*[in]*/ BSTR OldName) = 0;
+		virtual HRESULT __stdcall FireProjectItemsEvent_ItemAdded(
+			/*[in]*/ struct ProjectItem* ProjectItem) = 0;
+		virtual HRESULT __stdcall FireProjectItemsEvent_ItemRemoved(
+			/*[in]*/ struct ProjectItem* ProjectItem) = 0;
+		virtual HRESULT __stdcall FireProjectItemsEvent_ItemRenamed(
+			/*[in]*/ struct ProjectItem* ProjectItem,
+			/*[in]*/ BSTR OldName) = 0;
+		virtual HRESULT __stdcall BuildUIHierarchyFromTree(
+			OLE_HANDLE hwnd,
+			struct Window* pParent,
+			/*[out,retval]*/ struct UIHierarchy** ppUIHierarchy) = 0;
+		virtual HRESULT __stdcall FireCodeModelEvent(
+			long dispid,
+			struct CodeElement* pElement,
+			enum vsCMChangeKind changeKind) = 0;
+		virtual HRESULT __stdcall IsFireCodeModelEventNeeded(
+			VARIANT_BOOL* vbNeeded) = 0;
+		virtual HRESULT __stdcall RunWizardFileEx(
+			/*[in]*/ BSTR bstrWizFilename,
+			/*[in]*/ long hwndOwner,
+			/*[in]*/ SAFEARRAY** vContextParams,
+			/*[in]*/ SAFEARRAY** vCustomParams,
+			/*[out,retval]*/ long* pResult) = 0;
+		virtual HRESULT __stdcall FireCodeModelEvent3(
+			long dispid,
+			IDispatch* pParent,
+			struct CodeElement* pElement,
+			enum vsCMChangeKind changeKind) = 0;
+	};
+
+	struct __declspec(uuid("b85f43c4-c765-4984-ae3d-695e8cd8e992"))
+		IInternalExtenderProvider : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall GetExtenderNames(
+			/*[in]*/ BSTR ExtenderCATID,
+			/*[in]*/ IUnknown* ExtendeeObject,
+			/*[out,retval]*/ VARIANT* ExtenderNames) = 0;
+		virtual HRESULT __stdcall GetExtender(
+			/*[in]*/ BSTR ExtenderCATID,
+			/*[in]*/ BSTR ExtenderName,
+			/*[in]*/ IDispatch* ExtendeeObject,
+			/*[in]*/ struct IExtenderSite* ExtenderSite,
+			/*[in]*/ long Cookie,
+			/*[out,retval]*/ IDispatch** Extender) = 0;
+		virtual HRESULT __stdcall CanExtend(
+			/*[in]*/ BSTR ExtenderCATID,
+			/*[in]*/ BSTR ExtenderName,
+			/*[in]*/ IDispatch* ExtendeeObject,
+			/*[out,retval]*/ VARIANT_BOOL* fRetval) = 0;
+	};
+
+	enum __declspec(uuid("a3acf727-0590-4467-a9c7-5557b9c0f3f6"))
+		vsFindOptions2
+	{
+		vsFindOptionsWaitForFindToComplete = 16384
+	};
+
+	struct __declspec(uuid("01568308-5b2a-4f30-8d0a-e10ee0f28f4a"))
+		Find2 : Find
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_WaitForFindToComplete(
+			/*[out,retval]*/ VARIANT_BOOL* pWait) = 0;
+		virtual HRESULT __stdcall put_WaitForFindToComplete(
+			VARIANT_BOOL pWait) = 0;
+	};
+
+	struct __declspec(uuid("c8f4f9cc-b7e5-4458-bce3-e1542468f26b"))
+		LifetimeInformation : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_HasBeenDeleted(
+			/*[out,retval]*/ VARIANT_BOOL* pDeleted) = 0;
+	};
+
+	struct __declspec(uuid("82c9dbf2-1da8-4ed6-a5ec-8b876b46317c"))
+		ToolBoxItem2 : ToolBoxItem
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_Data(
+			/*[out,retval]*/ VARIANT* pData) = 0;
+	};
+
+	struct __declspec(uuid("a64715cb-85d7-41c3-8e71-2302d4eebc34"))
+		ToolBoxTab2 : ToolBoxTab
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_UniqueID(
+			/*[out,retval]*/ BSTR* pbstrID) = 0;
+		virtual HRESULT __stdcall put_UniqueID(
+			/*[in]*/ BSTR pbstrID) = 0;
+	};
+
+	enum __declspec(uuid("fd6530d0-1a2c-4073-aae9-3c2b3aa8bc4d"))
+		vsIncrementalSearchResult
+	{
+		vsIncrementalSearchResultFound = 1,
+		vsIncrementalSearchResultPassedEOB = 2,
+		vsIncrementalSearchResultPassedStart = 4,
+		vsIncrementalSearchResultFailed = 8
+	};
+
+	struct __declspec(uuid("c5bee6d8-ed45-4317-96bf-97eb88ea3a07"))
+		IncrementalSearch : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_DTE(
+			/*[out,retval]*/ struct _DTE** DTEObject) = 0;
+		virtual HRESULT __stdcall StartForward() = 0;
+		virtual HRESULT __stdcall StartBackward() = 0;
+		virtual HRESULT __stdcall get_IncrementalSearchModeOn(
+			/*[out,retval]*/ VARIANT_BOOL* pOn) = 0;
+		virtual HRESULT __stdcall SearchWithLastPattern(
+			/*[out,retval]*/ enum vsIncrementalSearchResult* pResult) = 0;
+		virtual HRESULT __stdcall get_Pattern(
+			/*[out,retval]*/ BSTR* pPattern) = 0;
+		virtual HRESULT __stdcall AppendCharAndSearch(
+			short Character,
+			/*[out,retval]*/ enum vsIncrementalSearchResult* pResult) = 0;
+		virtual HRESULT __stdcall DeleteCharAndBackup(
+			/*[out,retval]*/ enum vsIncrementalSearchResult* pResult) = 0;
+		virtual HRESULT __stdcall Exit() = 0;
+		virtual HRESULT __stdcall SearchForward(
+			/*[out,retval]*/ enum vsIncrementalSearchResult* pResult) = 0;
+		virtual HRESULT __stdcall SearchBackward(
+			/*[out,retval]*/ enum vsIncrementalSearchResult* pResult) = 0;
+	};
+
+	struct __declspec(uuid("ace19c7b-a0ac-4089-94fd-749cf4380e1f"))
+		TextPane2 : TextPane
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_IncrementalSearch(
+			/*[out,retval]*/ struct IncrementalSearch** ppIncrementalSearch) = 0;
+	};
+
+	struct __declspec(uuid("1099aaa6-4169-430d-9f57-0b4c76624b3b"))
+		SolutionConfiguration2 : SolutionConfiguration
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_PlatformName(
+			/*[out,retval]*/ BSTR* pName) = 0;
+	};
+
+	struct __declspec(uuid("c508b13c-06c5-40c7-b405-d327d4f8e268"))
+		IVsProfferCommands2 : IVsProfferCommands
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall AddNamedCommand2(
+			/*[in]*/ GUID* pguidPackage,
+			/*[in]*/ GUID* pguidCmdGroup,
+			/*[in]*/ LPWSTR pszCmdNameCanonical,
+			/*[out]*/ unsigned long* pdwCmdId,
+			/*[in]*/ LPWSTR pszCmdNameLocalized,
+			/*[in]*/ LPWSTR pszBtnText,
+			/*[in]*/ LPWSTR pszCmdTooltip,
+			/*[in]*/ LPWSTR pszSatelliteDLL,
+			/*[in]*/ unsigned long dwBitmapResourceId,
+			/*[in]*/ unsigned long dwBitmapImageIndex,
+			/*[in]*/ unsigned long dwCmdFlagsDefault,
+			/*[in]*/ unsigned long cUIContexts,
+			/*[in]*/ GUID* rgguidUIContexts,
+			/*[in]*/ unsigned long dwUIElementType) = 0;
+	};
+
+	enum __declspec(uuid("861474e5-de58-4924-b6d3-8d48ba712944"))
+		vsPublishState
+	{
+		vsPublishStateDone = 1,
+		vsPublishStateInProgress = 2,
+		vsPublishStateNotStarted = 4
+	};
+
+	struct __declspec(uuid("c2516e4b-5d69-459d-b539-c95a71c4fa3d"))
+		SolutionBuild2 : SolutionBuild
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall Publish(
+			VARIANT_BOOL WaitForPublishToFinish) = 0;
+		virtual HRESULT __stdcall PublishProject(
+			BSTR SolutionConfiguration,
+			BSTR ProjectUniqueName,
+			VARIANT_BOOL WaitForPublishToFinish) = 0;
+		virtual HRESULT __stdcall get_LastPublishInfo(
+			/*[out,retval]*/ long* Info) = 0;
+		virtual HRESULT __stdcall get_PublishState(
+			/*[out,retval]*/ enum vsPublishState* State) = 0;
+		virtual HRESULT __stdcall DeployProject(
+			BSTR SolutionConfiguration,
+			BSTR ProjectUniqueName,
+			VARIANT_BOOL WaitForDeployToFinish) = 0;
+	};
+
+	struct __declspec(uuid("f49a191f-7258-493b-9310-5f7771ddf3d7"))
+		ErrorItem : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_DTE(
+			/*[out,retval]*/ struct _DTE** DTEObject) = 0;
+		virtual HRESULT __stdcall get_Collection(
+			/*[out,retval]*/ struct ErrorItems** ErrorItems) = 0;
+		virtual HRESULT __stdcall get_ErrorLevel(
+			/*[out,retval]*/ enum vsBuildErrorLevel* ErrorLevel) = 0;
+		virtual HRESULT __stdcall get_Description(
+			/*[out,retval]*/ BSTR* Description) = 0;
+		virtual HRESULT __stdcall get_FileName(
+			/*[out,retval]*/ BSTR* File) = 0;
+		virtual HRESULT __stdcall get_Line(
+			/*[out,retval]*/ long* Line) = 0;
+		virtual HRESULT __stdcall get_Column(
+			/*[out,retval]*/ long* Column) = 0;
+		virtual HRESULT __stdcall get_Project(
+			/*[out,retval]*/ BSTR* ProjectUniqueName) = 0;
+		virtual HRESULT __stdcall Navigate() = 0;
+	};
+
+	struct __declspec(uuid("dcf93a30-d013-42f4-8aee-9f5ba215fb8b"))
+		ErrorItems : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_DTE(
+			/*[out,retval]*/ struct _DTE** DTEObject) = 0;
+		virtual HRESULT __stdcall get_Parent(
+			/*[out,retval]*/ struct ErrorList** ErrorList) = 0;
+		virtual HRESULT __stdcall Item(
+			/*[in]*/ VARIANT index,
+			/*[out,retval]*/ struct ErrorItem** ErrorItem) = 0;
+		virtual HRESULT __stdcall get_Count(
+			/*[out,retval]*/ long* Count) = 0;
+	};
+
+	struct __declspec(uuid("7bf84ef1-8246-498a-a127-2ea37824fda1"))
+		ErrorList : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_DTE(
+			/*[out,retval]*/ struct _DTE** ppDTEObject) = 0;
+		virtual HRESULT __stdcall get_Parent(
+			/*[out,retval]*/ struct Window** ppWindow) = 0;
+		virtual HRESULT __stdcall get_ShowErrors(
+			/*[out,retval]*/ VARIANT_BOOL* pShowErrors) = 0;
+		virtual HRESULT __stdcall put_ShowErrors(
+			VARIANT_BOOL pShowErrors) = 0;
+		virtual HRESULT __stdcall get_ShowWarnings(
+			/*[out,retval]*/ VARIANT_BOOL* pShowWarnings) = 0;
+		virtual HRESULT __stdcall put_ShowWarnings(
+			VARIANT_BOOL pShowWarnings) = 0;
+		virtual HRESULT __stdcall get_ShowMessages(
+			/*[out,retval]*/ VARIANT_BOOL* pShowMessages) = 0;
+		virtual HRESULT __stdcall put_ShowMessages(
+			VARIANT_BOOL pShowMessages) = 0;
+		virtual HRESULT __stdcall get_ErrorItems(
+			/*[out,retval]*/ struct ErrorItems** ppErrorItems) = 0;
+		virtual HRESULT __stdcall get_SelectedItems(
+			/*[out,retval]*/ VARIANT* Selections) = 0;
+	};
+
+	struct __declspec(uuid("19ac6f68-3019-4d65-8d98-404dfb96b8e2"))
+		ToolWindows : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_DTE(
+			/*[out,retval]*/ struct _DTE** DTEObject) = 0;
+		virtual HRESULT __stdcall GetToolWindow(
+			BSTR Name,
+			/*[out,retval]*/ IDispatch** ppObject) = 0;
+		virtual HRESULT __stdcall get_ToolBox(
+			/*[out,retval]*/ struct ToolBox** ppToolBox) = 0;
+		virtual HRESULT __stdcall get_CommandWindow(
+			/*[out,retval]*/ struct CommandWindow** ppOutputWindow) = 0;
+		virtual HRESULT __stdcall get_OutputWindow(
+			/*[out,retval]*/ struct OutputWindow** ppOutputWindow) = 0;
+		virtual HRESULT __stdcall get_SolutionExplorer(
+			/*[out,retval]*/ struct UIHierarchy** ppUIHierarchy) = 0;
+		virtual HRESULT __stdcall get_TaskList(
+			/*[out,retval]*/ struct TaskList** ppTaskList) = 0;
+		virtual HRESULT __stdcall get_ErrorList(
+			/*[out,retval]*/ struct ErrorList** ppErrorList) = 0;
+	};
+
+	struct __declspec(uuid("2ee1e9fa-0afe-4348-a89f-ed9cb45c99cf"))
+		DTE2 : _DTE
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_ToolWindows(
+			/*[out,retval]*/ struct ToolWindows** ppcbs) = 0;
+		virtual HRESULT __stdcall GetThemeColor(
+			enum vsThemeColors Element,
+			/*[out,retval]*/ OLE_COLOR* pColor) = 0;
+	};
+
+	struct __declspec(uuid("8b5e2bfd-4642-4efe-8af4-0b2da9aaa23c"))
+		Debugger2 : Debugger
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall WriteMinidump(
+			/*[in]*/ BSTR FileName,
+			/*[in]*/ enum dbgMinidumpOption Option) = 0;
+		virtual HRESULT __stdcall GetProcesses(
+			/*[in]*/ struct Transport* pTransport,
+			/*[in]*/ BSTR TransportQualifier,
+			/*[out,retval]*/ struct Processes** Processes) = 0;
+		virtual HRESULT __stdcall GetExpression2(
+			/*[in]*/ BSTR ExpressionText,
+			/*[in]*/ VARIANT_BOOL UseAutoExpandRules,
+			/*[in]*/ VARIANT_BOOL TreatAsStatement,
+			/*[in]*/ long Timeout,
+			/*[out,retval]*/ struct Expression** Expression) = 0;
+		virtual HRESULT __stdcall get_Transports(
+			/*[out,retval]*/ struct Transports** Transports) = 0;
+	};
+
+	struct __declspec(uuid("c977eaed-9e6c-4122-9d28-9d5eae2bdc33"))
+		Transport : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_Name(
+			/*[out,retval]*/ BSTR* Name) = 0;
+		virtual HRESULT __stdcall get_ID(
+			/*[out,retval]*/ BSTR* ID) = 0;
+		virtual HRESULT __stdcall get_Engines(
+			/*[out,retval]*/ struct Engines** Engines) = 0;
+		virtual HRESULT __stdcall get_DTE(
+			/*[out,retval]*/ struct _DTE** DTE) = 0;
+		virtual HRESULT __stdcall get_Parent(
+			/*[out,retval]*/ struct Debugger2** Debugger) = 0;
+		virtual HRESULT __stdcall get_Collection(
+			/*[out,retval]*/ struct Transports** Transports) = 0;
+	};
+
+	struct __declspec(uuid("ea47c3d9-fd41-4402-bdc6-7f07d0c8e3fc"))
+		Transports : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall Item(
+			/*[in]*/ VARIANT index,
+			/*[out,retval]*/ struct Transport** Transport) = 0;
+		virtual HRESULT __stdcall _NewEnum(
+			/*[out,retval]*/ IUnknown** Enumerator) = 0;
+		virtual HRESULT __stdcall get_DTE(
+			/*[out,retval]*/ struct _DTE** DTEObject) = 0;
+		virtual HRESULT __stdcall get_Parent(
+			/*[out,retval]*/ struct Debugger** Debugger) = 0;
+		virtual HRESULT __stdcall get_Count(
+			/*[out,retval]*/ long* Count) = 0;
+	};
+
+	struct __declspec(uuid("95ac1923-6eaa-427c-b43e-6274a8ca6c95"))
+		Process2 : Process
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall Attach2(
+			/*[in]*/ VARIANT Engines) = 0;
+		virtual HRESULT __stdcall get_Transport(
+			/*[out,retval]*/ struct Transport** Transport) = 0;
+		virtual HRESULT __stdcall get_TransportQualifier(
+			/*[out,retval]*/ BSTR* TransportQualifier) = 0;
+		virtual HRESULT __stdcall get_Threads(
+			/*[out,retval]*/ struct Threads** Threads) = 0;
+		virtual HRESULT __stdcall get_IsBeingDebugged(
+			/*[out,retval]*/ VARIANT_BOOL* IsBeingDebugged) = 0;
+		virtual HRESULT __stdcall get_UserName(
+			/*[out,retval]*/ BSTR* UserName) = 0;
+	};
+
+	struct __declspec(uuid("fbc8d85a-e449-4cb3-b026-f7808deb7792"))
+		Breakpoint2 : Breakpoint
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_Process(
+			/*[out,retval]*/ struct Process2** ppProcess) = 0;
+		virtual HRESULT __stdcall get_BreakWhenHit(
+			/*[out,retval]*/ VARIANT_BOOL* BreakWhenHit) = 0;
+		virtual HRESULT __stdcall put_BreakWhenHit(
+			/*[in]*/ VARIANT_BOOL BreakWhenHit) = 0;
+		virtual HRESULT __stdcall get_Message(
+			/*[out,retval]*/ BSTR* Message) = 0;
+		virtual HRESULT __stdcall put_Message(
+			/*[in]*/ BSTR Message) = 0;
+		virtual HRESULT __stdcall get_Macro(
+			/*[out,retval]*/ BSTR* Macro) = 0;
+		virtual HRESULT __stdcall put_Macro(
+			/*[in]*/ BSTR Macro) = 0;
+		virtual HRESULT __stdcall get_FilterBy(
+			/*[out,retval]*/ BSTR* FilterBy) = 0;
+		virtual HRESULT __stdcall put_FilterBy(
+			/*[in]*/ BSTR FilterBy) = 0;
+	};
+
+	struct __declspec(uuid("9f998c5e-549e-4c74-9fd8-b3a93d85a248"))
+		Engines : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall Item(
+			/*[in]*/ VARIANT index,
+			/*[out,retval]*/ struct Engine** Engine) = 0;
+		virtual HRESULT __stdcall _NewEnum(
+			/*[out,retval]*/ IUnknown** Enumerator) = 0;
+		virtual HRESULT __stdcall get_DTE(
+			/*[out,retval]*/ struct _DTE** DTEObject) = 0;
+		virtual HRESULT __stdcall get_Parent(
+			/*[out,retval]*/ struct Debugger** Debugger) = 0;
+		virtual HRESULT __stdcall get_Count(
+			/*[out,retval]*/ long* Count) = 0;
+	};
+
+	struct __declspec(uuid("8cea6d39-ebee-4de9-b282-b5cece9c9861"))
+		Engine : IDispatch
+	{
+		//
+		// Raw methods provided by interface
+		//
+
+		virtual HRESULT __stdcall get_Name(
+			/*[out,retval]*/ BSTR* Name) = 0;
+		virtual HRESULT __stdcall get_ID(
+			/*[out,retval]*/ BSTR* ID) = 0;
+		virtual HRESULT __stdcall get_AttachResult(
+			/*[out,retval]*/ HRESULT* Result) = 0;
+		virtual HRESULT __stdcall get_DTE(
+			/*[out,retval]*/ struct _DTE** DTE) = 0;
+		virtual HRESULT __stdcall get_Parent(
+			/*[out,retval]*/ struct Transport** Transport) = 0;
+		virtual HRESULT __stdcall get_Collection(
+			/*[out,retval]*/ struct Engines** Engines) = 0;
+	};
+
+	//
+	// Named GUID constants initializations
+	//
+
+	extern "C" const GUID __declspec(selectany) LIBID_EnvDTE80 =
+	{ 0x1a31287a,0x4d7d,0x413e,{0x8e,0x32,0x3b,0x37,0x49,0x31,0xbd,0x89} };
+	extern "C" const GUID __declspec(selectany) IID_Commands2 =
+	{ 0x7eaa857b,0x2356,0x494b,{0x9e,0x13,0x0f,0x6e,0xef,0xa8,0x6e,0x43} };
+	extern "C" const GUID __declspec(selectany) IID_SourceControlBindings =
+	{ 0x544a6477,0xbe0b,0x42ed,{0xb4,0x7b,0x55,0x3e,0xd8,0xc5,0xf2,0x2c} };
+	extern "C" const GUID __declspec(selectany) IID_SourceControl2 =
+	{ 0x111522ab,0xf439,0x4d85,{0x9a,0x36,0x17,0x16,0xda,0x4d,0xa1,0x14} };
+	extern "C" const GUID __declspec(selectany) IID_CodeAttributeArgument =
+	{ 0x80f4779b,0x835d,0x4873,{0x83,0x56,0x2f,0x34,0xa7,0x59,0xa5,0x14} };
+	extern "C" const GUID __declspec(selectany) IID_CodeEvent =
+	{ 0xce615bd2,0x8ed5,0x4f0c,{0xa7,0xb6,0x4a,0x29,0x9d,0x88,0x01,0xfd} };
+	extern "C" const GUID __declspec(selectany) IID_CodeElement2 =
+	{ 0xf03dcce8,0x233b,0x43d7,{0xa6,0x6b,0xa6,0x6e,0xfc,0x1f,0x85,0xc3} };
+	extern "C" const GUID __declspec(selectany) IID_CodeImport =
+	{ 0x0c9a256e,0x0ff9,0x4d4a,{0x88,0xe6,0x30,0x4a,0xcf,0x78,0x22,0x5f} };
+	extern "C" const GUID __declspec(selectany) IID_FileCodeModel2 =
+	{ 0xa65964df,0x3a07,0x45eb,{0x88,0x2a,0xdd,0x04,0x60,0x20,0x16,0xb9} };
+	extern "C" const GUID __declspec(selectany) IID_CodeModel2 =
+	{ 0x99b9cd0e,0x6c89,0x4bc4,{0xbb,0xa2,0xff,0xd3,0x52,0x9d,0x3a,0xcb} };
+	extern "C" const GUID __declspec(selectany) IID_CodeClass2 =
+	{ 0x295adcd4,0xb052,0x49ee,{0x93,0x4e,0xc6,0xb3,0x68,0x62,0xa7,0xc6} };
+	extern "C" const GUID __declspec(selectany) IID_CodeParameter2 =
+	{ 0x35cd9e36,0x7c96,0x4429,{0x96,0x8f,0xc0,0xc3,0x50,0xcb,0x1a,0x47} };
+	extern "C" const GUID __declspec(selectany) IID_CodeFunction2 =
+	{ 0x7e20cd35,0x8689,0x466d,{0x8e,0xa0,0xa8,0x63,0xb7,0xea,0x5d,0xb9} };
+	extern "C" const GUID __declspec(selectany) IID_CodeAttribute2 =
+	{ 0x35187e2a,0xe5f6,0x4f89,{0xa4,0xce,0xda,0x25,0x46,0x40,0x85,0x5b} };
+	extern "C" const GUID __declspec(selectany) IID_CodeVariable2 =
+	{ 0xf747a8a0,0x01b1,0x4da2,{0x92,0x59,0x0d,0x5a,0x0c,0xb4,0xc0,0x49} };
+	extern "C" const GUID __declspec(selectany) IID_CodeDelegate2 =
+	{ 0x3b1b24ef,0xdd8e,0x4c98,{0x87,0x99,0x4e,0xfa,0xc8,0x00,0x80,0xe9} };
+	extern "C" const GUID __declspec(selectany) IID_CodeStruct2 =
+	{ 0xf6dc1a01,0xe65a,0x404b,{0x8b,0x6d,0x9c,0xdd,0x60,0x3d,0xb4,0xed} };
+	extern "C" const GUID __declspec(selectany) IID_CodeInterface2 =
+	{ 0x860ab609,0x8af2,0x4434,{0xb4,0xdd,0xa4,0x3d,0xee,0x31,0xb0,0x17} };
+	extern "C" const GUID __declspec(selectany) IID_CodeTypeRef2 =
+	{ 0x9883c07a,0xfa07,0x4ce7,{0xbd,0x8e,0x01,0xe1,0xa3,0xf3,0xa3,0xf7} };
+	extern "C" const GUID __declspec(selectany) IID_CodeProperty2 =
+	{ 0x33770c02,0x21b7,0x4224,{0xa5,0x77,0x68,0x77,0xbd,0xba,0x60,0xea} };
+	extern "C" const GUID __declspec(selectany) DIID__dispCodeModelEvents =
+	{ 0x4ea8090e,0xd289,0x4d56,{0x98,0xcd,0xc4,0x8d,0xd2,0x85,0x3b,0x2e} };
+	extern "C" const GUID __declspec(selectany) CLSID_CodeModelEvents =
+	{ 0xb2fa9979,0x35eb,0x4ca2,{0xb4,0x67,0x73,0x70,0x15,0x2e,0x53,0xb7} };
+	extern "C" const GUID __declspec(selectany) IID__CodeModelEvents =
+	{ 0x66adc510,0x0ca2,0x475d,{0xa3,0x43,0x57,0x19,0x2b,0xce,0x38,0xbf} };
+	extern "C" const GUID __declspec(selectany) IID__CodeModelEventsRoot =
+	{ 0xc6e28776,0xb7ff,0x421f,{0x8c,0x18,0x57,0xf8,0x2e,0x44,0x77,0x04} };
+	extern "C" const GUID __declspec(selectany) DIID__dispDebuggerProcessEvents =
+	{ 0x7d04c01d,0xbb7a,0x47e8,{0x92,0xeb,0xe9,0x14,0xcd,0x61,0x36,0x6b} };
+	extern "C" const GUID __declspec(selectany) IID__DebuggerProcessEventsRoot =
+	{ 0xc2eb9070,0x38b3,0x404d,{0xbe,0xd8,0x2d,0x5f,0x5d,0x97,0x1d,0xf5} };
+	extern "C" const GUID __declspec(selectany) IID__DebuggerProcessEvents =
+	{ 0xce9ddba3,0xb23b,0x4c53,{0xbb,0x3e,0x54,0x71,0x65,0x92,0x89,0xd1} };
+	extern "C" const GUID __declspec(selectany) CLSID_DebuggerProcessEvents =
+	{ 0xd14b8b85,0xe4a8,0x42f8,{0xb4,0x86,0x8a,0x14,0xdc,0x74,0xad,0xeb} };
+	extern "C" const GUID __declspec(selectany) DIID__dispDebuggerExpressionEvaluationEvents =
+	{ 0x73ffa13f,0xad72,0x4154,{0xbe,0x77,0xd4,0x28,0x8f,0x2e,0x4f,0xc5} };
+	extern "C" const GUID __declspec(selectany) IID__DebuggerExpressionEvaluationEvents =
+	{ 0x6973a466,0xe09c,0x4195,{0x9a,0xe8,0x07,0xb7,0xaa,0xff,0x7d,0x85} };
+	extern "C" const GUID __declspec(selectany) IID__DebuggerExpressionEvaluationEventsRoot =
+	{ 0x45ae9835,0x6090,0x4cca,{0x97,0xe0,0x5e,0xa9,0xa5,0x60,0x8f,0xbe} };
+	extern "C" const GUID __declspec(selectany) CLSID_DebuggerExpressionEvaluationEvents =
+	{ 0x1aa6b3e4,0x42f7,0x4396,{0x80,0xfa,0x76,0x72,0x8d,0x1b,0x82,0x4c} };
+	extern "C" const GUID __declspec(selectany) IID_Windows2 =
+	{ 0x31efb5b1,0xc655,0x4ada,{0xbb,0x52,0x3e,0xd8,0x7f,0xb2,0xa4,0xae} };
+	extern "C" const GUID __declspec(selectany) IID_Window2 =
+	{ 0x25731932,0x3283,0x4ae0,{0xb7,0xcf,0xf4,0x69,0x1b,0x8b,0xe5,0x23} };
+	extern "C" const GUID __declspec(selectany) IID_WindowVisibilityEventsRoot =
+	{ 0xc7b4bcc9,0xe23e,0x400c,{0x88,0x21,0xc8,0x5b,0x6b,0x31,0x36,0x9e} };
+	extern "C" const GUID __declspec(selectany) IID__WindowVisibilityEvents =
+	{ 0x84de07bc,0x43a2,0x4275,{0xbc,0xf9,0xd2,0x07,0xd2,0x0e,0x49,0xed} };
+	extern "C" const GUID __declspec(selectany) DIID__dispWindowVisibilityEvents =
+	{ 0x94259e4b,0xa44a,0x4b77,{0xb1,0x8f,0xf2,0xcc,0x9a,0x60,0x1d,0x03} };
+	extern "C" const GUID __declspec(selectany) CLSID_WindowVisibilityEvents =
+	{ 0x8b7e04ad,0xb109,0x4b96,{0x8b,0xa3,0x2f,0x34,0x88,0x13,0xf2,0x38} };
+	extern "C" const GUID __declspec(selectany) IID__TextDocumentKeyPressEventsRoot =
+	{ 0xd7eade3f,0xbd19,0x4422,{0x9c,0x4c,0x85,0xa0,0x25,0x35,0x43,0x7c} };
+	extern "C" const GUID __declspec(selectany) IID__TextDocumentKeyPressEvents =
+	{ 0x505b7600,0x8fcc,0x487c,{0x9e,0x4f,0xc7,0xfd,0x0b,0x5f,0xb6,0x90} };
+	extern "C" const GUID __declspec(selectany) DIID__dispTextDocumentKeyPressEvents =
+	{ 0x4b57c85e,0x5100,0x4caf,{0x93,0x01,0x45,0x44,0xb8,0x5c,0x79,0x45} };
+	extern "C" const GUID __declspec(selectany) CLSID_TextDocumentKeyPressEvents =
+	{ 0xe7532a4e,0xab9e,0x41df,{0xbb,0x9a,0x7c,0x76,0x46,0x77,0xe5,0xc3} };
+	extern "C" const GUID __declspec(selectany) IID__PublishEvents =
+	{ 0x827be7dc,0x1817,0x4171,{0xa8,0xff,0xaa,0xb3,0x85,0x49,0x13,0xbf} };
+	extern "C" const GUID __declspec(selectany) DIID__dispPublishEvents =
+	{ 0xa0b40b93,0x9311,0x410f,{0xb2,0x10,0x1f,0x65,0xba,0xfb,0x0e,0x27} };
+	extern "C" const GUID __declspec(selectany) CLSID_PublishEvents =
+	{ 0x045448ea,0xe8c1,0x4122,{0xac,0x7b,0xd9,0x6d,0x8e,0x5c,0x6e,0x5b} };
+	extern "C" const GUID __declspec(selectany) IID_Events2 =
+	{ 0xbed31e8c,0xf845,0x4397,{0xaf,0x13,0x6b,0x82,0xa6,0x99,0x6c,0x0d} };
+	extern "C" const GUID __declspec(selectany) IID_Solution2 =
+	{ 0xfa238614,0xfbb1,0x4314,{0xa7,0xf7,0x49,0xae,0x8b,0xb6,0xc6,0xba} };
+	extern "C" const GUID __declspec(selectany) IID_SolutionFolder =
+	{ 0xf8f69788,0x267c,0x4408,{0x89,0x67,0x74,0xf2,0x61,0x08,0xc4,0x38} };
+	extern "C" const GUID __declspec(selectany) IID_TaskItems2 =
+	{ 0xb820f931,0x645a,0x473f,{0x82,0x46,0x92,0x2c,0xf0,0x69,0xe1,0xfe} };
+	extern "C" const GUID __declspec(selectany) IID_EditPoint2 =
+	{ 0x136afa9f,0xf243,0x4abb,{0xa8,0xf8,0x4c,0x2d,0x26,0xc4,0x71,0x63} };
+	extern "C" const GUID __declspec(selectany) IID_IVsExtensibility2 =
+	{ 0x12133bc2,0x390a,0x4b30,{0xad,0x5b,0x50,0x4c,0x1d,0x1c,0x89,0xe7} };
+	extern "C" const GUID __declspec(selectany) IID_IInternalExtenderProvider =
+	{ 0xb85f43c4,0xc765,0x4984,{0xae,0x3d,0x69,0x5e,0x8c,0xd8,0xe9,0x92} };
+	extern "C" const GUID __declspec(selectany) IID_Find2 =
+	{ 0x01568308,0x5b2a,0x4f30,{0x8d,0x0a,0xe1,0x0e,0xe0,0xf2,0x8f,0x4a} };
+	extern "C" const GUID __declspec(selectany) IID_LifetimeInformation =
+	{ 0xc8f4f9cc,0xb7e5,0x4458,{0xbc,0xe3,0xe1,0x54,0x24,0x68,0xf2,0x6b} };
+	extern "C" const GUID __declspec(selectany) IID_ToolBoxItem2 =
+	{ 0x82c9dbf2,0x1da8,0x4ed6,{0xa5,0xec,0x8b,0x87,0x6b,0x46,0x31,0x7c} };
+	extern "C" const GUID __declspec(selectany) IID_ToolBoxTab2 =
+	{ 0xa64715cb,0x85d7,0x41c3,{0x8e,0x71,0x23,0x02,0xd4,0xee,0xbc,0x34} };
+	extern "C" const GUID __declspec(selectany) IID_IncrementalSearch =
+	{ 0xc5bee6d8,0xed45,0x4317,{0x96,0xbf,0x97,0xeb,0x88,0xea,0x3a,0x07} };
+	extern "C" const GUID __declspec(selectany) IID_TextPane2 =
+	{ 0xace19c7b,0xa0ac,0x4089,{0x94,0xfd,0x74,0x9c,0xf4,0x38,0x0e,0x1f} };
+	extern "C" const GUID __declspec(selectany) IID_SolutionConfiguration2 =
+	{ 0x1099aaa6,0x4169,0x430d,{0x9f,0x57,0x0b,0x4c,0x76,0x62,0x4b,0x3b} };
+	extern "C" const GUID __declspec(selectany) IID_IVsProfferCommands2 =
+	{ 0xc508b13c,0x06c5,0x40c7,{0xb4,0x05,0xd3,0x27,0xd4,0xf8,0xe2,0x68} };
+	extern "C" const GUID __declspec(selectany) IID_SolutionBuild2 =
+	{ 0xc2516e4b,0x5d69,0x459d,{0xb5,0x39,0xc9,0x5a,0x71,0xc4,0xfa,0x3d} };
+	extern "C" const GUID __declspec(selectany) IID_ErrorItem =
+	{ 0xf49a191f,0x7258,0x493b,{0x93,0x10,0x5f,0x77,0x71,0xdd,0xf3,0xd7} };
+	extern "C" const GUID __declspec(selectany) IID_ErrorItems =
+	{ 0xdcf93a30,0xd013,0x42f4,{0x8a,0xee,0x9f,0x5b,0xa2,0x15,0xfb,0x8b} };
+	extern "C" const GUID __declspec(selectany) IID_ErrorList =
+	{ 0x7bf84ef1,0x8246,0x498a,{0xa1,0x27,0x2e,0xa3,0x78,0x24,0xfd,0xa1} };
+	extern "C" const GUID __declspec(selectany) IID_ToolWindows =
+	{ 0x19ac6f68,0x3019,0x4d65,{0x8d,0x98,0x40,0x4d,0xfb,0x96,0xb8,0xe2} };
+	extern "C" const GUID __declspec(selectany) IID_DTE2 =
+	{ 0x2ee1e9fa,0x0afe,0x4348,{0xa8,0x9f,0xed,0x9c,0xb4,0x5c,0x99,0xcf} };
+	extern "C" const GUID __declspec(selectany) IID_Debugger2 =
+	{ 0x8b5e2bfd,0x4642,0x4efe,{0x8a,0xf4,0x0b,0x2d,0xa9,0xaa,0xa2,0x3c} };
+	extern "C" const GUID __declspec(selectany) IID_Transport =
+	{ 0xc977eaed,0x9e6c,0x4122,{0x9d,0x28,0x9d,0x5e,0xae,0x2b,0xdc,0x33} };
+	extern "C" const GUID __declspec(selectany) IID_Transports =
+	{ 0xea47c3d9,0xfd41,0x4402,{0xbd,0xc6,0x7f,0x07,0xd0,0xc8,0xe3,0xfc} };
+	extern "C" const GUID __declspec(selectany) IID_Process2 =
+	{ 0x95ac1923,0x6eaa,0x427c,{0xb4,0x3e,0x62,0x74,0xa8,0xca,0x6c,0x95} };
+	extern "C" const GUID __declspec(selectany) IID_Breakpoint2 =
+	{ 0xfbc8d85a,0xe449,0x4cb3,{0xb0,0x26,0xf7,0x80,0x8d,0xeb,0x77,0x92} };
+	extern "C" const GUID __declspec(selectany) IID_Engines =
+	{ 0x9f998c5e,0x549e,0x4c74,{0x9f,0xd8,0xb3,0xa9,0x3d,0x85,0xa2,0x48} };
+	extern "C" const GUID __declspec(selectany) IID_Engine =
+	{ 0x8cea6d39,0xebee,0x4de9,{0xb2,0x82,0xb5,0xce,0xce,0x9c,0x98,0x61} };
+
+} // namespace EnvDTE80
+
+#pragma pack(pop)

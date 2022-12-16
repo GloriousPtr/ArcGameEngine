@@ -33,7 +33,7 @@ project "{PROJECT_NAME}"
 
     links
     {
-        "Arc-ScriptCore"
+        ArcRootDir .. "/Arc-Editor/Resources/Scripts/Arc-ScriptCore.dll"
     }
 
     filter "configurations:Debug"
@@ -47,7 +47,3 @@ project "{PROJECT_NAME}"
     filter "configurations:Dist"
         optimize "Full"
         symbols "Off"
-
-group "Arc"
-    include (ArcRootDir .. "/Arc-ScriptCore")
-group ""

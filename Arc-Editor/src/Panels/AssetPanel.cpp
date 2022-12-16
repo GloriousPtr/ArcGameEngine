@@ -13,44 +13,72 @@
 #include "../Utils/EditorTheme.h"
 #include "Arc/Core/Filesystem.h"
 
+#include "Platform/VisualStudio/VisualStudioAccessor.h"
+
 namespace ArcEngine
 {
-	static const eastl::hash_map<eastl::string, eastl::string> s_FileTypes =
+	enum class FileType
 	{
-		{ "png",	"Texture" },
-		{ "jpg",	"Texture" },
-		{ "jpeg",	"Texture" },
-		{ "bmp",	"Texture" },
-		{ "gif",	"Texture" },
-
-		{ "hdr",	"Cubemap" },
-		{ "tga",	"Cubemap" },
-
-		{ "glsl",	"Shader" },
-
-		{ "obj",	"Model" },
-		{ "fbx",	"Model" },
-		{ "gltf",	"Model" },
-		{ "assbin",	"Model" },
-
-		{ "mp3",	"Audio" },
-		{ "m4a",	"Audio" },
-		{ "wav",	"Audio" },
-
-		{ "arc",	"Scene" },
-		{ "prefab", "Prefab" },
+		Unknown = 0,
+		Scene, Prefab, Script, Shader,
+		Texture, Cubemap, Model,
+		Audio
 	};
 
-	static const eastl::hash_map<eastl::string, ImVec4> s_TypeColors =
+	static const eastl::hash_map<FileType, eastl::string> s_FileTypesToString =
 	{
-		{ "Texture",		{ 0.80f, 0.20f, 0.30f, 1.00f } },
-		{ "Cubemap",		{ 0.80f, 0.20f, 0.30f, 1.00f } },
-		{ "Shader",			{ 0.20f, 0.40f, 0.75f, 1.00f } },
-		{ "Model",			{ 0.20f, 0.80f, 0.75f, 1.00f } },
-		{ "Audio",			{ 0.20f, 0.80f, 0.50f, 1.00f } },
+		{ FileType::Unknown,	"Unknown" },
 
-		{ "Scene",			{ 0.75f, 0.35f, 0.20f, 1.00f } },
-		{ "Prefab",			{ 0.10f, 0.50f, 0.80f, 1.00f } },
+		{ FileType::Scene,		"Scene" },
+		{ FileType::Prefab,		"Prefab" },
+		{ FileType::Script,		"Script" },
+		{ FileType::Shader,		"Shader" },
+
+		{ FileType::Texture,	"Texture" },
+		{ FileType::Cubemap,	"Cubemap" },
+		{ FileType::Model,		"Model" },
+
+		{ FileType::Audio,		"Audio" },
+	};
+
+	static const eastl::hash_map<eastl::string, FileType> s_FileTypes =
+	{
+		{ "arc",	FileType::Scene },
+		{ "prefab", FileType::Prefab },
+		{ "cs",		FileType::Script },
+		{ "glsl",	FileType::Shader },
+
+		{ "png",	FileType::Texture },
+		{ "jpg",	FileType::Texture },
+		{ "jpeg",	FileType::Texture },
+		{ "bmp",	FileType::Texture },
+		{ "gif",	FileType::Texture },
+
+		{ "hdr",	FileType::Cubemap },
+		{ "tga",	FileType::Cubemap },
+
+		{ "obj",	FileType::Model },
+		{ "fbx",	FileType::Model },
+		{ "gltf",	FileType::Model },
+		{ "assbin",	FileType::Model },
+
+		{ "mp3",	FileType::Audio },
+		{ "m4a",	FileType::Audio },
+		{ "wav",	FileType::Audio },
+	};
+
+	static const eastl::hash_map<FileType, ImVec4> s_TypeColors =
+	{
+		{ FileType::Scene,			{ 0.75f, 0.35f, 0.20f, 1.00f } },
+		{ FileType::Prefab,			{ 0.10f, 0.50f, 0.80f, 1.00f } },
+		{ FileType::Script,			{ 0.10f, 0.50f, 0.80f, 1.00f } },
+		{ FileType::Shader,			{ 0.10f, 0.50f, 0.80f, 1.00f } },
+
+		{ FileType::Texture,		{ 0.80f, 0.20f, 0.30f, 1.00f } },
+		{ FileType::Cubemap,		{ 0.80f, 0.20f, 0.30f, 1.00f } },
+		{ FileType::Model,			{ 0.20f, 0.80f, 0.75f, 1.00f } },
+
+		{ FileType::Audio,			{ 0.20f, 0.80f, 0.50f, 1.00f } },
 	};
 
 	static const char* GetFileIcon(const char* ext)
@@ -95,6 +123,40 @@ namespace ArcEngine
 			ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", filepath.c_str(), filepath.length() + 1);
 			ImGui::Text(StringUtils::GetName(eastl::move(filepath)).c_str());
 			ImGui::EndDragDropSource();
+		}
+	}
+
+	static void OpenFile(const std::filesystem::path& path)
+	{
+		std::string filepathString = path.string();
+		const char* filepath = filepathString.c_str();
+		std::string ext = path.extension().string();
+		ext = ext.substr(1);
+		if (s_FileTypes.find_as(ext.c_str()) != s_FileTypes.end())
+		{
+			FileType fileType = s_FileTypes.at(ext.c_str());
+			switch (fileType)
+			{
+				case FileType::Scene:
+					EditorLayer::GetInstance()->OpenScene(filepath);
+					break;
+				case FileType::Script:
+				case FileType::Shader:
+					VisualStudioAccessor::OpenFile(filepath);
+					break;
+				case FileType::Unknown:
+				case FileType::Prefab:
+				case FileType::Texture:
+				case FileType::Cubemap:
+				case FileType::Model:
+				case FileType::Audio:
+				default:
+					FileDialogs::OpenFileWithProgram(filepath);
+			}
+		}
+		else
+		{
+			FileDialogs::OpenFileWithProgram(filepath);
 		}
 	}
 
@@ -596,9 +658,12 @@ namespace ArcEngine
 					if (ImGui::IsItemHovered())
 						anyItemHovered = true;
 
-					if (isDir && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 					{
-						directoryToOpen = path;
+						if (isDir)
+							directoryToOpen = path;
+						else
+							OpenFile(path);
 						EditorLayer::GetInstance()->ResetContext();
 					}
 
@@ -613,9 +678,14 @@ namespace ArcEngine
 					ImGui::Image((ImTextureID)textureId, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
 
 					// Type Color frame
-					const char* fileType = "Unknown";
+					auto fileType = FileType::Unknown;
+					auto fileTypeString = s_FileTypesToString.at(FileType::Unknown);
 					if (s_FileTypes.find_as(file.Extension.c_str()) != s_FileTypes.end())
-						fileType = s_FileTypes.at(file.Extension.c_str()).c_str();
+					{
+						fileType = s_FileTypes.at(file.Extension.c_str());
+						fileTypeString = s_FileTypesToString.at(fileType);
+					}
+
 					ImVec4 typeColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 					if (s_TypeColors.find_as(fileType) != s_TypeColors.end())
 						typeColor = s_TypeColors.at(fileType);
@@ -634,7 +704,7 @@ namespace ArcEngine
 						ImGui::SetCursorPos({ cursorPos.x + padding * 2.0f, cursorPos.y + backgroundThumbnailSize.y - EditorTheme::SmallFont->FontSize - padding * 2.0f });
 						ImGui::BeginDisabled();
 						ImGui::PushFont(EditorTheme::SmallFont);
-						ImGui::TextUnformatted(fileType);
+						ImGui::TextUnformatted(fileTypeString.c_str());
 						ImGui::PopFont();
 						ImGui::EndDisabled();
 					}
@@ -717,7 +787,6 @@ namespace ArcEngine
 
 	void AssetPanel::DrawContextMenuItems(const std::filesystem::path& context, bool isDir)
 	{
-		std::string contextPath = context.string();
 		if (isDir)
 		{
 			if (ImGui::BeginMenu("Create"))
@@ -749,17 +818,17 @@ namespace ArcEngine
 		}
 		if (ImGui::MenuItem("Show in Explorer"))
 		{
-			FileDialogs::OpenFolderAndSelectItem(contextPath.c_str());
+			FileDialogs::OpenFolderAndSelectItem(context.string().c_str());
 			ImGui::CloseCurrentPopup();
 		}
 		if (ImGui::MenuItem("Open"))
 		{
-			FileDialogs::OpenFileWithProgram(contextPath.c_str());
+			FileDialogs::OpenFileWithProgram(context.string().c_str());
 			ImGui::CloseCurrentPopup();
 		}
 		if (ImGui::MenuItem("Copy Path"))
 		{
-			ImGui::SetClipboardText(contextPath.c_str());
+			ImGui::SetClipboardText(context.string().c_str());
 			ImGui::CloseCurrentPopup();
 		}
 		if (ImGui::MenuItem("Refresh"))
@@ -770,7 +839,7 @@ namespace ArcEngine
 		if (ImGui::MenuItem("Open C# Project"))
 		{
 			if (Project::GetActive())
-				FileDialogs::OpenSolutionWithVS(Project::GetSolutionPath().string().c_str());
+				VisualStudioAccessor::RunVisualStudio();
 			ImGui::CloseCurrentPopup();
 		}
 	}
