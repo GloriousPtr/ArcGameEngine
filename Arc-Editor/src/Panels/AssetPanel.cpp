@@ -831,16 +831,19 @@ namespace ArcEngine
 			ImGui::SetClipboardText(context.string().c_str());
 			ImGui::CloseCurrentPopup();
 		}
-		if (ImGui::MenuItem("Refresh"))
+
+		if (isDir)
 		{
-			Refresh();
-			ImGui::CloseCurrentPopup();
-		}
-		if (ImGui::MenuItem("Open C# Project"))
-		{
-			if (Project::GetActive())
+			if (ImGui::MenuItem("Refresh"))
+			{
+				Refresh();
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::MenuItem("Open C# Project"))
+			{
 				VisualStudioAccessor::RunVisualStudio();
-			ImGui::CloseCurrentPopup();
+				ImGui::CloseCurrentPopup();
+			}
 		}
 	}
 }
