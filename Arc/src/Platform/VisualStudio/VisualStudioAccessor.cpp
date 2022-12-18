@@ -57,7 +57,7 @@ namespace ArcEngine
 					continue;
 
 				ComPtr<EnvDTE80::DTE2> vsInstance = nullptr;
-				pUnk->QueryInterface(__uuidof(EnvDTE80::DTE2), (void**)&vsInstance);
+				pUnk->QueryInterface(IID_PPV_ARGS(&vsInstance));
 
 				ComPtr<EnvDTE80::_Solution> solution;
 				result = vsInstance->get_Solution(&solution);
@@ -144,7 +144,7 @@ namespace ArcEngine
 		return TRUE;
 	}
 
-	void RunAndOpenSolutionAndFile(const std::filesystem::path& solutionPath, const char* filepath)
+	void RunAndOpenSolutionAndFile(const std::filesystem::path& solutionPath, const char* filepath = nullptr, uint32_t goToLine = 0)
 	{
 		static PROCESS_INFORMATION processInfo = { nullptr, nullptr, 0, 0 };
 		ProcessInfo process = {false, processInfo.dwProcessId};
@@ -173,6 +173,11 @@ namespace ArcEngine
 			cmdArgs += filepath;
 			cmdArgs += "\"";
 			processShouldRun = true;
+		}
+
+		if (goToLine > 0)
+		{
+			cmdArgs += fmt::format(" /command \"edit.goto {0}\"", goToLine);
 		}
 
 		if (processShouldRun)
@@ -216,19 +221,19 @@ namespace ArcEngine
 				FindAndSetRunningInstance(solutionPath.string());
 
 				if (!IsDteValid())
-					RunAndOpenSolutionAndFile(solutionPath, nullptr);
+					RunAndOpenSolutionAndFile(solutionPath);
 				else
 					ShowDteWindow(s_VsInstance);
 			}
 			else
 			{
 				if (!ShowDteWindow(s_VsInstance))
-					RunAndOpenSolutionAndFile(solutionPath, nullptr);
+					RunAndOpenSolutionAndFile(solutionPath);
 			}
 		});
 	}
 
-	void VisualStudioAccessor::OpenFile(const eastl::string& filepath)
+	void VisualStudioAccessor::OpenFile(const eastl::string& filepath, uint32_t goToLine, bool selectLine)
 	{
 		if (!Project::GetActive())
 		{
@@ -236,7 +241,7 @@ namespace ArcEngine
 			return;
 		}
 
-		s_OpenFileFuture = std::async(std::launch::async, [filepath]()
+		s_OpenFileFuture = std::async(std::launch::async, [filepath, goToLine, selectLine]()
 		{
 			const auto solutionPath = Project::GetSolutionPath();
 			if (!IsDteValid())
@@ -245,7 +250,7 @@ namespace ArcEngine
 
 				if (!IsDteValid())
 				{
-					RunAndOpenSolutionAndFile(solutionPath, filepath.c_str());
+					RunAndOpenSolutionAndFile(solutionPath, filepath.c_str(), goToLine);
 					return;
 				}
 			}
@@ -263,6 +268,27 @@ namespace ArcEngine
 			CComBSTR bstrKind(EnvDTE80::vsViewKindTextView);
 			ComPtr<EnvDTE80::Window> window;
 			itemOps->OpenFile(bstrFilepath, bstrKind, &window);
+
+			if (goToLine > 0)
+			{
+				ComPtr<EnvDTE80::Document> doc;
+				result = s_VsInstance->get_ActiveDocument(&doc);
+				if (FAILED(result))
+					return;
+
+				ComPtr<IDispatch> selectionDispatch;
+				result = doc->get_Selection(&selectionDispatch);
+				if (FAILED(result))
+					return;
+
+				ComPtr<EnvDTE80::TextSelection> selection;
+				result = selectionDispatch->QueryInterface(IID_PPV_ARGS(&selection));
+				if (FAILED(result))
+					return;
+
+				selection->GotoLine((long)goToLine, selectLine);
+			}
+
 			if (window)
 				window->put_Visible(VARIANT_TRUE);
 		});
