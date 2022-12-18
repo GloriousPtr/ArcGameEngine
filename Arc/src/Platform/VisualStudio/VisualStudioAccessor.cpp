@@ -5,7 +5,7 @@
 #include "dte80.tlh"
 
 #define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include <Windows.h>
 #include <wrl.h>
 #include <atlbase.h>
 
@@ -20,10 +20,10 @@ namespace ArcEngine
 {
 	using namespace Microsoft::WRL;
 
-	static constexpr const char* programId = "VisualStudio.DTE";
-	static ComPtr<EnvDTE80::DTE2> s_VsInstance = nullptr;
-	static std::future<void> s_OpenProjectFuture;
-	static std::future<void> s_OpenFileFuture;
+	inline static constexpr const char* programId = "VisualStudio.DTE";
+	inline static ComPtr<EnvDTE80::DTE2> s_VsInstance = nullptr;
+	inline static std::future<void> s_OpenProjectFuture;
+	inline static std::future<void> s_OpenFileFuture;
 
 	static bool FindAndSetRunningInstance(const std::string& solutionPath)
 	{

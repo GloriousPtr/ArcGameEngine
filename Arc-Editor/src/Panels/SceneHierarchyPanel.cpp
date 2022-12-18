@@ -24,9 +24,7 @@ namespace ArcEngine
 
 		if (ImGui::IsKeyPressed(ImGuiKey_F2))
 		{
-			const EditorContext& context = EditorLayer::GetInstance()->GetContext();
-			if (context.IsValid(EditorContextType::Entity))
-				m_RenamingEntity = *context.As<Entity>();
+			m_RenamingEntity = m_SelectedEntity;
 		}
 	}
 

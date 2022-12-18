@@ -180,7 +180,7 @@ namespace ArcEngine
 			data.EventCallback(event);
 		});
 
-		glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, int xPos, int yPos, int* hit)
+		glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, [[maybe_unused]] int xPos, [[maybe_unused]] int yPos, int* hit)
 		{
 			*hit = ((WindowData*)glfwGetWindowUserPointer(window))->OverTitlebar ? 1 : 0;
 		});
