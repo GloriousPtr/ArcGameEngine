@@ -250,7 +250,7 @@ namespace ArcEngine
 							ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 
 							if (ImGui::MenuItem("Reload Assemblies"))
-								ScriptEngine::ReloadAppDomain();
+								ScriptEngine::ReloadAppDomain(true);
 
 							ImGui::PopStyleVar();
 							ImGui::EndMenu();
@@ -329,15 +329,43 @@ namespace ArcEngine
 				{
 					ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 1, 1 });
-					if (ImGui::BeginMenuBar())
+
+					if (Project::GetActive())
 					{
-						ImVec2 region = ImGui::GetContentRegionMax();
+						if (ImGui::BeginMenuBar())
+						{
+							const char* buildConfigStrings[3] = { "Debug", "Release", "Dist" };
+							const char* current = buildConfigStrings[(int)Project::GetActive()->GetConfig().BuildConfiguration];
+							ImGui::SetNextItemWidth(100.0f);
+							if (ImGui::BeginCombo("##BuildConfiguration", current))
+							{
+								for (int i = 0; i < 3; i++)
+								{
+									bool isSelected = current == buildConfigStrings[i];
+									if (ImGui::Selectable(buildConfigStrings[i], isSelected))
+									{
+										current = buildConfigStrings[i];
+										Project::GetActive()->GetConfig().BuildConfiguration = (ProjectConfig::BuildConfig)i;
+										SaveProject(Project::GetProjectDirectory() / (Project::GetActive()->GetConfig().Name + ".arcproj").c_str());
+
+										ScriptEngine::ReloadAppDomain(true);
+									}
+
+									if (isSelected)
+										ImGui::SetItemDefaultFocus();
+								}
+								ImGui::EndCombo();
+							}
+						}
+
+						ImVec2 region = ImGui::GetContentRegionAvail();
+						ImVec2 maxRegion = ImGui::GetContentRegionMax();
 
 						ImVec2 buttonSize = { frameHeight * 1.5f, frameHeight };
 						constexpr uint8_t buttonCount = 3;
-						float buttonStartPositionX = region.x * 0.5f - buttonCount * 0.5f * buttonSize.x;
+						float buttonStartPositionX = maxRegion.x * 0.5f - buttonCount * 0.5f * buttonSize.x;
 
-						ImGui::InvisibleButton("TitlebarGrab2", { buttonStartPositionX - buttonSize.x * 0.25f, region.y });
+						ImGui::InvisibleButton("TitlebarGrab2", { buttonStartPositionX - ImGui::GetCursorPosX(), maxRegion.y });
 						if (ImGui::IsItemHovered())
 							m_Application->GetWindow().RegisterOverTitlebar(true);
 						ImGui::SetItemAllowOverlap();
@@ -784,7 +812,7 @@ namespace ArcEngine
 	{
 		if (Project::Load(path))
 		{
-			ScriptEngine::ReloadAppDomain();
+			ScriptEngine::ReloadAppDomain(true);
 
 			if (!Project::GetActive()->GetConfig().StartScene.empty())
 			{

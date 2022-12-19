@@ -103,7 +103,8 @@ namespace ArcEngine
 
 		GCManager::Init();
 		ScriptEngineRegistry::RegisterInternalCalls();
-		ReloadAppDomain();
+
+		ReloadAppDomain(true);
 	}
 
 	void ScriptEngine::Shutdown()
@@ -192,7 +193,8 @@ namespace ArcEngine
 			{
 				std::string buildCommand = "dotnet msbuild \"";
 				buildCommand += Project::GetSolutionPath().string();
-				buildCommand += "\" -nologo"																	// no microsoft branding in console
+				buildCommand += ("\" /property:Configuration=" + Project::GetBuildConfigString()).c_str();
+				buildCommand += " -nologo"																	// no microsoft branding in console
 								" -noconlog"																// no console logs
 								//" -t:rebuild"																// rebuild the project
 								" -m"																		// multiprocess build

@@ -1,5 +1,6 @@
 Project:
   Name: Sandbox
-  StartScene: "Scenes/Box2D.arc"
-  AssetDirectory: "Assets"
-  ScriptModulePath: "Binaries"
+  StartScene: Scenes/Box2D.arc
+  AssetDirectory: Assets
+  ScriptModulePath: Binaries
+  BuildConfiguration: 0

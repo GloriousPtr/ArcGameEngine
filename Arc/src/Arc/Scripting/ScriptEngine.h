@@ -212,7 +212,7 @@ namespace ArcEngine
 		static void Shutdown();
 		static void LoadCoreAssembly();
 		static void LoadClientAssembly();
-		static void ReloadAppDomain(bool rebuild = true);
+		static void ReloadAppDomain(bool rebuild);
 		static void LoadAssemblyClasses(MonoAssembly* assembly);
 
 		static MonoDomain* GetDomain();

@@ -25,6 +25,7 @@ namespace ArcEngine
 				out << YAML::Key << "StartScene" << YAML::Value << config.StartScene.string();
 				out << YAML::Key << "AssetDirectory" << YAML::Value << config.AssetDirectory.string();
 				out << YAML::Key << "ScriptModulePath" << YAML::Value << config.ScriptModulePath.string();
+				out << YAML::Key << "BuildConfiguration" << YAML::Value << (int)config.BuildConfiguration;
 				out << YAML::EndMap; // Project
 			}
 			out << YAML::EndMap; // Root
@@ -59,6 +60,9 @@ namespace ArcEngine
 		config.StartScene = projectNode["StartScene"].as<std::string>();
 		config.AssetDirectory = projectNode["AssetDirectory"].as<std::string>();
 		config.ScriptModulePath = projectNode["ScriptModulePath"].as<std::string>();
+		if (projectNode["BuildConfiguration"])
+			config.BuildConfiguration = (ProjectConfig::BuildConfig)projectNode["BuildConfiguration"].as<int>();
+
 		return true;
 	}
 }

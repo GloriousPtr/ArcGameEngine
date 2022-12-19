@@ -19,14 +19,6 @@ namespace ArcEngine
 
 		if (OnBegin())
 		{
-			static const char* btnTitle = "Reload Assemblies";
-			ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(btnTitle).x - ImGui::GetStyle().WindowPadding.x);
-
-			if (ImGui::Button(btnTitle))
-				ScriptEngine::ReloadAppDomain();
-
-			ImGui::Separator();
-
 			auto& layerCollisionMask = Scene::LayerCollisionMask;
 
 			if (ImGui::TreeNode("Layers"))
