@@ -19,7 +19,7 @@ namespace ArcEngine
 		#region Log
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void Log_LogMessage(Log.LogLevel level, string formattedMessage);
+		internal static extern void Log_LogMessage(Log.LogLevel level, string formattedMessage, string fileName, string memberName, int lineNumber);
 
 		#endregion
 

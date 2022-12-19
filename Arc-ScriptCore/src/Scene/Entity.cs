@@ -75,7 +75,7 @@ namespace ArcEngine
 		{
 			if (HasComponent<T>())
 			{
-				Log.Error("{0} already exists on Entity: {1}", typeof(T).Name, ID);
+				Log.Error($"{typeof(T).Name} already exists on Entity: {ID}");
 				return GetComponent<T>();
 			}
 

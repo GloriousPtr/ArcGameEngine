@@ -95,25 +95,29 @@ namespace ArcEngine
 	// Logging ////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
-	void Log_LogMessage(Log::Level level, MonoString* formattedMessage)
+	void Log_LogMessage(Log::Level level, MonoString* formattedMessage, MonoString* filepath, MonoString* function, int32_t line)
 	{
 		ARC_PROFILE_SCOPE();
 
+		eastl::string file = MonoUtils::MonoStringToUTF8(filepath);
+		eastl::string func = MonoUtils::MonoStringToUTF8(function);
+		eastl::string msg = MonoUtils::MonoStringToUTF8(formattedMessage);
+
 		switch (level)
 		{
-			case Log::Level::Trace:		ARC_APP_TRACE(MonoUtils::MonoStringToUTF8(formattedMessage));
+			case Log::Level::Trace:		ARC_APP_TRACE_EXTERNAL(file.c_str(), line, func.c_str(), msg);
 										break;
-			case Log::Level::Debug:		ARC_APP_DEBUG(MonoUtils::MonoStringToUTF8(formattedMessage));
+			case Log::Level::Debug:		ARC_APP_DEBUG_EXTERNAL(file.c_str(), line, func.c_str(), msg);
 										break;
-			case Log::Level::Info:		ARC_APP_INFO(MonoUtils::MonoStringToUTF8(formattedMessage));
+			case Log::Level::Info:		ARC_APP_INFO_EXTERNAL(file.c_str(), line, func.c_str(), msg);
 										break;
-			case Log::Level::Warn:		ARC_APP_WARN(MonoUtils::MonoStringToUTF8(formattedMessage));
+			case Log::Level::Warn:		ARC_APP_WARN_EXTERNAL(file.c_str(), line, func.c_str(), msg);
 										break;
-			case Log::Level::Error:		ARC_APP_ERROR(MonoUtils::MonoStringToUTF8(formattedMessage));
+			case Log::Level::Error:		ARC_APP_ERROR_EXTERNAL(file.c_str(), line, func.c_str(), msg);
 										break;
-			case Log::Level::Critical:	ARC_APP_CRITICAL(MonoUtils::MonoStringToUTF8(formattedMessage));
+			case Log::Level::Critical:	ARC_APP_CRITICAL_EXTERNAL(file.c_str(), line, func.c_str(), msg);
 										break;
-			default:					ARC_APP_TRACE(MonoUtils::MonoStringToUTF8(formattedMessage));
+			default:					ARC_APP_TRACE_EXTERNAL(file.c_str(), line, func.c_str(), msg);
 										break;
 		}
 	}

@@ -64,3 +64,10 @@ struct fmt::formatter<eastl::string>
 #define ARC_APP_WARN(...)		::ArcEngine::Log::GetClientLogger()->warn(__VA_ARGS__)
 #define ARC_APP_ERROR(...)		::ArcEngine::Log::GetClientLogger()->error(__VA_ARGS__)
 #define ARC_APP_CRITICAL(...)	::ArcEngine::Log::GetClientLogger()->critical(__VA_ARGS__)
+
+#define ARC_APP_TRACE_EXTERNAL(file, line, function, ...)			::ArcEngine::Log::GetClientLogger()->log(spdlog::source_loc{ file, line, function }, spdlog::level::trace, __VA_ARGS__)
+#define ARC_APP_INFO_EXTERNAL(file, line, function, ...)			::ArcEngine::Log::GetClientLogger()->log(spdlog::source_loc{ file, line, function }, spdlog::level::info, __VA_ARGS__)
+#define ARC_APP_DEBUG_EXTERNAL(file, line, function, ...)			::ArcEngine::Log::GetClientLogger()->log(spdlog::source_loc{ file, line, function }, spdlog::level::debug, __VA_ARGS__)
+#define ARC_APP_WARN_EXTERNAL(file, line, function, ...)			::ArcEngine::Log::GetClientLogger()->log(spdlog::source_loc{ file, line, function }, spdlog::level::warn, __VA_ARGS__)
+#define ARC_APP_ERROR_EXTERNAL(file, line, function, ...)			::ArcEngine::Log::GetClientLogger()->log(spdlog::source_loc{ file, line, function }, spdlog::level::err, __VA_ARGS__)
+#define ARC_APP_CRITICAL_EXTERNAL(file, line, function, ...)		::ArcEngine::Log::GetClientLogger()->log(spdlog::source_loc{ file, line, function }, spdlog::level::critical, __VA_ARGS__)

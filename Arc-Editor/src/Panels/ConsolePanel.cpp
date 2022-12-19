@@ -1,6 +1,7 @@
 #include "ConsolePanel.h"
 
 #include <Arc/ImGui/Modules/ExternalConsoleSink.h>
+#include <Platform/VisualStudio/VisualStudioAccessor.h>
 
 #include <glm/glm.hpp>
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -24,7 +25,7 @@ namespace ArcEngine
 		s_MessageBufferRenderFilter |= Log::Level::Error;
 		s_MessageBufferRenderFilter |= Log::Level::Critical;
 
-		ExternalConsoleSink::SetConsoleSink_HandleFlush([this](const eastl::string& message, Log::Level level){ AddMessage(message, level); });
+		ExternalConsoleSink::SetConsoleSink_HandleFlush([this](const eastl::string& message, const eastl::string& filepath, const eastl::string& function, int32_t line, Log::Level level){ AddMessage(message, filepath, function, line, level); });
 		m_MessageBuffer = eastl::vector<Ref<ConsolePanel::Message>>(m_Capacity);
 	}
 
@@ -33,13 +34,13 @@ namespace ArcEngine
 		ExternalConsoleSink::SetConsoleSink_HandleFlush(nullptr);
 	}
 
-	void ConsolePanel::AddMessage(const eastl::string& message, Log::Level level)
+	void ConsolePanel::AddMessage(const eastl::string& message, const eastl::string& filepath, const eastl::string& function, int32_t line, Log::Level level)
 	{
 		ARC_PROFILE_SCOPE();
 
 		static uint32_t id = 0;
 
-		*(m_MessageBuffer.begin() + m_BufferBegin) = CreateRef<Message>(id, message, level);
+		*(m_MessageBuffer.begin() + m_BufferBegin) = CreateRef<Message>(id, message, filepath, function, line, level);
 		if (++m_BufferBegin == m_Capacity)
 			m_BufferBegin = 0;
 		if (m_BufferSize < m_Capacity)
@@ -177,9 +178,9 @@ namespace ArcEngine
 
 		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_RowBg
 			| ImGuiTableFlags_ContextMenuInBody
-			| ImGuiTableFlags_ScrollX
 			| ImGuiTableFlags_ScrollY;
 
+		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 1, 1 });
 		if (ImGui::BeginTable("ScrollRegionTable", 1, tableFlags))
 		{
 			ImGui::SetWindowFontScale(m_DisplayScale);
@@ -236,13 +237,13 @@ namespace ArcEngine
 
 			ImGui::EndTable();
 		}
+		ImGui::PopStyleVar();
 	}
 
-	ConsolePanel::Message::Message(uint32_t id, const eastl::string& message, Log::Level level)
-		: ID(id), Buffer(message), Level(level)
+	ConsolePanel::Message::Message(uint32_t id, const eastl::string& message, const eastl::string& filepath, const eastl::string& function, int32_t line, Log::Level level)
+		: ID(id), Buffer(message), Filepath(filepath), Function(function), Line(line), Level(level)
 	{
 		ARC_PROFILE_SCOPE();
-
 	}
 
 	void ConsolePanel::Message::OnImGuiRender() const
@@ -252,15 +253,24 @@ namespace ArcEngine
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
 
+		ImGuiTreeNodeFlags flags = 0;
+		flags |= ImGuiTreeNodeFlags_OpenOnArrow;
+		flags |= ImGuiTreeNodeFlags_SpanFullWidth;
+		flags |= ImGuiTreeNodeFlags_FramePadding;
+		flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+
+		ImGui::PushID((int)ID);
 		glm::vec4 c = GetRenderColor(Level);
 		ImGui::PushStyleColor(ImGuiCol_Text, { c.r, c.g, c.b, c.a });
 		ImGui::PushFont(EditorTheme::BoldFont);
 		auto levelIcon = GetLevelIcon(Level);
-		ImGui::Text("%s  %s", levelIcon, Buffer.c_str());
+		ImGui::TreeNodeEx((const void*)ID, flags, "%s  %s", levelIcon, Buffer.c_str());
 		ImGui::PopFont();
 		ImGui::PopStyleColor();
 
-		ImGui::PushID((int)ID);
+		if (Line != 0 && !Filepath.empty() && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+			VisualStudioAccessor::OpenFile(Filepath, Line);
+
 		if(ImGui::BeginPopupContextItem("Popup"))
 		{
 			if(ImGui::MenuItem("Copy"))
