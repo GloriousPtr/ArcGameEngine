@@ -146,10 +146,32 @@ namespace ArcEngine
 
 	void RunAndOpenSolutionAndFile(const std::filesystem::path& solutionPath, const char* filepath = nullptr, uint32_t goToLine = 0)
 	{
+		constexpr const char* vs2022Enterprise = "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/Common7/IDE/devenv.exe";
+		constexpr const char* vs2022Professional = "C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/devenv.exe";
+		constexpr const char* vs2022Community = "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/devenv.exe";
+
+		std::string cmdArgs = "";
+		if (std::filesystem::exists(vs2022Enterprise))
+		{
+			cmdArgs = vs2022Enterprise;
+		}
+		else if (std::filesystem::exists(vs2022Professional))
+		{
+			cmdArgs = vs2022Professional;
+		}
+		else if (std::filesystem::exists(vs2022Community))
+		{
+			cmdArgs = vs2022Community;
+		}
+		else
+		{
+			ARC_CORE_ERROR("Failed to run Visual Studio 2022! Make sure VS2022 Enterprise, Professional or Community is installed");
+			return;
+		}
+		cmdArgs += " ";
+
 		static PROCESS_INFORMATION processInfo = { nullptr, nullptr, 0, 0 };
 		ProcessInfo process = {false, processInfo.dwProcessId};
-
-		std::string cmdArgs = "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/devenv.exe ";
 
 		bool processShouldRun = process.ID == 0;
 
