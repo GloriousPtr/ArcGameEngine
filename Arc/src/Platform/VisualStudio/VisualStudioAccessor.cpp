@@ -21,6 +21,7 @@ namespace ArcEngine
 	using namespace Microsoft::WRL;
 
 	inline static constexpr const char* programId = "VisualStudio.DTE";
+	inline static constexpr const char* projGenId = "vs2022";
 	inline static ComPtr<EnvDTE80::DTE2> s_VsInstance = nullptr;
 	inline static std::future<void> s_OpenProjectFuture;
 	inline static std::future<void> s_OpenFileFuture;
@@ -144,7 +145,7 @@ namespace ArcEngine
 		return TRUE;
 	}
 
-	void RunAndOpenSolutionAndFile(const std::filesystem::path& solutionPath, const char* filepath = nullptr, uint32_t goToLine = 0)
+	static void RunAndOpenSolutionAndFile(const std::filesystem::path& solutionPath, const char* filepath = nullptr, uint32_t goToLine = 0)
 	{
 		constexpr const char* vs2022Enterprise = "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/Common7/IDE/devenv.exe";
 		constexpr const char* vs2022Professional = "C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/devenv.exe";
@@ -225,6 +226,87 @@ namespace ArcEngine
 			CloseHandle(processInfo.hThread);
 			CloseHandle(processInfo.hProcess);
 		}
+	}
+
+	static bool BuildSolutionUsingProcess(const std::filesystem::path& solutionPath, const std::string& buildConfig)
+	{
+		constexpr const char* buildFlags = ""
+			" -nologo"																	// no microsoft branding in console
+			" -noconlog"																// no console logs
+			//" -t:rebuild"																// rebuild the project
+			" -m"																		// multiprocess build
+			" -flp1:Verbosity=minimal;logfile=AssemblyBuildErrors.log;errorsonly"		// dump errors in AssemblyBuildErrors.log file
+			" -flp2:Verbosity=minimal;logfile=AssemblyBuildWarnings.log;warningsonly";	// dump warnings in AssemblyBuildWarnings.log file
+
+		std::string buildCommand = "dotnet.exe msbuild ";
+
+		buildCommand += "\"";
+		buildCommand += solutionPath.string();
+		buildCommand += "\"";
+
+		buildCommand += " /property:Configuration=";
+		buildCommand += buildConfig;
+
+		buildCommand += buildFlags;
+
+		_bstr_t wCmdArgs(buildCommand.c_str());
+
+		STARTUPINFO startInfo = {};
+		PROCESS_INFORMATION processInfo = { nullptr, nullptr, 0, 0 };
+		HRESULT result = CreateProcess(nullptr, wCmdArgs, nullptr, nullptr, FALSE, HIGH_PRIORITY_CLASS, nullptr, nullptr, &startInfo, &processInfo);
+		WaitForSingleObject(processInfo.hProcess, INFINITE);
+
+		bool failed = FAILED(result);
+		if (failed)
+			ARC_CORE_ERROR("Failed to build solution: {}", GetLastError());
+
+		CloseHandle(processInfo.hThread);
+		CloseHandle(processInfo.hProcess);
+
+		// Errors
+		{
+			FILE* errors = fopen("AssemblyBuildErrors.log", "r");
+
+			char buffer[4096];
+			if (errors != nullptr)
+			{
+				while (fgets(buffer, sizeof(buffer), errors))
+				{
+					if (buffer)
+					{
+						size_t newLine = eastl::string_view(buffer).size() - 1;
+						buffer[newLine] = '\0';
+						ARC_APP_ERROR(buffer);
+						failed = true;
+					}
+				}
+
+				fclose(errors);
+			}
+		}
+
+		// Warnings
+		{
+			FILE* warns = fopen("AssemblyBuildWarnings.log", "r");
+
+			char buffer[1024];
+			if (warns != nullptr)
+			{
+				while (fgets(buffer, sizeof(buffer), warns))
+				{
+					if (buffer)
+					{
+						size_t newLine = eastl::string_view(buffer).size() - 1;
+						buffer[newLine] = '\0';
+						ARC_APP_WARN(buffer);
+					}
+				}
+
+				fclose(warns);
+			}
+		}
+		
+		return !failed;
 	}
 
 	void VisualStudioAccessor::RunVisualStudio()
@@ -314,5 +396,90 @@ namespace ArcEngine
 			if (window)
 				window->put_Visible(VARIANT_TRUE);
 		});
+	}
+
+	bool VisualStudioAccessor::AddFile(const eastl::string& filepath, bool open)
+	{
+		bool success = GenerateProjectFiles();
+		if (open)
+			OpenFile(filepath);
+		return success;
+	}
+
+	bool VisualStudioAccessor::GenerateProjectFiles()
+	{
+		if (!Project::GetActive())
+		{
+			ARC_CORE_ERROR("No active project found!");
+			return false;
+		}
+
+		std::filesystem::path premakeExePath = "../vendor/premake/bin/premake5.exe";
+		if (!std::filesystem::exists(premakeExePath))
+		{
+			ARC_CORE_ERROR("Failed to locate premake5.exe to generate solution files");
+			return false;
+		}
+
+		std::filesystem::path projectFilepath = Project::GetProjectDirectory() / "premake5.lua";
+		if (!std::filesystem::exists(projectFilepath))
+		{
+			ARC_CORE_ERROR("Failed to locate premake5.lua at {}", projectFilepath);
+			return false;
+		}
+
+		std::string premakeCommand = "\"";
+		premakeCommand += premakeExePath.string();
+		premakeCommand += "\"";
+
+		premakeCommand += " --file=";
+
+		premakeCommand += "\"";
+		premakeCommand += projectFilepath.string();
+		premakeCommand += "\"";
+
+		premakeCommand += " --scripts=";
+		premakeCommand += "\"";
+		premakeCommand += std::filesystem::current_path().string();
+		premakeCommand += "\"";
+
+		premakeCommand += " ";
+		premakeCommand += projGenId;
+
+		_bstr_t wCmdArgs(premakeCommand.c_str());
+
+		STARTUPINFO startInfo = {};
+		PROCESS_INFORMATION processInfo = { nullptr, nullptr, 0, 0 };
+		HRESULT result = CreateProcess(nullptr, wCmdArgs, nullptr, nullptr, FALSE, HIGH_PRIORITY_CLASS, nullptr, nullptr, &startInfo, &processInfo);
+		WaitForSingleObject(processInfo.hProcess, INFINITE);
+
+		bool failed = FAILED(result);
+		if (failed)
+			ARC_CORE_ERROR("Failed to generate solution files: {}", GetLastError());
+
+		CloseHandle(processInfo.hThread);
+		CloseHandle(processInfo.hProcess);
+
+		return !failed;
+	}
+	
+	bool VisualStudioAccessor::BuildSolution(const std::function<void()>& onComplete)
+	{
+		if (!Project::GetActive())
+		{
+			ARC_CORE_ERROR("No active project found!");
+			return false;
+		}
+
+		std::filesystem::path solutionPath = Project::GetSolutionPath();
+		if (!IsDteValid())
+			FindAndSetRunningInstance(solutionPath.string());
+
+		bool success = BuildSolutionUsingProcess(solutionPath, Project::GetBuildConfigString().c_str());
+
+		if (onComplete)
+			onComplete();
+
+		return success;
 	}
 }

@@ -18,6 +18,7 @@
 #include "MonoUtils.h"
 #include "GCManager.h"
 #include "ScriptEngineRegistry.h"
+#include "Platform/VisualStudio/VisualStudioAccessor.h"
 
 namespace ArcEngine
 {
@@ -104,7 +105,7 @@ namespace ArcEngine
 		GCManager::Init();
 		ScriptEngineRegistry::RegisterInternalCalls();
 
-		ReloadAppDomain(true);
+		ReloadAppDomain();
 	}
 
 	void ScriptEngine::Shutdown()
@@ -131,9 +132,8 @@ namespace ArcEngine
 		if (!project)
 			return;
 
-		constexpr const char* coreAssemblyName = "Arc-ScriptCore.dll";
-		auto path = Project::GetScriptModuleDirectory() / coreAssemblyName;
-		s_Data->CoreAssembly = MonoUtils::LoadMonoAssembly(path.string().c_str(), s_Data->EnableDebugging);
+		std::filesystem::path path = "Resources/Scripts/Arc-ScriptCore.dll";
+		s_Data->CoreAssembly = MonoUtils::LoadMonoAssembly(path, s_Data->EnableDebugging);
 		s_Data->CoreImage = mono_assembly_get_image(s_Data->CoreAssembly);
 
 		s_Data->EntityClass = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "Entity");
@@ -157,98 +157,48 @@ namespace ArcEngine
 
 		std::string clientAssemblyName = project->GetConfig().Name + ".dll";
 		auto path = Project::GetScriptModuleDirectory() / clientAssemblyName;
-		s_Data->AppAssembly = MonoUtils::LoadMonoAssembly(path, s_Data->EnableDebugging);
-		s_Data->AppImage = mono_assembly_get_image(s_Data->AppAssembly);
+		if (std::filesystem::exists(path))
+		{
+			s_Data->AppAssembly = MonoUtils::LoadMonoAssembly(path, s_Data->EnableDebugging);
+			s_Data->AppImage = mono_assembly_get_image(s_Data->AppAssembly);
 
-		GCManager::CollectGarbage();
+			GCManager::CollectGarbage();
 
-		s_Data->EntityClasses.clear();
-		LoadAssemblyClasses(s_Data->AppAssembly);
+			s_Data->EntityClasses.clear();
+			LoadAssemblyClasses(s_Data->AppAssembly);
 
-		ScriptEngineRegistry::ClearTypes();
-		ScriptEngineRegistry::RegisterTypes();
+			ScriptEngineRegistry::ClearTypes();
+			ScriptEngineRegistry::RegisterTypes();
+		}
+		else
+		{
+			GCManager::CollectGarbage();
+		}
 	}
 
-	void ScriptEngine::ReloadAppDomain(bool rebuild)
+	void ScriptEngine::ReloadAppDomain()
 	{
 		ARC_PROFILE_SCOPE();
 
+		if (!Project::GetActive())
+			return;
+
 		std::chrono::high_resolution_clock::time_point begin = std::chrono::high_resolution_clock::now();
-		if (rebuild)
+		if (!VisualStudioAccessor::GenerateProjectFiles())
+			return;
+
+		bool buildSuccess = VisualStudioAccessor::BuildSolution();
+
+		std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+		auto timeTaken = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+
+		if (!buildSuccess)
 		{
-			if (!Project::GetActive())
-				return;
-
-			// Premake build
-			std::filesystem::path projectPath = Project::GetProjectDirectory();
-			{
-				std::string premakeCommand = R"(call "../vendor/premake/bin/premake5.exe" --file=")";
-				premakeCommand += (projectPath / R"(premake5.lua")").string();
-				premakeCommand += " --scripts=" + std::filesystem::current_path().string();
-				premakeCommand += " vs2022";
-				std::system(premakeCommand.c_str());
-			}
-
-			//Compile app assembly
-			{
-				std::string buildCommand = "dotnet msbuild \"";
-				buildCommand += Project::GetSolutionPath().string();
-				buildCommand += ("\" /property:Configuration=" + Project::GetBuildConfigString()).c_str();
-				buildCommand += " -nologo"																	// no microsoft branding in console
-								" -noconlog"																// no console logs
-								//" -t:rebuild"																// rebuild the project
-								" -m"																		// multiprocess build
-								" -flp1:Verbosity=minimal;logfile=AssemblyBuildErrors.log;errorsonly"		// dump errors in AssemblyBuildErrors.log file
-								" -flp2:Verbosity=minimal;logfile=AssemblyBuildWarnings.log;warningsonly";	// dump warnings in AssemblyBuildWarnings.log file
-				std::system(buildCommand.c_str());
-
-				// Errors
-				{
-					FILE* errors = fopen("AssemblyBuildErrors.log", "r");
-
-					char buffer[4096];
-					if (errors != nullptr)
-					{
-						while (fgets(buffer, sizeof(buffer), errors))
-						{
-							if (buffer)
-							{
-								size_t newLine = eastl::string_view(buffer).size() - 1;
-								buffer[newLine] = '\0';
-								ARC_APP_ERROR(buffer);
-							}
-						}
-
-						fclose(errors);
-					}
-				}
-
-				// Warnings
-				{
-					FILE* warns = fopen("AssemblyBuildWarnings.log", "r");
-
-					char buffer[1024];
-					if (warns != nullptr)
-					{
-						while (fgets(buffer, sizeof(buffer), warns))
-						{
-							if (buffer)
-							{
-								size_t newLine = eastl::string_view(buffer).size() - 1;
-								buffer[newLine] = '\0';
-								ARC_APP_WARN(buffer);
-							}
-						}
-
-						fclose(warns);
-					}
-				}
-			}
-
-			std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
-			auto timeTaken = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-			ARC_CORE_INFO("Compile time: {0}ms", timeTaken);
+			ARC_CORE_ERROR("Build Failed; Compile time: {0}ms", timeTaken);
+			return;
 		}
+
+		ARC_CORE_INFO("Build Suceeded; Compile time: {0}ms", timeTaken);
 
 		if (s_Data->AppDomain)
 		{

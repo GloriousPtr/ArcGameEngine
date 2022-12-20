@@ -250,7 +250,7 @@ namespace ArcEngine
 							ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 
 							if (ImGui::MenuItem("Reload Assemblies"))
-								ScriptEngine::ReloadAppDomain(true);
+								ScriptEngine::ReloadAppDomain();
 
 							ImGui::PopStyleVar();
 							ImGui::EndMenu();
@@ -348,7 +348,7 @@ namespace ArcEngine
 										Project::GetActive()->GetConfig().BuildConfiguration = (ProjectConfig::BuildConfig)i;
 										SaveProject(Project::GetProjectDirectory() / (Project::GetActive()->GetConfig().Name + ".arcproj").c_str());
 
-										ScriptEngine::ReloadAppDomain(true);
+										ScriptEngine::ReloadAppDomain();
 									}
 
 									if (isSelected)
@@ -812,7 +812,7 @@ namespace ArcEngine
 	{
 		if (Project::Load(path))
 		{
-			ScriptEngine::ReloadAppDomain(true);
+			ScriptEngine::ReloadAppDomain();
 
 			if (!Project::GetActive()->GetConfig().StartScene.empty())
 			{
