@@ -264,7 +264,7 @@ namespace ArcEngine
 		ImGui::PushStyleColor(ImGuiCol_Text, { c.r, c.g, c.b, c.a });
 		ImGui::PushFont(EditorTheme::BoldFont);
 		auto levelIcon = GetLevelIcon(Level);
-		ImGui::TreeNodeEx((const void*)ID, flags, "%s  %s", levelIcon, Buffer.c_str());
+		ImGui::TreeNodeEx((void*)(uint64_t)ID, flags, "%s  %s", levelIcon, Buffer.c_str());
 		ImGui::PopFont();
 		ImGui::PopStyleColor();
 
