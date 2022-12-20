@@ -329,9 +329,9 @@ namespace ArcEngine
 				{
 					ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 1, 1 });
-
 					if (Project::GetActive())
 					{
+						ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, windowPadding);
 						if (ImGui::BeginMenuBar())
 						{
 							const char* buildConfigStrings[3] = { "Debug", "Release", "Dist" };
@@ -357,6 +357,7 @@ namespace ArcEngine
 								ImGui::EndCombo();
 							}
 						}
+						ImGui::PopStyleVar();
 
 						ImVec2 region = ImGui::GetContentRegionAvail();
 						ImVec2 maxRegion = ImGui::GetContentRegionMax();
