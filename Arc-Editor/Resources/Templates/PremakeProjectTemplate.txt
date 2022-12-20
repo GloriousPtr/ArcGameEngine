@@ -39,11 +39,14 @@ project "{PROJECT_NAME}"
     filter "configurations:Debug"
         optimize "Off"
         symbols "Default"
+        defines { "DEBUG" }
 
     filter "configurations:Release"
         optimize "On"
         symbols "Default"
-        
+        defines { "RELEASE" }
+
     filter "configurations:Dist"
         optimize "Full"
         symbols "Off"
+        defines { "DIST" }

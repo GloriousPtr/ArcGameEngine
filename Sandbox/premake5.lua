@@ -33,22 +33,20 @@ project "Sandbox"
 
     links
     {
-        ArcRootDir .. "Arc-ScriptCore"
+        ArcRootDir .. "/Arc-Editor/Resources/Scripts/Arc-ScriptCore.dll"
     }
 
     filter "configurations:Debug"
         optimize "Off"
         symbols "Default"
+        defines { "DEBUG" }
 
     filter "configurations:Release"
         optimize "On"
         symbols "Default"
+        defines { "RELEASE" }
         
     filter "configurations:Dist"
         optimize "Full"
         symbols "Off"
-
-group "Dependencies"
-	include (ArcRootDir .. "Arc-ScriptCore")
-
-group ""
+        defines { "DIST" }
