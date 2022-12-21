@@ -1,10 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-
-#include <string>
-#include <glm/glm.hpp>
-
 namespace ArcEngine
 {
 	enum class MaterialPropertyType

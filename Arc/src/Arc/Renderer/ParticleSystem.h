@@ -1,15 +1,14 @@
 #pragma once
 
-#include <vector>
-#include <glm/glm.hpp>
-#include <glm/gtx/compatibility.hpp>
-
 #include "Arc/Core/Timestep.h"
 #include "Arc/Math/Math.h"
-#include "Arc/Renderer/Texture.h"
+
+#include <glm/gtx/compatibility.hpp>
 
 namespace ArcEngine
 {
+	class Texture2D;
+
 	struct Particle
 	{
 		glm::vec3 Position = glm::vec3(0.0f);

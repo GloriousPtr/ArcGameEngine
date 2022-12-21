@@ -1,16 +1,12 @@
 #include "PropertiesPanel.h"
 
-#include <glm/gtc/type_ptr.hpp>
 #include <icons/IconsMaterialDesignIcons.h>
-#include <imgui/imgui.h>
-#include <ImGuizmo/ImGradient.h>
 #include <imgui/imgui_internal.h>
 
 #include <Arc/Scene/EntitySerializer.h>
 
 #include "../Utils/UI.h"
 #include "../Utils/EditorTheme.h"
-#include "../EditorLayer.h"
 
 namespace ArcEngine
 {

@@ -180,7 +180,7 @@ namespace ArcEngine
 			out << YAML::BeginMap; // TagComponent
 
 			const auto& tc = entity.GetComponent<TagComponent>();
-			out << YAML::Key << "Tag" << YAML::Value << tc.Tag.c_str();
+			out << YAML::Key << "Tag" << YAML::Value << tc.Tag;
 			out << YAML::Key << "Layer" << YAML::Value << tc.Layer;
 			out << YAML::Key << "Enabled" << YAML::Value << tc.Enabled;
 
@@ -252,7 +252,7 @@ namespace ArcEngine
 			out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.Color;
 			out << YAML::Key << "SortingOrder" << YAML::Value << spriteRendererComponent.SortingOrder;
 			out << YAML::Key << "TilingFactor" << YAML::Value << spriteRendererComponent.TilingFactor;
-			out << YAML::Key << "TexturePath" << YAML::Value << (spriteRendererComponent.Texture ? Project::GetAssetRelativeFileSystemPath(spriteRendererComponent.Texture->GetPath().c_str()).string() : "");
+			out << YAML::Key << "TexturePath" << YAML::Value << (spriteRendererComponent.Texture ? Project::GetAssetRelativeFileSystemPath(spriteRendererComponent.Texture->GetPath()).string() : "");
 
 			out << YAML::EndMap; // SpriteRendererComponent
 		}
@@ -263,7 +263,7 @@ namespace ArcEngine
 			out << YAML::BeginMap; // MeshComponent
 
 			const auto& skyLightComponent = entity.GetComponent<SkyLightComponent>();
-			out << YAML::Key << "TexturePath" << YAML::Value << (skyLightComponent.Texture ? Project::GetAssetRelativeFileSystemPath(skyLightComponent.Texture->GetPath().c_str()).string() : "");
+			out << YAML::Key << "TexturePath" << YAML::Value << (skyLightComponent.Texture ? Project::GetAssetRelativeFileSystemPath(skyLightComponent.Texture->GetPath()).string() : "");
 			out << YAML::Key << "Intensity" << YAML::Value << skyLightComponent.Intensity;
 			out << YAML::Key << "Rotation" << YAML::Value << skyLightComponent.Rotation;
 
@@ -352,7 +352,7 @@ namespace ArcEngine
 			out << YAML::Key << "RotationBySpeed.MaxSpeed" << YAML::Value << particleProps.RotationBySpeed.MaxSpeed;
 			out << YAML::Key << "RotationBySpeed.Enabled" << YAML::Value << particleProps.RotationBySpeed.Enabled;
 
-			out << YAML::Key << "TexturePath" << YAML::Value << particleProps.Texture->GetPath().c_str();
+			out << YAML::Key << "TexturePath" << YAML::Value << particleProps.Texture->GetPath();
 
 			out << YAML::EndMap; // ParticleSystemComponent
 		}
@@ -681,7 +681,7 @@ namespace ArcEngine
 				out << YAML::Key << i << YAML::BeginMap;
 				++i;
 
-				out << YAML::Key << "Name" << YAML::Value << className.c_str();
+				out << YAML::Key << "Name" << YAML::Value << className;
 				out << YAML::Key << "Fields" << YAML::BeginMap;
 
 				const auto& fields = ScriptEngine::GetFieldMap(className.c_str());
@@ -695,7 +695,7 @@ namespace ArcEngine
 					if (!field.Serializable)
 						continue;
 
-					out << YAML::Key << fieldName.c_str() << YAML::Value;
+					out << YAML::Key << fieldName << YAML::Value;
 
 					switch (field.Type)
 					{
@@ -734,8 +734,8 @@ namespace ArcEngine
 			out << YAML::BeginMap; // AudioSourceComponent
 
 			const auto& audioSourceComponent = entity.GetComponent<AudioSourceComponent>();
-			std::string f = (audioSourceComponent.Source ? Project::GetAssetRelativeFileSystemPath(audioSourceComponent.Source->GetPath()).string().c_str() : "");
-			out << YAML::Key << "Filepath" << YAML::Value << f.c_str();
+			std::string f = (audioSourceComponent.Source ? Project::GetAssetRelativeFileSystemPath(audioSourceComponent.Source->GetPath()).string() : "");
+			out << YAML::Key << "Filepath" << YAML::Value << f;
 			out << YAML::Key << "VolumeMultiplier" << YAML::Value << audioSourceComponent.Config.VolumeMultiplier;
 			out << YAML::Key << "PitchMultiplier" << YAML::Value << audioSourceComponent.Config.PitchMultiplier;
 			out << YAML::Key << "PlayOnAwake" << YAML::Value << audioSourceComponent.Config.PlayOnAwake;
@@ -784,7 +784,7 @@ namespace ArcEngine
 		auto tagComponent = entity["TagComponent"];
 		if (tagComponent)
 		{
-			name = tagComponent["Tag"].as<std::string>().c_str();
+			name = tagComponent["Tag"].as<std::string>();
 			TrySet(layer, tagComponent["Layer"]);
 			TrySet(enabled, tagComponent["Enabled"]);
 		}
@@ -882,9 +882,9 @@ namespace ArcEngine
 
 			if (!texturePath.empty())
 			{
-				std::filesystem::path path = texturePath.c_str();
+				std::filesystem::path path = texturePath;
 				path = Project::GetAssetFileSystemPath(path);
-				src.Texture = AssetManager::GetTexture2D(path.string().c_str());
+				src.Texture = AssetManager::GetTexture2D(path.string());
 			}
 		}
 
@@ -898,9 +898,9 @@ namespace ArcEngine
 			TrySet(texturePath, skyLight["TexturePath"]);
 			if (!texturePath.empty())
 			{
-				std::filesystem::path path = texturePath.c_str();
+				std::filesystem::path path = texturePath;
 				path = Project::GetAssetFileSystemPath(path);
-				src.Texture = AssetManager::GetTextureCubemap(path.string().c_str());
+				src.Texture = AssetManager::GetTextureCubemap(path.string());
 			}
 		}
 
@@ -985,9 +985,9 @@ namespace ArcEngine
 			TrySet(texturePath, psComponent["TexturePath"]);
 			if (!texturePath.empty())
 			{
-				std::filesystem::path path = texturePath.c_str();
+				std::filesystem::path path = texturePath;
 				path = Project::GetAssetFileSystemPath(path);
-				props.Texture = AssetManager::GetTexture2D(path.string().c_str());
+				props.Texture = AssetManager::GetTexture2D(path.string());
 			}
 		}
 
@@ -1221,9 +1221,9 @@ namespace ArcEngine
 
 			if (!filepath.empty())
 			{
-				std::filesystem::path path = filepath.c_str();
+				std::filesystem::path path = filepath;
 				path = Project::GetAssetFileSystemPath(path);
-				src.MeshGeometry = AssetManager::GetMesh(path.string().c_str());
+				src.MeshGeometry = AssetManager::GetMesh(path.string());
 			}
 		}
 
@@ -1242,15 +1242,15 @@ namespace ArcEngine
 				{
 					auto scriptNode = scripts[i];
 					
-					std::string scriptName = "";
+					std::string scriptName;
 					TrySet(scriptName, scriptNode["Name"]);
-					if (!ScriptEngine::HasClass(scriptName.c_str()))
+					if (!ScriptEngine::HasClass(scriptName))
 					{
-						ARC_CORE_ERROR("Class not found with name: {}", scriptName.c_str());
+						ARC_CORE_ERROR("Class not found with name: {}", scriptName);
 						continue;
 					}
 
-					sc.Classes.emplace_back(scriptName.c_str());
+					sc.Classes.emplace_back(scriptName);
 
 					const auto& fields = ScriptEngine::GetFieldMap(scriptName.c_str());
 					auto& fieldInstances = ScriptEngine::GetFieldInstanceMap(deserializedEntity, scriptName.c_str());
@@ -1263,7 +1263,7 @@ namespace ArcEngine
 							if (!field.Serializable)
 								continue;
 
-							auto fieldNode = scriptNode["Fields"][fieldName.c_str()];
+							auto fieldNode = scriptNode["Fields"][fieldName];
 							if (fieldNode)
 							{
 								auto& fieldInstance = fieldInstances[fieldName];
@@ -1320,7 +1320,7 @@ namespace ArcEngine
 
 			if (!filepath.empty())
 			{
-				std::filesystem::path path = filepath.c_str();
+				std::filesystem::path path = filepath;
 				path = Project::GetAssetFileSystemPath(path);
 				src.Source = CreateRef<AudioSource>(path.string().c_str());
 			}
@@ -1393,12 +1393,12 @@ namespace ArcEngine
 
 		if (!prefabID)
 		{
-			ARC_CORE_ERROR("Ivalid prefab id : {0} ({1})", StringUtils::GetName(filepath).c_str(), prefabID);
+			ARC_CORE_ERROR("Ivalid prefab id : {0} ({1})", StringUtils::GetName(filepath), prefabID);
 			return {};
 		}
 
 		auto entities = data["Entities"];
-		ARC_CORE_TRACE("Deserializing prefab : {0} ({1})", StringUtils::GetName(filepath).c_str(), prefabID);
+		ARC_CORE_TRACE("Deserializing prefab : {0} ({1})", StringUtils::GetName(filepath), prefabID);
 
 		Entity root = {};
 
@@ -1433,7 +1433,7 @@ namespace ArcEngine
 		}
 		else
 		{
-			ARC_CORE_ERROR("There are no entities in the prefab {0} ({1}) to deserialize!", StringUtils::GetName(filepath).c_str(), prefabID);
+			ARC_CORE_ERROR("There are no entities in the prefab {0} ({1}) to deserialize!", StringUtils::GetName(filepath), prefabID);
 		}
 
 		return root;

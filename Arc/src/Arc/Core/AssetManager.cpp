@@ -1,7 +1,6 @@
 #include "arcpch.h"
 #include "AssetManager.h"
 
-#include <fstream>
 #include <stb_image.h>
 
 #include "Arc/Core/Application.h"

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "Arc/Core/Layer.h"
 
 namespace ArcEngine

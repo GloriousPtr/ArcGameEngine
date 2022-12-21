@@ -4,7 +4,6 @@
 
 #include "Panels/ConsolePanel.h"
 #include "Panels/EditorContext.h"
-#include "Panels/ProjectSettingsPanel.h"
 #include "Panels/SceneHierarchyPanel.h"
 
 namespace ArcEngine

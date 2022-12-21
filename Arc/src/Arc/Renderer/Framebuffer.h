@@ -1,9 +1,5 @@
 #pragma once
 
-#include <vector>
-
-#include "Arc/Core/Base.h"
-
 namespace ArcEngine
 {
 	enum class FramebufferTextureFormat

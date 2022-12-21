@@ -53,7 +53,7 @@ namespace ArcEngine
 		if (!data["Scene"])
 			return false;
 
-		std::string sceneName = data["Scene"].as<std::string>().c_str();
+		std::string sceneName = data["Scene"].as<std::string>();
 		ARC_CORE_TRACE("Deserializing scene '{0}'", sceneName);
 
 		auto entities = data["Entities"];

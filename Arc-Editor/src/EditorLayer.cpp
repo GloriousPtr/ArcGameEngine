@@ -3,16 +3,14 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
+#include <icons/IconsMaterialDesignIcons.h>
 
-#include <ArcEngine.h>
-#include <Arc/Project/ProjectSerializer.h>
 #include <Arc/Scene/SceneSerializer.h>
 #include <Arc/Scripting/ScriptEngine.h>
 #include <Arc/Utils/PlatformUtils.h>
-#include <Arc/Math/Math.h>
-#include <icons/IconsMaterialDesignIcons.h>
 
 #include "Panels/AssetPanel.h"
+#include "Panels/ProjectSettingsPanel.h"
 #include "Panels/PropertiesPanel.h"
 #include "Panels/RendererSettingsPanel.h"
 #include "Panels/SceneViewport.h"
@@ -346,7 +344,7 @@ namespace ArcEngine
 									{
 										current = buildConfigStrings[i];
 										Project::GetActive()->GetConfig().BuildConfiguration = (ProjectConfig::BuildConfig)i;
-										SaveProject(Project::GetProjectDirectory() / (Project::GetActive()->GetConfig().Name + ".arcproj").c_str());
+										SaveProject(Project::GetProjectDirectory() / (Project::GetActive()->GetConfig().Name + ".arcproj"));
 
 										ScriptEngine::ReloadAppDomain();
 									}
@@ -525,7 +523,7 @@ namespace ArcEngine
 					folderPath = buffer;
 				ImGui::SameLine();
 				if (ImGui::Button((const char*)ICON_MDI_FOLDER))
-					folderPath = FileDialogs::OpenFolder().c_str();
+					folderPath = FileDialogs::OpenFolder();
 
 				ImGui::Separator();
 
@@ -535,12 +533,12 @@ namespace ArcEngine
 					if (!prjName.empty() && !folderPath.empty())
 					{
 						Project::New();
-						Project::GetActive()->GetConfig().Name = prjName.c_str();
-						std::filesystem::path projectDirPath = std::filesystem::path(folderPath.c_str()) / prjName.c_str();
+						Project::GetActive()->GetConfig().Name = prjName;
+						std::filesystem::path projectDirPath = std::filesystem::path(folderPath) / prjName;
 						if (!std::filesystem::exists(projectDirPath))
 							std::filesystem::create_directories(projectDirPath);
 
-						std::filesystem::path projectPath = projectDirPath / (prjName + ".arcproj").c_str();
+						std::filesystem::path projectPath = projectDirPath / (prjName + ".arcproj");
 						SaveProject(projectPath);
 						OpenProject(projectPath);
 						ImGui::CloseCurrentPopup();
@@ -837,7 +835,7 @@ namespace ArcEngine
 	{
 		std::string filepath = FileDialogs::OpenFile("Arc Scene (*.arcproj)\0*.arcproj\0");
 		if (!filepath.empty())
-			OpenProject(filepath.c_str());
+			OpenProject(filepath);
 	}
 
 	void EditorLayer::SaveProject(const std::filesystem::path& path) const
@@ -895,7 +893,7 @@ namespace ArcEngine
 		if (!m_ScenePath.empty())
 		{
 			SceneSerializer serializer(m_ActiveScene);
-			serializer.Serialize(m_ScenePath.string().c_str());
+			serializer.Serialize(m_ScenePath.string());
 		}
 		else
 		{
@@ -910,7 +908,7 @@ namespace ArcEngine
 		{
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Serialize(filepath);
-			m_ScenePath = filepath.c_str();
+			m_ScenePath = filepath;
 		}
 	}
 

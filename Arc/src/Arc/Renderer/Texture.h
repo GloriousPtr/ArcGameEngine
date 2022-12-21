@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Arc/Core/Base.h"
-
 namespace ArcEngine
 {
 	using TextureData = void*;

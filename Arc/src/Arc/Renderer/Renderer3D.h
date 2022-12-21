@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "Arc/Scene/Components.h"
 
 struct aiMesh;
@@ -10,7 +8,9 @@ struct aiNode;
 
 namespace ArcEngine
 {
+	class Shader;
 	class ShaderLibrary;
+	class UniformBuffer;
 	struct Submesh;
 	struct RenderGraphData;
 	class Entity;

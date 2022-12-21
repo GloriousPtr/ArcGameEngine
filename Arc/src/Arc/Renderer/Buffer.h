@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 namespace ArcEngine
 {
 	enum class ShaderDataType

@@ -1,10 +1,5 @@
 #pragma once
 
-#include <filesystem>
-
-#include <string>
-#include <unordered_map>
-
 #include "Arc/Core/Base.h"
 
 namespace ArcEngine

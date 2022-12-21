@@ -134,7 +134,7 @@ namespace ArcEngine
 				}
 				default:
 				{
-					ARC_CORE_ASSERT("Unknown type material property: {}", name.c_str());
+					ARC_CORE_ASSERT("Unknown type material property: {}", name);
 					break;
 				}
 			}

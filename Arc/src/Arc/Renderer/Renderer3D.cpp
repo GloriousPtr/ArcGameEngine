@@ -9,6 +9,7 @@
 #include "Framebuffer.h"
 #include "Arc/Renderer/VertexArray.h"
 #include "Arc/Renderer/Material.h"
+#include "Arc/Renderer/Shader.h"
 
 #include "Arc/Scene/Entity.h"
 

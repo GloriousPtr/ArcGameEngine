@@ -1,7 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-
 #include "Arc/Renderer/Shader.h"
 
 namespace ArcEngine

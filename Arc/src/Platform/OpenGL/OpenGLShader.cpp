@@ -28,7 +28,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 		
 		std::string source;
-		Filesystem::ReadFileText(filepath.c_str(), source);
+		Filesystem::ReadFileText(filepath, source);
 		auto shaderSources = PreProcess(source);
 		Compile(shaderSources);
 		
@@ -65,7 +65,7 @@ namespace ArcEngine
 		glDeleteProgram(m_RendererID);
 
 		std::string source;
-		Filesystem::ReadFileText(filepath.c_str(), source);
+		Filesystem::ReadFileText(filepath, source);
 		auto shaderSources = PreProcess(source);
 		Compile(shaderSources);
 	}

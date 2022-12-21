@@ -1,12 +1,10 @@
 #include "SceneViewport.h"
 
 #include <icons/IconsMaterialDesignIcons.h>
-#include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <ImGuizmo.h>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Arc/Math/Math.h"
 #include "../EditorLayer.h"
 #include "../Utils/UI.h"
 

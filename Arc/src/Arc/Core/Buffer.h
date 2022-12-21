@@ -1,8 +1,5 @@
 #pragma once
 
-#include <cstdint>
-#include <cstring>
-
 namespace ArcEngine
 {
 	struct Buffer

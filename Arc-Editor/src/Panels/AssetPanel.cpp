@@ -1,19 +1,17 @@
 #include "AssetPanel.h"
 
-#include <ArcEngine.h>
 #include <Arc/Scene/EntitySerializer.h>
+#include <Arc/Core/Filesystem.h>
+#include <Platform/VisualStudio/VisualStudioAccessor.h>
 
 #include <icons/IconsMaterialDesignIcons.h>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
-#include <filesystem>
 
 #include "../EditorLayer.h"
 #include "../Utils/UI.h"
 #include "../Utils/EditorTheme.h"
-#include "Arc/Core/Filesystem.h"
 
-#include "Platform/VisualStudio/VisualStudioAccessor.h"
 
 namespace ArcEngine
 {
@@ -105,7 +103,7 @@ namespace ArcEngine
 			{
 				Entity entity = *((Entity*)payload->Data);
 				std::filesystem::path path(dropPath);
-				path /= std::string(entity.GetComponent<TagComponent>().Tag + ".prefab").c_str();
+				path /= std::string(entity.GetComponent<TagComponent>().Tag + ".prefab");
 				EntitySerializer::SerializeEntityAsPrefab(path.string().c_str(), entity);
 				return true;
 			}
@@ -132,9 +130,9 @@ namespace ArcEngine
 		const char* filepath = filepathString.c_str();
 		std::string ext = path.extension().string();
 		ext = ext.substr(1);
-		if (s_FileTypes.find(ext.c_str()) != s_FileTypes.end())
+		if (s_FileTypes.find(ext) != s_FileTypes.end())
 		{
-			FileType fileType = s_FileTypes.at(ext.c_str());
+			FileType fileType = s_FileTypes.at(ext);
 			switch (fileType)
 			{
 				case FileType::Scene:
@@ -204,7 +202,7 @@ namespace ArcEngine
 				anyNodeClicked = true;
 			}
 
-			const std::string filepath = entryPath.string().c_str();
+			const std::string filepath = entryPath.string();
 
 			if (!entryIsFile)
 				DragDropTarget(filepath.c_str());
@@ -680,9 +678,9 @@ namespace ArcEngine
 					// Type Color frame
 					auto fileType = FileType::Unknown;
 					const char* fileTypeString = s_FileTypesToString.at(FileType::Unknown);
-					if (s_FileTypes.find(file.Extension.c_str()) != s_FileTypes.end())
+					if (s_FileTypes.find(file.Extension) != s_FileTypes.end())
 					{
-						fileType = s_FileTypes.at(file.Extension.c_str());
+						fileType = s_FileTypes.at(file.Extension);
 						fileTypeString = s_FileTypesToString.at(fileType);
 					}
 
@@ -777,9 +775,9 @@ namespace ArcEngine
 		{
 			const auto& path = directoryEntry.path();
 			auto relativePath = std::filesystem::relative(path, m_AssetsDirectory);
-			std::string filename = relativePath.filename().string().c_str();
-			std::string extension = relativePath.extension().string().c_str();
-			m_DirectoryEntries.emplace_back(filename, path.string().c_str(), extension, directoryEntry, nullptr, directoryEntry.is_directory());
+			std::string filename = relativePath.filename().string();
+			std::string extension = relativePath.extension().string();
+			m_DirectoryEntries.emplace_back(filename, path.string(), extension, directoryEntry, nullptr, directoryEntry.is_directory());
 		}
 
 		m_ElapsedTime = 0.0f;

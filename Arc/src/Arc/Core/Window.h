@@ -1,8 +1,5 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <string>
-
 #include "Arc/Core/Base.h"
 #include "Arc/Events/Event.h"
 

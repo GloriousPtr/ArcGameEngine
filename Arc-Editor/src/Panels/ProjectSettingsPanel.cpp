@@ -1,8 +1,6 @@
 #include "ProjectSettingsPanel.h"
 
-#include <ArcEngine.h>
 #include <icons/IconsMaterialDesignIcons.h>
-#include <imgui/imgui.h>
 
 #include "../Utils/UI.h"
 

@@ -34,7 +34,7 @@ namespace ArcEngine
 			{
 				std::string buffer;
 				Filesystem::ReadFileText("Resources/Templates/PremakeProjectTemplate.txt", buffer);
-				StringUtils::ReplaceString(buffer, "{PROJECT_NAME}", s_ActiveProject->GetConfig().Name.c_str());
+				StringUtils::ReplaceString(buffer, "{PROJECT_NAME}", s_ActiveProject->GetConfig().Name);
 				Filesystem::WriteFileText(premakeFilepath, buffer);
 			}
 

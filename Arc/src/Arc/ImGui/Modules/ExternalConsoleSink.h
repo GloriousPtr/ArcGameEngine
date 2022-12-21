@@ -5,7 +5,6 @@
 
 #include <functional>
 #include <string>
-#include <spdlog/details/null_mutex.h>
 #include <spdlog/sinks/base_sink.h>
 
 namespace ArcEngine

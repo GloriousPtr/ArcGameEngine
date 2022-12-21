@@ -3,7 +3,6 @@
 #include <Arc/ImGui/Modules/ExternalConsoleSink.h>
 #include <Platform/VisualStudio/VisualStudioAccessor.h>
 
-#include <glm/glm.hpp>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 #include <icons/IconsMaterialDesignIcons.h>

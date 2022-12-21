@@ -3,7 +3,6 @@
 #include <Arc/Scene/EntitySerializer.h>
 
 #include <icons/IconsMaterialDesignIcons.h>
-#include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
 #include "../EditorLayer.h"

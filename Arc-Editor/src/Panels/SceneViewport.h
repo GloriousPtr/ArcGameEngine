@@ -1,9 +1,8 @@
 #pragma once
 
-#include <ArcEngine.h>
-#include <Arc/Renderer/EditorCamera.h>
-
 #include "BasePanel.h"
+
+#include <Arc/Renderer/EditorCamera.h>
 
 namespace ArcEngine
 {

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Project.h"
-
 namespace ArcEngine
 {
+	class Project;
+
 	class ProjectSerializer
 	{
 	public:

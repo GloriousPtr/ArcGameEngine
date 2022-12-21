@@ -11,18 +11,18 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		m_ID = std::format(" {} {}\t\t###{}{}", (const char*)icon, name, s_Count, name).c_str();
+		m_ID = std::format(" {} {}\t\t###{}{}", (const char*)icon, name, s_Count, name);
 		s_Count++;
 	}
 
-	bool BasePanel::OnBegin(ImGuiWindowFlags flags)
+	bool BasePanel::OnBegin(int32_t windowFlags)
 	{
 		if (!Showing)
 			return false;
 
 		ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
 
-		ImGui::Begin(m_ID.c_str(), &Showing, flags | ImGuiWindowFlags_NoCollapse);
+		ImGui::Begin(m_ID.c_str(), &Showing, windowFlags | ImGuiWindowFlags_NoCollapse);
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, EditorTheme::UIFramePadding);
 		return true;
 	}

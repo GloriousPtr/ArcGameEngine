@@ -4,6 +4,8 @@
 #include <fstream>
 #include <yaml-cpp/yaml.h>
 
+#include "Project.h"
+
 namespace ArcEngine
 {
 	ProjectSerializer::ProjectSerializer(Ref<Project> project)

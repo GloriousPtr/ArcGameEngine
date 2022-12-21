@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Arc/Core/Base.h"
-
 struct aiScene;
 struct aiNode;
 struct aiMesh;
@@ -17,7 +15,7 @@ namespace ArcEngine
 		Ref<Material> Mat;
 		Ref<VertexArray> Geometry;
 
-		Submesh(const char* name, const Ref<Material>& material, const Ref<VertexArray>& geometry)
+		Submesh(const std::string& name, const Ref<Material>& material, const Ref<VertexArray>& geometry)
 			: Name(name), Mat(material), Geometry(geometry)
 		{
 		}

@@ -157,7 +157,7 @@ namespace ArcEngine
 				Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices.data(), indices.size());
 				vertexArray->SetIndexBuffer(indexBuffer);
 
-				const Submesh& submesh = m_Submeshes.emplace_back(shape.name.c_str(), CreateRef<Material>(), vertexArray);
+				const Submesh& submesh = m_Submeshes.emplace_back(shape.name, CreateRef<Material>(), vertexArray);
 
 				if (materialId >= 0)
 				{
@@ -179,28 +179,28 @@ namespace ArcEngine
 								(name.find("albedo") != std::string::npos || name.find("Albedo") != std::string::npos ||
 									name.find("diff") != std::string::npos || name.find("Diff") != std::string::npos))
 							{
-								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.diffuse_texname.c_str()));
+								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.diffuse_texname));
 							}
 
 							if (!material.normal_texname.empty() &&
 								(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
 									name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
 							{
-								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.normal_texname.c_str()));
+								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.normal_texname));
 								normalMapApplied = true;
 							}
 							else if (!material.bump_texname.empty() &&
 								(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
 									name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
 							{
-								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.bump_texname.c_str()));
+								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.bump_texname));
 								normalMapApplied = true;
 							}
 
 							if (!material.emissive_texname.empty() &&
 								(name.find("emissi") != std::string::npos || name.find("Emissi") != std::string::npos))
 							{
-								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.emissive_texname.c_str()));
+								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.emissive_texname));
 							}
 						}
 

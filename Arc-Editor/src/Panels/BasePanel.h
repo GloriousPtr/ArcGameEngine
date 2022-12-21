@@ -2,8 +2,6 @@
 
 #include <ArcEngine.h>
 
-#include <imgui/imgui.h>
-
 namespace ArcEngine
 {
 	class BasePanel
@@ -27,7 +25,7 @@ namespace ArcEngine
 		const char8_t* GetIcon() const { return m_Icon; }
 
 	protected:
-		bool OnBegin(ImGuiWindowFlags flags = 0);
+		bool OnBegin(int32_t windowFlags = 0);
 		void OnEnd() const;
 
 	protected:

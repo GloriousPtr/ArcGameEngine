@@ -230,7 +230,7 @@ namespace ArcEngine
 
 			const char* nameSpace = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAMESPACE]);
 			const char* name = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAME]);
-			std::string fullname = std::format("{}.{}", nameSpace, name).c_str();
+			std::string fullname = std::format("{}.{}", nameSpace, name);
 
 			MonoClass* monoClass = mono_class_from_name(image, nameSpace, name);
 			if (!monoClass)
@@ -384,7 +384,7 @@ namespace ArcEngine
 		{
 			MonoString* monoString = mono_object_to_string(exception, nullptr);
 			std::string ex = MonoUtils::MonoStringToUTF8(monoString);
-			ARC_APP_CRITICAL(ex.c_str());
+			ARC_APP_CRITICAL(ex);
 		}
 		return gcHandle;
 	}
@@ -572,7 +572,7 @@ namespace ArcEngine
 		void* params = &entityID;
 		m_EntityClass->InvokeMethod(m_Handle, m_Constructor, &params);
 		
-		std::string fullClassName = std::format("{}.{}", scriptClass->m_ClassNamespace.c_str(), scriptClass->m_ClassName.c_str()).c_str();
+		std::string fullClassName = std::format("{}.{}", scriptClass->m_ClassNamespace, scriptClass->m_ClassName);
 		auto& fieldsMap = s_Data->EntityFields[entityID][fullClassName];
 		for (const auto& [fieldName, field] : scriptClass->m_FieldsMap)
 		{

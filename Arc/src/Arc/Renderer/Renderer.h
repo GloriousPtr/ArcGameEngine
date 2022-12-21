@@ -2,8 +2,6 @@
 
 #include "Arc/Renderer/RenderCommand.h"
 
-#include "Arc/Renderer/Shader.h"
-
 namespace ArcEngine
 {
 	class Renderer

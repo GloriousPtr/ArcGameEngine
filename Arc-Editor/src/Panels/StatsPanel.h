@@ -1,7 +1,5 @@
 #pragma once
 
-#include <ArcEngine.h>
-
 #include "BasePanel.h"
 
 namespace ArcEngine

@@ -1,9 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-
-#include "Arc/Core/Base.h"
-
 namespace ArcEngine
 {
 	class Texture2D;

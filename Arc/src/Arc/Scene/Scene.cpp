@@ -1263,7 +1263,7 @@ namespace ArcEngine
 		JPH::MutableCompoundShapeSettings compoundShapeSettings;
 		float maxScaleComponent = glm::max(glm::max(transform.Scale.x, transform.Scale.y), transform.Scale.z);
 
-		const char* entityName = entity.GetComponent<TagComponent>().Tag.c_str();
+		const auto& entityName = entity.GetComponent<TagComponent>().Tag;
 
 		if (entity.HasComponent<BoxColliderComponent>())
 		{

@@ -30,7 +30,7 @@ namespace ArcEngine
 			MonoType* type = mono_reflection_type_from_name(&name[0], ScriptEngine::GetCoreAssemblyImage());
 			if (type)
 			{
-				ARC_CORE_TRACE("Registering {}", name.c_str());
+				ARC_CORE_TRACE("Registering {}", name);
 				s_HasComponentFuncs[type] = [](const Entity& entity, [[maybe_unused]] MonoType*) { return entity.HasComponent<Component>(); };
 				s_AddComponentFuncs[type] = [](const Entity& entity, [[maybe_unused]] MonoType*) { entity.AddComponent<Component>(); };
 			}
@@ -49,7 +49,7 @@ namespace ArcEngine
 		MonoType* type = mono_reflection_type_from_name(&name[0], ScriptEngine::GetAppAssemblyImage());
 		if (type)
 		{
-			ARC_CORE_TRACE("Registering {}", name.c_str());
+			ARC_CORE_TRACE("Registering {}", name);
 			s_HasComponentFuncs[type] = [](const Entity& entity, MonoType* monoType) { std::string scriptClassName = mono_type_get_name(monoType); return ScriptEngine::HasInstance(entity, scriptClassName); };
 			s_AddComponentFuncs[type] = [](const Entity& entity, MonoType* monoType) { std::string scriptClassName = mono_type_get_name(monoType); ScriptEngine::CreateInstance(entity, scriptClassName); };
 			s_GetComponentFuncs[type] = [](const Entity& entity, MonoType* monoType) { std::string scriptClassName = mono_type_get_name(monoType); return ScriptEngine::GetInstance(entity, scriptClassName)->GetHandle(); };

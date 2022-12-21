@@ -1,8 +1,6 @@
 #include "arcpch.h"
 #include "Arc/Renderer/RendererAPI.h"
 
-#include "Arc/Renderer/VertexArray.h"
-
 #include "Platform/OpenGL/OpenGLRendererAPI.h"
 
 namespace ArcEngine
