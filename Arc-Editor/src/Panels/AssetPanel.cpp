@@ -81,7 +81,7 @@ namespace ArcEngine
 		{ FileType::Audio,			{ 0.20f, 0.80f, 0.50f, 1.00f } },
 	};
 
-	static const char* GetFileIcon(const char* ext)
+	static const char8_t* GetFileIcon(const char* ext)
 	{
 		if (!(strcmp(ext, "txt") && strcmp(ext, "md")))
 			return ICON_MDI_FILE_DOCUMENT;
@@ -211,7 +211,7 @@ namespace ArcEngine
 			DragDropFrom(filepath);
 
 			eastl::string name = StringUtils::GetNameWithExtension(filepath.c_str());
-			const char* folderIcon;
+			const char8_t* folderIcon;
 			if (entryIsFile)
 				folderIcon = GetFileIcon(StringUtils::GetExtension((eastl::string&&)name).c_str());
 			else
@@ -219,7 +219,7 @@ namespace ArcEngine
 			
 			ImGui::SameLine();
 			ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::AssetIconColor);
-			ImGui::TextUnformatted(folderIcon);
+			ImGui::TextUnformatted((const char*)folderIcon);
 			ImGui::PopStyleColor();
 			ImGui::SameLine();
 			ImGui::TextUnformatted(name.c_str());
@@ -330,7 +330,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (ImGui::Button(ICON_MDI_COGS))
+		if (ImGui::Button((const char*)ICON_MDI_COGS))
 			ImGui::OpenPopup("SettingsPopup");
 		if (ImGui::BeginPopup("SettingsPopup"))
 		{
@@ -347,7 +347,7 @@ namespace ArcEngine
 		{
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(cursorPosX + ImGui::GetFontSize() * 0.5f);
-			ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
+			ImGui::TextUnformatted((const char*)ICON_MDI_MAGNIFY " Search...");
 		}
 
 		ImGui::Spacing();
@@ -365,7 +365,7 @@ namespace ArcEngine
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-			if (ImGui::Button(ICON_MDI_ARROW_LEFT_CIRCLE_OUTLINE))
+			if (ImGui::Button((const char*)ICON_MDI_ARROW_LEFT_CIRCLE_OUTLINE))
 			{
 				m_BackStack.push(m_CurrentDirectory);
 				UpdateDirectoryEntries(m_CurrentDirectory.parent_path());
@@ -392,7 +392,7 @@ namespace ArcEngine
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-			if (ImGui::Button(ICON_MDI_ARROW_RIGHT_CIRCLE_OUTLINE))
+			if (ImGui::Button((const char*)ICON_MDI_ARROW_RIGHT_CIRCLE_OUTLINE))
 			{
 				const auto& top = m_BackStack.top();
 				UpdateDirectoryEntries(top);
@@ -408,7 +408,7 @@ namespace ArcEngine
 
 		ImGui::SameLine();
 
-		ImGui::TextUnformatted(ICON_MDI_FOLDER);
+		ImGui::TextUnformatted((const char*)ICON_MDI_FOLDER);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
@@ -479,10 +479,10 @@ namespace ArcEngine
 				UpdateDirectoryEntries(m_AssetsDirectory);
 				selectionMask = 0;
 			}
-			const char* folderIcon = opened ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
+			const char8_t* folderIcon = opened ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
 			ImGui::SameLine();
 			ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::AssetIconColor);
-			ImGui::TextUnformatted(folderIcon);
+			ImGui::TextUnformatted((const char*)folderIcon);
 			ImGui::PopStyleColor();
 			ImGui::SameLine();
 			ImGui::TextUnformatted("Assets");

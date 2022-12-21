@@ -99,7 +99,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (ImGui::Button(ICON_MDI_COGS))
+		if (ImGui::Button((const char*)ICON_MDI_COGS))
 			ImGui::OpenPopup("SettingsPopup");
 
 		if (ImGui::BeginPopup("SettingsPopup"))
@@ -146,7 +146,7 @@ namespace ArcEngine
 
 		ImGui::SameLine();
 
-		if (ImGui::Button(ICON_MDI_NOTIFICATION_CLEAR_ALL))
+		if (ImGui::Button((const char*)ICON_MDI_NOTIFICATION_CLEAR_ALL))
 			Clear();
 
 		ImGui::PopStyleColor();
@@ -158,7 +158,7 @@ namespace ArcEngine
 		{
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(cursorPosX + ImGui::GetFontSize() * 0.5f);
-			ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
+			ImGui::TextUnformatted((const char*)ICON_MDI_MAGNIFY " Search...");
 		}
 	}
 
@@ -315,12 +315,12 @@ namespace ArcEngine
     {
         switch(level)
         {
-			case Log::Level::Trace:				return ICON_MDI_MESSAGE_TEXT;
-			case Log::Level::Info:				return ICON_MDI_INFORMATION;
-			case Log::Level::Debug:				return ICON_MDI_BUG;
-			case Log::Level::Warn:				return ICON_MDI_ALERT;
-			case Log::Level::Error:				return ICON_MDI_CLOSE_OCTAGON;
-			case Log::Level::Critical:			return ICON_MDI_ALERT_OCTAGRAM;
+			case Log::Level::Trace:				return (const char*)ICON_MDI_MESSAGE_TEXT;
+			case Log::Level::Info:				return (const char*)ICON_MDI_INFORMATION;
+			case Log::Level::Debug:				return (const char*)ICON_MDI_BUG;
+			case Log::Level::Warn:				return (const char*)ICON_MDI_ALERT;
+			case Log::Level::Error:				return (const char*)ICON_MDI_CLOSE_OCTAGON;
+			case Log::Level::Critical:			return (const char*)ICON_MDI_ALERT_OCTAGRAM;
         }
 
 		return "Unknown name";

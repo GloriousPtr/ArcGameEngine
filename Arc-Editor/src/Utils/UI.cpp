@@ -488,7 +488,7 @@ namespace ArcEngine
 				if (disabled)
 					ImGui::BeginDisabled();
 
-				if (ImGui::Button(ICON_MDI_CLOSE))
+				if (ImGui::Button((const char*)ICON_MDI_CLOSE))
 					removeIt = it;
 
 				ImGui::PopID();
@@ -959,14 +959,14 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// Buttons //////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::IconButton(const char* icon, const char* label, ImVec4 iconColor)
+	bool UI::IconButton(const char8_t* icon, const char* label, ImVec4 iconColor)
 	{
 		PushID();
 
 		float lineHeight = ImGui::GetTextLineHeight();
 		ImVec2 padding = ImGui::GetStyle().FramePadding;
 
-		float width = ImGui::CalcTextSize(icon).x;
+		float width = ImGui::CalcTextSize((const char*)icon).x;
 		width += ImGui::CalcTextSize(label).x;
 		width += padding.x * 2.0f;
 
@@ -975,7 +975,7 @@ namespace ArcEngine
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(cursorPosX);
-		ImGui::TextColored(iconColor, icon);
+		ImGui::TextColored(iconColor, (const char*)icon);
 		ImGui::SameLine();
 		ImGui::Text(label);
 		ImGui::PopStyleVar();
@@ -984,12 +984,12 @@ namespace ArcEngine
 		return clicked;
 	}
 
-	glm::vec2 UI::GetIconButtonSize(const char* icon, const char* label)
+	glm::vec2 UI::GetIconButtonSize(const char8_t* icon, const char* label)
 	{
 		float lineHeight = ImGui::GetTextLineHeight();
 		ImVec2 padding = ImGui::GetStyle().FramePadding;
 
-		float width = ImGui::CalcTextSize(icon).x;
+		float width = ImGui::CalcTextSize((const char*)icon).x;
 		width += ImGui::CalcTextSize(label).x;
 		width += padding.x * 2.0f;
 

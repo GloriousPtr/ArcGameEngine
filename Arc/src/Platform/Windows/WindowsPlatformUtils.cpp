@@ -1,11 +1,14 @@
 #include "arcpch.h"
 #include "Arc/Utils/PlatformUtils.h"
 
-#include <ShlObj_core.h>
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
+
+#include <ShlObj_core.h>
 #include <comdef.h>
+#include <commdlg.h>
+#include <shellapi.h>
 
 #include "Arc/Core/Application.h"
 

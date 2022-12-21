@@ -1,7 +1,7 @@
 project "Arc-Editor"
 	kind "ConsoleApp"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 	staticruntime "off"
 
 	binDir = "%{wks.location}/bin/" .. outputdir
@@ -37,6 +37,8 @@ project "Arc-Editor"
 	{
 		"Arc",
 	}
+
+	buildoptions { "/utf-8" }
 
 	filter "system:windows"
 		systemversion "latest"

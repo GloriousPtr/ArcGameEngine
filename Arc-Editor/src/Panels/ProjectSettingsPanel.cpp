@@ -58,7 +58,7 @@ namespace ArcEngine
 						if (i == 0)
 						{
 							ImGui::SameLine();
-							ImGui::Text(ICON_MDI_INFORMATION);
+							ImGui::Text((const char*)ICON_MDI_INFORMATION);
 							if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 							{
 								ImGui::BeginTooltip();
@@ -70,7 +70,7 @@ namespace ArcEngine
 					else
 					{
 						ImGui::SameLine();
-						if (ImGui::Button(ICON_MDI_CLOSE))
+						if (ImGui::Button((const char*)ICON_MDI_CLOSE))
 							deletedLayer = layer;
 					}
 					ImGui::PopID();

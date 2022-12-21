@@ -265,8 +265,8 @@ namespace ArcEngine
 
 					ImVec2 draggerCursorPos = ImGui::GetCursorPos();
 					ImGui::SetCursorPosX(draggerCursorPos.x + framePadding.x);
-					ImGui::TextUnformatted(ICON_MDI_DOTS_HORIZONTAL);
-					ImVec2 draggerSize = ImGui::CalcTextSize(ICON_MDI_DOTS_HORIZONTAL);
+					ImGui::TextUnformatted((const char*)ICON_MDI_DOTS_HORIZONTAL);
+					ImVec2 draggerSize = ImGui::CalcTextSize((const char*)ICON_MDI_DOTS_HORIZONTAL);
 					draggerSize.x *= 2.0f;
 					ImGui::SetCursorPos(draggerCursorPos);
 					ImGui::InvisibleButton("GizmoDragger", draggerSize);
@@ -280,17 +280,17 @@ namespace ArcEngine
 					lastMousePosition = mousePos;
 
 					constexpr float alpha = 0.6f;
-					if (UI::ToggleButton(ICON_MDI_AXIS_ARROW, m_GizmoType == ImGuizmo::TRANSLATE, buttonSize, alpha, alpha))
+					if (UI::ToggleButton((const char*)ICON_MDI_AXIS_ARROW, m_GizmoType == ImGuizmo::TRANSLATE, buttonSize, alpha, alpha))
 						m_GizmoType = ImGuizmo::TRANSLATE;
-					if (UI::ToggleButton(ICON_MDI_ROTATE_3D, m_GizmoType == ImGuizmo::ROTATE, buttonSize, alpha, alpha))
+					if (UI::ToggleButton((const char*)ICON_MDI_ROTATE_3D, m_GizmoType == ImGuizmo::ROTATE, buttonSize, alpha, alpha))
 						m_GizmoType = ImGuizmo::ROTATE;
-					if (UI::ToggleButton(ICON_MDI_ARROW_EXPAND, m_GizmoType == ImGuizmo::SCALE, buttonSize, alpha, alpha))
+					if (UI::ToggleButton((const char*)ICON_MDI_ARROW_EXPAND, m_GizmoType == ImGuizmo::SCALE, buttonSize, alpha, alpha))
 						m_GizmoType = ImGuizmo::SCALE;
-					if (UI::ToggleButton(ICON_MDI_VECTOR_SQUARE, m_GizmoType == ImGuizmo::BOUNDS, buttonSize, alpha, alpha))
+					if (UI::ToggleButton((const char*)ICON_MDI_VECTOR_SQUARE, m_GizmoType == ImGuizmo::BOUNDS, buttonSize, alpha, alpha))
 						m_GizmoType = ImGuizmo::BOUNDS;
-					if (UI::ToggleButton(ICON_MDI_ARROW_EXPAND_ALL, m_GizmoType == ImGuizmo::UNIVERSAL, buttonSize, alpha, alpha))
+					if (UI::ToggleButton((const char*)ICON_MDI_ARROW_EXPAND_ALL, m_GizmoType == ImGuizmo::UNIVERSAL, buttonSize, alpha, alpha))
 						m_GizmoType = ImGuizmo::UNIVERSAL;
-					if (UI::ToggleButton(m_GizmoMode == ImGuizmo::WORLD ? ICON_MDI_EARTH : ICON_MDI_EARTH_OFF, m_GizmoMode == ImGuizmo::WORLD, buttonSize, alpha, alpha))
+					if (UI::ToggleButton(m_GizmoMode == ImGuizmo::WORLD ? (const char*)ICON_MDI_EARTH : (const char*)ICON_MDI_EARTH_OFF, m_GizmoMode == ImGuizmo::WORLD, buttonSize, alpha, alpha))
 						m_GizmoMode = m_GizmoMode == ImGuizmo::LOCAL ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
 
 					ImGui::PopStyleVar(2);

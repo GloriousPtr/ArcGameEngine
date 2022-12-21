@@ -12,7 +12,7 @@ namespace ArcEngine
 		bool Showing;
 
 	public:
-		BasePanel(const char* name = "Unnamed Panel", const char* icon = "", bool defaultShow = false);
+		BasePanel(const char* name = "Unnamed Panel", const char8_t* icon = u8"", bool defaultShow = false);
 		virtual ~BasePanel() = default;
 
 		BasePanel(const BasePanel& other) = delete;
@@ -24,7 +24,7 @@ namespace ArcEngine
 		virtual void OnImGuiRender() = 0;
 		
 		const char* GetName() const { return m_Name.c_str(); }
-		const char* GetIcon() const { return m_Icon; }
+		const char8_t* GetIcon() const { return m_Icon; }
 
 	protected:
 		bool OnBegin(ImGuiWindowFlags flags = 0);
@@ -32,7 +32,7 @@ namespace ArcEngine
 
 	protected:
 		eastl::string m_Name;
-		const char* m_Icon;
+		const char8_t* m_Icon;
 		eastl::string m_ID;
 
 	private:

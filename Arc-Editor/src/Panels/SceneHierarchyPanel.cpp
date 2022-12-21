@@ -64,7 +64,7 @@ namespace ArcEngine
 			{
 				ImGui::SameLine();
 				ImGui::SetCursorPosX(filterCursorPosX + ImGui::GetFontSize() * 0.5f);
-				ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
+				ImGui::TextUnformatted((const char*)ICON_MDI_MAGNIFY " Search...");
 			}
 
 			ImVec2 cursorPos = ImGui::GetCursorPos();
@@ -78,7 +78,7 @@ namespace ArcEngine
 			{
 				ImGui::TableSetupColumn("  Label", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_NoClip);
 				ImGui::TableSetupColumn("  Type", ImGuiTableColumnFlags_WidthFixed, lineHeight * 3.0f);
-				ImGui::TableSetupColumn("  " ICON_MDI_EYE_OUTLINE, ImGuiTableColumnFlags_WidthFixed, lineHeight * 2.0f);
+				ImGui::TableSetupColumn((const char*)"  " ICON_MDI_EYE_OUTLINE, ImGuiTableColumnFlags_WidthFixed, lineHeight * 2.0f);
 
 				ImGui::TableSetupScrollFreeze(0, 1);
 				

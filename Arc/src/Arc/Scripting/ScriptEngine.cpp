@@ -86,8 +86,8 @@ namespace ArcEngine
 		{
 			static char* options[] =
 			{
-				"--debugger-agent=transport=dt_socket,address=127.0.0.1:2550,server=y,suspend=n,loglevel=3,logfile=MonoDebugger.log",
-				"--soft-breakpoints"
+				(char*)"--debugger-agent=transport=dt_socket,address=127.0.0.1:2550,server=y,suspend=n,loglevel=3,logfile=MonoDebugger.log",
+				(char*)"--soft-breakpoints"
 			};
 			mono_jit_parse_options(2, (char**)options);
 			mono_debug_init(MONO_DEBUG_FORMAT_MONO);
@@ -207,7 +207,7 @@ namespace ArcEngine
 			s_Data->AppDomain = nullptr;
 		}
 
-		s_Data->AppDomain = mono_domain_create_appdomain("ScriptRuntime", nullptr);
+		s_Data->AppDomain = mono_domain_create_appdomain((char*)"ScriptRuntime", nullptr);
 		ARC_CORE_ASSERT(s_Data->AppDomain);
 		mono_domain_set(s_Data->AppDomain, true);
 

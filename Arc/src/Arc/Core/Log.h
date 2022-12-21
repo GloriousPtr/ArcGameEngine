@@ -1,6 +1,9 @@
 #pragma once
 
 #include <EASTL/string.h>
+#include <filesystem>
+
+#include "UUID.h"
 
 // This ignores all warnings raised inside External headers
 #pragma warning(push, 0)
@@ -37,7 +40,7 @@ namespace ArcEngine
 }
 
 template<>
-struct fmt::formatter<eastl::string>
+struct std::formatter<eastl::string>
 {
 	constexpr auto parse(format_parse_context& ctx) const -> decltype(ctx.begin())
 	{
@@ -48,6 +51,36 @@ struct fmt::formatter<eastl::string>
 	auto format(const eastl::string& input, FormatContext& ctx) -> decltype(ctx.out())
 	{
 		return format_to(ctx.out(), "{}", input.c_str());
+	}
+};
+
+template<>
+struct std::formatter<ArcEngine::UUID>
+{
+	constexpr auto parse(format_parse_context& ctx) const -> decltype(ctx.begin())
+	{
+		return ctx.end();
+	}
+
+	template <typename FormatContext>
+	auto format(const ArcEngine::UUID& input, FormatContext& ctx) -> decltype(ctx.out())
+	{
+		return format_to(ctx.out(), "{}", (uint64_t)input);
+	}
+};
+
+template<>
+struct std::formatter<std::filesystem::path>
+{
+	constexpr auto parse(format_parse_context& ctx) const -> decltype(ctx.begin())
+	{
+		return ctx.end();
+	}
+
+	template <typename FormatContext>
+	auto format(const std::filesystem::path& input, FormatContext& ctx) -> decltype(ctx.out())
+	{
+		return format_to(ctx.out(), "{}", input.string());
 	}
 };
 
