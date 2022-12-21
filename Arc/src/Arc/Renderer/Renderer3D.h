@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EASTL/fixed_vector.h>
+#include <vector>
 
 #include "Arc/Scene/Components.h"
 
@@ -25,7 +25,7 @@ namespace ArcEngine
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene(const CameraData& cameraData, Entity cubemap, eastl::vector<Entity>&& lights);
+		static void BeginScene(const CameraData& cameraData, Entity cubemap, std::vector<Entity>&& lights);
 		static void EndScene(const Ref<RenderGraphData>& renderTarget);
 
 		static void DrawCube();
@@ -70,7 +70,7 @@ namespace ArcEngine
 
 		static Statistics s_Stats;
 		static ShaderLibrary s_ShaderLibrary;
-		static eastl::fixed_vector<Renderer3D::MeshData, 100000> s_Meshes;
+		static std::vector<Renderer3D::MeshData> s_Meshes;
 		static Ref<Texture2D> s_BRDFLutTexture;
 		static Ref<Shader> s_Shader;
 		static Ref<Shader> s_LightingShader;
@@ -87,7 +87,7 @@ namespace ArcEngine
 		static Ref<UniformBuffer> s_UbDirectionalLights;
 
 		static Entity s_Skylight;
-		static eastl::vector<Entity> s_SceneLights;
+		static std::vector<Entity> s_SceneLights;
 
 	public:
 

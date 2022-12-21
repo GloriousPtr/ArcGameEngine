@@ -1,7 +1,7 @@
 #pragma once
 
 #include <filesystem>
-#include <EASTL/string.h>
+#include <string>
 
 #include "Buffer.h"
 
@@ -11,7 +11,7 @@ namespace ArcEngine
 	{
 	public:
 		static Buffer ReadFileBinary(const std::filesystem::path& filepath);
-		static void ReadFileText(const std::filesystem::path& filepath, eastl::string& outString);
-		static void WriteFileText(const std::filesystem::path& filepath, const eastl::string& buffer);
+		static void ReadFileText(const std::filesystem::path& filepath, std::string& outString);
+		static void WriteFileText(const std::filesystem::path& filepath, const std::string& buffer);
 	};
 }

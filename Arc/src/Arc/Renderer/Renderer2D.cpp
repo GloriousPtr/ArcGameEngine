@@ -50,7 +50,7 @@ namespace ArcEngine
 		LineVertex* LineVertexBufferBase = nullptr;
 		LineVertex* LineVertexBufferPtr = nullptr;
 
-		eastl::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
+		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 1; // 0 = white texture
 
 		glm::vec4 QuadVertexPositions[4];

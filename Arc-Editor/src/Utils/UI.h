@@ -17,7 +17,7 @@ namespace ArcEngine
 		static void EndProperties();
 
 		// Strings
-		static bool Property(const char* label, eastl::string& value, const char* tooltip = nullptr);
+		static bool Property(const char* label, std::string& value, const char* tooltip = nullptr);
 
 		template<std::integral T>
 		static bool Property(const char* label, T& value, T min = 0, T max = 0, const char* tooltip = nullptr)
@@ -111,23 +111,23 @@ namespace ArcEngine
 
 		template<typename T, typename Fn>
 			requires std::integral<T> || std::floating_point<T>
-		bool Property(const char* label, eastl::vector<T>&v, T defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr)
+		bool Property(const char* label, std::vector<T>&v, T defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr)
 		{
 			return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, int8_t& value) { UI::Property(name, value); });
 		}
 
 		// Vec2/3/4
-		static bool Property(const char* label, eastl::vector<glm::vec2>& v, const glm::vec2& defaultValue = glm::vec2(0.0f), size_t minElements = 0, const char* tooltip = nullptr);
-		static bool Property(const char* label, eastl::vector<glm::vec3>& v, const glm::vec3& defaultValue = glm::vec3(0.0f), size_t minElements = 0, const char* tooltip = nullptr);
-		static bool Property(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue = glm::vec4(0.0f), size_t minElements = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, std::vector<glm::vec2>& v, const glm::vec2& defaultValue = glm::vec2(0.0f), size_t minElements = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, std::vector<glm::vec3>& v, const glm::vec3& defaultValue = glm::vec3(0.0f), size_t minElements = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, std::vector<glm::vec4>& v, const glm::vec4& defaultValue = glm::vec4(0.0f), size_t minElements = 0, const char* tooltip = nullptr);
 
 		// Bool
-		static bool Property(const char* label, eastl::vector<bool>& v, bool defaultValue, size_t minElements = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, std::vector<bool>& v, bool defaultValue, size_t minElements = 0, const char* tooltip = nullptr);
 
 		// Colors
-		static bool PropertyColor(const char* label, eastl::vector<glm::vec3>& v, const glm::vec3& defaultValue = glm::vec3(1.0f), size_t minElements = 0, const char* tooltip = nullptr);
-		static bool PropertyColor(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue = glm::vec4(1.0f), size_t minElements = 0, const char* tooltip = nullptr);
-		static bool PropertyColor4as3(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue = glm::vec4(1.0f), size_t minElements = 0, const char* tooltip = nullptr);
+		static bool PropertyColor(const char* label, std::vector<glm::vec3>& v, const glm::vec3& defaultValue = glm::vec3(1.0f), size_t minElements = 0, const char* tooltip = nullptr);
+		static bool PropertyColor(const char* label, std::vector<glm::vec4>& v, const glm::vec4& defaultValue = glm::vec4(1.0f), size_t minElements = 0, const char* tooltip = nullptr);
+		static bool PropertyColor4as3(const char* label, std::vector<glm::vec4>& v, const glm::vec4& defaultValue = glm::vec4(1.0f), size_t minElements = 0, const char* tooltip = nullptr);
 
 
 
@@ -199,7 +199,7 @@ namespace ArcEngine
 		}
 
 		// Field
-		static void DrawField(Entity entity, const eastl::string& className, const eastl::string& fieldName);
+		static void DrawField(Entity entity, const std::string& className, const std::string& fieldName);
 
 		// Vec3 with reset button
 		static void DrawVec3Control(const char* label, glm::vec3& values, const char* tooltip = nullptr, float resetValue = 0.0f);
@@ -224,7 +224,7 @@ namespace ArcEngine
 			| ImGuiTableFlags_BordersOuterH);
 
 		template<typename T, typename Fn>
-		static bool ListProperty(const char* label, eastl::vector<T>& v, const T& defaultValue, size_t minElements, const char* tooltip, Fn function);
+		static bool ListProperty(const char* label, std::vector<T>& v, const T& defaultValue, size_t minElements, const char* tooltip, Fn function);
 
 	private:
 		static int s_UIContextID;

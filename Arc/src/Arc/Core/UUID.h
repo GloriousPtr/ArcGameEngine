@@ -15,7 +15,7 @@ namespace ArcEngine
 	};
 }
 
-namespace eastl
+namespace std
 {
 	template<>
 	struct hash<ArcEngine::UUID>

@@ -3,7 +3,7 @@
 
 namespace ArcEngine
 {
-	Layer::Layer(const eastl::string& name)
+	Layer::Layer(const std::string& name)
 		:m_DebugName(name)
 	{
 	}

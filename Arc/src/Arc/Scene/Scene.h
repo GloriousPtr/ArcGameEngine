@@ -1,7 +1,6 @@
 #pragma once
 
-#include <EASTL/hash_map.h>
-#include <EASTL/map.h>
+#include <unordered_map>
 
 // This ignores all warnings raised inside External headers
 #pragma warning(push, 0)
@@ -38,7 +37,7 @@ namespace ArcEngine
 	using EntityLayer = uint16_t;
 	struct EntityLayerData
 	{
-		eastl::string Name = "Layer";
+		std::string Name = "Layer";
 		EntityLayer Flags = 0xFFFF;
 		uint8_t Index = 1;
 	};
@@ -52,7 +51,7 @@ namespace ArcEngine
 
 		static const EntityLayer StaticLayer  = BIT(0);
 		static const EntityLayer DefaultLayer = BIT(1);
-		static eastl::map<EntityLayer, EntityLayerData> LayerCollisionMask;
+		static std::map<EntityLayer, EntityLayerData> LayerCollisionMask;
 
 	public:
 		Scene() = default;
@@ -60,8 +59,8 @@ namespace ArcEngine
 
 		static Ref<Scene> CopyTo(Ref<Scene> other);
 
-		Entity CreateEntity(const eastl::string& name = eastl::string());
-		Entity CreateEntityWithUUID(UUID uuid, const eastl::string& name = eastl::string());
+		Entity CreateEntity(const std::string& name = std::string());
+		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
 		void DestroyEntity(Entity entity);
 		Entity Duplicate(Entity entity);
 		bool HasEntity(UUID uuid);
@@ -103,7 +102,7 @@ namespace ArcEngine
 		friend class SceneHierarchyPanel;
 
 		entt::registry m_Registry;
-		eastl::hash_map<UUID, entt::entity> m_EntityMap;
+		std::unordered_map<UUID, entt::entity> m_EntityMap;
 		bool m_IsRunning = false;
 
 		b2World* m_PhysicsWorld2D = nullptr;

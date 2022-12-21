@@ -14,7 +14,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/compatibility.hpp>
 #include <box2d/box2d.h>
-#include <EASTL/set.h>
 
 // Jolt includes
 #include <Jolt/Jolt.h>
@@ -32,7 +31,7 @@
 
 namespace ArcEngine
 {
-	eastl::map<EntityLayer, EntityLayerData> Scene::LayerCollisionMask =
+	std::map<EntityLayer, EntityLayerData> Scene::LayerCollisionMask =
 	{
 		{ BIT(0), { "Static",		(uint16_t)0xFFFF, 0 } },
 		{ BIT(1), { "Default",		(uint16_t)0xFFFF, 1 } },
@@ -79,12 +78,12 @@ namespace ArcEngine
 			if (e1.HasComponent<BuoyancyEffector2DComponent>() && aSensor
 				&& !e2.HasComponent<BuoyancyEffector2DComponent>() && b->GetBody()->GetType() == b2_dynamicBody)
 			{
-				m_BuoyancyFixtures.insert(eastl::make_pair(a, b));
+				m_BuoyancyFixtures.insert(std::make_pair(a, b));
 			}
 			else if (e2.HasComponent<BuoyancyEffector2DComponent>() && bSensor
 				&& !e1.HasComponent<BuoyancyEffector2DComponent>() && a->GetBody()->GetType() == b2_dynamicBody)
 			{
-				m_BuoyancyFixtures.insert(eastl::make_pair(b, a));
+				m_BuoyancyFixtures.insert(std::make_pair(b, a));
 			}
 
 			b2WorldManifold worldManifold;
@@ -148,12 +147,12 @@ namespace ArcEngine
 			if (e1.HasComponent<BuoyancyEffector2DComponent>() && aSensor
 				&& !e2.HasComponent<BuoyancyEffector2DComponent>() && b->GetBody()->GetType() == b2_dynamicBody)
 			{
-				m_BuoyancyFixtures.erase(eastl::make_pair(a, b));
+				m_BuoyancyFixtures.erase(std::make_pair(a, b));
 			}
 			else if (e2.HasComponent<BuoyancyEffector2DComponent>() && bSensor
 				&& !e1.HasComponent<BuoyancyEffector2DComponent>() && a->GetBody()->GetType() == b2_dynamicBody)
 			{
-				m_BuoyancyFixtures.erase(eastl::make_pair(b, a));
+				m_BuoyancyFixtures.erase(std::make_pair(b, a));
 			}
 
 			b2WorldManifold worldManifold;
@@ -239,7 +238,7 @@ namespace ArcEngine
 	private:
 		Scene* m_Scene;
 
-		eastl::set<eastl::pair<b2Fixture*, b2Fixture*>> m_BuoyancyFixtures;
+		std::set<std::pair<b2Fixture*, b2Fixture*>> m_BuoyancyFixtures;
 	};
 	
 	#pragma endregion
@@ -338,7 +337,7 @@ namespace ArcEngine
 	}
 
 	template<typename... Component>
-	static void CopyComponent(entt::registry& dst, entt::registry& src, eastl::hash_map<UUID, entt::entity> enttMap)
+	static void CopyComponent(entt::registry& dst, entt::registry& src, std::unordered_map<UUID, entt::entity> enttMap)
 	{
 		([&]()
 		{
@@ -354,7 +353,7 @@ namespace ArcEngine
 	}
 
 	template<typename... Component>
-	static void CopyComponent(ComponentGroup<Component...>, entt::registry& dst, entt::registry& src, eastl::hash_map<UUID, entt::entity> enttMap)
+	static void CopyComponent(ComponentGroup<Component...>, entt::registry& dst, entt::registry& src, std::unordered_map<UUID, entt::entity> enttMap)
 	{
 		CopyComponent<Component...>(dst, src, enttMap);
 	}
@@ -419,14 +418,14 @@ namespace ArcEngine
 		return newScene;
 	}
 
-	Entity Scene::CreateEntity(const eastl::string& name)
+	Entity Scene::CreateEntity(const std::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 
 		return CreateEntityWithUUID(UUID(), name);
 	}
 
-	Entity Scene::CreateEntityWithUUID(UUID uuid, const eastl::string& name)
+	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -465,7 +464,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		eastl::string name = entity.GetComponent<TagComponent>().Tag;
+		std::string name = entity.GetComponent<TagComponent>().Tag;
 		Entity duplicate = CreateEntity(name);
 		CopyComponent(AllComponents{}, m_Registry, entity, duplicate);
 		return duplicate;
@@ -927,8 +926,8 @@ namespace ArcEngine
 							JPH::Vec3 position = body->GetPosition();
 							JPH::Vec3 rotation = body->GetRotation().GetEulerAngles();
 
-							rb.PreviousTranslation = eastl::move(rb.Translation);
-							rb.PreviousRotation = eastl::move(rb.Rotation);
+							rb.PreviousTranslation = std::move(rb.Translation);
+							rb.PreviousRotation = std::move(rb.Rotation);
 							rb.Translation = { position.GetX(), position.GetY(), position.GetZ() };
 							rb.Rotation = glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ());
 						}
@@ -941,8 +940,8 @@ namespace ArcEngine
 						JPH::Vec3 position = body->GetPosition();
 						JPH::Vec3 rotation = body->GetRotation().GetEulerAngles();
 
-						rb.PreviousTranslation = eastl::move(rb.Translation);
-						rb.PreviousRotation = eastl::move(rb.Rotation);
+						rb.PreviousTranslation = std::move(rb.Translation);
+						rb.PreviousRotation = std::move(rb.Rotation);
 						rb.Translation = { position.GetX(), position.GetY(), position.GetZ() };
 						rb.Rotation = glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ());
 						tc.Translation = rb.Translation;
@@ -967,7 +966,7 @@ namespace ArcEngine
 						if (stepped)
 						{
 							b2Vec2 position = body->GetPosition();
-							rb.PreviousTranslationRotation = eastl::move(rb.TranslationRotation);
+							rb.PreviousTranslationRotation = std::move(rb.TranslationRotation);
 							rb.TranslationRotation = { position.x, position.y, body->GetAngle() };
 						}
 
@@ -980,7 +979,7 @@ namespace ArcEngine
 					{
 						b2Vec2 position = body->GetPosition();
 
-						rb.PreviousTranslationRotation = eastl::move(rb.TranslationRotation);
+						rb.PreviousTranslationRotation = std::move(rb.TranslationRotation);
 						rb.TranslationRotation = { position.x, position.y, body->GetAngle() };
 
 						tc.Translation.x = rb.TranslationRotation.x;
@@ -1189,7 +1188,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_CATEGORY("Rendering", Profile::Category::Rendering);
 
-		eastl::vector<Entity> lights;
+		std::vector<Entity> lights;
 		{
 			ARC_PROFILE_SCOPE("Prepare Light Data");
 
@@ -1207,7 +1206,7 @@ namespace ArcEngine
 				skylight = Entity(*view.begin(), this);
 		}
 
-		Renderer3D::BeginScene(cameraData, skylight, eastl::move(lights));
+		Renderer3D::BeginScene(cameraData, skylight, std::move(lights));
 		// Meshes
 		{
 			ARC_PROFILE_SCOPE("Submit Mesh Data");

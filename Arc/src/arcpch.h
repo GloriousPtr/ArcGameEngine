@@ -11,16 +11,20 @@
 
 #include <sstream>
 
-#include <EASTL/memory.h>
-#include <EASTL/utility.h>
-#include <EASTL/algorithm.h>
-#include <EASTL/functional.h>
-#include <EASTL/string.h>
-#include <EASTL/array.h>
-#include <EASTL/vector.h>
-#include <EASTL/hash_map.h>
-#include <EASTL/fixed_vector.h>
-#include <EASTL/fixed_hash_map.h>
+#include <future>
+#include <memory>
+#include <utility>
+#include <algorithm>
+#include <functional>
+#include <string>
+#include <array>
+#include <vector>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <unordered_set>
+#include <stack>
+#include <queue>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>

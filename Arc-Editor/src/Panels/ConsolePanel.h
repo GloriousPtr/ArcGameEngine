@@ -13,13 +13,13 @@ namespace ArcEngine
 		struct Message
 		{
 			uint32_t ID;
-			eastl::string Buffer;
-			eastl::string Filepath;
-			eastl::string Function;
+			std::string Buffer;
+			std::string Filepath;
+			std::string Function;
 			int32_t Line;
 			Log::Level Level;
 
-			Message(uint32_t id, const eastl::string& message, const eastl::string& filepath, const eastl::string& function, int32_t line, Log::Level level = Log::Level::Trace);
+			Message(uint32_t id, const std::string& message, const std::string& filepath, const std::string& function, int32_t line, Log::Level level = Log::Level::Trace);
 			void OnImGuiRender() const;
 
 			static const char* GetLevelName(Log::Level level);
@@ -36,7 +36,7 @@ namespace ArcEngine
 		ConsolePanel& operator=(const ConsolePanel& other) = delete;
 		ConsolePanel& operator=(ConsolePanel&& other) = delete;
 
-		void AddMessage(const eastl::string& message, const eastl::string& filepath, const eastl::string& function, int32_t line, Log::Level level);
+		void AddMessage(const std::string& message, const std::string& filepath, const std::string& function, int32_t line, Log::Level level);
 		const Message* GetRecentMessage();
 		void Clear();
 		void SetFocus() const;
@@ -56,7 +56,7 @@ namespace ArcEngine
 		uint32_t s_MessageBufferRenderFilter = (uint32_t)Log::Level::Trace;
 		bool m_AllowScrollingToBottom = true;
 		bool m_RequestScrollToBottom = false;
-		eastl::vector<Ref<Message>> m_MessageBuffer;
+		std::vector<Ref<Message>> m_MessageBuffer;
 		ImGuiTextFilter m_Filter;
 	};
 }

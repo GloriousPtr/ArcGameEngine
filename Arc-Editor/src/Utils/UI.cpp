@@ -95,7 +95,7 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// Strings //////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, eastl::string& value, const char* tooltip)
+	bool UI::Property(const char* label, std::string& value, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
 
@@ -302,9 +302,8 @@ namespace ArcEngine
 	}
 
 
-
 	template<typename T, typename Fn>
-	bool UI::ListProperty(const char* label, eastl::vector<T>& v, const T& defaultValue, size_t minElements, const char* tooltip, Fn function)
+	bool UI::ListProperty(const char* label, std::vector<T>& v, const T& defaultValue, size_t minElements, const char* tooltip, Fn function)
 	{
 		bool modified = false;
 		if (ImGui::TreeNode(label))
@@ -330,21 +329,21 @@ namespace ArcEngine
 			}
 
 			uint32_t i = 0;
-			std::string name;
-			T* removeIt = nullptr;
-			for (auto* it = v.begin(); it != v.end(); ++it)
+//			std::vector<bool>::iterator removeIt;
+//			std::vector<bool>::iterator ptr;
+			for (T& p : v)
 			{
-				ImGui::PushID(it);
-				name = fmt::format("Point {}", i);
-				function(name.c_str(), v[i]);
+				ImGui::PushID(i);
+				std::string name = fmt::format("Point {}", i);
+				function(name.c_str(), p);
 				ImGui::TableNextColumn();
 
 				bool disabled = pointsCount <= minElements;
 				if (disabled)
 					ImGui::BeginDisabled();
 
-				if (ImGui::Button((const char*)ICON_MDI_CLOSE))
-					removeIt = it;
+//				if (ImGui::Button((const char*)ICON_MDI_CLOSE))
+//					removeIt = p;
 
 				ImGui::PopID();
 
@@ -355,8 +354,8 @@ namespace ArcEngine
 			}
 			EndProperties();
 
-			if (removeIt)
-				v.erase(removeIt);
+			//if (removeIt != v.end())
+				//std::erase_if(v, [removeIt](auto t) { return t == *removeIt; });
 
 			ImGui::TreePop();
 		}
@@ -364,37 +363,38 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, eastl::vector<glm::vec2>& v, const glm::vec2& defaultValue, size_t minElements, const char* tooltip)
+	bool UI::Property(const char* label, std::vector<glm::vec2>& v, const glm::vec2& defaultValue, size_t minElements, const char* tooltip)
 	{
 		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec2& value) { PropertyVector(name, value); });
 	}
 
-	bool UI::Property(const char* label, eastl::vector<glm::vec3>& v, const glm::vec3& defaultValue, size_t minElements, const char* tooltip)
+	bool UI::Property(const char* label, std::vector<glm::vec3>& v, const glm::vec3& defaultValue, size_t minElements, const char* tooltip)
 	{
 		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec3& value) { PropertyVector(name, value); });
 	}
 
-	bool UI::Property(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, const char* tooltip)
+	bool UI::Property(const char* label, std::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, const char* tooltip)
 	{
 		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::PropertyVector(name, value); });
 	}
 
-	bool UI::Property(const char* label, eastl::vector<bool>& v, bool defaultValue, size_t minElements, const char* tooltip)
+	bool UI::Property(const char* label, std::vector<bool>& v, bool defaultValue, size_t minElements, const char* tooltip)
 	{
-		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, bool& value) { UI::Property(name, value); });
+		return false;
+		//return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, bool& value) { UI::Property(name, value); });
 	}
 
-	bool UI::PropertyColor(const char* label, eastl::vector<glm::vec3>& v, const glm::vec3& defaultValue, size_t minElements, const char* tooltip)
+	bool UI::PropertyColor(const char* label, std::vector<glm::vec3>& v, const glm::vec3& defaultValue, size_t minElements, const char* tooltip)
 	{
 		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec3& value) { UI::PropertyVector(name, value, true); });
 	}
 
-	bool UI::PropertyColor(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, const char* tooltip)
+	bool UI::PropertyColor(const char* label, std::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, const char* tooltip)
 	{
 		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::PropertyVector(name, value, true); });
 	}
 
-	bool UI::PropertyColor4as3(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, const char* tooltip)
+	bool UI::PropertyColor4as3(const char* label, std::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, const char* tooltip)
 	{
 		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::PropertyVector(name, value, true, false); });
 	}
@@ -406,7 +406,7 @@ namespace ArcEngine
 
 
 	template<typename T>
-	static void DrawScriptFieldScalar(Entity entity, const eastl::string& className, const eastl::string& fieldName)
+	static void DrawScriptFieldScalar(Entity entity, const std::string& className, const std::string& fieldName)
 	{
 		const auto& fieldMap = ScriptEngine::GetFieldMap(className.c_str());
 		const ScriptField& field = fieldMap.at(fieldName);
@@ -418,7 +418,7 @@ namespace ArcEngine
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
-			if (fieldInstanceMap.find_as(fieldName) != fieldInstanceMap.end())
+			if (fieldInstanceMap.find(fieldName) != fieldInstanceMap.end())
 			{
 				ScriptFieldInstance& fieldInstance = fieldInstanceMap.at(fieldName);
 
@@ -451,7 +451,7 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	static void DrawScriptField(Entity entity, const eastl::string& className, const eastl::string& fieldName)
+	static void DrawScriptField(Entity entity, const std::string& className, const std::string& fieldName)
 	{
 		const auto& fieldMap = ScriptEngine::GetFieldMap(className.c_str());
 		const ScriptField& field = fieldMap.at(fieldName);
@@ -461,7 +461,7 @@ namespace ArcEngine
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
-			if (fieldInstanceMap.find_as(fieldName) != fieldInstanceMap.end())
+			if (fieldInstanceMap.find(fieldName) != fieldInstanceMap.end())
 			{
 				ScriptFieldInstance& fieldInstance = fieldInstanceMap.at(fieldName);
 
@@ -494,7 +494,7 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	static void DrawScriptFieldVector(Entity entity, const eastl::string& className, const eastl::string& fieldName, bool color = false)
+	static void DrawScriptFieldVector(Entity entity, const std::string& className, const std::string& fieldName, bool color = false)
 	{
 		const auto& fieldMap = ScriptEngine::GetFieldMap(className.c_str());
 		const ScriptField& field = fieldMap.at(fieldName);
@@ -504,7 +504,7 @@ namespace ArcEngine
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
-			if (fieldInstanceMap.find_as(fieldName) != fieldInstanceMap.end())
+			if (fieldInstanceMap.find(fieldName) != fieldInstanceMap.end())
 			{
 				ScriptFieldInstance& fieldInstance = fieldInstanceMap.at(fieldName);
 
@@ -536,7 +536,7 @@ namespace ArcEngine
 		}
 	}
 
-	static void DrawScriptFieldString(Entity entity, const eastl::string& className, const eastl::string& fieldName)
+	static void DrawScriptFieldString(Entity entity, const std::string& className, const std::string& fieldName)
 	{
 		const auto& fieldMap = ScriptEngine::GetFieldMap(className.c_str());
 		const ScriptField& field = fieldMap.at(fieldName);
@@ -546,7 +546,7 @@ namespace ArcEngine
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
-			if (fieldInstanceMap.find_as(fieldName) != fieldInstanceMap.end())
+			if (fieldInstanceMap.find(fieldName) != fieldInstanceMap.end())
 			{
 				ScriptFieldInstance& fieldInstance = fieldInstanceMap.at(fieldName);
 
@@ -556,13 +556,13 @@ namespace ArcEngine
 					return;
 				}
 
-				eastl::string value = (const char*)fieldInstance.GetBuffer();
+				std::string value = (const char*)fieldInstance.GetBuffer();
 				if (UI::Property(field.DisplayName.c_str(), value, tooltip))
 					fieldInstance.SetValueString(value);
 			}
 			else
 			{
-				eastl::string value = field.DefaultValue;
+				std::string value = field.DefaultValue;
 				if (UI::Property(field.DisplayName.c_str(), value, tooltip))
 				{
 					fieldInstanceMap[fieldName].Type = field.Type;
@@ -572,13 +572,13 @@ namespace ArcEngine
 		}
 		else
 		{
-			eastl::string value = scriptInstance->GetFieldValueString(field.Name);
+			std::string value = scriptInstance->GetFieldValueString(field.Name);
 			if (UI::Property(field.DisplayName.c_str(), value, tooltip))
 				scriptInstance->SetFieldValue<const char*>(field.Name, value.c_str());
 		}
 	}
 
-	void UI::DrawField(Entity entity, const eastl::string& className, const eastl::string& fieldName)
+	void UI::DrawField(Entity entity, const std::string& className, const std::string& fieldName)
 	{
 		const ScriptField& field = ScriptEngine::GetFieldMap(className.c_str()).at(fieldName);
 		if (field.Type == FieldType::Unknown)

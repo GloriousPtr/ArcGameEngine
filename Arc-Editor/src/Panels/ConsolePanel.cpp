@@ -25,8 +25,8 @@ namespace ArcEngine
 		s_MessageBufferRenderFilter |= Log::Level::Error;
 		s_MessageBufferRenderFilter |= Log::Level::Critical;
 
-		ExternalConsoleSink::SetConsoleSink_HandleFlush([this](const eastl::string& message, const eastl::string& filepath, const eastl::string& function, int32_t line, Log::Level level){ AddMessage(message, filepath, function, line, level); });
-		m_MessageBuffer = eastl::vector<Ref<ConsolePanel::Message>>(m_Capacity);
+		ExternalConsoleSink::SetConsoleSink_HandleFlush([this](const std::string& message, const std::string& filepath, const std::string& function, int32_t line, Log::Level level){ AddMessage(message, filepath, function, line, level); });
+		m_MessageBuffer = std::vector<Ref<ConsolePanel::Message>>(m_Capacity);
 	}
 
 	ConsolePanel::~ConsolePanel()
@@ -34,7 +34,7 @@ namespace ArcEngine
 		ExternalConsoleSink::SetConsoleSink_HandleFlush(nullptr);
 	}
 
-	void ConsolePanel::AddMessage(const eastl::string& message, const eastl::string& filepath, const eastl::string& function, int32_t line, Log::Level level)
+	void ConsolePanel::AddMessage(const std::string& message, const std::string& filepath, const std::string& function, int32_t line, Log::Level level)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -188,7 +188,7 @@ namespace ArcEngine
 			const auto& messageStart = m_MessageBuffer.begin() + m_BufferBegin;
 			if (*messageStart) // If contains old message here
 			{
-				for (const auto* message = messageStart; message != m_MessageBuffer.end(); message++)
+				for (auto message = messageStart; message != m_MessageBuffer.end(); message++)
 				{
 					if (!(s_MessageBufferRenderFilter & (*message)->Level))
 						continue;
@@ -210,7 +210,7 @@ namespace ArcEngine
 
 			if (m_BufferBegin != 0) // Skipped first messages in vector
 			{
-				for (const auto* message = m_MessageBuffer.begin(); message != messageStart; message++)
+				for (auto message = m_MessageBuffer.begin(); message != messageStart; message++)
 				{
 					if (!(s_MessageBufferRenderFilter & (*message)->Level))
 						continue;
@@ -240,7 +240,7 @@ namespace ArcEngine
 		ImGui::PopStyleVar();
 	}
 
-	ConsolePanel::Message::Message(uint32_t id, const eastl::string& message, const eastl::string& filepath, const eastl::string& function, int32_t line, Log::Level level)
+	ConsolePanel::Message::Message(uint32_t id, const std::string& message, const std::string& filepath, const std::string& function, int32_t line, Log::Level level)
 		: ID(id), Buffer(message), Filepath(filepath), Function(function), Line(line), Level(level)
 	{
 		ARC_PROFILE_SCOPE();

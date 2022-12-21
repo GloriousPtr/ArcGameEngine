@@ -117,20 +117,20 @@ namespace ArcEngine
 			| ImGuiTreeNodeFlags_Framed
 			| ImGuiTreeNodeFlags_FramePadding;
 
-		const eastl::string* toRemove = nullptr;
+		std::string toRemove;
 		
 		float frameHeight = ImGui::GetFrameHeight();
 		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 
-		for (const auto* it = component.Classes.begin(); it != component.Classes.end(); ++it)
+		for (auto it = component.Classes.begin(); it != component.Classes.end(); ++it)
 		{
-			const eastl::string& className = *it;
+			const std::string& className = *it;
 
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
-			bool open = ImGui::TreeNodeEx(it, treeFlags, "%s", className.c_str());
+			bool open = ImGui::TreeNodeEx(&it, treeFlags, "%s", className.c_str());
 
 			{
-				ImGui::PushID((int)(uint64_t)it);
+				ImGui::PushID(&it);
 
 				ImGui::SameLine(ImGui::GetContentRegionMax().x - frameHeight * 1.2f);
 				if (ImGui::Button((const char*)ICON_MDI_SETTINGS, ImVec2{ frameHeight * 1.2f, frameHeight }))
@@ -139,7 +139,7 @@ namespace ArcEngine
 				if (ImGui::BeginPopup("ScriptSettings"))
 				{
 					if (ImGui::MenuItem("Remove"))
-						toRemove = it;
+						toRemove = *it;
 
 					ImGui::EndPopup();
 				}
@@ -180,9 +180,9 @@ namespace ArcEngine
 			}
 		}
 
-		if (toRemove)
+		if (!toRemove.empty())
 		{
-			component.Classes.erase(toRemove);
+			std::erase_if(component.Classes, [&toRemove](auto n) { return n == toRemove; });
 		}
 	}
 
@@ -224,11 +224,11 @@ namespace ArcEngine
 				}
 				case MaterialPropertyType::Float:
 				{
-					const bool isSlider01 = n.find("01") != eastl::string::npos;
+					const bool isSlider01 = n.find("01") != std::string::npos;
 					auto v = material->GetData<float>(name);
 					if (isSlider01)
 					{
-						eastl::string displayName2 = displayName;
+						std::string displayName2 = displayName;
 						displayName2[displayName2.size() - 2] = '\0';
 						if (UI::Property(displayName2.c_str(), v, 0.0f, 1.0f))
 							material->SetData(name, v);
@@ -249,7 +249,7 @@ namespace ArcEngine
 				}
 				case MaterialPropertyType::Float3:
 				{
-					const bool isColor = n.find("color") != eastl::string::npos || n.find("Color") != eastl::string::npos;
+					const bool isColor = n.find("color") != std::string::npos || n.find("Color") != std::string::npos;
 					auto v = material->GetData<glm::vec3>(name);
 					if (UI::PropertyVector(displayName, v, isColor))
 						material->SetData(name, v);
@@ -257,7 +257,7 @@ namespace ArcEngine
 				}
 				case MaterialPropertyType::Float4:
 				{
-					const bool isColor = n.find("color") != eastl::string::npos || n.find("Color") != eastl::string::npos;
+					const bool isColor = n.find("color") != std::string::npos || n.find("Color") != std::string::npos;
 					auto v = material->GetData<glm::vec4>(name);
 					if (UI::PropertyVector(displayName, v, isColor))
 							material->SetData(name, v);
@@ -272,7 +272,7 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	static void DrawParticleOverLifetimeModule(eastl::string_view moduleName, OverLifetimeModule<T>& propertyModule, bool color = false, bool rotation = false)
+	static void DrawParticleOverLifetimeModule(std::string_view moduleName, OverLifetimeModule<T>& propertyModule, bool color = false, bool rotation = false)
 	{
 		static constexpr ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen
 			| ImGuiTreeNodeFlags_SpanAvailWidth
@@ -308,7 +308,7 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	static void DrawParticleBySpeedModule(eastl::string_view moduleName, BySpeedModule<T>& propertyModule, bool color = false, bool rotation = false)
+	static void DrawParticleBySpeedModule(std::string_view moduleName, BySpeedModule<T>& propertyModule, bool color = false, bool rotation = false)
 	{
 		static constexpr ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen
 			| ImGuiTreeNodeFlags_SpanAvailWidth
@@ -365,7 +365,7 @@ namespace ArcEngine
 				strcpy_s(buffer, tag.Tag.c_str());
 				ImGui::SetNextItemWidth(tagWidth);
 				if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
-					tag.Tag = eastl::string(buffer);
+					tag.Tag = std::string(buffer);
 			}
 
 			ImGui::SameLine();
@@ -534,7 +534,7 @@ namespace ArcEngine
 		{
 			if (ImGui::Button(component.MeshGeometry ? component.MeshGeometry->GetFilepath() : "null", { ImGui::GetContentRegionAvail().x, ImGui::GetFrameHeight() }))
 			{
-				eastl::string filepath = FileDialogs::OpenFile("Mesh (*.assbin)\0*.assbin\0(*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
+				std::string filepath = FileDialogs::OpenFile("Mesh (*.assbin)\0*.assbin\0(*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
 				if (!filepath.empty())
 				{
 					component.MeshGeometry = CreateRef<Mesh>(filepath.c_str());
@@ -1085,7 +1085,7 @@ namespace ArcEngine
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 				for (const auto& [name, scriptClass] : classes)
 				{
-					bool notFound = eastl::find(component.Classes.begin(), component.Classes.end(), name) == component.Classes.end();
+					bool notFound = std::find(component.Classes.begin(), component.Classes.end(), name) == component.Classes.end();
 					if (notFound && !m_Filter.IsActive() || (m_Filter.IsActive() && m_Filter.PassFilter(name.c_str())))
 					{
 						if (ImGui::MenuItem(name.c_str()))
@@ -1114,7 +1114,7 @@ namespace ArcEngine
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
 					const char* path = (const char*)payload->Data;
-					eastl::string ext = StringUtils::GetExtension(path);
+					std::string ext = StringUtils::GetExtension(path);
 					if (ext == "mp3" || ext == "wav")
 						component.Source = CreateRef<AudioSource>(path);
 				}
@@ -1197,8 +1197,8 @@ namespace ArcEngine
 
 	void PropertiesPanel::DrawFileProperties(const char* filepath)
 	{
-		const eastl::string name = StringUtils::GetNameWithExtension(filepath);
-		const eastl::string& ext = StringUtils::GetExtension(name.c_str());
+		const std::string name = StringUtils::GetNameWithExtension(filepath);
+		const std::string& ext = StringUtils::GetExtension(name.c_str());
 
 		if (ext == "prefab")
 		{

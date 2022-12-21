@@ -2,8 +2,8 @@
 
 #include <filesystem>
 
-#include <EASTL/string.h>
-#include <EASTL/hash_map.h>
+#include <string>
+#include <unordered_map>
 
 #include "Arc/Core/Base.h"
 
@@ -31,7 +31,7 @@ namespace ArcEngine
 	class Project
 	{
 	private:
-		inline static const eastl::hash_map<ProjectConfig::BuildConfig, eastl::string> s_BuildConfigMap =
+		inline static const std::unordered_map<ProjectConfig::BuildConfig, const char*> s_BuildConfigMap =
 		{
 			{ ProjectConfig::BuildConfig::Debug,	"Debug"		},
 			{ ProjectConfig::BuildConfig::Release,	"Release"	},
@@ -75,7 +75,7 @@ namespace ArcEngine
 			return GetProjectDirectory() / (s_ActiveProject->GetConfig().Name + ".sln");
 		}
 
-		static const eastl::string& GetBuildConfigString()
+		static const std::string_view GetBuildConfigString()
 		{
 			ARC_CORE_ASSERT(s_ActiveProject);
 			return s_BuildConfigMap.at(s_ActiveProject->GetConfig().BuildConfiguration);

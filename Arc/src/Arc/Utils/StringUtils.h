@@ -7,7 +7,7 @@ namespace ArcEngine
 	class StringUtils
 	{
 	public:
-		inline static eastl::string GetExtension(const eastl::string&& filepath)
+		inline static std::string GetExtension(const std::string&& filepath)
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -15,27 +15,27 @@ namespace ArcEngine
 			return filepath.substr(lastDot + 1, filepath.size() - lastDot);
 		}
 
-		inline static eastl::string GetName(const eastl::string&& filepath)
+		inline static std::string GetName(const std::string&& filepath)
 		{
 			ARC_PROFILE_SCOPE();
 
 			auto lastSlash = filepath.find_last_of("/\\");
-			lastSlash = lastSlash == eastl::string::npos ? 0 : lastSlash + 1;
+			lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
 			auto lastDot = filepath.rfind('.');
-			auto count = lastDot == eastl::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
+			auto count = lastDot == std::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
 			return filepath.substr(lastSlash, count);
 		}
 
-		inline static eastl::string GetNameWithExtension(const eastl::string&& filepath)
+		inline static std::string GetNameWithExtension(const std::string&& filepath)
 		{
 			ARC_PROFILE_SCOPE();
 
 			auto lastSlash = filepath.find_last_of("/\\");
-			lastSlash = lastSlash == eastl::string::npos ? 0 : lastSlash + 1;
+			lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
 			return filepath.substr(lastSlash, filepath.size());
 		}
 
-		inline static void ReplaceString(eastl::string& subject, const eastl::string& search, const eastl::string& replace)
+		inline static void ReplaceString(std::string& subject, const std::string& search, const std::string& replace)
 		{
 			size_t pos = 0;
 			while ((pos = subject.find(search, pos)) != std::string::npos)

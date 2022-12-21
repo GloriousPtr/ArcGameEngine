@@ -1,6 +1,5 @@
 #pragma once
 
-#include <EASTL/string.h>
 #include <filesystem>
 
 #include "UUID.h"
@@ -38,21 +37,6 @@ namespace ArcEngine
 		static std::shared_ptr<spdlog::logger> s_ClientLogger;
 	};
 }
-
-template<>
-struct std::formatter<eastl::string>
-{
-	constexpr auto parse(format_parse_context& ctx) const -> decltype(ctx.begin())
-	{
-		return ctx.end();
-	}
-
-	template <typename FormatContext>
-	auto format(const eastl::string& input, FormatContext& ctx) -> decltype(ctx.out())
-	{
-		return format_to(ctx.out(), "{}", input.c_str());
-	}
-};
 
 template<>
 struct std::formatter<ArcEngine::UUID>

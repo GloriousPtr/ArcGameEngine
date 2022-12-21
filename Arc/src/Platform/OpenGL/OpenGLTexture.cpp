@@ -23,7 +23,7 @@ namespace ArcEngine
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
-	OpenGLTexture2D::OpenGLTexture2D(const eastl::string& path)
+	OpenGLTexture2D::OpenGLTexture2D(const std::string& path)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -57,7 +57,7 @@ namespace ArcEngine
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
 	}
 
-	void OpenGLTexture2D::Invalidate(eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels)
+	void OpenGLTexture2D::Invalidate(std::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -71,7 +71,7 @@ namespace ArcEngine
 		glBindTextureUnit(slot, m_RendererID);
 	}
 
-	void OpenGLTexture2D::InvalidateImpl(eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels)
+	void OpenGLTexture2D::InvalidateImpl(std::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels)
 	{
 		ARC_PROFILE_SCOPE();
 

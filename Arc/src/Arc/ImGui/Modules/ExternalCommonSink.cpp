@@ -3,5 +3,5 @@
 
 namespace ArcEngine
 {
-	eastl::function<void(eastl::string, eastl::string, eastl::string, int32_t, Log::Level)> ExternalConsoleSink::OnFlush;
+	std::function<void(std::string, std::string, std::string, int32_t, Log::Level)> ExternalConsoleSink::OnFlush;
 }

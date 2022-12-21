@@ -25,7 +25,7 @@ namespace ArcEngine
 		Audio
 	};
 
-	static const eastl::hash_map<FileType, eastl::string> s_FileTypesToString =
+	static const std::unordered_map<FileType, const char*> s_FileTypesToString =
 	{
 		{ FileType::Unknown,	"Unknown" },
 
@@ -41,7 +41,7 @@ namespace ArcEngine
 		{ FileType::Audio,		"Audio" },
 	};
 
-	static const eastl::hash_map<eastl::string, FileType> s_FileTypes =
+	static const std::unordered_map<std::string, FileType> s_FileTypes =
 	{
 		{ "arc",	FileType::Scene },
 		{ "prefab", FileType::Prefab },
@@ -67,7 +67,7 @@ namespace ArcEngine
 		{ "wav",	FileType::Audio },
 	};
 
-	static const eastl::hash_map<FileType, ImVec4> s_TypeColors =
+	static const std::unordered_map<FileType, ImVec4> s_TypeColors =
 	{
 		{ FileType::Scene,			{ 0.75f, 0.35f, 0.20f, 1.00f } },
 		{ FileType::Prefab,			{ 0.10f, 0.50f, 0.80f, 1.00f } },
@@ -105,7 +105,7 @@ namespace ArcEngine
 			{
 				Entity entity = *((Entity*)payload->Data);
 				std::filesystem::path path(dropPath);
-				path /= eastl::string(entity.GetComponent<TagComponent>().Tag + ".prefab").c_str();
+				path /= std::string(entity.GetComponent<TagComponent>().Tag + ".prefab").c_str();
 				EntitySerializer::SerializeEntityAsPrefab(path.string().c_str(), entity);
 				return true;
 			}
@@ -116,12 +116,12 @@ namespace ArcEngine
 		return false;
 	}
 
-	static void DragDropFrom(const eastl::string& filepath)
+	static void DragDropFrom(const std::string& filepath)
 	{
 		if (ImGui::BeginDragDropSource())
 		{
 			ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", filepath.c_str(), filepath.length() + 1);
-			ImGui::Text(StringUtils::GetName(eastl::move(filepath)).c_str());
+			ImGui::Text(StringUtils::GetName(std::move(filepath)).c_str());
 			ImGui::EndDragDropSource();
 		}
 	}
@@ -132,7 +132,7 @@ namespace ArcEngine
 		const char* filepath = filepathString.c_str();
 		std::string ext = path.extension().string();
 		ext = ext.substr(1);
-		if (s_FileTypes.find_as(ext.c_str()) != s_FileTypes.end())
+		if (s_FileTypes.find(ext.c_str()) != s_FileTypes.end())
 		{
 			FileType fileType = s_FileTypes.at(ext.c_str());
 			switch (fileType)
@@ -204,16 +204,16 @@ namespace ArcEngine
 				anyNodeClicked = true;
 			}
 
-			const eastl::string filepath = entryPath.string().c_str();
+			const std::string filepath = entryPath.string().c_str();
 
 			if (!entryIsFile)
 				DragDropTarget(filepath.c_str());
 			DragDropFrom(filepath);
 
-			eastl::string name = StringUtils::GetNameWithExtension(filepath.c_str());
+			std::string name = StringUtils::GetNameWithExtension(filepath.c_str());
 			const char8_t* folderIcon;
 			if (entryIsFile)
-				folderIcon = GetFileIcon(StringUtils::GetExtension((eastl::string&&)name).c_str());
+				folderIcon = GetFileIcon(StringUtils::GetExtension((std::string&&)name).c_str());
 			else
 				folderIcon = open ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
 			
@@ -582,7 +582,7 @@ namespace ArcEngine
 				uint64_t textureId = m_DirectoryIcon->GetRendererID();
 				if (!isDir)
 				{
-					eastl::string ext = StringUtils::GetExtension((eastl::string&&)file.Name);
+					std::string ext = StringUtils::GetExtension((std::string&&)file.Name);
 					if (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp")
 					{
 						if (file.Thumbnail)
@@ -623,7 +623,7 @@ namespace ArcEngine
 					}
 
 					// Background button
-					static eastl::string id = "###";
+					static std::string id = "###";
 					id[2] = (char)i;
 					bool const clicked = UI::ToggleButton(id.c_str(), highlight, backgroundThumbnailSize, 0.0f, 1.0f);
 					if (m_ElapsedTime > 0.25f && clicked)
@@ -679,15 +679,15 @@ namespace ArcEngine
 
 					// Type Color frame
 					auto fileType = FileType::Unknown;
-					auto fileTypeString = s_FileTypesToString.at(FileType::Unknown);
-					if (s_FileTypes.find_as(file.Extension.c_str()) != s_FileTypes.end())
+					const char* fileTypeString = s_FileTypesToString.at(FileType::Unknown);
+					if (s_FileTypes.find(file.Extension.c_str()) != s_FileTypes.end())
 					{
 						fileType = s_FileTypes.at(file.Extension.c_str());
 						fileTypeString = s_FileTypesToString.at(fileType);
 					}
 
 					ImVec4 typeColor = { 1.0f, 1.0f, 1.0f, 1.0f };
-					if (s_TypeColors.find_as(fileType) != s_TypeColors.end())
+					if (s_TypeColors.find(fileType) != s_TypeColors.end())
 						typeColor = s_TypeColors.at(fileType);
 					ImVec2 typeColorFrameSize = { scaledThumbnailSizeX, scaledThumbnailSizeX * 0.03f };
 					ImGui::SetCursorPosX(cursorPos.x + padding);
@@ -704,7 +704,7 @@ namespace ArcEngine
 						ImGui::SetCursorPos({ cursorPos.x + padding * 2.0f, cursorPos.y + backgroundThumbnailSize.y - EditorTheme::SmallFont->FontSize - padding * 2.0f });
 						ImGui::BeginDisabled();
 						ImGui::PushFont(EditorTheme::SmallFont);
-						ImGui::TextUnformatted(fileTypeString.c_str());
+						ImGui::TextUnformatted(fileTypeString);
 						ImGui::PopFont();
 						ImGui::EndDisabled();
 					}
@@ -777,8 +777,8 @@ namespace ArcEngine
 		{
 			const auto& path = directoryEntry.path();
 			auto relativePath = std::filesystem::relative(path, m_AssetsDirectory);
-			eastl::string filename = relativePath.filename().string().c_str();
-			eastl::string extension = relativePath.extension().string().c_str();
+			std::string filename = relativePath.filename().string().c_str();
+			std::string extension = relativePath.extension().string().c_str();
 			m_DirectoryEntries.emplace_back(filename, path.string().c_str(), extension, directoryEntry, nullptr, directoryEntry.is_directory());
 		}
 

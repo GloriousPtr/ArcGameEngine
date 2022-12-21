@@ -15,7 +15,7 @@
 namespace ArcEngine
 {
 	Renderer3D::Statistics Renderer3D::s_Stats;
-	eastl::fixed_vector<Renderer3D::MeshData, 100000> Renderer3D::s_Meshes;
+	std::vector<Renderer3D::MeshData> Renderer3D::s_Meshes;
 	Ref<Texture2D> Renderer3D::s_BRDFLutTexture;
 	Ref<Shader> Renderer3D::s_Shader;
 	Ref<Shader> Renderer3D::s_LightingShader;
@@ -32,7 +32,7 @@ namespace ArcEngine
 	Ref<UniformBuffer> Renderer3D::s_UbDirectionalLights;
 
 	Entity Renderer3D::s_Skylight;
-	eastl::vector<Entity> Renderer3D::s_SceneLights;
+	std::vector<Entity> Renderer3D::s_SceneLights;
 
 	ShaderLibrary Renderer3D::s_ShaderLibrary;
 	Renderer3D::TonemappingType Renderer3D::Tonemapping = Renderer3D::TonemappingType::ACES;
@@ -197,12 +197,12 @@ namespace ArcEngine
 
 	}
 
-	void Renderer3D::BeginScene(const CameraData& cameraData, Entity cubemap, eastl::vector<Entity>&& lights)
+	void Renderer3D::BeginScene(const CameraData& cameraData, Entity cubemap, std::vector<Entity>&& lights)
 	{
 		ARC_PROFILE_SCOPE();
 
 		s_Skylight = cubemap;
-		s_SceneLights = eastl::move(lights);
+		s_SceneLights = std::move(lights);
 
 		SetupCameraData(cameraData);
 		SetupLightsData();

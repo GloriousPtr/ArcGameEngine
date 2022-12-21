@@ -31,9 +31,9 @@ namespace ArcEngine
 		void OnEnd() const;
 
 	protected:
-		eastl::string m_Name;
+		std::string m_Name;
 		const char8_t* m_Icon;
-		eastl::string m_ID;
+		std::string m_ID;
 
 	private:
 		static uint32_t s_Count;

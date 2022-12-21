@@ -49,8 +49,8 @@ namespace ArcEngine
 			currentMoniker->GetDisplayName(bindCtx, nullptr, &buffer);
 			_bstr_t wBuffer = buffer;
 			const char* cBuffer = wBuffer;
-			eastl::string name(cBuffer);
-			if (name.find(programId) != eastl::string::npos)
+			std::string name(cBuffer);
+			if (name.find(programId) != std::string::npos)
 			{
 				ComPtr<IUnknown> pUnk;
 				result = runningObjectTable->GetObjectW(currentMoniker, &pUnk);
@@ -274,7 +274,7 @@ namespace ArcEngine
 				{
 					if (buffer)
 					{
-						size_t newLine = eastl::string_view(buffer).size() - 1;
+						size_t newLine = std::string_view(buffer).size() - 1;
 						buffer[newLine] = '\0';
 						ARC_APP_ERROR(buffer);
 						failed = true;
@@ -296,7 +296,7 @@ namespace ArcEngine
 				{
 					if (buffer)
 					{
-						size_t newLine = eastl::string_view(buffer).size() - 1;
+						size_t newLine = std::string_view(buffer).size() - 1;
 						buffer[newLine] = '\0';
 						ARC_APP_WARN(buffer);
 					}
@@ -337,7 +337,7 @@ namespace ArcEngine
 		});
 	}
 
-	void VisualStudioAccessor::OpenFile(const eastl::string& filepath, uint32_t goToLine, bool selectLine)
+	void VisualStudioAccessor::OpenFile(const std::string& filepath, uint32_t goToLine, bool selectLine)
 	{
 		if (!Project::GetActive())
 		{
@@ -398,7 +398,7 @@ namespace ArcEngine
 		});
 	}
 
-	bool VisualStudioAccessor::AddFile(const eastl::string& filepath, bool open)
+	bool VisualStudioAccessor::AddFile(const std::string& filepath, bool open)
 	{
 		bool success = GenerateProjectFiles();
 		if (open)
@@ -475,7 +475,7 @@ namespace ArcEngine
 		if (!IsDteValid())
 			FindAndSetRunningInstance(solutionPath.string());
 
-		bool success = BuildSolutionUsingProcess(solutionPath, Project::GetBuildConfigString().c_str());
+		bool success = BuildSolutionUsingProcess(solutionPath, Project::GetBuildConfigString().data());
 
 		if (onComplete)
 			onComplete();

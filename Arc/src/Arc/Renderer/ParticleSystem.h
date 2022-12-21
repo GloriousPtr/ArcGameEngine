@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EASTL/fixed_vector.h>
+#include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtx/compatibility.hpp>
 
@@ -123,7 +123,7 @@ namespace ArcEngine
 		void Emit(const glm::vec3& position, uint16_t count = 1);
 
 	private:
-		eastl::fixed_vector<Particle, 10000> m_Particles;
+		std::vector<Particle> m_Particles;
 		uint32_t m_PoolIndex = 0;
 		ParticleProperties m_Properties;
 

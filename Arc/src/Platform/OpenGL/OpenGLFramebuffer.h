@@ -31,10 +31,10 @@ namespace ArcEngine
 	private:
 		uint32_t m_RendererID = 0;
 		FramebufferSpecification m_Specification;
-		eastl::vector<FramebufferTextureSpecification> m_ColorAttachmentSpecifications;
+		std::vector<FramebufferTextureSpecification> m_ColorAttachmentSpecifications;
 		FramebufferTextureSpecification m_DepthAttachmentSpecification;
 
-		eastl::vector<uint32_t> m_ColorAttachments;
+		std::vector<uint32_t> m_ColorAttachments;
 		uint32_t m_DepthAttachment;
 	};
 }

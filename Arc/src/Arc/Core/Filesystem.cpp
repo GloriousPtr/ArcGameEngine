@@ -25,7 +25,7 @@ namespace ArcEngine
 		return buffer;
 	}
 
-	void Filesystem::ReadFileText(const std::filesystem::path& filepath, eastl::string& outString)
+	void Filesystem::ReadFileText(const std::filesystem::path& filepath, std::string& outString)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -51,7 +51,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Filesystem::WriteFileText(const std::filesystem::path& filepath, const eastl::string& buffer)
+	void Filesystem::WriteFileText(const std::filesystem::path& filepath, const std::string& buffer)
 	{
 		std::ofstream stream(filepath, std::ios::out);
 		stream << buffer.c_str();

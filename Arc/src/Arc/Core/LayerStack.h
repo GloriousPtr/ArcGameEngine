@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EASTL/vector.h>
+#include <vector>
 
 #include "Arc/Core/Layer.h"
 
@@ -20,18 +20,18 @@ namespace ArcEngine
 		void PopLayer(Layer* layer);
 		void PopOverlay(Layer* overlay);
 
-		eastl::vector<Layer*>::iterator begin() { return m_Layers.begin(); }
-		eastl::vector<Layer*>::iterator end() { return m_Layers.end(); }
-		eastl::vector<Layer*>::reverse_iterator rbegin() { return m_Layers.rbegin(); }
-		eastl::vector<Layer*>::reverse_iterator rend() { return m_Layers.rend(); }
+		std::vector<Layer*>::iterator begin() { return m_Layers.begin(); }
+		std::vector<Layer*>::iterator end() { return m_Layers.end(); }
+		std::vector<Layer*>::reverse_iterator rbegin() { return m_Layers.rbegin(); }
+		std::vector<Layer*>::reverse_iterator rend() { return m_Layers.rend(); }
 
-		eastl::vector<Layer*>::const_iterator begin() const { return m_Layers.begin(); }
-		eastl::vector<Layer*>::const_iterator end()	const { return m_Layers.end(); }
-		eastl::vector<Layer*>::const_reverse_iterator rbegin() const { return m_Layers.rbegin(); }
-		eastl::vector<Layer*>::const_reverse_iterator rend() const { return m_Layers.rend(); }
+		std::vector<Layer*>::const_iterator begin() const { return m_Layers.begin(); }
+		std::vector<Layer*>::const_iterator end()	const { return m_Layers.end(); }
+		std::vector<Layer*>::const_reverse_iterator rbegin() const { return m_Layers.rbegin(); }
+		std::vector<Layer*>::const_reverse_iterator rend() const { return m_Layers.rend(); }
 
 	private:
-		eastl::vector<Layer*> m_Layers;
+		std::vector<Layer*> m_Layers;
 		unsigned int m_LayerInsertIndex = 0;
 	};
 }

@@ -13,7 +13,6 @@ project "Arc-Editor"
 		"src/**.h",
 		"src/**.cpp",
 
-		"%{IncludeDir.EASTL}/../doc/EASTL.natvis",
 		"%{IncludeDir.glm}/util/glm.natvis",
 		"%{IncludeDir.yaml_cpp}/../src/contrib/yaml-cpp.natvis",
 		"%{IncludeDir.ImGui}/misc/debuggers/imgui.natvis",
@@ -28,8 +27,6 @@ project "Arc-Editor"
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.optick}",
-		"%{IncludeDir.EABase}",
-		"%{IncludeDir.EASTL}",
 		"%{IncludeDir.icons}",
 	}
 

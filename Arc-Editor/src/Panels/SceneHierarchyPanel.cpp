@@ -250,7 +250,7 @@ namespace ArcEngine
 				else if (const ImGuiPayload* assetPanelPayload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
 					const char* path = (const char*)assetPanelPayload->Data;
-					eastl::string ext = StringUtils::GetExtension(path);
+					std::string ext = StringUtils::GetExtension(path);
 					if (ext == "prefab")
 					{
 						m_DraggedEntity = EntitySerializer::DeserializeEntityAsPrefab(path, *m_Context);
@@ -282,7 +282,7 @@ namespace ArcEngine
 			size_t minSize = glm::min(sizeof(buffer), tag.size());
 			strncpy_s(buffer, tag.c_str(), minSize);
 			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
-				tag = eastl::string(buffer);
+				tag = std::string(buffer);
 
 			if (ImGui::IsItemDeactivated())
 			{
@@ -396,8 +396,8 @@ namespace ArcEngine
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 			{
 				const char* path = (const char*)payload->Data;
-				eastl::string name = StringUtils::GetName(path);
-				eastl::string ext = StringUtils::GetExtension(path);
+				std::string name = StringUtils::GetName(path);
+				std::string ext = StringUtils::GetExtension(path);
 
 				if (ext == "prefab")
 				{

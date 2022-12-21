@@ -1,8 +1,8 @@
 #pragma once
 
-#include <EASTL/hash_map.h>
+#include <unordered_map>
 
-#include <EASTL/string.h>
+#include <string>
 #include <glm/glm.hpp>
 
 namespace ArcEngine
@@ -48,42 +48,42 @@ namespace ArcEngine
 	public:
 		virtual ~Shader() = default;
 
-		virtual void Recompile(const eastl::string& path) = 0;
+		virtual void Recompile(const std::string& path) = 0;
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
-		virtual void SetInt(const eastl::string& name, int value) = 0;
-		virtual void SetIntArray(const eastl::string& name, const int* values, uint32_t count) = 0;
-		virtual void SetFloat(const eastl::string& name, float value) = 0;
-		virtual void SetFloat2(const eastl::string& name, const glm::vec2& value) = 0;
-		virtual void SetFloat3(const eastl::string& name, const glm::vec3& value) = 0;
-		virtual void SetFloat4(const eastl::string& name, const glm::vec4& value) = 0;
-		virtual void SetMat3(const eastl::string& name, const glm::mat3& value) = 0;
-		virtual void SetMat4(const eastl::string& name, const glm::mat4& value) = 0;
-		virtual void SetUniformBlock(const eastl::string& name, uint32_t blockIndex) = 0;
+		virtual void SetInt(const std::string& name, int value) = 0;
+		virtual void SetIntArray(const std::string& name, const int* values, uint32_t count) = 0;
+		virtual void SetFloat(const std::string& name, float value) = 0;
+		virtual void SetFloat2(const std::string& name, const glm::vec2& value) = 0;
+		virtual void SetFloat3(const std::string& name, const glm::vec3& value) = 0;
+		virtual void SetFloat4(const std::string& name, const glm::vec4& value) = 0;
+		virtual void SetMat3(const std::string& name, const glm::mat3& value) = 0;
+		virtual void SetMat4(const std::string& name, const glm::mat4& value) = 0;
+		virtual void SetUniformBlock(const std::string& name, uint32_t blockIndex) = 0;
 		
-		virtual eastl::hash_map<eastl::string, MaterialProperty>& GetMaterialProperties() = 0;
+		virtual std::unordered_map<std::string, MaterialProperty>& GetMaterialProperties() = 0;
 
-		virtual const eastl::string& GetName() const = 0;
+		virtual const std::string& GetName() const = 0;
 
-		static Ref<Shader> Create(const eastl::string& filepath);
-		static Ref<Shader> Create(const eastl::string& name, const eastl::string& vertexSrc, const eastl::string& fragmentSrc);
+		static Ref<Shader> Create(const std::string& filepath);
+		static Ref<Shader> Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
 	};
 
 	class ShaderLibrary
 	{
 	public:
-		void Add(const eastl::string& name, const Ref<Shader>& shader);
+		void Add(const std::string& name, const Ref<Shader>& shader);
 		void Add(const Ref<Shader>& shader);
-		Ref<Shader> Load(const eastl::string& filepath);
-		Ref<Shader> Load(const eastl::string& name, const eastl::string& filepath);
+		Ref<Shader> Load(const std::string& filepath);
+		Ref<Shader> Load(const std::string& name, const std::string& filepath);
 		void ReloadAll();
 
-		Ref<Shader> Get(const eastl::string& name);
+		Ref<Shader> Get(const std::string& name);
 
-		bool Exists(const eastl::string& name) const;
+		bool Exists(const std::string& name) const;
 	private:
-		eastl::hash_map<eastl::string, Ref<Shader>> m_Shaders;
-		eastl::hash_map<eastl::string, eastl::string> m_ShaderPaths;
+		std::unordered_map<std::string, Ref<Shader>> m_Shaders;
+		std::unordered_map<std::string, std::string> m_ShaderPaths;
 	};
 }

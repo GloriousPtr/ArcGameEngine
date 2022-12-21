@@ -87,26 +87,6 @@ namespace YAML
 	};
 
 	template<>
-	struct convert<eastl::string>
-	{
-		static Node encode(const eastl::string& str)
-		{
-			Node node;
-			node.push_back(str.c_str());
-			return node;
-		}
-
-		static bool decode(const Node& node, eastl::string& str)
-		{
-			std::string buffer;
-			bool success = convert<std::string>::decode(node, buffer);
-			if (success)
-				str = buffer.c_str();
-			return success;
-		}
-	};
-
-	template<>
 	struct convert<ArcEngine::UUID>
 	{
 		static Node encode(const ArcEngine::UUID& uuid)
@@ -754,7 +734,7 @@ namespace ArcEngine
 			out << YAML::BeginMap; // AudioSourceComponent
 
 			const auto& audioSourceComponent = entity.GetComponent<AudioSourceComponent>();
-			eastl::string f = (audioSourceComponent.Source ? Project::GetAssetRelativeFileSystemPath(audioSourceComponent.Source->GetPath()).string().c_str() : "");
+			std::string f = (audioSourceComponent.Source ? Project::GetAssetRelativeFileSystemPath(audioSourceComponent.Source->GetPath()).string().c_str() : "");
 			out << YAML::Key << "Filepath" << YAML::Value << f.c_str();
 			out << YAML::Key << "VolumeMultiplier" << YAML::Value << audioSourceComponent.Config.VolumeMultiplier;
 			out << YAML::Key << "PitchMultiplier" << YAML::Value << audioSourceComponent.Config.PitchMultiplier;
@@ -798,7 +778,7 @@ namespace ArcEngine
 
 		uint64_t uuid = entity["Entity"].as<uint64_t>();
 
-		eastl::string name;
+		std::string name;
 		bool enabled = true;
 		EntityLayer layer = 0;
 		auto tagComponent = entity["TagComponent"];
@@ -897,7 +877,7 @@ namespace ArcEngine
 			TrySet(src.SortingOrder, spriteRenderer["SortingOrder"]);
 			TrySet(src.TilingFactor, spriteRenderer["TilingFactor"]);
 
-			eastl::string texturePath = "";
+			std::string texturePath = "";
 			TrySet(texturePath, spriteRenderer["TexturePath"]);
 
 			if (!texturePath.empty())
@@ -914,7 +894,7 @@ namespace ArcEngine
 			TrySet(src.Intensity, skyLight["Intensity"]);
 			TrySet(src.Rotation, skyLight["Rotation"]);
 
-			eastl::string texturePath = "";
+			std::string texturePath = "";
 			TrySet(texturePath, skyLight["TexturePath"]);
 			if (!texturePath.empty())
 			{
@@ -1001,7 +981,7 @@ namespace ArcEngine
 			TrySet(props.RotationBySpeed.MaxSpeed, psComponent["RotationBySpeed.MaxSpeed"]);
 			TrySet(props.RotationBySpeed.Enabled, psComponent["RotationBySpeed.Enabled"]);
 
-			eastl::string texturePath = "";
+			std::string texturePath = "";
 			TrySet(texturePath, psComponent["TexturePath"]);
 			if (!texturePath.empty())
 			{
@@ -1234,7 +1214,7 @@ namespace ArcEngine
 		if (const auto& meshComponent = entity["MeshComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<MeshComponent>();
-			eastl::string filepath = "";
+			std::string filepath = "";
 			TrySet(filepath, meshComponent["Filepath"]);
 			TrySet(src.SubmeshIndex, meshComponent["SubmeshIndex"]);
 			TrySetEnum(src.CullMode, meshComponent["CullMode"]);
@@ -1262,7 +1242,7 @@ namespace ArcEngine
 				{
 					auto scriptNode = scripts[i];
 					
-					eastl::string scriptName = "";
+					std::string scriptName = "";
 					TrySet(scriptName, scriptNode["Name"]);
 					if (!ScriptEngine::HasClass(scriptName.c_str()))
 					{
@@ -1320,7 +1300,7 @@ namespace ArcEngine
 		if (const auto& audioSourceComponent = entity["AudioSourceComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<AudioSourceComponent>();
-			eastl::string filepath = "";
+			std::string filepath = "";
 			TrySet(filepath, audioSourceComponent["Filepath"]);
 			TrySet(src.Config.VolumeMultiplier, audioSourceComponent["VolumeMultiplier"]);
 			TrySet(src.Config.PitchMultiplier, audioSourceComponent["PitchMultiplier"]);
@@ -1358,9 +1338,9 @@ namespace ArcEngine
 		return deserializedEntity.GetUUID();
 	}
 
-	static void GetAllChildren(Entity parent, eastl::vector<Entity>& outEntities)
+	static void GetAllChildren(Entity parent, std::vector<Entity>& outEntities)
 	{
-		eastl::vector<UUID> children = parent.GetComponent<RelationshipComponent>().Children;
+		std::vector<UUID> children = parent.GetComponent<RelationshipComponent>().Children;
 		for (const auto& child : children)
 		{
 			Entity entity = parent.GetScene()->GetEntity(child);
@@ -1382,7 +1362,7 @@ namespace ArcEngine
 		out << YAML::Key << "Prefab" << YAML::Value << entity.AddComponent<PrefabComponent>().ID;
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 
-		eastl::vector<Entity> entities;
+		std::vector<Entity> entities;
 		entities.push_back(entity);
 		GetAllChildren(entity, entities);
 
@@ -1424,7 +1404,7 @@ namespace ArcEngine
 
 		if (entities)
 		{
-			eastl::hash_map<UUID, UUID> oldNewIdMap;
+			std::unordered_map<UUID, UUID> oldNewIdMap;
 			for (const auto& entity : entities)
 			{
 				UUID oldUUID = 0;

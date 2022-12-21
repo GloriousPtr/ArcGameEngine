@@ -10,10 +10,10 @@
 
 namespace ArcEngine
 {
-	eastl::hash_map<eastl::string, Ref<Texture2D>> AssetManager::m_Texture2DMap;
-	eastl::hash_map<eastl::string, Ref<TextureCubemap>> AssetManager::m_TextureCubeMap;
-	eastl::hash_map<eastl::string, Ref<Mesh>> AssetManager::m_MeshMap;
-	eastl::vector<std::future<void>> AssetManager::m_Futures;
+	inline static std::unordered_map<std::string, Ref<Texture2D>> m_Texture2DMap;
+	inline static std::unordered_map<std::string, Ref<TextureCubemap>> m_TextureCubeMap;
+	inline static std::unordered_map<std::string, Ref<Mesh>> m_MeshMap;
+	inline static std::vector<std::future<void>> m_Futures;
 
 	void AssetManager::Init()
 	{
@@ -32,7 +32,7 @@ namespace ArcEngine
 		m_Futures.clear();
 	}
 
-	static void LoadTexture2D(Texture2D* tex, const eastl::string_view path)
+	static void LoadTexture2D(Texture2D* tex, const std::string_view path)
 	{
 		ARC_PROFILE_THREAD("IO Thread");
 
@@ -48,11 +48,11 @@ namespace ArcEngine
 		Application::Get().SubmitToMainThread([tex, path, width, height, data, channels]() { tex->Invalidate(path, width, height, data, channels); stbi_image_free(data); });
 	}
 
-	Ref<Texture2D> AssetManager::GetTexture2D(const eastl::string& path)
+	Ref<Texture2D> AssetManager::GetTexture2D(const std::string& path)
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (m_Texture2DMap.find_as(path) != m_Texture2DMap.end())
+		if (m_Texture2DMap.find(path) != m_Texture2DMap.end())
 			return m_Texture2DMap.at(path);
 
 		Ref<Texture2D> texture = Texture2D::Create();
@@ -61,7 +61,7 @@ namespace ArcEngine
 		return texture;
 	}
 
-	static void LoadTextureCubemap(TextureCubemap* tex, const eastl::string_view path)
+	static void LoadTextureCubemap(TextureCubemap* tex, const std::string_view path)
 	{
 		ARC_PROFILE_THREAD("IO Thread");
 
@@ -77,11 +77,11 @@ namespace ArcEngine
 		Application::Get().SubmitToMainThread([tex, path, width, height, data, channels]() { tex->Invalidate(path, width, height, data, channels); stbi_image_free(data); });
 	}
 
-	Ref<TextureCubemap> AssetManager::GetTextureCubemap(const eastl::string& path)
+	Ref<TextureCubemap> AssetManager::GetTextureCubemap(const std::string& path)
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (m_TextureCubeMap.find_as(path) != m_TextureCubeMap.end())
+		if (m_TextureCubeMap.find(path) != m_TextureCubeMap.end())
 			return m_TextureCubeMap.at(path);
 
 		Ref<TextureCubemap> texture = TextureCubemap::Create();
@@ -90,11 +90,11 @@ namespace ArcEngine
 		return texture;
 	}
 
-	Ref<Mesh> AssetManager::GetMesh(const eastl::string& path)
+	Ref<Mesh> AssetManager::GetMesh(const std::string& path)
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (m_MeshMap.find_as(path) != m_MeshMap.end())
+		if (m_MeshMap.find(path) != m_MeshMap.end())
 			return m_MeshMap.at(path);
 
 		Ref<Mesh> mesh = CreateRef<Mesh>(path.c_str());

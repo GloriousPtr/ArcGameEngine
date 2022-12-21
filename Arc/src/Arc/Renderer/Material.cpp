@@ -23,12 +23,12 @@ namespace ArcEngine
 		}
 
 		// Extract name from filepath
-		eastl::string filepath = shaderPath;
-		auto lastSlash = eastl::string(filepath).find_last_of("/\\");
-		lastSlash = lastSlash == eastl::string::npos ? 0 : lastSlash + 1;
+		std::string filepath = shaderPath;
+		auto lastSlash = std::string(filepath).find_last_of("/\\");
+		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
 		auto lastDot = filepath.rfind('.');
-		auto count = lastDot == eastl::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
-		eastl::string name = filepath.substr(lastSlash, count);
+		auto count = lastDot == std::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
+		std::string name = filepath.substr(lastSlash, count);
 
 		if (!Renderer3D::GetShaderLibrary().Exists(name))
 			m_Shader = Renderer3D::GetShaderLibrary().Load(shaderPath);
@@ -75,9 +75,9 @@ namespace ArcEngine
 				property.Type == MaterialPropertyType::Float3 ||
 				property.Type == MaterialPropertyType::Float4)
 			{
-				if (name.find("albedo") != eastl::string::npos || name.find("Albedo") != eastl::string::npos)
+				if (name.find("albedo") != std::string::npos || name.find("Albedo") != std::string::npos)
 					memcpy(m_Buffer + property.OffsetInBytes, glm::value_ptr(one), property.SizeInBytes);
-				if (name.find("roughness") != eastl::string::npos || name.find("Roughness") != eastl::string::npos)
+				if (name.find("roughness") != std::string::npos || name.find("Roughness") != std::string::npos)
 					memcpy(m_Buffer + property.OffsetInBytes, glm::value_ptr(one), property.SizeInBytes);
 			}
 		}
@@ -168,7 +168,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		const auto& materialProperties = m_Shader->GetMaterialProperties();
-		const auto& materialProperty = m_Shader->GetMaterialProperties().find_as(name);
+		const auto& materialProperty = m_Shader->GetMaterialProperties().find(name);
 		if (materialProperty != materialProperties.end())
 			return m_Buffer + materialProperty->second.OffsetInBytes;
 
@@ -180,7 +180,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		const auto& materialProperties = m_Shader->GetMaterialProperties();
-		const auto& property = m_Shader->GetMaterialProperties().find_as(name);
+		const auto& property = m_Shader->GetMaterialProperties().find(name);
 		if (property != materialProperties.end())
 			memcpy(m_Buffer + property->second.OffsetInBytes, data, property->second.SizeInBytes);
 	}

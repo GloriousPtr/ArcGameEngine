@@ -10,7 +10,7 @@ typedef uint32_t GLenum;
 
 namespace ArcEngine
 {
-	static GLenum ShaderTypeFromString(const eastl::string& type)
+	static GLenum ShaderTypeFromString(const std::string& type)
 	{
 		if(type == "vertex")
 			return GL_VERTEX_SHADER;
@@ -23,29 +23,29 @@ namespace ArcEngine
 		return 0;
 	}
 	
-	OpenGLShader::OpenGLShader(const eastl::string& filepath)
+	OpenGLShader::OpenGLShader(const std::string& filepath)
 	{
 		ARC_PROFILE_SCOPE();
 		
-		eastl::string source;
+		std::string source;
 		Filesystem::ReadFileText(filepath.c_str(), source);
 		auto shaderSources = PreProcess(source);
 		Compile(shaderSources);
 		
 		// Extract name from filepath
 		auto lastSlash = filepath.find_last_of("/\\");
-		lastSlash = lastSlash == eastl::string::npos ? 0 : lastSlash + 1;
+		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
 		auto lastDot = filepath.rfind('.');
-		auto count = lastDot == eastl::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
+		auto count = lastDot == std::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
 		m_Name = filepath.substr(lastSlash, count);
 	}
 
-	OpenGLShader::OpenGLShader(const eastl::string& name, const eastl::string& vertexSrc, const eastl::string& fragmentSrc)
+	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
 		: m_Name(name)
 	{
 		ARC_PROFILE_SCOPE();
 		
-		eastl::unordered_map<GLenum, eastl::string> sources;
+		std::unordered_map<GLenum, std::string> sources;
 		sources[GL_VERTEX_SHADER] = vertexSrc;
 		sources[GL_FRAGMENT_SHADER] = fragmentSrc;
 		Compile(sources);
@@ -58,13 +58,13 @@ namespace ArcEngine
 		glDeleteProgram(m_RendererID);
 	}
 
-	void OpenGLShader::Recompile(const eastl::string& filepath)
+	void OpenGLShader::Recompile(const std::string& filepath)
 	{
 		ARC_PROFILE_SCOPE();
 
 		glDeleteProgram(m_RendererID);
 
-		eastl::string source;
+		std::string source;
 		Filesystem::ReadFileText(filepath.c_str(), source);
 		auto shaderSources = PreProcess(source);
 		Compile(shaderSources);
@@ -84,114 +84,114 @@ namespace ArcEngine
 		glUseProgram(0);
 	}
 
-	void OpenGLShader::SetInt(const eastl::string& name, int value)
+	void OpenGLShader::SetInt(const std::string& name, int value)
 	{
 		ARC_PROFILE_SCOPE();
 		
 		UploadUniformInt(name, value);
 	}
 
-	void OpenGLShader::SetIntArray(const eastl::string& name, const int* values, uint32_t count)
+	void OpenGLShader::SetIntArray(const std::string& name, const int* values, uint32_t count)
 	{
 		ARC_PROFILE_SCOPE();
 		
 		UploadUniformIntArray(name, values, count);		
 	}
 
-	void OpenGLShader::SetFloat(const eastl::string& name, float value)
+	void OpenGLShader::SetFloat(const std::string& name, float value)
 	{
 		ARC_PROFILE_SCOPE();
 		
 		UploadUniformFloat(name, value);
 	}
 
-	void OpenGLShader::SetFloat2(const eastl::string& name, const glm::vec2& value)
+	void OpenGLShader::SetFloat2(const std::string& name, const glm::vec2& value)
 	{
 		ARC_PROFILE_SCOPE();
 		
 		UploadUniformFloat2(name, value);
 	}
 
-	void OpenGLShader::SetFloat3(const eastl::string& name, const glm::vec3& value)
+	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
 	{
 		ARC_PROFILE_SCOPE();
 		
 		UploadUniformFloat3(name, value);
 	}
 
-	void OpenGLShader::SetFloat4(const eastl::string& name, const glm::vec4& value)
+	void OpenGLShader::SetFloat4(const std::string& name, const glm::vec4& value)
 	{
 		ARC_PROFILE_SCOPE();
 		
 		UploadUniformFloat4(name, value);
 	}
 
-	void OpenGLShader::SetMat3(const eastl::string& name, const glm::mat3& value)
+	void OpenGLShader::SetMat3(const std::string& name, const glm::mat3& value)
 	{
 		ARC_PROFILE_SCOPE();
 		
 		UploadUniformMat3(name, value);
 	}
 
-	void OpenGLShader::SetMat4(const eastl::string& name, const glm::mat4& value)
+	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
 	{
 		ARC_PROFILE_SCOPE();
 		
 		UploadUniformMat4(name, value);
 	}
 
-	void OpenGLShader::SetUniformBlock(const eastl::string& name, uint32_t blockIndex)
+	void OpenGLShader::SetUniformBlock(const std::string& name, uint32_t blockIndex)
 	{
 		ARC_PROFILE_SCOPE();
 
 		glUniformBlockBinding(m_RendererID, glGetUniformBlockIndex(m_RendererID, name.c_str()), blockIndex);
 	}
 
-	void OpenGLShader::UploadUniformInt(const eastl::string& name, int value)
+	void OpenGLShader::UploadUniformInt(const std::string& name, int value)
 	{
 		glUniform1i(GetLocation(name), value);
 	}
 
-	void OpenGLShader::UploadUniformIntArray(const eastl::string& name, const int* values, uint32_t count)
+	void OpenGLShader::UploadUniformIntArray(const std::string& name, const int* values, uint32_t count)
 	{
 		glUniform1iv(GetLocation(name), count, values);
 	}
 
-	void OpenGLShader::UploadUniformFloat(const eastl::string& name, float value)
+	void OpenGLShader::UploadUniformFloat(const std::string& name, float value)
 	{
 		glUniform1f(GetLocation(name), value);
 	}
 
-	void OpenGLShader::UploadUniformFloat2(const eastl::string& name, const glm::vec2& values)
+	void OpenGLShader::UploadUniformFloat2(const std::string& name, const glm::vec2& values)
 	{
 		glUniform2f(GetLocation(name), values.x, values.y);
 	}
 
-	void OpenGLShader::UploadUniformFloat3(const eastl::string& name, const glm::vec3& values)
+	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& values)
 	{
 		glUniform3f(GetLocation(name), values.x, values.y, values.z);
 	}
 
-	void OpenGLShader::UploadUniformFloat4(const eastl::string& name, const glm::vec4& values)
+	void OpenGLShader::UploadUniformFloat4(const std::string& name, const glm::vec4& values)
 	{
 		glUniform4f(GetLocation(name), values.x, values.y, values.z, values.w);
 	}
 	
-	void OpenGLShader::UploadUniformMat3(const eastl::string& name, const glm::mat3& matrix)
+	void OpenGLShader::UploadUniformMat3(const std::string& name, const glm::mat3& matrix)
 	{
 		glUniformMatrix3fv(GetLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
 	}
 
-	void OpenGLShader::UploadUniformMat4(const eastl::string& name, const glm::mat4& matrix)
+	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& matrix)
 	{
 		glUniformMatrix4fv(GetLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
 	}
 
-	int OpenGLShader::GetLocation(const eastl::string& name)
+	int OpenGLShader::GetLocation(const std::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (m_UniformLocationCache.find_as(name) != m_UniformLocationCache.end())
+		if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
 			return m_UniformLocationCache.at(name);
 
 		int location = glGetUniformLocation(m_RendererID, name.c_str());
@@ -199,26 +199,26 @@ namespace ArcEngine
 		return location;
 	}
 
-	eastl::unordered_map<GLenum, eastl::string> OpenGLShader::PreProcess(const eastl::string& source) const
+	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(const std::string& source) const
 	{
 		ARC_PROFILE_SCOPE();
 		
-		eastl::unordered_map<GLenum, eastl::string> shaderSources;
+		std::unordered_map<GLenum, std::string> shaderSources;
 
 		constexpr const char* typeToken = "#type";
-		size_t typeTokenLength = eastl::string_view(typeToken).size();
+		size_t typeTokenLength = std::string_view(typeToken).size();
 		size_t pos = source.find(typeToken, 0);
-		while (pos != eastl::string::npos)
+		while (pos != std::string::npos)
 		{
 			size_t eol = source.find_first_of("\r\n", pos);
-			ARC_CORE_ASSERT(eol != eastl::string::npos, "Syntax error");
+			ARC_CORE_ASSERT(eol != std::string::npos, "Syntax error");
 			size_t begin = pos + typeTokenLength + 1;
-			eastl::string type = source.substr(begin, eol - begin);
+			std::string type = source.substr(begin, eol - begin);
 			ARC_CORE_ASSERT(ShaderTypeFromString(type), "Invalid shader type specified");
 
 			size_t nextLinePos = source.find_first_not_of("\r\n", eol);
 			pos = source.find(typeToken, nextLinePos);
-			shaderSources[ShaderTypeFromString(type)] = source.substr(nextLinePos, pos - (nextLinePos == eastl::string::npos ? source.size() - 1 : nextLinePos));
+			shaderSources[ShaderTypeFromString(type)] = source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));
 		}
 
 		return shaderSources;
@@ -240,13 +240,13 @@ namespace ArcEngine
 		return MaterialPropertyType::None;
 	}
 
-	void OpenGLShader::Compile(const eastl::unordered_map<GLenum, eastl::string>& shaderSources)
+	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
 		ARC_PROFILE_SCOPE();
 		
 		GLuint program = glCreateProgram();
 		ARC_CORE_ASSERT(shaderSources.size() <= 2, "We only support 2 shaders for now");
-		eastl::array<GLenum, 2> glShaderIDs;
+		std::array<GLenum, 2> glShaderIDs;
 		int glShaderIDIndex = 0;
 		for (const auto& [type, source] : shaderSources)
 		{
@@ -265,7 +265,7 @@ namespace ArcEngine
 				GLint maxLength = 0;
 				glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
 
-				eastl::vector<GLchar> infoLog(maxLength);
+				std::vector<GLchar> infoLog(maxLength);
 				glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
 				
 				glDeleteShader(shader);
@@ -289,7 +289,7 @@ namespace ArcEngine
 			GLint maxLength = 0;
 			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
 
-			eastl::vector<GLchar> infoLog(maxLength);
+			std::vector<GLchar> infoLog(maxLength);
 			glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
 			
 			glDeleteProgram(program);
@@ -323,7 +323,7 @@ namespace ArcEngine
 			glGetActiveUniform(program, (GLuint)i, maxLength, nullptr, &size, &type, &name[0]);
 
 			constexpr const char* prefix = "u_Material.";
-			constexpr size_t prefixLength = eastl::string_view(prefix).size();
+			constexpr size_t prefixLength = std::string_view(prefix).size();
 			if (strncmp(name, prefix, prefixLength) == 0)
 			{
 				MaterialPropertyType propertyType = GetMaterialPropertyType(type);

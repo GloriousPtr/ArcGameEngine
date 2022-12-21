@@ -71,7 +71,7 @@ namespace ArcEngine
 		void SetVelocity(const glm::vec3& velocity) const;
 
 	private:
-		eastl::string m_Path;
+		std::string m_Path;
 		Scope<ma_sound> m_Sound;
 		bool m_Spatialization = false;
 	};

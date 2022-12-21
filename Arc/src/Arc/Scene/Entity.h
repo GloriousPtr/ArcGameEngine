@@ -22,7 +22,7 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE();
 
 			ARC_CORE_ASSERT(m_Scene, "Scene is null!");
-			T& component = m_Scene->m_Registry.emplace_or_replace<T>(m_EntityHandle, eastl::forward<Args>(args)...);
+			T& component = m_Scene->m_Registry.emplace_or_replace<T>(m_EntityHandle, std::forward<Args>(args)...);
 			m_Scene->OnComponentAdded<T>(*this, component);
 			return component;
 		}
@@ -55,7 +55,7 @@ namespace ArcEngine
 		}
 
 		UUID GetUUID() const { return GetComponent<IDComponent>().ID; }
-		eastl::string_view GetTag() const { return GetComponent<TagComponent>().Tag; }
+		std::string_view GetTag() const { return GetComponent<TagComponent>().Tag; }
 		TransformComponent& GetTransform() const { return GetComponent<TransformComponent>(); }
 		RelationshipComponent& GetRelationship() const { return GetComponent<RelationshipComponent>(); }
 		
@@ -94,7 +94,7 @@ namespace ArcEngine
 				return;
 
 			auto& parent = parentEntity.GetRelationship();
-			for (const auto* it = parent.Children.begin(); it != parent.Children.end(); it++)
+			for (auto it = parent.Children.begin(); it != parent.Children.end(); it++)
 			{
 				if (*it == uuid)
 				{

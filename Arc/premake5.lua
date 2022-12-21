@@ -22,7 +22,6 @@ project "Arc"
 		"vendor/ImGuizmo/ImGuizmo.h",
 		"vendor/ImGuizmo/ImGuizmo.cpp",
 
-		"%{IncludeDir.EASTL}/../doc/EASTL.natvis",
 		"%{IncludeDir.glm}/util/glm.natvis",
 		"%{IncludeDir.yaml_cpp}/../src/contrib/yaml-cpp.natvis",
 		"%{IncludeDir.JoltPhysics}/Jolt/Jolt.natvis",
@@ -62,8 +61,6 @@ project "Arc"
 		"%{IncludeDir.optick}",
 		"%{IncludeDir.box2d}",
 		"%{IncludeDir.mono}",
-		"%{IncludeDir.EABase}",
-		"%{IncludeDir.EASTL}",
 		"%{IncludeDir.miniaudio}",
 		"%{IncludeDir.icons}",
 		"%{IncludeDir.JoltPhysics}",
@@ -79,7 +76,6 @@ project "Arc"
 		"yaml-cpp",
 		"optick",
 		"box2d",
-		"EASTL",
 		"JoltPhysics",
 		"Arc-ScriptCore",
 

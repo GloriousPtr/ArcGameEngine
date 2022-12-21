@@ -6,7 +6,7 @@
 
 namespace ArcEngine
 {
-	Ref<Shader> Shader::Create(const eastl::string& filepath)
+	Ref<Shader> Shader::Create(const std::string& filepath)
 	{
 		switch (Renderer::GetAPI())
 		{
@@ -18,7 +18,7 @@ namespace ArcEngine
 		return nullptr;
 	}
 
-	Ref<Shader> Shader::Create(const eastl::string& name, const eastl::string& vertexSrc, const eastl::string& fragmentSrc)
+	Ref<Shader> Shader::Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
 	{
 		switch (Renderer::GetAPI())
 		{
@@ -30,7 +30,7 @@ namespace ArcEngine
 		return nullptr;
 	}
 
-	void ShaderLibrary::Add(const eastl::string& name, const Ref<Shader>& shader)
+	void ShaderLibrary::Add(const std::string& name, const Ref<Shader>& shader)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -46,7 +46,7 @@ namespace ArcEngine
 		Add(name, shader);
 	}
 
-	Ref<Shader> ShaderLibrary::Load(const eastl::string& filepath)
+	Ref<Shader> ShaderLibrary::Load(const std::string& filepath)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -56,7 +56,7 @@ namespace ArcEngine
 		return shader;
 	}
 
-	Ref<Shader> ShaderLibrary::Load(const eastl::string& name, const eastl::string& filepath)
+	Ref<Shader> ShaderLibrary::Load(const std::string& name, const std::string& filepath)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -70,17 +70,17 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		eastl::string shaderName;
+		std::string shaderName;
 		for (const auto& [name, shader] : m_Shaders)
 		{
-			if (m_ShaderPaths.find_as(name) == m_ShaderPaths.end())
+			if (m_ShaderPaths.find(name) == m_ShaderPaths.end())
 				continue;
 
 			shader->Recompile(m_ShaderPaths.at(name));
 		}
 	}
 
-	Ref<Shader> ShaderLibrary::Get(const eastl::string& name)
+	Ref<Shader> ShaderLibrary::Get(const std::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -88,11 +88,11 @@ namespace ArcEngine
 		return m_Shaders[name];
 	}
 
-	bool ShaderLibrary::Exists(const eastl::string& name) const
+	bool ShaderLibrary::Exists(const std::string& name) const
 	{
 		ARC_PROFILE_SCOPE();
 
-		return m_Shaders.find_as(name) != m_Shaders.end();
+		return m_Shaders.find(name) != m_Shaders.end();
 	}
 
 }

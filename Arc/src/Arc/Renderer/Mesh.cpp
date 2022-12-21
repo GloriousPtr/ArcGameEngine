@@ -63,7 +63,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		eastl::string ext = StringUtils::GetExtension(filepath);
+		std::string ext = StringUtils::GetExtension(filepath);
 		bool supportedFile = ext == "obj";
 		if (!supportedFile)
 		{
@@ -95,8 +95,8 @@ namespace ArcEngine
 			// Loop over shapes
 			for (const auto& shape : shapes)
 			{
-				eastl::vector<Vertex> vertices;
-				eastl::vector<uint32_t> indices;
+				std::vector<Vertex> vertices;
+				std::vector<uint32_t> indices;
 				std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 
 				// Loop over faces(polygon)
@@ -166,8 +166,8 @@ namespace ArcEngine
 					const auto& materialProperties = submesh.Mat->GetShader()->GetMaterialProperties();
 					bool normalMapApplied = false;
 
-					eastl::string path = eastl::string(filepath);
-					eastl::string dir = path.substr(0, path.find_last_of('\\'));
+					std::string path = std::string(filepath);
+					std::string dir = path.substr(0, path.find_last_of('\\'));
 
 					for (const auto& [name, property] : materialProperties)
 					{
@@ -176,37 +176,37 @@ namespace ArcEngine
 							uint32_t slot = submesh.Mat->GetData<uint32_t>(name.c_str());
 
 							if (!material.diffuse_texname.empty() &&
-								(name.find("albedo") != eastl::string::npos || name.find("Albedo") != eastl::string::npos ||
-									name.find("diff") != eastl::string::npos || name.find("Diff") != eastl::string::npos))
+								(name.find("albedo") != std::string::npos || name.find("Albedo") != std::string::npos ||
+									name.find("diff") != std::string::npos || name.find("Diff") != std::string::npos))
 							{
 								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.diffuse_texname.c_str()));
 							}
 
 							if (!material.normal_texname.empty() &&
-								(name.find("norm") != eastl::string::npos || name.find("Norm") != eastl::string::npos ||
-									name.find("height") != eastl::string::npos || name.find("Height") != eastl::string::npos))
+								(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
+									name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
 							{
 								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.normal_texname.c_str()));
 								normalMapApplied = true;
 							}
 							else if (!material.bump_texname.empty() &&
-								(name.find("norm") != eastl::string::npos || name.find("Norm") != eastl::string::npos ||
-									name.find("height") != eastl::string::npos || name.find("Height") != eastl::string::npos))
+								(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
+									name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
 							{
 								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.bump_texname.c_str()));
 								normalMapApplied = true;
 							}
 
 							if (!material.emissive_texname.empty() &&
-								(name.find("emissi") != eastl::string::npos || name.find("Emissi") != eastl::string::npos))
+								(name.find("emissi") != std::string::npos || name.find("Emissi") != std::string::npos))
 							{
 								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.emissive_texname.c_str()));
 							}
 						}
 
 						if (property.Type == MaterialPropertyType::Bool && normalMapApplied &&
-							(name.find("norm") != eastl::string::npos || name.find("Norm") != eastl::string::npos ||
-								name.find("height") != eastl::string::npos || name.find("Height") != eastl::string::npos))
+							(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
+								name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
 						{
 							submesh.Mat->SetData(name.c_str(), 1);
 						}

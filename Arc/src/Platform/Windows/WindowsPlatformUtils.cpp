@@ -14,7 +14,7 @@
 
 namespace ArcEngine
 {
-	eastl::string FileDialogs::OpenFolder()
+	std::string FileDialogs::OpenFolder()
 	{
 		WCHAR szTitle[MAX_PATH];
 		BROWSEINFO bi;
@@ -38,7 +38,7 @@ namespace ArcEngine
 		return "";
 	}
 
-	eastl::string FileDialogs::OpenFile(const char* filter)
+	std::string FileDialogs::OpenFile(const char* filter)
 	{
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
@@ -57,7 +57,7 @@ namespace ArcEngine
 		return "";
 	}
 
-	eastl::string FileDialogs::SaveFile(const char* filter)
+	std::string FileDialogs::SaveFile(const char* filter)
 	{
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };

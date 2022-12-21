@@ -43,16 +43,16 @@ namespace ArcEngine
 
 	struct ScriptField
 	{
-		eastl::string Name = "";
-		eastl::string DisplayName = "";
+		std::string Name = "";
+		std::string DisplayName = "";
 		FieldType Type = FieldType::Unknown;
 		MonoClassField* Field = nullptr;
 
 		// For attributes
 		bool Serializable = true;
 		bool Hidden = false;
-		eastl::string Header = "";
-		eastl::string Tooltip = "";
+		std::string Header = "";
+		std::string Tooltip = "";
 		float Min = 0.0f;
 		float Max = 0.0f;
 
@@ -95,7 +95,7 @@ namespace ArcEngine
 			memcpy(m_Buffer, &value, sizeof(T));
 		}
 
-		void SetValueString(eastl::string_view value)
+		void SetValueString(std::string_view value)
 		{
 			if (value.size() < MaxSize)
 				memcpy(m_Buffer, value.data(), MaxSize);
@@ -112,7 +112,7 @@ namespace ArcEngine
 	public:
 		ScriptClass() = delete;
 		explicit ScriptClass(MonoClass* monoClass);
-		ScriptClass(const eastl::string& classNamespace, const eastl::string& className);
+		ScriptClass(const std::string& classNamespace, const std::string& className);
 		
 		ScriptClass(const ScriptClass& other) = delete;
 		ScriptClass(ScriptClass&& other) = delete;
@@ -121,8 +121,8 @@ namespace ArcEngine
 		MonoMethod* GetMethod(const char* methodName, uint32_t parameterCount);
 		GCHandle InvokeMethod(GCHandle gcHandle, MonoMethod* method, void** params = nullptr);
 
-		const eastl::vector<eastl::string>& GetFields() const { return m_Fields; }
-		const eastl::hash_map<eastl::string, ScriptField>& GetFieldsMap() const { return m_FieldsMap; }
+		const std::vector<std::string>& GetFields() const { return m_Fields; }
+		const std::unordered_map<std::string, ScriptField>& GetFieldsMap() const { return m_FieldsMap; }
 
 	private:
 		void LoadFields();
@@ -131,12 +131,12 @@ namespace ArcEngine
 		friend class ScriptEngine;
 		friend class ScriptInstance;
 
-		eastl::string m_ClassNamespace;
-		eastl::string m_ClassName;
+		std::string m_ClassNamespace;
+		std::string m_ClassName;
 
 		MonoClass* m_MonoClass = nullptr;
-		eastl::vector<eastl::string> m_Fields;
-		eastl::hash_map<eastl::string, ScriptField> m_FieldsMap;
+		std::vector<std::string> m_Fields;
+		std::unordered_map<std::string, ScriptField> m_FieldsMap;
 	};
 
 	struct Collision2DData
@@ -164,7 +164,7 @@ namespace ArcEngine
 		void InvokeOnSensorExit2D(Collision2DData& other) const;
 
 		template<typename T>
-		T GetFieldValue(const eastl::string& fieldName) const
+		T GetFieldValue(const std::string& fieldName) const
 		{
 			T value;
 			GetFieldValueInternal(fieldName, &value);
@@ -172,12 +172,12 @@ namespace ArcEngine
 		}
 
 		template<typename T>
-		void SetFieldValue(const eastl::string& fieldName, const T& value) const
+		void SetFieldValue(const std::string& fieldName, const T& value) const
 		{
 			SetFieldValueInternal(fieldName, &value);
 		}
 
-		eastl::string GetFieldValueString(const eastl::string& fieldName) const
+		std::string GetFieldValueString(const std::string& fieldName) const
 		{
 			return GetFieldValueStringInternal(fieldName);
 		}
@@ -185,9 +185,9 @@ namespace ArcEngine
 		const GCHandle GetHandle() const;
 
 	private:
-		void GetFieldValueInternal(const eastl::string& name, void* value) const;
-		void SetFieldValueInternal(const eastl::string& name, const void* value) const;
-		eastl::string GetFieldValueStringInternal(const eastl::string& name) const;
+		void GetFieldValueInternal(const std::string& name, void* value) const;
+		void SetFieldValueInternal(const std::string& name, const void* value) const;
+		std::string GetFieldValueStringInternal(const std::string& name) const;
 
 	private:
 		Ref<ScriptClass> m_EntityClass;
@@ -219,16 +219,16 @@ namespace ArcEngine
 		static MonoImage* GetCoreAssemblyImage();
 		static MonoImage* GetAppAssemblyImage();
 
-		static bool HasClass(const eastl::string& className);
-		static ScriptInstance* CreateInstance(Entity entity, const eastl::string& name);
-		static bool HasInstance(Entity entity, const eastl::string& name);
-		static ScriptInstance* GetInstance(Entity entity, const eastl::string& name);
-		static void RemoveInstance(Entity entity, const eastl::string& name);
+		static bool HasClass(const std::string& className);
+		static ScriptInstance* CreateInstance(Entity entity, const std::string& name);
+		static bool HasInstance(Entity entity, const std::string& name);
+		static ScriptInstance* GetInstance(Entity entity, const std::string& name);
+		static void RemoveInstance(Entity entity, const std::string& name);
 		
-		static eastl::hash_map<eastl::string, Ref<ScriptClass>>& GetClasses();
-		static const eastl::vector<eastl::string>& GetFields (const char* className);
-		static const eastl::hash_map<eastl::string, ScriptField>& GetFieldMap(const char* className);
-		static eastl::hash_map<eastl::string, ScriptFieldInstance>& GetFieldInstanceMap(Entity entity, const char* className);
+		static std::unordered_map<std::string, Ref<ScriptClass>>& GetClasses();
+		static const std::vector<std::string>& GetFields (const char* className);
+		static const std::unordered_map<std::string, ScriptField>& GetFieldMap(const char* className);
+		static std::unordered_map<std::string, ScriptFieldInstance>& GetFieldInstanceMap(Entity entity, const char* className);
 
 		static void SetScene(Scene* scene) { s_CurrentScene = scene; }
 		static Scene* GetScene() { return s_CurrentScene; }

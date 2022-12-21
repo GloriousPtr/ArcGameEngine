@@ -14,7 +14,7 @@ namespace ArcEngine
 	static Ref<Shader> s_IrradianceShader;
 	static Ref<Shader> s_RadianceShader;
 
-	OpenGLTextureCubemap::OpenGLTextureCubemap(const eastl::string& path)
+	OpenGLTextureCubemap::OpenGLTextureCubemap(const std::string& path)
 	{
 		ARC_PROFILE_SCOPE();
 		
@@ -49,7 +49,7 @@ namespace ArcEngine
 		
 	}
 
-	void OpenGLTextureCubemap::Invalidate(eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels)
+	void OpenGLTextureCubemap::Invalidate(std::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -77,13 +77,13 @@ namespace ArcEngine
 		glBindTextureUnit(slot, m_RadianceRendererID);
 	}
 
-	void OpenGLTextureCubemap::InvalidateImpl(eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels)
+	void OpenGLTextureCubemap::InvalidateImpl(std::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels)
 	{
 		ARC_PROFILE_SCOPE();
 
 		if (channels < 3)
 		{
-			ARC_CORE_ERROR("Couldn't load HDR cubemap with {} channels: {}", channels, path.begin());
+			ARC_CORE_ERROR("Couldn't load HDR cubemap with {} channels: {}", channels, path);
 			return;
 		}
 

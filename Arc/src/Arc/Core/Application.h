@@ -17,7 +17,7 @@ namespace ArcEngine
 	class Application
 	{
 	public:
-		explicit Application(const eastl::string& name = "Arc App");
+		explicit Application(const std::string& name = "Arc App");
 		virtual ~Application();
 		
 		Application(const Application& other) = delete;
@@ -52,7 +52,7 @@ namespace ArcEngine
 		LayerStack* m_LayerStack;
 		float m_LastFrameTime = 0.0f;
 
-		eastl::vector<std::function<void()>> m_MainThreadQueue;
+		std::vector<std::function<void()>> m_MainThreadQueue;
 		std::mutex m_MainThreadQueueMutex;
 
 	private:

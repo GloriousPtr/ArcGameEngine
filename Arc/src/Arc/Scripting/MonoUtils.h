@@ -12,7 +12,7 @@ namespace ArcEngine
 		static MonoAssembly* LoadMonoAssembly(const std::filesystem::path& assemblyPath, bool loadPdb);
 
 		static bool CheckMonoError(MonoError& error);
-		static eastl::string MonoStringToUTF8(MonoString* monoString);
-		static MonoString* UTF8ToMonoString(const eastl::string& monoString);
+		static std::string MonoStringToUTF8(MonoString* monoString);
+		static MonoString* UTF8ToMonoString(const std::string& monoString);
 	};
 }

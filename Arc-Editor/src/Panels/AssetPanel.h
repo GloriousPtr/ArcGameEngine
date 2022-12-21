@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EASTL/stack.h>
+#include <stack>
 #include <imgui/imgui.h>
 
 #include "BasePanel.h"
@@ -37,16 +37,16 @@ namespace ArcEngine
 	private:
 		struct File
 		{
-			eastl::string Name;
-			eastl::string Filepath;
-			eastl::string Extension;
+			std::string Name;
+			std::string Filepath;
+			std::string Extension;
 			std::filesystem::directory_entry DirectoryEntry;
 			Ref<Texture2D> Thumbnail = nullptr;
 			bool IsDirectory = false;
 
-			File(const eastl::string& name,
-				const eastl::string& filepath,
-				const eastl::string& extension,
+			File(const std::string& name,
+				const std::string& filepath,
+				const std::string& extension,
 				const std::filesystem::directory_entry& directoryEntry,
 				const Ref<Texture2D> thumbnail,
 				bool isDir)
@@ -58,8 +58,8 @@ namespace ArcEngine
 
 		std::filesystem::path m_AssetsDirectory;
 		std::filesystem::path m_CurrentDirectory;
-		eastl::stack<std::filesystem::path> m_BackStack;
-		eastl::vector<File> m_DirectoryEntries;
+		std::stack<std::filesystem::path> m_BackStack;
+		std::vector<File> m_DirectoryEntries;
 		uint32_t m_CurrentlyVisibleItemsTreeView = 0;
 		float m_ThumbnailSize = 128.0f;
 		ImGuiTextFilter m_Filter;

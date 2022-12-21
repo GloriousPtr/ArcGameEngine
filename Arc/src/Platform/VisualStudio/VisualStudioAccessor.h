@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EASTL/string.h>
+#include <string>
 
 namespace ArcEngine
 {
@@ -8,8 +8,8 @@ namespace ArcEngine
 	{
 	public:
 		static void RunVisualStudio();
-		static void OpenFile(const eastl::string& filepath, uint32_t goToLine = 0, bool selectLine = false);
-		static bool AddFile(const eastl::string& filepath, bool open = true);
+		static void OpenFile(const std::string& filepath, uint32_t goToLine = 0, bool selectLine = false);
+		static bool AddFile(const std::string& filepath, bool open = true);
 		static bool GenerateProjectFiles();
 		static bool BuildSolution(const std::function<void()>& onComplete = nullptr);
 	};

@@ -66,7 +66,7 @@ namespace ArcEngine
 		return false;
 	}
 
-	eastl::string MonoUtils::MonoStringToUTF8(MonoString* monoString)
+	std::string MonoUtils::MonoStringToUTF8(MonoString* monoString)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -78,12 +78,12 @@ namespace ArcEngine
 		if (CheckMonoError(error))
 			return "";
 
-		eastl::string result(utf8);
+		std::string result(utf8);
 		mono_free(utf8);
 		return result;
 	}
 
-	MonoString* MonoUtils::UTF8ToMonoString(const eastl::string& str)
+	MonoString* MonoUtils::UTF8ToMonoString(const std::string& str)
 	{
 		ARC_PROFILE_SCOPE();
 

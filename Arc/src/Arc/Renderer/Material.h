@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EASTL/hash_map.h>
+#include <unordered_map>
 
 #include "Arc/Core/Base.h"
 
@@ -48,7 +48,7 @@ namespace ArcEngine
 		Ref<Shader> m_Shader = nullptr;
 		char* m_Buffer = nullptr;
 		size_t m_BufferSizeInBytes = 0;
-		eastl::hash_map<uint32_t, Ref<Texture2D>> m_Textures;
+		std::unordered_map<uint32_t, Ref<Texture2D>> m_Textures;
 
 		static Ref<Texture2D> s_WhiteTexture;
 	};

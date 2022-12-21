@@ -29,10 +29,10 @@ namespace ArcEngine
 		static void RegisterComponent();
 		template<typename... Component>
 		static void RegisterComponent(ComponentGroup<Component...>);
-		static void RegisterScriptComponent(const eastl::string& className);
+		static void RegisterScriptComponent(const std::string& className);
 
-		static eastl::hash_map<MonoType*, eastl::function<bool(const Entity&, MonoType*)>> s_HasComponentFuncs;
-		static eastl::hash_map<MonoType*, eastl::function<void(const Entity&, MonoType*)>> s_AddComponentFuncs;
-		static eastl::hash_map<MonoType*, eastl::function<GCHandle(const Entity&, MonoType*)>> s_GetComponentFuncs;
+		static std::unordered_map<MonoType*, std::function<bool(const Entity&, MonoType*)>> s_HasComponentFuncs;
+		static std::unordered_map<MonoType*, std::function<void(const Entity&, MonoType*)>> s_AddComponentFuncs;
+		static std::unordered_map<MonoType*, std::function<GCHandle(const Entity&, MonoType*)>> s_GetComponentFuncs;
 	};
 }

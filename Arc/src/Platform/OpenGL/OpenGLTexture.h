@@ -11,7 +11,7 @@ namespace ArcEngine
 	public:
 		OpenGLTexture2D() = default;
 		OpenGLTexture2D(uint32_t width, uint32_t height);
-		explicit OpenGLTexture2D(const eastl::string& path);
+		explicit OpenGLTexture2D(const std::string& path);
 		~OpenGLTexture2D() override;
 
 		OpenGLTexture2D(const OpenGLTexture2D& other) = default;
@@ -20,18 +20,18 @@ namespace ArcEngine
 		uint32_t GetWidth() const override { return m_Width; }
 		uint32_t GetHeight() const override { return m_Height; }
 		uint64_t GetRendererID() const override { return m_RendererID; }
-		const eastl::string& GetPath() const override { return m_Path; }
+		const std::string& GetPath() const override { return m_Path; }
 
 		void SetData(void* data, uint32_t size) override;
-		void Invalidate(eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels) override;
+		void Invalidate(std::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels) override;
 
 		void Bind(uint32_t slot = 0) const override;
 
 	private:
-		void InvalidateImpl(eastl::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels);
+		void InvalidateImpl(std::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels);
 
 	private:
-		eastl::string m_Path;
+		std::string m_Path;
 		uint32_t m_Width = 0, m_Height = 0;
 		uint32_t m_RendererID = 0;
 		GLenum m_InternalFormat, m_DataFormat;

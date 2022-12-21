@@ -30,7 +30,7 @@ namespace ArcEngine
 
 	struct TagComponent
 	{
-		eastl::string Tag;
+		std::string Tag;
 		uint16_t Layer = BIT(1);
 		bool Enabled = true;
 
@@ -38,7 +38,7 @@ namespace ArcEngine
 
 		TagComponent() = default;
 		TagComponent(const TagComponent&) = default;
-		explicit TagComponent(const eastl::string& tag)
+		explicit TagComponent(const std::string& tag)
 			: Tag(tag) {}
 	};
 	
@@ -56,7 +56,7 @@ namespace ArcEngine
 	struct RelationshipComponent
 	{
 		UUID Parent = 0;
-		eastl::vector<UUID> Children;
+		std::vector<UUID> Children;
 
 		RelationshipComponent() = default;
 		RelationshipComponent(const RelationshipComponent&) = default;
@@ -248,7 +248,7 @@ namespace ArcEngine
 	{
 		bool IsSensor = false;
 		glm::vec2 Offset = { 0.0f, 0.0f };
-		eastl::vector<glm::vec2> Points = { { 0.0f, 0.0f }, { 1.0, 0.0f }, { 0.0f, 1.0f } };
+		std::vector<glm::vec2> Points = { { 0.0f, 0.0f }, { 1.0, 0.0f }, { 0.0f, 1.0f } };
 
 		float Density = 1.0f;
 
@@ -497,7 +497,7 @@ namespace ArcEngine
 
 	struct ScriptComponent
 	{
-		eastl::vector<eastl::string> Classes;
+		std::vector<std::string> Classes;
 
 		ScriptComponent() = default;
 		ScriptComponent(const ScriptComponent&) = default;

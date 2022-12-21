@@ -15,16 +15,16 @@
 
 namespace ArcEngine
 {
-	eastl::hash_map<MonoType*, eastl::function<bool(const Entity&, MonoType*)>> ScriptEngineRegistry::s_HasComponentFuncs;
-	eastl::hash_map<MonoType*, eastl::function<void(const Entity&, MonoType*)>> ScriptEngineRegistry::s_AddComponentFuncs;
-	eastl::hash_map<MonoType*, eastl::function<GCHandle(const Entity&, MonoType*)>> ScriptEngineRegistry::s_GetComponentFuncs;
+	std::unordered_map<MonoType*, std::function<bool(const Entity&, MonoType*)>> ScriptEngineRegistry::s_HasComponentFuncs;
+	std::unordered_map<MonoType*, std::function<void(const Entity&, MonoType*)>> ScriptEngineRegistry::s_AddComponentFuncs;
+	std::unordered_map<MonoType*, std::function<GCHandle(const Entity&, MonoType*)>> ScriptEngineRegistry::s_GetComponentFuncs;
 
 	template<typename... Component>
 	void ScriptEngineRegistry::RegisterComponent()
 	{
 		([]()
 		{
-			constexpr size_t n = eastl::string_view("struct ArcEngine::").size();
+			constexpr size_t n = std::string_view("struct ArcEngine::").size();
 			const char* componentName = n + typeid(Component).name();
 			std::string name = std::string("ArcEngine.") + componentName;
 			MonoType* type = mono_reflection_type_from_name(&name[0], ScriptEngine::GetCoreAssemblyImage());
@@ -43,16 +43,16 @@ namespace ArcEngine
 		RegisterComponent<Component...>();
 	}
 
-	void ScriptEngineRegistry::RegisterScriptComponent(const eastl::string& className)
+	void ScriptEngineRegistry::RegisterScriptComponent(const std::string& className)
 	{
-		eastl::string name = className;
+		std::string name = className;
 		MonoType* type = mono_reflection_type_from_name(&name[0], ScriptEngine::GetAppAssemblyImage());
 		if (type)
 		{
 			ARC_CORE_TRACE("Registering {}", name.c_str());
-			s_HasComponentFuncs[type] = [](const Entity& entity, MonoType* monoType) { eastl::string scriptClassName = mono_type_get_name(monoType); return ScriptEngine::HasInstance(entity, scriptClassName); };
-			s_AddComponentFuncs[type] = [](const Entity& entity, MonoType* monoType) { eastl::string scriptClassName = mono_type_get_name(monoType); ScriptEngine::CreateInstance(entity, scriptClassName); };
-			s_GetComponentFuncs[type] = [](const Entity& entity, MonoType* monoType) { eastl::string scriptClassName = mono_type_get_name(monoType); return ScriptEngine::GetInstance(entity, scriptClassName)->GetHandle(); };
+			s_HasComponentFuncs[type] = [](const Entity& entity, MonoType* monoType) { std::string scriptClassName = mono_type_get_name(monoType); return ScriptEngine::HasInstance(entity, scriptClassName); };
+			s_AddComponentFuncs[type] = [](const Entity& entity, MonoType* monoType) { std::string scriptClassName = mono_type_get_name(monoType); ScriptEngine::CreateInstance(entity, scriptClassName); };
+			s_GetComponentFuncs[type] = [](const Entity& entity, MonoType* monoType) { std::string scriptClassName = mono_type_get_name(monoType); return ScriptEngine::GetInstance(entity, scriptClassName)->GetHandle(); };
 		}
 	}
 
@@ -99,9 +99,9 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		eastl::string file = MonoUtils::MonoStringToUTF8(filepath);
-		eastl::string func = MonoUtils::MonoStringToUTF8(function);
-		eastl::string msg = MonoUtils::MonoStringToUTF8(formattedMessage);
+		std::string file = MonoUtils::MonoStringToUTF8(filepath);
+		std::string func = MonoUtils::MonoStringToUTF8(function);
+		std::string msg = MonoUtils::MonoStringToUTF8(formattedMessage);
 
 		switch (level)
 		{

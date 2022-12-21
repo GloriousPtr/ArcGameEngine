@@ -1,7 +1,7 @@
 #pragma once
 
 #include <box2d/box2d.h>
-#include <EASTL/vector.h>
+#include <vector>
 #include <glm/glm.hpp>
 
 namespace ArcEngine
@@ -28,7 +28,7 @@ namespace ArcEngine
 			return b2Vec2((n1 * dp.x - n2 * dc.x) * n3, (n1 * dp.y - n2 * dc.y) * n3);
 		}
 
-		static bool VerticesFromCircle(b2Fixture* fixture, eastl::vector<b2Vec2>& vertices, float resolution = 16.0f)
+		static bool VerticesFromCircle(b2Fixture* fixture, std::vector<b2Vec2>& vertices, float resolution = 16.0f)
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -57,11 +57,11 @@ namespace ArcEngine
 		//http://rosettacode.org/wiki/Sutherland-Hodgman_polygon_clipping#JavaScript
 		//Note that this only works when fB is a convex polygon, but we know all 
 		//fixtures in Box2D are convex, so that will not be a problem
-		static bool FindIntersectionOfFixtures(b2Fixture* fA, b2Fixture* fB, eastl::vector<b2Vec2>& outputVertices)
+		static bool FindIntersectionOfFixtures(b2Fixture* fA, b2Fixture* fB, std::vector<b2Vec2>& outputVertices)
 		{
 			ARC_PROFILE_SCOPE();
 			
-			eastl::vector<b2Vec2> clipPolygon;
+			std::vector<b2Vec2> clipPolygon;
 
 			const b2PolygonShape* polyA = nullptr;
 			switch (fA->GetShape()->GetType())
@@ -104,7 +104,7 @@ namespace ArcEngine
 				if (outputVertices.empty())
 					return false;
 
-				eastl::vector<b2Vec2> inputList = outputVertices;
+				std::vector<b2Vec2> inputList = outputVertices;
 				outputVertices.clear();
 				b2Vec2 s = inputList[inputList.size() - 1]; //last on the input list
 				for (const auto& e : inputList)
@@ -128,7 +128,7 @@ namespace ArcEngine
 			return !outputVertices.empty();
 		}
 
-		static b2Vec2 ComputeCentroid(eastl::vector<b2Vec2> vs, float& area)
+		static b2Vec2 ComputeCentroid(std::vector<b2Vec2> vs, float& area)
 		{
 			ARC_PROFILE_SCOPE();
 			
@@ -176,7 +176,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE();
 			
-			eastl::vector<b2Vec2> intersectionPoints;
+			std::vector<b2Vec2> intersectionPoints;
 			if (FindIntersectionOfFixtures(fluid, fixture, intersectionPoints))
 			{
 				float area = 0;

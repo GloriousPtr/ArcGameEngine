@@ -22,7 +22,7 @@
 
 namespace ArcEngine
 {
-	static const eastl::hash_map<eastl::string, FieldType> s_ScriptFieldTypeMap =
+	static const std::unordered_map<std::string, FieldType> s_ScriptFieldTypeMap =
 	{
 		{ "System.Single",		FieldType::Float },
 		{ "System.Double",		FieldType::Double },
@@ -63,10 +63,10 @@ namespace ArcEngine
 
 		bool EnableDebugging = true;
 
-		eastl::hash_map<eastl::string, Ref<ScriptClass>> EntityClasses;
-		eastl::hash_map<UUID, eastl::hash_map<eastl::string, eastl::hash_map<eastl::string, ScriptFieldInstance>>> EntityFields;
+		std::unordered_map<std::string, Ref<ScriptClass>> EntityClasses;
+		std::unordered_map<UUID, std::unordered_map<std::string, std::unordered_map<std::string, ScriptFieldInstance>>> EntityFields;
 
-		using EntityInstanceMap = eastl::hash_map<UUID, eastl::hash_map<eastl::string, ScriptInstance*>>;
+		using EntityInstanceMap = std::unordered_map<UUID, std::unordered_map<std::string, ScriptInstance*>>;
 		EntityInstanceMap EntityRuntimeInstances;
 	};
 
@@ -230,7 +230,7 @@ namespace ArcEngine
 
 			const char* nameSpace = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAMESPACE]);
 			const char* name = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAME]);
-			eastl::string fullname = fmt::format("{}.{}", nameSpace, name).c_str();
+			std::string fullname = fmt::format("{}.{}", nameSpace, name).c_str();
 
 			MonoClass* monoClass = mono_class_from_name(image, nameSpace, name);
 			if (!monoClass)
@@ -260,7 +260,7 @@ namespace ArcEngine
 		return s_Data->AppImage;
 	}
 
-	ScriptInstance* ScriptEngine::CreateInstance(Entity entity, const eastl::string& name)
+	ScriptInstance* ScriptEngine::CreateInstance(Entity entity, const std::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -271,29 +271,29 @@ namespace ArcEngine
 		return instance;
 	}
 
-	bool ScriptEngine::HasInstance(Entity entity, const eastl::string& name)
+	bool ScriptEngine::HasInstance(Entity entity, const std::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 
 		UUID id = entity.GetUUID();
-		return s_Data->EntityRuntimeInstances[id].find_as(name) != s_Data->EntityRuntimeInstances[id].end();
+		return s_Data->EntityRuntimeInstances[id].find(name) != s_Data->EntityRuntimeInstances[id].end();
 	}
 
-	ScriptInstance* ScriptEngine::GetInstance(Entity entity, const eastl::string& name)
+	ScriptInstance* ScriptEngine::GetInstance(Entity entity, const std::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 
 		return s_Data->EntityRuntimeInstances.at(entity.GetUUID()).at(name);
 	}
 
-	bool ScriptEngine::HasClass(const eastl::string& className)
+	bool ScriptEngine::HasClass(const std::string& className)
 	{
 		ARC_PROFILE_SCOPE();
 
-		return s_Data->EntityClasses.find_as(className) != s_Data->EntityClasses.end();
+		return s_Data->EntityClasses.find(className) != s_Data->EntityClasses.end();
 	}
 
-	void ScriptEngine::RemoveInstance(Entity entity, const eastl::string& name)
+	void ScriptEngine::RemoveInstance(Entity entity, const std::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -306,22 +306,22 @@ namespace ArcEngine
 		return s_Data->AppDomain;
 	}
 
-	const eastl::vector<eastl::string>& ScriptEngine::GetFields(const char* className)
+	const std::vector<std::string>& ScriptEngine::GetFields(const char* className)
 	{
 		return s_Data->EntityClasses.at(className)->GetFields();
 	}
 
-	const eastl::hash_map<eastl::string, ScriptField>& ScriptEngine::GetFieldMap(const char* className)
+	const std::unordered_map<std::string, ScriptField>& ScriptEngine::GetFieldMap(const char* className)
 	{
 		return s_Data->EntityClasses.at(className)->GetFieldsMap();
 	}
 
-	eastl::hash_map<eastl::string, ScriptFieldInstance>& ScriptEngine::GetFieldInstanceMap(Entity entity, const char* className)
+	std::unordered_map<std::string, ScriptFieldInstance>& ScriptEngine::GetFieldInstanceMap(Entity entity, const char* className)
 	{
 		return s_Data->EntityFields[entity.GetUUID()][className];
 	}
 
-	eastl::hash_map<eastl::string, Ref<ScriptClass>>& ScriptEngine::GetClasses()
+	std::unordered_map<std::string, Ref<ScriptClass>>& ScriptEngine::GetClasses()
 	{
 		return s_Data->EntityClasses;
 	}
@@ -337,7 +337,7 @@ namespace ArcEngine
 		LoadFields();
 	}
 
-	ScriptClass::ScriptClass(const eastl::string& classNamespace, const eastl::string& className)
+	ScriptClass::ScriptClass(const std::string& classNamespace, const std::string& className)
 		: m_ClassNamespace(classNamespace), m_ClassName(className)
 	{
 		ARC_PROFILE_SCOPE();
@@ -383,7 +383,7 @@ namespace ArcEngine
 		if (exception)
 		{
 			MonoString* monoString = mono_object_to_string(exception, nullptr);
-			eastl::string ex = MonoUtils::MonoStringToUTF8(monoString);
+			std::string ex = MonoUtils::MonoStringToUTF8(monoString);
 			ARC_APP_CRITICAL(ex.c_str());
 		}
 		return gcHandle;
@@ -463,10 +463,10 @@ namespace ArcEngine
 			const char* fieldName = mono_field_get_name(monoField);
 
 			MonoType* fieldType = mono_field_get_type(monoField);
-			eastl::string typeName = mono_type_get_name(fieldType);
+			std::string typeName = mono_type_get_name(fieldType);
 
 			FieldType type = FieldType::Unknown;
-			if (s_ScriptFieldTypeMap.find_as(typeName) != s_ScriptFieldTypeMap.end())
+			if (s_ScriptFieldTypeMap.find(typeName) != s_ScriptFieldTypeMap.end())
 				type = s_ScriptFieldTypeMap.at(typeName);
 
 			if (type == FieldType::Unknown)
@@ -478,8 +478,8 @@ namespace ArcEngine
 			uint8_t accessibilityFlag = GetFieldAccessibility(monoField);
 			bool serializable = accessibilityFlag & (uint8_t)Accessibility::Public;
 			bool hidden = !serializable;
-			eastl::string header = "";
-			eastl::string tooltip = "";
+			std::string header = "";
+			std::string tooltip = "";
 			float min = 0;
 			float max = 0;
 
@@ -542,7 +542,7 @@ namespace ArcEngine
 			if (type == FieldType::String)
 			{
 				MonoString* monoStr = (MonoString*)mono_field_get_value_object(s_Data->AppDomain, monoField, tempObject);
-				eastl::string str = MonoUtils::MonoStringToUTF8(monoStr);
+				std::string str = MonoUtils::MonoStringToUTF8(monoStr);
 				memcpy(scriptField.DefaultValue, str.data(), sizeof(scriptField.DefaultValue));
 			}
 			else
@@ -572,11 +572,11 @@ namespace ArcEngine
 		void* params = &entityID;
 		m_EntityClass->InvokeMethod(m_Handle, m_Constructor, &params);
 		
-		eastl::string fullClassName = fmt::format("{}.{}", scriptClass->m_ClassNamespace.c_str(), scriptClass->m_ClassName.c_str()).c_str();
+		std::string fullClassName = fmt::format("{}.{}", scriptClass->m_ClassNamespace.c_str(), scriptClass->m_ClassName.c_str()).c_str();
 		auto& fieldsMap = s_Data->EntityFields[entityID][fullClassName];
 		for (const auto& [fieldName, field] : scriptClass->m_FieldsMap)
 		{
-			if (fieldsMap.find_as(fieldName) != fieldsMap.end())
+			if (fieldsMap.find(fieldName) != fieldsMap.end())
 			{
 				const ScriptFieldInstance& fieldInstance = fieldsMap.at(fieldName);
 				SetFieldValueInternal(fieldName, fieldInstance.GetBuffer());
@@ -664,7 +664,7 @@ namespace ArcEngine
 		return m_Handle;
     }
 
-    void ScriptInstance::GetFieldValueInternal(const eastl::string& name, void* value) const
+    void ScriptInstance::GetFieldValueInternal(const std::string& name, void* value) const
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -672,7 +672,7 @@ namespace ArcEngine
 		mono_field_get_value(GCManager::GetReferencedObject(m_Handle), classField, value);
 	}
 
-	void ScriptInstance::SetFieldValueInternal(const eastl::string& name, const void* value) const
+	void ScriptInstance::SetFieldValueInternal(const std::string& name, const void* value) const
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -689,13 +689,13 @@ namespace ArcEngine
 		}
 	}
 
-	eastl::string ScriptInstance::GetFieldValueStringInternal(const eastl::string& name) const
+	std::string ScriptInstance::GetFieldValueStringInternal(const std::string& name) const
 	{
 		ARC_PROFILE_SCOPE();
 
 		MonoClassField* classField = m_ScriptClass->m_FieldsMap.at(name).Field;
 		MonoString* monoStr = (MonoString*)mono_field_get_value_object(s_Data->AppDomain, classField, GCManager::GetReferencedObject(m_Handle));
-		eastl::string str = MonoUtils::MonoStringToUTF8(monoStr);
+		std::string str = MonoUtils::MonoStringToUTF8(monoStr);
 		return str;
 	}
 }

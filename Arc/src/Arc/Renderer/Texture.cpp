@@ -31,7 +31,7 @@ namespace ArcEngine
 		return nullptr;
 	}
 
-	Ref<Texture2D> Texture2D::Create(const eastl::string& path)
+	Ref<Texture2D> Texture2D::Create(const std::string& path)
 	{
 		switch (Renderer::GetAPI())
 		{
@@ -55,7 +55,7 @@ namespace ArcEngine
 		return nullptr;
 	}
 
-	Ref<TextureCubemap> TextureCubemap::Create(const eastl::string& path)
+	Ref<TextureCubemap> TextureCubemap::Create(const std::string& path)
 	{
 		switch (Renderer::GetAPI())
 		{

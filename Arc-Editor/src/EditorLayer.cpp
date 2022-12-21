@@ -75,7 +75,7 @@ namespace ArcEngine
 		Renderer3D::ResetStats();
 
 		// Remove unused scene viewports
-		for (const Scope<SceneViewport>* it = m_Viewports.begin(); it != m_Viewports.end(); it++)
+		for (auto it = m_Viewports.begin(); it != m_Viewports.end(); it++)
 		{
 			if (!it->get()->Showing)
 			{
@@ -85,7 +85,7 @@ namespace ArcEngine
 		}
 
 		// Remove unused properties panels
-		for (const Scope<PropertiesPanel>* it = m_Properties.begin(); it != m_Properties.end(); it++)
+		for (auto it = m_Properties.begin(); it != m_Properties.end(); it++)
 		{
 			if (!it->get()->Showing)
 			{
@@ -95,7 +95,7 @@ namespace ArcEngine
 		}
 
 		// Remove unused asset panels
-		for (const Scope<AssetPanel>* it = m_AssetPanels.begin(); it != m_AssetPanels.end(); it++)
+		for (auto it = m_AssetPanels.begin(); it != m_AssetPanels.end(); it++)
 		{
 			if (!it->get()->Showing)
 			{
@@ -509,8 +509,8 @@ namespace ArcEngine
 			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 			if (ImGui::BeginPopupModal("New Project", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 			{
-				static eastl::string prjName = "";
-				static eastl::string folderPath = "";
+				static std::string prjName = "";
+				static std::string folderPath = "";
 
 				constexpr size_t size = 256;
 				char buffer[size];
@@ -835,7 +835,7 @@ namespace ArcEngine
 
 	void EditorLayer::OpenProject()
 	{
-		eastl::string filepath = FileDialogs::OpenFile("Arc Scene (*.arcproj)\0*.arcproj\0");
+		std::string filepath = FileDialogs::OpenFile("Arc Scene (*.arcproj)\0*.arcproj\0");
 		if (!filepath.empty())
 			OpenProject(filepath.c_str());
 	}
@@ -905,7 +905,7 @@ namespace ArcEngine
 
 	void EditorLayer::SaveSceneAs()
 	{
-		eastl::string filepath = FileDialogs::SaveFile("Arc Scene (*.arc)\0*.arc\0");
+		std::string filepath = FileDialogs::SaveFile("Arc Scene (*.arc)\0*.arc\0");
 		if (!filepath.empty())
 		{
 			SceneSerializer serializer(m_ActiveScene);
