@@ -334,7 +334,7 @@ namespace ArcEngine
 			for (T& p : v)
 			{
 				ImGui::PushID(i);
-				std::string name = fmt::format("Point {}", i);
+				std::string name = std::format("Point {}", i);
 				function(name.c_str(), p);
 				ImGui::TableNextColumn();
 

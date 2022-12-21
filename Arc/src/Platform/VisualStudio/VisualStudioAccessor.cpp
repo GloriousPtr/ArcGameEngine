@@ -200,7 +200,7 @@ namespace ArcEngine
 
 		if (goToLine > 0)
 		{
-			cmdArgs += fmt::format(" /command \"edit.goto {0}\"", goToLine);
+			cmdArgs += std::format(" /command \"edit.goto {0}\"", goToLine);
 		}
 
 		if (processShouldRun)

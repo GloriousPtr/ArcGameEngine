@@ -57,7 +57,7 @@ namespace ArcEngine
 			base_sink<std::mutex>::formatter_->format(msg, formatted);
 			std::string filename = msg.source.filename ? msg.source.filename : "";
 			std::string funcname = msg.source.funcname ? msg.source.funcname : "";
-			*(m_MessageBuffer.begin() + m_MessagesBuffered) = CreateRef<Message>(fmt::to_string(formatted), filename, funcname, msg.source.line, GetMessageLevel(msg.level));
+			*(m_MessageBuffer.begin() + m_MessagesBuffered) = CreateRef<Message>(formatted.data(), filename, funcname, msg.source.line, GetMessageLevel(msg.level));
 
 			if (++m_MessagesBuffered == m_MessageBufferCapacity)
 				flush_();

@@ -798,7 +798,7 @@ namespace ArcEngine
 					std::string newFolderPath;
 					while (!created)
 					{
-						std::string folderName = "New Folder" + (i == 0 ? "" : fmt::format(" ({})", i));
+						std::string folderName = "New Folder" + (i == 0 ? "" : std::format(" ({})", i));
 						newFolderPath = (context / folderName).string();
 						created = std::filesystem::create_directory(newFolderPath);
 						++i;
