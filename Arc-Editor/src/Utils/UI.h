@@ -19,27 +19,63 @@ namespace ArcEngine
 		// Strings
 		static bool Property(const char* label, eastl::string& value, const char* tooltip = nullptr);
 
-		// s/byte
-		static bool Property(const char* label, int8_t& value, int8_t min = 0, int8_t max = 0, const char* tooltip = nullptr);
-		static bool Property(const char* label, uint8_t& value, uint8_t min = 0, uint8_t max = 0, const char* tooltip = nullptr);
+		template<std::integral T>
+		static bool Property(const char* label, T& value, T min = 0, T max = 0, const char* tooltip = nullptr)
+		{
+			BeginPropertyGrid(label, tooltip);
+			bool modified;
 
-		// u/short
-		static bool Property(const char* label, int16_t& value, int16_t min = 0, int16_t max = 0, const char* tooltip = nullptr);
-		static bool Property(const char* label, uint16_t& value, uint16_t min = 0, uint16_t max = 0, const char* tooltip = nullptr);
-		
-		// u/int
-		static bool Property(const char* label, int32_t& value, int32_t min = 0, int32_t max = 0, const char* tooltip = nullptr);
-		static bool Property(const char* label, uint32_t& value, uint32_t min = 0, uint32_t max = 0, const char* tooltip = nullptr);
+			int dataType = ImGuiDataType_S32;
+			if constexpr (std::is_signed<T>::value)
+			{
+				if constexpr (sizeof(T) == 1)
+					dataType = ImGuiDataType_S8;
+				else if constexpr (sizeof(T) == 2)
+					dataType = ImGuiDataType_S16;
+				else if constexpr (sizeof(T) == 4)
+					dataType = ImGuiDataType_S32;
+				else if constexpr (sizeof(T) == 8)
+					dataType = ImGuiDataType_S64;
+			}
+			else
+			{
+				if constexpr (sizeof(T) == 1)
+					dataType = ImGuiDataType_U8;
+				else if constexpr (sizeof(T) == 2)
+					dataType = ImGuiDataType_U16;
+				else if constexpr (sizeof(T) == 4)
+					dataType = ImGuiDataType_U32;
+				else if constexpr (sizeof(T) == 8)
+					dataType = ImGuiDataType_U64;
+			}
 
-		// u/long
-		static bool Property(const char* label, int64_t& value, int64_t min = 0, int64_t max = 0, const char* tooltip = nullptr);
-		static bool Property(const char* label, uint64_t& value, uint64_t min = 0, uint64_t max = 0, const char* tooltip = nullptr);
+			if (max > min)
+				modified = ImGui::SliderScalar(s_IDBuffer, dataType, &value, &min, &max);
+			else
+				modified = ImGui::DragScalar(s_IDBuffer, dataType, &value);
 
-		// Float
-		static bool Property(const char* label, float& value, float min = 0.0f, float max = 0.0f, const char* tooltip = nullptr, float delta = 0.1f, const char* fmt = "%.3f");
+			EndPropertyGrid();
+			return modified;
+		}
 
-		// Double
-		static bool Property(const char* label, double& value, double min = 0.0, double max = 0.0, const char* tooltip = nullptr, float delta = 0.1f, const char* fmt = "%.6f");
+		template<std::floating_point T>
+		static bool Property(const char* label, T& value, T min = 0, T max = 0, const char* tooltip = nullptr, float delta = 0.1f, const char* fmt = "%.3f")
+		{
+			BeginPropertyGrid(label, tooltip);
+			bool modified;
+
+			int dataType = ImGuiDataType_Float;
+			if constexpr (sizeof(T) == 8)
+				dataType = ImGuiDataType_Double;
+
+			if (max > min)
+				modified = ImGui::SliderScalar(s_IDBuffer, dataType, &value, &min, &max, fmt);
+			else
+				modified = ImGui::DragScalar(s_IDBuffer, dataType, &value, delta, nullptr, nullptr, fmt);
+
+			EndPropertyGrid();
+			return modified;
+		}
 
 		// Vec2/3/4
 		template<typename T>
@@ -73,27 +109,12 @@ namespace ArcEngine
 		static bool Property(const char* label, Ref<TextureCubemap>& texture, uint64_t overrideTextureID = 0, const char* tooltip = nullptr);
 		static bool Property(const char* label, Ref<Texture2D>& texture, uint64_t overrideTextureID = 0, const char* tooltip = nullptr);
 
-		// s/byte
-		static bool Property(const char* label, eastl::vector<int8_t>& v, int8_t defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr);
-		static bool Property(const char* label, eastl::vector<uint8_t>& v, uint8_t defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr);
-
-		// u/short
-		static bool Property(const char* label, eastl::vector<int16_t>& v, int16_t defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr);
-		static bool Property(const char* label, eastl::vector<uint16_t>& v, uint16_t defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr);
-
-		// u/int
-		static bool Property(const char* label, eastl::vector<int32_t>& v, int32_t defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr);
-		static bool Property(const char* label, eastl::vector<uint32_t>& v, uint32_t defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr);
-
-		// u/long
-		static bool Property(const char* label, eastl::vector<int64_t>& v, int64_t defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr);
-		static bool Property(const char* label, eastl::vector<uint64_t>& v, uint64_t defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr);
-
-		// Float
-		static bool Property(const char* label, eastl::vector<float>& v, float defaultValue = 0.0f, size_t minElements = 0, const char* tooltip = nullptr);
-
-		// Double
-		static bool Property(const char* label, eastl::vector<double>& v, double defaultValue = 0.0, size_t minElements = 0, const char* tooltip = nullptr);
+		template<typename T, typename Fn>
+			requires std::integral<T> || std::floating_point<T>
+		bool Property(const char* label, eastl::vector<T>&v, T defaultValue = 0, size_t minElements = 0, const char* tooltip = nullptr)
+		{
+			return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, int8_t& value) { UI::Property(name, value); });
+		}
 
 		// Vec2/3/4
 		static bool Property(const char* label, eastl::vector<glm::vec2>& v, const glm::vec2& defaultValue = glm::vec2(0.0f), size_t minElements = 0, const char* tooltip = nullptr);
@@ -171,7 +192,7 @@ namespace ArcEngine
 
 			if (!entityID)
 				ImGui::PopStyleColor();
-			
+
 			EndPropertyGrid();
 
 			return modified;
@@ -179,7 +200,7 @@ namespace ArcEngine
 
 		// Field
 		static void DrawField(Entity entity, const eastl::string& className, const eastl::string& fieldName);
-		
+
 		// Vec3 with reset button
 		static void DrawVec3Control(const char* label, glm::vec3& values, const char* tooltip = nullptr, float resetValue = 0.0f);
 

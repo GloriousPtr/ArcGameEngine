@@ -558,7 +558,7 @@ namespace ArcEngine
 
 				size_t submeshCount = component.MeshGeometry->GetSubmeshCount();
 				if (submeshCount > 1)
-					UI::Property("Submesh Index", component.SubmeshIndex, 0, submeshCount - 1);
+					UI::Property<size_t>("Submesh Index", component.SubmeshIndex, 0, submeshCount - 1);
 
 				const char* cullModeTypeStrings[] = { "Front", "Back", "Double Sided" };
 				int cullMode = (int) component.CullMode;
@@ -604,7 +604,7 @@ namespace ArcEngine
 
 			if (component.UseColorTemperatureMode)
 			{
-				if (UI::Property("Temperature (K)", component.Temperature, 1000, 40000))
+				if (UI::Property<uint32_t>("Temperature (K)", component.Temperature, 1000, 40000))
 					ColorUtils::TempratureToColor(component.Temperature, component.Color);
 			}
 			else
