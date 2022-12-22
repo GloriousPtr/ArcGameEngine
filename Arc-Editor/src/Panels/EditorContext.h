@@ -61,7 +61,6 @@ namespace ArcEngine
 		bool IsValid(EditorContextType type) const { return type == m_Type && m_Data != nullptr; }
 		operator bool() const { return m_Type != EditorContextType::None && m_Data != nullptr; }
 		bool operator==(const EditorContext& other) const { return m_Type == other.m_Type && m_Data == other.m_Data; }
-		bool operator!=(const EditorContext& other) const { return !(*this == other); }
 
 	private:
 		EditorContextType m_Type = EditorContextType::None;

@@ -276,7 +276,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		UUID id = entity.GetUUID();
-		return s_Data->EntityRuntimeInstances[id].find(name) != s_Data->EntityRuntimeInstances[id].end();
+		return s_Data->EntityRuntimeInstances[id].contains(name);
 	}
 
 	ScriptInstance* ScriptEngine::GetInstance(Entity entity, const std::string& name)
@@ -290,7 +290,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		return s_Data->EntityClasses.find(className) != s_Data->EntityClasses.end();
+		return s_Data->EntityClasses.contains(className);
 	}
 
 	void ScriptEngine::RemoveInstance(Entity entity, const std::string& name)
@@ -466,8 +466,9 @@ namespace ArcEngine
 			std::string typeName = mono_type_get_name(fieldType);
 
 			FieldType type = FieldType::Unknown;
-			if (s_ScriptFieldTypeMap.find(typeName) != s_ScriptFieldTypeMap.end())
-				type = s_ScriptFieldTypeMap.at(typeName);
+			const auto& fieldIt = s_ScriptFieldTypeMap.find(typeName);
+			if (fieldIt != s_ScriptFieldTypeMap.end())
+				type = fieldIt->second;
 
 			if (type == FieldType::Unknown)
 			{
@@ -576,9 +577,10 @@ namespace ArcEngine
 		auto& fieldsMap = s_Data->EntityFields[entityID][fullClassName];
 		for (const auto& [fieldName, field] : scriptClass->m_FieldsMap)
 		{
-			if (fieldsMap.find(fieldName) != fieldsMap.end())
+			const auto& fieldIt = fieldsMap.find(fieldName);
+			if (fieldIt != fieldsMap.end())
 			{
-				const ScriptFieldInstance& fieldInstance = fieldsMap.at(fieldName);
+				const ScriptFieldInstance& fieldInstance = fieldIt->second;
 				SetFieldValueInternal(fieldName, fieldInstance.GetBuffer());
 			}
 		}

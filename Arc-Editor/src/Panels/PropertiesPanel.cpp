@@ -431,8 +431,13 @@ namespace ArcEngine
 
 			ImGui::SetNextItemWidth(regionX - framePadding.x);
 
-			const auto it = Scene::LayerCollisionMask.find(tag.Layer);
-			const char* current = Scene::LayerCollisionMask[it == Scene::LayerCollisionMask.end() ? Scene::DefaultLayer : tag.Layer].Name.c_str();
+			const char* current;
+			const auto& it = Scene::LayerCollisionMask.find(tag.Layer);
+			if (it != Scene::LayerCollisionMask.end())
+				current = it->second.Name.c_str();
+			else
+				current = Scene::LayerCollisionMask[Scene::DefaultLayer].Name.c_str();
+
 			if (ImGui::BeginCombo("##LayerName", current))
 			{
 				for (auto [layer, layerData] : Scene::LayerCollisionMask)
@@ -1081,7 +1086,7 @@ namespace ArcEngine
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 				for (const auto& [name, scriptClass] : classes)
 				{
-					bool notFound = std::find(component.Classes.begin(), component.Classes.end(), name) == component.Classes.end();
+					bool notFound = std::ranges::find(component.Classes, name) == component.Classes.end();
 					if (notFound && !m_Filter.IsActive() || (m_Filter.IsActive() && m_Filter.PassFilter(name.c_str())))
 					{
 						if (ImGui::MenuItem(name.c_str()))

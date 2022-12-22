@@ -417,9 +417,10 @@ namespace ArcEngine
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
-			if (fieldInstanceMap.find(fieldName) != fieldInstanceMap.end())
+			const auto& fieldInstanceIt = fieldInstanceMap.find(fieldName);
+			if (fieldInstanceIt != fieldInstanceMap.end())
 			{
-				ScriptFieldInstance& fieldInstance = fieldInstanceMap.at(fieldName);
+				ScriptFieldInstance& fieldInstance = fieldInstanceIt->second;
 
 				if (fieldInstance.Type != field.Type)
 				{
@@ -460,9 +461,10 @@ namespace ArcEngine
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
-			if (fieldInstanceMap.find(fieldName) != fieldInstanceMap.end())
+			const auto& fieldInstanceIt = fieldInstanceMap.find(fieldName);
+			if (fieldInstanceIt != fieldInstanceMap.end())
 			{
-				ScriptFieldInstance& fieldInstance = fieldInstanceMap.at(fieldName);
+				ScriptFieldInstance& fieldInstance = fieldInstanceIt->second;
 
 				if (fieldInstance.Type != field.Type)
 				{
@@ -503,9 +505,10 @@ namespace ArcEngine
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
-			if (fieldInstanceMap.find(fieldName) != fieldInstanceMap.end())
+			const auto& fieldInstanceIt = fieldInstanceMap.find(fieldName);
+			if (fieldInstanceIt != fieldInstanceMap.end())
 			{
-				ScriptFieldInstance& fieldInstance = fieldInstanceMap.at(fieldName);
+				ScriptFieldInstance& fieldInstance = fieldInstanceIt->second;
 
 				if (fieldInstance.Type != field.Type)
 				{
@@ -545,9 +548,10 @@ namespace ArcEngine
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
-			if (fieldInstanceMap.find(fieldName) != fieldInstanceMap.end())
+			const auto& fieldInstanceIt = fieldInstanceMap.find(fieldName);
+			if (fieldInstanceIt != fieldInstanceMap.end())
 			{
-				ScriptFieldInstance& fieldInstance = fieldInstanceMap.at(fieldName);
+				ScriptFieldInstance& fieldInstance = fieldInstanceIt->second;
 
 				if (fieldInstance.Type != field.Type)
 				{

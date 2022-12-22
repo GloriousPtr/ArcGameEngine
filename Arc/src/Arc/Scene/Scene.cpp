@@ -470,19 +470,20 @@ namespace ArcEngine
 		return duplicate;
 	}
 
-	bool Scene::HasEntity(UUID uuid)
+	bool Scene::HasEntity(UUID uuid) const
 	{
 		ARC_PROFILE_SCOPE();
 
-		return m_EntityMap.find(uuid) != m_EntityMap.end();
+		return m_EntityMap.contains(uuid);
 	}
 
 	Entity Scene::GetEntity(UUID uuid)
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (m_EntityMap.find(uuid) != m_EntityMap.end())
-			return { m_EntityMap.at(uuid), this };
+		const auto& it = m_EntityMap.find(uuid);
+		if (it != m_EntityMap.end())
+			return { it->second, this };
 
 		return {};
 	}
@@ -926,8 +927,8 @@ namespace ArcEngine
 							JPH::Vec3 position = body->GetPosition();
 							JPH::Vec3 rotation = body->GetRotation().GetEulerAngles();
 
-							rb.PreviousTranslation = std::move(rb.Translation);
-							rb.PreviousRotation = std::move(rb.Rotation);
+							rb.PreviousTranslation = rb.Translation;
+							rb.PreviousRotation = rb.Rotation;
 							rb.Translation = { position.GetX(), position.GetY(), position.GetZ() };
 							rb.Rotation = glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ());
 						}
@@ -940,8 +941,8 @@ namespace ArcEngine
 						JPH::Vec3 position = body->GetPosition();
 						JPH::Vec3 rotation = body->GetRotation().GetEulerAngles();
 
-						rb.PreviousTranslation = std::move(rb.Translation);
-						rb.PreviousRotation = std::move(rb.Rotation);
+						rb.PreviousTranslation = rb.Translation;
+						rb.PreviousRotation = rb.Rotation;
 						rb.Translation = { position.GetX(), position.GetY(), position.GetZ() };
 						rb.Rotation = glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ());
 						tc.Translation = rb.Translation;
@@ -966,7 +967,7 @@ namespace ArcEngine
 						if (stepped)
 						{
 							b2Vec2 position = body->GetPosition();
-							rb.PreviousTranslationRotation = std::move(rb.TranslationRotation);
+							rb.PreviousTranslationRotation = rb.TranslationRotation;
 							rb.TranslationRotation = { position.x, position.y, body->GetAngle() };
 						}
 
@@ -979,7 +980,7 @@ namespace ArcEngine
 					{
 						b2Vec2 position = body->GetPosition();
 
-						rb.PreviousTranslationRotation = std::move(rb.TranslationRotation);
+						rb.PreviousTranslationRotation = rb.TranslationRotation;
 						rb.TranslationRotation = { position.x, position.y, body->GetAngle() };
 
 						tc.Translation.x = rb.TranslationRotation.x;

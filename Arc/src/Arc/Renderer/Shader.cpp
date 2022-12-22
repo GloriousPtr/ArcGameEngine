@@ -73,10 +73,11 @@ namespace ArcEngine
 		std::string shaderName;
 		for (const auto& [name, shader] : m_Shaders)
 		{
-			if (m_ShaderPaths.find(name) == m_ShaderPaths.end())
+			const auto& it = m_ShaderPaths.find(name);
+			if (it == m_ShaderPaths.end())
 				continue;
 
-			shader->Recompile(m_ShaderPaths.at(name));
+			shader->Recompile(it->second);
 		}
 	}
 
@@ -92,7 +93,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		return m_Shaders.find(name) != m_Shaders.end();
+		return m_Shaders.contains(name);
 	}
 
 }

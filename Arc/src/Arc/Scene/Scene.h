@@ -61,7 +61,7 @@ namespace ArcEngine
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
 		void DestroyEntity(Entity entity);
 		Entity Duplicate(Entity entity);
-		bool HasEntity(UUID uuid);
+		bool HasEntity(UUID uuid) const;
 		Entity GetEntity(UUID uuid);
 		bool IsRunning() const { return m_IsRunning; }
 

@@ -110,10 +110,10 @@ namespace ArcEngine
 			return;
 		}
 
-		if (s_GCState->StrongRefMap.find(handle) != s_GCState->StrongRefMap.end())
+		if (s_GCState->StrongRefMap.contains(handle))
 			s_GCState->StrongRefMap.erase(handle);
 
-		if (s_GCState->WeakRefMap.find(handle) != s_GCState->WeakRefMap.end())
+		if (s_GCState->WeakRefMap.contains(handle))
 			s_GCState->WeakRefMap.erase(handle);
 	}
 }

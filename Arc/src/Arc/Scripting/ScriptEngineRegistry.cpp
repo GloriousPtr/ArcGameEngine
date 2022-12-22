@@ -163,7 +163,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		MonoType* monoType = mono_reflection_type_get_type((MonoReflectionType*)type);
-		ARC_CORE_ASSERT(s_AddComponentFuncs.find(monoType) != s_AddComponentFuncs.end(), mono_type_get_name(monoType));
+		ARC_CORE_ASSERT(s_AddComponentFuncs.contains(monoType), mono_type_get_name(monoType));
 		s_AddComponentFuncs.at(monoType)(GetEntity(entityID), monoType);
 	}
 
@@ -172,7 +172,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		MonoType* monoType = mono_reflection_type_get_type((MonoReflectionType*)type);
-		ARC_CORE_ASSERT(s_HasComponentFuncs.find(monoType) != s_HasComponentFuncs.end(), mono_type_get_name(monoType));
+		ARC_CORE_ASSERT(s_HasComponentFuncs.contains(monoType), mono_type_get_name(monoType));
 		return s_HasComponentFuncs.at(monoType)(GetEntity(entityID), monoType);
 	}
 

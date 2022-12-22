@@ -7,7 +7,7 @@ namespace ArcEngine
 	class StringUtils
 	{
 	public:
-		inline static std::string GetExtension(const std::string&& filepath)
+		inline static std::string GetExtension(const std::string& filepath)
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -15,7 +15,7 @@ namespace ArcEngine
 			return filepath.substr(lastDot + 1, filepath.size() - lastDot);
 		}
 
-		inline static std::string GetName(const std::string&& filepath)
+		inline static std::string GetName(const std::string& filepath)
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -26,7 +26,7 @@ namespace ArcEngine
 			return filepath.substr(lastSlash, count);
 		}
 
-		inline static std::string GetNameWithExtension(const std::string&& filepath)
+		inline static std::string GetNameWithExtension(const std::string& filepath)
 		{
 			ARC_PROFILE_SCOPE();
 

@@ -26,7 +26,7 @@ namespace ArcEngine
 			bool modified;
 
 			int dataType = ImGuiDataType_S32;
-			if constexpr (std::is_signed<T>::value)
+			if constexpr (std::is_signed_v<T>)
 			{
 				if constexpr (sizeof(T) == 1)
 					dataType = ImGuiDataType_S8;

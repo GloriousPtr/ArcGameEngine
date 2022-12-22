@@ -95,15 +95,14 @@ namespace ArcEngine
 		return ICON_MDI_FILE;
 	}
 	
-	static bool DragDropTarget(const char* dropPath)
+	static bool DragDropTarget(const std::filesystem::path& dropPath)
 	{
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity"))
 			{
 				Entity entity = *((Entity*)payload->Data);
-				std::filesystem::path path(dropPath);
-				path /= std::string(entity.GetComponent<TagComponent>().Tag + ".prefab");
+				std::filesystem::path path = dropPath / std::string(entity.GetComponent<TagComponent>().Tag + ".prefab");
 				EntitySerializer::SerializeEntityAsPrefab(path.string().c_str(), entity);
 				return true;
 			}
@@ -114,12 +113,13 @@ namespace ArcEngine
 		return false;
 	}
 
-	static void DragDropFrom(const std::string& filepath)
+	static void DragDropFrom(const std::filesystem::path& filepath)
 	{
 		if (ImGui::BeginDragDropSource())
 		{
-			ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", filepath.c_str(), filepath.length() + 1);
-			ImGui::Text(StringUtils::GetName(std::move(filepath)).c_str());
+			std::string pathStr = filepath.string();
+			ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", pathStr.c_str(), pathStr.length() + 1);
+			ImGui::TextUnformatted(filepath.filename().string().c_str());
 			ImGui::EndDragDropSource();
 		}
 	}
@@ -130,9 +130,10 @@ namespace ArcEngine
 		const char* filepath = filepathString.c_str();
 		std::string ext = path.extension().string();
 		ext = ext.substr(1);
-		if (s_FileTypes.find(ext) != s_FileTypes.end())
+		const auto& fileTypeIt = s_FileTypes.find(ext);
+		if (fileTypeIt != s_FileTypes.end())
 		{
-			FileType fileType = s_FileTypes.at(ext);
+			FileType fileType = fileTypeIt->second;
 			switch (fileType)
 			{
 				case FileType::Scene:
@@ -205,13 +206,13 @@ namespace ArcEngine
 			const std::string filepath = entryPath.string();
 
 			if (!entryIsFile)
-				DragDropTarget(filepath.c_str());
-			DragDropFrom(filepath);
+				DragDropTarget(entryPath);
+			DragDropFrom(entryPath);
 
-			std::string name = StringUtils::GetNameWithExtension(filepath.c_str());
+			std::string name = StringUtils::GetNameWithExtension(filepath);
 			const char8_t* folderIcon;
 			if (entryIsFile)
-				folderIcon = GetFileIcon(StringUtils::GetExtension((std::string&&)name).c_str());
+				folderIcon = GetFileIcon(entryPath.extension().string().c_str());
 			else
 				folderIcon = open ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
 			
@@ -580,8 +581,7 @@ namespace ArcEngine
 				uint64_t textureId = m_DirectoryIcon->GetRendererID();
 				if (!isDir)
 				{
-					std::string ext = StringUtils::GetExtension((std::string&&)file.Name);
-					if (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp")
+					if (file.Extension == "png" || file.Extension == "jpg" || file.Extension == "jpeg" || file.Extension == "bmp")
 					{
 						if (file.Thumbnail)
 						{
@@ -677,16 +677,20 @@ namespace ArcEngine
 
 					// Type Color frame
 					auto fileType = FileType::Unknown;
+					const auto& fileTypeIt = s_FileTypes.find(file.Extension);
+					if (fileTypeIt != s_FileTypes.end())
+						fileType = fileTypeIt->second;
+
 					const char* fileTypeString = s_FileTypesToString.at(FileType::Unknown);
-					if (s_FileTypes.find(file.Extension) != s_FileTypes.end())
-					{
-						fileType = s_FileTypes.at(file.Extension);
-						fileTypeString = s_FileTypesToString.at(fileType);
-					}
+					const auto& fileStringTypeIt = s_FileTypesToString.find(fileType);
+					if (fileTypeIt != s_FileTypes.end())
+						fileTypeString = fileStringTypeIt->second;
 
 					ImVec4 typeColor = { 1.0f, 1.0f, 1.0f, 1.0f };
-					if (s_TypeColors.find(fileType) != s_TypeColors.end())
-						typeColor = s_TypeColors.at(fileType);
+					const auto& fileTypeColorIt = s_TypeColors.find(fileType);
+					if (fileTypeColorIt != s_TypeColors.end())
+						typeColor = fileTypeColorIt->second;
+
 					ImVec2 typeColorFrameSize = { scaledThumbnailSizeX, scaledThumbnailSizeX * 0.03f };
 					ImGui::SetCursorPosX(cursorPos.x + padding);
 					ImGui::Image((ImTextureID)m_WhiteTexture->GetRendererID(), typeColorFrameSize, { 0, 0 }, { 1, 1 }, isDir ? ImVec4(0.0f, 0.0f, 0.0f, 0.0f) : typeColor);

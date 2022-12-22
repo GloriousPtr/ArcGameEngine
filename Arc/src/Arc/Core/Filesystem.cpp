@@ -34,7 +34,7 @@ namespace ArcEngine
 		{
 			in.seekg(0, std::ios::end);
 			const size_t size = in.tellg();
-			if (size != -1)
+			if (std::cmp_not_equal(size, -1))
 			{
 				outString.resize(size);
 				in.seekg(0, std::ios::beg);

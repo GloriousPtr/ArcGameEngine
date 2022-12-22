@@ -51,8 +51,9 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (m_Texture2DMap.find(path) != m_Texture2DMap.end())
-			return m_Texture2DMap.at(path);
+		const auto& it = m_Texture2DMap.find(path);
+		if (it != m_Texture2DMap.end())
+			return it->second;
 
 		Ref<Texture2D> texture = Texture2D::Create();
 		m_Texture2DMap.emplace(path, texture);
@@ -80,8 +81,9 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (m_TextureCubeMap.find(path) != m_TextureCubeMap.end())
-			return m_TextureCubeMap.at(path);
+		const auto& it = m_TextureCubeMap.find(path);
+		if (it != m_TextureCubeMap.end())
+			return it->second;
 
 		Ref<TextureCubemap> texture = TextureCubemap::Create();
 		m_TextureCubeMap.emplace(path, texture);
@@ -93,8 +95,9 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (m_MeshMap.find(path) != m_MeshMap.end())
-			return m_MeshMap.at(path);
+		const auto& it = m_MeshMap.find(path);
+		if (it != m_MeshMap.end())
+			return it->second;
 
 		Ref<Mesh> mesh = CreateRef<Mesh>(path.c_str());
 		m_MeshMap.emplace(path, mesh);
