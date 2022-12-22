@@ -8,7 +8,7 @@ namespace ArcEngine
 	{
 	public:
 		explicit OpenGLShader(const std::string& filepath);
-		OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
+		OpenGLShader(const std::string& name, std::string_view vertexSrc, std::string_view fragmentSrc);
 		~OpenGLShader() override;
 
 		OpenGLShader(const OpenGLShader& other) = default;
@@ -46,7 +46,7 @@ namespace ArcEngine
 
 	private:
 		int GetLocation(const std::string& name);
-		std::unordered_map<uint32_t, std::string> PreProcess(const std::string& source) const;
+		std::unordered_map<uint32_t, std::string> PreProcess(std::string_view source) const;
 		void Compile(const std::unordered_map<uint32_t, std::string>& shaderSources);
 
 	private:

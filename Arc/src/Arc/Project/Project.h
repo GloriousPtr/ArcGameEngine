@@ -70,7 +70,7 @@ namespace ArcEngine
 			return GetProjectDirectory() / (s_ActiveProject->GetConfig().Name + ".sln");
 		}
 
-		static const std::string_view GetBuildConfigString()
+		static std::string_view GetBuildConfigString()
 		{
 			ARC_CORE_ASSERT(s_ActiveProject);
 			return s_BuildConfigMap.at(s_ActiveProject->GetConfig().BuildConfiguration);

@@ -121,9 +121,6 @@ namespace ArcEngine
 		static bool Property(const char* label, std::vector<glm::vec3>& v, const glm::vec3& defaultValue = glm::vec3(0.0f), size_t minElements = 0, const char* tooltip = nullptr);
 		static bool Property(const char* label, std::vector<glm::vec4>& v, const glm::vec4& defaultValue = glm::vec4(0.0f), size_t minElements = 0, const char* tooltip = nullptr);
 
-		// Bool
-		static bool Property(const char* label, std::vector<bool>& v, bool defaultValue, size_t minElements = 0, const char* tooltip = nullptr);
-
 		// Colors
 		static bool PropertyColor(const char* label, std::vector<glm::vec3>& v, const glm::vec3& defaultValue = glm::vec3(1.0f), size_t minElements = 0, const char* tooltip = nullptr);
 		static bool PropertyColor(const char* label, std::vector<glm::vec4>& v, const glm::vec4& defaultValue = glm::vec4(1.0f), size_t minElements = 0, const char* tooltip = nullptr);

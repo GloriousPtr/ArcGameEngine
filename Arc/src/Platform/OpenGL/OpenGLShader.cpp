@@ -10,7 +10,7 @@ typedef uint32_t GLenum;
 
 namespace ArcEngine
 {
-	static GLenum ShaderTypeFromString(const std::string& type)
+	static GLenum ShaderTypeFromString(std::string_view type)
 	{
 		if(type == "vertex")
 			return GL_VERTEX_SHADER;
@@ -40,7 +40,7 @@ namespace ArcEngine
 		m_Name = filepath.substr(lastSlash, count);
 	}
 
-	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
+	OpenGLShader::OpenGLShader(const std::string& name, std::string_view vertexSrc, std::string_view fragmentSrc)
 		: m_Name(name)
 	{
 		ARC_PROFILE_SCOPE();
@@ -200,7 +200,7 @@ namespace ArcEngine
 		return location;
 	}
 
-	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(const std::string& source) const
+	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(std::string_view source) const
 	{
 		ARC_PROFILE_SCOPE();
 		
@@ -214,7 +214,7 @@ namespace ArcEngine
 			size_t eol = source.find_first_of("\r\n", pos);
 			ARC_CORE_ASSERT(eol != std::string::npos, "Syntax error");
 			size_t begin = pos + typeTokenLength + 1;
-			std::string type = source.substr(begin, eol - begin);
+			std::string type = static_cast<std::string>(source.substr(begin, eol - begin));
 			ARC_CORE_ASSERT(ShaderTypeFromString(type), "Invalid shader type specified");
 
 			size_t nextLinePos = source.find_first_not_of("\r\n", eol);

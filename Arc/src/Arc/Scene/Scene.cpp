@@ -331,11 +331,6 @@ namespace ArcEngine
 
 	#pragma endregion
 
-	Scene::~Scene()
-	{
-		ARC_PROFILE_SCOPE();
-	}
-
 	template<typename... Component>
 	static void CopyComponent(entt::registry& dst, entt::registry& src, std::unordered_map<UUID, entt::entity> enttMap)
 	{
@@ -1507,9 +1502,8 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	void Scene::OnComponentAdded(Entity entity, T& component)
+	void Scene::OnComponentAdded([[maybe_unused]] Entity entity, [[maybe_unused]] T& component)
 	{
-		//static_assert(false);
 	}
 
 	template<>

@@ -15,14 +15,6 @@
 
 namespace ArcEngine
 {
-	enum class FileType
-	{
-		Unknown = 0,
-		Scene, Prefab, Script, Shader,
-		Texture, Cubemap, Model,
-		Audio
-	};
-
 	static const std::unordered_map<FileType, const char*> s_FileTypesToString =
 	{
 		{ FileType::Unknown,	"Unknown" },
@@ -41,28 +33,27 @@ namespace ArcEngine
 
 	static const std::unordered_map<std::string, FileType, UM_StringTransparentEquality> s_FileTypes =
 	{
-		{ "arc",	FileType::Scene },
-		{ "prefab", FileType::Prefab },
-		{ "cs",		FileType::Script },
-		{ "glsl",	FileType::Shader },
+		{ ".arc",		FileType::Scene },
+		{ ".prefab",	FileType::Prefab },
+		{ ".cs",		FileType::Script },
+		{ ".glsl",		FileType::Shader },
 
-		{ "png",	FileType::Texture },
-		{ "jpg",	FileType::Texture },
-		{ "jpeg",	FileType::Texture },
-		{ "bmp",	FileType::Texture },
-		{ "gif",	FileType::Texture },
+		{ ".png",		FileType::Texture },
+		{ ".jpg",		FileType::Texture },
+		{ ".jpeg",		FileType::Texture },
+		{ ".bmp",		FileType::Texture },
+		{ ".gif",		FileType::Texture },
 
-		{ "hdr",	FileType::Cubemap },
-		{ "tga",	FileType::Cubemap },
+		{ ".hdr",		FileType::Cubemap },
+		{ ".tga",		FileType::Cubemap },
 
-		{ "obj",	FileType::Model },
-		{ "fbx",	FileType::Model },
-		{ "gltf",	FileType::Model },
-		{ "assbin",	FileType::Model },
+		{ ".obj",		FileType::Model },
+		{ ".fbx",		FileType::Model },
+		{ ".gltf",		FileType::Model },
 
-		{ "mp3",	FileType::Audio },
-		{ "m4a",	FileType::Audio },
-		{ "wav",	FileType::Audio },
+		{ ".mp3",		FileType::Audio },
+		{ ".m4a",		FileType::Audio },
+		{ ".wav",		FileType::Audio },
 	};
 
 	static const std::unordered_map<FileType, ImVec4> s_TypeColors =
@@ -129,7 +120,6 @@ namespace ArcEngine
 		std::string filepathString = path.string();
 		const char* filepath = filepathString.c_str();
 		std::string ext = path.extension().string();
-		ext = ext.substr(1);
 		const auto& fileTypeIt = s_FileTypes.find(ext);
 		if (fileTypeIt != s_FileTypes.end())
 		{
@@ -581,7 +571,7 @@ namespace ArcEngine
 				uint64_t textureId = m_DirectoryIcon->GetRendererID();
 				if (!isDir)
 				{
-					if (file.Extension == "png" || file.Extension == "jpg" || file.Extension == "jpeg" || file.Extension == "bmp")
+					if (file.Type == FileType::Texture)
 					{
 						if (file.Thumbnail)
 						{
@@ -676,24 +666,11 @@ namespace ArcEngine
 					ImGui::Image((ImTextureID)textureId, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
 
 					// Type Color frame
-					auto fileType = FileType::Unknown;
-					const auto& fileTypeIt = s_FileTypes.find(file.Extension);
-					if (fileTypeIt != s_FileTypes.end())
-						fileType = fileTypeIt->second;
-
-					const char* fileTypeString = s_FileTypesToString.at(FileType::Unknown);
-					const auto& fileStringTypeIt = s_FileTypesToString.find(fileType);
-					if (fileTypeIt != s_FileTypes.end())
-						fileTypeString = fileStringTypeIt->second;
-
-					ImVec4 typeColor = { 1.0f, 1.0f, 1.0f, 1.0f };
-					const auto& fileTypeColorIt = s_TypeColors.find(fileType);
-					if (fileTypeColorIt != s_TypeColors.end())
-						typeColor = fileTypeColorIt->second;
+					
 
 					ImVec2 typeColorFrameSize = { scaledThumbnailSizeX, scaledThumbnailSizeX * 0.03f };
 					ImGui::SetCursorPosX(cursorPos.x + padding);
-					ImGui::Image((ImTextureID)m_WhiteTexture->GetRendererID(), typeColorFrameSize, { 0, 0 }, { 1, 1 }, isDir ? ImVec4(0.0f, 0.0f, 0.0f, 0.0f) : typeColor);
+					ImGui::Image((ImTextureID)m_WhiteTexture->GetRendererID(), typeColorFrameSize, { 0, 0 }, { 1, 1 }, isDir ? ImVec4(0.0f, 0.0f, 0.0f, 0.0f) : file.FileTypeIndicatorColor);
 
 					ImVec2 rectMin = ImGui::GetItemRectMin();
 					ImVec2 rectSize = ImGui::GetItemRectSize();
@@ -706,7 +683,7 @@ namespace ArcEngine
 						ImGui::SetCursorPos({ cursorPos.x + padding * 2.0f, cursorPos.y + backgroundThumbnailSize.y - EditorTheme::SmallFont->FontSize - padding * 2.0f });
 						ImGui::BeginDisabled();
 						ImGui::PushFont(EditorTheme::SmallFont);
-						ImGui::TextUnformatted(fileTypeString);
+						ImGui::TextUnformatted(file.FileTypeString.data());
 						ImGui::PopFont();
 						ImGui::EndDisabled();
 					}
@@ -781,7 +758,24 @@ namespace ArcEngine
 			auto relativePath = std::filesystem::relative(path, m_AssetsDirectory);
 			std::string filename = relativePath.filename().string();
 			std::string extension = relativePath.extension().string();
-			m_DirectoryEntries.emplace_back(filename, path.string(), extension, directoryEntry, nullptr, directoryEntry.is_directory());
+
+			auto fileType = FileType::Unknown;
+			const auto& fileTypeIt = s_FileTypes.find(extension);
+			if (fileTypeIt != s_FileTypes.end())
+				fileType = fileTypeIt->second;
+
+			std::string_view fileTypeString = s_FileTypesToString.at(FileType::Unknown);
+			const auto& fileStringTypeIt = s_FileTypesToString.find(fileType);
+			if (fileTypeIt != s_FileTypes.end())
+				fileTypeString = fileStringTypeIt->second;
+
+			ImVec4 fileTypeColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+			const auto& fileTypeColorIt = s_TypeColors.find(fileType);
+			if (fileTypeColorIt != s_TypeColors.end())
+				fileTypeColor = fileTypeColorIt->second;
+
+			m_DirectoryEntries.emplace_back(filename, path.string(), extension, directoryEntry, nullptr, directoryEntry.is_directory(),
+				fileType, fileTypeString, fileTypeColor);
 		}
 
 		m_ElapsedTime = 0.0f;

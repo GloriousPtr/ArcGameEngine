@@ -377,12 +377,6 @@ namespace ArcEngine
 		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::PropertyVector(name, value); });
 	}
 
-	bool UI::Property(const char* label, std::vector<bool>& v, bool defaultValue, size_t minElements, const char* tooltip)
-	{
-		return false;
-		//return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, bool& value) { UI::Property(name, value); });
-	}
-
 	bool UI::PropertyColor(const char* label, std::vector<glm::vec3>& v, const glm::vec3& defaultValue, size_t minElements, const char* tooltip)
 	{
 		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec3& value) { UI::PropertyVector(name, value, true); });
@@ -397,12 +391,6 @@ namespace ArcEngine
 	{
 		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::PropertyVector(name, value, true, false); });
 	}
-
-
-
-
-
-
 
 	template<typename T>
 	static void DrawScriptFieldScalar(Entity entity, const std::string& className, const std::string& fieldName)

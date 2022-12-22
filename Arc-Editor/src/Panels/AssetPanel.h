@@ -7,6 +7,14 @@
 
 namespace ArcEngine
 {
+	enum class FileType
+	{
+		Unknown = 0,
+		Scene, Prefab, Script, Shader,
+		Texture, Cubemap, Model,
+		Audio
+	};
+
 	class AssetPanel : public BasePanel
 	{
 	public:
@@ -44,16 +52,9 @@ namespace ArcEngine
 			Ref<Texture2D> Thumbnail = nullptr;
 			bool IsDirectory = false;
 
-			File(const std::string& name,
-				const std::string& filepath,
-				const std::string& extension,
-				const std::filesystem::directory_entry& directoryEntry,
-				const Ref<Texture2D> thumbnail,
-				bool isDir)
-				:	Name(name), Filepath(filepath), Extension(extension),
-					DirectoryEntry(directoryEntry), Thumbnail(thumbnail), IsDirectory(isDir)
-			{
-			}
+			FileType Type;
+			std::string_view FileTypeString;
+			ImVec4 FileTypeIndicatorColor;
 		};
 
 		std::filesystem::path m_AssetsDirectory;

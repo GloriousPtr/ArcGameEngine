@@ -52,9 +52,6 @@ namespace ArcEngine
 		static std::map<EntityLayer, EntityLayerData> LayerCollisionMask;
 
 	public:
-		Scene() = default;
-		~Scene();
-
 		static Ref<Scene> CopyTo(Ref<Scene> other);
 
 		Entity CreateEntity(const std::string& name = std::string());
@@ -91,7 +88,7 @@ namespace ArcEngine
 		void CreatePolygonCollider2D(Entity entity, const Rigidbody2DComponent& rb, PolygonCollider2DComponent& component) const;
 
 		template<typename T>
-		void OnComponentAdded(Entity entity, T& component);
+		void OnComponentAdded([[maybe_unused]] Entity entity, [[maybe_unused]] T& component);
 	
 	private:
 

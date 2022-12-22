@@ -39,7 +39,7 @@ namespace ArcEngine
 template<>
 struct std::formatter<ArcEngine::UUID>
 {
-	constexpr auto parse(format_parse_context& ctx) const -> decltype(ctx.begin())
+	constexpr auto parse(const format_parse_context& ctx) const -> decltype(ctx.begin())
 	{
 		return ctx.end();
 	}
