@@ -257,9 +257,6 @@ namespace ArcEngine
 		m_CurrentDirectory = m_AssetsDirectory;
 		Refresh();
 
-
-
-
 		static filewatch::FileWatch<std::filesystem::path> watch(m_AssetsDirectory,
 			[this](const std::filesystem::path& path, const filewatch::Event change_type)
 			{
@@ -807,8 +804,8 @@ namespace ArcEngine
 			if (fileTypeColorIt != s_TypeColors.end())
 				fileTypeColor = fileTypeColorIt->second;
 
-			m_DirectoryEntries.emplace_back(filename, path.string(), extension, directoryEntry, nullptr, directoryEntry.is_directory(),
-				fileType, fileTypeString, fileTypeColor);
+			m_DirectoryEntries.push_back({ filename, path.string(), extension, directoryEntry, nullptr, directoryEntry.is_directory(),
+				fileType, fileTypeString, fileTypeColor });
 		}
 
 		m_ElapsedTime = 0.0f;
