@@ -82,7 +82,7 @@ namespace ArcEngine
 		static bool PropertyVector(const char* label, T& value, bool color = false, bool showAlpha = true, const char* tooltip = nullptr, float delta = 0.1f)
 		{
 			BeginPropertyGrid(label, tooltip);
-			bool modified = false;
+			bool modified;
 			int componentCount = value.length();
 			if (componentCount >= 3 && color)
 			{

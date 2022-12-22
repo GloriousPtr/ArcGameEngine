@@ -7,7 +7,7 @@
 namespace ArcEngine
 {
 	StatsPanel::StatsPanel(const char* name)
-		: BasePanel(name, ICON_MDI_INFORMATION_VARIANT, true)
+		: BasePanel(name, ICON_MDI_INFORMATION_VARIANT, true), m_FpsValues{}
 	{
 	}
 

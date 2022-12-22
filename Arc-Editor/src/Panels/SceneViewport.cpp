@@ -122,7 +122,7 @@ namespace ArcEngine
 			const int mouseY = (int)my;
 			if(mouseX >= 0 && mouseY >= 0 && mouseX < viewportWidth && mouseY < viewportHeight)
 			{
-				// TODO: Scene GetEntity or use raycast for selection
+				// TODO: Scene GetEntity or use ray-cast for selection
 			}
 		}
 
@@ -230,7 +230,7 @@ namespace ArcEngine
 					}
 				}
 
-				// Cubeview
+				// Cube-view
 				ImGuizmo::ViewManipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), ImGuizmo::OPERATION::ROTATE_SCREEN, ImGuizmo::MODE::WORLD, glm::value_ptr(m_CubeViewMatrix), 8.0f,
 					ImVec2(m_ViewportBounds[1].x - 128, m_ViewportBounds[0].y), ImVec2(128, 128), 0x10101010);
 				if (m_ViewportFocused)

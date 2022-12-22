@@ -73,7 +73,7 @@ namespace ArcEngine
 		Renderer3D::ResetStats();
 
 		// Remove unused scene viewports
-		for (auto it = m_Viewports.begin(); it != m_Viewports.end(); it++)
+		for (auto it = m_Viewports.begin(); it != m_Viewports.end(); ++it)
 		{
 			if (!it->get()->Showing)
 			{
@@ -83,7 +83,7 @@ namespace ArcEngine
 		}
 
 		// Remove unused properties panels
-		for (auto it = m_Properties.begin(); it != m_Properties.end(); it++)
+		for (auto it = m_Properties.begin(); it != m_Properties.end(); ++it)
 		{
 			if (!it->get()->Showing)
 			{
@@ -93,7 +93,7 @@ namespace ArcEngine
 		}
 
 		// Remove unused asset panels
-		for (auto it = m_AssetPanels.begin(); it != m_AssetPanels.end(); it++)
+		for (auto it = m_AssetPanels.begin(); it != m_AssetPanels.end(); ++it)
 		{
 			if (!it->get()->Showing)
 			{
@@ -507,8 +507,8 @@ namespace ArcEngine
 			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 			if (ImGui::BeginPopupModal("New Project", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 			{
-				static std::string prjName = "";
-				static std::string folderPath = "";
+				static std::string prjName;
+				static std::string folderPath;
 
 				constexpr size_t size = 256;
 				char buffer[size];
@@ -580,7 +580,7 @@ namespace ArcEngine
 		bool opt_fullscreen = opt_fullscreen_persistant;
 		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoCloseButton;
 
-		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dock-able into,
 		// because it would be confusing to have two docking targets within each others.
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 		const ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -595,15 +595,14 @@ namespace ArcEngine
 			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 		}
 
-		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background and handle the pass-thru hole, so we ask Begin() to not render a background.
 		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
 			window_flags |= ImGuiWindowFlags_NoBackground;
 
 		// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
 		// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive, 
-		// all active windows docked into it will lose their parent and become undocked.
+		// all active windows docked into it will lose their parent and become un-docked.
 		// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise 
-		// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
+		// any change of dock-space/settings would lead to windows being stuck in limbo and never being visible.
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
 		ImGui::PopStyleVar();

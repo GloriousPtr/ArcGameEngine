@@ -1,5 +1,6 @@
 #include "PropertiesPanel.h"
 
+#include <ranges>
 #include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui_internal.h>
 
@@ -656,7 +657,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<ParticleSystemComponent>(ICON_MDI_LAMP " Particle System", entity, [](ParticleSystemComponent& component)
+		DrawComponent<ParticleSystemComponent>(ICON_MDI_LAMP " Particle System", entity, [](const ParticleSystemComponent& component)
 		{
 			auto& props = component.System->GetProperties();
 
@@ -1084,7 +1085,7 @@ namespace ArcEngine
 				}
 
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
-				for (const auto& [name, scriptClass] : classes)
+				for (const auto& name : classes | std::views::keys)
 				{
 					bool notFound = std::ranges::find(component.Classes, name) == component.Classes.end();
 					if (notFound && !m_Filter.IsActive() || (m_Filter.IsActive() && m_Filter.PassFilter(name.c_str())))

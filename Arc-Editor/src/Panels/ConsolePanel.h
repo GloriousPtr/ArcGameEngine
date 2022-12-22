@@ -36,7 +36,7 @@ namespace ArcEngine
 		ConsolePanel& operator=(ConsolePanel&& other) = delete;
 
 		void AddMessage(const std::string& message, const std::string& filepath, const std::string& function, int32_t line, Log::Level level);
-		const Message* GetRecentMessage();
+		const Message* GetRecentMessage() const;
 		void Clear();
 		void SetFocus() const;
 

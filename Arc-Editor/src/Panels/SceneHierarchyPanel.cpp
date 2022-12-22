@@ -328,8 +328,7 @@ namespace ArcEngine
 		{
 			if (opened && !entityDeleted)
 			{
-				ImColor treeLineColor = ImColor(128, 128, 128, 128);
-
+				ImColor treeLineColor;
 				depth %= 4;
 				switch (depth)
 				{

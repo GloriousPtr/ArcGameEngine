@@ -51,7 +51,7 @@ namespace ArcEngine
 		id++;
 	}
 
-	const ConsolePanel::Message* ConsolePanel::GetRecentMessage()
+	const ConsolePanel::Message* ConsolePanel::GetRecentMessage() const
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -187,7 +187,7 @@ namespace ArcEngine
 			const auto& messageStart = m_MessageBuffer.begin() + m_BufferBegin;
 			if (*messageStart) // If contains old message here
 			{
-				for (auto message = messageStart; message != m_MessageBuffer.end(); message++)
+				for (auto message = messageStart; message != m_MessageBuffer.end(); ++message)
 				{
 					if (!(s_MessageBufferRenderFilter & (*message)->Level))
 						continue;
@@ -209,7 +209,7 @@ namespace ArcEngine
 
 			if (m_BufferBegin != 0) // Skipped first messages in vector
 			{
-				for (auto message = m_MessageBuffer.begin(); message != messageStart; message++)
+				for (auto message = m_MessageBuffer.begin(); message != messageStart; ++message)
 				{
 					if (!(s_MessageBufferRenderFilter & (*message)->Level))
 						continue;
