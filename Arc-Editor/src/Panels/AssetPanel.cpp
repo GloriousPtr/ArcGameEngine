@@ -11,7 +11,7 @@
 #include "../EditorLayer.h"
 #include "../Utils/UI.h"
 #include "../Utils/EditorTheme.h"
-
+#include "../Utils/FileWatch.hpp"
 
 namespace ArcEngine
 {
@@ -256,6 +256,43 @@ namespace ArcEngine
 		m_AssetsDirectory = Project::GetAssetDirectory();
 		m_CurrentDirectory = m_AssetsDirectory;
 		Refresh();
+
+
+
+
+		static filewatch::FileWatch<std::filesystem::path> watch(m_AssetsDirectory,
+			[this](const std::filesystem::path& path, const filewatch::Event change_type)
+			{
+				Refresh();
+
+				std::string ext = path.extension().string();
+				FileType fileType = FileType::Unknown;
+				if (s_FileTypes.contains(ext))
+					fileType = s_FileTypes.at(ext);
+
+				if (fileType == FileType::Script)
+					Application::Get().SubmitToMainThread([]() { ScriptEngine::ReloadAppDomain(); });
+
+				switch (change_type)
+				{
+					case filewatch::Event::added:
+						ARC_CORE_TRACE("The file was added to the directory: {}", path);
+						break;
+					case filewatch::Event::removed:
+						ARC_CORE_TRACE("The file was removed from the directory: {}", path);
+						break;
+					case filewatch::Event::modified:
+						ARC_CORE_TRACE("The file was modified: {}; This can be a change in the time stamp or attributes.", path);
+						break;
+					case filewatch::Event::renamed_old:
+						ARC_CORE_TRACE("The file was renamed and this is the old name: {}", path);
+						break;
+					case filewatch::Event::renamed_new:
+						ARC_CORE_TRACE("The file was renamed and this is the new name: {}", path);
+						break;
+				}
+			}
+		);
 	}
 
 	void AssetPanel::OnUpdate([[maybe_unused]] Timestep ts)
@@ -272,7 +309,6 @@ namespace ArcEngine
 				const std::filesystem::path path = context.As<char>();
 				std::filesystem::remove_all(path);
 				EditorLayer::GetInstance()->ResetContext();
-				Refresh();
 			}
 		}
 	}
@@ -550,8 +586,6 @@ namespace ArcEngine
 		ImVec2 region = ImGui::GetContentRegionAvail();
 		ImGui::InvisibleButton("##DragDropTargetAssetPanelBody", region);
 		
-		if (DragDropTarget(m_CurrentDirectory.string().c_str()))
-			Refresh();
 		ImGui::SetItemAllowOverlap();
 		ImGui::SetCursorPos(cursorPos);
 
@@ -738,7 +772,6 @@ namespace ArcEngine
 		{
 			std::filesystem::remove_all(directoryToDelete);
 			EditorLayer::GetInstance()->ResetContext();
-			Refresh();
 		}
 
 		if (!directoryToOpen.empty())
@@ -799,14 +832,12 @@ namespace ArcEngine
 						created = std::filesystem::create_directory(newFolderPath);
 						++i;
 					}
-					Refresh();
 					EditorLayer::GetInstance()->SetContext(EditorContextType::File, newFolderPath.c_str(), sizeof(char) * (newFolderPath.length() + 1));
 					ImGui::CloseCurrentPopup();
 				}
 				if (ImGui::MenuItem("C# Script"))
 				{
 					Filesystem::WriteFileText(context / "Script.cs", "using ArcEngine;");
-					Refresh();
 					ImGui::CloseCurrentPopup();
 				}
 				ImGui::EndMenu();

@@ -35,6 +35,12 @@ project "Arc-Editor"
 		"Arc",
 	}
 
+	defines
+	{
+		"_CRT_SECURE_NO_WARNINGS",
+		"SPDLOG_USE_STD_FORMAT"
+	}
+
 	buildoptions { "/utf-8" }
 
 	filter "system:windows"
