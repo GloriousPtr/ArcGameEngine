@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Arc/Utils/StringUtils.h"
+
 namespace ArcEngine
 {
 	enum class MaterialPropertyType
@@ -57,7 +59,7 @@ namespace ArcEngine
 		virtual void SetMat4(const std::string& name, const glm::mat4& value) = 0;
 		virtual void SetUniformBlock(const std::string& name, uint32_t blockIndex) = 0;
 		
-		virtual std::unordered_map<std::string, MaterialProperty>& GetMaterialProperties() = 0;
+		virtual std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality>& GetMaterialProperties() = 0;
 
 		virtual const std::string& GetName() const = 0;
 
@@ -78,7 +80,7 @@ namespace ArcEngine
 
 		bool Exists(const std::string& name) const;
 	private:
-		std::unordered_map<std::string, Ref<Shader>> m_Shaders;
-		std::unordered_map<std::string, std::string> m_ShaderPaths;
+		std::unordered_map<std::string, Ref<Shader>, UM_StringTransparentEquality> m_Shaders;
+		std::unordered_map<std::string, std::string, UM_StringTransparentEquality> m_ShaderPaths;
 	};
 }

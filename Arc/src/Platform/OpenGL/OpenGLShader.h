@@ -29,7 +29,7 @@ namespace ArcEngine
 		void SetMat4(const std::string& name, const glm::mat4& value) override;
 		void SetUniformBlock(const std::string& name, uint32_t blockIndex) override;
 
-		std::unordered_map<std::string, MaterialProperty>& GetMaterialProperties() override { return m_MaterialProperties; }
+		std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality>& GetMaterialProperties() override { return m_MaterialProperties; }
 
 		const std::string& GetName() const override { return m_Name; }
 		
@@ -52,7 +52,7 @@ namespace ArcEngine
 	private:
 		uint32_t m_RendererID;
 		std::string m_Name;
-		std::unordered_map<std::string, int> m_UniformLocationCache;
-		std::unordered_map<std::string, MaterialProperty> m_MaterialProperties;
+		std::unordered_map<std::string, int, UM_StringTransparentEquality> m_UniformLocationCache;
+		std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality> m_MaterialProperties;
 	};
 }

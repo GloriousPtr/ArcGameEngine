@@ -6,12 +6,13 @@
 #include "Arc/Core/Application.h"
 #include "Arc/Renderer/Mesh.h"
 #include "Arc/Renderer/Texture.h"
+#include "Arc/Utils/StringUtils.h"
 
 namespace ArcEngine
 {
-	inline static std::unordered_map<std::string, Ref<Texture2D>> m_Texture2DMap;
-	inline static std::unordered_map<std::string, Ref<TextureCubemap>> m_TextureCubeMap;
-	inline static std::unordered_map<std::string, Ref<Mesh>> m_MeshMap;
+	inline static std::unordered_map<std::string, Ref<Texture2D>, UM_StringTransparentEquality> m_Texture2DMap;
+	inline static std::unordered_map<std::string, Ref<TextureCubemap>, UM_StringTransparentEquality> m_TextureCubeMap;
+	inline static std::unordered_map<std::string, Ref<Mesh>, UM_StringTransparentEquality> m_MeshMap;
 	inline static std::vector<std::future<void>> m_Futures;
 
 	void AssetManager::Init()

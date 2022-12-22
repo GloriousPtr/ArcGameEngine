@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Arc/Core/UUID.h"
+#include "Arc/Utils/StringUtils.h"
 
 typedef struct _MonoDomain MonoDomain;
 typedef struct _MonoAssembly MonoAssembly;
@@ -43,16 +44,16 @@ namespace ArcEngine
 
 	struct ScriptField
 	{
-		std::string Name = "";
-		std::string DisplayName = "";
+		std::string Name;
+		std::string DisplayName;
 		FieldType Type = FieldType::Unknown;
 		MonoClassField* Field = nullptr;
 
 		// For attributes
 		bool Serializable = true;
 		bool Hidden = false;
-		std::string Header = "";
-		std::string Tooltip = "";
+		std::string Header;
+		std::string Tooltip;
 		float Min = 0.0f;
 		float Max = 0.0f;
 
@@ -122,7 +123,7 @@ namespace ArcEngine
 		GCHandle InvokeMethod(GCHandle gcHandle, MonoMethod* method, void** params = nullptr);
 
 		const std::vector<std::string>& GetFields() const { return m_Fields; }
-		const std::unordered_map<std::string, ScriptField>& GetFieldsMap() const { return m_FieldsMap; }
+		const std::unordered_map<std::string, ScriptField, UM_StringTransparentEquality>& GetFieldsMap() const { return m_FieldsMap; }
 
 	private:
 		void LoadFields();
@@ -136,7 +137,7 @@ namespace ArcEngine
 
 		MonoClass* m_MonoClass = nullptr;
 		std::vector<std::string> m_Fields;
-		std::unordered_map<std::string, ScriptField> m_FieldsMap;
+		std::unordered_map<std::string, ScriptField, UM_StringTransparentEquality> m_FieldsMap;
 	};
 
 	struct Collision2DData
@@ -225,10 +226,10 @@ namespace ArcEngine
 		static ScriptInstance* GetInstance(Entity entity, const std::string& name);
 		static void RemoveInstance(Entity entity, const std::string& name);
 		
-		static std::unordered_map<std::string, Ref<ScriptClass>>& GetClasses();
+		static std::unordered_map<std::string, Ref<ScriptClass>, UM_StringTransparentEquality>& GetClasses();
 		static const std::vector<std::string>& GetFields (const char* className);
-		static const std::unordered_map<std::string, ScriptField>& GetFieldMap(const char* className);
-		static std::unordered_map<std::string, ScriptFieldInstance>& GetFieldInstanceMap(Entity entity, const char* className);
+		static const std::unordered_map<std::string, ScriptField, UM_StringTransparentEquality>& GetFieldMap(const char* className);
+		static std::unordered_map<std::string, ScriptFieldInstance, UM_StringTransparentEquality>& GetFieldInstanceMap(Entity entity, const char* className);
 
 		static void SetScene(Scene* scene) { s_CurrentScene = scene; }
 		static Scene* GetScene() { return s_CurrentScene; }
