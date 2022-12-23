@@ -7,8 +7,8 @@ namespace ArcEngine
 {
 	class EditorTheme
 	{
-		static ImVec4 Darken(ImVec4 c, float p)			{ return ImVec4(glm::max(0.f, c.x - 1.0f * p), glm::max(0.f, c.y - 1.0f * p), glm::max(0.f, c.z - 1.0f *p), c.w); }
-		static ImVec4 Lighten(ImVec4 c, float p)		{ return ImVec4(glm::max(0.f, c.x + 1.0f * p), glm::max(0.f, c.y + 1.0f * p), glm::max(0.f, c.z + 1.0f *p), c.w); }
+		static ImVec4 Darken(ImVec4 c, float p) { return { glm::max(0.f, c.x - 1.0f * p), glm::max(0.f, c.y - 1.0f * p), glm::max(0.f, c.z - 1.0f * p), c.w }; }
+		static ImVec4 Lighten(ImVec4 c, float p) { return { glm::max(0.f, c.x + 1.0f * p), glm::max(0.f, c.y + 1.0f * p), glm::max(0.f, c.z + 1.0f * p), c.w }; }
 
 		static ImVec4 Disabled(ImVec4 c)	{ return Darken(c, 0.6f); }
 		static ImVec4 Hovered(ImVec4 c)		{ return Lighten(c, 0.2f); }

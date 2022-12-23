@@ -27,17 +27,17 @@ namespace ArcEngine
 		};
 #define UM_StringTransparentEquality StringUtils::StringHash, std::equal_to<>
 
-		inline static std::string GetExtension(std::string_view filepath)
+		[[nodiscard]] static std::string GetExtension(std::string_view filepath)
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			auto lastDot = filepath.find_last_of(".");
 			return static_cast<std::string>(filepath.substr(lastDot + 1, filepath.size() - lastDot));
 		}
 
-		inline static std::string GetName(std::string_view filepath)
+		[[nodiscard]] static std::string GetName(std::string_view filepath)
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			auto lastSlash = filepath.find_last_of("/\\");
 			lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
@@ -46,16 +46,16 @@ namespace ArcEngine
 			return static_cast<std::string>(filepath.substr(lastSlash, count));
 		}
 
-		inline static std::string GetNameWithExtension(std::string_view filepath)
+		[[nodiscard]] static std::string GetNameWithExtension(std::string_view filepath)
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			auto lastSlash = filepath.find_last_of("/\\");
 			lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
 			return static_cast<std::string>(filepath.substr(lastSlash, filepath.size()));
 		}
 
-		inline static void ReplaceString(std::string& subject, std::string_view search, std::string_view replace)
+		static void ReplaceString(std::string& subject, std::string_view search, std::string_view replace)
 		{
 			size_t pos = 0;
 			while ((pos = subject.find(search, pos)) != std::string::npos)
@@ -63,6 +63,11 @@ namespace ArcEngine
 				subject.replace(pos, search.length(), replace);
 				pos += replace.length();
 			}
+		}
+
+		[[nodiscard]] static const char* FromChar8T(const char8_t* c)
+		{
+			return reinterpret_cast<const char*>(c);
 		}
 	};
 }

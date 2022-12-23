@@ -12,7 +12,7 @@ namespace ArcEngine
 		virtual void Init() = 0;
 		virtual void SwapBuffers() = 0;
 
-		static Scope<GraphicsContext> Create(WindowHandle window);
+		[[nodiscard]] static Scope<GraphicsContext> Create(WindowHandle window);
 	};
 }
 

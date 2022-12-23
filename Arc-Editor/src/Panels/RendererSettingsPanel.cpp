@@ -13,7 +13,7 @@ namespace ArcEngine
 
 	void RendererSettingsPanel::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (OnBegin())
 		{
@@ -22,9 +22,9 @@ namespace ArcEngine
 				UI::Property("Exposure", Renderer3D::Exposure, 0.0f, 0.0f, "Sets the exposure value.");
 
 				const char* tonemapTypeStrings[] = { "None", "ACES", "Filmic", "Uncharted" };
-				int index = (int)Renderer3D::Tonemapping;
+				int index = static_cast<int>(Renderer3D::Tonemapping);
 				if (UI::Property("Tonemapping", index, tonemapTypeStrings, 4, "Choose the desired tonemapping algorithm."))
-					Renderer3D::Tonemapping = (Renderer3D::TonemappingType)index;
+					Renderer3D::Tonemapping = static_cast<Renderer3D::TonemappingType>(index);
 			}
 			UI::EndProperties();
 
@@ -85,7 +85,7 @@ namespace ArcEngine
 				else
 				{
 					glm::vec2 offset = Renderer3D::VignetteOffset;
-					if (UI::PropertyVector("Offset", offset, "Set the offset of the vignette."))
+					if (UI::PropertyVector("Offset", offset, false, false, "Set the offset of the vignette."))
 					{
 						Renderer3D::VignetteOffset.x = offset.x;
 						Renderer3D::VignetteOffset.y = offset.y;

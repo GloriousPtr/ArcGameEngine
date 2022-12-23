@@ -23,7 +23,7 @@ namespace ArcEngine
 		static void InitScriptComponentTypes();
 		static void AddComponent(uint64_t entityID, void* type);
 		static bool HasComponent(uint64_t entityID, void* type);
-		static MonoObject* GetComponent(uint64_t entityID, void* type);
+		[[nodiscard]] static MonoObject* GetComponent(uint64_t entityID, void* type);
 
 		template<typename... Component>
 		static void RegisterComponent();

@@ -5,6 +5,8 @@
 #include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui_internal.h>
 
+#include <ranges>
+
 #include "../EditorLayer.h"
 #include "../Utils/UI.h"
 #include "../Utils/EditorTheme.h"
@@ -29,7 +31,7 @@ namespace ArcEngine
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_RowBg
 			| ImGuiTableFlags_ContextMenuInBody
@@ -63,7 +65,7 @@ namespace ArcEngine
 			{
 				ImGui::SameLine();
 				ImGui::SetCursorPosX(filterCursorPosX + ImGui::GetFontSize() * 0.5f);
-				ImGui::TextUnformatted((const char*)ICON_MDI_MAGNIFY " Search...");
+				ImGui::TextUnformatted(StringUtils::FromChar8T(ICON_MDI_MAGNIFY " Search..."));
 			}
 
 			ImVec2 cursorPos = ImGui::GetCursorPos();
@@ -77,7 +79,7 @@ namespace ArcEngine
 			{
 				ImGui::TableSetupColumn("  Label", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_NoClip);
 				ImGui::TableSetupColumn("  Type", ImGuiTableColumnFlags_WidthFixed, lineHeight * 3.0f);
-				ImGui::TableSetupColumn((const char*)"  " ICON_MDI_EYE_OUTLINE, ImGuiTableColumnFlags_WidthFixed, lineHeight * 2.0f);
+				ImGui::TableSetupColumn(StringUtils::FromChar8T("  " ICON_MDI_EYE_OUTLINE), ImGuiTableColumnFlags_WidthFixed, lineHeight * 2.0f);
 
 				ImGui::TableSetupScrollFreeze(0, 1);
 				
@@ -94,9 +96,8 @@ namespace ArcEngine
 
 				ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 				auto view = m_Context->m_Registry.view<IDComponent>();
-				for (auto it = view.rbegin(); it != view.rend(); ++it)
+				for (auto e : std::ranges::reverse_view(view))
 				{
-					entt::entity e = *it;
 					Entity entity = { e, m_Context.get() };
 					if (!entity.GetParent())
 						DrawEntityNode(entity);
@@ -142,7 +143,7 @@ namespace ArcEngine
 
 	ImRect SceneHierarchyPanel::DrawEntityNode(Entity entity, uint32_t depth, bool forceExpandTree, bool isPartOfPrefab)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
@@ -193,7 +194,7 @@ namespace ArcEngine
 		if (prefabColorApplied)
 			ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::HeaderSelectedColor);
 
-		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity.GetUUID(), flags, "%s %s", ICON_MDI_CUBE_OUTLINE, tag.c_str());
+		bool opened = ImGui::TreeNodeEx(reinterpret_cast<void*>(static_cast<uint64_t>(entity.GetUUID())), flags, "%s %s", StringUtils::FromChar8T(ICON_MDI_CUBE_OUTLINE), tag.c_str());
 
 		if (highlight)
 			ImGui::PopStyleColor(2);
@@ -204,7 +205,7 @@ namespace ArcEngine
 				ImGui::IsItemClicked(ImGuiMouseButton_Middle) ||
 				ImGui::IsItemClicked(ImGuiMouseButton_Right)))
 		{
-			EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, &entity, sizeof(entity));
+			EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, reinterpret_cast<const char*>(&entity), sizeof(entity));
 		}
 
 		// Expand recursively
@@ -216,7 +217,7 @@ namespace ArcEngine
 		if (ImGui::BeginPopupContextItem())
 		{
 			if (m_SelectedEntity != entity)
-				EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, &entity, sizeof(entity));
+				EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, reinterpret_cast<const char*>(&entity), sizeof(entity));
 
 			if (ImGui::MenuItem("Rename", "F2"))
 				m_RenamingEntity = entity;
@@ -243,12 +244,12 @@ namespace ArcEngine
 			{
 				if (const ImGuiPayload* entityPayload = ImGui::AcceptDragDropPayload("Entity"))
 				{
-					m_DraggedEntity = *((Entity*)entityPayload->Data);
+					m_DraggedEntity = *static_cast<Entity*>(entityPayload->Data);
 					m_DraggedEntityTarget = entity;
 				}
 				else if (const ImGuiPayload* assetPanelPayload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
-					const char* path = (const char*)assetPanelPayload->Data;
+					const char* path = static_cast<char*>(assetPanelPayload->Data);
 					std::string ext = StringUtils::GetExtension(path);
 					if (ext == "prefab")
 					{
@@ -262,8 +263,8 @@ namespace ArcEngine
 
 			if (ImGui::BeginDragDropSource())
 			{
-				ImGui::SetDragDropPayload("Entity", (void*)&entity, sizeof(entity));
-				ImGui::Text(tag.c_str());
+				ImGui::SetDragDropPayload("Entity", &entity, sizeof(entity));
+				ImGui::TextUnformatted(tag.c_str());
 				ImGui::EndDragDropSource();
 			}
 		}
@@ -301,12 +302,12 @@ namespace ArcEngine
 		ImGui::Button(isPartOfPrefab ? "Prefab" : "Entity", { buttonSizeX, frameHeight });
 		// Select
 		if (ImGui::IsItemDeactivated() && ImGui::IsItemHovered() && !ImGui::IsItemToggledOpen())
-			EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, &entity, sizeof(entity));
+			EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, reinterpret_cast<const char*>(&entity), sizeof(entity));
 
 		ImGui::TableNextColumn();
 		// Visibility Toggle
 		{
-			ImGui::Text("  %s", tagComponent.Enabled ? ICON_MDI_EYE_OUTLINE : ICON_MDI_EYE_OFF_OUTLINE);
+			ImGui::Text("  %s", reinterpret_cast<const char*>(tagComponent.Enabled ? ICON_MDI_EYE_OUTLINE : ICON_MDI_EYE_OFF_OUTLINE));
 			
 			if (!ImGui::IsItemHovered())
 				tagComponent.handled = false;
@@ -382,7 +383,7 @@ namespace ArcEngine
 
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		m_Context = context;
 	}
@@ -393,7 +394,7 @@ namespace ArcEngine
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 			{
-				const char* path = (const char*)payload->Data;
+				const char* path = static_cast<char*>(payload->Data);
 				std::string name = StringUtils::GetName(path);
 				std::string ext = StringUtils::GetExtension(path);
 
@@ -544,6 +545,6 @@ namespace ArcEngine
 			toSelect.SetParent(m_SelectedEntity);
 
 		if (toSelect)
-			EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, &toSelect, sizeof(toSelect));
+			EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, reinterpret_cast<const char*>(&toSelect), sizeof(toSelect));
 	}
 }

@@ -7,10 +7,11 @@ namespace ArcEngine
 		None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Bool
 	};
 
-	static uint32_t ShaderDataTypeSize(ShaderDataType type)
+	[[nodiscard]] static uint32_t ShaderDataTypeSize(ShaderDataType type)
 	{
 		switch (type)
 		{
+			case ShaderDataType::None:									return 0;
 			case ShaderDataType::Float:									return 4;
 			case ShaderDataType::Float2:								return 4 * 2;
 			case ShaderDataType::Float3:								return 4 * 3;
@@ -24,7 +25,7 @@ namespace ArcEngine
 			case ShaderDataType::Bool:									return 1;
 		}
 
-		ARC_CORE_ASSERT(false, "Unknown ShaderDataType!");
+		ARC_CORE_ASSERT(false, "Unknown ShaderDataType!")
 		return 0;
 	}
 	
@@ -43,10 +44,11 @@ namespace ArcEngine
 		{
 		}
 
-		uint8_t GetComponentCount() const
+		[[nodiscard]] uint8_t GetComponentCount() const
 		{
 			switch(Type)
 			{
+				case ShaderDataType::None:									return 0;
 				case ShaderDataType::Float:									return 1;
 				case ShaderDataType::Float2:								return 2;
 				case ShaderDataType::Float3:								return 3;
@@ -60,7 +62,7 @@ namespace ArcEngine
 				case ShaderDataType::Bool:									return 1;
 			}
 
-			ARC_CORE_ASSERT(false, "Unknown ShaderDataType!");
+			ARC_CORE_ASSERT(false, "Unknown ShaderDataType!")
 			return 0;
 		}
 	};
@@ -76,13 +78,13 @@ namespace ArcEngine
 			CalculateOffsetAndStride();
 		}
 
-		inline uint32_t GetStride() const { return m_Stride; }
-		inline const std::vector<BufferElement>& GetElements() const { return m_Elements; }
+		[[nodiscard]] uint32_t GetStride() const { return m_Stride; }
+		[[nodiscard]] const std::vector<BufferElement>& GetElements() const { return m_Elements; }
 
-		std::vector<BufferElement>::iterator begin() { return m_Elements.begin(); }
-		std::vector<BufferElement>::iterator end() { return m_Elements.end(); }
-		std::vector<BufferElement>::const_iterator begin() const { return m_Elements.begin(); }
-		std::vector<BufferElement>::const_iterator end() const { return m_Elements.end(); }
+		[[nodiscard]] std::vector<BufferElement>::iterator begin() { return m_Elements.begin(); }
+		[[nodiscard]] std::vector<BufferElement>::iterator end() { return m_Elements.end(); }
+		[[nodiscard]] std::vector<BufferElement>::const_iterator begin() const { return m_Elements.begin(); }
+		[[nodiscard]] std::vector<BufferElement>::const_iterator end() const { return m_Elements.end(); }
 	private:
 		void CalculateOffsetAndStride()
 		{
@@ -110,11 +112,11 @@ namespace ArcEngine
 
 		virtual void SetData(const void* data, uint32_t size) = 0;
 		
-		virtual const BufferLayout& GetLayout() const = 0;
+		[[nodiscard]] virtual const BufferLayout& GetLayout() const = 0;
 		virtual void SetLayout(const BufferLayout& layout) = 0;
 		
-		static Ref<VertexBuffer> Create(size_t size);
-		static Ref<VertexBuffer> Create(const float* verticies, size_t size);
+		[[nodiscard]] static Ref<VertexBuffer> Create(size_t size);
+		[[nodiscard]] static Ref<VertexBuffer> Create(const float* verticies, size_t size);
 	};
 
 	class IndexBuffer
@@ -125,9 +127,9 @@ namespace ArcEngine
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
-		virtual uint32_t GetCount() const = 0;
+		[[nodiscard]] virtual uint32_t GetCount() const = 0;
 
-		static Ref<IndexBuffer> Create(const uint32_t* indices, size_t count);
+		[[nodiscard]] static Ref<IndexBuffer> Create(const uint32_t* indices, size_t count);
 	};
 
 	class UniformBuffer
@@ -140,6 +142,6 @@ namespace ArcEngine
 		virtual void SetData(const void* data, uint32_t offset, uint32_t size) = 0;
 		virtual void SetLayout(const BufferLayout& layout, uint32_t blockIndex, uint32_t count = 1) = 0;
 
-		static Ref<UniformBuffer> Create();
+		[[nodiscard]] static Ref<UniformBuffer> Create();
 	};
 }

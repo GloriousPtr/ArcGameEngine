@@ -116,7 +116,7 @@ namespace ArcEngine
 		DWORD dwPID;
 		GetWindowThreadProcessId(hwnd, &dwPID);
 
-		auto pInfo = (ProcessInfo*)lParam;
+		const auto pInfo = reinterpret_cast<ProcessInfo*>(lParam);
 		if (dwPID == pInfo->ID && GetWindow(hwnd, GW_OWNER) == nullptr && IsWindowVisible(hwnd))
 		{
 			WINDOWPLACEMENT place = {};
@@ -151,7 +151,7 @@ namespace ArcEngine
 		constexpr const char* vs2022Professional = "C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/devenv.exe";
 		constexpr const char* vs2022Community = "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/devenv.exe";
 
-		std::string cmdArgs = "";
+		std::string cmdArgs;
 		if (std::filesystem::exists(vs2022Enterprise))
 		{
 			cmdArgs = vs2022Enterprise;
@@ -177,7 +177,7 @@ namespace ArcEngine
 		bool processShouldRun = process.ID == 0;
 
 		if (!processShouldRun)
-			EnumWindows(EnumWindowsProc, (LPARAM)&process);
+			EnumWindows(EnumWindowsProc, reinterpret_cast<LPARAM>(&process));
 
 		if (!process.Found)
 		{
@@ -207,22 +207,10 @@ namespace ArcEngine
 		{
 			_bstr_t wCmdArgs(cmdArgs.c_str());
 
-			STARTUPINFO startInfo =
-			{
-				sizeof(STARTUPINFO),
-				nullptr, nullptr, nullptr,
-				(::DWORD)CW_USEDEFAULT,
-				(::DWORD)CW_USEDEFAULT,
-				(::DWORD)CW_USEDEFAULT,
-				(::DWORD)CW_USEDEFAULT,
-				(::DWORD)0, (::DWORD)0, (::DWORD)0,
-				(::DWORD)0,
-				SW_HIDE,
-				0, nullptr,
-				nullptr, nullptr, nullptr
-			};
-			uint32_t CreateFlags = NORMAL_PRIORITY_CLASS | DETACHED_PROCESS;
-			CreateProcess(nullptr, wCmdArgs, nullptr, nullptr, FALSE, CreateFlags, nullptr, nullptr, &startInfo, &processInfo);
+			STARTUPINFO startInfo{};
+			startInfo.wShowWindow = SW_HIDE;
+			uint32_t createFlags = NORMAL_PRIORITY_CLASS | DETACHED_PROCESS;
+			CreateProcess(nullptr, wCmdArgs, nullptr, nullptr, FALSE, createFlags, nullptr, nullptr, &startInfo, &processInfo);
 			CloseHandle(processInfo.hThread);
 			CloseHandle(processInfo.hProcess);
 		}
@@ -234,7 +222,7 @@ namespace ArcEngine
 			" -nologo"																	// no microsoft branding in console
 			" -noconlog"																// no console logs
 			//" -t:rebuild"																// rebuild the project
-			" -m"																		// multiprocess build
+			" -m"																		// multi-process build
 			" -flp1:Verbosity=minimal;logfile=AssemblyBuildErrors.log;errorsonly"		// dump errors in AssemblyBuildErrors.log file
 			" -flp2:Verbosity=minimal;logfile=AssemblyBuildWarnings.log;warningsonly";	// dump warnings in AssemblyBuildWarnings.log file
 
@@ -249,11 +237,12 @@ namespace ArcEngine
 
 		buildCommand += buildFlags;
 
-		_bstr_t wCmdArgs(buildCommand.c_str());
+		const _bstr_t wCmdArgs(buildCommand.c_str());
 
 		STARTUPINFO startInfo = {};
 		PROCESS_INFORMATION processInfo = { nullptr, nullptr, 0, 0 };
-		HRESULT result = CreateProcess(nullptr, wCmdArgs, nullptr, nullptr, FALSE, HIGH_PRIORITY_CLASS, nullptr, nullptr, &startInfo, &processInfo);
+		constexpr uint32_t createFlags = HIGH_PRIORITY_CLASS;
+		const HRESULT result = CreateProcess(nullptr, wCmdArgs, nullptr, nullptr, FALSE, createFlags, nullptr, nullptr, &startInfo, &processInfo);
 		WaitForSingleObject(processInfo.hProcess, INFINITE);
 
 		bool failed = FAILED(result);
@@ -265,7 +254,8 @@ namespace ArcEngine
 
 		// Errors
 		{
-			FILE* errors = fopen("AssemblyBuildErrors.log", "r");
+			FILE* errors = nullptr;
+			fopen_s(&errors, "AssemblyBuildErrors.log", "r");
 
 			char buffer[4096];
 			if (errors != nullptr)
@@ -287,7 +277,8 @@ namespace ArcEngine
 
 		// Warnings
 		{
-			FILE* warns = fopen("AssemblyBuildWarnings.log", "r");
+			FILE* warns;
+			fopen_s(&warns, "AssemblyBuildWarnings.log", "r");
 
 			char buffer[1024];
 			if (warns != nullptr)
@@ -390,7 +381,7 @@ namespace ArcEngine
 				if (FAILED(result))
 					return;
 
-				selection->GotoLine((long)goToLine, selectLine);
+				selection->GotoLine(static_cast<long>(goToLine), selectLine);
 			}
 
 			if (window)
@@ -450,7 +441,8 @@ namespace ArcEngine
 
 		STARTUPINFO startInfo = {};
 		PROCESS_INFORMATION processInfo = { nullptr, nullptr, 0, 0 };
-		HRESULT result = CreateProcess(nullptr, wCmdArgs, nullptr, nullptr, FALSE, HIGH_PRIORITY_CLASS, nullptr, nullptr, &startInfo, &processInfo);
+		constexpr uint32_t createFlags = HIGH_PRIORITY_CLASS;
+		HRESULT result = CreateProcess(nullptr, wCmdArgs, nullptr, nullptr, FALSE, createFlags, nullptr, nullptr, &startInfo, &processInfo);
 		WaitForSingleObject(processInfo.hProcess, INFINITE);
 
 		bool failed = FAILED(result);

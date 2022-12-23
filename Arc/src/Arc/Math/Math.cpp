@@ -9,7 +9,7 @@ namespace ArcEngine
 	bool Math::DecomposeTransform(const glm::mat4& transform, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale)
 	{
 		// From glm::decompose in matrix_decompose.inl
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		using namespace glm;
 		using T = float;
@@ -17,7 +17,7 @@ namespace ArcEngine
 		mat4 LocalMatrix(transform);
 
 		// Normalize the matrix.
-		if (epsilonEqual(LocalMatrix[3][3], static_cast<float>(0), epsilon<T>()))
+		if (epsilonEqual(LocalMatrix[3][3], 0.0f, epsilon<T>()))
 			return false;
 
 		// First, isolate perspective.  This is the messiest.
@@ -171,16 +171,12 @@ namespace ArcEngine
 			currentVelocity.x = (output_x - originalTo.x) / deltaTime;
 			currentVelocity.y = (output_y - originalTo.y) / deltaTime;
 		}
-		return glm::vec2(output_x, output_y);
+		return { output_x, output_y };
 	}
 
 	// Gradually changes a vector towards a desired goal over time.
 	glm::vec3 Math::SmoothDamp(const glm::vec3& current, const glm::vec3& target, glm::vec3& currentVelocity, float smoothTime, float maxSpeed, float deltaTime)
 	{
-		float output_x = 0.0f;
-		float output_y = 0.0f;
-		float output_z = 0.0f;
-
 		// Based on Game Programming Gems 4 Chapter 1.10
 		smoothTime = glm::max(0.0001F, smoothTime);
 		float omega = 2.0f / smoothTime;
@@ -218,9 +214,9 @@ namespace ArcEngine
 		currentVelocity.y = (currentVelocity.y - omega * temp_y) * exp;
 		currentVelocity.z = (currentVelocity.z - omega * temp_z) * exp;
 
-		output_x = newTargetX + (change_x + temp_x) * exp;
-		output_y = newTargetY + (change_y + temp_y) * exp;
-		output_z = newTargetZ + (change_z + temp_z) * exp;
+		float output_x = newTargetX + (change_x + temp_x) * exp;
+		float output_y = newTargetY + (change_y + temp_y) * exp;
+		float output_z = newTargetZ + (change_z + temp_z) * exp;
 
 		// Prevent overshooting
 		float origMinusCurrent_x = originalTo.x - current.x;
@@ -241,6 +237,6 @@ namespace ArcEngine
 			currentVelocity.z = (output_z - originalTo.z) / deltaTime;
 		}
 
-		return glm::vec3(output_x, output_y, output_z);
+		return { output_x, output_y, output_z };
 	}
 }

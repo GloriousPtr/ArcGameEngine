@@ -16,23 +16,6 @@ namespace ArcEngine
 		Float4,
 	};
 
-	static size_t GetSizeInBytes(MaterialPropertyType type)
-	{
-		switch (type)
-		{
-			case MaterialPropertyType::None					: return 0;
-			case MaterialPropertyType::Sampler2D			: return sizeof(int32_t);
-			case MaterialPropertyType::Bool					: return sizeof(int32_t);
-			case MaterialPropertyType::Int					: return sizeof(int32_t);
-			case MaterialPropertyType::Float				: return sizeof(float);
-			case MaterialPropertyType::Float2				: return sizeof(glm::vec2);
-			case MaterialPropertyType::Float3				: return sizeof(glm::vec3);
-			case MaterialPropertyType::Float4				: return sizeof(glm::vec4);
-		}
-
-		return 0;
-	}
-
 	struct MaterialProperty
 	{
 		MaterialPropertyType Type;
@@ -59,12 +42,29 @@ namespace ArcEngine
 		virtual void SetMat4(const std::string& name, const glm::mat4& value) = 0;
 		virtual void SetUniformBlock(const std::string& name, uint32_t blockIndex) = 0;
 		
-		virtual std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality>& GetMaterialProperties() = 0;
+		[[nodiscard]] virtual std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality>& GetMaterialProperties() = 0;
 
-		virtual const std::string& GetName() const = 0;
+		[[nodiscard]] virtual const std::string& GetName() const = 0;
 
-		static Ref<Shader> Create(const std::string& filepath);
-		static Ref<Shader> Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
+		[[nodiscard]] static Ref<Shader> Create(const std::string& filepath);
+		[[nodiscard]] static Ref<Shader> Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
+
+		[[nodiscard]] static size_t GetSizeInBytes(MaterialPropertyType type)
+		{
+			switch (type)
+			{
+				case MaterialPropertyType::None: return 0;
+				case MaterialPropertyType::Sampler2D: return sizeof(int32_t);
+				case MaterialPropertyType::Bool: return sizeof(int32_t);
+				case MaterialPropertyType::Int: return sizeof(int32_t);
+				case MaterialPropertyType::Float: return sizeof(float);
+				case MaterialPropertyType::Float2: return sizeof(glm::vec2);
+				case MaterialPropertyType::Float3: return sizeof(glm::vec3);
+				case MaterialPropertyType::Float4: return sizeof(glm::vec4);
+			}
+
+			return 0;
+		}
 	};
 
 	class ShaderLibrary
@@ -72,13 +72,13 @@ namespace ArcEngine
 	public:
 		void Add(const std::string& name, const Ref<Shader>& shader);
 		void Add(const Ref<Shader>& shader);
-		Ref<Shader> Load(const std::string& filepath);
-		Ref<Shader> Load(const std::string& name, const std::string& filepath);
+		[[nodiscard]] Ref<Shader> Load(const std::string& filepath);
+		[[nodiscard]] Ref<Shader> Load(const std::string& name, const std::string& filepath);
 		void ReloadAll();
 
-		Ref<Shader> Get(const std::string& name);
+		[[nodiscard]] Ref<Shader> Get(const std::string& name);
 
-		bool Exists(const std::string& name) const;
+		[[nodiscard]] bool Exists(const std::string& name) const;
 	private:
 		std::unordered_map<std::string, Ref<Shader>, UM_StringTransparentEquality> m_Shaders;
 		std::unordered_map<std::string, std::string, UM_StringTransparentEquality> m_ShaderPaths;

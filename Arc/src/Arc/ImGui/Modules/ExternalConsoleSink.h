@@ -34,9 +34,9 @@ namespace ArcEngine
 		ExternalConsoleSink& operator=(const ExternalConsoleSink&) = delete;
 		~ExternalConsoleSink() override = default;
 
-		static void SetConsoleSink_HandleFlush(std::function<void(std::string, std::string, std::string, int32_t, Log::Level)> func)
+		static void SetConsoleSink_HandleFlush(const std::function<void(std::string, std::string, std::string, int32_t, Log::Level)>& func)
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			OnFlush = func;
 		}
@@ -44,7 +44,7 @@ namespace ArcEngine
 	protected:
 		void sink_it_(const spdlog::details::log_msg& msg) override
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			if (OnFlush == nullptr)
 			{
@@ -64,7 +64,7 @@ namespace ArcEngine
 
 		void flush_() override
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			if (OnFlush == nullptr)
 				return;

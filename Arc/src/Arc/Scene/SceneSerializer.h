@@ -12,8 +12,8 @@ namespace ArcEngine
 		void Serialize(const std::string& filepath) const;
 		void SerializeRuntime(const std::string& filepath) const;
 
-		bool Deserialize(const std::string& filepath) const;
-		bool DeserializeRuntime(const std::string& filepath) const;
+		[[nodiscard]] bool Deserialize(const std::string& filepath) const;
+		[[nodiscard]] bool DeserializeRuntime(const std::string& filepath) const;
 	private:
 		Ref<Scene> m_Scene;
 	};

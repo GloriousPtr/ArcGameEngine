@@ -17,7 +17,7 @@ namespace ArcEngine
 {
 	static bool Physics3DObjectCanCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		EntityLayer layer1 = BIT(inObject1);
 		EntityLayer layer2 = BIT(inObject2);
@@ -59,7 +59,7 @@ namespace ArcEngine
 	public:
 		BPLayerInterfaceImpl()
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			mObjectToBroadPhase[Physics3DLayer::STATIC] = BroadPhaseLayers::STATIC;
 			mObjectToBroadPhase[Physics3DLayer::DEFAULT] = BroadPhaseLayers::DEFAULT;
@@ -81,16 +81,16 @@ namespace ArcEngine
 
 		JPH::uint GetNumBroadPhaseLayers() const override
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			return BroadPhaseLayers::NUM_LAYERS;
 		}
 
 		JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
-			ARC_CORE_ASSERT(inLayer < Physics3DLayer::NUM_LAYERS);
+			ARC_CORE_ASSERT(inLayer < Physics3DLayer::NUM_LAYERS)
 			return mObjectToBroadPhase[inLayer];
 		}
 
@@ -112,7 +112,7 @@ namespace ArcEngine
 
 	static bool Physics3DBroadPhaseCanCollide(JPH::ObjectLayer inLayer1, JPH::BroadPhaseLayer inLayer2)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (inLayer1 == Physics3DLayer::STATIC)
 			return inLayer2 != BroadPhaseLayers::STATIC;
@@ -128,7 +128,7 @@ namespace ArcEngine
 
 	void Physics3D::Init()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		JPH::RegisterDefaultAllocator();
 
@@ -137,7 +137,7 @@ namespace ArcEngine
 		JPH::RegisterTypes();
 
 		s_TempAllocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
-		s_JobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, JPH::thread::hardware_concurrency() - 1);
+		s_JobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, static_cast<int>(JPH::thread::hardware_concurrency()) - 1);
 		constexpr JPH::uint cMaxBodies = 65536;
 		constexpr JPH::uint cNumBodyMutexes = 0;
 		constexpr JPH::uint cMaxBodyPairs = 65536;
@@ -150,7 +150,7 @@ namespace ArcEngine
 
 	void Physics3D::Shutdown()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		delete s_PhysicsSystem;
 		delete s_BPLayerInterface;
@@ -167,18 +167,18 @@ namespace ArcEngine
 
 	void Physics3D::Step(float physicsTs)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
-		ARC_CORE_ASSERT(s_PhysicsSystem, "Physics system not initialized");
+		ARC_CORE_ASSERT(s_PhysicsSystem, "Physics system not initialized")
 
 		s_PhysicsSystem->Update(physicsTs, 1, 1, s_TempAllocator, s_JobSystem);
 	}
 
 	JPH::PhysicsSystem& Physics3D::GetPhysicsSystem()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
-		ARC_CORE_ASSERT(s_PhysicsSystem, "Physics system not initialized");
+		ARC_CORE_ASSERT(s_PhysicsSystem, "Physics system not initialized")
 
 		return *s_PhysicsSystem;
 	}

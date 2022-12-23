@@ -12,7 +12,7 @@ namespace ArcEngine
 	#ifdef ARC_PLATFORM_WINDOWS
 		return CreateScope<WindowsWindow>(props);
 	#else
-		ARC_CORE_ASSERT(false, "Unknown platform!");
+		ARC_CORE_ASSERT(false, "Unknown platform!")
 		return nullptr;
 	#endif
 	}

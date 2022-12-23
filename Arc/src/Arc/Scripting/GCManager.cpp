@@ -1,6 +1,7 @@
 #include "arcpch.h"
 #include "GCManager.h"
 
+#include <ranges>
 #include <mono/metadata/object.h>
 #include <mono/metadata/mono-gc.h>
 
@@ -16,20 +17,20 @@ namespace ArcEngine
 
 	void GCManager::Init()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		s_GCState = new GCState();
 	}
 
 	void GCManager::Shutdown()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (!s_GCState->StrongRefMap.empty())
 		{
 			ARC_CORE_ERROR("Memory leak detected\n Not all GCHandles have been cleaned up!");
 
-			for (const auto& [handle, object] : s_GCState->StrongRefMap)
+			for (const auto& handle : s_GCState->StrongRefMap | std::views::keys)
 				mono_gchandle_free_v2(handle);
 
 			s_GCState->StrongRefMap.clear();
@@ -39,7 +40,7 @@ namespace ArcEngine
 		{
 			ARC_CORE_ERROR("Memory leak detected\n Not all GCHandles have been cleaned up!");
 
-			for (const auto& [handle, object] : s_GCState->WeakRefMap)
+			for (const auto& handle : s_GCState->WeakRefMap | std::views::keys)
 				mono_gchandle_free_v2(handle);
 
 			s_GCState->WeakRefMap.clear();
@@ -56,7 +57,7 @@ namespace ArcEngine
 
 	void GCManager::CollectGarbage(bool blockUntilFinalized)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		mono_gc_collect(mono_gc_max_generation());
 		if (blockUntilFinalized)
@@ -67,13 +68,13 @@ namespace ArcEngine
 
 	GCHandle GCManager::CreateObjectReference(MonoObject* managedObject, bool weakReference, bool pinned, bool track)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		GCHandle handle = weakReference
 			? mono_gchandle_new_weakref_v2(managedObject, pinned)
 			: mono_gchandle_new_v2(managedObject, pinned);
 
-		ARC_CORE_ASSERT(handle, "Failed to get valid GC Handle!");
+		ARC_CORE_ASSERT(handle, "Failed to get valid GC Handle!")
 
 		if (track)
 		{
@@ -88,7 +89,7 @@ namespace ArcEngine
 
 	MonoObject* GCManager::GetReferencedObject(GCHandle handle)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		MonoObject* obj = mono_gchandle_get_target_v2(handle);
 		if (obj == nullptr || mono_object_get_vtable(obj) == nullptr)
@@ -98,7 +99,7 @@ namespace ArcEngine
 
 	void GCManager::ReleaseObjectReference(GCHandle handle)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (mono_gchandle_get_target_v2(handle) != nullptr)
 		{

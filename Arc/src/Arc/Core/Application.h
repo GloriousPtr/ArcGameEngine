@@ -25,24 +25,24 @@ namespace ArcEngine
 
 		void OnEvent(Event& e);
 
-		void PushLayer(Layer* layer);
-		void PushOverlay(Layer* layer);
+		void PushLayer(Layer* layer) const;
+		void PushOverlay(Layer* layer) const;
 
-		Window& GetWindow() const { return *m_Window; }
+		[[nodiscard]] Window& GetWindow() const { return *m_Window; }
 
 		void Close();
 
-		ImGuiLayer* GetImGuiLayer() const { return m_ImGuiLayer; }
+		[[nodiscard]] ImGuiLayer* GetImGuiLayer() const { return m_ImGuiLayer; }
 
-		static size_t GetAllocatedMemorySize();
-		inline static Application& Get() { return *s_Instance; }
+		[[nodiscard]] static size_t GetAllocatedMemorySize();
+		[[nodiscard]] static Application& Get() { return *s_Instance; }
 		
 		void SubmitToMainThread(const std::function<void()>& function);
 
 	private:
 		void Run();
-		bool OnWindowClose([[maybe_unused]] const WindowCloseEvent& e);
-		bool OnWindowResize(const WindowResizeEvent& e);
+		[[nodiscard]] bool OnWindowClose([[maybe_unused]] const WindowCloseEvent& e);
+		[[nodiscard]] bool OnWindowResize(const WindowResizeEvent& e);
 		void ExecuteMainThreadQueue();
 		
 		Scope<Window> m_Window;

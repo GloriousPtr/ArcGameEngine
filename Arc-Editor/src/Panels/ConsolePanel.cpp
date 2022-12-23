@@ -15,7 +15,7 @@ namespace ArcEngine
 	ConsolePanel::ConsolePanel(const char* name)
 		: BasePanel(name, ICON_MDI_CONSOLE, true)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		s_MessageBufferRenderFilter |= Log::Level::Trace;
 		s_MessageBufferRenderFilter |= Log::Level::Info;
@@ -35,7 +35,7 @@ namespace ArcEngine
 
 	void ConsolePanel::AddMessage(const std::string& message, const std::string& filepath, const std::string& function, int32_t line, Log::Level level)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		static uint32_t id = 0;
 
@@ -53,7 +53,7 @@ namespace ArcEngine
 
 	const ConsolePanel::Message* ConsolePanel::GetRecentMessage() const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (m_BufferBegin == 0)
 			return nullptr;
@@ -63,7 +63,7 @@ namespace ArcEngine
 
 	void ConsolePanel::Clear()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		for (auto& message : m_MessageBuffer)
 			message = nullptr;
@@ -73,7 +73,7 @@ namespace ArcEngine
 
 	void ConsolePanel::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (OnBegin())
 		{
@@ -89,16 +89,16 @@ namespace ArcEngine
 
 	void ConsolePanel::SetFocus() const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		ImGui::SetWindowFocus(m_ID.c_str());
 	}
 
 	void ConsolePanel::ImGuiRenderHeader()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
-		if (ImGui::Button((const char*)ICON_MDI_COGS))
+		if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_COGS)))
 			ImGui::OpenPopup("SettingsPopup");
 
 		if (ImGui::BeginPopup("SettingsPopup"))
@@ -111,7 +111,7 @@ namespace ArcEngine
 
 		float spacing = ImGui::GetStyle().ItemSpacing.x;
         ImGui::GetStyle().ItemSpacing.x = 2;
-        float levelButtonWidth = (ImGui::CalcTextSize(Message::GetLevelIcon(Log::Level(1))) + ImGui::GetStyle().FramePadding * 2.0f).x;
+        float levelButtonWidth = (ImGui::CalcTextSize(StringUtils::FromChar8T(Message::GetLevelIcon(Log::Level::Trace))) + ImGui::GetStyle().FramePadding * 2.0f).x;
         float levelButtonWidths = (levelButtonWidth + ImGui::GetStyle().ItemSpacing.x) * 7;
 
 		const float cursorPosX = ImGui::GetCursorPosX();
@@ -122,7 +122,7 @@ namespace ArcEngine
 		for(int i = 0; i < 6; i++)
 		{
 			ImGui::SameLine();
-			auto level = Log::Level(glm::pow(2, i));
+			auto level = static_cast<Log::Level>(glm::pow(2, i));
 
 			bool levelEnabled = s_MessageBufferRenderFilter & level;
 			glm::vec4 c = Message::GetRenderColor(level);
@@ -131,7 +131,7 @@ namespace ArcEngine
 			else
 				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5, 0.5f, 0.5f));
 
-			if(ImGui::Button(Message::GetLevelIcon(level)))
+			if(ImGui::Button(StringUtils::FromChar8T(Message::GetLevelIcon(level))))
 			{
 				s_MessageBufferRenderFilter ^= level;
 			}
@@ -145,7 +145,7 @@ namespace ArcEngine
 
 		ImGui::SameLine();
 
-		if (ImGui::Button((const char*)ICON_MDI_NOTIFICATION_CLEAR_ALL))
+		if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_NOTIFICATION_CLEAR_ALL)))
 			Clear();
 
 		ImGui::PopStyleColor();
@@ -157,13 +157,13 @@ namespace ArcEngine
 		{
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(cursorPosX + ImGui::GetFontSize() * 0.5f);
-			ImGui::TextUnformatted((const char*)ICON_MDI_MAGNIFY " Search...");
+			ImGui::TextUnformatted(StringUtils::FromChar8T(ICON_MDI_MAGNIFY " Search..."));
 		}
 	}
 
 	void ConsolePanel::ImGuiRenderSettings()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		UI::BeginProperties(ImGuiTableFlags_SizingStretchSame);
 		UI::Property("Scroll to bottom", m_AllowScrollingToBottom);
@@ -173,7 +173,7 @@ namespace ArcEngine
 
 	void ConsolePanel::ImGuiRenderMessages()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_RowBg
 			| ImGuiTableFlags_ContextMenuInBody
@@ -242,12 +242,12 @@ namespace ArcEngine
 	ConsolePanel::Message::Message(uint32_t id, const std::string& message, const std::string& filepath, const std::string& function, int32_t line, Log::Level level)
 		: ID(id), Buffer(message), Filepath(filepath), Function(function), Line(line), Level(level)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 	}
 
 	void ConsolePanel::Message::OnImGuiRender() const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
@@ -258,12 +258,12 @@ namespace ArcEngine
 		flags |= ImGuiTreeNodeFlags_FramePadding;
 		flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
-		ImGui::PushID((int)ID);
+		ImGui::PushID(static_cast<int>(ID));
 		glm::vec4 c = GetRenderColor(Level);
 		ImGui::PushStyleColor(ImGuiCol_Text, { c.r, c.g, c.b, c.a });
 		ImGui::PushFont(EditorTheme::BoldFont);
 		auto levelIcon = GetLevelIcon(Level);
-		ImGui::TreeNodeEx((void*)(uint64_t)ID, flags, "%s  %s", levelIcon, Buffer.c_str());
+		ImGui::TreeNodeEx(&ID, flags, "%s  %s", StringUtils::FromChar8T(levelIcon), Buffer.c_str());
 		ImGui::PopFont();
 		ImGui::PopStyleColor();
 
@@ -299,7 +299,11 @@ namespace ArcEngine
 	{
 		switch (level)
 		{
-			case Log::Level::Trace:			return *(glm::vec4*)(&EditorTheme::TextColor); // Grey
+		case Log::Level::Trace:
+										{
+											const auto& txtColor = EditorTheme::TextColor;
+											return { txtColor.x, txtColor.y, txtColor.z, txtColor.w }; // Grey
+										}
 			case Log::Level::Info:			return { 0.10f, 0.60f, 0.10f, 1.00f }; // Green
 			case Log::Level::Debug:			return { 0.00f, 0.50f, 0.50f, 1.00f }; // Cyan
 			case Log::Level::Warn:			return { 0.60f, 0.60f, 0.10f, 1.00f }; // Yellow
@@ -310,18 +314,18 @@ namespace ArcEngine
 		return { 1.00f, 1.00f, 1.00f, 1.00f };
 	}
 
-	const char* ConsolePanel::Message::GetLevelIcon(Log::Level level)
+	const char8_t* ConsolePanel::Message::GetLevelIcon(Log::Level level)
     {
         switch(level)
         {
-			case Log::Level::Trace:				return (const char*)ICON_MDI_MESSAGE_TEXT;
-			case Log::Level::Info:				return (const char*)ICON_MDI_INFORMATION;
-			case Log::Level::Debug:				return (const char*)ICON_MDI_BUG;
-			case Log::Level::Warn:				return (const char*)ICON_MDI_ALERT;
-			case Log::Level::Error:				return (const char*)ICON_MDI_CLOSE_OCTAGON;
-			case Log::Level::Critical:			return (const char*)ICON_MDI_ALERT_OCTAGRAM;
+			case Log::Level::Trace:				return ICON_MDI_MESSAGE_TEXT;
+			case Log::Level::Info:				return ICON_MDI_INFORMATION;
+			case Log::Level::Debug:				return ICON_MDI_BUG;
+			case Log::Level::Warn:				return ICON_MDI_ALERT;
+			case Log::Level::Error:				return ICON_MDI_CLOSE_OCTAGON;
+			case Log::Level::Critical:			return ICON_MDI_ALERT_OCTAGRAM;
         }
 
-		return "Unknown name";
+		return u8"Unknown name";
     }
 }

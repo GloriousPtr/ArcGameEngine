@@ -11,7 +11,7 @@ namespace ArcEngine
 
 	struct EditorContext
 	{
-		void Set(EditorContextType type, const void* data, size_t size)
+		void Set(EditorContextType type, const char* data, size_t size)
 		{
 			delete[] m_Data;
 
@@ -45,7 +45,7 @@ namespace ArcEngine
 			Set(other.m_Type, other.m_Data, other.m_Size);
 		}
 
-		EditorContext operator=(const EditorContext& other)
+		EditorContext& operator=(const EditorContext& other)
 		{
 			Set(other.m_Type, other.m_Data, other.m_Size);
 			return *this;
@@ -54,11 +54,12 @@ namespace ArcEngine
 		EditorContext(EditorContext&& other) = delete;
 		EditorContext operator=(EditorContext&& other) = delete;
 
-		EditorContextType GetType() const { return m_Type; }
-		template<typename T>
-		const T* As() const { return (T*)m_Data; }
+		[[nodiscard]] EditorContextType GetType() const { return m_Type; }
 
-		bool IsValid(EditorContextType type) const { return type == m_Type && m_Data != nullptr; }
+		template<typename T>
+		[[nodiscard]] const T* As() const { return reinterpret_cast<T*>(m_Data); }
+
+		[[nodiscard]] bool IsValid(EditorContextType type) const { return type == m_Type && m_Data != nullptr; }
 		operator bool() const { return m_Type != EditorContextType::None && m_Data != nullptr; }
 		bool operator==(const EditorContext& other) const { return m_Type == other.m_Type && m_Data == other.m_Data; }
 

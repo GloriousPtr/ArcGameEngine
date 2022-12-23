@@ -26,9 +26,9 @@ namespace ArcEngine
 		void OnImGuiRender() override;
 		void OnEvent([[maybe_unused]] Event& e) override;
 
-		void SetContext(EditorContextType type, const void* data, size_t size) { m_SelectedContext.Set(type, data, size); }
+		void SetContext(EditorContextType type, const char* data, size_t size) { m_SelectedContext.Set(type, data, size); }
 		void ResetContext() { m_SelectedContext.Reset(); }
-		const EditorContext& GetContext() const { return m_SelectedContext; }
+		[[nodiscard]] const EditorContext& GetContext() const { return m_SelectedContext; }
 		
 		void OpenScene(const char* filepath);
 
@@ -38,8 +38,8 @@ namespace ArcEngine
 		void BeginDockspace(const char* name) const;
 		void EndDockspace() const;
 		bool OnKeyPressed([[maybe_unused]] const KeyPressedEvent& e);
-		bool OnMouseButtonPressed([[maybe_unused]] const MouseButtonPressedEvent& e) const;
-		bool OnMouseButtonReleased([[maybe_unused]] const MouseButtonReleasedEvent& e) const;
+		[[nodiscard]] bool OnMouseButtonPressed([[maybe_unused]] const MouseButtonPressedEvent& e) const;
+		[[nodiscard]] bool OnMouseButtonReleased([[maybe_unused]] const MouseButtonReleasedEvent& e) const;
 
 		void OpenProject(const std::filesystem::path& path);
 		void OpenProject();
@@ -55,7 +55,6 @@ namespace ArcEngine
 		void OnSceneUnpause();
 
 	private:
-		Application* m_Application = nullptr;
 		Ref<Scene> m_ActiveScene;
 		Ref<Scene> m_EditorScene;
 		Ref<Scene> m_RuntimeScene;

@@ -18,7 +18,7 @@ namespace ArcEngine
 
 	void ImGuiLayer::OnAttach()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -41,7 +41,7 @@ namespace ArcEngine
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
-		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 
 		// Setup Platform/Renderer bindings
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -71,7 +71,7 @@ namespace ArcEngine
 
 	void ImGuiLayer::OnDetach()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
@@ -90,7 +90,7 @@ namespace ArcEngine
 
 	void ImGuiLayer::Begin() const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -100,14 +100,14 @@ namespace ArcEngine
 
 	void ImGuiLayer::End() const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		ImGuiIO& io = ImGui::GetIO();
 		const Window& window = Application::Get().GetWindow();
-		io.DisplaySize = ImVec2((float)window.GetWidth(), (float)window.GetHeight());
+		io.DisplaySize = ImVec2(static_cast<float>(window.GetWidth()), static_cast<float>(window.GetHeight()));
 
 		{
-			ARC_PROFILE_SCOPE("ImGui::End::Render");
+			ARC_PROFILE_SCOPE("ImGui::End::Render")
 			// Rendering
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

@@ -33,7 +33,7 @@ namespace ArcEngine
 		void Invalidate();
 
 	private:
-		std::pair<bool, uint32_t> DirectoryTreeViewRecursive(const std::filesystem::path& path, uint32_t* count, int* selection_mask, ImGuiTreeNodeFlags flags);
+		std::pair<bool, uint32_t> DirectoryTreeViewRecursive(const std::filesystem::path& path, uint32_t* count, int* selectionMask, ImGuiTreeNodeFlags flags);
 		void RenderHeader();
 		void RenderSideView();
 		void RenderBody(bool grid);

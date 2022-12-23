@@ -12,8 +12,8 @@ namespace ArcEngine
 		static void Init();
 		static void Shutdown();
 
-		static Ref<Texture2D> GetTexture2D(const std::string& path);
-		static Ref<TextureCubemap> GetTextureCubemap(const std::string& path);
-		static Ref<Mesh> GetMesh(const std::string& path);
+		[[nodiscard]] static Ref<Texture2D> GetTexture2D(const std::string& path);
+		[[nodiscard]] static Ref<TextureCubemap> GetTextureCubemap(const std::string& path);
+		[[nodiscard]] static Ref<Mesh> GetMesh(const std::string& path);
 	};
 }

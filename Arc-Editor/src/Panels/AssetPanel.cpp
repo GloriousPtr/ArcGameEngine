@@ -70,21 +70,21 @@ namespace ArcEngine
 		{ FileType::Audio,			{ 0.20f, 0.80f, 0.50f, 1.00f } },
 	};
 
-	static const char8_t* GetFileIcon(const char* ext)
+	static const std::unordered_map<FileType, const char8_t*> s_FileTypesToIcon =
 	{
-		if (!(strcmp(ext, "txt") && strcmp(ext, "md")))
-			return ICON_MDI_FILE_DOCUMENT;
-		if (!(strcmp(ext, "png") && strcmp(ext, "jpg") && strcmp(ext, "jpeg") && strcmp(ext, "bmp") && strcmp(ext, "gif")))
-			return ICON_MDI_FILE_IMAGE;
-		if (!(strcmp(ext, "hdr") && strcmp(ext, "tga")))
-			return ICON_MDI_IMAGE_FILTER_HDR;
-		if (!(strcmp(ext, "glsl")))
-			return ICON_MDI_IMAGE_FILTER_BLACK_WHITE;
-		if (!(strcmp(ext, "obj") && strcmp(ext, "fbx") && strcmp(ext, "gltf")))
-			return ICON_MDI_VECTOR_POLYGON;
+		{ FileType::Unknown,	ICON_MDI_FILE },
 
-		return ICON_MDI_FILE;
-	}
+		{ FileType::Scene,		ICON_MDI_FILE },
+		{ FileType::Prefab,		ICON_MDI_FILE },
+		{ FileType::Script,		ICON_MDI_LANGUAGE_CSHARP },
+		{ FileType::Shader,		ICON_MDI_IMAGE_FILTER_BLACK_WHITE },
+
+		{ FileType::Texture,	ICON_MDI_FILE_IMAGE },
+		{ FileType::Cubemap,	ICON_MDI_IMAGE_FILTER_HDR },
+		{ FileType::Model,		ICON_MDI_VECTOR_POLYGON },
+
+		{ FileType::Audio,		ICON_MDI_MICROPHONE },
+	};
 	
 	static bool DragDropTarget(const std::filesystem::path& dropPath)
 	{
@@ -92,7 +92,7 @@ namespace ArcEngine
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity"))
 			{
-				Entity entity = *((Entity*)payload->Data);
+				Entity entity = *static_cast<Entity*>(payload->Data);
 				std::filesystem::path path = dropPath / std::string(entity.GetComponent<TagComponent>().Tag + ".prefab");
 				EntitySerializer::SerializeEntityAsPrefab(path.string().c_str(), entity);
 				return true;
@@ -139,8 +139,8 @@ namespace ArcEngine
 				case FileType::Cubemap:
 				case FileType::Model:
 				case FileType::Audio:
-				default:
 					FileDialogs::OpenFileWithProgram(filepath);
+					break;
 			}
 		}
 		else
@@ -151,7 +151,7 @@ namespace ArcEngine
 
 	std::pair<bool, uint32_t> AssetPanel::DirectoryTreeViewRecursive(const std::filesystem::path& path, uint32_t* count, int* selectionMask, ImGuiTreeNodeFlags flags)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		bool anyNodeClicked = false;
 		uint32_t nodeClicked = 0;
@@ -181,7 +181,8 @@ namespace ArcEngine
 				ImGui::PushStyleColor(ImGuiCol_HeaderHovered, EditorTheme::HeaderHoveredColor);
 			}
 
-			bool open = ImGui::TreeNodeEx((void*)(intptr_t)(*count), nodeFlags, "");
+			uint64_t id = *count;
+			bool open = ImGui::TreeNodeEx(reinterpret_cast<void*>(id), nodeFlags, "");
 			ImGui::PopStyleColor(selected ? 2 : 1);
 
 			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
@@ -200,15 +201,27 @@ namespace ArcEngine
 			DragDropFrom(entryPath);
 
 			std::string name = StringUtils::GetNameWithExtension(filepath);
-			const char8_t* folderIcon;
+
+			const char8_t* folderIcon = ICON_MDI_FILE;
 			if (entryIsFile)
-				folderIcon = GetFileIcon(entryPath.extension().string().c_str());
+			{
+				auto fileType = FileType::Unknown;
+				const auto& fileTypeIt = s_FileTypes.find(entryPath.extension().string());
+				if (fileTypeIt != s_FileTypes.end())
+					fileType = fileTypeIt->second;
+
+				const auto& fileTypeIconIt = s_FileTypesToIcon.find(fileType);
+				if (fileTypeIconIt != s_FileTypesToIcon.end())
+					folderIcon = fileTypeIconIt->second;
+			}
 			else
+			{
 				folderIcon = open ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
-			
+			}
+
 			ImGui::SameLine();
 			ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::AssetIconColor);
-			ImGui::TextUnformatted((const char*)folderIcon);
+			ImGui::TextUnformatted(StringUtils::FromChar8T(folderIcon));
 			ImGui::PopStyleColor();
 			ImGui::SameLine();
 			ImGui::TextUnformatted(name.c_str());
@@ -244,7 +257,7 @@ namespace ArcEngine
 	AssetPanel::AssetPanel(const char* name)
 		: BasePanel(name, ICON_MDI_FOLDER_STAR, true)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		m_WhiteTexture = Texture2D::Create(1, 1);
 		uint32_t whiteTextureData = 0xffffffff;
@@ -257,12 +270,13 @@ namespace ArcEngine
 		m_CurrentDirectory = m_AssetsDirectory;
 		Refresh();
 
-		static filewatch::FileWatch<std::filesystem::path> watch(m_AssetsDirectory,
-			[this](const std::filesystem::path& path, const filewatch::Event change_type)
+		static filewatch::FileWatch<std::string> watch(m_AssetsDirectory.string(),
+			[this](const std::string& path, const filewatch::Event change_type)
 			{
 				Refresh();
 
-				std::string ext = path.extension().string();
+				std::filesystem::path filepath = path;
+				std::string ext = filepath.extension().string();
 				FileType fileType = FileType::Unknown;
 				if (s_FileTypes.contains(ext))
 					fileType = s_FileTypes.at(ext);
@@ -294,7 +308,7 @@ namespace ArcEngine
 
 	void AssetPanel::OnUpdate([[maybe_unused]] Timestep ts)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		m_ElapsedTime += ts;
 
@@ -312,7 +326,7 @@ namespace ArcEngine
 
 	void AssetPanel::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollWithMouse
 			| ImGuiWindowFlags_NoScrollbar;
@@ -350,9 +364,9 @@ namespace ArcEngine
 
 	void AssetPanel::RenderHeader()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
-		if (ImGui::Button((const char*)ICON_MDI_COGS))
+		if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_COGS)))
 			ImGui::OpenPopup("SettingsPopup");
 		if (ImGui::BeginPopup("SettingsPopup"))
 		{
@@ -369,7 +383,7 @@ namespace ArcEngine
 		{
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(cursorPosX + ImGui::GetFontSize() * 0.5f);
-			ImGui::TextUnformatted((const char*)ICON_MDI_MAGNIFY " Search...");
+			ImGui::TextUnformatted(StringUtils::FromChar8T(ICON_MDI_MAGNIFY " Search..."));
 		}
 
 		ImGui::Spacing();
@@ -387,7 +401,7 @@ namespace ArcEngine
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-			if (ImGui::Button((const char*)ICON_MDI_ARROW_LEFT_CIRCLE_OUTLINE))
+			if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_ARROW_LEFT_CIRCLE_OUTLINE)))
 			{
 				m_BackStack.push(m_CurrentDirectory);
 				UpdateDirectoryEntries(m_CurrentDirectory.parent_path());
@@ -414,7 +428,7 @@ namespace ArcEngine
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-			if (ImGui::Button((const char*)ICON_MDI_ARROW_RIGHT_CIRCLE_OUTLINE))
+			if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_ARROW_RIGHT_CIRCLE_OUTLINE)))
 			{
 				const auto& top = m_BackStack.top();
 				UpdateDirectoryEntries(top);
@@ -430,13 +444,13 @@ namespace ArcEngine
 
 		ImGui::SameLine();
 
-		ImGui::TextUnformatted((const char*)ICON_MDI_FOLDER);
+		ImGui::TextUnformatted(StringUtils::FromChar8T(ICON_MDI_FOLDER));
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.0f, 0.0f, 0.0f, 0.0f });
 		std::filesystem::path current = m_AssetsDirectory.parent_path();
-		std::filesystem::path directoryToOpen = "";
+		std::filesystem::path directoryToOpen;
 		std::filesystem::path currentDirectory = std::filesystem::relative(m_CurrentDirectory, current);
 		for (auto& path : currentDirectory)
 		{
@@ -460,7 +474,7 @@ namespace ArcEngine
 
 	void AssetPanel::RenderSideView()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		static int selectionMask = 0;
 
@@ -504,7 +518,7 @@ namespace ArcEngine
 			const char8_t* folderIcon = opened ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
 			ImGui::SameLine();
 			ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::AssetIconColor);
-			ImGui::TextUnformatted((const char*)folderIcon);
+			ImGui::TextUnformatted(StringUtils::FromChar8T(folderIcon));
 			ImGui::PopStyleColor();
 			ImGui::SameLine();
 			ImGui::TextUnformatted("Assets");
@@ -540,10 +554,10 @@ namespace ArcEngine
 
 	void AssetPanel::RenderBody(bool grid)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
-		std::filesystem::path directoryToOpen = "";
-		std::filesystem::path directoryToDelete = "";
+		std::filesystem::path directoryToOpen;
+		std::filesystem::path directoryToDelete;
 
 		float padding = 4.0f;
 		float scaledThumbnailSize = m_ThumbnailSize * ImGui::GetIO().FontGlobalScale;
@@ -557,12 +571,12 @@ namespace ArcEngine
 		ImVec2 backgroundThumbnailSize = { scaledThumbnailSizeX + padding * 2, scaledThumbnailSize + padding * 2 };
 
 		float panelWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ScrollbarSize;
-		int columnCount = (int) (panelWidth / cellSize);
+		int columnCount = static_cast<int>(panelWidth / cellSize);
 		if (columnCount < 1)
 			columnCount = 1;
 
 		float lineHeight = ImGui::GetTextLineHeight();
-		uint32_t flags = ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_ScrollY;
+		int flags = ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_ScrollY;
 
 		if (!grid)
 		{
@@ -590,7 +604,7 @@ namespace ArcEngine
 		bool textureCreated = false;
 		if (ImGui::BeginTable("BodyTable", columnCount, flags))
 		{
-			for (int i = 0, len = (int)m_DirectoryEntries.size(); i < len; ++i)
+			for (int i = 0, len = static_cast<int>(m_DirectoryEntries.size()); i < len; ++i)
 			{
 				ImGui::PushID(i);
 
@@ -643,11 +657,11 @@ namespace ArcEngine
 
 					// Background button
 					static std::string id = "###";
-					id[2] = (char)i;
+					id[2] = static_cast<char>(i);
 					bool const clicked = UI::ToggleButton(id.c_str(), highlight, backgroundThumbnailSize, 0.0f, 1.0f);
 					if (m_ElapsedTime > 0.25f && clicked)
 					{
-						EditorLayer::GetInstance()->SetContext(EditorContextType::File, (void*)strPath.c_str(), sizeof(char) * (strPath.length() + 1));
+						EditorLayer::GetInstance()->SetContext(EditorContextType::File, strPath.c_str(), sizeof(char) * (strPath.length() + 1));
 					}
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 					if (ImGui::BeginPopupContextItem())
@@ -689,19 +703,19 @@ namespace ArcEngine
 					// Foreground Image
 					ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
 					ImGui::SetItemAllowOverlap();
-					ImGui::Image((ImTextureID)m_WhiteTexture->GetRendererID(), { backgroundThumbnailSize.x - padding * 2.0f, backgroundThumbnailSize.y - padding * 2.0f }, { 0, 0 }, { 1, 1 }, EditorTheme::WindowBgAlternativeColor);
+					ImGui::Image(reinterpret_cast<ImTextureID>(m_WhiteTexture->GetRendererID()), { backgroundThumbnailSize.x - padding * 2.0f, backgroundThumbnailSize.y - padding * 2.0f }, { 0, 0 }, { 1, 1 }, EditorTheme::WindowBgAlternativeColor);
 
 					// Thumbnail Image
 					ImGui::SetCursorPos({ cursorPos.x + thumbnailPadding * 0.75f, cursorPos.y + thumbnailPadding });
 					ImGui::SetItemAllowOverlap();
-					ImGui::Image((ImTextureID)textureId, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
 
 					// Type Color frame
 					
 
 					ImVec2 typeColorFrameSize = { scaledThumbnailSizeX, scaledThumbnailSizeX * 0.03f };
 					ImGui::SetCursorPosX(cursorPos.x + padding);
-					ImGui::Image((ImTextureID)m_WhiteTexture->GetRendererID(), typeColorFrameSize, { 0, 0 }, { 1, 1 }, isDir ? ImVec4(0.0f, 0.0f, 0.0f, 0.0f) : file.FileTypeIndicatorColor);
+					ImGui::Image(reinterpret_cast<ImTextureID>(m_WhiteTexture->GetRendererID()), typeColorFrameSize, { 0, 0 }, { 1, 1 }, isDir ? ImVec4(0.0f, 0.0f, 0.0f, 0.0f) : file.FileTypeIndicatorColor);
 
 					ImVec2 rectMin = ImGui::GetItemRectMin();
 					ImVec2 rectSize = ImGui::GetItemRectSize();
@@ -737,7 +751,7 @@ namespace ArcEngine
 
 					ImGui::SameLine();
 					ImGui::SetCursorPosX(ImGui::GetCursorPosX() - lineHeight);
-					ImGui::Image((ImTextureID)textureId, { lineHeight, lineHeight }, { 0, 1 }, { 1, 0 });
+					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), { lineHeight, lineHeight }, { 0, 1 }, { 1, 0 });
 					ImGui::SameLine();
 					ImGui::TextUnformatted(filename);
 
@@ -777,7 +791,7 @@ namespace ArcEngine
 
 	void AssetPanel::UpdateDirectoryEntries(const std::filesystem::path& directory)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		m_CurrentDirectory = directory;
 		m_DirectoryEntries.clear();

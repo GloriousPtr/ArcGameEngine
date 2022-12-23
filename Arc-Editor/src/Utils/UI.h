@@ -103,7 +103,7 @@ namespace ArcEngine
 		static bool Property(const char* label, bool& flag, const char* tooltip = nullptr);
 
 		// Dropdown
-		static bool Property(const char* label, int& value, const char** dropdownStrings, size_t count, const char* tooltip = nullptr);
+		static bool Property(const char* label, int& value, const char** dropdownStrings, int count, const char* tooltip = nullptr);
 
 		// 2D/3D Textures
 		static bool Property(const char* label, Ref<TextureCubemap>& texture, uint64_t overrideTextureID = 0, const char* tooltip = nullptr);
@@ -159,7 +159,7 @@ namespace ArcEngine
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity"))
 				{
-					Entity* payloadEntity = (Entity*)payload->Data;
+					Entity* payloadEntity = static_cast<Entity*>(payload->Data);
 					if (payloadEntity->HasComponent<T>())
 					{
 						entityID = payloadEntity->GetUUID();
@@ -224,8 +224,6 @@ namespace ArcEngine
 		static bool ListProperty(const char* label, std::vector<T>& v, const T& defaultValue, size_t minElements, const char* tooltip, Fn function);
 
 	private:
-		static int s_UIContextID;
-		static uint32_t s_Counter;
 		static char s_IDBuffer[16];
 	};
 }

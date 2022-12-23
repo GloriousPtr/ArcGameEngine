@@ -13,9 +13,9 @@ namespace ArcEngine
 
 	void StatsPanel::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
-		float avg = 0.0f;
+		float avg = 0.0;
 
 		const size_t size = m_FrameTimes.size();
 		if (size >= 50)
@@ -28,7 +28,7 @@ namespace ArcEngine
 			avg += m_FrameTimes[i];
 		}
 		
-		avg /= (float)size;
+		avg /= static_cast<float>(size);
 
 		if (OnBegin())
 		{
@@ -68,10 +68,10 @@ namespace ArcEngine
 				Application::Get().GetWindow().SetVSync(vSync);
 			UI::EndProperties();
 
-			ImGui::PlotLines("##FPS", m_FpsValues, (int)size);
-			ImGui::Text("FPS: %f", avg);
-			const float fps = (1.0f / avg) * 1000.0f;
-			ImGui::Text("Frame time (ms): %f", fps);
+			ImGui::PlotLines("##FPS", m_FpsValues, static_cast<int>(size));
+			ImGui::Text("FPS: %lf", static_cast<double>(avg));
+			const double fps = (1.0 / static_cast<double>(avg)) * 1000.0;
+			ImGui::Text("Frame time (ms): %lf", fps);
 
 			OnEnd();
 		}

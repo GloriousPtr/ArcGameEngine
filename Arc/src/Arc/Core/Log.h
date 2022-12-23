@@ -5,9 +5,19 @@
 #include "UUID.h"
 
 // This ignores all warnings raised inside External headers
-#pragma warning(push, 0)
+#if defined(__clang__)
+//#	pragma clang diagnostic push
+#elif defined(_MSC_VER)
+#	pragma warning(push, 0)
+#endif
+
 #include <spdlog/spdlog.h>
-#pragma warning(pop)
+
+#if defined(__clang__)
+//#	pragma clang diagnostic pop
+#elif defined(_MSC_VER)
+#	pragma warning(pop)
+#endif
 
 namespace ArcEngine
 {
@@ -47,7 +57,7 @@ struct std::formatter<ArcEngine::UUID>
 	template <typename FormatContext>
 	auto format(const ArcEngine::UUID& input, FormatContext& ctx) -> decltype(ctx.out())
 	{
-		return format_to(ctx.out(), "{}", (uint64_t)input);
+		return format_to(ctx.out(), "{}", static_cast<uint64_t>(input));
 	}
 };
 

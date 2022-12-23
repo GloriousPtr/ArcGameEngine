@@ -23,43 +23,43 @@ namespace ArcEngine
 		}
 
 		// To keep the compiler happy
-		ARC_CORE_ASSERT(false, "Unknown ShaderDataType!");
+		ARC_CORE_ASSERT(false, "Unknown ShaderDataType!")
 		return 0;
 	}
 	
 	OpenGLVertexArray::OpenGLVertexArray()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		glCreateVertexArrays(1, &m_RendererID);
 	}
 
 	OpenGLVertexArray::~OpenGLVertexArray()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		glDeleteVertexArrays(1, &m_RendererID);
 	}
 
 	void OpenGLVertexArray::Bind() const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		glBindVertexArray(m_RendererID);
 	}
 
 	void OpenGLVertexArray::Unbind() const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		glBindVertexArray(0);
 	}
 
 	void OpenGLVertexArray::AddVertexBuffer(Ref<VertexBuffer>& vertexBuffer)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
-		ARC_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
+		ARC_CORE_ASSERT(!vertexBuffer->GetLayout().GetElements().empty(), "Vertex Buffer has no layout!")
 		
 		glBindVertexArray(m_RendererID);
 		vertexBuffer->Bind();
@@ -80,8 +80,8 @@ namespace ArcEngine
 						element.GetComponentCount(),
 						ShaderDataTypeToOpenGLBaseType(element.Type),
 						element.Normalized ? GL_TRUE : GL_FALSE,
-						layout.GetStride(),
-						(const void*)element.Offset);
+						static_cast<int>(layout.GetStride()),
+						reinterpret_cast<const void*>(element.Offset));
 					m_VertexBufferIndex++;
 					break;
 				}
@@ -96,8 +96,8 @@ namespace ArcEngine
 							count,
 							ShaderDataTypeToOpenGLBaseType(element.Type),
 							element.Normalized ? GL_TRUE : GL_FALSE,
-							layout.GetStride(),
-							(const void*)(element.Offset + sizeof(float) * count * i));
+							static_cast<int>(layout.GetStride()),
+							reinterpret_cast<const void*>(element.Offset + sizeof(float) * count * i));
 						glVertexAttribDivisor(m_VertexBufferIndex, 1);
 						m_VertexBufferIndex++;
 					}
@@ -112,13 +112,14 @@ namespace ArcEngine
 					glVertexAttribIPointer(m_VertexBufferIndex,
 						element.GetComponentCount(),
 						ShaderDataTypeToOpenGLBaseType(element.Type),
-						layout.GetStride(),
-						(const void*)element.Offset);
+						static_cast<int>(layout.GetStride()),
+						reinterpret_cast<const void*>(element.Offset));
 					m_VertexBufferIndex++;
 					break;
 				}
 				default:
-					ARC_CORE_ASSERT(false, "Unknown ShaderDataType!");
+					ARC_CORE_ASSERT(false, "Unknown ShaderDataType!")
+					break;
 			}
 		}
 		m_VertexBuffers.emplace_back(vertexBuffer);
@@ -126,7 +127,7 @@ namespace ArcEngine
 
 	void OpenGLVertexArray::SetIndexBuffer(Ref<IndexBuffer>& indexBuffer)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		glBindVertexArray(m_RendererID);
 		indexBuffer->Bind();

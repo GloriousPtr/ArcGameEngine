@@ -57,7 +57,7 @@ namespace ArcEngine
 		float Min = 0.0f;
 		float Max = 0.0f;
 
-		char DefaultValue[16];
+		char DefaultValue[16] = {};
 
 		ScriptField()
 		{
@@ -65,10 +65,10 @@ namespace ArcEngine
 		}
 
 		template<typename T>
-		T GetDefaultValue() const
+		[[nodiscard]] T GetDefaultValue() const
 		{
 			static_assert(sizeof(T) <= 16, "Type too large");
-			return *(const T*)DefaultValue;
+			return *reinterpret_cast<const T*>(DefaultValue);
 		}
 	};
 
@@ -83,10 +83,10 @@ namespace ArcEngine
 		}
 
 		template<typename T>
-		T GetValue() const
+		[[nodiscard]] T GetValue() const
 		{
 			static_assert(sizeof(T) <= MaxSize, "Type too large");
-			return *(const T*)m_Buffer;
+			return *reinterpret_cast<const T*>(m_Buffer);
 		}
 
 		template<typename T>
@@ -102,10 +102,10 @@ namespace ArcEngine
 				memcpy(m_Buffer, value.data(), MaxSize);
 		}
 
-		const void* GetBuffer() const { return m_Buffer; }
+		[[nodiscard]] const void* GetBuffer() const { return m_Buffer; }
 
 	private:
-		char m_Buffer[MaxSize];
+		char m_Buffer[MaxSize] = {};
 	};
 
 	class ScriptClass
@@ -118,12 +118,12 @@ namespace ArcEngine
 		ScriptClass(const ScriptClass& other) = delete;
 		ScriptClass(ScriptClass&& other) = delete;
 
-		GCHandle Instantiate();
-		MonoMethod* GetMethod(const char* methodName, uint32_t parameterCount);
-		GCHandle InvokeMethod(GCHandle gcHandle, MonoMethod* method, void** params = nullptr);
+		[[nodiscard]] GCHandle Instantiate();
+		[[nodiscard]] MonoMethod* GetMethod(const char* methodName, uint32_t parameterCount) const;
+		GCHandle InvokeMethod(GCHandle gcHandle, MonoMethod* method, void** params = nullptr) const;
 
-		const std::vector<std::string>& GetFields() const { return m_Fields; }
-		const std::unordered_map<std::string, ScriptField, UM_StringTransparentEquality>& GetFieldsMap() const { return m_FieldsMap; }
+		[[nodiscard]] const std::vector<std::string>& GetFields() const { return m_Fields; }
+		[[nodiscard]] const std::unordered_map<std::string, ScriptField, UM_StringTransparentEquality>& GetFieldsMap() const { return m_FieldsMap; }
 
 	private:
 		void LoadFields();
@@ -149,7 +149,7 @@ namespace ArcEngine
 	class ScriptInstance
 	{
 	public:
-		ScriptInstance(Ref<ScriptClass> scriptClass, UUID entityID);
+		ScriptInstance(Ref<ScriptClass>& scriptClass, UUID entityID);
 
 		ScriptInstance(const ScriptInstance& other) = delete;
 		ScriptInstance(ScriptInstance&& other) = delete;
@@ -165,7 +165,7 @@ namespace ArcEngine
 		void InvokeOnSensorExit2D(Collision2DData& other) const;
 
 		template<typename T>
-		T GetFieldValue(const std::string& fieldName) const
+		[[nodiscard]] T GetFieldValue(const std::string& fieldName) const
 		{
 			T value;
 			GetFieldValueInternal(fieldName, &value);
@@ -178,17 +178,17 @@ namespace ArcEngine
 			SetFieldValueInternal(fieldName, &value);
 		}
 
-		std::string GetFieldValueString(const std::string& fieldName) const
+		[[nodiscard]] std::string GetFieldValueString(const std::string& fieldName) const
 		{
 			return GetFieldValueStringInternal(fieldName);
 		}
 
-		const GCHandle GetHandle() const;
+		[[nodiscard]] const GCHandle GetHandle() const;
 
 	private:
 		void GetFieldValueInternal(const std::string& name, void* value) const;
 		void SetFieldValueInternal(const std::string& name, const void* value) const;
-		std::string GetFieldValueStringInternal(const std::string& name) const;
+		[[nodiscard]] std::string GetFieldValueStringInternal(const std::string& name) const;
 
 	private:
 		Ref<ScriptClass> m_EntityClass;
@@ -216,23 +216,23 @@ namespace ArcEngine
 		static void ReloadAppDomain();
 		static void LoadAssemblyClasses(MonoAssembly* assembly);
 
-		static MonoDomain* GetDomain();
-		static MonoImage* GetCoreAssemblyImage();
-		static MonoImage* GetAppAssemblyImage();
+		[[nodiscard]] static MonoDomain* GetDomain();
+		[[nodiscard]] static MonoImage* GetCoreAssemblyImage();
+		[[nodiscard]] static MonoImage* GetAppAssemblyImage();
 
-		static bool HasClass(const std::string& className);
+		[[nodiscard]] static bool HasClass(const std::string& className);
 		static ScriptInstance* CreateInstance(Entity entity, const std::string& name);
-		static bool HasInstance(Entity entity, const std::string& name);
-		static ScriptInstance* GetInstance(Entity entity, const std::string& name);
+		[[nodiscard]] static bool HasInstance(Entity entity, const std::string& name);
+		[[nodiscard]] static ScriptInstance* GetInstance(Entity entity, const std::string& name);
 		static void RemoveInstance(Entity entity, const std::string& name);
 		
-		static std::unordered_map<std::string, Ref<ScriptClass>, UM_StringTransparentEquality>& GetClasses();
-		static const std::vector<std::string>& GetFields (const char* className);
-		static const std::unordered_map<std::string, ScriptField, UM_StringTransparentEquality>& GetFieldMap(const char* className);
-		static std::unordered_map<std::string, ScriptFieldInstance, UM_StringTransparentEquality>& GetFieldInstanceMap(Entity entity, const char* className);
+		[[nodiscard]] static std::unordered_map<std::string, Ref<ScriptClass>, UM_StringTransparentEquality>& GetClasses();
+		[[nodiscard]] static const std::vector<std::string>& GetFields (const char* className);
+		[[nodiscard]] static const std::unordered_map<std::string, ScriptField, UM_StringTransparentEquality>& GetFieldMap(const char* className);
+		[[nodiscard]] static std::unordered_map<std::string, ScriptFieldInstance, UM_StringTransparentEquality>& GetFieldInstanceMap(Entity entity, const char* className);
 
 		static void SetScene(Scene* scene) { s_CurrentScene = scene; }
-		static Scene* GetScene() { return s_CurrentScene; }
+		[[nodiscard]] static Scene* GetScene() { return s_CurrentScene; }
 
 	private:
 		static Scene* s_CurrentScene;

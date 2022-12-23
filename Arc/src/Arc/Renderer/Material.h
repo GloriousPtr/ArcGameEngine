@@ -17,28 +17,28 @@ namespace ArcEngine
 		Material(Material&& other) = default;
 
 		void Invalidate();
-		void Bind();
+		void Bind() const;
 		void Unbind() const;
-		Ref<Shader> GetShader() const;
-		Ref<Texture2D> GetTexture(uint32_t slot);
+		[[nodiscard]] Ref<Shader> GetShader() const;
+		[[nodiscard]] Ref<Texture2D> GetTexture(uint32_t slot);
 		void SetTexture(uint32_t slot, Ref<Texture2D> texture);
 
 		template<typename T>
-		T GetData(const char* name)
+		[[nodiscard]] T GetData(const char* name) const
 		{
 			MaterialData value = GetData_Internal(name);
-			return *(T*)(value);
+			return *static_cast<T*>(value);
 		}
 
 		template<typename T>
-		void SetData(const char* name, T data)
+		void SetData(const char* name, T data) const
 		{
 			SetData_Internal(name, &data);
 		}
 
 	private:
-		MaterialData GetData_Internal(const char* name);
-		void SetData_Internal(const char* name, MaterialData data);
+		[[nodiscard]] MaterialData GetData_Internal(const char* name) const;
+		void SetData_Internal(const char* name, MaterialData data) const;
 
 	private:
 		Ref<Shader> m_Shader = nullptr;

@@ -20,7 +20,7 @@ namespace ArcEngine
 		Ref<Framebuffer> LightingPassTarget;
 		Ref<Framebuffer> FXAAPassTarget;
 
-		static const size_t MaxBlurSamples = 6;
+		static constexpr size_t MaxBlurSamples = 6;
 		size_t BlurSamples = MaxBlurSamples;
 		Ref<Framebuffer> PrefilteredFramebuffer;
 		Ref<Framebuffer> TempBlurFramebuffers[MaxBlurSamples];
@@ -29,7 +29,7 @@ namespace ArcEngine
 
 		RenderGraphData(uint32_t width, uint32_t height)
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			if (width <= 0 || height <= 0)
 			{
@@ -100,7 +100,7 @@ namespace ArcEngine
 
 		void Resize(uint32_t width, uint32_t height)
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			CompositePassTarget->Resize(width, height);
 			RenderPassTarget->Resize(width, height);

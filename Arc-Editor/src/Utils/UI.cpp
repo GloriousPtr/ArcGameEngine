@@ -1,12 +1,14 @@
 #include "UI.h"
 
+#include <icons/IconsMaterialDesignIcons.h>
+
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
 namespace ArcEngine
 {
-	int UI::s_UIContextID = 0;
-	uint32_t UI::s_Counter = 0;
+	inline static int s_UIContextID = 0;
+	inline static int s_Counter = 0;
 	char UI::s_IDBuffer[16];
 
 	void UI::PushID()
@@ -31,11 +33,11 @@ namespace ArcEngine
 
 		ImGui::PushID(label);
 		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
-		ImGui::Text(label);
+		ImGui::TextUnformatted(label);
 		if (tooltip && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 		{
 			ImGui::BeginTooltip();
-			ImGui::Text(tooltip);
+			ImGui::TextUnformatted(tooltip);
 			ImGui::EndTooltip();
 		}
 
@@ -150,7 +152,7 @@ namespace ArcEngine
 	/// Dropdown /////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UI::Property(const char* label, int& value, const char** dropdownStrings, size_t count, const char* tooltip)
+	bool UI::Property(const char* label, int& value, const char** dropdownStrings, int count, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
 
@@ -204,20 +206,20 @@ namespace ArcEngine
 		uint64_t id = overrideTextureID;
 		if (id == 0)
 			id = texture == nullptr ? 0 : texture->GetHRDRendererID();
-		ImGui::ImageButton((ImTextureID)id, { buttonSize, buttonSize }, { 1, 1 }, { 0, 0 }, 0);
+		ImGui::ImageButton(reinterpret_cast<ImTextureID>(id), { buttonSize, buttonSize }, { 1, 1 }, { 0, 0 }, 0);
 		if (texture && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 		{
 			ImGui::BeginTooltip();
-			ImGui::Text(texture->GetPath().c_str());
+			ImGui::TextUnformatted(texture->GetPath().c_str());
 			ImGui::Spacing();
-			ImGui::Image((ImTextureID)id, { tooltipSize, tooltipSize }, { 1, 1 }, { 0, 0 });
+			ImGui::Image(reinterpret_cast<ImTextureID>(id), { tooltipSize, tooltipSize }, { 1, 1 }, { 0, 0 });
 			ImGui::EndTooltip();
 		}
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 			{
-				const char* path = (const char*)payload->Data;
+				const char* path = static_cast<char*>(payload->Data);
 				texture = AssetManager::GetTextureCubemap(path);
 				changed = true;
 			}
@@ -262,20 +264,20 @@ namespace ArcEngine
 		uint64_t id = overrideTextureID;
 		if (id == 0)
 			id = texture == nullptr ? 0 : texture->GetRendererID();
-		ImGui::ImageButton((ImTextureID)id, { buttonSize, buttonSize }, { 1, 1 }, { 0, 0 }, 0);
+		ImGui::ImageButton(reinterpret_cast<ImTextureID>(id), { buttonSize, buttonSize }, { 1, 1 }, { 0, 0 }, 0);
 		if (texture && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 		{
 			ImGui::BeginTooltip();
-			ImGui::Text(texture->GetPath().c_str());
+			ImGui::TextUnformatted(texture->GetPath().c_str());
 			ImGui::Spacing();
-			ImGui::Image((ImTextureID)id, { tooltipSize, tooltipSize }, { 1, 1 }, { 0, 0 });
+			ImGui::Image(reinterpret_cast<ImTextureID>(id), { tooltipSize, tooltipSize }, { 1, 1 }, { 0, 0 });
 			ImGui::EndTooltip();
 		}
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 			{
-				const char* path = (const char*)payload->Data;
+				const char* path = static_cast<char*>(payload->Data);
 				texture = AssetManager::GetTexture2D(path);
 				changed = true;
 			}
@@ -327,9 +329,8 @@ namespace ArcEngine
 				modified = true;
 			}
 
-			uint32_t i = 0;
-//			std::vector<bool>::iterator removeIt;
-//			std::vector<bool>::iterator ptr;
+			int i = 0;
+			int removeAt = -1;
 			for (T& p : v)
 			{
 				ImGui::PushID(i);
@@ -341,8 +342,8 @@ namespace ArcEngine
 				if (disabled)
 					ImGui::BeginDisabled();
 
-//				if (ImGui::Button((const char*)ICON_MDI_CLOSE))
-//					removeIt = p;
+				if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_CLOSE)))
+					removeAt = i;
 
 				ImGui::PopID();
 
@@ -353,8 +354,8 @@ namespace ArcEngine
 			}
 			EndProperties();
 
-			//if (removeIt != v.end())
-				//std::erase_if(v, [removeIt](auto t) { return t == *removeIt; });
+			if (removeAt > -1)
+				v.erase(v.begin() + removeAt);
 
 			ImGui::TreePop();
 		}
@@ -398,8 +399,8 @@ namespace ArcEngine
 		const auto& fieldMap = ScriptEngine::GetFieldMap(className.c_str());
 		const ScriptField& field = fieldMap.at(fieldName);
 		const char* tooltip = field.Tooltip.empty() ? nullptr : field.Tooltip.c_str();
-		T min = (T)field.Min;
-		T max = (T)field.Max;
+		T min = static_cast<T>(field.Min);
+		T max = static_cast<T>(field.Max);
 
 		const ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
 		if (!scriptInstance)
@@ -547,7 +548,7 @@ namespace ArcEngine
 					return;
 				}
 
-				std::string value = (const char*)fieldInstance.GetBuffer();
+				std::string value = static_cast<const char*>(fieldInstance.GetBuffer());
 				if (UI::Property(field.DisplayName.c_str(), value, tooltip))
 					fieldInstance.SetValueString(value);
 			}
@@ -580,6 +581,8 @@ namespace ArcEngine
 
 		switch (field.Type)
 		{
+			case FieldType::Unknown:
+				break;
 			case FieldType::Bool:
 			{
 				DrawScriptField<bool>(entity, className, fieldName);
@@ -660,10 +663,8 @@ namespace ArcEngine
 				DrawScriptFieldVector<glm::vec4>(entity, className, fieldName, true);
 				break;
 			}
-			default:
-			{
+			case FieldType::Char:
 				break;
-			}
 		}
 	}
 
@@ -762,7 +763,7 @@ namespace ArcEngine
 		float lineHeight = ImGui::GetTextLineHeight();
 		ImVec2 padding = ImGui::GetStyle().FramePadding;
 
-		float width = ImGui::CalcTextSize((const char*)icon).x;
+		float width = ImGui::CalcTextSize(StringUtils::FromChar8T(icon)).x;
 		width += ImGui::CalcTextSize(label).x;
 		width += padding.x * 2.0f;
 
@@ -771,9 +772,9 @@ namespace ArcEngine
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(cursorPosX);
-		ImGui::TextColored(iconColor, (const char*)icon);
+		ImGui::TextColored(iconColor, "%s", StringUtils::FromChar8T(icon));
 		ImGui::SameLine();
-		ImGui::Text(label);
+		ImGui::TextUnformatted(label);
 		ImGui::PopStyleVar();
 		PopID();
 
@@ -785,7 +786,7 @@ namespace ArcEngine
 		float lineHeight = ImGui::GetTextLineHeight();
 		ImVec2 padding = ImGui::GetStyle().FramePadding;
 
-		float width = ImGui::CalcTextSize((const char*)icon).x;
+		float width = ImGui::CalcTextSize(StringUtils::FromChar8T(icon)).x;
 		width += ImGui::CalcTextSize(label).x;
 		width += padding.x * 2.0f;
 
@@ -826,7 +827,7 @@ namespace ArcEngine
 	{
 		// Hide anything after a '##' string
 		const char* text_display_end = ImGui::FindRenderedTextEnd(text, text_end);
-		const int text_len = (int)(text_display_end - text);
+		const int text_len = static_cast<int>(text_display_end - text);
 		if (text_len == 0)
 			return;
 

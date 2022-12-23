@@ -18,7 +18,7 @@ namespace ArcEngine
 
 	void PropertiesPanel::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (OnBegin())
 		{
@@ -42,8 +42,6 @@ namespace ArcEngine
 						DrawFileProperties(m_Context.As<char>());
 						break;
 					}
-					default:
-						break;
 				}
 			}
 			OnEnd();
@@ -53,7 +51,7 @@ namespace ArcEngine
 	template<typename T, typename UIFunction>
 	static void DrawComponent(const char8_t* name, Entity entity, UIFunction uiFunction, const bool removable = true)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if(entity.HasComponent<T>())
 		{
@@ -70,16 +68,16 @@ namespace ArcEngine
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
 
 			size_t id = typeid(T).hash_code();
-			bool open = ImGui::TreeNodeEx((void*)id, treeFlags, "%s", name);
+			bool open = ImGui::TreeNodeEx(reinterpret_cast<void*>(id), treeFlags, "%s", reinterpret_cast<const char*>(name));
 
 			bool removeComponent = false;
 			if(removable)
 			{
-				ImGui::PushID((uint32_t)id);
+				ImGui::PushID(static_cast<int>(id));
 
 				float frameHeight = ImGui::GetFrameHeight();
 				ImGui::SameLine(ImGui::GetContentRegionMax().x - frameHeight * 1.2f);
-				if(ImGui::Button((const char*)ICON_MDI_SETTINGS, ImVec2{ frameHeight * 1.2f, frameHeight }))
+				if(ImGui::Button(StringUtils::FromChar8T(ICON_MDI_SETTINGS), ImVec2{ frameHeight * 1.2f, frameHeight }))
 					ImGui::OpenPopup("ComponentSettings");
 
 				if(ImGui::BeginPopup("ComponentSettings"))
@@ -95,7 +93,7 @@ namespace ArcEngine
 
 			if(open)
 			{
-				ARC_PROFILE_SCOPE("UI Function");
+				ARC_PROFILE_SCOPE("UI Function")
 
 				uiFunction(component);
 				ImGui::TreePop();
@@ -130,7 +128,7 @@ namespace ArcEngine
 				ImGui::PushID(&it);
 
 				ImGui::SameLine(ImGui::GetContentRegionMax().x - frameHeight * 1.2f);
-				if (ImGui::Button((const char*)ICON_MDI_SETTINGS, ImVec2{ frameHeight * 1.2f, frameHeight }))
+				if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_SETTINGS), ImVec2{ frameHeight * 1.2f, frameHeight }))
 					ImGui::OpenPopup("ScriptSettings");
 
 				if (ImGui::BeginPopup("ScriptSettings"))
@@ -146,7 +144,7 @@ namespace ArcEngine
 
 			if (open)
 			{
-				ARC_PROFILE_SCOPE("UI Function");
+				ARC_PROFILE_SCOPE("UI Function")
 
 				// Public Fields
 				UI::BeginProperties();
@@ -198,7 +196,7 @@ namespace ArcEngine
 				case MaterialPropertyType::None: break;
 				case MaterialPropertyType::Sampler2D:
 				{
-					uint32_t slot = material->GetData<uint32_t>(name);
+					auto slot = material->GetData<uint32_t>(name);
 					uint64_t tex = material->GetTexture(slot) ? material->GetTexture(slot)->GetRendererID() : 0;
 					Ref<Texture2D> tmp = material->GetTexture(slot);
 					if (UI::Property(displayName, tmp, tex))
@@ -260,8 +258,6 @@ namespace ArcEngine
 							material->SetData(name, v);
 					break;
 				}
-				default:
-					break;
 			}
 		}
 
@@ -343,7 +339,7 @@ namespace ArcEngine
 
 	void PropertiesPanel::DrawComponents(Entity entity)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		ImVec2 framePadding = ImGui::GetStyle().FramePadding;
 		float frameHeight = ImGui::GetFrameHeight();
@@ -381,7 +377,7 @@ namespace ArcEngine
 					{
 						ImGui::SameLine();
 						ImGui::SetCursorPosX(filterCursorPosX + ImGui::GetFontSize() * 0.5f);
-						ImGui::TextUnformatted((const char*)ICON_MDI_MAGNIFY " Search...");
+						ImGui::TextUnformatted(StringUtils::FromChar8T(ICON_MDI_MAGNIFY " Search..."));
 					}
 
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
@@ -426,7 +422,7 @@ namespace ArcEngine
 			{
 				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + framePadding.x);
 				const char8_t* icon = m_Locked ? ICON_MDI_LOCK : ICON_MDI_LOCK_OPEN_OUTLINE;
-				if (UI::ToggleButton((const char*)icon, m_Locked, lockButtonSize))
+				if (UI::ToggleButton(StringUtils::FromChar8T(icon), m_Locked, lockButtonSize))
 					m_Locked = !m_Locked;
 			}
 
@@ -482,9 +478,9 @@ namespace ArcEngine
 			UI::Property("Primary", component.Primary);
 
 			const char* projectionTypeStrings[] = { "Perspective", "Orthographic" };
-			int projectionType = (int) camera.GetProjectionType();
+			int projectionType = static_cast<int>(camera.GetProjectionType());
 			if (UI::Property("Projection", projectionType, projectionTypeStrings, 2))
-				camera.SetProjectionType((SceneCamera::ProjectionType) projectionType);
+				camera.SetProjectionType(static_cast<SceneCamera::ProjectionType>(projectionType));
 
 			if(camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 			{
@@ -547,7 +543,7 @@ namespace ArcEngine
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
-					component.MeshGeometry = CreateRef<Mesh>((const char*)payload->Data);
+					component.MeshGeometry = CreateRef<Mesh>(static_cast<char*>(payload->Data));
 					ImGui::EndDragDropTarget();
 					return;
 				}
@@ -563,9 +559,9 @@ namespace ArcEngine
 					UI::Property<size_t>("Submesh Index", component.SubmeshIndex, 0, submeshCount - 1);
 
 				const char* cullModeTypeStrings[] = { "Front", "Back", "Double Sided" };
-				int cullMode = (int) component.CullMode;
+				int cullMode = static_cast<int>(component.CullMode);
 				if (UI::Property("Cull Mode", cullMode, cullModeTypeStrings, 3))
-					component.CullMode = (MeshComponent::CullModeType) cullMode;
+					component.CullMode = static_cast<MeshComponent::CullModeType>(cullMode);
 				UI::EndProperties();
 
 				constexpr ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed
@@ -595,9 +591,9 @@ namespace ArcEngine
 		{
 			UI::BeginProperties();
 			const char* lightTypeStrings[] = { "Directional", "Point", "Spot" };
-			int lightType = (int) component.Type;
+			int lightType = static_cast<int>(component.Type);
 			if (UI::Property("Light Type", lightType, lightTypeStrings, 3))
-				component.Type = (LightComponent::LightType) lightType;
+				component.Type = static_cast<LightComponent::LightType>(lightType);
 
 			if (UI::Property("Use color temperature mode", component.UseColorTemperatureMode) && component.UseColorTemperatureMode)
 			{
@@ -645,13 +641,13 @@ namespace ArcEngine
 			else
 			{
 				const char* shadowQualityTypeStrings[] = { "Hard", "Soft", "Ultra Soft" };
-				int shadowQualityType = (int) component.ShadowQuality;
+				int shadowQualityType = static_cast<int>(component.ShadowQuality);
 
 				if (UI::Property("Shadow Quality Type", shadowQualityType, shadowQualityTypeStrings, 3))
-					component.ShadowQuality = (LightComponent::ShadowQualityType) shadowQualityType;
+					component.ShadowQuality = static_cast<LightComponent::ShadowQualityType>(shadowQualityType);
 
 				uint64_t textureID = component.ShadowMapFramebuffer->GetDepthAttachmentRendererID();
-				ImGui::Image((ImTextureID)textureID, ImVec2{ 256, 256 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+				ImGui::Image(reinterpret_cast<ImTextureID>(textureID), ImVec2{ 256, 256 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 			}
 
 			UI::EndProperties();
@@ -663,10 +659,10 @@ namespace ArcEngine
 
 			ImGui::Text("Active Particles Count: %u", component.System->GetActiveParticleCount());
 			ImGui::BeginDisabled(props.Looping);
-			if (ImGui::Button((const char*)ICON_MDI_PLAY))
+			if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_PLAY)))
 				component.System->Play();
 			ImGui::SameLine();
-			if (ImGui::Button((const char*)ICON_MDI_STOP))
+			if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_STOP)))
 				component.System->Stop();
 			ImGui::EndDisabled();
 
@@ -718,9 +714,9 @@ namespace ArcEngine
 			UI::BeginProperties();
 
 			const char* bodyTypeStrings[] = { "Static", "Kinematic", "Dynamic" };
-			int bodyType = (int) component.Type;
+			int bodyType = static_cast<int>(component.Type);
 			if (UI::Property("Body Type", bodyType, bodyTypeStrings, 3))
-				component.Type = (Rigidbody2DComponent::BodyType)bodyType;
+				component.Type = static_cast<Rigidbody2DComponent::BodyType>(bodyType);
 
 			if (component.Type == Rigidbody2DComponent::BodyType::Dynamic)
 			{
@@ -962,9 +958,9 @@ namespace ArcEngine
 			UI::BeginProperties();
 
 			const char* bodyTypeStrings[] = { "Static", "Kinematic", "Dynamic" };
-			int bodyType = (int)component.Type;
+			int bodyType = static_cast<int>(component.Type);
 			if (UI::Property("Body Type", bodyType, bodyTypeStrings, 3))
-				component.Type = (RigidbodyComponent::BodyType)bodyType;
+				component.Type = static_cast<RigidbodyComponent::BodyType>(bodyType);
 
 			if (component.Type == RigidbodyComponent::BodyType::Dynamic)
 			{
@@ -1080,7 +1076,7 @@ namespace ArcEngine
 					{
 						ImGui::SameLine();
 						ImGui::SetCursorPosX(filterCursorPosX + ImGui::GetFontSize() * 0.5f);
-						ImGui::TextUnformatted((const char*)ICON_MDI_MAGNIFY " Search...");
+						ImGui::TextUnformatted(StringUtils::FromChar8T(ICON_MDI_MAGNIFY " Search..."));
 					}
 				}
 
@@ -1088,7 +1084,7 @@ namespace ArcEngine
 				for (const auto& name : classes | std::views::keys)
 				{
 					bool notFound = std::ranges::find(component.Classes, name) == component.Classes.end();
-					if (notFound && !m_Filter.IsActive() || (m_Filter.IsActive() && m_Filter.PassFilter(name.c_str())))
+					if (notFound && (!m_Filter.IsActive() || (m_Filter.IsActive() && m_Filter.PassFilter(name.c_str()))))
 					{
 						if (ImGui::MenuItem(name.c_str()))
 						{
@@ -1115,7 +1111,7 @@ namespace ArcEngine
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
-					const char* path = (const char*)payload->Data;
+					const char* path = static_cast<char*>(payload->Data);
 					std::string ext = StringUtils::GetExtension(path);
 					if (ext == "mp3" || ext == "wav")
 						component.Source = CreateRef<AudioSource>(path);
@@ -1132,13 +1128,13 @@ namespace ArcEngine
 			UI::EndProperties();
 
 			ImGui::Spacing();
-			if (ImGui::Button((const char*)ICON_MDI_PLAY "Play ")&& component.Source)
+			if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_PLAY "Play "))&& component.Source)
 				component.Source->Play();
 			ImGui::SameLine();
-			if (ImGui::Button((const char*)ICON_MDI_PAUSE "Pause ") && component.Source)
+			if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_PAUSE "Pause ")) && component.Source)
 				component.Source->Pause();
 			ImGui::SameLine();
-			if (ImGui::Button((const char*)ICON_MDI_STOP "Stop ") && component.Source)
+			if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_STOP "Stop ")) && component.Source)
 				component.Source->Stop();
 			ImGui::Spacing();
 
@@ -1149,9 +1145,9 @@ namespace ArcEngine
 			{
 				ImGui::Indent();
 				const char* attenuationTypeStrings[] = { "None", "Inverse", "Linear", "Exponential" };
-				int attenuationType = (int)config.AttenuationModel;
+				int attenuationType = static_cast<int>(config.AttenuationModel);
 				if (UI::Property("Attenuation Model", attenuationType, attenuationTypeStrings, 4))
-					config.AttenuationModel = (AttenuationModelType)attenuationType;
+					config.AttenuationModel = static_cast<AttenuationModelType>(attenuationType);
 				UI::Property("Roll Off", config.RollOff);
 				UI::Property("Min Gain", config.MinGain);
 				UI::Property("Max Gain", config.MaxGain);
@@ -1227,7 +1223,7 @@ namespace ArcEngine
 	template<typename Component>
 	void PropertiesPanel::DrawAddComponent(Entity entity, const char8_t* name, const char* category) const
 	{
-		const char* displayName = (const char*)name;
+		const char* displayName = StringUtils::FromChar8T(name);
 		if (!entity.HasComponent<Component>())
 		{
 			if (!m_Filter.IsActive())

@@ -19,49 +19,49 @@ namespace ArcEngine
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args) const
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
-			ARC_CORE_ASSERT(m_Scene, "Scene is null!");
+			ARC_CORE_ASSERT(m_Scene, "Scene is null!")
 			T& component = m_Scene->m_Registry.emplace_or_replace<T>(m_EntityHandle, std::forward<Args>(args)...);
 			m_Scene->OnComponentAdded<T>(*this, component);
 			return component;
 		}
 
 		template<typename T>
-		T& GetComponent() const
+		[[nodiscard]] T& GetComponent() const
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
-			ARC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
+			ARC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!")
 			return m_Scene->m_Registry.get<T>(m_EntityHandle);
 		}
 
 		template<typename T>
-		bool HasComponent() const
+		[[nodiscard]] bool HasComponent() const
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
-			ARC_CORE_ASSERT(m_Scene, "Scene is null!");
+			ARC_CORE_ASSERT(m_Scene, "Scene is null!")
 			return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
 		}
 
 		template<typename T>
 		void RemoveComponent() const
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
-			ARC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
+			ARC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!")
 			m_Scene->m_Registry.remove<T>(m_EntityHandle);
 		}
 
-		UUID GetUUID() const { return GetComponent<IDComponent>().ID; }
-		std::string_view GetTag() const { return GetComponent<TagComponent>().Tag; }
-		TransformComponent& GetTransform() const { return GetComponent<TransformComponent>(); }
-		RelationshipComponent& GetRelationship() const { return GetComponent<RelationshipComponent>(); }
+		[[nodiscard]] UUID GetUUID() const { return GetComponent<IDComponent>().ID; }
+		[[nodiscard]] std::string_view GetTag() const { return GetComponent<TagComponent>().Tag; }
+		[[nodiscard]] TransformComponent& GetTransform() const { return GetComponent<TransformComponent>(); }
+		[[nodiscard]] RelationshipComponent& GetRelationship() const { return GetComponent<RelationshipComponent>(); }
 		
-		Entity GetParent() const
+		[[nodiscard]] Entity GetParent() const
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			if (!m_Scene)
 				return {};
@@ -72,9 +72,9 @@ namespace ArcEngine
 
 		void SetParent(Entity parent) const
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
-			ARC_CORE_ASSERT(m_Scene->m_EntityMap.contains(parent.GetUUID()), "Parent is not in the same scene as entity");
+			ARC_CORE_ASSERT(m_Scene->m_EntityMap.contains(parent.GetUUID()), "Parent is not in the same scene as entity")
 			Deparent();
 			
 			auto& rc = GetComponent<RelationshipComponent>();
@@ -84,7 +84,7 @@ namespace ArcEngine
 
 		void Deparent() const
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			auto& transform = GetRelationship();
 			UUID uuid = GetUUID();
@@ -94,7 +94,7 @@ namespace ArcEngine
 				return;
 
 			auto& parent = parentEntity.GetRelationship();
-			for (auto it = parent.Children.begin(); it != parent.Children.end(); it++)
+			for (auto it = parent.Children.begin(); it != parent.Children.end(); ++it)
 			{
 				if (*it == uuid)
 				{
@@ -105,9 +105,9 @@ namespace ArcEngine
 			transform.Parent = 0;
 		}
 		
-		glm::mat4 GetWorldTransform() const
+		[[nodiscard]] glm::mat4 GetWorldTransform() const
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			const auto& transform = GetTransform();
 			const auto& rc = GetRelationship();
@@ -116,19 +116,19 @@ namespace ArcEngine
 			return parentTransform * glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);
 		}
 
-		glm::mat4 GetLocalTransform() const
+		[[nodiscard]] glm::mat4 GetLocalTransform() const
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			const auto& transform = GetTransform();
 			return glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);
 		}
 
-		Scene* GetScene() const { return m_Scene; }
+		[[nodiscard]] Scene* GetScene() const { return m_Scene; }
 
 		operator bool() const { return m_EntityHandle != entt::null && m_Scene != nullptr && m_Scene->m_Registry.valid(m_EntityHandle); }
 		operator entt::entity() const { return m_EntityHandle; }
-		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
+		operator uint32_t() const { return static_cast<uint32_t>(m_EntityHandle); }
 
 		bool operator==(const Entity& other) const { return m_EntityHandle == other.m_EntityHandle && m_Scene == other.m_Scene; }
 

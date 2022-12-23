@@ -20,25 +20,25 @@ namespace ArcEngine
 			return {};
 
 		Buffer buffer(size);
-		stream.read(buffer.As<char>(), (std::streamsize)size);
+		stream.read(buffer.As<char>(), static_cast<std::streamsize>(size));
 		stream.close();
 		return buffer;
 	}
 
 	void Filesystem::ReadFileText(const std::filesystem::path& filepath, std::string& outString)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
-		std::ifstream in(filepath.c_str(), std::ios::in | std::ios::binary); // ifstream closes itself due to RAII
+		std::ifstream in(filepath.c_str(), std::ios::in | std::ios::binary);
 		if (in)
 		{
 			in.seekg(0, std::ios::end);
-			const size_t size = in.tellg();
+			const int64_t size = in.tellg();
 			if (std::cmp_not_equal(size, -1))
 			{
 				outString.resize(size);
 				in.seekg(0, std::ios::beg);
-				in.read(&outString[0], size);
+				in.read(outString.data(), size);
 			}
 			else
 			{

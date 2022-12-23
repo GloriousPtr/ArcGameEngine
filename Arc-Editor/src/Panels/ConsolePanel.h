@@ -23,7 +23,7 @@ namespace ArcEngine
 
 			static const char* GetLevelName(Log::Level level);
 			static glm::vec4 GetRenderColor(Log::Level level);
-			static const char* GetLevelIcon(Log::Level level);
+			static const char8_t* GetLevelIcon(Log::Level level);
 		};
 
 	public:
@@ -36,7 +36,7 @@ namespace ArcEngine
 		ConsolePanel& operator=(ConsolePanel&& other) = delete;
 
 		void AddMessage(const std::string& message, const std::string& filepath, const std::string& function, int32_t line, Log::Level level);
-		const Message* GetRecentMessage() const;
+		[[nodiscard]] const Message* GetRecentMessage() const;
 		void Clear();
 		void SetFocus() const;
 
@@ -52,7 +52,7 @@ namespace ArcEngine
 		uint16_t m_Capacity = 200;
 		uint16_t m_BufferSize = 0;
 		uint16_t m_BufferBegin = 0;
-		uint32_t s_MessageBufferRenderFilter = (uint32_t)Log::Level::Trace;
+		uint32_t s_MessageBufferRenderFilter = Log::Level::Trace;
 		bool m_AllowScrollingToBottom = true;
 		bool m_RequestScrollToBottom = false;
 		std::vector<Ref<Message>> m_MessageBuffer;

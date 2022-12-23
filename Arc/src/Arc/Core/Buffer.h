@@ -10,9 +10,9 @@ namespace ArcEngine
 		Buffer() = default;
 		explicit Buffer(uint64_t size) { Allocate(size); }
 
-		static Buffer Copy(Buffer other)
+		[[nodiscard]] static Buffer Copy(Buffer other)
 		{
-			Buffer result = Buffer(other.Size);
+			auto result = Buffer(other.Size);
 			memcpy_s(result.Data, result.Size, other.Data, other.Size);
 			return result;
 		}
@@ -33,9 +33,9 @@ namespace ArcEngine
 		}
 
 		template<typename T>
-		T* As() { return (T*)Data; }
+		[[nodiscard]] T* As() { return reinterpret_cast<T*>(Data); }
 
-		operator bool() const {	return (bool)Data; }
+		operator bool() const {	return Data; }
 	};
 
 	struct ScopedBuffer
@@ -52,11 +52,11 @@ namespace ArcEngine
 
 		~ScopedBuffer() { m_Buffer.Release(); }
 
-		uint8_t* Data() { return m_Buffer.Data; }
-		uint64_t Size() const { return m_Buffer.Size; }
+		[[nodiscard]] uint8_t* Data() const { return m_Buffer.Data; }
+		[[nodiscard]] uint64_t Size() const { return m_Buffer.Size; }
 
 		template<typename T>
-		T* As() { return m_Buffer.As<T>(); }
+		[[nodiscard]] T* As() { return m_Buffer.As<T>(); }
 
 		operator bool() const { return m_Buffer; }
 

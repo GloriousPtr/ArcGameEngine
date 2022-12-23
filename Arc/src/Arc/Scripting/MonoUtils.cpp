@@ -16,7 +16,7 @@ namespace ArcEngine
 
 		// NOTE: We can't use this image for anything other than loading the assembly because this image doesn't have a reference to the assembly
 		MonoImageOpenStatus status;
-		MonoImage* image = mono_image_open_from_data_full(fileBuffer.As<char>(), (uint32_t)fileBuffer.Size(), 1, &status, 0);
+		MonoImage* image = mono_image_open_from_data_full(fileBuffer.As<char>(), static_cast<uint32_t>(fileBuffer.Size()), 1, &status, 0);
 
 		if (status != MONO_IMAGE_OK)
 		{
@@ -34,7 +34,7 @@ namespace ArcEngine
 			if (std::filesystem::exists(pdbPath))
 			{
 				ScopedBuffer pdbFileData = Filesystem::ReadFileBinary(pdbPath);
-				mono_debug_open_image_from_memory(image, pdbFileData.As<const mono_byte>(), (int32_t)pdbFileData.Size());
+				mono_debug_open_image_from_memory(image, pdbFileData.As<const mono_byte>(), static_cast<int32_t>(pdbFileData.Size()));
 				ARC_CORE_TRACE("Loaded PDB: {}", pdbPath);
 			}
 		}
@@ -48,7 +48,7 @@ namespace ArcEngine
 
 	bool MonoUtils::CheckMonoError(MonoError& error)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		bool hasError = !mono_error_ok(&error);
 
@@ -68,7 +68,7 @@ namespace ArcEngine
 
 	std::string MonoUtils::MonoStringToUTF8(MonoString* monoString)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (monoString == nullptr || mono_string_length(monoString) == 0)
 			return "";
@@ -85,7 +85,7 @@ namespace ArcEngine
 
 	MonoString* MonoUtils::UTF8ToMonoString(const std::string& str)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		return mono_string_new(ScriptEngine::GetDomain(), str.c_str());
 	}

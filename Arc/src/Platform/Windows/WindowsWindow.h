@@ -16,35 +16,35 @@ namespace ArcEngine
 		
 		void OnUpdate() override;
 
-		unsigned int GetWidth() const override { return m_Data.Width; }
-		unsigned int GetHeight() const override { return m_Data.Height; }
+		[[nodiscard]] unsigned int GetWidth() const override { return m_Data.Width; }
+		[[nodiscard]] unsigned int GetHeight() const override { return m_Data.Height; }
 
 		// Window attributes
 		void SetEventCallBack(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
 		void SetVSync(bool enabled) override;
-		bool IsVSync() const override;
+		[[nodiscard]] bool IsVSync() const override;
 
-		bool IsMaximized() override { return glfwGetWindowAttrib(m_Window, GLFW_MAXIMIZED); }
+		[[nodiscard]] bool IsMaximized() override { return glfwGetWindowAttrib(m_Window, GLFW_MAXIMIZED); }
 		void Minimize() override;
 		void Maximize() override;
 		void Restore() override;
 		void RegisterOverTitlebar(bool value) override;
 
-		WindowHandle GetNativeWindow() const override { return m_Window; }
+		[[nodiscard]] WindowHandle GetNativeWindow() const override { return m_Window; }
 	private:
 		void Init(const WindowProps& props);
-		void Shutdown();
+		void Shutdown() const;
 
 	private:
-		GLFWwindow* m_Window;
+		GLFWwindow* m_Window = nullptr;
 		Scope<GraphicsContext> m_Context;
 
 		struct WindowData
 		{
 			std::string Title;
-			unsigned int Width;
-			unsigned int Height;
-			bool VSync;
+			unsigned int Width = 0;
+			unsigned int Height = 0;
+			bool VSync = true;
 
 			bool OverTitlebar = false;
 

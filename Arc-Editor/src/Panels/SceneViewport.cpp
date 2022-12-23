@@ -18,7 +18,7 @@ namespace ArcEngine
 
 	void SceneViewport::OnInit()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		constexpr uint32_t width = 1280;
 		constexpr uint32_t height = 720;
@@ -29,20 +29,24 @@ namespace ArcEngine
 
 	void SceneViewport::OnUpdate([[maybe_unused]] Timestep timestep)
 	{
-		ARC_PROFILE_SCOPE(m_ID.c_str());
+		ARC_PROFILE_SCOPE(m_ID.c_str())
 
 		if (FramebufferSpecification spec = m_RenderGraphData->CompositePassTarget->GetSpecification();
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized fb is invalid
-			(spec.Width != (uint32_t)m_ViewportSize.x || spec.Height != (uint32_t)m_ViewportSize.y))
+			(spec.Width != static_cast<uint32_t>(m_ViewportSize.x) || spec.Height != static_cast<uint32_t>(m_ViewportSize.y)))
 		{
-			m_MiniViewportRenderGraphData->Resize((uint32_t)(m_ViewportSize.x * m_MiniViewportSizeMultiplier), (uint32_t)(m_ViewportSize.y * m_MiniViewportSizeMultiplier));
-			m_RenderGraphData->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			auto miniViewportSize = m_ViewportSize * m_MiniViewportSizeMultiplier;
+			m_MiniViewportRenderGraphData->Resize(static_cast<uint32_t>(miniViewportSize.x), static_cast<uint32_t>(miniViewportSize.y));
+
+			uint32_t w = static_cast<uint32_t>(m_ViewportSize.x);
+			uint32_t h = static_cast<uint32_t>(m_ViewportSize.y);
+			m_RenderGraphData->Resize(w, h);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
-			m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_Scene->OnViewportResize(w, h);
 		}
 		else if (m_Scene->IsViewportDirty())
 		{
-			m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_Scene->OnViewportResize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
 		}
 
 		if (!m_SimulationRunning && m_UseEditorCamera)
@@ -115,11 +119,11 @@ namespace ArcEngine
 			auto [mx, my] = ImGui::GetMousePos();
 			mx -= m_ViewportBounds[0].x;
 			my -= m_ViewportBounds[0].y;
-			const int viewportWidth = (int)(m_ViewportBounds[1].x - m_ViewportBounds[0].x);
-			const int viewportHeight = (int)(m_ViewportBounds[1].y - m_ViewportBounds[0].y);
-			my = (float)viewportHeight - my;
-			const int mouseX = (int)mx;
-			const int mouseY = (int)my;
+			const auto viewportWidth = static_cast<int>(m_ViewportBounds[1].x - m_ViewportBounds[0].x);
+			const auto viewportHeight = static_cast<int>(m_ViewportBounds[1].y - m_ViewportBounds[0].y);
+			my = static_cast<float>(viewportHeight) - my;
+			const int mouseX = static_cast<int>(mx);
+			const int mouseY = static_cast<int>(my);
 			if(mouseX >= 0 && mouseY >= 0 && mouseX < viewportWidth && mouseY < viewportHeight)
 			{
 				// TODO: Scene GetEntity or use ray-cast for selection
@@ -150,7 +154,7 @@ namespace ArcEngine
 
 	void SceneViewport::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		ImVec2 windowPadding = ImGui::GetStyle().WindowPadding;
 
@@ -172,7 +176,7 @@ namespace ArcEngine
 			m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
 			uint64_t textureID = m_RenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
-			ImGui::Image((ImTextureID)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+			ImGui::Image(reinterpret_cast<ImTextureID>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 			if (m_SceneHierarchyPanel)
 				m_SceneHierarchyPanel->DragDropTarget();
@@ -180,7 +184,8 @@ namespace ArcEngine
 			if (!m_SimulationRunning)
 			{
 				// Transform Gizmos
-				ImGuizmo::SetID((int)(uint64_t)&m_ID);
+				uint64_t id = reinterpret_cast<uint64_t>(&m_ID);
+				ImGuizmo::SetID(static_cast<int>(id));
 				ImGuizmo::SetOrthographic(false);
 				ImGuizmo::SetDrawlist();
 				ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
@@ -190,7 +195,7 @@ namespace ArcEngine
 
 				if (m_SceneHierarchyPanel && m_GizmoType != -1)
 				{
-					ARC_PROFILE_SCOPE("Transform Gizmos");
+					ARC_PROFILE_SCOPE("Transform Gizmos")
 
 					EditorContext context = EditorLayer::GetInstance()->GetContext();
 					if (context.IsValid(EditorContextType::Entity))
@@ -211,20 +216,21 @@ namespace ArcEngine
 							float snapValues[3] = { snapValue, snapValue, snapValue };
 							float bounds[6] = { -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f };
 
-							ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), (ImGuizmo::OPERATION)m_GizmoType, (ImGuizmo::MODE)m_GizmoMode,
-								glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr, (ImGuizmo::OPERATION)m_GizmoType == ImGuizmo::OPERATION::BOUNDS ? bounds : nullptr, snap ? snapValues : nullptr);
+							ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), static_cast<ImGuizmo::OPERATION>(m_GizmoType), static_cast<ImGuizmo::MODE>(m_GizmoMode),
+								glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr, static_cast<ImGuizmo::OPERATION>(m_GizmoType) == ImGuizmo::OPERATION::BOUNDS ? bounds : nullptr, snap ? snapValues : nullptr);
 
 							if (ImGuizmo::IsUsing())
 							{
 								Entity parent = selectedEntity.GetParent();
 								const glm::mat4& parentWorldTransform = parent ? parent.GetWorldTransform() : glm::mat4(1.0f);
 								glm::vec3 translation, rotation, scale;
-								Math::DecomposeTransform(glm::inverse(parentWorldTransform) * transform, translation, rotation, scale);
-
-								tc.Translation = translation;
-								const glm::vec3 deltaRotation = rotation - tc.Rotation;
-								tc.Rotation += deltaRotation;
-								tc.Scale = scale;
+								if (Math::DecomposeTransform(glm::inverse(parentWorldTransform) * transform, translation, rotation, scale))
+								{
+									tc.Translation = translation;
+									const glm::vec3 deltaRotation = rotation - tc.Rotation;
+									tc.Rotation += deltaRotation;
+									tc.Scale = scale;
+								}
 							}
 						}
 					}
@@ -263,8 +269,8 @@ namespace ArcEngine
 
 					ImVec2 draggerCursorPos = ImGui::GetCursorPos();
 					ImGui::SetCursorPosX(draggerCursorPos.x + framePadding.x);
-					ImGui::TextUnformatted((const char*)ICON_MDI_DOTS_HORIZONTAL);
-					ImVec2 draggerSize = ImGui::CalcTextSize((const char*)ICON_MDI_DOTS_HORIZONTAL);
+					ImGui::TextUnformatted(StringUtils::FromChar8T(ICON_MDI_DOTS_HORIZONTAL));
+					ImVec2 draggerSize = ImGui::CalcTextSize(StringUtils::FromChar8T(ICON_MDI_DOTS_HORIZONTAL));
 					draggerSize.x *= 2.0f;
 					ImGui::SetCursorPos(draggerCursorPos);
 					ImGui::InvisibleButton("GizmoDragger", draggerSize);
@@ -278,17 +284,17 @@ namespace ArcEngine
 					lastMousePosition = mousePos;
 
 					constexpr float alpha = 0.6f;
-					if (UI::ToggleButton((const char*)ICON_MDI_AXIS_ARROW, m_GizmoType == ImGuizmo::TRANSLATE, buttonSize, alpha, alpha))
+					if (UI::ToggleButton(StringUtils::FromChar8T(ICON_MDI_AXIS_ARROW), m_GizmoType == ImGuizmo::TRANSLATE, buttonSize, alpha, alpha))
 						m_GizmoType = ImGuizmo::TRANSLATE;
-					if (UI::ToggleButton((const char*)ICON_MDI_ROTATE_3D, m_GizmoType == ImGuizmo::ROTATE, buttonSize, alpha, alpha))
+					if (UI::ToggleButton(StringUtils::FromChar8T(ICON_MDI_ROTATE_3D), m_GizmoType == ImGuizmo::ROTATE, buttonSize, alpha, alpha))
 						m_GizmoType = ImGuizmo::ROTATE;
-					if (UI::ToggleButton((const char*)ICON_MDI_ARROW_EXPAND, m_GizmoType == ImGuizmo::SCALE, buttonSize, alpha, alpha))
+					if (UI::ToggleButton(StringUtils::FromChar8T(ICON_MDI_ARROW_EXPAND), m_GizmoType == ImGuizmo::SCALE, buttonSize, alpha, alpha))
 						m_GizmoType = ImGuizmo::SCALE;
-					if (UI::ToggleButton((const char*)ICON_MDI_VECTOR_SQUARE, m_GizmoType == ImGuizmo::BOUNDS, buttonSize, alpha, alpha))
+					if (UI::ToggleButton(StringUtils::FromChar8T(ICON_MDI_VECTOR_SQUARE), m_GizmoType == ImGuizmo::BOUNDS, buttonSize, alpha, alpha))
 						m_GizmoType = ImGuizmo::BOUNDS;
-					if (UI::ToggleButton((const char*)ICON_MDI_ARROW_EXPAND_ALL, m_GizmoType == ImGuizmo::UNIVERSAL, buttonSize, alpha, alpha))
+					if (UI::ToggleButton(StringUtils::FromChar8T(ICON_MDI_ARROW_EXPAND_ALL), m_GizmoType == ImGuizmo::UNIVERSAL, buttonSize, alpha, alpha))
 						m_GizmoType = ImGuizmo::UNIVERSAL;
-					if (UI::ToggleButton(m_GizmoMode == ImGuizmo::WORLD ? (const char*)ICON_MDI_EARTH : (const char*)ICON_MDI_EARTH_OFF, m_GizmoMode == ImGuizmo::WORLD, buttonSize, alpha, alpha))
+					if (UI::ToggleButton(m_GizmoMode == ImGuizmo::WORLD ? StringUtils::FromChar8T(ICON_MDI_EARTH) : StringUtils::FromChar8T(ICON_MDI_EARTH_OFF), m_GizmoMode == ImGuizmo::WORLD, buttonSize, alpha, alpha))
 						m_GizmoMode = m_GizmoMode == ImGuizmo::LOCAL ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
 
 					ImGui::PopStyleVar(2);
@@ -301,7 +307,7 @@ namespace ArcEngine
 			EditorContext context = EditorLayer::GetInstance()->GetContext();
 			if (!m_SimulationRunning && context.IsValid(EditorContextType::Entity))
 			{
-				ARC_PROFILE_SCOPE("MiniViewport");
+				ARC_PROFILE_SCOPE("MiniViewport")
 
 				Entity selectedEntity = *context.As<Entity>();
 				if (selectedEntity && selectedEntity.HasComponent<CameraComponent>())
@@ -324,7 +330,7 @@ namespace ArcEngine
 					ImVec2 miniViewportSize = { m_ViewportSize.x * m_MiniViewportSizeMultiplier, m_ViewportSize.y * m_MiniViewportSizeMultiplier };
 					ImGui::SetCursorPos({ endCursorPos.x - miniViewportSize.x - windowPadding.x, endCursorPos.y - miniViewportSize.y - windowPadding.y });
 					uint64_t textureId = m_MiniViewportRenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
-					ImGui::Image((ImTextureID)textureId, ImVec2{ miniViewportSize.x, miniViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
+					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), ImVec2{ miniViewportSize.x, miniViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
 				}
 			}
 
@@ -336,7 +342,7 @@ namespace ArcEngine
 
 	void SceneViewport::OnOverlayRender() const
 	{
-		ARC_PROFILE_CATEGORY("Debug Rendering", Profile::Category::Debug);
+		ARC_PROFILE_CATEGORY("Debug Rendering", Profile::Category::Debug)
 
 		Renderer2D::BeginScene(m_EditorCamera.GetViewProjection());
 		{
@@ -357,9 +363,9 @@ namespace ArcEngine
 						{
 							const glm::vec4 pt = 
 							inv * glm::vec4(
-							2.0f * (float)x - 1.0f,
-							2.0f * (float)y - 1.0f,
-							2.0f * (float)z - 1.0f,
+							2.0f * static_cast<float>(x) - 1.0f,
+							2.0f * static_cast<float>(y) - 1.0f,
+							2.0f * static_cast<float>(z) - 1.0f,
 							1.0f);
 							frustumCorners[i] = (glm::vec3(pt) / pt.w);
 							++i;
@@ -396,10 +402,10 @@ namespace ArcEngine
 			auto polygonColliderView = m_Scene->GetAllEntitiesWith<TransformComponent, PolygonCollider2DComponent>();
 			for (auto &&[entity, tc, pc] : polygonColliderView.each())
 			{
-				glm::mat4 transform = Entity(entity, m_Scene.get()).GetWorldTransform();
-				glm::vec3 translation = glm::vec3(0.0f);
-				glm::vec3 rotation = glm::vec3(0.0f);
-				glm::vec3 scale = glm::vec3(0.0f);
+				auto transform = Entity(entity, m_Scene.get()).GetWorldTransform();
+				auto translation = glm::vec3(0.0f);
+				auto rotation = glm::vec3(0.0f);
+				auto scale = glm::vec3(0.0f);
 				Math::DecomposeTransform(transform, translation, rotation, scale);
 				transform = glm::translate(glm::mat4(1.0f), translation) * glm::toMat4(glm::quat(rotation));
 
@@ -408,7 +414,7 @@ namespace ArcEngine
 				for (size_t i = 0; i < pc.Points.size(); ++i)
 				{
 					glm::vec4 p0 = transform * glm::vec4(pc.Offset + pc.Points[i], 0.0f, 1.0f);
-					glm::vec4 p1 = glm::vec4(0.0f);
+					auto p1 = glm::vec4(0.0f);
 					if (i == pc.Points.size() - 1)
 						p1 = transform * glm::vec4(pc.Offset + pc.Points[0], 0.0f, 1.0f);
 					else

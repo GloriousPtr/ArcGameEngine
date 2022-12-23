@@ -29,9 +29,9 @@ namespace ArcEngine
 		void SetMat4(const std::string& name, const glm::mat4& value) override;
 		void SetUniformBlock(const std::string& name, uint32_t blockIndex) override;
 
-		std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality>& GetMaterialProperties() override { return m_MaterialProperties; }
+		[[nodiscard]] std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality>& GetMaterialProperties() override { return m_MaterialProperties; }
 
-		const std::string& GetName() const override { return m_Name; }
+		[[nodiscard]] const std::string& GetName() const override { return m_Name; }
 		
 		void UploadUniformInt(const std::string& name, int value);
 		void UploadUniformIntArray(const std::string& name, const int* values, uint32_t count);
@@ -45,12 +45,12 @@ namespace ArcEngine
 		void UploadUniformMat4(const std::string& name, const glm::mat4& matrix);
 
 	private:
-		int GetLocation(const std::string& name);
-		std::unordered_map<uint32_t, std::string> PreProcess(std::string_view source) const;
+		[[nodiscard]] int GetLocation(const std::string& name);
+		[[nodiscard]] std::unordered_map<uint32_t, std::string> PreProcess(std::string_view source) const;
 		void Compile(const std::unordered_map<uint32_t, std::string>& shaderSources);
 
 	private:
-		uint32_t m_RendererID;
+		uint32_t m_RendererID = 0;
 		std::string m_Name;
 		std::unordered_map<std::string, int, UM_StringTransparentEquality> m_UniformLocationCache;
 		std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality> m_MaterialProperties;

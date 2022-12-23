@@ -3,5 +3,5 @@
 
 namespace ArcEngine
 {
-	Scope<RendererAPI> RenderCommand::s_RendererAPI = RendererAPI::Create();
+	[[nodiscard]] Scope<RendererAPI> RenderCommand::s_RendererAPI = RendererAPI::Create();
 }

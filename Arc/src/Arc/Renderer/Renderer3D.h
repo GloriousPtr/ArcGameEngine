@@ -33,7 +33,7 @@ namespace ArcEngine
 		static void ReserveMeshes(size_t count);
 		static void SubmitMesh(const glm::mat4& transform, const Submesh& submesh, MeshComponent::CullModeType cullMode);
 
-		static ShaderLibrary& GetShaderLibrary() { return s_ShaderLibrary; }
+		[[nodiscard]] static ShaderLibrary& GetShaderLibrary() { return s_ShaderLibrary; }
 
 		struct Statistics
 		{
@@ -42,7 +42,7 @@ namespace ArcEngine
 		};
 
 		static void ResetStats();
-		static Statistics GetStats();
+		[[nodiscard]] static Statistics GetStats();
 
 	private:
 		static void SetupCameraData(const CameraData& cameraData);

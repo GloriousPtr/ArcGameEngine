@@ -12,6 +12,8 @@
 #include <mono/metadata/debug-helpers.h>
 #endif // ARC_DEBUG
 
+#include <ranges>
+
 #include "Arc/Project/Project.h"
 #include "Arc/Scene/Entity.h"
 #include "Arc/Scene/Scene.h"
@@ -76,7 +78,7 @@ namespace ArcEngine
 
 	void ScriptEngine::Init()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		mono_set_assemblies_path("mono/lib");
 
@@ -86,15 +88,16 @@ namespace ArcEngine
 		{
 			static char* options[] =
 			{
-				(char*)"--debugger-agent=transport=dt_socket,address=127.0.0.1:2550,server=y,suspend=n,loglevel=3,logfile=MonoDebugger.log",
-				(char*)"--soft-breakpoints"
+				const_cast<char*>(
+					"--debugger-agent=transport=dt_socket,address=127.0.0.1:2550,server=y,suspend=n,loglevel=3,logfile=MonoDebugger.log"),
+				const_cast<char*>("--soft-breakpoints")
 			};
-			mono_jit_parse_options(2, (char**)options);
+			mono_jit_parse_options(2, options);
 			mono_debug_init(MONO_DEBUG_FORMAT_MONO);
 		}
 
 		MonoDomain* rootDomain = mono_jit_init("ArcJITRuntime");
-		ARC_CORE_ASSERT(rootDomain);
+		ARC_CORE_ASSERT(rootDomain)
 		mono_domain_set(rootDomain, false);
 
 		if (s_Data->EnableDebugging)
@@ -110,7 +113,7 @@ namespace ArcEngine
 
 	void ScriptEngine::Shutdown()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		s_Data->EntityClasses.clear();
 		s_Data->EntityFields.clear();
@@ -126,7 +129,7 @@ namespace ArcEngine
 
 	void ScriptEngine::LoadCoreAssembly()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		auto project = Project::GetActive();
 		if (!project)
@@ -149,7 +152,7 @@ namespace ArcEngine
 
 	void ScriptEngine::LoadClientAssembly()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		auto project = Project::GetActive();
 		if (!project)
@@ -178,7 +181,7 @@ namespace ArcEngine
 
 	void ScriptEngine::ReloadAppDomain()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (!Project::GetActive())
 			return;
@@ -207,8 +210,8 @@ namespace ArcEngine
 			s_Data->AppDomain = nullptr;
 		}
 
-		s_Data->AppDomain = mono_domain_create_appdomain((char*)"ScriptRuntime", nullptr);
-		ARC_CORE_ASSERT(s_Data->AppDomain);
+		s_Data->AppDomain = mono_domain_create_appdomain(const_cast<char*>("ScriptRuntime"), nullptr);
+		ARC_CORE_ASSERT(s_Data->AppDomain)
 		mono_domain_set(s_Data->AppDomain, true);
 
 		LoadCoreAssembly();
@@ -217,7 +220,7 @@ namespace ArcEngine
 
 	void ArcEngine::ScriptEngine::LoadAssemblyClasses(MonoAssembly* assembly)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		MonoImage* image = mono_assembly_get_image(assembly);
 		const MonoTableInfo* typeDefinitionTable = mono_image_get_table_info(image, MONO_TABLE_TYPEDEF);
@@ -262,9 +265,9 @@ namespace ArcEngine
 
 	ScriptInstance* ScriptEngine::CreateInstance(Entity entity, const std::string& name)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
-		const auto& scriptClass = s_Data->EntityClasses.at(name);
+		auto& scriptClass = s_Data->EntityClasses.at(name);
 		UUID entityID = entity.GetUUID();
 		ScriptInstance* instance = new ScriptInstance(scriptClass, entityID);
 		s_Data->EntityRuntimeInstances[entityID][name] = instance;
@@ -273,7 +276,7 @@ namespace ArcEngine
 
 	bool ScriptEngine::HasInstance(Entity entity, const std::string& name)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		UUID id = entity.GetUUID();
 		return s_Data->EntityRuntimeInstances[id].contains(name);
@@ -281,21 +284,21 @@ namespace ArcEngine
 
 	ScriptInstance* ScriptEngine::GetInstance(Entity entity, const std::string& name)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		return s_Data->EntityRuntimeInstances.at(entity.GetUUID()).at(name);
 	}
 
 	bool ScriptEngine::HasClass(const std::string& className)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		return s_Data->EntityClasses.contains(className);
 	}
 
 	void ScriptEngine::RemoveInstance(Entity entity, const std::string& name)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		delete s_Data->EntityRuntimeInstances.at(entity.GetUUID()).at(name);
 		s_Data->EntityRuntimeInstances[entity.GetUUID()].erase(name);
@@ -332,7 +335,7 @@ namespace ArcEngine
 	ScriptClass::ScriptClass(MonoClass* monoClass)
 		: m_MonoClass(monoClass)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		LoadFields();
 	}
@@ -340,7 +343,7 @@ namespace ArcEngine
 	ScriptClass::ScriptClass(const std::string& classNamespace, const std::string& className)
 		: m_ClassNamespace(classNamespace), m_ClassName(className)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		m_MonoClass = mono_class_from_name(s_Data->AppImage, classNamespace.c_str(), className.c_str());
 		LoadFields();
@@ -348,7 +351,7 @@ namespace ArcEngine
 
 	GCHandle ScriptClass::Instantiate()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		MonoObject* object = mono_object_new(s_Data->AppDomain, m_MonoClass);
 		if (object)
@@ -360,16 +363,16 @@ namespace ArcEngine
 		return nullptr;
 	}
 
-	MonoMethod* ScriptClass::GetMethod(const char* methodName, uint32_t parameterCount)
+	MonoMethod* ScriptClass::GetMethod(const char* methodName, uint32_t parameterCount) const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
-		return mono_class_get_method_from_name(m_MonoClass, methodName, parameterCount);
+		return mono_class_get_method_from_name(m_MonoClass, methodName, static_cast<int>(parameterCount));
 	}
 
-	GCHandle ScriptClass::InvokeMethod(GCHandle gcHandle, MonoMethod* method, void** params)
+	GCHandle ScriptClass::InvokeMethod(GCHandle gcHandle, MonoMethod* method, void** params) const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		MonoObject* reference = GCManager::GetReferencedObject(gcHandle);
 		MonoObject* exception;
@@ -401,45 +404,45 @@ namespace ArcEngine
 	// Gets the accessibility level of the given field
 	static uint8_t GetFieldAccessibility(MonoClassField* field)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
-		uint8_t accessibility = (uint8_t)Accessibility::None;
+		uint8_t accessibility = static_cast<uint8_t>(Accessibility::None);
 		uint32_t accessFlag = mono_field_get_flags(field) & MONO_FIELD_ATTR_FIELD_ACCESS_MASK;
 
 		switch (accessFlag)
 		{
-		case MONO_FIELD_ATTR_PRIVATE:
-		{
-			accessibility = (uint8_t)Accessibility::Private;
-			break;
-		}
-		case MONO_FIELD_ATTR_FAM_AND_ASSEM:
-		{
-			accessibility |= (uint8_t)Accessibility::Protected;
-			accessibility |= (uint8_t)Accessibility::Internal;
-			break;
-		}
-		case MONO_FIELD_ATTR_ASSEMBLY:
-		{
-			accessibility = (uint8_t)Accessibility::Internal;
-			break;
-		}
-		case MONO_FIELD_ATTR_FAMILY:
-		{
-			accessibility = (uint8_t)Accessibility::Protected;
-			break;
-		}
-		case MONO_FIELD_ATTR_FAM_OR_ASSEM:
-		{
-			accessibility |= (uint8_t)Accessibility::Private;
-			accessibility |= (uint8_t)Accessibility::Protected;
-			break;
-		}
-		case MONO_FIELD_ATTR_PUBLIC:
-		{
-			accessibility = (uint8_t)Accessibility::Public;
-			break;
-		}
+			case MONO_FIELD_ATTR_PRIVATE:
+			{
+				accessibility = static_cast<uint8_t>(Accessibility::Private);
+				break;
+			}
+			case MONO_FIELD_ATTR_FAM_AND_ASSEM:
+			{
+				accessibility |= static_cast<uint8_t>(Accessibility::Protected);
+				accessibility |= static_cast<uint8_t>(Accessibility::Internal);
+				break;
+			}
+			case MONO_FIELD_ATTR_ASSEMBLY:
+			{
+				accessibility = static_cast<uint8_t>(Accessibility::Internal);
+				break;
+			}
+			case MONO_FIELD_ATTR_FAMILY:
+			{
+				accessibility = static_cast<uint8_t>(Accessibility::Protected);
+				break;
+			}
+			case MONO_FIELD_ATTR_FAM_OR_ASSEM:
+			{
+				accessibility |= static_cast<uint8_t>(Accessibility::Private);
+				accessibility |= static_cast<uint8_t>(Accessibility::Protected);
+				break;
+			}
+			case MONO_FIELD_ATTR_PUBLIC:
+			{
+				accessibility = static_cast<uint8_t>(Accessibility::Public);
+				break;
+			}
 		}
 
 		return accessibility;
@@ -447,7 +450,7 @@ namespace ArcEngine
 
 	void ScriptClass::LoadFields()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		m_Fields.clear();
 		m_FieldsMap.clear();
@@ -477,15 +480,14 @@ namespace ArcEngine
 			}
 
 			uint8_t accessibilityFlag = GetFieldAccessibility(monoField);
-			bool serializable = accessibilityFlag & (uint8_t)Accessibility::Public;
+			bool serializable = accessibilityFlag & static_cast<uint8_t>(Accessibility::Public);
 			bool hidden = !serializable;
-			std::string header = "";
-			std::string tooltip = "";
+			std::string header;
+			std::string tooltip;
 			float min = 0;
 			float max = 0;
 
-			MonoCustomAttrInfo* attr = mono_custom_attrs_from_field(m_MonoClass, monoField);
-			if (attr)
+			if (MonoCustomAttrInfo* attr = mono_custom_attrs_from_field(m_MonoClass, monoField))
 			{
 				if (!serializable)
 					serializable = mono_custom_attrs_has_attr(attr, s_Data->SerializeFieldAttribute);
@@ -502,7 +504,7 @@ namespace ArcEngine
 					MonoObject* attributeObject = mono_custom_attrs_get_attr(attr, s_Data->HeaderAttribute);
 					MonoClassField* messageField = mono_class_get_field_from_name(s_Data->HeaderAttribute, "Message");
 					MonoObject* monoStr = mono_field_get_value_object(ScriptEngine::GetDomain(), messageField, attributeObject);
-					header = MonoUtils::MonoStringToUTF8((MonoString*)monoStr);
+					header = MonoUtils::MonoStringToUTF8(reinterpret_cast<MonoString*>(monoStr));
 				}
 
 				if (mono_custom_attrs_has_attr(attr, s_Data->TooltipAttribute))
@@ -510,7 +512,7 @@ namespace ArcEngine
 					MonoObject* attributeObject = mono_custom_attrs_get_attr(attr, s_Data->TooltipAttribute);
 					MonoClassField* messageField = mono_class_get_field_from_name(s_Data->TooltipAttribute, "Message");
 					MonoObject* monoStr = mono_field_get_value_object(ScriptEngine::GetDomain(), messageField, attributeObject);
-					tooltip = MonoUtils::MonoStringToUTF8((MonoString*)monoStr);
+					tooltip = MonoUtils::MonoStringToUTF8(reinterpret_cast<MonoString*>(monoStr));
 				}
 
 				if (mono_custom_attrs_has_attr(attr, s_Data->RangeAttribute))
@@ -542,7 +544,7 @@ namespace ArcEngine
 
 			if (type == FieldType::String)
 			{
-				MonoString* monoStr = (MonoString*)mono_field_get_value_object(s_Data->AppDomain, monoField, tempObject);
+				MonoString* monoStr = reinterpret_cast<MonoString*>(mono_field_get_value_object(s_Data->AppDomain, monoField, tempObject));
 				std::string str = MonoUtils::MonoStringToUTF8(monoStr);
 				memcpy(scriptField.DefaultValue, str.data(), sizeof(scriptField.DefaultValue));
 			}
@@ -561,10 +563,10 @@ namespace ArcEngine
 	// Script Instance /////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////
 
-	ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass, UUID entityID)
+	ScriptInstance::ScriptInstance(Ref<ScriptClass>& scriptClass, UUID entityID)
 		: m_ScriptClass(scriptClass)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		m_Handle = scriptClass->Instantiate();
 
@@ -575,7 +577,7 @@ namespace ArcEngine
 		
 		std::string fullClassName = std::format("{}.{}", scriptClass->m_ClassNamespace, scriptClass->m_ClassName);
 		auto& fieldsMap = s_Data->EntityFields[entityID][fullClassName];
-		for (const auto& [fieldName, field] : scriptClass->m_FieldsMap)
+		for (const auto& fieldName : scriptClass->m_FieldsMap | std::views::keys)
 		{
 			const auto& fieldIt = fieldsMap.find(fieldName);
 			if (fieldIt != fieldsMap.end())
@@ -597,14 +599,14 @@ namespace ArcEngine
 
 	ScriptInstance::~ScriptInstance()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		GCManager::ReleaseObjectReference(m_Handle);
 	}
 
 	void ScriptInstance::InvokeOnCreate() const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (m_OnCreateMethod)
 			m_ScriptClass->InvokeMethod(m_Handle, m_OnCreateMethod);
@@ -612,7 +614,7 @@ namespace ArcEngine
 
 	void ScriptInstance::InvokeOnUpdate(float ts) const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (m_OnUpdateMethod)
 		{
@@ -623,7 +625,7 @@ namespace ArcEngine
 
 	void ScriptInstance::InvokeOnDestroy() const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (m_OnDestroyMethod)
 			m_ScriptClass->InvokeMethod(m_Handle, m_OnDestroyMethod);
@@ -631,7 +633,7 @@ namespace ArcEngine
 
 	void ScriptInstance::InvokeOnCollisionEnter2D(Collision2DData& other) const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		void* params = &other;
 		m_EntityClass->InvokeMethod(m_Handle, m_OnCollisionEnter2DMethod, &params);
@@ -639,7 +641,7 @@ namespace ArcEngine
 
 	void ScriptInstance::InvokeOnCollisionExit2D(Collision2DData& other) const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		void* params = &other;
 		m_EntityClass->InvokeMethod(m_Handle, m_OnCollisionExit2DMethod, &params);
@@ -647,7 +649,7 @@ namespace ArcEngine
 
 	void ScriptInstance::InvokeOnSensorEnter2D(Collision2DData& other) const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		void* params = &other;
 		m_EntityClass->InvokeMethod(m_Handle, m_OnSensorEnter2DMethod, &params);
@@ -655,7 +657,7 @@ namespace ArcEngine
 
 	void ScriptInstance::InvokeOnSensorExit2D(Collision2DData& other) const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		void* params = &other;
 		m_EntityClass->InvokeMethod(m_Handle, m_OnSensorExit2DMethod, &params);
@@ -668,7 +670,7 @@ namespace ArcEngine
 
     void ScriptInstance::GetFieldValueInternal(const std::string& name, void* value) const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		MonoClassField* classField = m_ScriptClass->m_FieldsMap.at(name).Field;
 		mono_field_get_value(GCManager::GetReferencedObject(m_Handle), classField, value);
@@ -676,27 +678,27 @@ namespace ArcEngine
 
 	void ScriptInstance::SetFieldValueInternal(const std::string& name, const void* value) const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		const auto& field = m_ScriptClass->m_FieldsMap.at(name);
 		MonoClassField* classField = field.Field;
 		if (field.Type == FieldType::String)
 		{
-			MonoString* monoStr = mono_string_new(s_Data->AppDomain, (const char*)value);
+			MonoString* monoStr = mono_string_new(s_Data->AppDomain, static_cast<const char*>(value));
 			mono_field_set_value(GCManager::GetReferencedObject(m_Handle), classField, monoStr);
 		}
 		else
 		{
-			mono_field_set_value(GCManager::GetReferencedObject(m_Handle), classField, (void*)value);
+			mono_field_set_value(GCManager::GetReferencedObject(m_Handle), classField, const_cast<void*>(value));
 		}
 	}
 
 	std::string ScriptInstance::GetFieldValueStringInternal(const std::string& name) const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		MonoClassField* classField = m_ScriptClass->m_FieldsMap.at(name).Field;
-		MonoString* monoStr = (MonoString*)mono_field_get_value_object(s_Data->AppDomain, classField, GCManager::GetReferencedObject(m_Handle));
+		auto* monoStr = reinterpret_cast<MonoString*>(mono_field_get_value_object(s_Data->AppDomain, classField, GCManager::GetReferencedObject(m_Handle)));
 		std::string str = MonoUtils::MonoStringToUTF8(monoStr);
 		return str;
 	}

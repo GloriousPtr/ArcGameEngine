@@ -12,7 +12,7 @@ namespace ArcEngine
 		
 		static void OnWindowResize(uint32_t width, uint32_t height);
 		
-		inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
+		[[nodiscard]] inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
 	private:
 		struct SceneData
 		{

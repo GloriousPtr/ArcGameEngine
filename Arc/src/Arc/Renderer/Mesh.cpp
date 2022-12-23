@@ -38,7 +38,7 @@ namespace std
 {
 	template<> struct hash<ArcEngine::Vertex>
 	{
-		size_t operator()(ArcEngine::Vertex const& vertex) const
+		size_t operator()(ArcEngine::Vertex const& vertex) const noexcept
 		{
 			std::size_t h1 = std::hash<glm::vec3>{}(vertex.Position);
 			std::size_t h2 = std::hash<glm::vec2>{}(vertex.TexCoord);
@@ -54,14 +54,14 @@ namespace ArcEngine
 {
 	Mesh::Mesh(const char* filepath)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		Load(filepath);
 	}
 
 	void Mesh::Load(const char* filepath)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		std::string ext = StringUtils::GetExtension(filepath);
 		bool supportedFile = ext == "obj";
@@ -104,7 +104,7 @@ namespace ArcEngine
 				size_t index_offset = 0;
 				for (size_t f = 0; f < shape.mesh.num_face_vertices.size(); f++)
 				{
-					size_t fv = size_t(shape.mesh.num_face_vertices[f]);
+					auto fv = static_cast<size_t>(shape.mesh.num_face_vertices[f]);
 
 					// Loop over vertices in the face.
 					for (size_t v = 0; v < fv; v++)
@@ -113,24 +113,24 @@ namespace ArcEngine
 						tinyobj::index_t idx = shape.mesh.indices[index_offset + v];
 
 						Vertex vertex;
-						vertex.Position.x = attrib.vertices[3 * size_t(idx.vertex_index) + 0];
-						vertex.Position.y = attrib.vertices[3 * size_t(idx.vertex_index) + 1];
-						vertex.Position.z = attrib.vertices[3 * size_t(idx.vertex_index) + 2];
+						vertex.Position.x = attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 0];
+						vertex.Position.y = attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 1];
+						vertex.Position.z = attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 2];
 						if (idx.texcoord_index >= 0)
 						{
-							vertex.TexCoord.x = attrib.texcoords[2 * size_t(idx.texcoord_index) + 0];
-							vertex.TexCoord.y = attrib.texcoords[2 * size_t(idx.texcoord_index) + 1];
+							vertex.TexCoord.x = attrib.texcoords[2 * static_cast<size_t>(idx.texcoord_index) + 0];
+							vertex.TexCoord.y = attrib.texcoords[2 * static_cast<size_t>(idx.texcoord_index) + 1];
 						}
 						if (idx.normal_index >= 0)
 						{
-							vertex.Normal.x = attrib.normals[3 * size_t(idx.normal_index) + 0];
-							vertex.Normal.y = attrib.normals[3 * size_t(idx.normal_index) + 1];
-							vertex.Normal.z = attrib.normals[3 * size_t(idx.normal_index) + 2];
+							vertex.Normal.x = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 0];
+							vertex.Normal.y = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 1];
+							vertex.Normal.z = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 2];
 						}
 
 						if (uniqueVertices.count(vertex) == 0)
 						{
-							uniqueVertices[vertex] = (uint32_t)(vertices.size());
+							uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
 							vertices.push_back(vertex);
 						}
 
@@ -144,7 +144,7 @@ namespace ArcEngine
 
 				Ref<VertexArray> vertexArray = VertexArray::Create();
 
-				Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create((float*)vertices.data(), (sizeof(Vertex) * vertices.size()));
+				Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(reinterpret_cast<float*>(vertices.data()), (sizeof(Vertex) * vertices.size()));
 				vertexBuffer->SetLayout({
 					{ ShaderDataType::Float3, "a_Position" },
 					{ ShaderDataType::Float2, "a_TexCoord" },
@@ -173,7 +173,7 @@ namespace ArcEngine
 					{
 						if (property.Type == MaterialPropertyType::Sampler2D)
 						{
-							uint32_t slot = submesh.Mat->GetData<uint32_t>(name.c_str());
+							auto slot = submesh.Mat->GetData<uint32_t>(name.c_str());
 
 							if (!material.diffuse_texname.empty() &&
 								(name.find("albedo") != std::string::npos || name.find("Albedo") != std::string::npos ||
@@ -221,9 +221,9 @@ namespace ArcEngine
 
 	Submesh& Mesh::GetSubmesh(size_t index)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
-		ARC_CORE_ASSERT(index < m_Submeshes.size(), "Submesh index out of bounds");
+		ARC_CORE_ASSERT(index < m_Submeshes.size(), "Submesh index out of bounds")
 
 		return m_Submeshes[index];
 	}

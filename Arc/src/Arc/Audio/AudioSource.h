@@ -40,16 +40,16 @@ namespace ArcEngine
 		explicit AudioSource(const char* filepath);
 		~AudioSource();
 
-		AudioSource(const AudioSource& other) = default;
-		AudioSource(AudioSource&& other) = default;
+		AudioSource(const AudioSource& other) = delete;
+		AudioSource(AudioSource&& other) = delete;
 
-		const char* GetPath() const { return m_Path.c_str(); }
+		[[nodiscard]] const char* GetPath() const { return m_Path.c_str(); }
 
 		void Play() const;
 		void Pause() const;
 		void UnPause() const;
 		void Stop() const;
-		bool IsPlaying() const;
+		[[nodiscard]] bool IsPlaying() const;
 
 		void SetConfig(const AudioSourceConfig& config);
 

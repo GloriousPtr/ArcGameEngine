@@ -33,10 +33,10 @@ namespace ArcEngine
 {
 	std::map<EntityLayer, EntityLayerData> Scene::LayerCollisionMask =
 	{
-		{ BIT(0), { "Static",		(uint16_t)0xFFFF, 0 } },
-		{ BIT(1), { "Default",		(uint16_t)0xFFFF, 1 } },
-		{ BIT(2), { "Player",		(uint16_t)0xFFFF, 2 } },
-		{ BIT(3), { "Sensor",		(uint16_t)0xFFFF, 3 } },
+		{ BIT(0), { "Static",		static_cast<uint16_t>(0xFFFF), 0 } },
+		{ BIT(1), { "Default",		static_cast<uint16_t>(0xFFFF), 1 } },
+		{ BIT(2), { "Player",		static_cast<uint16_t>(0xFFFF), 2 } },
+		{ BIT(3), { "Sensor",		static_cast<uint16_t>(0xFFFF), 3 } },
 	};
 
 	#pragma region Physics2DListeners
@@ -47,13 +47,13 @@ namespace ArcEngine
 		explicit Physics2DContactListener(Scene* scene)
 			: m_Scene(scene)
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 		}
 
 		~Physics2DContactListener() override
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			m_BuoyancyFixtures.clear();
 		}
@@ -65,15 +65,15 @@ namespace ArcEngine
 
 		void BeginContact(b2Contact* contact) override
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			b2Fixture* a = contact->GetFixtureA();
 			b2Fixture* b = contact->GetFixtureB();
 
 			bool aSensor = a->IsSensor();
 			bool bSensor = b->IsSensor();
-			Entity e1 = { (entt::entity)(uint32_t)a->GetUserData().pointer, m_Scene };
-			Entity e2 = { (entt::entity)(uint32_t)b->GetUserData().pointer, m_Scene };
+			Entity e1 = { static_cast<entt::entity>(static_cast<uint32_t>(a->GetUserData().pointer)), m_Scene };
+			Entity e2 = { static_cast<entt::entity>(static_cast<uint32_t>(b->GetUserData().pointer)), m_Scene };
 
 			if (e1.HasComponent<BuoyancyEffector2DComponent>() && aSensor
 				&& !e2.HasComponent<BuoyancyEffector2DComponent>() && b->GetBody()->GetType() == b2_dynamicBody)
@@ -86,7 +86,7 @@ namespace ArcEngine
 				m_BuoyancyFixtures.insert(std::make_pair(b, a));
 			}
 
-			b2WorldManifold worldManifold;
+			b2WorldManifold worldManifold{};
 			contact->GetWorldManifold(&worldManifold);
 			b2Vec2 point = worldManifold.points[0];
 			b2Vec2 velocityA = a->GetBody()->GetLinearVelocityFromWorldPoint(point);
@@ -135,14 +135,14 @@ namespace ArcEngine
 
 		void EndContact(b2Contact* contact) override
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			b2Fixture* a = contact->GetFixtureA();
 			b2Fixture* b = contact->GetFixtureB();
 			bool aSensor = a->IsSensor();
 			bool bSensor = b->IsSensor();
-			Entity e1 = { (entt::entity)(uint32_t)a->GetUserData().pointer, m_Scene };
-			Entity e2 = { (entt::entity)(uint32_t)b->GetUserData().pointer, m_Scene };
+			Entity e1 = { static_cast<entt::entity>(static_cast<uint32_t>(a->GetUserData().pointer)), m_Scene };
+			Entity e2 = { static_cast<entt::entity>(static_cast<uint32_t>(b->GetUserData().pointer)), m_Scene };
 
 			if (e1.HasComponent<BuoyancyEffector2DComponent>() && aSensor
 				&& !e2.HasComponent<BuoyancyEffector2DComponent>() && b->GetBody()->GetType() == b2_dynamicBody)
@@ -155,7 +155,7 @@ namespace ArcEngine
 				m_BuoyancyFixtures.erase(std::make_pair(b, a));
 			}
 
-			b2WorldManifold worldManifold;
+			b2WorldManifold worldManifold{};
 			contact->GetWorldManifold(&worldManifold);
 			b2Vec2 point = worldManifold.points[0];
 			b2Vec2 velocityA = a->GetBody()->GetLinearVelocityFromWorldPoint(point);
@@ -204,21 +204,21 @@ namespace ArcEngine
 
 		void PreSolve(b2Contact* contact, const b2Manifold* oldManifold) override
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			/* Handle pre solve */
 		}
 
 		void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) override
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			/* Handle post solve */
 		}
 
 		void OnUpdate([[maybe_unused]] Timestep ts)
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			auto it = m_BuoyancyFixtures.begin();
 			auto end = m_BuoyancyFixtures.end();
@@ -227,7 +227,7 @@ namespace ArcEngine
 				b2Fixture* fluid = it->first;
 				b2Fixture* fixture = it->second;
 
-				Entity fluidEntity = { (entt::entity)(uint32_t)fluid->GetUserData().pointer, m_Scene };
+				Entity fluidEntity = { static_cast<entt::entity>(static_cast<uint32_t>(fluid->GetUserData().pointer)), m_Scene };
 				const auto& buoyancyComponent2D = fluidEntity.GetComponent<BuoyancyEffector2DComponent>();
 				b2Vec2 gravity = { m_Scene->Gravity.x, m_Scene->Gravity.y };
 				PhysicsUtils::HandleBuoyancy(fluid, fixture, gravity, buoyancyComponent2D.FlipGravity, buoyancyComponent2D.Density, buoyancyComponent2D.DragMultiplier, buoyancyComponent2D.FlowMagnitude, buoyancyComponent2D.FlowAngle);
@@ -250,7 +250,7 @@ namespace ArcEngine
 	private:
 		static void	GetFrictionAndRestitution(const JPH::Body& inBody, const JPH::SubShapeID& inSubShapeID, float& outFriction, float& outRestitution)
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			// Get the material that corresponds to the sub shape ID
 			const JPH::PhysicsMaterial* material = inBody.GetShape()->GetMaterial(inSubShapeID);
@@ -261,7 +261,7 @@ namespace ArcEngine
 			}
 			else
 			{
-				const PhysicsMaterial3D* phyMaterial = (const PhysicsMaterial3D*)material;
+				const auto* phyMaterial = dynamic_cast<const PhysicsMaterial3D*>(material);
 				outFriction = phyMaterial->Friction;
 				outRestitution = phyMaterial->Restitution;
 			}
@@ -269,7 +269,7 @@ namespace ArcEngine
 
 		static void	OverrideContactSettings(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings)
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			// Get the custom friction and restitution for both bodies
 			float friction1, friction2, restitution1, restitution2;
@@ -284,28 +284,28 @@ namespace ArcEngine
 	public:
 		JPH::ValidateResult OnContactValidate(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::CollideShapeResult& inCollisionResult) override
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
 		}
 
 		void OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			OverrideContactSettings(inBody1, inBody2, inManifold, ioSettings);
 		}
 
 		void OnContactPersisted(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			OverrideContactSettings(inBody1, inBody2, inManifold, ioSettings);
 		}
 
 		void OnContactRemoved(const JPH::SubShapeIDPair& inSubShapePair) override
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			/* On Collision Exit */
 		}
@@ -316,14 +316,14 @@ namespace ArcEngine
 	public:
 		void OnBodyActivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			/* Body Activated */
 		}
 
 		void OnBodyDeactivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			/* Body Deactivated */
 		}
@@ -372,9 +372,9 @@ namespace ArcEngine
 		CopyComponent<Component...>(dst, srcEntity, dstEntity);
 	}
 
-	Ref<Scene> Scene::CopyTo(Ref<Scene> other)
+	Ref<Scene> Scene::CopyTo(const Ref<Scene>& other)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		Ref<Scene> newScene = CreateRef<Scene>();
 		newScene->VelocityIterations = other->VelocityIterations;
@@ -384,7 +384,7 @@ namespace ArcEngine
 		newScene->m_ViewportHeight = other->m_ViewportHeight;
 
 		auto view = other->m_Registry.group<IDComponent, TagComponent>();
-		for (auto it = view.rbegin(); it != view.rend(); it++)
+		for (auto it = view.rbegin(); it != view.rend(); ++it)
 		{
 			auto [id, tag] = view.get<IDComponent, TagComponent>(*it);
 			Entity newEntity = newScene->CreateEntityWithUUID(id.ID, tag.Tag);
@@ -415,14 +415,14 @@ namespace ArcEngine
 
 	Entity Scene::CreateEntity(const std::string& name)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		return CreateEntityWithUUID(UUID(), name);
 	}
 
 	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		Entity entity = { m_Registry.create(), this };
 		m_EntityMap.emplace(uuid, entity);
@@ -440,7 +440,7 @@ namespace ArcEngine
 
 	void Scene::DestroyEntity(Entity entity)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		entity.Deparent();
 		auto children = entity.GetComponent<RelationshipComponent>().Children;
@@ -457,7 +457,7 @@ namespace ArcEngine
 
 	Entity Scene::Duplicate(Entity entity)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		std::string name = entity.GetComponent<TagComponent>().Tag;
 		Entity duplicate = CreateEntity(name);
@@ -467,14 +467,14 @@ namespace ArcEngine
 
 	bool Scene::HasEntity(UUID uuid) const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		return m_EntityMap.contains(uuid);
 	}
 
 	Entity Scene::GetEntity(UUID uuid)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		const auto& it = m_EntityMap.find(uuid);
 		if (it != m_EntityMap.end())
@@ -485,7 +485,7 @@ namespace ArcEngine
 
 	void Scene::OnRuntimeStart()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		SortForSprites();
 
@@ -495,7 +495,7 @@ namespace ArcEngine
 
 		#pragma region Physics
 		{
-			ARC_PROFILE_CATEGORY("Physics", Profile::Category::Physics);
+			ARC_PROFILE_CATEGORY("Physics", Profile::Category::Physics)
 
 			#pragma region Physics3D
 			{
@@ -540,8 +540,8 @@ namespace ArcEngine
 						Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
 						if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
 						{
-							b2Body* body1 = (b2Body*)body.RuntimeBody;
-							b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+							auto body1 = static_cast<b2Body*>(body.RuntimeBody);
+							auto body2 = static_cast<b2Body*>(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
 
 							b2Vec2 worldAnchorA = body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y });
 							b2Vec2 worldAnchorB = body2->GetWorldPoint({ joint.ConnectedAnchor.x, joint.ConnectedAnchor.y });
@@ -564,8 +564,8 @@ namespace ArcEngine
 						Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
 						if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
 						{
-							b2Body* body1 = (b2Body*)body.RuntimeBody;
-							b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+							auto body1 = static_cast<b2Body*>(body.RuntimeBody);
+							auto body2 = static_cast<b2Body*>(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
 
 							b2Vec2 worldAnchorA = body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y });
 							b2Vec2 worldAnchorB = body2->GetWorldPoint({ joint.ConnectedAnchor.x, joint.ConnectedAnchor.y });
@@ -589,8 +589,8 @@ namespace ArcEngine
 						Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
 						if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
 						{
-							b2Body* body1 = (b2Body*)body.RuntimeBody;
-							b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+							auto body1 = static_cast<b2Body*>(body.RuntimeBody);
+							auto body2 = static_cast<b2Body*>(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
 
 							b2RevoluteJointDef jd;
 							jd.Initialize(body1, body2, body1->GetWorldPoint({ joint.Anchor.x, joint.Anchor.y }));
@@ -612,8 +612,8 @@ namespace ArcEngine
 						Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
 						if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
 						{
-							b2Body* body1 = (b2Body*)body.RuntimeBody;
-							b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+							auto body1 = static_cast<b2Body*>(body.RuntimeBody);
+							auto body2 = static_cast<b2Body*>(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
 
 							b2Vec2 worldAxis(1.0f, 0.0f);
 
@@ -638,8 +638,8 @@ namespace ArcEngine
 						Entity connectedBodyEntity = GetEntity(joint.ConnectedRigidbody);
 						if (connectedBodyEntity && connectedBodyEntity.HasComponent<Rigidbody2DComponent>())
 						{
-							b2Body* body1 = (b2Body*)body.RuntimeBody;
-							b2Body* body2 = (b2Body*)(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
+							auto body1 = static_cast<b2Body*>(body.RuntimeBody);
+							auto body2 = static_cast<b2Body*>(connectedBodyEntity.GetComponent<Rigidbody2DComponent>().RuntimeBody);
 
 							b2Vec2 axis(0.0f, 1.0f);
 
@@ -669,7 +669,7 @@ namespace ArcEngine
 
 		#pragma region Audio
 		{
-			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio);
+			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio)
 
 			auto listenerView = m_Registry.group<AudioListenerComponent>(entt::get<TransformComponent>);
 			for (auto &&[e, ac, tc] : listenerView.each())
@@ -705,7 +705,7 @@ namespace ArcEngine
 
 		#pragma region VFX
 		{
-			ARC_PROFILE_SCOPE("Submit Particle Data");
+			ARC_PROFILE_SCOPE("Submit Particle Data")
 
 			auto particleSystemView = m_Registry.view<ParticleSystemComponent>();
 			for (auto&& [e, psc] : particleSystemView.each())
@@ -720,25 +720,25 @@ namespace ArcEngine
 
 		#pragma region Scripting
 		{
-			ARC_PROFILE_CATEGORY("OnCreate", Profile::Category::Script);
+			ARC_PROFILE_CATEGORY("OnCreate", Profile::Category::Script)
 
 			auto scriptView = m_Registry.view<ScriptComponent>();
 			for (auto &&[e, sc] : scriptView.each())
 			{
 				Entity entity = { e, this };
-				ARC_PROFILE_TAG("Entity", entity.GetTag().data());
-				ARC_PROFILE_TAG("EntityID", entity.GetUUID());
+				ARC_PROFILE_TAG("Entity", entity.GetTag().data())
+				ARC_PROFILE_TAG("EntityID", entity.GetUUID())
 
 				for (const auto& className : sc.Classes)
 				{
-					ARC_PROFILE_TAG("ScriptInstantiate", className.c_str());
+					ARC_PROFILE_TAG("ScriptInstantiate", className.c_str())
 
 					ScriptEngine::CreateInstance(entity, className);
 				}
 
 				for (const auto& className : sc.Classes)
 				{
-					ARC_PROFILE_TAG("Script", className.c_str());
+					ARC_PROFILE_TAG("Script", className.c_str())
 
 					ScriptEngine::GetInstance(entity, className)->InvokeOnCreate();
 				}
@@ -749,24 +749,24 @@ namespace ArcEngine
 
 	void Scene::OnRuntimeStop()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		m_IsRunning = false;
 
 		#pragma region Scripting
 		{
-			ARC_PROFILE_CATEGORY("OnDestroy", Profile::Category::Script);
+			ARC_PROFILE_CATEGORY("OnDestroy", Profile::Category::Script)
 
 			auto scriptView = m_Registry.view<ScriptComponent>();
 			for (auto &&[e, sc] : scriptView.each())
 			{
 				Entity entity = { e, this };
-				ARC_PROFILE_TAG("Entity", entity.GetTag().data());
-				ARC_PROFILE_TAG("EntityID", entity.GetUUID());
+				ARC_PROFILE_TAG("Entity", entity.GetTag().data())
+				ARC_PROFILE_TAG("EntityID", entity.GetUUID())
 
 				for (const auto& className : sc.Classes)
 				{
-					ARC_PROFILE_TAG("Script", className.c_str());
+					ARC_PROFILE_TAG("Script", className.c_str())
 
 					ScriptEngine::GetInstance(entity, className)->InvokeOnDestroy();
 					ScriptEngine::RemoveInstance(entity, className);
@@ -779,7 +779,7 @@ namespace ArcEngine
 
 		#pragma region Audio
 		{
-			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio);
+			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio)
 
 			auto view = m_Registry.view<AudioSourceComponent>();
 			for (auto &&[e, ac] : view.each())
@@ -792,7 +792,7 @@ namespace ArcEngine
 
 		#pragma region Physics
 		{
-			ARC_PROFILE_CATEGORY("Physics", Profile::Category::Physics);
+			ARC_PROFILE_CATEGORY("Physics", Profile::Category::Physics)
 
 			#pragma region Physics3D
 			{
@@ -802,7 +802,7 @@ namespace ArcEngine
 				{
 					if (rb.RuntimeBody)
 					{
-						const JPH::Body* body = (const JPH::Body*)rb.RuntimeBody;
+						const auto* body = static_cast<const JPH::Body*>(rb.RuntimeBody);
 						bodyInterface.RemoveBody(body->GetID());
 						bodyInterface.DestroyBody(body->GetID());
 					}
@@ -830,11 +830,11 @@ namespace ArcEngine
 
 	void Scene::OnUpdateEditor([[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		#pragma region VFX
 		{
-			ARC_PROFILE_CATEGORY("VFX", Profile::Category::VFX);
+			ARC_PROFILE_CATEGORY("VFX", Profile::Category::VFX)
 
 			auto particleSystemView = m_Registry.view<TransformComponent, ParticleSystemComponent>();
 			for (auto&& [e, tc, psc] : particleSystemView.each())
@@ -854,22 +854,22 @@ namespace ArcEngine
 
 	void Scene::OnUpdateRuntime([[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		#pragma region Scripting
 		{
-			ARC_PROFILE_CATEGORY("OnUpdate", Profile::Category::Script);
+			ARC_PROFILE_CATEGORY("OnUpdate", Profile::Category::Script)
 
 			auto scriptView = m_Registry.view<ScriptComponent>();
 			for (auto &&[e, sc] : scriptView.each())
 			{
 				Entity entity = { e, this };
-				ARC_PROFILE_TAG("Entity", entity.GetTag().data());
-				ARC_PROFILE_TAG("EntityID", entity.GetUUID());
+				ARC_PROFILE_TAG("Entity", entity.GetTag().data())
+				ARC_PROFILE_TAG("EntityID", entity.GetUUID())
 
 				for (const auto& className : sc.Classes)
 				{
-					ARC_PROFILE_TAG("Script", className.c_str());
+					ARC_PROFILE_TAG("Script", className.c_str())
 
 					ScriptEngine::GetInstance(entity, className)->InvokeOnUpdate(ts);
 				}
@@ -879,7 +879,7 @@ namespace ArcEngine
 		
 		#pragma region Physics
 		{
-			ARC_PROFILE_CATEGORY("Physics", Profile::Category::Physics);
+			ARC_PROFILE_CATEGORY("Physics", Profile::Category::Physics)
 
 			// Minimum stable value is 16.0
 			constexpr float physicsStepRate = 50.0f;
@@ -891,7 +891,7 @@ namespace ArcEngine
 			while (m_PhysicsFrameAccumulator >= physicsTs)
 			{
 				m_ContactListener2D->OnUpdate(physicsTs);
-				m_PhysicsWorld2D->Step(physicsTs, VelocityIterations, PositionIterations);
+				m_PhysicsWorld2D->Step(physicsTs, static_cast<int32_t>(VelocityIterations), static_cast<int32_t>(PositionIterations));
 
 				Physics3D::Step(physicsTs);
 
@@ -910,7 +910,7 @@ namespace ArcEngine
 					if (!rb.RuntimeBody)
 						continue;
 
-					auto body = (const JPH::Body*)rb.RuntimeBody;
+					auto body = static_cast<const JPH::Body*>(rb.RuntimeBody);
 
 					if (!bodyInterface.IsActive(body->GetID()))
 						continue;
@@ -952,7 +952,7 @@ namespace ArcEngine
 				auto view = m_Registry.group<Rigidbody2DComponent>(entt::get<TransformComponent>);
 				for (auto &&[e, rb, tc] : view.each())
 				{
-					const b2Body* body = (b2Body*)rb.RuntimeBody;
+					const auto* body = static_cast<b2Body*>(rb.RuntimeBody);
 
 					if (!body->IsAwake())
 						continue;
@@ -989,7 +989,7 @@ namespace ArcEngine
 				{
 					if (joint.RuntimeJoint)
 					{
-						b2Joint* j = (b2Joint*)joint.RuntimeJoint;
+						auto j = static_cast<b2Joint*>(joint.RuntimeJoint);
 
 						if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce)
 						{
@@ -1004,7 +1004,7 @@ namespace ArcEngine
 				{
 					if (joint.RuntimeJoint)
 					{
-						b2Joint* j = (b2Joint*)joint.RuntimeJoint;
+						auto j = static_cast<b2Joint*>(joint.RuntimeJoint);
 
 						if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce)
 						{
@@ -1019,7 +1019,7 @@ namespace ArcEngine
 				{
 					if (joint.RuntimeJoint)
 					{
-						b2Joint* j = (b2Joint*)joint.RuntimeJoint;
+						auto j = static_cast<b2Joint*>(joint.RuntimeJoint);
 
 						if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce
 							|| j->GetReactionTorque(physicsStepRate) > joint.BreakTorque)
@@ -1035,7 +1035,7 @@ namespace ArcEngine
 				{
 					if (joint.RuntimeJoint)
 					{
-						b2Joint* j = (b2Joint*)joint.RuntimeJoint;
+						auto j = static_cast<b2Joint*>(joint.RuntimeJoint);
 
 						if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce
 							|| j->GetReactionTorque(physicsStepRate) > joint.BreakTorque)
@@ -1051,7 +1051,7 @@ namespace ArcEngine
 				{
 					if (joint.RuntimeJoint)
 					{
-						b2Joint* j = (b2Joint*)joint.RuntimeJoint;
+						auto j = static_cast<b2Joint*>(joint.RuntimeJoint);
 
 						if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce
 							|| j->GetReactionTorque(physicsStepRate) > joint.BreakTorque)
@@ -1068,7 +1068,7 @@ namespace ArcEngine
 
 		#pragma region Audio
 		{
-			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio);
+			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio)
 
 			auto listenerView = m_Registry.group<AudioListenerComponent>(entt::get<TransformComponent>);
 			for (auto &&[e, ac, tc] : listenerView.each())
@@ -1100,7 +1100,7 @@ namespace ArcEngine
 
 		#pragma region VFX
 		{
-			ARC_PROFILE_CATEGORY("VFX", Profile::Category::VFX);
+			ARC_PROFILE_CATEGORY("VFX", Profile::Category::VFX)
 
 			auto particleSystemView = m_Registry.view<TransformComponent, ParticleSystemComponent>();
 			for (auto&& [e, tc, psc] : particleSystemView.each())
@@ -1111,7 +1111,7 @@ namespace ArcEngine
 		#pragma region Rendering
 		CameraData cameraData = {};
 		{
-			ARC_PROFILE_CATEGORY("Camera", Profile::Category::Camera);
+			ARC_PROFILE_CATEGORY("Camera", Profile::Category::Camera)
 
 			Entity cameraEntity = GetPrimaryCameraEntity();
 			if (!overrideCamera)
@@ -1141,7 +1141,7 @@ namespace ArcEngine
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		m_ViewportWidth = width;
 		m_ViewportHeight = height;
@@ -1160,7 +1160,7 @@ namespace ArcEngine
 
 	Entity Scene::GetPrimaryCameraEntity()
 	{
-		ARC_PROFILE_CATEGORY("Camera", Profile::Category::Camera);
+		ARC_PROFILE_CATEGORY("Camera", Profile::Category::Camera)
 
 		auto view = m_Registry.view<CameraComponent>();
 		for (auto entity : view)
@@ -1182,11 +1182,11 @@ namespace ArcEngine
 
 	void Scene::OnRender(const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData)
 	{
-		ARC_PROFILE_CATEGORY("Rendering", Profile::Category::Rendering);
+		ARC_PROFILE_CATEGORY("Rendering", Profile::Category::Rendering)
 
 		std::vector<Entity> lights;
 		{
-			ARC_PROFILE_SCOPE("Prepare Light Data");
+			ARC_PROFILE_SCOPE("Prepare Light Data")
 
 			auto view = m_Registry.view<LightComponent>();
 			lights.reserve(view.size());
@@ -1195,7 +1195,7 @@ namespace ArcEngine
 		}
 		Entity skylight = {};
 		{
-			ARC_PROFILE_SCOPE("PrepareSkylightData");
+			ARC_PROFILE_SCOPE("PrepareSkylightData")
 
 			auto view = m_Registry.view<SkyLightComponent>();
 			if (!view.empty())
@@ -1205,7 +1205,7 @@ namespace ArcEngine
 		Renderer3D::BeginScene(cameraData, skylight, std::move(lights));
 		// Meshes
 		{
-			ARC_PROFILE_SCOPE("Submit Mesh Data");
+			ARC_PROFILE_SCOPE("Submit Mesh Data")
 
 			auto view = m_Registry.view<MeshComponent>();
 			Renderer3D::ReserveMeshes(view.size());
@@ -1213,7 +1213,7 @@ namespace ArcEngine
 			{
 				if (meshComponent.MeshGeometry && meshComponent.MeshGeometry->GetSubmeshCount() != 0)
 				{
-					ARC_CORE_ASSERT(meshComponent.MeshGeometry->GetSubmeshCount() > meshComponent.SubmeshIndex, "Trying to access submesh index that does not exist!");
+					ARC_CORE_ASSERT(meshComponent.MeshGeometry->GetSubmeshCount() > meshComponent.SubmeshIndex, "Trying to access submesh index that does not exist!")
 					Renderer3D::SubmitMesh(Entity(entity, this).GetWorldTransform(), meshComponent.MeshGeometry->GetSubmesh(meshComponent.SubmeshIndex), meshComponent.CullMode);
 				}
 			}
@@ -1222,14 +1222,14 @@ namespace ArcEngine
 
 		Renderer2D::BeginScene(cameraData.ViewProjection);
 		{
-			ARC_PROFILE_SCOPE("Submit Particle Data");
+			ARC_PROFILE_SCOPE("Submit Particle Data")
 
 			auto particleSystemView = m_Registry.view<ParticleSystemComponent>();
 			for (auto&& [e, psc] : particleSystemView.each())
 				psc.System->OnRender();
 		}
 		{
-			ARC_PROFILE_SCOPE("Submit 2D Data");
+			ARC_PROFILE_SCOPE("Submit 2D Data")
 
 			auto view = m_Registry.view<SpriteRendererComponent>();
 			for (auto &&[entity, sprite] : view.each())
@@ -1242,9 +1242,9 @@ namespace ArcEngine
 
 	void Scene::CreateRigidbody(Entity entity, const TransformComponent& transform, RigidbodyComponent& component) const
 	{
-		ARC_PROFILE_SCOPE();
-		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
-		ARC_PROFILE_TAG("EntityID", entity.GetUUID());
+		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_TAG("Entity", entity.GetTag().data())
+		ARC_PROFILE_TAG("EntityID", entity.GetUUID())
 
 		if (!m_IsRunning)
 			return;
@@ -1252,7 +1252,7 @@ namespace ArcEngine
 		auto& bodyInterface = Physics3D::GetPhysicsSystem().GetBodyInterface();
 		if (component.RuntimeBody)
 		{
-			bodyInterface.DestroyBody(((JPH::Body*)component.RuntimeBody)->GetID());
+			bodyInterface.DestroyBody(static_cast<JPH::Body*>(component.RuntimeBody)->GetID());
 			component.RuntimeBody = nullptr;
 		}
 
@@ -1331,7 +1331,7 @@ namespace ArcEngine
 		if (collisionMaskIt != LayerCollisionMask.end())
 			layerIndex = collisionMaskIt->second.Index;
 
-		JPH::BodyCreationSettings bodySettings(compoundShapeSettings.Create().Get(), {transform.Translation.x, transform.Translation.y, transform.Translation.z}, {rotation.x, rotation.y, rotation.z, rotation.w}, (JPH::EMotionType)component.Type, layerIndex);
+		JPH::BodyCreationSettings bodySettings(compoundShapeSettings.Create().Get(), {transform.Translation.x, transform.Translation.y, transform.Translation.z}, {rotation.x, rotation.y, rotation.z, rotation.w}, static_cast<JPH::EMotionType>(component.Type), layerIndex);
 
 		if (!component.AutoMass)
 		{
@@ -1358,15 +1358,15 @@ namespace ArcEngine
 
 	void Scene::CreateRigidbody2D(Entity entity, const TransformComponent& transform, Rigidbody2DComponent& component) const
 	{
-		ARC_PROFILE_SCOPE();
-		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
-		ARC_PROFILE_TAG("EntityID", entity.GetUUID());
+		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_TAG("Entity", entity.GetTag().data())
+		ARC_PROFILE_TAG("EntityID", entity.GetUUID())
 
 		if (!m_PhysicsWorld2D)
 			return;
 
 		b2BodyDef def;
-		def.type = (b2BodyType)component.Type;
+		def.type = static_cast<b2BodyType>(component.Type);
 		def.linearDamping = glm::max(component.LinearDrag, 0.0f);
 		def.angularDamping = glm::max(component.AngularDrag, 0.0f);
 		def.allowSleep = component.AllowSleep;
@@ -1400,9 +1400,9 @@ namespace ArcEngine
 
 	void Scene::CreateBoxCollider2D(Entity entity, const TransformComponent& transform, const Rigidbody2DComponent& rb, BoxCollider2DComponent& component) const
 	{
-		ARC_PROFILE_SCOPE();
-		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
-		ARC_PROFILE_TAG("EntityID", entity.GetUUID());
+		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_TAG("Entity", entity.GetTag().data())
+		ARC_PROFILE_TAG("EntityID", entity.GetUUID())
 
 		if (!m_PhysicsWorld2D)
 			return;
@@ -1416,7 +1416,7 @@ namespace ArcEngine
 		fixtureDef.density = component.Density;
 		fixtureDef.friction = component.Friction;
 		fixtureDef.restitution = component.Restitution;
-		fixtureDef.userData.pointer = (uint32_t)entity;
+		fixtureDef.userData.pointer = static_cast<uint32_t>(entity);
 
 		auto layer = entity.GetComponent<TagComponent>().Layer;
 		auto collisionMaskIt = LayerCollisionMask.find(layer);
@@ -1425,16 +1425,16 @@ namespace ArcEngine
 		fixtureDef.filter.categoryBits = layer;
 		fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
 
-		auto* body = (b2Body*)rb.RuntimeBody;
+		auto* body = static_cast<b2Body*>(rb.RuntimeBody);
 		b2Fixture* fixture = body->CreateFixture(&fixtureDef);
 		component.RuntimeFixture = fixture;
 	}
 
 	void Scene::CreateCircleCollider2D(Entity entity, const TransformComponent& transform, const Rigidbody2DComponent& rb, CircleCollider2DComponent& component) const
 	{
-		ARC_PROFILE_SCOPE();
-		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
-		ARC_PROFILE_TAG("EntityID", entity.GetUUID());
+		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_TAG("Entity", entity.GetTag().data())
+		ARC_PROFILE_TAG("EntityID", entity.GetUUID())
 
 		if (!m_PhysicsWorld2D)
 			return;
@@ -1449,7 +1449,7 @@ namespace ArcEngine
 		fixtureDef.density = component.Density;
 		fixtureDef.friction = component.Friction;
 		fixtureDef.restitution = component.Restitution;
-		fixtureDef.userData.pointer = (uint32_t)entity;
+		fixtureDef.userData.pointer = static_cast<uint32_t>(entity);
 
 		auto layer = entity.GetComponent<TagComponent>().Layer;
 		auto collisionMaskIt = LayerCollisionMask.find(layer);
@@ -1458,16 +1458,16 @@ namespace ArcEngine
 		fixtureDef.filter.categoryBits = layer;
 		fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
 
-		auto* body = (b2Body*)rb.RuntimeBody;
+		auto* body = static_cast<b2Body*>(rb.RuntimeBody);
 		b2Fixture* fixture = body->CreateFixture(&fixtureDef);
 		component.RuntimeFixture = fixture;
 	}
 
 	void Scene::CreatePolygonCollider2D(Entity entity, const Rigidbody2DComponent& rb, PolygonCollider2DComponent& component) const
 	{
-		ARC_PROFILE_SCOPE();
-		ARC_PROFILE_TAG("Entity", entity.GetTag().data());
-		ARC_PROFILE_TAG("EntityID", entity.GetUUID());
+		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_TAG("Entity", entity.GetTag().data())
+		ARC_PROFILE_TAG("EntityID", entity.GetUUID())
 
 		if (!m_PhysicsWorld2D)
 			return;
@@ -1479,7 +1479,7 @@ namespace ArcEngine
 		}
 
 		b2PolygonShape shape;
-		shape.Set((const b2Vec2*)component.Points.data(), (int32_t)component.Points.size());
+		shape.Set(reinterpret_cast<const b2Vec2*>(component.Points.data()), static_cast<int32_t>(component.Points.size()));
 
 		b2FixtureDef fixtureDef;
 		fixtureDef.shape = &shape;
@@ -1487,7 +1487,7 @@ namespace ArcEngine
 		fixtureDef.density = component.Density;
 		fixtureDef.friction = component.Friction;
 		fixtureDef.restitution = component.Restitution;
-		fixtureDef.userData.pointer = (uint32_t)entity;
+		fixtureDef.userData.pointer = static_cast<uint32_t>(entity);
 
 		auto layer = entity.GetComponent<TagComponent>().Layer;
 		auto collisionMaskIt = LayerCollisionMask.find(layer);
@@ -1496,7 +1496,7 @@ namespace ArcEngine
 		fixtureDef.filter.categoryBits = layer;
 		fixtureDef.filter.maskBits = LayerCollisionMask[layer].Flags;
 
-		auto* body = (b2Body*)rb.RuntimeBody;
+		auto* body = static_cast<b2Body*>(rb.RuntimeBody);
 		b2Fixture* fixture = body->CreateFixture(&fixtureDef);
 		component.RuntimeFixture = fixture;
 	}

@@ -13,7 +13,7 @@ namespace ArcEngine
 
 	void ProjectSettingsPanel::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (OnBegin())
 		{
@@ -25,10 +25,7 @@ namespace ArcEngine
 				{
 					float cursorPosY = ImGui::GetCursorPosY();
 					if (UI::IconButton("  " ICON_MDI_PLUS, "Add  "))
-					{
-						EntityLayerData newLayer = { "Layer", 0xFFFF, (uint8_t)layerCollisionMask.size() };
-						layerCollisionMask[BIT(layerCollisionMask.size())] = newLayer;
-					}
+						layerCollisionMask[BIT(layerCollisionMask.size())] = { "Layer", 0xFFFF, static_cast<uint8_t>(layerCollisionMask.size()) };
 
 					ImGui::SetCursorPosY(cursorPosY + UI::GetIconButtonSize("  " ICON_MDI_PLUS, "Add  ").y + ImGui::GetStyle().FramePadding.y);
 				}
@@ -56,7 +53,7 @@ namespace ArcEngine
 						if (i == 0)
 						{
 							ImGui::SameLine();
-							ImGui::Text((const char*)ICON_MDI_INFORMATION);
+							ImGui::TextUnformatted(StringUtils::FromChar8T(ICON_MDI_INFORMATION));
 							if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 							{
 								ImGui::BeginTooltip();
@@ -68,7 +65,7 @@ namespace ArcEngine
 					else
 					{
 						ImGui::SameLine();
-						if (ImGui::Button((const char*)ICON_MDI_CLOSE))
+						if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_CLOSE)))
 							deletedLayer = layer;
 					}
 					ImGui::PopID();
@@ -86,7 +83,7 @@ namespace ArcEngine
 			if (ImGui::TreeNode("Collision Matrix"))
 			{
 				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 50.0f);
-				const int colCount = (int)layerCollisionMask.size() + 1;
+				const int colCount = static_cast<int>(layerCollisionMask.size()) + 1;
 				if (ImGui::BeginTable("table1", colCount, ImGuiTableFlags_SizingFixedFit))
 				{
 					int i = 0;

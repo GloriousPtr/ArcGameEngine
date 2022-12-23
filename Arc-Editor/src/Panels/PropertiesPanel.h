@@ -29,7 +29,7 @@ namespace ArcEngine
 			m_Context = context;
 		}
 
-		void ForceSetContext(const EditorContext context) { m_Context = context; }
+		void ForceSetContext(const EditorContext& context) { m_Context = context; }
 
 	private:
 		void DrawComponents(Entity entity);

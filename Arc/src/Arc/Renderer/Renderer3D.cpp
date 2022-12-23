@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <ranges>
 
 #include "Renderer.h"
 #include "RenderGraphData.h"
@@ -51,7 +52,7 @@ namespace ArcEngine
 
 	void Renderer3D::Init()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		s_UbCamera = UniformBuffer::Create();
 		s_UbCamera->SetLayout({
@@ -100,7 +101,7 @@ namespace ArcEngine
 		s_LightingShader->SetUniformBlock("PointLightBuffer", 1);
 		s_LightingShader->SetUniformBlock("DirectionalLightBuffer", 2);
 
-		// Cubemap
+		// Cube-map
 		{
 			float vertices[108] = {
 				// back face
@@ -194,13 +195,13 @@ namespace ArcEngine
 
 	void Renderer3D::Shutdown()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 	}
 
 	void Renderer3D::BeginScene(const CameraData& cameraData, Entity cubemap, std::vector<Entity>&& lights)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		s_Skylight = cubemap;
 		s_SceneLights = std::move(lights);
@@ -211,7 +212,7 @@ namespace ArcEngine
 
 	void Renderer3D::EndScene(const Ref<RenderGraphData>& renderTarget)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		Flush(renderTarget);
 
@@ -220,14 +221,14 @@ namespace ArcEngine
 
 	void Renderer3D::DrawCube()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		RenderCommand::Draw(s_CubeVertexArray, 36);
 	}
 
 	void Renderer3D::DrawQuad()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		RenderCommand::DrawIndexed(s_QuadVertexArray);
 	}
@@ -239,14 +240,14 @@ namespace ArcEngine
 
 	void Renderer3D::SubmitMesh(const glm::mat4& transform, const Submesh& submesh, MeshComponent::CullModeType cullMode)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		s_Meshes.emplace_back(transform, submesh, cullMode);
 	}
 
 	void Renderer3D::Flush(const Ref<RenderGraphData>& renderGraphData)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		ShadowMapPass();
 		RenderPass(renderGraphData->RenderPassTarget);
@@ -259,7 +260,7 @@ namespace ArcEngine
 
 	void Renderer3D::FXAAPass(const Ref<RenderGraphData>& renderGraphData)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (UseFXAA)
 		{
@@ -274,21 +275,21 @@ namespace ArcEngine
 
 	void Renderer3D::ResetStats()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		memset(&s_Stats, 0, sizeof(Statistics));
 	}
 
 	Renderer3D::Statistics Renderer3D::GetStats()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		return s_Stats;
 	}
 
 	void Renderer3D::SetupCameraData(const CameraData& cameraData)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		static_assert(sizeof(CameraData) == sizeof(glm::mat4) * 3 + sizeof(glm::vec3));
 		s_UbCamera->Bind();
@@ -297,7 +298,7 @@ namespace ArcEngine
 
 	void Renderer3D::SetupLightsData()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		{
 			struct PointLightData
@@ -336,7 +337,7 @@ namespace ArcEngine
 					zDir
 				};
 
-				s_UbPointLights->SetData((void*)(&pointLightData), size * numLights, size);
+				s_UbPointLights->SetData(&pointLightData, size * numLights, size);
 
 				numLights++;
 			}
@@ -379,13 +380,13 @@ namespace ArcEngine
 
 				DirectionalLightData dirLightData = 
 				{
-					glm::vec4(pos, (uint32_t) lightComponent.ShadowQuality),
+					glm::vec4(pos, static_cast<uint32_t>(lightComponent.ShadowQuality)),
 					glm::vec4(lightComponent.Color, lightComponent.Intensity),
 					zDir,
 					dirLightViewProj
 				};
 
-				s_UbDirectionalLights->SetData((void*)(&dirLightData), size * numLights, size);
+				s_UbDirectionalLights->SetData(&dirLightData, size * numLights, size);
 
 				numLights++;
 			}
@@ -397,11 +398,11 @@ namespace ArcEngine
 
 	void Renderer3D::CompositePass(const Ref<RenderGraphData>& renderGraphData)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		renderGraphData->CompositePassTarget->Bind();
 		s_HdrShader->Bind();
-		glm::vec4 tonemappingParams = glm::vec4(((int) Tonemapping), Exposure, 0.0f, 0.0f);
+		glm::vec4 tonemappingParams = glm::vec4(static_cast<int>(Tonemapping), Exposure, 0.0f, 0.0f);
 		
 		s_HdrShader->SetFloat4("u_TonemappParams", tonemappingParams);
 		s_HdrShader->SetFloat("u_BloomStrength", UseBloom ? BloomStrength : 0.0f);
@@ -429,7 +430,7 @@ namespace ArcEngine
 
 	void Renderer3D::BloomPass(const Ref<RenderGraphData>& renderGraphData)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (!UseBloom)
 			return;
@@ -438,7 +439,7 @@ namespace ArcEngine
 		glm::vec4 params = glm::vec4(BloomClamp, 2.0f, 0.0f, 0.0f);
 
 		{
-			ARC_PROFILE_SCOPE("Prefilter");
+			ARC_PROFILE_SCOPE("Prefilter")
 
 			renderGraphData->PrefilteredFramebuffer->Bind();
 			s_BloomShader->Bind();
@@ -452,7 +453,7 @@ namespace ArcEngine
 		size_t blurSamples = renderGraphData->BlurSamples;
 		FramebufferSpecification spec = renderGraphData->PrefilteredFramebuffer->GetSpecification();
 		{
-			ARC_PROFILE_SCOPE("Downsample");
+			ARC_PROFILE_SCOPE("Downsample")
 
 			s_GaussianBlurShader->Bind();
 			s_GaussianBlurShader->SetInt("u_Texture", 0);
@@ -474,7 +475,7 @@ namespace ArcEngine
 		}
 		
 		{
-			ARC_PROFILE_SCOPE("Upsample");
+			ARC_PROFILE_SCOPE("Upsample")
 
 			s_BloomShader->Bind();
 			s_BloomShader->SetFloat4("u_Threshold", threshold);
@@ -510,7 +511,7 @@ namespace ArcEngine
 
 	void Renderer3D::LightingPass(const Ref<RenderGraphData>& renderGraphData)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		renderGraphData->LightingPassTarget->Bind();
 		RenderCommand::Clear();
@@ -529,7 +530,7 @@ namespace ArcEngine
 
 		int32_t samplers[MAX_NUM_DIR_LIGHTS];
 		for (uint32_t i = 0; i < MAX_NUM_DIR_LIGHTS; i++)
-			samplers[i] = i + 8;
+			samplers[i] = static_cast<int32_t>(i + 8);
 		s_LightingShader->SetIntArray("u_DirectionalShadowMap", samplers, MAX_NUM_DIR_LIGHTS);
 
 		renderGraphData->RenderPassTarget->BindColorAttachment(0, 0);
@@ -574,7 +575,7 @@ namespace ArcEngine
 
 	void Renderer3D::RenderPass(const Ref<Framebuffer>& renderTarget)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		renderTarget->Bind();
 		RenderCommand::SetBlendState(false);
@@ -585,7 +586,7 @@ namespace ArcEngine
 		float skylightIntensity = 0.0f;
 		float skylightRotation = 0.0f;
 		{
-			ARC_PROFILE_SCOPE("Skylight");
+			ARC_PROFILE_SCOPE("Skylight")
 
 			if (s_Skylight)
 			{
@@ -610,7 +611,7 @@ namespace ArcEngine
 		}
 		
 		{
-			ARC_PROFILE_SCOPE("Draw Meshes");
+			ARC_PROFILE_SCOPE("Draw Meshes")
 
 			MeshComponent::CullModeType currentCullMode = MeshComponent::CullModeType::Unknown;
 			for (const auto& meshData : s_Meshes)
@@ -635,7 +636,7 @@ namespace ArcEngine
 							RenderCommand::BackCull();
 							break;
 						default:
-							ARC_CORE_ASSERT(false);
+							ARC_CORE_ASSERT(false)
 							break;
 					}
 				}
@@ -649,7 +650,7 @@ namespace ArcEngine
 
 	void Renderer3D::ShadowMapPass()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		for (const auto& lightEntity : s_SceneLights)
 		{
@@ -676,9 +677,9 @@ namespace ArcEngine
 			s_ShadowMapShader->Bind();
 			s_ShadowMapShader->SetMat4("u_ViewProjection", dirLightViewProj);
 
-			for (auto it = s_Meshes.rbegin(); it != s_Meshes.rend(); it++)
+			for (auto& s_Meshe : std::ranges::reverse_view(s_Meshes))
 			{
-				const MeshData* meshData = &(*it);
+				const MeshData* meshData = &s_Meshe;
 				s_ShadowMapShader->SetMat4("u_Model", meshData->Transform);
 				RenderCommand::DrawIndexed(meshData->SubmeshGeometry.Geometry);
 			}

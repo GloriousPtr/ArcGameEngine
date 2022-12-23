@@ -35,7 +35,7 @@ namespace ArcEngine
 		{
 		}
 
-		T Evaluate(float factor)
+		[[nodiscard]] T Evaluate(float factor)
 		{
 			return glm::lerp(End, Start, factor);
 		}
@@ -60,7 +60,7 @@ namespace ArcEngine
 		{
 		}
 
-		T Evaluate(float speed)
+		[[nodiscard]] T Evaluate(float speed)
 		{
 			float factor = Math::InverseLerpClamped(MinSpeed, MaxSpeed, speed);
 			return glm::lerp(End, Start, factor);
@@ -82,9 +82,9 @@ namespace ArcEngine
 		bool PlayOnAwake = true;
 		uint32_t MaxParticles = 1000;
 
-		uint16_t RateOverTime = 10;
-		uint16_t RateOverDistance = 0;
-		uint16_t BurstCount = 0;
+		uint32_t RateOverTime = 10;
+		uint32_t RateOverDistance = 0;
+		uint32_t BurstCount = 0;
 		float BurstTime = 1.0f;
 
 		glm::vec3 PositionStart = glm::vec3(-0.2f, 0.0f, 0.0f);
@@ -106,20 +106,19 @@ namespace ArcEngine
 	{
 	public:
 		ParticleSystem();
-		~ParticleSystem() = default;
 
 		void Play();
 		void Stop(bool force = false);
 		void OnUpdate(Timestep ts, const glm::vec3& position);
-		void OnRender();
+		void OnRender() const;
 
-		ParticleProperties& GetProperties() { return m_Properties; }
-		const ParticleProperties& GetProperties() const { return m_Properties; }
+		[[nodiscard]] ParticleProperties& GetProperties() { return m_Properties; }
+		[[nodiscard]] const ParticleProperties& GetProperties() const { return m_Properties; }
 
-		uint32_t GetActiveParticleCount() const { return m_ActiveParticleCount; }
+		[[nodiscard]] uint32_t GetActiveParticleCount() const { return m_ActiveParticleCount; }
 
 	private:
-		void Emit(const glm::vec3& position, uint16_t count = 1);
+		void Emit(const glm::vec3& position, uint32_t count = 1);
 
 	private:
 		std::vector<Particle> m_Particles;

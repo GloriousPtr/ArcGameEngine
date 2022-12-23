@@ -22,14 +22,13 @@ namespace ArcEngine
 			case GL_DEBUG_SEVERITY_MEDIUM:			ARC_CORE_ERROR(message); return;
 			case GL_DEBUG_SEVERITY_LOW:				ARC_CORE_WARN(message); return;
 			case GL_DEBUG_SEVERITY_NOTIFICATION:	ARC_CORE_TRACE(message); return;
+			default:								ARC_CORE_DEBUG("Unknown severity level: {}", message);
 		}
-
-		ARC_CORE_ASSERT(false, "Unknown severity level!");
 	}
 	
 	void OpenGLRendererAPI::Init()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		#ifdef ARC_DEBUG
 			glEnable(GL_DEBUG_OUTPUT);
@@ -48,88 +47,88 @@ namespace ArcEngine
 
 	void OpenGLRendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
-		glViewport(x, y, width, height);
+		glViewport(static_cast<int>(x), static_cast<int>(y), static_cast<int>(width), static_cast<int>(height));
 	}
 
 	void OpenGLRendererAPI::SetClearColor(const glm::vec4& color)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		glClearColor(color.r, color.g, color.b, color.a);
 	}
 
 	void OpenGLRendererAPI::Clear()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		vertexArray->Bind();
 		const uint32_t count = indexCount != 0 ? indexCount : vertexArray->GetIndexBuffer()->GetCount();
-		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, static_cast<int>(count), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void OpenGLRendererAPI::Draw(const Ref<VertexArray>& vertexArray, uint32_t count)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		vertexArray->Bind();
-		glDrawArrays(GL_TRIANGLES, 0, count);
+		glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(count));
 	}
 
 	void OpenGLRendererAPI::DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		vertexArray->Bind();
-		glDrawArrays(GL_LINES, 0, vertexCount);
+		glDrawArrays(GL_LINES, 0, static_cast<int>(vertexCount));
 	}
 
 	void OpenGLRendererAPI::EnableCulling()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		glEnable(GL_CULL_FACE);
 	}
 
 	void OpenGLRendererAPI::DisableCulling()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		glDisable(GL_CULL_FACE);
 	}
 
 	void OpenGLRendererAPI::FrontCull()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		glCullFace(GL_FRONT);
 	}
 
 	void OpenGLRendererAPI::BackCull()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		glCullFace(GL_BACK);
 	}
 
 	void OpenGLRendererAPI::SetDepthMask(bool value)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		glDepthMask(value);
 	}
 
 	void OpenGLRendererAPI::SetDepthTest(bool value)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (value)
 			glEnable(GL_DEPTH_TEST);

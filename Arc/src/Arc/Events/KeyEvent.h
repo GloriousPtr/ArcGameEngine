@@ -8,7 +8,7 @@ namespace ArcEngine
 	class KeyEvent : public Event
 	{
 	public:
-		KeyCode GetKeyCode() const { return m_KeyCode; }
+		[[nodiscard]] KeyCode GetKeyCode() const { return m_KeyCode; }
 
 		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 	protected:
@@ -24,9 +24,9 @@ namespace ArcEngine
 		explicit KeyPressedEvent(const KeyCode keyCode, const uint16_t repeatCount)
 			: KeyEvent(keyCode), m_RepeatCount(repeatCount) {}
 
-		uint16_t GetRepeatCount() const { return m_RepeatCount; }
+		[[nodiscard]] uint16_t GetRepeatCount() const { return m_RepeatCount; }
 
-		std::string ToString() const override
+		[[nodiscard]] std::string ToString() const override
 		{
 			std::stringstream ss;
 			ss << "KeyPressedEvent: " << m_KeyCode << " (" << m_RepeatCount << " repeats)";
@@ -44,7 +44,7 @@ namespace ArcEngine
 		explicit KeyReleasedEvent(const KeyCode keyCode)
 			: KeyEvent(keyCode) {}
 
-		std::string ToString() const override
+		[[nodiscard]] std::string ToString() const override
 		{
 			std::stringstream ss;
 			ss << "KeyReleasedEvent: " << m_KeyCode;
@@ -60,7 +60,7 @@ namespace ArcEngine
 		explicit KeyTypedEvent(const KeyCode keycode)
 			: KeyEvent(keycode) {}
 
-		std::string ToString() const override
+		[[nodiscard]] std::string ToString() const override
 		{
 			std::stringstream ss;
 			ss << "KeyTypedEvent: " << m_KeyCode;

@@ -34,7 +34,7 @@ namespace ArcEngine
 
 	void ParticleSystem::OnUpdate(Timestep ts, const glm::vec3& position)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		const float simTs = ts * m_Properties.SimulationSpeed;
 
@@ -45,7 +45,7 @@ namespace ArcEngine
 		{
 			// Emit particles in unit time
 			m_SpawnTime += simTs;
-			if (m_SpawnTime >= 1.0f / (float)m_Properties.RateOverTime)
+			if (m_SpawnTime >= 1.0f / static_cast<float>(m_Properties.RateOverTime))
 			{
 				m_SpawnTime = 0.0f;
 				Emit(position, 1);
@@ -117,9 +117,9 @@ namespace ArcEngine
 		}
 	}
 
-	void ParticleSystem::OnRender()
+	void ParticleSystem::OnRender() const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		for (const auto& particle : m_Particles)
 		{
@@ -133,18 +133,18 @@ namespace ArcEngine
 
 	static float RandomFloat(float min, float max)
 	{
-		float r = (float)rand() / (float)RAND_MAX;
+		float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 		return min + r * (max - min);
 	}
 
-	void ParticleSystem::Emit(const glm::vec3& position, uint16_t count)
+	void ParticleSystem::Emit(const glm::vec3& position, uint32_t count)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (m_ActiveParticleCount >= m_Properties.MaxParticles)
 			return;
 
-		for (uint16_t i = 0; i < count; ++i)
+		for (uint32_t i = 0; i < count; ++i)
 		{
 			if (++m_PoolIndex >= 10000)
 				m_PoolIndex = 0;

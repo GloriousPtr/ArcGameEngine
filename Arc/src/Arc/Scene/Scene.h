@@ -47,20 +47,20 @@ namespace ArcEngine
 		uint32_t PositionIterations = 3;
 		glm::vec2 Gravity = { 0.0f, -9.8f };
 
-		static const EntityLayer StaticLayer  = BIT(0);
-		static const EntityLayer DefaultLayer = BIT(1);
+		static constexpr EntityLayer StaticLayer  = BIT(0);
+		static constexpr EntityLayer DefaultLayer = BIT(1);
 		static std::map<EntityLayer, EntityLayerData> LayerCollisionMask;
 
 	public:
-		static Ref<Scene> CopyTo(Ref<Scene> other);
+		[[nodiscard]] static Ref<Scene> CopyTo(const Ref<Scene>& other);
 
 		Entity CreateEntity(const std::string& name = std::string());
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
 		void DestroyEntity(Entity entity);
 		Entity Duplicate(Entity entity);
-		bool HasEntity(UUID uuid) const;
-		Entity GetEntity(UUID uuid);
-		bool IsRunning() const { return m_IsRunning; }
+		[[nodiscard]] bool HasEntity(UUID uuid) const;
+		[[nodiscard]] Entity GetEntity(UUID uuid);
+		[[nodiscard]] bool IsRunning() const { return m_IsRunning; }
 
 		void OnUpdateEditor([[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera);
 		void OnUpdateRuntime([[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera = nullptr);
@@ -70,12 +70,12 @@ namespace ArcEngine
 
 		void OnViewportResize(uint32_t width, uint32_t height);
 		void MarkViewportDirty() { m_ViewportDirty = true; }
-		bool IsViewportDirty() const { return m_ViewportDirty; }
-		Entity GetPrimaryCameraEntity();
+		[[nodiscard]] bool IsViewportDirty() const { return m_ViewportDirty; }
+		[[nodiscard]] Entity GetPrimaryCameraEntity();
 		void SortForSprites();
 
 		template<typename... Components>
-		auto GetAllEntitiesWith()
+		[[nodiscard]] auto GetAllEntitiesWith()
 		{
 			return m_Registry.view<Components...>();
 		}

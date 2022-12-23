@@ -23,10 +23,10 @@ namespace ArcEngine
 
 		void Resize(uint32_t width, uint32_t height) override;
 
-		uint64_t GetColorAttachmentRendererID(uint32_t index = 0) const override { ARC_CORE_ASSERT(index < m_ColorAttachments.size()); return m_ColorAttachments[index]; }
-		uint64_t GetDepthAttachmentRendererID() const override { return m_DepthAttachment; }
+		[[nodiscard]] uint64_t GetColorAttachmentRendererID(uint32_t index = 0) const override { ARC_CORE_ASSERT(index < m_ColorAttachments.size()) return m_ColorAttachments[index]; }
+		[[nodiscard]] uint64_t GetDepthAttachmentRendererID() const override { return m_DepthAttachment; }
 
-		const FramebufferSpecification& GetSpecification() const override { return m_Specification; }
+		[[nodiscard]] const FramebufferSpecification& GetSpecification() const override { return m_Specification; }
 
 	private:
 		uint32_t m_RendererID = 0;

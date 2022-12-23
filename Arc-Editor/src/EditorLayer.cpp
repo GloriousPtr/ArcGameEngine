@@ -26,20 +26,19 @@ namespace ArcEngine
 	EditorLayer::EditorLayer()
 		: Layer("Arc-Editor")
 	{
-		ARC_CORE_ASSERT(!s_Instance, "Editor Layer already exists!");
+		ARC_CORE_ASSERT(!s_Instance, "Editor Layer already exists!")
 
 		s_Instance = this;
 	}
 
 	void EditorLayer::OnAttach()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		EditorTheme::SetFont();
 		EditorTheme::SetStyle();
 		EditorTheme::ApplyTheme();
 
-		m_Application = &Application::Get();
 		m_ActiveScene = CreateRef<Scene>();
 		m_EditorScene = m_ActiveScene;
 
@@ -62,12 +61,12 @@ namespace ArcEngine
 
 	void EditorLayer::OnDetach()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 	}
 
 	void EditorLayer::OnUpdate([[maybe_unused]] Timestep ts)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		Renderer2D::ResetStats();
 		Renderer3D::ResetStats();
@@ -129,13 +128,13 @@ namespace ArcEngine
 
 	void EditorLayer::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
-		m_Application->GetWindow().RegisterOverTitlebar(false);
+		Application::Get().GetWindow().RegisterOverTitlebar(false);
 
 		BeginDockspace("MyDockSpace");
 		{
-			auto* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
+			auto* viewport = ImGui::GetMainViewport();
 			ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar
 				| ImGuiWindowFlags_NoSavedSettings
 				| ImGuiWindowFlags_MenuBar
@@ -184,7 +183,7 @@ namespace ArcEngine
 								ImGui::EndMenu();
 							}
 							if (ImGui::MenuItem("Exit"))
-								m_Application->Close();
+								Application::Get().Close();
 
 							ImGui::PopStyleVar();
 							ImGui::EndMenu();
@@ -263,7 +262,7 @@ namespace ArcEngine
 						float buttonStartRegion = region.x - 3.0f * buttonSize.x + ImGui::GetStyle().WindowPadding.x;
 						ImGui::InvisibleButton("TitlebarGrab1", { buttonStartRegion - windowGrabAreaStart.x, frameHeight + windowPadding.y });
 						if (ImGui::IsItemHovered())
-							m_Application->GetWindow().RegisterOverTitlebar(true);
+							Application::Get().GetWindow().RegisterOverTitlebar(true);
 
 						ImGui::PushStyleColor(ImGuiCol_Button, EditorTheme::WindowBgAlternativeColor);
 						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, EditorTheme::WindowBgAlternativeColor);
@@ -290,13 +289,13 @@ namespace ArcEngine
 						bool isNormalCursor = ImGui::GetMouseCursor() == ImGuiMouseCursor_Arrow;
 
 						// Minimize Button
-						if (ImGui::Button((const char*)ICON_MDI_MINUS, buttonSize) && isNormalCursor)
-							m_Application->GetWindow().Minimize();
+						if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_MINUS), buttonSize) && isNormalCursor)
+							Application::Get().GetWindow().Minimize();
 
 						// Maximize Button
-						if (ImGui::Button((const char*)ICON_MDI_WINDOW_MAXIMIZE, buttonSize) && isNormalCursor)
+						if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_WINDOW_MAXIMIZE), buttonSize) && isNormalCursor)
 						{
-							Window& window = m_Application->GetWindow();
+							Window& window = Application::Get().GetWindow();
 							if (window.IsMaximized())
 								window.Restore();
 							else
@@ -306,8 +305,8 @@ namespace ArcEngine
 						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.909f, 0.066f, 0.137f, 1.0f });
 						ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0.920f, 0.066f, 0.120f, 1.0f });
 						// Close Button
-						if (ImGui::Button((const char*)ICON_MDI_WINDOW_CLOSE, buttonSize) && isNormalCursor)
-							m_Application->Close();
+						if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_WINDOW_CLOSE), buttonSize) && isNormalCursor)
+							Application::Get().Close();
 						ImGui::PopStyleColor(2);
 
 						ImGui::PopStyleColor();
@@ -333,7 +332,7 @@ namespace ArcEngine
 						if (ImGui::BeginMenuBar())
 						{
 							const char* buildConfigStrings[3] = { "Debug", "Release", "Dist" };
-							const char* current = buildConfigStrings[(int)Project::GetActive()->GetConfig().BuildConfiguration];
+							const char* current = buildConfigStrings[static_cast<int>(Project::GetActive()->GetConfig().BuildConfiguration)];
 							ImGui::SetNextItemWidth(100.0f);
 							if (ImGui::BeginCombo("##BuildConfiguration", current))
 							{
@@ -343,7 +342,7 @@ namespace ArcEngine
 									if (ImGui::Selectable(buildConfigStrings[i], isSelected))
 									{
 										current = buildConfigStrings[i];
-										Project::GetActive()->GetConfig().BuildConfiguration = (ProjectConfig::BuildConfig)i;
+										Project::GetActive()->GetConfig().BuildConfiguration = static_cast<ProjectConfig::BuildConfig>(i);
 										SaveProject(Project::GetProjectDirectory() / (Project::GetActive()->GetConfig().Name + ".arcproj"));
 
 										ScriptEngine::ReloadAppDomain();
@@ -366,14 +365,14 @@ namespace ArcEngine
 
 						ImGui::InvisibleButton("TitlebarGrab2", { buttonStartPositionX - ImGui::GetCursorPosX(), maxRegion.y });
 						if (ImGui::IsItemHovered())
-							m_Application->GetWindow().RegisterOverTitlebar(true);
+							Application::Get().GetWindow().RegisterOverTitlebar(true);
 						ImGui::SetItemAllowOverlap();
 
 						ImGui::SetCursorPosX(buttonStartPositionX);
 						//Play Button
 						bool highlight = m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
 						const char8_t* icon = m_SceneState == SceneState::Edit ? ICON_MDI_PLAY : ICON_MDI_STOP;
-						if (UI::ToggleButton((const char*)icon, highlight, buttonSize))
+						if (UI::ToggleButton(StringUtils::FromChar8T(icon), highlight, buttonSize))
 						{
 							if (m_SceneState == SceneState::Edit)
 								OnScenePlay();
@@ -384,7 +383,7 @@ namespace ArcEngine
 						//Pause Button
 						highlight = m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
 						ImGui::PushItemFlag(ImGuiItemFlags_Disabled, m_SceneState == SceneState::Edit);
-						if (UI::ToggleButton((const char*)ICON_MDI_PAUSE, highlight, buttonSize))
+						if (UI::ToggleButton(StringUtils::FromChar8T(ICON_MDI_PAUSE), highlight, buttonSize))
 						{
 							if (m_SceneState == SceneState::Play)
 								OnScenePause();
@@ -396,7 +395,7 @@ namespace ArcEngine
 						if (m_SceneState == SceneState::Step)
 							OnScenePause();
 						ImGui::PushItemFlag(ImGuiItemFlags_Disabled, m_SceneState != SceneState::Pause);
-						if (ImGui::Button((const char*)ICON_MDI_STEP_FORWARD, buttonSize) && m_SceneState == SceneState::Pause)
+						if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_STEP_FORWARD), buttonSize) && m_SceneState == SceneState::Pause)
 						{
 							OnSceneUnpause();
 							m_SceneState = SceneState::Step;
@@ -407,13 +406,13 @@ namespace ArcEngine
 
 						ImGui::InvisibleButton("TitlebarGrab3", region);
 						if (ImGui::IsItemHovered())
-							m_Application->GetWindow().RegisterOverTitlebar(true);
+							Application::Get().GetWindow().RegisterOverTitlebar(true);
 						ImGui::SetItemAllowOverlap();
 
 						ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - ImGui::CalcTextSize("FPS: XX.XX (XX.XXXms  MEM: XXXX.XXMB").x);
-						float fps = ImGui::GetIO().Framerate;
+						auto fps = static_cast<double>(ImGui::GetIO().Framerate);
 						size_t allocatedMemory = Application::GetAllocatedMemorySize();
-						ImGui::Text("FPS: %.2f (%.3fms)  MEM: %.2fMB", fps, 1000.0f / fps, (float)allocatedMemory / (1024.0f * 1024.0f));
+						ImGui::Text("FPS: %.2lf (%.3lfms)  MEM: %.2lfMB", fps, 1000.0 / fps, static_cast<double>(allocatedMemory) / (1024.0 * 1024.0));
 						
 						ImGui::EndMenuBar();
 					}
@@ -522,7 +521,7 @@ namespace ArcEngine
 				if (ImGui::InputText("##ProjectLocation", buffer, size))
 					folderPath = buffer;
 				ImGui::SameLine();
-				if (ImGui::Button((const char*)ICON_MDI_FOLDER))
+				if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_FOLDER)))
 					folderPath = FileDialogs::OpenFolder();
 
 				ImGui::Separator();
@@ -532,8 +531,8 @@ namespace ArcEngine
 				{
 					if (!prjName.empty() && !folderPath.empty())
 					{
-						Project::New();
-						Project::GetActive()->GetConfig().Name = prjName;
+						const auto& project = Project::New();
+						project->GetConfig().Name = prjName;
 						std::filesystem::path projectDirPath = std::filesystem::path(folderPath) / prjName;
 						if (!std::filesystem::exists(projectDirPath))
 							std::filesystem::create_directories(projectDirPath);
@@ -555,7 +554,7 @@ namespace ArcEngine
 			if (m_ShowDemoWindow)
 				ImGui::ShowDemoWindow(&m_ShowDemoWindow);
 
-			m_Application->GetImGuiLayer()->SetBlockEvents(false);
+			Application::Get().GetImGuiLayer()->SetBlockEvents(false);
 		}
 		EndDockspace();
 
@@ -565,7 +564,7 @@ namespace ArcEngine
 
 	void EditorLayer::OnEvent([[maybe_unused]] Event& e)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(ARC_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
@@ -642,7 +641,7 @@ namespace ArcEngine
 
 	bool EditorLayer::OnKeyPressed([[maybe_unused]] const KeyPressedEvent& e)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		/*
 		HotKeys:
@@ -741,7 +740,7 @@ namespace ArcEngine
 				if (ctrl && shift)
 				{
 					Entity entity = m_ActiveScene->CreateEntity();
-					m_SelectedContext.Set(EditorContextType::Entity, &entity, sizeof(Entity));
+					m_SelectedContext.Set(EditorContextType::Entity, reinterpret_cast<const char*>(&entity), sizeof(Entity));
 					return true;
 				}
 				if (ctrl)
@@ -753,7 +752,7 @@ namespace ArcEngine
 				{
 					Entity child = m_ActiveScene->CreateEntity();
 					child.SetParent(*m_SelectedContext.As<Entity>());
-					m_SelectedContext.Set(EditorContextType::Entity, &child, sizeof(Entity));
+					m_SelectedContext.Set(EditorContextType::Entity, reinterpret_cast<const char*>(&child), sizeof(Entity));
 					return true;
 				}
 				break;
@@ -839,7 +838,8 @@ namespace ArcEngine
 
 	void EditorLayer::SaveProject(const std::filesystem::path& path) const
 	{
-		Project::SaveActive(path);
+		if (!Project::SaveActive(path))
+			ARC_CORE_ERROR("Could not save project!");
 	}
 
 	void EditorLayer::NewScene()
@@ -883,7 +883,8 @@ namespace ArcEngine
 			m_Viewports[0]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
 
 		SceneSerializer serializer(m_ActiveScene);
-		serializer.Deserialize(filepath);
+		if (!serializer.Deserialize(filepath))
+			ARC_CORE_ERROR("Could not deserialize scene!");
 		m_ScenePath = filepath;
 	}
 	

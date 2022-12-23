@@ -9,9 +9,9 @@ namespace ArcEngine
 	BasePanel::BasePanel(const char* name, const char8_t* icon, bool defaultShow)
 		: Showing(defaultShow), m_Name(name), m_Icon(icon)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
-		m_ID = std::format(" {} {}\t\t###{}{}", (const char*)icon, name, s_Count, name);
+		m_ID = std::format(" {} {}\t\t###{}{}", StringUtils::FromChar8T(icon), name, s_Count, name);
 		s_Count++;
 	}
 

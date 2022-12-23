@@ -1,6 +1,7 @@
 #include "arcpch.h"
 #include "Material.h"
 
+#include <ranges>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Renderer3D.h"
@@ -13,7 +14,7 @@ namespace ArcEngine
 
 	Material::Material(const char* shaderPath)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		if (!s_WhiteTexture)
 		{
@@ -40,28 +41,28 @@ namespace ArcEngine
 
 	Material::~Material()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		delete[] m_Buffer;
 	}
 
 	void Material::Invalidate()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		delete[] m_Buffer;
 
 		m_BufferSizeInBytes = 0;
 		const auto& materialProperties = m_Shader->GetMaterialProperties();
 
-		for (const auto& [name, property] : materialProperties)
+		for (const auto& property : materialProperties | std::views::values)
 			m_BufferSizeInBytes += property.SizeInBytes;
 
 		m_Buffer = new char[m_BufferSizeInBytes];
 		memset(m_Buffer, 0, m_BufferSizeInBytes);
 		
 		uint32_t slot = 0;
-		glm::vec4 one = glm::vec4(1.0);
+		auto one = glm::vec4(1.0);
 		for (auto& [name, property] : materialProperties)
 		{
 			if (property.Type == MaterialPropertyType::Sampler2D)
@@ -83,9 +84,9 @@ namespace ArcEngine
 		}
 	}
 
-	void Material::Bind()
+	void Material::Bind() const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		const auto& materialProperties = m_Shader->GetMaterialProperties();
 
@@ -93,13 +94,13 @@ namespace ArcEngine
 		for (const auto& [name, property] : materialProperties)
 		{
 			char* bufferStart = m_Buffer + property.OffsetInBytes;
-			uint32_t slot = *(uint32_t*)bufferStart;
+			uint32_t slot = *reinterpret_cast<uint32_t*>(bufferStart);
 			switch (property.Type)
 			{
 				case MaterialPropertyType::None : break;
 				case MaterialPropertyType::Sampler2D :
 				{
-					m_Shader->SetInt(name, slot);
+					m_Shader->SetInt(name, static_cast<int>(slot));
 					if (m_Textures.at(slot))
 						m_Textures.at(slot)->Bind(slot);
 					else
@@ -109,32 +110,27 @@ namespace ArcEngine
 				case MaterialPropertyType::Bool :
 				case MaterialPropertyType::Int :
 				{
-					m_Shader->SetInt(name, *((int32_t*)bufferStart));
+					m_Shader->SetInt(name, *reinterpret_cast<int32_t*>(bufferStart));
 					break;
 				}
 				case MaterialPropertyType::Float :
 				{
-					m_Shader->SetFloat(name, *((float*)bufferStart));
+					m_Shader->SetFloat(name, *reinterpret_cast<float*>(bufferStart));
 					break;
 				}
 				case MaterialPropertyType::Float2 :
 				{
-					m_Shader->SetFloat2(name, *((glm::vec2*)bufferStart));
+					m_Shader->SetFloat2(name, *reinterpret_cast<glm::vec2*>(bufferStart));
 					break;
 				}
 				case MaterialPropertyType::Float3 :
 				{
-					m_Shader->SetFloat3(name, *((glm::vec3*)bufferStart));
+					m_Shader->SetFloat3(name, *reinterpret_cast<glm::vec3*>(bufferStart));
 					break;
 				}
 				case MaterialPropertyType::Float4 :
 				{
-					m_Shader->SetFloat4(name, *((glm::vec4*)bufferStart));
-					break;
-				}
-				default:
-				{
-					ARC_CORE_ASSERT("Unknown type material property: {}", name);
+					m_Shader->SetFloat4(name, *reinterpret_cast<glm::vec4*>(bufferStart));
 					break;
 				}
 			}
@@ -143,7 +139,7 @@ namespace ArcEngine
 
 	void Material::Unbind() const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		m_Shader->Unbind();
 	}
@@ -163,9 +159,9 @@ namespace ArcEngine
 		m_Textures[slot] = texture;
 	}
 
-	Material::MaterialData Material::GetData_Internal(const char* name)
+	Material::MaterialData Material::GetData_Internal(const char* name) const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		const auto& materialProperties = m_Shader->GetMaterialProperties();
 		const auto& materialProperty = m_Shader->GetMaterialProperties().find(name);
@@ -175,9 +171,9 @@ namespace ArcEngine
 		return nullptr;
 	}
 
-	void Material::SetData_Internal(const char* name, const Material::MaterialData data)
+	void Material::SetData_Internal(const char* name, const MaterialData data) const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		const auto& materialProperties = m_Shader->GetMaterialProperties();
 		const auto& property = m_Shader->GetMaterialProperties().find(name);

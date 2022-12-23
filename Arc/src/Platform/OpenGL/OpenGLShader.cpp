@@ -19,13 +19,13 @@ namespace ArcEngine
 		if(type == "compute")
 			return GL_COMPUTE_SHADER;
 
-		ARC_CORE_ASSERT(false, "Unknown shader type!");
+		ARC_CORE_ASSERT(false, "Unknown shader type!")
 		return 0;
 	}
 	
 	OpenGLShader::OpenGLShader(const std::string& filepath)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		std::string source;
 		Filesystem::ReadFileText(filepath, source);
@@ -43,7 +43,7 @@ namespace ArcEngine
 	OpenGLShader::OpenGLShader(const std::string& name, std::string_view vertexSrc, std::string_view fragmentSrc)
 		: m_Name(name)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		std::unordered_map<GLenum, std::string> sources;
 		sources[GL_VERTEX_SHADER] = vertexSrc;
@@ -53,14 +53,14 @@ namespace ArcEngine
 
 	OpenGLShader::~OpenGLShader()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		glDeleteProgram(m_RendererID);
 	}
 
 	void OpenGLShader::Recompile(const std::string& filepath)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		glDeleteProgram(m_RendererID);
 
@@ -72,77 +72,77 @@ namespace ArcEngine
 
 	void OpenGLShader::Bind() const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		glUseProgram(m_RendererID);
 	}
 
 	void OpenGLShader::Unbind() const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		glUseProgram(0);
 	}
 
 	void OpenGLShader::SetInt(const std::string& name, int value)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		UploadUniformInt(name, value);
 	}
 
 	void OpenGLShader::SetIntArray(const std::string& name, const int* values, uint32_t count)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		UploadUniformIntArray(name, values, count);		
 	}
 
 	void OpenGLShader::SetFloat(const std::string& name, float value)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		UploadUniformFloat(name, value);
 	}
 
 	void OpenGLShader::SetFloat2(const std::string& name, const glm::vec2& value)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		UploadUniformFloat2(name, value);
 	}
 
 	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		UploadUniformFloat3(name, value);
 	}
 
 	void OpenGLShader::SetFloat4(const std::string& name, const glm::vec4& value)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		UploadUniformFloat4(name, value);
 	}
 
 	void OpenGLShader::SetMat3(const std::string& name, const glm::mat3& value)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		UploadUniformMat3(name, value);
 	}
 
 	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		UploadUniformMat4(name, value);
 	}
 
 	void OpenGLShader::SetUniformBlock(const std::string& name, uint32_t blockIndex)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		glUniformBlockBinding(m_RendererID, glGetUniformBlockIndex(m_RendererID, name.c_str()), blockIndex);
 	}
@@ -154,7 +154,7 @@ namespace ArcEngine
 
 	void OpenGLShader::UploadUniformIntArray(const std::string& name, const int* values, uint32_t count)
 	{
-		glUniform1iv(GetLocation(name), count, values);
+		glUniform1iv(GetLocation(name), static_cast<int>(count), values);
 	}
 
 	void OpenGLShader::UploadUniformFloat(const std::string& name, float value)
@@ -189,7 +189,7 @@ namespace ArcEngine
 
 	int OpenGLShader::GetLocation(const std::string& name)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 
 		const auto& it = m_UniformLocationCache.find(name);
 		if (it != m_UniformLocationCache.end())
@@ -202,7 +202,7 @@ namespace ArcEngine
 
 	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(std::string_view source) const
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		std::unordered_map<GLenum, std::string> shaderSources;
 
@@ -212,10 +212,10 @@ namespace ArcEngine
 		while (pos != std::string::npos)
 		{
 			size_t eol = source.find_first_of("\r\n", pos);
-			ARC_CORE_ASSERT(eol != std::string::npos, "Syntax error");
+			ARC_CORE_ASSERT(eol != std::string::npos, "Syntax error")
 			size_t begin = pos + typeTokenLength + 1;
 			std::string type = static_cast<std::string>(source.substr(begin, eol - begin));
-			ARC_CORE_ASSERT(ShaderTypeFromString(type), "Invalid shader type specified");
+			ARC_CORE_ASSERT(ShaderTypeFromString(type), "Invalid shader type specified")
 
 			size_t nextLinePos = source.find_first_not_of("\r\n", eol);
 			pos = source.find(typeToken, nextLinePos);
@@ -236,18 +236,17 @@ namespace ArcEngine
 			case GL_FLOAT_VEC2:		return MaterialPropertyType::Float2;
 			case GL_FLOAT_VEC3:		return MaterialPropertyType::Float3;
 			case GL_FLOAT_VEC4:		return MaterialPropertyType::Float4;
+			default:				return MaterialPropertyType::None;
 		}
-
-		return MaterialPropertyType::None;
 	}
 
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_SCOPE()
 		
 		GLuint program = glCreateProgram();
-		ARC_CORE_ASSERT(shaderSources.size() <= 2, "We only support 2 shaders for now");
-		std::array<GLenum, 2> glShaderIDs;
+		ARC_CORE_ASSERT(shaderSources.size() <= 2, "We only support 2 shaders for now")
+		std::array<GLenum, 2> glShaderIDs = {};
 		int glShaderIDIndex = 0;
 		for (const auto& [type, source] : shaderSources)
 		{
@@ -267,12 +266,12 @@ namespace ArcEngine
 				glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
 
 				std::vector<GLchar> infoLog(maxLength);
-				glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
+				glGetShaderInfoLog(shader, maxLength, &maxLength, infoLog.data());
 				
 				glDeleteShader(shader);
 
 				ARC_CORE_ERROR("{0}", infoLog.data());
-				ARC_CORE_ASSERT(false, "Shader compilation failure!");
+				ARC_CORE_ASSERT(false, "Shader compilation failure!")
 				break;
 			}
 
@@ -291,14 +290,14 @@ namespace ArcEngine
 			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
 
 			std::vector<GLchar> infoLog(maxLength);
-			glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
+			glGetProgramInfoLog(program, maxLength, &maxLength, infoLog.data());
 			
 			glDeleteProgram(program);
 			for (auto id : glShaderIDs)
 				glDeleteShader(id);
 
 			ARC_CORE_ERROR("{0}", infoLog.data());
-			ARC_CORE_ASSERT(false, "Shader link failure!");
+			ARC_CORE_ASSERT(false, "Shader link failure!")
 			return;
 		}
 
@@ -316,12 +315,12 @@ namespace ArcEngine
 		glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &uniformCount);
 
 		size_t offset = 0;
-		for (int i = 0; i < uniformCount; i++)
+		for (GLuint i = 0; i < static_cast<GLuint>(uniformCount); i++)
 		{
 			char name[128];
 			int size;
 			GLenum type;
-			glGetActiveUniform(program, (GLuint)i, maxLength, nullptr, &size, &type, &name[0]);
+			glGetActiveUniform(program, i, maxLength, nullptr, &size, &type, &name[0]);
 
 			constexpr const char* prefix = "u_Material.";
 			constexpr size_t prefixLength = std::string_view(prefix).size();

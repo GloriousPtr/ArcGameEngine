@@ -28,22 +28,22 @@ namespace ArcEngine
 		virtual ~Window() = default;
 
 		virtual void OnUpdate() = 0;
-		virtual uint32_t GetWidth() const = 0;
-		virtual uint32_t GetHeight() const = 0;
+		[[nodiscard]] virtual uint32_t GetWidth() const = 0;
+		[[nodiscard]] virtual uint32_t GetHeight() const = 0;
 
 		// Window attributes
 		virtual void SetEventCallBack(const EventCallbackFn& callback) = 0;
 		virtual void SetVSync(bool enabled) = 0;
-		virtual bool IsVSync() const = 0;
+		[[nodiscard]] virtual bool IsVSync() const = 0;
 
-		virtual bool IsMaximized() = 0;
+		[[nodiscard]] virtual bool IsMaximized() = 0;
 		virtual void Minimize() = 0;
 		virtual void Maximize() = 0;
 		virtual void Restore() = 0;
 		virtual void RegisterOverTitlebar(bool value) = 0;
 
-		virtual WindowHandle GetNativeWindow() const = 0;
+		[[nodiscard]] virtual WindowHandle GetNativeWindow() const = 0;
 		
-		static Scope<Window> Create(const WindowProps& props = WindowProps());
+		[[nodiscard]] static Scope<Window> Create(const WindowProps& props = WindowProps());
 	};
 }

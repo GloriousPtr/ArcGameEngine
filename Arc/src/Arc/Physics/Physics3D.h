@@ -19,7 +19,7 @@ namespace ArcEngine
 		static void Shutdown();
 		static void Step(float physicsTs);
 
-		static JPH::PhysicsSystem& GetPhysicsSystem();
+		[[nodiscard]] static JPH::PhysicsSystem& GetPhysicsSystem();
 
 	private:
 		static JPH::PhysicsSystem* s_PhysicsSystem;

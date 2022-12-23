@@ -6,9 +6,9 @@ namespace ArcEngine
 	{
 	public:
 		// These return empty strings if cancelled
-		static std::string OpenFolder();
-		static std::string OpenFile(const char* filter);
-		static std::string SaveFile(const char* filter);
+		[[nodiscard]] static std::string OpenFolder();
+		[[nodiscard]] static std::string OpenFile(const char* filter);
+		[[nodiscard]] static std::string SaveFile(const char* filter);
 		static void OpenFolderAndSelectItem(const char* path);
 		static void OpenFileWithProgram(const char* path);
 	};

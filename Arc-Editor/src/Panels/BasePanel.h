@@ -21,8 +21,8 @@ namespace ArcEngine
 		virtual void OnUpdate([[maybe_unused]] Timestep ts) { /* Not pure virtual */ }
 		virtual void OnImGuiRender() = 0;
 		
-		const char* GetName() const { return m_Name.c_str(); }
-		const char8_t* GetIcon() const { return m_Icon; }
+		[[nodiscard]] const char* GetName() const { return m_Name.c_str(); }
+		[[nodiscard]] const char8_t* GetIcon() const { return m_Icon; }
 
 	protected:
 		bool OnBegin(int32_t windowFlags = 0);

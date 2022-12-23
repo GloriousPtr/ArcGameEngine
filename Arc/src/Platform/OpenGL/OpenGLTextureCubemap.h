@@ -16,11 +16,11 @@ namespace ArcEngine
 		OpenGLTextureCubemap(const OpenGLTextureCubemap& other) = default;
 		OpenGLTextureCubemap(OpenGLTextureCubemap&& other) = default;
 
-		uint32_t GetWidth() const override { return m_Width; }
-		uint32_t GetHeight() const override { return m_Height; }
-		uint64_t GetRendererID() const override { return m_RendererID; }
-		uint64_t GetHRDRendererID() const override { return m_HRDRendererID; }
-		const std::string& GetPath() const override { return m_Path; }
+		[[nodiscard]] uint32_t GetWidth() const override { return m_Width; }
+		[[nodiscard]] uint32_t GetHeight() const override { return m_Height; }
+		[[nodiscard]] uint64_t GetRendererID() const override { return m_RendererID; }
+		[[nodiscard]] uint64_t GetHRDRendererID() const override { return m_HRDRendererID; }
+		[[nodiscard]] const std::string& GetPath() const override { return m_Path; }
 
 		void SetData(void* data, uint32_t size) override;
 		void Invalidate(std::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels) override;

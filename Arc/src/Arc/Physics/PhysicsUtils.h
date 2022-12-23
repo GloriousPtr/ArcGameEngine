@@ -9,44 +9,45 @@ namespace ArcEngine
 	class PhysicsUtils
 	{
 	public:
-		static bool Inside(b2Vec2 cp1, b2Vec2 cp2, b2Vec2 p)
+		[[nodiscard]] static bool Inside(b2Vec2 cp1, b2Vec2 cp2, b2Vec2 p)
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			return (cp2.x - cp1.x) * (p.y - cp1.y) > (cp2.y - cp1.y) * (p.x - cp1.x);
 		}
 
-		static b2Vec2 Intersection(b2Vec2 cp1, b2Vec2 cp2, b2Vec2 s, b2Vec2 e)
+		[[nodiscard]] static b2Vec2 Intersection(b2Vec2 cp1, b2Vec2 cp2, b2Vec2 s, b2Vec2 e)
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			b2Vec2 dc(cp1.x - cp2.x, cp1.y - cp2.y);
 			b2Vec2 dp(s.x - e.x, s.y - e.y);
 			float n1 = cp1.x * cp2.y - cp1.y * cp2.x;
 			float n2 = s.x * e.y - s.y * e.x;
 			float n3 = 1.0f / (dc.x * dp.y - dc.y * dp.x);
-			return b2Vec2((n1 * dp.x - n2 * dc.x) * n3, (n1 * dp.y - n2 * dc.y) * n3);
+			return { (n1 * dp.x - n2 * dc.x) * n3, (n1 * dp.y - n2 * dc.y) * n3 };
 		}
 
 		static bool VerticesFromCircle(b2Fixture* fixture, std::vector<b2Vec2>& vertices, float resolution = 16.0f)
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 
 			if (fixture->GetShape()->GetType() != b2Shape::e_circle)
 				return false;
 
-			const b2CircleShape* circle = (b2CircleShape*)fixture->GetShape();
+			const auto* circle = static_cast<b2CircleShape*>(fixture->GetShape());
 			b2Vec2 position = fixture->GetBody()->GetPosition();
 			const float radius = circle->m_radius;
 
-			const float polyCount = resolution * radius;
+			const float polyCountFloat = resolution * radius;
+			const int polyCount = static_cast<int>(glm::ceil(polyCountFloat));
 			constexpr float twoPi = 6.28318530718f;
-			const float deltaRadians = twoPi / polyCount;
+			const float deltaRadians = twoPi / static_cast<float>(polyCount);
 
-			vertices.reserve((size_t)polyCount);
-			for (uint32_t i = 0; i < (uint32_t)polyCount; ++i)
+			vertices.reserve(polyCount);
+			for (int i = 0; i < polyCount; ++i)
 			{
-				float radians = deltaRadians * (float)i;
+				float radians = deltaRadians * static_cast<float>(i);
 				b2Vec2 point = { glm::cos(radians), glm::sin(radians) };
 				vertices.emplace_back(position + (radius * point));
 			}
@@ -57,9 +58,9 @@ namespace ArcEngine
 		//http://rosettacode.org/wiki/Sutherland-Hodgman_polygon_clipping#JavaScript
 		//Note that this only works when fB is a convex polygon, but we know all 
 		//fixtures in Box2D are convex, so that will not be a problem
-		static bool FindIntersectionOfFixtures(b2Fixture* fA, b2Fixture* fB, std::vector<b2Vec2>& outputVertices)
+		[[nodiscard]] static bool FindIntersectionOfFixtures(b2Fixture* fA, b2Fixture* fB, std::vector<b2Vec2>& outputVertices)
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 			
 			std::vector<b2Vec2> clipPolygon;
 
@@ -67,7 +68,7 @@ namespace ArcEngine
 			switch (fA->GetShape()->GetType())
 			{
 			case b2Shape::e_polygon:
-				polyA = (b2PolygonShape*)fA->GetShape();
+				polyA = static_cast<b2PolygonShape*>(fA->GetShape());
 				//fill subject polygon from fixtureA polygon
 				for (int i = 0; i < polyA->m_count; i++)
 					outputVertices.emplace_back(fA->GetBody()->GetWorldPoint(polyA->m_vertices[i]));
@@ -83,7 +84,7 @@ namespace ArcEngine
 			switch (fB->GetShape()->GetType())
 			{
 			case b2Shape::e_polygon:
-				polyB = (b2PolygonShape*)fB->GetShape();
+				polyB = static_cast<b2PolygonShape*>(fB->GetShape());
 				//fill clip polygon from fixtureB polygon
 				for (int i = 0; i < polyB->m_count; i++)
 					clipPolygon.emplace_back(fB->GetBody()->GetWorldPoint(polyB->m_vertices[i]));
@@ -128,22 +129,22 @@ namespace ArcEngine
 			return !outputVertices.empty();
 		}
 
-		static b2Vec2 ComputeCentroid(std::vector<b2Vec2> vs, float& area)
+		[[nodiscard]] static b2Vec2 ComputeCentroid(std::vector<b2Vec2> vs, float& area)
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 			
-			int count = (int)vs.size();
+			int count = static_cast<int>(vs.size());
 			b2Assert(count >= 3);
 
-			b2Vec2 c;
+			b2Vec2 c = {};
 			c.Set(0.0f, 0.0f);
 			area = 0.0f;
 
 			// pRef is the reference point for forming triangles.
-			// Its location doesnt change the result (except for rounding error).
+			// Its location doesn't change the result (except for rounding error).
 			b2Vec2 pRef(0.0f, 0.0f);
 
-			const float inv3 = 1.0f / 3.0f;
+			constexpr float inv3 = 1.0f / 3.0f;
 
 			for (int32 i = 0; i < count; ++i)
 			{
@@ -174,7 +175,7 @@ namespace ArcEngine
 
 		static void HandleBuoyancy(b2Fixture* fluid, b2Fixture* fixture, b2Vec2 gravity, bool flipGravity, float density, float dragMultiplier, float flowMagnitude, float flowAngleInRadians)
 		{
-			ARC_PROFILE_SCOPE();
+			ARC_PROFILE_SCOPE()
 			
 			std::vector<b2Vec2> intersectionPoints;
 			if (FindIntersectionOfFixtures(fluid, fixture, intersectionPoints))
@@ -191,7 +192,7 @@ namespace ArcEngine
 				fixture->GetBody()->ApplyForceToCenter(flowForce, true);
 
 				//apply drag separately for each polygon edge
-				for (int i = 0; i < intersectionPoints.size(); i++)
+				for (size_t i = 0; i < intersectionPoints.size(); i++)
 				{
 					//the end points and mid-point of this edge 
 					b2Vec2 v0 = intersectionPoints[i];

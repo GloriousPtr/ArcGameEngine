@@ -19,15 +19,15 @@ namespace ArcEngine
 		void SetYaw(float yaw) { m_Yaw = yaw; }														// In radians
 		void SetPitch(float pitch) { m_Pitch = pitch; }												// In radians
 
-		const glm::mat4& GetView() const { return m_ViewMatrix; }
-		glm::mat4 GetViewProjection() const { return m_Projection * m_ViewMatrix; }
+		[[nodiscard]] const glm::mat4& GetView() const { return m_ViewMatrix; }
+		[[nodiscard]] glm::mat4 GetViewProjection() const { return m_Projection * m_ViewMatrix; }
 
-		const glm::vec3& GetPosition() const { return m_Position; }
-		const glm::vec3& GetForward() const { return m_Forward; }
-		const glm::vec3& GetRight() const { return m_Right; }
-		const glm::vec3& GetUp() const { return m_Up; }
-		float GetYaw() const { return m_Yaw; }														// In radians
-		float GetPitch() const { return m_Pitch; }													// In radians
+		[[nodiscard]] const glm::vec3& GetPosition() const { return m_Position; }
+		[[nodiscard]] const glm::vec3& GetForward() const { return m_Forward; }
+		[[nodiscard]] const glm::vec3& GetRight() const { return m_Right; }
+		[[nodiscard]] const glm::vec3& GetUp() const { return m_Up; }
+		[[nodiscard]] float GetYaw() const { return m_Yaw; }														// In radians
+		[[nodiscard]] float GetPitch() const { return m_Pitch; }													// In radians
 
 	private:
 		float m_Fov = glm::radians(45.0f);															// In radians
