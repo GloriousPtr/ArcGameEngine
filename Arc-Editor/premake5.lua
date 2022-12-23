@@ -37,7 +37,6 @@ project "Arc-Editor"
 
 	defines
 	{
-		"_CRT_SECURE_NO_WARNINGS",
 		"SPDLOG_USE_STD_FORMAT"
 	}
 

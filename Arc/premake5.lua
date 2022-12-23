@@ -41,7 +41,6 @@ project "Arc"
 
 	defines
 	{
-		"_CRT_SECURE_NO_WARNINGS",
 		"GLFW_INCLUDE_NONE",
 		"SPDLOG_USE_STD_FORMAT"
 	}
