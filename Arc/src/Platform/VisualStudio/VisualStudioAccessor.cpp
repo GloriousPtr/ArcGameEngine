@@ -1,8 +1,22 @@
 #include "arcpch.h"
 #include "VisualStudioAccessor.h"
 
+
+#if defined(__clang__) || defined(__llvm__)
+#	pragma clang diagnostic push
+#	pragma clang diagnostic ignored "-Weverything"
+#elif defined(_MSC_VER)
+#	pragma warning(push, 0)
+#endif
+
 #include "dte80a.tlh"
 #include "dte80.tlh"
+
+#if defined(__clang__) || defined(__llvm__)
+#	pragma clang diagnostic pop
+#elif defined(_MSC_VER)
+#	pragma warning(pop)
+#endif
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -262,13 +276,10 @@ namespace ArcEngine
 			{
 				while (fgets(buffer, sizeof(buffer), errors))
 				{
-					if (buffer)
-					{
-						size_t newLine = std::string_view(buffer).size() - 1;
-						buffer[newLine] = '\0';
-						ARC_APP_ERROR(buffer);
-						failed = true;
-					}
+					size_t newLine = std::string_view(buffer).size() - 1;
+					buffer[newLine] = '\0';
+					ARC_APP_ERROR(buffer);
+					failed = true;
 				}
 
 				fclose(errors);
@@ -285,12 +296,9 @@ namespace ArcEngine
 			{
 				while (fgets(buffer, sizeof(buffer), warns))
 				{
-					if (buffer)
-					{
-						size_t newLine = std::string_view(buffer).size() - 1;
-						buffer[newLine] = '\0';
-						ARC_APP_WARN(buffer);
-					}
+					size_t newLine = std::string_view(buffer).size() - 1;
+					buffer[newLine] = '\0';
+					ARC_APP_WARN(buffer);
 				}
 
 				fclose(warns);

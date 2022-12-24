@@ -29,7 +29,7 @@ if '%errorlevel%' NEQ '0' (
 echo Cloning LLVM-Utils and setting up to work with Visual Studio
 
 if not exist ".cache" mkdir .cache
-git clone -q --depth=1 --branch=main https://github.com/zufuliu/llvm-utils.git .cache/llvm-utils
+git clone -q --depth=1 --branch=main https://github.com/MohitSethi99/llvm-utils.git .cache/llvm-utils
 CALL ".cache/llvm-utils\VS2017\install.bat" 1
 
 echo LLVM should now work with Visual Studio

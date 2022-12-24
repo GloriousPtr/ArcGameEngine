@@ -3,6 +3,8 @@ project "Arc"
 	language "C++"
 	cppdialect "C++20"
 	staticruntime "off"
+	warnings "default"
+	externalwarnings "off"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")

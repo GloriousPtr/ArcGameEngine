@@ -3,6 +3,8 @@ project "Arc-Editor"
 	language "C++"
 	cppdialect "C++20"
 	staticruntime "off"
+	warnings "default"
+	externalwarnings "off"
 
 	binDir = "%{wks.location}/bin/" .. outputdir
 	targetdir ("%{binDir}/%{prj.name}")

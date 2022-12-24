@@ -53,8 +53,10 @@ filter "configurations:Dist"
 Lib = {}
 Lib["mono"] = "%{LibDir.Mono}/mono-2.0-sgen.lib"
 
-group "Dependencies"
+group "Setup"
 	include "vendor/premake"
+
+group "Dependencies"
 	include "Arc/vendor/GLFW"
 	include "Arc/vendor/Glad"
 	include "Arc/vendor/imgui"

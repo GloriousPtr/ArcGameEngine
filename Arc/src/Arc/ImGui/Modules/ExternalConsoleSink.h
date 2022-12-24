@@ -79,12 +79,14 @@ namespace ArcEngine
 		{
 			switch (level)
 			{
+				case spdlog::level::level_enum::off:			return static_cast<Log::Level>(0);
 				case spdlog::level::level_enum::trace:			return Log::Level::Trace;
 				case spdlog::level::level_enum::debug:			return Log::Level::Debug;
 				case spdlog::level::level_enum::info:			return Log::Level::Info;
 				case spdlog::level::level_enum::warn:			return Log::Level::Warn;
 				case spdlog::level::level_enum::err:			return Log::Level::Error;
 				case spdlog::level::level_enum::critical:		return Log::Level::Critical;
+				case spdlog::level::level_enum::n_levels:		return static_cast<Log::Level>(0);
 			}
 			return Log::Level::Trace;
 		}

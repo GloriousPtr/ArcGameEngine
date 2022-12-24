@@ -9,6 +9,7 @@ namespace ArcEngine
 	{
 		switch (type)
 		{
+			case ShaderDataType::None:		ARC_CORE_ASSERT(false, "Unknown ShaderDataType!") return 0;
 			case ShaderDataType::Float:		return GL_FLOAT;
 			case ShaderDataType::Float2:	return GL_FLOAT;
 			case ShaderDataType::Float3:	return GL_FLOAT;
@@ -22,8 +23,6 @@ namespace ArcEngine
 			case ShaderDataType::Bool:		return GL_BOOL;
 		}
 
-		// To keep the compiler happy
-		ARC_CORE_ASSERT(false, "Unknown ShaderDataType!")
 		return 0;
 	}
 	

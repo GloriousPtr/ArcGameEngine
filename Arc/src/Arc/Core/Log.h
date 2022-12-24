@@ -4,20 +4,7 @@
 
 #include "UUID.h"
 
-// This ignores all warnings raised inside External headers
-#if defined(__clang__)
-//#	pragma clang diagnostic push
-#elif defined(_MSC_VER)
-#	pragma warning(push, 0)
-#endif
-
 #include <spdlog/spdlog.h>
-
-#if defined(__clang__)
-//#	pragma clang diagnostic pop
-#elif defined(_MSC_VER)
-#	pragma warning(pop)
-#endif
 
 namespace ArcEngine
 {

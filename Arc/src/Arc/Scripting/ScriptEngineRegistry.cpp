@@ -1045,7 +1045,7 @@ namespace ArcEngine
 	///////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
-#define ARC_ADD_INTERNAL_CALL(Name) mono_add_internal_call("ArcEngine.InternalCalls::" #Name, (&Name))
+#define ARC_ADD_INTERNAL_CALL(Name) mono_add_internal_call("ArcEngine.InternalCalls::" #Name, (reinterpret_cast<void*>(&Name)))
 
 	void ScriptEngineRegistry::RegisterInternalCalls()
 	{
@@ -1054,9 +1054,9 @@ namespace ArcEngine
 		///////////////////////////////////////////////////////////////
 		// Entity /////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////
-		mono_add_internal_call("ArcEngine.InternalCalls::Entity_AddComponent", &ScriptEngineRegistry::AddComponent);
-		mono_add_internal_call("ArcEngine.InternalCalls::Entity_HasComponent", &ScriptEngineRegistry::HasComponent);
-		mono_add_internal_call("ArcEngine.InternalCalls::Entity_GetComponent", &ScriptEngineRegistry::GetComponent);
+		mono_add_internal_call("ArcEngine.InternalCalls::Entity_AddComponent", reinterpret_cast<void*>(&ScriptEngineRegistry::AddComponent));
+		mono_add_internal_call("ArcEngine.InternalCalls::Entity_HasComponent", reinterpret_cast<void*>(&ScriptEngineRegistry::HasComponent));
+		mono_add_internal_call("ArcEngine.InternalCalls::Entity_GetComponent", reinterpret_cast<void*>(&ScriptEngineRegistry::GetComponent));
 
 		///////////////////////////////////////////////////////////////
 		// Tag ////////////////////////////////////////////////////////
