@@ -149,7 +149,7 @@ private:
 	void						DumpList(const char *inTag, const Aggregators &inAggregators);
 	void						DumpChart(const char *inTag, const Threads &inThreads, const KeyToAggregator &inKeyToAggregators, const Aggregators &inAggregators);
 
-	mutex						mLock;																///< Lock that protects mThreads
+	std::mutex					mLock;																///< Lock that protects mThreads
 	Array<ProfileThread *>		mThreads;															///< List of all active threads
 	bool						mDump = false;														///< When true, the samples are dumped next frame
 	String						mDumpTag;															///< When not empty, this overrides the auto incrementing number of the dump filename
@@ -245,20 +245,18 @@ JPH_SUPPRESS_WARNING_POP
 #else
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Optick profiling instructions
+// Dummy profiling instructions
 //////////////////////////////////////////////////////////////////////////////////////////
-
-#include <optick.h>
 
 JPH_SUPPRESS_WARNING_PUSH
 JPH_CLANG_SUPPRESS_WARNING("-Wc++98-compat-pedantic")
 
 #define JPH_PROFILE_START(name)
 #define JPH_PROFILE_END()
-#define JPH_PROFILE_THREAD_START(name) OPTICK_THREAD(name)
+#define JPH_PROFILE_THREAD_START(name)
 #define JPH_PROFILE_THREAD_END()
-#define JPH_PROFILE(...) OPTICK_EVENT()
-#define JPH_PROFILE_FUNCTION() OPTICK_EVENT()
+#define JPH_PROFILE(...)
+#define JPH_PROFILE_FUNCTION()
 #define JPH_PROFILE_NEXTFRAME()
 #define JPH_PROFILE_DUMP(...)
 
