@@ -26,6 +26,7 @@ jobs:
         COMPILER:
           - msvc
           - clang
+          - llvm
     env:
       SOLUTION_FILE_PATH: "Arc.sln"
     steps:

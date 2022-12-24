@@ -3,21 +3,25 @@ import pathlib
 import sys
 
 compiler = "msvc"
-argsLen = len(sys.argv);
+argsLen = len(sys.argv)
 if argsLen == 1:
-    compiler = input("Select compiler: msvc/clang ")
+    compiler = input("Select compiler: msvc/clang/llvm ")
 elif argsLen == 2:
     compiler = sys.argv[1]
 else:
-    print("Invalid syntax, should only contain one argument: msvc/clang")
+    print("Invalid syntax, should only contain one argument: msvc/clang/llvm")
     exit
 
-if compiler != "msvc" and compiler != "clang":
+if compiler != "msvc" and compiler != "clang" and compiler != "llvm":
     print("Invalid compiler:", compiler)
     exit
 
-os.system("GenerateSolution.bat")
-if compiler == "clang":
+if compiler == "clang" or compiler == "llvm":
+    os.system("GenerateSolutionClang.bat")
+else:
+    os.system("GenerateSolution.bat")
+
+if compiler == "llvm":
     llvmInstallPath = "C:/Program Files/LLVM/bin/clang.exe"
     if (not os.path.exists(llvmInstallPath)):
         print("LLVM installation not found!")
@@ -31,7 +35,7 @@ if compiler == "clang":
                 continue
             with open(fpath) as f:
                 s = f.read()
-            s = s.replace("v143", "LLVM_v143")
+            s = s.replace("<PlatformToolset>ClangCL</PlatformToolset>", "<PlatformToolset>LLVM_v143</PlatformToolset>")
             with open(fpath, "w") as f:
                 f.write(s)
     print("Generated project files for", compiler)
