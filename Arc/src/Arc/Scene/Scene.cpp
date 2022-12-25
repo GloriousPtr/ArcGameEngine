@@ -261,7 +261,7 @@ namespace ArcEngine
 			}
 			else
 			{
-				const auto* phyMaterial = dynamic_cast<const PhysicsMaterial3D*>(material);
+				const auto* phyMaterial = static_cast<const PhysicsMaterial3D*>(material);
 				outFriction = phyMaterial->Friction;
 				outRestitution = phyMaterial->Restitution;
 			}
