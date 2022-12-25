@@ -7,7 +7,7 @@ project "Arc-Editor"
 	externalwarnings "off"
 
 	binDir = "%{wks.location}/bin/" .. outputdir
-	targetdir ("%{binDir}/%{prj.name}")
+	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
 	files
@@ -46,11 +46,10 @@ project "Arc-Editor"
 
 	filter "system:windows"
 		systemversion "latest"
+		postbuildmessage "Post-Build: Copying dependencies..."
 		postbuildcommands
 		{
-			'{COPY} "../Arc-ScriptCore" "%{binDir}"/Arc-ScriptCore',
 			'{COPY} "../vendor" "%{binDir}"/vendor',
-			'{COPY} "../Sandbox" "%{binDir}"/Sandbox',
 			'{COPY} "../Arc-Editor/assets" "%{cfg.targetdir}"/assets',
 			'{COPY} "../Arc-Editor/mono" "%{cfg.targetdir}"/mono',
 			'{COPY} "../Arc-Editor/Resources" "%{cfg.targetdir}"/Resources',
