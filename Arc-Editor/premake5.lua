@@ -5,6 +5,7 @@ project "Arc-Editor"
 	staticruntime "off"
 	warnings "default"
 	externalwarnings "off"
+	rtti "off"
 
 	binDir = "%{wks.location}/bin/" .. outputdir
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
@@ -22,9 +23,14 @@ project "Arc-Editor"
 
 	includedirs
 	{
-		"%{wks.location}/Arc/vendor/spdlog/include",
+		"src",
 		"%{wks.location}/Arc/src",
-		"%{wks.location}/Arc/vendor",
+		"%{wks.location}/Arc/vendor"
+	}
+
+	externalincludedirs
+	{
+		"%{wks.location}/Arc/vendor/spdlog/include",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.ImGuizmo}",

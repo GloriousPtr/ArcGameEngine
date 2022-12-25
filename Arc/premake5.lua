@@ -5,6 +5,7 @@ project "Arc"
 	staticruntime "off"
 	warnings "default"
 	externalwarnings "off"
+	rtti "off"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -49,7 +50,11 @@ project "Arc"
 
 	includedirs
 	{
-		"src",
+		"src"
+	}
+
+	externalincludedirs
+	{
 		"vendor/spdlog/include",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
@@ -84,10 +89,11 @@ project "Arc"
 	}
 
 	filter "files:vendor/ImGuizmo/**.cpp"
-	flags { "NoPCH" }
+		flags { "NoPCH" }
 
 	filter "system:windows"
 		systemversion "latest"
+		postbuildmessage "Post-Build: Copying dependencies..."
 
 	filter "configurations:Debug"
 		defines "ARC_DEBUG"
