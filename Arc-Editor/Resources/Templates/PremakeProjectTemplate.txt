@@ -33,7 +33,7 @@ project "{PROJECT_NAME}"
 
     links
     {
-        ArcRootDir .. "/Arc-Editor/Resources/Scripts/Arc-ScriptCore.dll"
+        _WORKING_DIR .. "/Resources/Scripts/Arc-ScriptCore.dll"
     }
 
     filter "configurations:Debug"
