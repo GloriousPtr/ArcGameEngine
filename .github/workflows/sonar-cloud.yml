@@ -47,7 +47,7 @@ jobs:
           unzip -o $HOME\.sonar\build-wrapper.zip -d $HOME\.sonar\
           echo "$HOME\.sonar\build-wrapper-win-x86" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
       - name: Set up msbuild
-        uses: microsoft/setup-msbuild@v1.1
+        uses: microsoft/setup-msbuild@v1.3
       - name: Generate Project Files
         run: "./scripts/GenerateSolution.bat"
       - name: Cache SonarCloud packages
