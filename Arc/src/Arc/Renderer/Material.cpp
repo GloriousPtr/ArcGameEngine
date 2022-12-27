@@ -1,7 +1,6 @@
 #include "arcpch.h"
 #include "Material.h"
 
-#include <ranges>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Renderer3D.h"
@@ -55,7 +54,7 @@ namespace ArcEngine
 		m_BufferSizeInBytes = 0;
 		const auto& materialProperties = m_Shader->GetMaterialProperties();
 
-		for (const auto& property : materialProperties | std::views::values)
+		for (const auto& [_, property] : materialProperties)
 			m_BufferSizeInBytes += property.SizeInBytes;
 
 		m_Buffer = new char[m_BufferSizeInBytes];

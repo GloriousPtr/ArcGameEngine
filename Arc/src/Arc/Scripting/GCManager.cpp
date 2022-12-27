@@ -1,7 +1,6 @@
 #include "arcpch.h"
 #include "GCManager.h"
 
-#include <ranges>
 #include <mono/metadata/object.h>
 #include <mono/metadata/mono-gc.h>
 
@@ -30,7 +29,7 @@ namespace ArcEngine
 		{
 			ARC_CORE_ERROR("Memory leak detected\n Not all GCHandles have been cleaned up!");
 
-			for (const auto& handle : s_GCState->StrongRefMap | std::views::keys)
+			for (const auto& [handle, _] : s_GCState->StrongRefMap)
 				mono_gchandle_free_v2(handle);
 
 			s_GCState->StrongRefMap.clear();
@@ -40,7 +39,7 @@ namespace ArcEngine
 		{
 			ARC_CORE_ERROR("Memory leak detected\n Not all GCHandles have been cleaned up!");
 
-			for (const auto& handle : s_GCState->WeakRefMap | std::views::keys)
+			for (const auto& [handle, _] : s_GCState->WeakRefMap)
 				mono_gchandle_free_v2(handle);
 
 			s_GCState->WeakRefMap.clear();

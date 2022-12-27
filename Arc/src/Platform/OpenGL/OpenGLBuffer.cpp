@@ -146,7 +146,7 @@ namespace ArcEngine
 		size *= count;
 
 		glBindBuffer(GL_UNIFORM_BUFFER, m_RendererID);
-		glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_STATIC_DRAW);
+		glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 		glBindBufferRange(GL_UNIFORM_BUFFER, blockIndex, m_RendererID, 0, size);
 	}

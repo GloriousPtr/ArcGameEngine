@@ -3,7 +3,6 @@
 
 #include <yaml-cpp/yaml.h>
 #include <fstream>
-#include <ranges>
 
 #include "Arc/Audio/AudioListener.h"
 #include "Arc/Audio/AudioSource.h"
@@ -1419,7 +1418,7 @@ namespace ArcEngine
 			root.AddComponent<PrefabComponent>().ID = prefabID;
 
 			// Fix parent/children UUIDs
-			for (const auto& newId : oldNewIdMap | std::views::values)
+			for (const auto& [oldId, newId] : oldNewIdMap)
 			{
 				auto& relationshipComponent = scene.GetEntity(newId).GetRelationship();
 				UUID parent = relationshipComponent.Parent;

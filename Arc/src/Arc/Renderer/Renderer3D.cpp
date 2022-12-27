@@ -3,7 +3,6 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <ranges>
 
 #include "Renderer.h"
 #include "RenderGraphData.h"
@@ -677,11 +676,11 @@ namespace ArcEngine
 			s_ShadowMapShader->Bind();
 			s_ShadowMapShader->SetMat4("u_ViewProjection", dirLightViewProj);
 
-			for (auto& s_Meshe : std::ranges::reverse_view(s_Meshes))
+			for (auto it = s_Meshes.rbegin(); it != s_Meshes.rend(); ++it)
 			{
-				const MeshData* meshData = &s_Meshe;
-				s_ShadowMapShader->SetMat4("u_Model", meshData->Transform);
-				RenderCommand::DrawIndexed(meshData->SubmeshGeometry.Geometry);
+				const MeshData& meshData = *it;
+				s_ShadowMapShader->SetMat4("u_Model", meshData.Transform);
+				RenderCommand::DrawIndexed(meshData.SubmeshGeometry.Geometry);
 			}
 		}
 	}
