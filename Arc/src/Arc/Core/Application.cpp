@@ -10,8 +10,8 @@
 
 extern "C"
 {
-	__declspec(dllexport) DWORD NvOptimusEnablement = 1;
-	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+	ARC_API(dllexport) unsigned long NvOptimusEnablement = 1;
+	ARC_API(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 
 namespace ArcEngine

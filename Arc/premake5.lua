@@ -44,8 +44,7 @@ project "Arc"
 
 	defines
 	{
-		"GLFW_INCLUDE_NONE",
-		"SPDLOG_USE_STD_FORMAT"
+		"GLFW_INCLUDE_NONE"
 	}
 
 	includedirs
@@ -74,6 +73,11 @@ project "Arc"
 		"%{IncludeDir.tinygltf}",
 	}
 
+	libdirs
+	{
+		"%{LibDir.Mono}"
+	}
+
 	links
 	{
 		"GLFW",
@@ -85,7 +89,15 @@ project "Arc"
 		"JoltPhysics",
 		"Arc-ScriptCore",
 
-		"%{Lib.mono}"
+		"%{Lib.mono}:shared",
+		"GL:shared",
+		"dl:shared"
+	}
+
+	postbuildmessage "================ Post-Build: Copying dependencies ================"
+	postbuildcommands
+	{
+		'{COPY} "%{LibLocation.Mono}" "%{cfg.targetdir}"'
 	}
 
 	filter "files:vendor/ImGuizmo/**.cpp"
@@ -93,32 +105,23 @@ project "Arc"
 
 	filter "system:windows"
 		systemversion "latest"
-		postbuildmessage "Post-Build: Copying dependencies..."
+
+	filter "system:linux"
+		pic "On"
+		systemversion "latest"
 
 	filter "configurations:Debug"
 		defines "ARC_DEBUG"
 		runtime "Debug"
 		symbols "on"
-		postbuildcommands
-		{
-			'{COPY} "../Arc/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
-		}
 
 	filter "configurations:Release"
 		defines "ARC_RELEASE"
 		runtime "Release"
 		optimize "speed"
-		postbuildcommands
-		{
-			'{COPY} "../Arc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
-		}
 
 	filter "configurations:Dist"
 		defines "ARC_DIST"
 		runtime "Release"
 		optimize "speed"
 		symbols "off"
-		postbuildcommands
-		{
-			'{COPY} "../Arc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
-		}

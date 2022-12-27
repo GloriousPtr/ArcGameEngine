@@ -1,6 +1,5 @@
 #include "PropertiesPanel.h"
 
-#include <ranges>
 #include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui_internal.h>
 
@@ -67,7 +66,7 @@ namespace ArcEngine
 			
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
 
-			size_t id = typeid(T).hash_code();
+			size_t id = entt::type_id<T>().hash();
 			bool open = ImGui::TreeNodeEx(reinterpret_cast<void*>(id), treeFlags, "%s", reinterpret_cast<const char*>(name));
 
 			bool removeComponent = false;
@@ -355,7 +354,7 @@ namespace ArcEngine
 			if (entity.HasComponent<TagComponent>())
 			{
 				char buffer[256] = {};
-				strcpy_s(buffer, tag.Tag.c_str());
+				std::strcpy(buffer, tag.Tag.c_str());
 				ImGui::SetNextItemWidth(tagWidth);
 				if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
 					tag.Tag = std::string(buffer);
@@ -532,7 +531,7 @@ namespace ArcEngine
 		{
 			if (ImGui::Button(component.MeshGeometry ? component.MeshGeometry->GetFilepath() : "null", { ImGui::GetContentRegionAvail().x, ImGui::GetFrameHeight() }))
 			{
-				std::string filepath = FileDialogs::OpenFile("Mesh (*.assbin)\0*.assbin\0(*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
+				std::string filepath; // = FileDialogs::OpenFile("Mesh (*.assbin)\0*.assbin\0(*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
 				if (!filepath.empty())
 				{
 					component.MeshGeometry = CreateRef<Mesh>(filepath.c_str());
@@ -1081,7 +1080,7 @@ namespace ArcEngine
 				}
 
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
-				for (const auto& name : classes | std::views::keys)
+				for (const auto& [name, _] : classes)
 				{
 					bool notFound = std::ranges::find(component.Classes, name) == component.Classes.end();
 					if (notFound && (!m_Filter.IsActive() || (m_Filter.IsActive() && m_Filter.PassFilter(name.c_str()))))

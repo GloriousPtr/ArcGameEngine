@@ -358,7 +358,7 @@ namespace ArcEngine
 	{
 		([&]()
 		{
-			if (typeid(Component) != typeid(ScriptComponent) && srcEntity.HasComponent<Component>())	// Currently not support duplicating ScriptComponent
+			if (entt::type_id<Component>() != entt::type_id<ScriptComponent>() && srcEntity.HasComponent<Component>())	// Currently not support duplicating ScriptComponent
 			{
 				const auto& component = srcEntity.GetComponent<Component>();
 				dst.emplace_or_replace<Component>(dstEntity, component);

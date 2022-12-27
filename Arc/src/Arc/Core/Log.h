@@ -34,7 +34,13 @@ namespace ArcEngine
 }
 
 template<>
-struct std::formatter<ArcEngine::UUID>
+struct 
+#if defined(SPDLOG_USE_STD_FORMAT)
+std
+#else
+fmt
+#endif
+::formatter<ArcEngine::UUID>
 {
 	constexpr auto parse(const format_parse_context& ctx) const -> decltype(ctx.begin())
 	{
@@ -49,7 +55,13 @@ struct std::formatter<ArcEngine::UUID>
 };
 
 template<>
-struct std::formatter<std::filesystem::path>
+struct 
+#if defined(SPDLOG_USE_STD_FORMAT)
+std
+#else
+fmt
+#endif
+::formatter<std::filesystem::path>
 {
 	constexpr auto parse(format_parse_context& ctx) const -> decltype(ctx.begin())
 	{

@@ -52,7 +52,9 @@ namespace ArcEngine {
 		/// <param name="b">The second value</param>
 		/// <param name="c">The third value</param>
 		public ResultsMax3( T a, T b, T c ) {
-			( this.a, this.b, this.c ) = ( a, b, c );
+			this.a = a;
+			this.b = b;
+			this.c = c;
 			count = 3;
 		}
 
@@ -60,14 +62,18 @@ namespace ArcEngine {
 		/// <param name="a">The first value</param>
 		/// <param name="b">The second value</param>
 		public ResultsMax3( T a, T b ) {
-			( this.a, this.b, this.c ) = ( a, b, default );
+			this.a = a;
+			this.b = b;
+			this.c = default;
 			count = 2;
 		}
 
 		/// <summary>Creates a result with one value</summary>
 		/// <param name="a">The one value</param>
 		public ResultsMax3( T a ) {
-			( this.a, this.b, this.c ) = ( a, default, default );
+			this.a = a;
+			this.b = default;
+			this.c = default;
 			count = 1;
 		}
 
@@ -95,26 +101,6 @@ namespace ArcEngine {
 				case 1:  return new ResultsMax3<T>( a, value );
 				case 2:  return new ResultsMax3<T>( a, b, value );
 				default: throw new IndexOutOfRangeException( "Can't add more than three values to ResultsMax3" );
-			}
-		}
-
-		/// <summary>Implicitly casts from a tuple with nullables to a results structure</summary>
-		/// <param name="tuple">The tuple to cast</param>
-		public static implicit operator ResultsMax3<T>( (T?, T?, T?) tuple ) {
-			int validCount = 0;
-			( T? a, T? b, T? c ) = tuple;
-			bool aIsValid = a.HasValue;
-			if( aIsValid ) validCount++;
-			bool bIsValid = b.HasValue;
-			if( bIsValid ) validCount++;
-			bool cIsValid = c.HasValue;
-			if( cIsValid ) validCount++;
-
-			switch( validCount ) {
-				case 1:  return new ResultsMax3<T>( aIsValid ? a.Value : bIsValid ? b.Value : c.Value );
-				case 2:  return new ResultsMax3<T>( aIsValid ? a.Value : b.Value, bIsValid ? b.Value : c.Value );
-				case 3:  return new ResultsMax3<T>( a.Value, b.Value, c.Value ); // all three passed, no change
-				default: return default;
 			}
 		}
 
@@ -187,13 +173,15 @@ namespace ArcEngine {
 
 		/// <inheritdoc cref="Freya.ResultsMax3{T}(T,T)"/>
 		public ResultsMax2( T a, T b ) {
-			( this.a, this.b ) = ( a, b );
+			this.a = a;
+			this.b = b;
 			count = 2;
 		}
 
 		/// <inheritdoc cref="Freya.ResultsMax3{T}(T)"/>
 		public ResultsMax2( T a ) {
-			( this.a, this.b ) = ( a, default );
+			this.a = a;
+			this.b = default;
 			count = 1;
 		}
 

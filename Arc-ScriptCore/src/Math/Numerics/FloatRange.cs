@@ -44,8 +44,12 @@ namespace ArcEngine {
 		/// <summary>Creates a new value range</summary>
 		/// <param name="a">The start of the range</param>
 		/// <param name="b">The end of the range</param>
-		public FloatRange( float a, float b ) => ( this.a, this.b ) = ( a, b );
-
+		public FloatRange( float a, float b )
+		{
+			this.a = a;
+			this.b = b;
+		}
+		
 		/// <summary>The value at the center of this value range</summary>
 		public float Center => ( a + b ) / 2;
 
@@ -87,7 +91,7 @@ namespace ArcEngine {
 		/// <param name="value">The range to remap</param>
 		/// <param name="input">The input range</param>
 		/// <param name="output">The output range</param>
-		public static FloatRange Remap( FloatRange value, FloatRange input, FloatRange output ) => new(Remap( value.a, input, output ), Remap( value.b, input, output ));
+		public static FloatRange Remap( FloatRange value, FloatRange input, FloatRange output ) => new FloatRange(Remap( value.a, input, output ), Remap( value.b, input, output ));
 
 		/// <summary>Returns whether or not this range overlaps another range</summary>
 		/// <param name="other">The other range to test overlap with</param>
@@ -107,12 +111,14 @@ namespace ArcEngine {
 
 		/// <summary>Expands the minimum or maximum value to contain the given <c>value</c></summary>
 		/// <param name="value">The value to include</param>
-		public FloatRange Encapsulate( float value ) =>
-			Direction switch {
-				1 => ( Mathfs.Min( a, value ), Mathfs.Max( b, value ) ), // forward - a is min, b is max
-				_ => ( Mathfs.Min( b, value ), Mathfs.Max( a, value ) ) // reversed - b is min, a is max
+		public FloatRange Encapsulate( float value )
+		{
+			switch(Direction) {
+				case 1:  return ( Mathfs.Min( a, value ), Mathfs.Max( b, value ) ); // forward - a is min, b is max
+				default: return ( Mathfs.Min( b, value ), Mathfs.Max( a, value ) ); // reversed - b is min, a is max
 			};
-
+		}
+		
 		/// <summary>Returns a version of this range, scaled around its start value</summary>
 		/// <param name="scale">The value to scale the range by</param>
 		public FloatRange ScaleFromStart( float scale ) => new FloatRange( a, a + scale * ( b - a ) );
@@ -134,13 +140,13 @@ namespace ArcEngine {
 		/// <param name="rangeY">The range of the Y axis</param>
 		/// <param name="rangeZ">The range of the Z axis</param>
 		public static Bounds ToBounds( FloatRange rangeX, FloatRange rangeY, FloatRange rangeZ ) {
-			Vector3 center = new(rangeX.Center, rangeY.Center, rangeZ.Center);
-			Vector3 size = new(rangeX.Length, rangeY.Length, rangeZ.Length);
+			Vector3 center = new Vector3(rangeX.Center, rangeY.Center, rangeZ.Center);
+			Vector3 size = new Vector3(rangeX.Length, rangeY.Length, rangeZ.Length);
 			return new Bounds( center, size );
 		}
 
-		public static FloatRange operator -( FloatRange range, float v ) => new(range.a - v, range.b - v);
-		public static FloatRange operator +( FloatRange range, float v ) => new(range.a + v, range.b + v);
+		public static FloatRange operator -( FloatRange range, float v ) => new FloatRange(range.a - v, range.b - v);
+		public static FloatRange operator +( FloatRange range, float v ) => new FloatRange(range.a + v, range.b + v);
 
 		public static implicit operator FloatRange( (float a, float b) tuple ) => new FloatRange( tuple.a, tuple.b );
 		public static bool operator ==( FloatRange a, FloatRange b ) => a.a == b.a && a.b == b.b;

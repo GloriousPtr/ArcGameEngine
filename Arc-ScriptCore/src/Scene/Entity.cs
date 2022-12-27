@@ -26,7 +26,7 @@ namespace ArcEngine
 			private ulong entityID;
 			public Vector2 relativeVelocity;
 
-			public Entity entity => new(entityID);
+			public Entity entity => new Entity(entityID);
 		}
 
 		protected event Action<CollisionData> OnCollisionEnter2D;

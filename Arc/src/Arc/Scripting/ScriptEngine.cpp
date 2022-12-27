@@ -12,15 +12,16 @@
 #include <mono/metadata/debug-helpers.h>
 #endif // ARC_DEBUG
 
-#include <ranges>
-
 #include "Arc/Project/Project.h"
 #include "Arc/Scene/Entity.h"
 #include "Arc/Scene/Scene.h"
 #include "MonoUtils.h"
 #include "GCManager.h"
 #include "ScriptEngineRegistry.h"
+
+#if defined(ARC_PLATFORM_WINDOWS)
 #include "Platform/VisualStudio/VisualStudioAccessor.h"
+#endif
 
 namespace ArcEngine
 {
@@ -187,10 +188,15 @@ namespace ArcEngine
 			return;
 
 		std::chrono::high_resolution_clock::time_point begin = std::chrono::high_resolution_clock::now();
+
+		bool buildSuccess = false;
+
+#if defined(ARC_PLATFORM_WINDOWS)
 		if (!VisualStudioAccessor::GenerateProjectFiles())
 			return;
 
-		bool buildSuccess = VisualStudioAccessor::BuildSolution();
+		buildSuccess = VisualStudioAccessor::BuildSolution();
+#endif
 
 		std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 		auto timeTaken = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
@@ -233,7 +239,7 @@ namespace ArcEngine
 
 			const char* nameSpace = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAMESPACE]);
 			const char* name = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAME]);
-			std::string fullname = std::format("{}.{}", nameSpace, name);
+			std::string fullname = fmt::format("{}.{}", nameSpace, name);
 
 			MonoClass* monoClass = mono_class_from_name(image, nameSpace, name);
 			if (!monoClass)
@@ -360,7 +366,7 @@ namespace ArcEngine
 			return GCManager::CreateObjectReference(object, false);
 		}
 
-		return nullptr;
+		return 0;
 	}
 
 	MonoMethod* ScriptClass::GetMethod(const char* methodName, uint32_t parameterCount) const
@@ -575,9 +581,9 @@ namespace ArcEngine
 		void* params = &entityID;
 		m_EntityClass->InvokeMethod(m_Handle, m_Constructor, &params);
 		
-		std::string fullClassName = std::format("{}.{}", scriptClass->m_ClassNamespace, scriptClass->m_ClassName);
+		std::string fullClassName = fmt::format("{}.{}", scriptClass->m_ClassNamespace, scriptClass->m_ClassName);
 		auto& fieldsMap = s_Data->EntityFields[entityID][fullClassName];
-		for (const auto& fieldName : scriptClass->m_FieldsMap | std::views::keys)
+		for (const auto& [fieldName, _] : scriptClass->m_FieldsMap)
 		{
 			const auto& fieldIt = fieldsMap.find(fieldName);
 			if (fieldIt != fieldsMap.end())

@@ -1,5 +1,7 @@
 #pragma once
 
+#if defined(ARC_PLATFORM_WINDOWS)
+
 namespace ArcEngine
 {
 	class VisualStudioAccessor
@@ -12,3 +14,5 @@ namespace ArcEngine
 		[[nodiscard]] static bool BuildSolution(const std::function<void()>& onComplete = nullptr);
 	};
 }
+
+#endif

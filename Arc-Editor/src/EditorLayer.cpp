@@ -521,8 +521,8 @@ namespace ArcEngine
 				if (ImGui::InputText("##ProjectLocation", buffer, size))
 					folderPath = buffer;
 				ImGui::SameLine();
-				if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_FOLDER)))
-					folderPath = FileDialogs::OpenFolder();
+//				if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_FOLDER)))
+//					folderPath = FileDialogs::OpenFolder();
 
 				ImGui::Separator();
 
@@ -831,9 +831,9 @@ namespace ArcEngine
 
 	void EditorLayer::OpenProject()
 	{
-		std::string filepath = FileDialogs::OpenFile("Arc Scene (*.arcproj)\0*.arcproj\0");
-		if (!filepath.empty())
-			OpenProject(filepath);
+//		std::string filepath = FileDialogs::OpenFile("Arc Scene (*.arcproj)\0*.arcproj\0");
+//		if (!filepath.empty())
+//			OpenProject(filepath);
 	}
 
 	void EditorLayer::SaveProject(const std::filesystem::path& path) const
@@ -903,13 +903,14 @@ namespace ArcEngine
 
 	void EditorLayer::SaveSceneAs()
 	{
+		/*
 		std::string filepath = FileDialogs::SaveFile("Arc Scene (*.arc)\0*.arc\0");
 		if (!filepath.empty())
 		{
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Serialize(filepath);
 			m_ScenePath = filepath;
-		}
+		}*/
 	}
 
 	void EditorLayer::OnScenePlay()

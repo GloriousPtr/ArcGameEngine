@@ -6,6 +6,7 @@ project "Arc-Editor"
 	warnings "default"
 	externalwarnings "off"
 	rtti "off"
+	characterset "Unicode"
 
 	binDir = "%{wks.location}/bin/" .. outputdir
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
@@ -38,17 +39,32 @@ project "Arc-Editor"
 		"%{IncludeDir.icons}",
 	}
 
+	libdirs
+	{
+		"%{LibDir.Mono}"
+	}
+
 	links
 	{
 		"Arc",
+		"GLFW",
+		"Glad",
+		"ImGui",
+		"yaml-cpp",
+		"optick",
+		"box2d",
+		"JoltPhysics",
+		"Arc-ScriptCore",
+
+		"%{Lib.mono}:shared",
+		"GL:shared",
 	}
 
-	defines
+	postbuildmessage "================ Post-Build: Copying dependencies ================"
+	postbuildcommands
 	{
-		"SPDLOG_USE_STD_FORMAT"
+		'{COPY} "%{LibLocation.Mono}" "%{cfg.targetdir}"'
 	}
-
-	buildoptions { "/utf-8" }
 
 	filter "system:windows"
 		systemversion "latest"
@@ -66,26 +82,14 @@ project "Arc-Editor"
 		defines "ARC_DEBUG"
 		runtime "Debug"
 		symbols "on"
-		postbuildcommands
-		{
-			'{COPY} "../Arc/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
-		}
 
 	filter "configurations:Release"
 		defines "ARC_RELEASE"
 		runtime "Release"
 		optimize "speed"
-		postbuildcommands
-		{
-			'{COPY} "../Arc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
-		}
 
 	filter "configurations:Dist"
 		defines "ARC_DIST"
 		runtime "Release"
         optimize "speed"
 		symbols "off"
-		postbuildcommands
-		{
-			'{COPY} "../Arc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"'
-		}

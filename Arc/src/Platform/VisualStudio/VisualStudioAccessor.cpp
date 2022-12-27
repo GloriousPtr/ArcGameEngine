@@ -1,6 +1,8 @@
 #include "arcpch.h"
-#include "VisualStudioAccessor.h"
 
+#if defined(ARC_PLATFORM_WINDOWS)
+
+#include "VisualStudioAccessor.h"
 
 #if defined(__clang__) || defined(__llvm__)
 #	pragma clang diagnostic push
@@ -483,3 +485,5 @@ namespace ArcEngine
 		return success;
 	}
 }
+
+#endif

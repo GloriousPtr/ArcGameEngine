@@ -1,7 +1,6 @@
 #include "arcpch.h"
 #include "ScriptEngineRegistry.h"
 
-#include <ranges>
 #include <mono/jit/jit.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <box2d/b2_body.h>
@@ -25,8 +24,8 @@ namespace ArcEngine
 		([]()
 		{
 			constexpr size_t n = std::string_view("struct ArcEngine::").size();
-			const char* componentName = n + typeid(Component).name();
-			std::string name = std::string("ArcEngine.") + componentName;
+			std::string_view componentName = entt::type_id<Component>().name().substr(n);
+			std::string name = std::string("ArcEngine.") + componentName.data();
 			MonoType* type = mono_reflection_type_from_name(&name[0], ScriptEngine::GetCoreAssemblyImage());
 			if (type)
 			{
@@ -70,7 +69,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		const auto& scripts = ScriptEngine::GetClasses();
-		for (const auto& className : scripts | std::views::keys)
+		for (const auto& [className, _] : scripts)
 			RegisterScriptComponent(className);
 	}
 

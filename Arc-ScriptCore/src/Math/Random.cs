@@ -9,7 +9,7 @@ namespace ArcEngine {
 	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public static class Random {
 
-		private static System.Random ArcRandom = new();
+		private static System.Random ArcRandom = new System.Random();
 
 		// 1D
 		/// <summary>Returns a random value between 0 and 1</summary>
@@ -53,7 +53,7 @@ namespace ArcEngine {
 				float sinPhi = Sin(phi);
 				float x = r * sinPhi * cosTheta;
 				float y = r * sinPhi * sinTheta;
-				return new(x, y);
+				return new Vector2(x, y);
 			}
 		}
 
@@ -78,7 +78,7 @@ namespace ArcEngine {
 				float x = r * sinPhi * cosTheta;
 				float y = r * sinPhi * sinTheta;
 				float z = r * cosPhi;
-				return new(x, y, z);
+				return new Vector3(x, y, z);
 			}
 		}
 

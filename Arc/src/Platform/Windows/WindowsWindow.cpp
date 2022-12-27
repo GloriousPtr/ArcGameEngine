@@ -60,7 +60,7 @@ namespace ArcEngine
 					glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 			#endif
 
-			glfwWindowHint(GLFW_TITLEBAR, GLFW_FALSE);
+//			glfwWindowHint(GLFW_TITLEBAR, GLFW_FALSE);
 			m_Window = glfwCreateWindow(static_cast<int>(props.Width), static_cast<int>(props.Height), m_Data.Title.c_str(), nullptr, nullptr);
 			++s_GLFWWindowCount;
 		}
@@ -179,10 +179,12 @@ namespace ArcEngine
 			data->EventCallback(event);
 		});
 
+		/*
 		glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, [[maybe_unused]] int xPos, [[maybe_unused]] int yPos, int* hit)
 		{
 			*hit = static_cast<WindowData*>(glfwGetWindowUserPointer(window))->OverTitlebar ? 1 : 0;
 		});
+		*/
 	}
 
 	void WindowsWindow::Shutdown() const

@@ -143,73 +143,74 @@ namespace ArcEngine {
 		/// <summary>Mirrors this vector around another point. Equivalent to rotating the vector 180° around the point</summary>
 		/// <param name="p">The point to mirror</param>
 		/// <param name="pivot">The point to mirror around</param>
-		[MethodImpl( INLINE )] public static Vector2 MirrorAround( this Vector2 p, Vector2 pivot ) => new(2 * pivot.x - p.x, 2 * pivot.y - p.y);
+		[MethodImpl( INLINE )] public static Vector2 MirrorAround( this Vector2 p, Vector2 pivot ) => new Vector2(2 * pivot.x - p.x, 2 * pivot.y - p.y);
 
 		/// <summary>Mirrors this vector around an x coordinate</summary>
 		/// <param name="p">The point to mirror</param>
 		/// <param name="xPivot">The x coordinate to mirror around</param>
-		[MethodImpl( INLINE )] public static Vector2 MirrorAroundX( this Vector2 p, float xPivot ) => new(2 * xPivot - p.x, p.y);
+		[MethodImpl( INLINE )] public static Vector2 MirrorAroundX( this Vector2 p, float xPivot ) => new Vector2(2 * xPivot - p.x, p.y);
 
 		/// <summary>Mirrors this vector around a y coordinate</summary>
 		/// <param name="p">The point to mirror</param>
 		/// <param name="yPivot">The y coordinate to mirror around</param>
-		[MethodImpl( INLINE )] public static Vector2 MirrorAroundY( this Vector2 p, float yPivot ) => new(p.x, 2 * yPivot - p.y);
+		[MethodImpl( INLINE )] public static Vector2 MirrorAroundY( this Vector2 p, float yPivot ) => new Vector2(p.x, 2 * yPivot - p.y);
 
 		/// <inheritdoc cref="MirrorAroundX(Vector2,float)"/>
-		[MethodImpl( INLINE )] public static Vector3 MirrorAroundX( this Vector3 p, float xPivot ) => new(2 * xPivot - p.x, p.y, p.z);
+		[MethodImpl( INLINE )] public static Vector3 MirrorAroundX( this Vector3 p, float xPivot ) => new Vector3(2 * xPivot - p.x, p.y, p.z);
 
 		/// <inheritdoc cref="MirrorAroundY(Vector2,float)"/>
-		[MethodImpl( INLINE )] public static Vector3 MirrorAroundY( this Vector3 p, float yPivot ) => new(p.x, 2 * yPivot - p.y, p.z);
+		[MethodImpl( INLINE )] public static Vector3 MirrorAroundY( this Vector3 p, float yPivot ) => new Vector3(p.x, 2 * yPivot - p.y, p.z);
 
 		/// <summary>Mirrors this vector around a y coordinate</summary>
 		/// <param name="p">The point to mirror</param>
 		/// <param name="zPivot">The z coordinate to mirror around</param>
-		[MethodImpl( INLINE )] public static Vector3 MirrorAroundZ( this Vector3 p, float zPivot ) => new(p.x, p.y, 2 * zPivot - p.z);
+		[MethodImpl( INLINE )] public static Vector3 MirrorAroundZ( this Vector3 p, float zPivot ) => new Vector3(p.x, p.y, 2 * zPivot - p.z);
 
 		/// <inheritdoc cref="MirrorAround(Vector2,Vector2)"/>
-		[MethodImpl( INLINE )] public static Vector3 MirrorAround( this Vector3 p, Vector3 pivot ) => new(2 * pivot.x - p.x, 2 * pivot.y - p.y, 2 * pivot.z - p.z);
+		[MethodImpl( INLINE )] public static Vector3 MirrorAround( this Vector3 p, Vector3 pivot ) => new Vector3(2 * pivot.x - p.x, 2 * pivot.y - p.y, 2 * pivot.z - p.z);
 
 		/// <summary>Scale the point <c>p</c> around <c>pivot</c> by <c>scale</c></summary>
 		/// <param name="p">The point to scale</param>
 		/// <param name="pivot">The pivot to scale around</param>
 		/// <param name="scale">The scale to scale by</param>
-		[MethodImpl( INLINE )] public static Vector2 ScaleAround( this Vector2 p, Vector2 pivot, Vector2 scale ) => new(pivot.x + ( p.x - pivot.x ) * scale.x, pivot.y + ( p.y - pivot.y ) * scale.y);
+		[MethodImpl( INLINE )] public static Vector2 ScaleAround( this Vector2 p, Vector2 pivot, Vector2 scale ) => new Vector2(pivot.x + ( p.x - pivot.x ) * scale.x, pivot.y + ( p.y - pivot.y ) * scale.y);
 
 		/// <inheritdoc cref="ScaleAround(Vector2,Vector2,Vector2)"/>
-		[MethodImpl( INLINE )] public static Vector3 ScaleAround( this Vector3 p, Vector3 pivot, Vector3 scale ) => new(pivot.x + ( p.x - pivot.x ) * scale.x, pivot.y + ( p.y - pivot.y ) * scale.y, pivot.z + ( p.z - pivot.z ) * scale.z);
+		[MethodImpl( INLINE )] public static Vector3 ScaleAround( this Vector3 p, Vector3 pivot, Vector3 scale ) => new Vector3(pivot.x + ( p.x - pivot.x ) * scale.x, pivot.y + ( p.y - pivot.y ) * scale.y, pivot.z + ( p.z - pivot.z ) * scale.z);
 
 
 		#region Quaternions
 
 		/// <summary>Rotates 180° around the extrinsic pre-rotation X axis, sometimes this is interpreted as a world space rotation, as opposed to rotating around its own axes</summary>
-		[MethodImpl( INLINE )] public static Quaternion Rotate180AroundExtrX( this Quaternion q ) => new(q.w, -q.z, q.y, -q.x);
+		[MethodImpl( INLINE )] public static Quaternion Rotate180AroundExtrX( this Quaternion q ) => new Quaternion(q.w, -q.z, q.y, -q.x);
 
 		/// <summary>Rotates 180° around the extrinsic pre-rotation Y axis, sometimes this is interpreted as a world space rotation, as opposed to rotating around its own axes</summary>
-		[MethodImpl( INLINE )] public static Quaternion Rotate180AroundExtrY( this Quaternion q ) => new(q.z, q.w, -q.x, -q.y);
+		[MethodImpl( INLINE )] public static Quaternion Rotate180AroundExtrY( this Quaternion q ) => new Quaternion(q.z, q.w, -q.x, -q.y);
 
 		/// <summary>Rotates 180° around the extrinsic pre-rotation Z axis, sometimes this is interpreted as a world space rotation, as opposed to rotating around its own axes</summary>
-		[MethodImpl( INLINE )] public static Quaternion Rotate180AroundExtrZ( this Quaternion q ) => new(-q.y, q.x, q.w, -q.z);
+		[MethodImpl( INLINE )] public static Quaternion Rotate180AroundExtrZ( this Quaternion q ) => new Quaternion(-q.y, q.x, q.w, -q.z);
 
 		/// <summary>Rotates 180° around its local X axis</summary>
-		[MethodImpl( INLINE )] public static Quaternion Rotate180AroundSelfX( this Quaternion q ) => new(q.w, q.z, -q.y, -q.x);
+		[MethodImpl( INLINE )] public static Quaternion Rotate180AroundSelfX( this Quaternion q ) => new Quaternion(q.w, q.z, -q.y, -q.x);
 
 		/// <summary>Rotates 180° around its local Y axis</summary>
-		[MethodImpl( INLINE )] public static Quaternion Rotate180AroundSelfY( this Quaternion q ) => new(-q.z, q.w, q.x, -q.y);
+		[MethodImpl( INLINE )] public static Quaternion Rotate180AroundSelfY( this Quaternion q ) => new Quaternion(-q.z, q.w, q.x, -q.y);
 
 		/// <summary>Rotates 180° around its local Z axis</summary>
-		[MethodImpl( INLINE )] public static Quaternion Rotate180AroundSelfZ( this Quaternion q ) => new(q.y, -q.x, q.w, -q.z);
+		[MethodImpl( INLINE )] public static Quaternion Rotate180AroundSelfZ( this Quaternion q ) => new Quaternion(q.y, -q.x, q.w, -q.z);
 
 		/// <summary>Returns an 180° rotated version of this quaternion around the given axis</summary>
 		/// <param name="q">The quaternion to rotate</param>
 		/// <param name="axis">The axis to rotate around</param>
 		/// <param name="space">The rotation space of the axis, if it should be intrinsic/self/local or extrinsic/"world"</param>
 		public static Quaternion Rotate180Around( this Quaternion q, Axis axis, RotationSpace space = RotationSpace.Self ) {
-			return axis switch {
-				Axis.X => space == RotationSpace.Self ? Rotate180AroundSelfX( q ) : Rotate180AroundExtrX( q ),
-				Axis.Y => space == RotationSpace.Self ? Rotate180AroundSelfY( q ) : Rotate180AroundExtrY( q ),
-				Axis.Z => space == RotationSpace.Self ? Rotate180AroundSelfZ( q ) : Rotate180AroundExtrZ( q ),
-				_      => throw new ArgumentOutOfRangeException( nameof(axis), $"Invalid axis: {axis}. Expected 0, 1 or 2" )
-			};
+			switch (axis)
+			{
+				case Axis.X: return space == RotationSpace.Self ? Rotate180AroundSelfX( q ) : Rotate180AroundExtrX( q );
+				case Axis.Y: return space == RotationSpace.Self ? Rotate180AroundSelfY( q ) : Rotate180AroundExtrY( q );
+				case Axis.Z: return space == RotationSpace.Self ? Rotate180AroundSelfZ( q ) : Rotate180AroundExtrZ( q );
+				default: throw new ArgumentOutOfRangeException( nameof(axis), $"Invalid axis: {axis}. Expected 0, 1 or 2" );
+			}
 		}
 
 		/// <summary>Returns the quaternion rotated around the given axis by the given angle in radians</summary>
@@ -230,21 +231,33 @@ namespace ArcEngine {
 			float zs = q.z * s;
 			float ws = q.w * s;
 
-			return space switch {
-				RotationSpace.Self => axis switch {
-					Axis.X => new Quaternion( xc + ws, yc + zs, zc - ys, wc - xs ),
-					Axis.Y => new Quaternion( xc - zs, yc + ws, zc + xs, wc - ys ),
-					Axis.Z => new Quaternion( xc + ys, yc - xs, zc + ws, wc - zs ),
-					_      => throw new ArgumentOutOfRangeException( nameof(axis) )
-				},
-				RotationSpace.Extrinsic => axis switch {
-					Axis.X => new Quaternion( xc + ws, yc - zs, zc + ys, wc - xs ),
-					Axis.Y => new Quaternion( xc + zs, yc + ws, zc - xs, wc - ys ),
-					Axis.Z => new Quaternion( xc - ys, yc + xs, zc + ws, wc - zs ),
-					_      => throw new ArgumentOutOfRangeException( nameof(axis) )
-				},
-				_ => throw new ArgumentOutOfRangeException( nameof(space) )
-			};
+			switch(space)
+			{
+				case RotationSpace.Self:
+				{
+					switch (axis)
+					{
+						case Axis.X: return new Quaternion( xc + ws, yc + zs, zc - ys, wc - xs );
+						case Axis.Y: return new Quaternion( xc - zs, yc + ws, zc + xs, wc - ys );
+						case Axis.Z: return new Quaternion( xc + ys, yc - xs, zc + ws, wc - zs );
+						default    : throw new ArgumentOutOfRangeException( nameof(axis) );
+					}
+
+					break;
+				}
+				case RotationSpace.Extrinsic:
+				{
+					switch (axis)
+					{
+						case Axis.X: return new Quaternion( xc + ws, yc - zs, zc + ys, wc - xs );
+						case Axis.Y: return new Quaternion( xc + zs, yc + ws, zc - xs, wc - ys );
+						case Axis.Z: return new Quaternion( xc - ys, yc + xs, zc + ws, wc - zs );
+						default    : throw new ArgumentOutOfRangeException( nameof(axis) );
+					}
+					break;
+				}
+				default: throw new ArgumentOutOfRangeException( nameof(space) );
+			}
 		}
 
 		/// <summary>Returns the quaternion rotated around the given axis by 90°</summary>
@@ -258,21 +271,33 @@ namespace ArcEngine {
 			float z = q.z;
 			float w = q.w;
 
-			return space switch {
-				RotationSpace.Self => axis switch {
-					Axis.X => new Quaternion( v * ( x + w ), v * ( y + z ), v * ( z - y ), v * ( w - x ) ),
-					Axis.Y => new Quaternion( v * ( x - z ), v * ( y + w ), v * ( z + x ), v * ( w - y ) ),
-					Axis.Z => new Quaternion( v * ( x + y ), v * ( y - x ), v * ( z + w ), v * ( w - z ) ),
-					_      => throw new ArgumentOutOfRangeException( nameof(axis) )
-				},
-				RotationSpace.Extrinsic => axis switch {
-					Axis.X => new Quaternion( v * ( x + w ), v * ( y - z ), v * ( z + y ), v * ( w - x ) ),
-					Axis.Y => new Quaternion( v * ( x + z ), v * ( y + w ), v * ( z - x ), v * ( w - y ) ),
-					Axis.Z => new Quaternion( v * ( x - y ), v * ( y + x ), v * ( z + w ), v * ( w - z ) ),
-					_      => throw new ArgumentOutOfRangeException( nameof(axis) )
-				},
-				_ => throw new ArgumentOutOfRangeException( nameof(space) )
-			};
+			switch(space)
+			{
+				case RotationSpace.Self:
+				{
+					switch (axis)
+					{
+						case Axis.X: return new Quaternion( v * ( x + w ), v * ( y + z ), v * ( z - y ), v * ( w - x ) );
+						case Axis.Y: return new Quaternion( v * ( x - z ), v * ( y + w ), v * ( z + x ), v * ( w - y ) );
+						case Axis.Z: return new Quaternion( v * ( x + y ), v * ( y - x ), v * ( z + w ), v * ( w - z ) );
+						default    : throw new ArgumentOutOfRangeException( nameof(axis) );
+					}
+
+					break;
+				}
+				case RotationSpace.Extrinsic:
+				{
+					switch (axis)
+					{
+						case Axis.X: return new Quaternion( v * ( x + w ), v * ( y - z ), v * ( z + y ), v * ( w - x ) );
+						case Axis.Y: return new Quaternion( v * ( x + z ), v * ( y + w ), v * ( z - x ), v * ( w - y ) );
+						case Axis.Z: return new Quaternion( v * ( x - y ), v * ( y + x ), v * ( z + w ), v * ( w - z ) );
+						default    : throw new ArgumentOutOfRangeException( nameof(axis) );
+					}
+					break;
+				}
+				default: throw new ArgumentOutOfRangeException( nameof(space) );
+			}
 		}
 
 		/// <summary>Returns the quaternion rotated around the given axis by -90°</summary>
@@ -286,41 +311,53 @@ namespace ArcEngine {
 			float z = q.z;
 			float w = q.w;
 
-			return space switch {
-				RotationSpace.Self => axis switch {
-					Axis.X => new Quaternion( v * ( x - w ), v * ( y - z ), v * ( z + y ), v * ( w + x ) ),
-					Axis.Y => new Quaternion( v * ( x + z ), v * ( y - w ), v * ( z - x ), v * ( w + y ) ),
-					Axis.Z => new Quaternion( v * ( x - y ), v * ( y + x ), v * ( z - w ), v * ( w + z ) ),
-					_      => throw new ArgumentOutOfRangeException( nameof(axis) )
-				},
-				RotationSpace.Extrinsic => axis switch {
-					Axis.X => new Quaternion( v * ( x - w ), v * ( y + z ), v * ( z - y ), v * ( w + x ) ),
-					Axis.Y => new Quaternion( v * ( x - z ), v * ( y - w ), v * ( z + x ), v * ( w + y ) ),
-					Axis.Z => new Quaternion( v * ( x + y ), v * ( y - x ), v * ( z - w ), v * ( w + z ) ),
-					_      => throw new ArgumentOutOfRangeException( nameof(axis) )
-				},
-				_ => throw new ArgumentOutOfRangeException( nameof(space) )
-			};
+			switch(space)
+			{
+				case RotationSpace.Self:
+				{
+					switch (axis)
+					{
+						case Axis.X: return new Quaternion( v * ( x - w ), v * ( y - z ), v * ( z + y ), v * ( w + x ) );
+						case Axis.Y: return new Quaternion( v * ( x + z ), v * ( y - w ), v * ( z - x ), v * ( w + y ) );
+						case Axis.Z: return new Quaternion( v * ( x - y ), v * ( y + x ), v * ( z - w ), v * ( w + z ) );
+						default    : throw new ArgumentOutOfRangeException( nameof(axis) );
+					}
+
+					break;
+				}
+				case RotationSpace.Extrinsic:
+				{
+					switch (axis)
+					{
+						case Axis.X: return new Quaternion( v * ( x - w ), v * ( y + z ), v * ( z - y ), v * ( w + x ) );
+						case Axis.Y: return new Quaternion( v * ( x - z ), v * ( y - w ), v * ( z + x ), v * ( w + y ) );
+						case Axis.Z: return new Quaternion( v * ( x + y ), v * ( y - x ), v * ( z - w ), v * ( w + z ) );
+						default    : throw new ArgumentOutOfRangeException( nameof(axis) );
+					}
+					break;
+				}
+				default: throw new ArgumentOutOfRangeException( nameof(space) );
+			}
 		}
 
 		/// <summary>Returns the given axis of this rotation (assumes this quaternion is normalized)</summary>
 		public static Vector3 GetAxis( this Quaternion q, Axis axis ) {
-			return axis switch {
-				Axis.X => q.Right(),
-				Axis.Y => q.Up(),
-				Axis.Z => q.Forward(),
-				_      => throw new ArgumentOutOfRangeException( nameof(axis) )
+			switch(axis) {
+				case Axis.X: return q.Right();
+				case Axis.Y: return q.Up();
+				case Axis.Z: return q.Forward();
+				default    : throw new ArgumentOutOfRangeException( nameof(axis) );
 			};
 		}
 
 		/// <summary>Returns the X axis of this rotation (assumes this quaternion is normalized)</summary>
-		[MethodImpl( INLINE )] public static Vector3 Right( this Quaternion q ) => new(q.x * q.x - q.y * q.y - q.z * q.z + q.w * q.w, 2 * ( q.x * q.y + q.z * q.w ), 2 * ( q.x * q.z - q.y * q.w ));
+		[MethodImpl( INLINE )] public static Vector3 Right( this Quaternion q ) => new Vector3(q.x * q.x - q.y * q.y - q.z * q.z + q.w * q.w, 2 * ( q.x * q.y + q.z * q.w ), 2 * ( q.x * q.z - q.y * q.w ));
 
 		/// <summary>Returns the Y axis of this rotation (assumes this quaternion is normalized)</summary>
-		[MethodImpl( INLINE )] public static Vector3 Up( this Quaternion q ) => new(2 * ( q.x * q.y - q.z * q.w ), -q.x * q.x + q.y * q.y - q.z * q.z + q.w * q.w, 2 * ( q.x * q.w + q.y * q.z ));
+		[MethodImpl( INLINE )] public static Vector3 Up( this Quaternion q ) => new Vector3(2 * ( q.x * q.y - q.z * q.w ), -q.x * q.x + q.y * q.y - q.z * q.z + q.w * q.w, 2 * ( q.x * q.w + q.y * q.z ));
 
 		/// <summary>Returns the Z axis of this rotation (assumes this quaternion is normalized)</summary>
-		[MethodImpl( INLINE )] public static Vector3 Forward( this Quaternion q ) => new(2 * ( q.x * q.z + q.y * q.w ), 2 * ( q.y * q.z - q.x * q.w ), -q.x * q.x - q.y * q.y + q.z * q.z + q.w * q.w);
+		[MethodImpl( INLINE )] public static Vector3 Forward( this Quaternion q ) => new Vector3(2 * ( q.x * q.z + q.y * q.w ), 2 * ( q.y * q.z - q.x * q.w ), -q.x * q.x - q.y * q.y + q.z * q.z + q.w * q.w);
 
 		/// <summary>Converts this quaternion to a rotation matrix</summary>
 		public static Matrix4 ToMatrix( this Quaternion q ) {
@@ -367,7 +404,7 @@ namespace ArcEngine {
 
 		/// <summary>Returns the natural exponent of a quaternion</summary>
 		public static Quaternion Exp( this Quaternion q ) {
-			Vector3 v = new(q.x, q.y, q.z);
+			Vector3 v = new Vector3(q.x, q.y, q.z);
 			double vMag = Math.Sqrt( (double)v.x * v.x + (double)v.y * v.y + (double)v.z * v.z );
 			double sc = Math.Exp( q.w );
 			double scV = sc * Mathfs.Sinc( vMag );
@@ -424,7 +461,7 @@ namespace ArcEngine {
 		/// <param name="r">The rectangle to get a position within</param>
 		/// <param name="tPos">The normalized position within this rectangle</param>
 		public static Vector2 Lerp( this Rect r, Vector2 tPos ) =>
-			new(
+			new Vector2(
 				Mathfs.Lerp( r.xMin, r.xMax, tPos.x ),
 				Mathfs.Lerp( r.yMin, r.yMax, tPos.y )
 			);

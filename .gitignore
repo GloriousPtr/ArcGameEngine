@@ -12,6 +12,8 @@
 *.csproj.user
 *.ini
 
+/**/Makefile
+
 # ArcEngine files
 *.log
 Arc-Editor/Resources/Scripts

@@ -5,8 +5,6 @@
 #include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui_internal.h>
 
-#include <ranges>
-
 #include "../EditorLayer.h"
 #include "../Utils/UI.h"
 #include "../Utils/EditorTheme.h"
@@ -96,9 +94,9 @@ namespace ArcEngine
 
 				ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 				auto view = m_Context->m_Registry.view<IDComponent>();
-				for (auto e : std::ranges::reverse_view(view))
+				for (auto e = view.rbegin(); e != view.rend(); ++e)
 				{
-					Entity entity = { e, m_Context.get() };
+					Entity entity = { *e, m_Context.get() };
 					if (!entity.GetParent())
 						DrawEntityNode(entity);
 				}
@@ -280,7 +278,7 @@ namespace ArcEngine
 
 			char buffer[256] = {};
 			size_t minSize = glm::min(sizeof(buffer), tag.size());
-			strncpy_s(buffer, tag.c_str(), minSize);
+			std::strncpy(buffer, tag.c_str(), minSize);
 			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
 				tag = std::string(buffer);
 

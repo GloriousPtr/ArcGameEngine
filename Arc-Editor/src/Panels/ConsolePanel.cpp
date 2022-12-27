@@ -1,7 +1,10 @@
 #include "ConsolePanel.h"
 
 #include <Arc/ImGui/Modules/ExternalConsoleSink.h>
+
+#if defined(ARC_PLATFORM_WINDOWS)
 #include <Platform/VisualStudio/VisualStudioAccessor.h>
+#endif
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
@@ -267,8 +270,10 @@ namespace ArcEngine
 		ImGui::PopFont();
 		ImGui::PopStyleColor();
 
+#if defined(ARC_PLATFORM_WINDOWS)
 		if (Line != 0 && !Filepath.empty() && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 			VisualStudioAccessor::OpenFile(Filepath, Line);
+#endif
 
 		if(ImGui::BeginPopupContextItem("Popup"))
 		{

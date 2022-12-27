@@ -6,6 +6,7 @@
 	#ifdef _WIN64
 		/* Windows x64  */
 		#define ARC_PLATFORM_WINDOWS
+		#define ARC_API(v) __declspec(v)
 	#else
 		/* Windows x86 */
 		#error "x86 Builds are not supported!"
@@ -33,9 +34,10 @@
 #elif defined(__ANDROID__)
 	#define ARC_PLATFORM_ANDROID
 	#error "Android is not supported!"
+	#define ARC_API(v)
 #elif defined(__linux__)
 	#define ARC_PLATFORM_LINUX
-	#error "Linux is not supported!"
+	#define ARC_API(v)
 #else
 	/* Unknown compiler/platform */
 	#error "Unknown platform!"

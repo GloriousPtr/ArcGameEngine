@@ -1,4 +1,7 @@
 #include "arcpch.h"
+
+#if defined(ARC_PLATFORM_WINDOWS)
+
 #include "Arc/Utils/PlatformUtils.h"
 
 #include <GLFW/glfw3.h>
@@ -92,3 +95,5 @@ namespace ArcEngine
 		ShellExecute(nullptr, L"open", widePath, nullptr, nullptr, SW_RESTORE);
 	}
 }
+
+#endif

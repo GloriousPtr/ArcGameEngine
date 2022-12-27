@@ -80,14 +80,14 @@ namespace ArcEngine
 			[MethodImpl(INLINE)]
 			get
 			{
-				return index switch
+				switch (index)
 				{
-					0 => r,
-					1 => g,
-					2 => b,
-					3 => a,
-					_ => throw new IndexOutOfRangeException(),
-				};
+					case 0: return r;
+					case 1: return g;
+					case 2: return b;
+					case 3: return a;
+					default: throw new IndexOutOfRangeException();
+				}
 			}
 			[MethodImpl(INLINE)]
 			set
@@ -105,9 +105,9 @@ namespace ArcEngine
 
 		// Static Methods
 		[MethodImpl(INLINE)]
-		public static implicit operator Vector4(in Color color) { return new(color.r, color.g, color.b, color.a); }
+		public static implicit operator Vector4(in Color color) { return new Vector4(color.r, color.g, color.b, color.a); }
 		[MethodImpl(INLINE)]
-		public static implicit operator Vector3(in Color color) { return new(color.r, color.g, color.b); }
+		public static implicit operator Vector3(in Color color) { return new Vector3(color.r, color.g, color.b); }
 
 		#endregion
 
@@ -119,7 +119,7 @@ namespace ArcEngine
 			get
 			{
 				float avg = (r + g + b) / 3.0f;
-				return new(avg, avg, avg, a);
+				return new Color(avg, avg, avg, a);
 			}
 		}
 
@@ -128,16 +128,16 @@ namespace ArcEngine
 		#region StaticProperties
 
 
-		public static Color Black { [MethodImpl(INLINE)] get { return new(0.0f, 0.0f, 0.0f, 1.0f); } }
-		public static Color Blue { [MethodImpl(INLINE)] get { return new(0.0f, 0.0f, 1.0f, 1.0f); } }
-		public static Color Clear { [MethodImpl(INLINE)] get { return new(0.0f, 0.0f, 0.0f, 0.0f); } }
-		public static Color Cyan { [MethodImpl(INLINE)] get { return new(0.0f, 1.0f, 1.0f, 1.0f); } }
-		public static Color Green {	[MethodImpl(INLINE)] get { return new(0.0f, 1.0f, 0.0f, 1.0f); } }
-		public static Color Grey { [MethodImpl(INLINE)] get { return new(0.5f, 0.5f, 0.5f, 1.0f); } }
-		public static Color Magenta { [MethodImpl(INLINE)] get { return new(1.0f, 0.0f, 1.0f, 1.0f); } }
-		public static Color Red { [MethodImpl(INLINE)] get { return new(1.0f, 0.0f, 0.0f, 1.0f); } }
-		public static Color White { [MethodImpl(INLINE)] get { return new(1.0f, 1.0f, 1.0f, 1.0f); } }
-		public static Color Yellow { [MethodImpl(INLINE)] get { return new(1.0f, 0.92f, 0.016f, 1.0f); } }
+		public static Color Black { [MethodImpl(INLINE)] get { return new Color(0.0f, 0.0f, 0.0f, 1.0f); } }
+		public static Color Blue { [MethodImpl(INLINE)] get { return new Color(0.0f, 0.0f, 1.0f, 1.0f); } }
+		public static Color Clear { [MethodImpl(INLINE)] get { return new Color(0.0f, 0.0f, 0.0f, 0.0f); } }
+		public static Color Cyan { [MethodImpl(INLINE)] get { return new Color(0.0f, 1.0f, 1.0f, 1.0f); } }
+		public static Color Green {	[MethodImpl(INLINE)] get { return new Color(0.0f, 1.0f, 0.0f, 1.0f); } }
+		public static Color Grey { [MethodImpl(INLINE)] get { return new Color(0.5f, 0.5f, 0.5f, 1.0f); } }
+		public static Color Magenta { [MethodImpl(INLINE)] get { return new Color(1.0f, 0.0f, 1.0f, 1.0f); } }
+		public static Color Red { [MethodImpl(INLINE)] get { return new Color(1.0f, 0.0f, 0.0f, 1.0f); } }
+		public static Color White { [MethodImpl(INLINE)] get { return new Color(1.0f, 1.0f, 1.0f, 1.0f); } }
+		public static Color Yellow { [MethodImpl(INLINE)] get { return new Color(1.0f, 0.92f, 0.016f, 1.0f); } }
 
 		#endregion
 	}

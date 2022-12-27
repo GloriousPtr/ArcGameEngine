@@ -13,7 +13,7 @@ namespace ArcEngine
 		[[nodiscard]] static Buffer Copy(Buffer other)
 		{
 			auto result = Buffer(other.Size);
-			memcpy_s(result.Data, result.Size, other.Data, other.Size);
+			std::memcpy(result.Data, other.Data, result.Size);
 			return result;
 		}
 

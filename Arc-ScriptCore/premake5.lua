@@ -2,7 +2,8 @@ project "Arc-ScriptCore"
     kind "SharedLib"
     language "C#"
     dotnetframework "4.8"
-    csversion "10.0"
+    csversion "7.2"
+    toolset "msc"
     
 	targetdir ("../Arc-Editor/Resources/Scripts")
 	objdir ("../Arc-Editor/Resources/Scripts/Intermediates")
@@ -15,7 +16,12 @@ project "Arc-ScriptCore"
 
     links
     {
-        "Microsoft.Bcl.HashCode"
+        "System.Core"
+    }
+
+    nuget
+    {
+        "Microsoft.Bcl.HashCode:1.1.1"
     }
 
     defines

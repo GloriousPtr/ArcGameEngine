@@ -61,13 +61,13 @@ namespace ArcEngine
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				return index switch
+				switch (index)
 				{
-					0 => x,
-					1 => y,
-					2 => z,
-					_ => throw new IndexOutOfRangeException(),
-				};
+					case 0: return x;
+					case 1: return y;
+					case 2: return z;
+					default: throw new IndexOutOfRangeException();
+				}
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set

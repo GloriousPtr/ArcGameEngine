@@ -5,6 +5,8 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
+#include <stdlib.h>
+
 namespace ArcEngine
 {
 	inline static int s_UIContextID = 0;
@@ -50,7 +52,8 @@ namespace ArcEngine
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
 		++s_Counter;
-		_itoa_s(s_Counter, s_IDBuffer + 2, 16, 16);
+		std::string buffer = fmt::format("##{}", s_Counter);
+		memccpy(&s_IDBuffer, buffer.data(), 16, buffer.size());
 	}
 	
 	void UI::EndPropertyGrid()
@@ -65,7 +68,8 @@ namespace ArcEngine
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
 		++s_Counter;
-		_itoa_s(s_Counter, s_IDBuffer + 2, 16, 16);
+		std::string buffer = fmt::format("##{}", s_Counter);
+		memccpy(&s_IDBuffer, buffer.data(), 16, buffer.size());
 
 		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_PadOuterX;
 		ImGui::BeginTable(s_IDBuffer, 2, tableFlags | flags);
@@ -79,7 +83,8 @@ namespace ArcEngine
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
 		++s_Counter;
-		_itoa_s(s_Counter, s_IDBuffer + 2, 16, 16);
+		std::string buffer = fmt::format("##{}", s_Counter);
+		memccpy(&s_IDBuffer, buffer.data(), 16, buffer.size());
 
 		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_PadOuterX;
 		ImGui::BeginTable(s_IDBuffer, 3, tableFlags | flags);
@@ -334,7 +339,7 @@ namespace ArcEngine
 			for (T& p : v)
 			{
 				ImGui::PushID(i);
-				std::string name = std::format("Point {}", i);
+				std::string name = fmt::format("Point {}", i);
 				function(name.c_str(), p);
 				ImGui::TableNextColumn();
 

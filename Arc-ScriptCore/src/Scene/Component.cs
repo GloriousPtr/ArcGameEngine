@@ -7,9 +7,9 @@ namespace ArcEngine
 	public interface IComponent
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal ulong GetEntityID();
+		ulong GetEntityID();
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal void SetEntity(ulong id);
+		void SetEntity(ulong id);
 	}
 
 	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
