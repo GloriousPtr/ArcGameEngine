@@ -37,19 +37,19 @@ layout(location = 0) out vec4 o_FragColor;
 // . . . . . . .
 vec4 DownsampleBox13Tap(sampler2D tex, vec2 uv, vec2 texelSize)
 {
-    vec4 A = texture2D(tex, uv + texelSize * vec2(-1.0, -1.0));
-    vec4 B = texture2D(tex, uv + texelSize * vec2( 0.0, -1.0));
-    vec4 C = texture2D(tex, uv + texelSize * vec2( 1.0, -1.0));
-    vec4 D = texture2D(tex, uv + texelSize * vec2(-0.5, -0.5));
-    vec4 E = texture2D(tex, uv + texelSize * vec2( 0.5, -0.5));
-    vec4 F = texture2D(tex, uv + texelSize * vec2(-1.0,  0.0));
-    vec4 G = texture2D(tex, uv                               );
-    vec4 H = texture2D(tex, uv + texelSize * vec2( 1.0,  0.0));
-    vec4 I = texture2D(tex, uv + texelSize * vec2(-0.5,  0.5));
-    vec4 J = texture2D(tex, uv + texelSize * vec2( 0.5,  0.5));
-    vec4 K = texture2D(tex, uv + texelSize * vec2(-1.0,  1.0));
-    vec4 L = texture2D(tex, uv + texelSize * vec2( 0.0,  1.0));
-    vec4 M = texture2D(tex, uv + texelSize * vec2( 1.0,  1.0));
+    vec4 A = texture(tex, uv + texelSize * vec2(-1.0, -1.0));
+    vec4 B = texture(tex, uv + texelSize * vec2( 0.0, -1.0));
+    vec4 C = texture(tex, uv + texelSize * vec2( 1.0, -1.0));
+    vec4 D = texture(tex, uv + texelSize * vec2(-0.5, -0.5));
+    vec4 E = texture(tex, uv + texelSize * vec2( 0.5, -0.5));
+    vec4 F = texture(tex, uv + texelSize * vec2(-1.0,  0.0));
+    vec4 G = texture(tex, uv                               );
+    vec4 H = texture(tex, uv + texelSize * vec2( 1.0,  0.0));
+    vec4 I = texture(tex, uv + texelSize * vec2(-0.5,  0.5));
+    vec4 J = texture(tex, uv + texelSize * vec2( 0.5,  0.5));
+    vec4 K = texture(tex, uv + texelSize * vec2(-1.0,  1.0));
+    vec4 L = texture(tex, uv + texelSize * vec2( 0.0,  1.0));
+    vec4 M = texture(tex, uv + texelSize * vec2( 1.0,  1.0));
 
     vec2 div = (1.0 / 4.0) * vec2(0.5, 0.125);
 
@@ -67,10 +67,10 @@ vec4 DownsampleBox4Tap(sampler2D tex, vec2 uv, vec2 texelSize)
 {
     vec4 d = texelSize.xyxy * vec4(-1.0, -1.0, 1.0, 1.0);
 
-    vec4 s = texture2D(tex, uv + d.xy);
-    s += texture2D(tex, uv + d.zy);
-    s += texture2D(tex, uv + d.xw);
-    s += texture2D(tex, uv + d.zw);
+    vec4 s = texture(tex, uv + d.xy);
+    s += texture(tex, uv + d.zy);
+    s += texture(tex, uv + d.xw);
+    s += texture(tex, uv + d.zw);
 
     return s * (1.0 / 4.0);
 }
@@ -80,17 +80,17 @@ vec4 UpsampleTent(sampler2D tex, vec2 uv, vec2 texelSize, vec4 sampleScale)
 {
     vec4 d = texelSize.xyxy * vec4(1.0, 1.0, -1.0, 0.0) * sampleScale;
 
-    vec4 s = texture2D(tex, uv - d.xy);
-    s += texture2D(tex, uv - d.wy) * 2.0;
-    s += texture2D(tex, uv - d.zy);
+    vec4 s = texture(tex, uv - d.xy);
+    s += texture(tex, uv - d.wy) * 2.0;
+    s += texture(tex, uv - d.zy);
 
-    s += texture2D(tex, uv + d.zw) * 2.0;
-    s += texture2D(tex, uv       ) * 4.0;
-    s += texture2D(tex, uv + d.xw) * 2.0;
+    s += texture(tex, uv + d.zw) * 2.0;
+    s += texture(tex, uv       ) * 4.0;
+    s += texture(tex, uv + d.xw) * 2.0;
 
-    s += texture2D(tex, uv + d.zy);
-    s += texture2D(tex, uv + d.wy) * 2.0;
-    s += texture2D(tex, uv + d.xy);
+    s += texture(tex, uv + d.zy);
+    s += texture(tex, uv + d.wy) * 2.0;
+    s += texture(tex, uv + d.xy);
 
     return s * (1.0 / 16.0);
 }
@@ -100,10 +100,10 @@ vec4 UpsampleBox(sampler2D tex, vec2 uv, vec2 texelSize, vec4 sampleScale)
 {
     vec4 d = texelSize.xyxy * vec4(-1.0, -1.0, 1.0, 1.0) * (sampleScale * 0.5);
 
-    vec4 s = texture2D(tex, uv + d.xy);
-    s += texture2D(tex, uv + d.zy);
-    s += texture2D(tex, uv + d.xw);
-    s += texture2D(tex, uv + d.zw);
+    vec4 s = texture(tex, uv + d.xy);
+    s += texture(tex, uv + d.zy);
+    s += texture(tex, uv + d.xw);
+    s += texture(tex, uv + d.zw);
 
     return s * (1.0 / 4.0);
 }
@@ -114,7 +114,7 @@ void main()
 	vec4 color = vec4(0.0);
 	if (u_Params.y <= 1.01)
 	{
-		color = texture2D(u_Texture, v_TexCoord);
+		color = texture(u_Texture, v_TexCoord);
 	}
 	else if (u_Params.y <= 2.01)
 	{
@@ -141,7 +141,7 @@ void main()
 	
 	if (u_Params.w > 0.0)
 	{
-		color += texture2D(u_AdditiveTexture, v_TexCoord);
+		color += texture(u_AdditiveTexture, v_TexCoord);
 	}
 	
 	o_FragColor = vec4(color.rgb, 1.0);
