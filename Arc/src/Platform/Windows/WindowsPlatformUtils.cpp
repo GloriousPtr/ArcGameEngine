@@ -1,6 +1,6 @@
 #include "arcpch.h"
 
-#if defined(ARC_PLATFORM_WINDOWS)
+#ifdef ARC_PLATFORM_WINDOWS
 
 #include "Arc/Utils/PlatformUtils.h"
 

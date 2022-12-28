@@ -242,8 +242,6 @@ namespace ArcEngine {
 						case Axis.Z: return new Quaternion( xc + ys, yc - xs, zc + ws, wc - zs );
 						default    : throw new ArgumentOutOfRangeException( nameof(axis) );
 					}
-
-					break;
 				}
 				case RotationSpace.Extrinsic:
 				{
@@ -254,7 +252,6 @@ namespace ArcEngine {
 						case Axis.Z: return new Quaternion( xc - ys, yc + xs, zc + ws, wc - zs );
 						default    : throw new ArgumentOutOfRangeException( nameof(axis) );
 					}
-					break;
 				}
 				default: throw new ArgumentOutOfRangeException( nameof(space) );
 			}
@@ -282,8 +279,6 @@ namespace ArcEngine {
 						case Axis.Z: return new Quaternion( v * ( x + y ), v * ( y - x ), v * ( z + w ), v * ( w - z ) );
 						default    : throw new ArgumentOutOfRangeException( nameof(axis) );
 					}
-
-					break;
 				}
 				case RotationSpace.Extrinsic:
 				{
@@ -294,7 +289,6 @@ namespace ArcEngine {
 						case Axis.Z: return new Quaternion( v * ( x - y ), v * ( y + x ), v * ( z + w ), v * ( w - z ) );
 						default    : throw new ArgumentOutOfRangeException( nameof(axis) );
 					}
-					break;
 				}
 				default: throw new ArgumentOutOfRangeException( nameof(space) );
 			}
@@ -322,8 +316,6 @@ namespace ArcEngine {
 						case Axis.Z: return new Quaternion( v * ( x - y ), v * ( y + x ), v * ( z - w ), v * ( w + z ) );
 						default    : throw new ArgumentOutOfRangeException( nameof(axis) );
 					}
-
-					break;
 				}
 				case RotationSpace.Extrinsic:
 				{
@@ -334,7 +326,6 @@ namespace ArcEngine {
 						case Axis.Z: return new Quaternion( v * ( x + y ), v * ( y - x ), v * ( z - w ), v * ( w + z ) );
 						default    : throw new ArgumentOutOfRangeException( nameof(axis) );
 					}
-					break;
 				}
 				default: throw new ArgumentOutOfRangeException( nameof(space) );
 			}

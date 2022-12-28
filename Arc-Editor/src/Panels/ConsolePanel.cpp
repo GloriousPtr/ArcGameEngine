@@ -2,7 +2,7 @@
 
 #include <Arc/ImGui/Modules/ExternalConsoleSink.h>
 
-#if defined(ARC_PLATFORM_WINDOWS)
+#ifdef ARC_PLATFORM_WINDOWS
 #include <Platform/VisualStudio/VisualStudioAccessor.h>
 #endif
 
@@ -270,7 +270,7 @@ namespace ArcEngine
 		ImGui::PopFont();
 		ImGui::PopStyleColor();
 
-#if defined(ARC_PLATFORM_WINDOWS)
+#ifdef ARC_PLATFORM_WINDOWS
 		if (Line != 0 && !Filepath.empty() && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 			VisualStudioAccessor::OpenFile(Filepath, Line);
 #endif

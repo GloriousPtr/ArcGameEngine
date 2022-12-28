@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined(ARC_PLATFORM_WINDOWS)
+#ifdef ARC_PLATFORM_WINDOWS
 
 namespace ArcEngine
 {

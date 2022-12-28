@@ -20,7 +20,7 @@ namespace ArcEngine
 			int32_t CallerLine;
 			Log::Level Level;
 
-			Message(std::string_view message, std::string_view callerPath, std::string_view callerFunction, int32_t callerLine, Log::Level level)
+			Message(const char* message, const char* callerPath, const char* callerFunction, int32_t callerLine, Log::Level level)
 				: Buffer(message), CallerPath(callerPath), CallerFunction(callerFunction), CallerLine(callerLine), Level(level)
 			{
 			}
@@ -56,7 +56,7 @@ namespace ArcEngine
 			base_sink<std::mutex>::formatter_->format(msg, formatted);
 			std::string filename = msg.source.filename ? msg.source.filename : "";
 			std::string funcname = msg.source.funcname ? msg.source.funcname : "";
-			*(m_MessageBuffer.begin() + m_MessagesBuffered) = CreateRef<Message>(formatted.data(), filename, funcname, msg.source.line, GetMessageLevel(msg.level));
+			*(m_MessageBuffer.begin() + m_MessagesBuffered) = CreateRef<Message>(fmt::to_string(formatted.data()).c_str(), filename.c_str(), funcname.c_str(), msg.source.line, GetMessageLevel(msg.level));
 
 			if (++m_MessagesBuffered == m_MessageBufferCapacity)
 				flush_();

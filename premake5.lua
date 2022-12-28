@@ -21,10 +21,17 @@ workspace "Arc"
 		"MultiProcessorCompile"
 	}
 
-	filter "system:windows"
-
 	filter "system:linux"
 		toolset "clang"
+
+-- Library directories relavtive to root folder (solution directory)
+LibDir = {}
+filter "configurations:Debug"
+	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Debug"
+filter "configurations:Release"
+	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Release"
+filter "configurations:Dist"
+	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Release"
 	
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}";
 
@@ -46,36 +53,6 @@ IncludeDir["icons"] = "%{wks.location}/Arc/vendor/icons/include"
 IncludeDir["JoltPhysics"] = "%{wks.location}/Arc/vendor/JoltPhysics/JoltPhysics"
 IncludeDir["tinyobj"] = "%{wks.location}/Arc/vendor/tinyobj"
 IncludeDir["tinygltf"] = "%{wks.location}/Arc/vendor/tinygltf"
-
--- Library directories relavtive to root folder (solution directory)
-LibDir = {}
-filter "system:windows"
-	filter "configurations:Debug"
-		LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Win64/Debug"
-	filter "configurations:Release"
-		LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Win64/Release"
-	filter "configurations:Dist"
-		LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Win64/Release"
-
-filter "system:linux"
-	filter "configurations:Debug"
-		LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Linux/Debug"
-	filter "configurations:Release"
-		LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Linux/Debug"
-	filter "configurations:Dist"
-		LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Linux/Debug"
-
-Lib = {}
-filter "system:windows"
-	Lib["mono"] = "mono-2.0-sgen.lib"
-filter "system:linux"
-	Lib["mono"] = "monosgen-2.0"
-
-LibLocation = {}
-filter "system:windows"
-	LibLocation["Mono"] = "%{LibDir.Mono}/%{Lib.mono}"
-filter "system:linux"
-	LibLocation["Mono"] = "%{LibDir.Mono}/lib%{Lib.mono}.so"
 
 group "Dependencies"
 	include "Arc/vendor/GLFW"

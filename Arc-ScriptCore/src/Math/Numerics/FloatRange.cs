@@ -153,7 +153,14 @@ namespace ArcEngine {
 		public static bool operator !=( FloatRange a, FloatRange b ) => a.a != b.a || a.b != b.b;
 		public bool Equals( FloatRange other ) => a.Equals( other.a ) && b.Equals( other.b );
 		public override bool Equals( object obj ) => obj is FloatRange other && Equals( other );
-		public override int GetHashCode() => System.HashCode.Combine(a, b);
+
+		public override int GetHashCode()
+		{
+			int hash = 17;
+			hash = hash * 23 + a.GetHashCode();
+			hash = hash * 23 + b.GetHashCode();
+			return hash;
+		}
 
 		public override string ToString() => $"[{a},{b}]";
 

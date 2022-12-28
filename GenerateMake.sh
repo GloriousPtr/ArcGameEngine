@@ -1,2 +1,2 @@
+chmod +x vendor/premake/bin/premake5
 ./vendor/premake/bin/premake5 gmake2
-make CSC=mcs -j$(nproc)

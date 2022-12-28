@@ -19,11 +19,6 @@ project "Arc-ScriptCore"
         "System.Core"
     }
 
-    nuget
-    {
-        "Microsoft.Bcl.HashCode:1.1.1"
-    }
-
     defines
     {
         "JETBRAINS_ANNOTATIONS"

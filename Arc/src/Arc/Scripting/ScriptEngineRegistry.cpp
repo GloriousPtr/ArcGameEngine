@@ -23,10 +23,27 @@ namespace ArcEngine
 	{
 		([]()
 		{
+			char* nameCstr = nullptr;
+#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+			constexpr size_t n = std::string_view("ArcEngine::").size();
+			std::string componentName = entt::type_id<Component>().name().substr(n).data();
+			size_t last = componentName.find_last_of(']');
+			std::string name = std::string("ArcEngine.") + componentName.substr(0, last);
+			nameCstr = name.data();
+#elif defined(_MSC_VER)
 			constexpr size_t n = std::string_view("struct ArcEngine::").size();
-			std::string_view componentName = entt::type_id<Component>().name().substr(n);
-			std::string name = std::string("ArcEngine.") + componentName.data();
-			MonoType* type = mono_reflection_type_from_name(&name[0], ScriptEngine::GetCoreAssemblyImage());
+			std::string componentName = entt::type_id<Component>().name().substr(n).data();
+			size_t last = componentName.find_first_of(">(");
+			std::string name = std::string("ArcEngine.") + componentName.substr(0, last);
+			nameCstr = name.data();
+#endif
+			if (!nameCstr)
+			{
+				ARC_CORE_ASSERT(false, "Could not register component")
+				return;
+			}
+
+			MonoType* type = mono_reflection_type_from_name(nameCstr, ScriptEngine::GetCoreAssemblyImage());
 			if (type)
 			{
 				ARC_CORE_TRACE("Registering {}", name);

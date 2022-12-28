@@ -3,7 +3,7 @@
 #include <Arc/Scene/EntitySerializer.h>
 #include <Arc/Core/Filesystem.h>
 
-#if defined(ARC_PLATFORM_WINDOWS)
+#ifdef ARC_PLATFORM_WINDOWS
 #include <Platform/VisualStudio/VisualStudioAccessor.h>
 #endif
 
@@ -134,7 +134,7 @@ namespace ArcEngine
 					break;
 				case FileType::Script:
 				case FileType::Shader:
-#if defined(ARC_PLATFORM_WINDOWS)
+#ifdef ARC_PLATFORM_WINDOWS
 					VisualStudioAccessor::OpenFile(filepath);
 #endif
 					break;
@@ -144,13 +144,13 @@ namespace ArcEngine
 				case FileType::Cubemap:
 				case FileType::Model:
 				case FileType::Audio:
-					//FileDialogs::OpenFileWithProgram(filepath);
+					FileDialogs::OpenFileWithProgram(filepath);
 					break;
 			}
 		}
 		else
 		{
-			//FileDialogs::OpenFileWithProgram(filepath);
+			FileDialogs::OpenFileWithProgram(filepath);
 		}
 	}
 
@@ -716,8 +716,6 @@ namespace ArcEngine
 					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
 
 					// Type Color frame
-					
-
 					ImVec2 typeColorFrameSize = { scaledThumbnailSizeX, scaledThumbnailSizeX * 0.03f };
 					ImGui::SetCursorPosX(cursorPos.x + padding);
 					ImGui::Image(reinterpret_cast<ImTextureID>(m_WhiteTexture->GetRendererID()), typeColorFrameSize, { 0, 0 }, { 1, 1 }, isDir ? ImVec4(0.0f, 0.0f, 0.0f, 0.0f) : file.FileTypeIndicatorColor);
@@ -861,12 +859,12 @@ namespace ArcEngine
 		}
 		if (ImGui::MenuItem("Show in Explorer"))
 		{
-			//FileDialogs::OpenFolderAndSelectItem(context.string().c_str());
+			FileDialogs::OpenFolderAndSelectItem(context.string().c_str());
 			ImGui::CloseCurrentPopup();
 		}
 		if (ImGui::MenuItem("Open"))
 		{
-			//FileDialogs::OpenFileWithProgram(context.string().c_str());
+			FileDialogs::OpenFileWithProgram(context.string().c_str());
 			ImGui::CloseCurrentPopup();
 		}
 		if (ImGui::MenuItem("Copy Path"))
@@ -884,7 +882,7 @@ namespace ArcEngine
 			}
 			if (ImGui::MenuItem("Open C# Project"))
 			{
-#if defined(ARC_PLATFORM_WINDOWS)
+#ifdef ARC_PLATFORM_WINDOWS
 				VisualStudioAccessor::RunVisualStudio();
 #endif
 				ImGui::CloseCurrentPopup();

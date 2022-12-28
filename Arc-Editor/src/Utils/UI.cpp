@@ -53,7 +53,7 @@ namespace ArcEngine
 		memset(s_IDBuffer + 2, 0, 14);
 		++s_Counter;
 		std::string buffer = fmt::format("##{}", s_Counter);
-		memccpy(&s_IDBuffer, buffer.data(), 16, buffer.size());
+		std::memcpy(&s_IDBuffer, buffer.data(), 16);
 	}
 	
 	void UI::EndPropertyGrid()
@@ -69,7 +69,7 @@ namespace ArcEngine
 		memset(s_IDBuffer + 2, 0, 14);
 		++s_Counter;
 		std::string buffer = fmt::format("##{}", s_Counter);
-		memccpy(&s_IDBuffer, buffer.data(), 16, buffer.size());
+		std::memcpy(&s_IDBuffer, buffer.data(), 16);
 
 		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_PadOuterX;
 		ImGui::BeginTable(s_IDBuffer, 2, tableFlags | flags);
@@ -84,7 +84,7 @@ namespace ArcEngine
 		memset(s_IDBuffer + 2, 0, 14);
 		++s_Counter;
 		std::string buffer = fmt::format("##{}", s_Counter);
-		memccpy(&s_IDBuffer, buffer.data(), 16, buffer.size());
+		std::memcpy(&s_IDBuffer, buffer.data(), 16);
 
 		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_PadOuterX;
 		ImGui::BeginTable(s_IDBuffer, 3, tableFlags | flags);

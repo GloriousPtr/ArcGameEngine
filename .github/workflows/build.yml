@@ -14,10 +14,11 @@ on:
   schedule:
     - cron: '23 17 * * 3'
 jobs:
-  build:
-    name: Build for ${{matrix.BUILD_CONFIGURATION}}-${{matrix.COMPILER}}
+  windows_build:
+    name: Build for Windows-${{matrix.BUILD_CONFIGURATION}}-${{matrix.COMPILER}}
     runs-on: windows-latest
     strategy:
+      fail-fast: false
       matrix:
         BUILD_CONFIGURATION:
           - Debug
@@ -58,5 +59,39 @@ jobs:
       
       - uses: actions/upload-artifact@v3
         with:
-          name: "Arc_${{matrix.COMPILER}}_${{matrix.BUILD_CONFIGURATION}}"
+          name: "Arc_Windows_${{matrix.COMPILER}}_${{matrix.BUILD_CONFIGURATION}}"
           path: "${{ github.workspace }}/bin/${{matrix.BUILD_CONFIGURATION}}-windows-x86_64"
+
+  linux_build:
+    name: Build for Linux-${{matrix.BUILD_CONFIGURATION}}-Clang
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        BUILD_CONFIGURATION:
+          - Debug
+          - Release
+          - Dist
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          submodules: true
+
+      - name: Setup Clang
+        run: |
+          sudo apt update
+          sudo apt install clang
+          sudo apt install libgl1-mesa-dev
+          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev
+
+      - name: Generate Project Files
+        run: ./GenerateMake.sh
+      
+      - name: Run Build
+        run: make CSC=mcs -j$(nproc)
+      
+      - uses: actions/upload-artifact@v3
+        with:
+          name: "Arc_Clang_${{matrix.BUILD_CONFIGURATION}}"
+          path: "${{ github.workspace }}/bin/${{matrix.BUILD_CONFIGURATION}}-linux-x86_64"

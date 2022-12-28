@@ -6,7 +6,7 @@ project "Arc-Editor"
 	warnings "default"
 	externalwarnings "off"
 	rtti "off"
-	characterset "Unicode"
+	postbuildmessage "================ Post-Build: Copying dependencies ================"
 
 	binDir = "%{wks.location}/bin/" .. outputdir
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
@@ -55,41 +55,62 @@ project "Arc-Editor"
 		"box2d",
 		"JoltPhysics",
 		"Arc-ScriptCore",
-
-		"%{Lib.mono}:shared",
-		"GL:shared",
 	}
 
-	postbuildmessage "================ Post-Build: Copying dependencies ================"
 	postbuildcommands
 	{
-		'{COPY} "%{LibLocation.Mono}" "%{cfg.targetdir}"'
+		'{COPY} "../vendor" "%{binDir}"/vendor',
+		'{COPY} "../Arc-Editor/assets" "%{cfg.targetdir}"/assets',
+		'{COPY} "../Arc-Editor/mono" "%{cfg.targetdir}"/mono',
+		'{COPY} "../Arc-Editor/Resources" "%{cfg.targetdir}"/Resources',
+		'{COPY} "../Arc-Editor/imgui.ini" "%{cfg.targetdir}"',
 	}
 
 	filter "system:windows"
 		systemversion "latest"
-		postbuildmessage "Post-Build: Copying dependencies..."
-		postbuildcommands
+		links
 		{
-			'{COPY} "../vendor" "%{binDir}"/vendor',
-			'{COPY} "../Arc-Editor/assets" "%{cfg.targetdir}"/assets',
-			'{COPY} "../Arc-Editor/mono" "%{cfg.targetdir}"/mono',
-			'{COPY} "../Arc-Editor/Resources" "%{cfg.targetdir}"/Resources',
-			'{COPY} "../Arc-Editor/imgui.ini" "%{cfg.targetdir}"',
+			"mono-2.0-sgen.lib",
+			"opengl.dll"
+		}
+
+	filter "system:linux"
+		pic "On"
+		systemversion "latest"
+		links
+		{
+			"monosgen-2.0:shared",
+			"GL:shared",
+			"dl:shared"
 		}
 
 	filter "configurations:Debug"
 		defines "ARC_DEBUG"
 		runtime "Debug"
 		symbols "on"
+		postbuildcommands
+		{
+			'{COPY} "../Arc/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
+			'{COPY} "../Arc/vendor/mono/bin/Debug/libmonosgen-2.0.so" "%{cfg.targetdir}"',
+		}
 
 	filter "configurations:Release"
 		defines "ARC_RELEASE"
 		runtime "Release"
 		optimize "speed"
+		postbuildcommands
+		{
+			'{COPY} "../Arc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
+			'{COPY} "../Arc/vendor/mono/bin/Release/libmonosgen-2.0.so" "%{cfg.targetdir}"',
+		}
 
 	filter "configurations:Dist"
 		defines "ARC_DIST"
 		runtime "Release"
         optimize "speed"
 		symbols "off"
+		postbuildcommands
+		{
+			'{COPY} "../Arc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
+			'{COPY} "../Arc/vendor/mono/bin/Release/libmonosgen-2.0.so" "%{cfg.targetdir}"',
+		}

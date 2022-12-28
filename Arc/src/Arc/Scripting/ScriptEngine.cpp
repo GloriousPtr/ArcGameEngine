@@ -19,7 +19,7 @@
 #include "GCManager.h"
 #include "ScriptEngineRegistry.h"
 
-#if defined(ARC_PLATFORM_WINDOWS)
+#ifdef ARC_PLATFORM_WINDOWS
 #include "Platform/VisualStudio/VisualStudioAccessor.h"
 #endif
 
@@ -191,7 +191,7 @@ namespace ArcEngine
 
 		bool buildSuccess = false;
 
-#if defined(ARC_PLATFORM_WINDOWS)
+#ifdef ARC_PLATFORM_WINDOWS
 		if (!VisualStudioAccessor::GenerateProjectFiles())
 			return;
 

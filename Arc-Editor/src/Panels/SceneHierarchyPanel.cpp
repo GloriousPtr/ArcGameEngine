@@ -4,6 +4,7 @@
 
 #include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui_internal.h>
+#include <string>
 
 #include "../EditorLayer.h"
 #include "../Utils/UI.h"
