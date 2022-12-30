@@ -77,6 +77,7 @@ project "Arc-Editor"
 	filter "system:linux"
 		pic "On"
 		systemversion "latest"
+		linkoptions { "`pkg-config --libs gtk+-3.0`" }
 		links
 		{
 			"monosgen-2.0:shared",

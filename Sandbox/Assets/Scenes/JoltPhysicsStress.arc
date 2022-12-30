@@ -33,7 +33,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 11210465593341363389
@@ -69,7 +69,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 6943276325934556344
@@ -105,7 +105,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 9616501567857697721
@@ -141,7 +141,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 16593858598802047510
@@ -177,7 +177,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 5491956954751514901
@@ -213,7 +213,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 753921122541701130
@@ -249,7 +249,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 13064821893814528444
@@ -285,7 +285,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 11128675184788650459
@@ -321,7 +321,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 8483912062854225111
@@ -357,7 +357,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 4851103044111943490
@@ -393,7 +393,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 4621262192666271876
@@ -429,7 +429,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 2444249596141022825
@@ -465,7 +465,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 1868747334916796151
@@ -501,7 +501,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 15279179578017657306
@@ -537,7 +537,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 8437376152470753005
@@ -573,7 +573,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 8846289724650821411
@@ -609,7 +609,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 2718287244799606032
@@ -645,7 +645,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 995448677697937483
@@ -681,7 +681,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 18399468004793980897
@@ -717,7 +717,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 14352939682305298412
@@ -753,7 +753,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 17749911831761596438
@@ -789,7 +789,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 4192742293232609852
@@ -825,7 +825,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 12404255891408395168
@@ -861,7 +861,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 7073378851536524047
@@ -897,7 +897,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 3936182926146543458
@@ -933,7 +933,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 468332790961292835
@@ -969,7 +969,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 5184893566954906337
@@ -1005,7 +1005,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 169744865761425563
@@ -1041,7 +1041,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 9422103833742678581
@@ -1077,7 +1077,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 7334558017416274354
@@ -1113,7 +1113,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 8061491806738344161
@@ -1149,7 +1149,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 1445777754947949440
@@ -1185,7 +1185,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 13456705717910914606
@@ -1221,7 +1221,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 4140649445221344682
@@ -1257,7 +1257,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 12824254564820094558
@@ -1293,7 +1293,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 4896796754133070555
@@ -1329,7 +1329,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 17585679770191856884
@@ -1365,7 +1365,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 15138430946532571732
@@ -1401,7 +1401,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 1241816721642437710
@@ -1437,7 +1437,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 8317918293545435658
@@ -1473,7 +1473,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 10108780309365958213
@@ -1509,7 +1509,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 12948744350972035450
@@ -1545,7 +1545,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 5252514698993042429
@@ -1581,7 +1581,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 18254265467875066477
@@ -1617,7 +1617,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 5085479002954686492
@@ -1653,7 +1653,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 12893465402555758320
@@ -1689,7 +1689,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 1790861031354857195
@@ -1725,7 +1725,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 1802362820950482050
@@ -1761,7 +1761,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 6708137494586254050
@@ -1797,7 +1797,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 5047820892971989287
@@ -1833,7 +1833,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 12224077620777277607
@@ -1869,7 +1869,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 9763701972958330367
@@ -1905,7 +1905,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 16310983442175867213
@@ -1941,7 +1941,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 17406546945230161603
@@ -1977,7 +1977,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 10961715272755690425
@@ -2013,7 +2013,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 9421969673211914974
@@ -2049,7 +2049,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 4363394899068282356
@@ -2085,7 +2085,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 9174793353154970090
@@ -2121,7 +2121,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 16612398910209757081
@@ -2157,7 +2157,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 12245455608505754747
@@ -2193,7 +2193,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 5270665724836872190
@@ -2229,7 +2229,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 14287466083475472049
@@ -2265,7 +2265,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 3050956482366797815
@@ -2301,7 +2301,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 13248862280735986531
@@ -2337,7 +2337,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 9651740289141010566
@@ -2373,7 +2373,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 12317852400171467211
@@ -2409,7 +2409,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 17563194834038627573
@@ -2445,7 +2445,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 1896185893589686458
@@ -2481,7 +2481,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 2983168258784093924
@@ -2517,7 +2517,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 3915709005047817710
@@ -2553,7 +2553,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 4320053318306055614
@@ -2589,7 +2589,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 5642388060126830597
@@ -2625,7 +2625,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 10650783022196255971
@@ -2661,7 +2661,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 18122878747498391815
@@ -2697,7 +2697,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 5514153480373569228
@@ -2733,7 +2733,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 18380710422362193449
@@ -2769,7 +2769,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 7806087811090799258
@@ -2805,7 +2805,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 7693398461104152561
@@ -2841,7 +2841,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 13998360568103080440
@@ -2877,7 +2877,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 3736114985764103840
@@ -2913,7 +2913,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 511442467651028393
@@ -2949,7 +2949,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 14842527580870274592
@@ -2985,7 +2985,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 3560961302221714992
@@ -3021,7 +3021,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 12440801768435256120
@@ -3057,7 +3057,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 16526525167652803866
@@ -3093,7 +3093,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 554050572384611648
@@ -3129,7 +3129,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 9290917142375969588
@@ -3165,7 +3165,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 12976890434539325866
@@ -3201,7 +3201,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 2933330386521017646
@@ -3237,7 +3237,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 10639883637984866261
@@ -3273,7 +3273,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 8570374240603365464
@@ -3309,7 +3309,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 15483821555898389114
@@ -3345,7 +3345,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 12250749969697700951
@@ -3381,7 +3381,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 7238625362022925659
@@ -3417,7 +3417,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 10599214992705631699
@@ -3453,7 +3453,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 4862909125526930049
@@ -3489,7 +3489,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 9785458381334200017
@@ -3525,7 +3525,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 1172993103311667751
@@ -3561,7 +3561,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 519077073449535561
@@ -3597,7 +3597,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 2511746863626705561
@@ -3633,7 +3633,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 14573219295636311251
@@ -3669,7 +3669,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 14155763979054722675
@@ -3705,7 +3705,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 10492343929942939762
@@ -3741,7 +3741,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 14563700866702608798
@@ -3777,7 +3777,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 12370109779380285886
@@ -3813,7 +3813,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 12582556596946204611
@@ -3849,7 +3849,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 14758419970602837156
@@ -3885,7 +3885,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 6292680551239308178
@@ -3921,7 +3921,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 16505065021551122790
@@ -3957,7 +3957,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 7847892340927183019
@@ -3993,7 +3993,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 8347463780669049243
@@ -4029,7 +4029,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 15397507514515286946
@@ -4065,7 +4065,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 6795337406097813191
@@ -4101,7 +4101,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 15506513112418639141
@@ -4137,7 +4137,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 17366228815718288592
@@ -4173,7 +4173,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 210831877007189416
@@ -4209,7 +4209,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 8167681207840814792
@@ -4245,7 +4245,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 3113884955553390321
@@ -4281,7 +4281,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 830239318620727715
@@ -4317,7 +4317,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 9673902040994162891
@@ -4353,7 +4353,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.200000003
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 7924704810687730180
@@ -4414,7 +4414,7 @@ Entities:
       Friction: 0.5
       Restitution: 0
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 4444126669705181132

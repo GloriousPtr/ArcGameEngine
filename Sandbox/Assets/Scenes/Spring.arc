@@ -260,7 +260,7 @@ Entities:
         {}
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      TexturePath: textures\circle.png
+      TexturePath: Textures/circle.png
       TilingFactor: 1
     Rigidbody2DComponent:
       Type: 1

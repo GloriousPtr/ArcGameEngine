@@ -1,2 +1,2 @@
 chmod +x vendor/premake/bin/premake5
-./vendor/premake/bin/premake5 gmake2
+./vendor/premake/bin/premake5 gmake2 --cc=clang

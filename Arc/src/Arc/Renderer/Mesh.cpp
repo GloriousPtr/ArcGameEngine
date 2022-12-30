@@ -163,11 +163,12 @@ namespace ArcEngine
 				{
 					const auto& material = materials.at(materialId);
 					
+					
 					const auto& materialProperties = submesh.Mat->GetShader()->GetMaterialProperties();
 					bool normalMapApplied = false;
 
-					std::string path = std::string(filepath);
-					std::string dir = path.substr(0, path.find_last_of('\\'));
+					std::filesystem::path path = filepath;
+					std::filesystem::path dir = path.parent_path();
 
 					for (const auto& [name, property] : materialProperties)
 					{
@@ -179,28 +180,32 @@ namespace ArcEngine
 								(name.find("albedo") != std::string::npos || name.find("Albedo") != std::string::npos ||
 									name.find("diff") != std::string::npos || name.find("Diff") != std::string::npos))
 							{
-								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.diffuse_texname));
+								std::string pathStr = (dir / material.diffuse_texname).string();
+								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(pathStr));
 							}
 
 							if (!material.normal_texname.empty() &&
 								(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
 									name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
 							{
-								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.normal_texname));
+								std::string pathStr = (dir / material.normal_texname).string();
+								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(pathStr));
 								normalMapApplied = true;
 							}
 							else if (!material.bump_texname.empty() &&
 								(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
 									name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
 							{
-								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.bump_texname));
+								std::string pathStr = (dir / material.bump_texname).string();
+								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(pathStr));
 								normalMapApplied = true;
 							}
 
 							if (!material.emissive_texname.empty() &&
 								(name.find("emissi") != std::string::npos || name.find("Emissi") != std::string::npos))
 							{
-								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(dir + '\\' + material.emissive_texname));
+								std::string pathStr = (dir / material.emissive_texname).string();
+								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(pathStr));
 							}
 						}
 

@@ -58,7 +58,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.5
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 1304237688638990982
@@ -118,7 +118,7 @@ Entities:
       Friction: 0.5
       Restitution: 0
     MeshComponent:
-      Filepath: Models\Primitives\Cube.fbx
+      Filepath: Models/Primitives/Cube.fbx
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 4444126669705181132
@@ -136,6 +136,6 @@ Entities:
       Children:
         {}
     SkyLightComponent:
-      TexturePath: Textures\Cubemap.hdr
+      TexturePath: Textures/Cubemap.hdr
       Intensity: 0.699999988
       Rotation: 0

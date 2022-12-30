@@ -105,11 +105,13 @@ project "Arc"
 	filter "system:linux"
 		pic "On"
 		systemversion "latest"
+		buildoptions { "`pkg-config --cflags gtk+-3.0`" }
+		linkoptions { "`pkg-config --libs gtk+-3.0`" }
 		links
 		{
 			"monosgen-2.0:shared",
 			"GL:shared",
-			"dl:shared"
+			"dl:shared",
 		}
 
 	filter "configurations:Debug"

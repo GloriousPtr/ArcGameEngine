@@ -56,7 +56,9 @@ namespace ArcEngine
 		m_Panels.emplace_back(CreateScope<RendererSettingsPanel>());
 		m_Panels.emplace_back(CreateScope<StatsPanel>());
 
+#ifdef ARC_PLATFORM_WINDOWS
 		OpenProject();
+#endif
 	}
 
 	void EditorLayer::OnDetach()
@@ -278,6 +280,7 @@ namespace ArcEngine
 						ImGui::PopStyleVar();
 						ImGui::PopStyleColor(3);
 
+#ifdef ARC_PLATFORM_WINDOWS
 						// Minimize/Maximize/Close buttons
 						ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 0.0f });
 						ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
@@ -311,6 +314,7 @@ namespace ArcEngine
 
 						ImGui::PopStyleColor();
 						ImGui::PopStyleVar(4);
+#endif
 
 						ImGui::EndMenuBar();
 					}
