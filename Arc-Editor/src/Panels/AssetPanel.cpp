@@ -3,9 +3,9 @@
 #include <Arc/Scene/EntitySerializer.h>
 #include <Arc/Core/Filesystem.h>
 
-#ifdef ARC_PLATFORM_WINDOWS
+#ifdef ARC_PLATFORM_VISUAL_STUDIO
 #include <Platform/VisualStudio/VisualStudioAccessor.h>
-#endif
+#endif //ARC_PLATFORM_VISUAL_STUDIO
 
 #include <icons/IconsMaterialDesignIcons.h>
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -134,9 +134,9 @@ namespace ArcEngine
 					break;
 				case FileType::Script:
 				case FileType::Shader:
-#ifdef ARC_PLATFORM_WINDOWS
+#ifdef ARC_PLATFORM_VISUAL_STUDIO
 					VisualStudioAccessor::OpenFile(filepath);
-#endif
+#endif //ARC_PLATFORM_VISUAL_STUDIO
 					break;
 				case FileType::Unknown:
 				case FileType::Prefab:
@@ -882,9 +882,9 @@ namespace ArcEngine
 			}
 			if (ImGui::MenuItem("Open C# Project"))
 			{
-#ifdef ARC_PLATFORM_WINDOWS
+#ifdef ARC_PLATFORM_VISUAL_STUDIO
 				VisualStudioAccessor::RunVisualStudio();
-#endif
+#endif //ARC_PLATFORM_VISUAL_STUDIO
 				ImGui::CloseCurrentPopup();
 			}
 		}

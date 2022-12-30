@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef ARC_PLATFORM_WINDOWS
+#ifdef ARC_PLATFORM_VISUAL_STUDIO
 
 namespace ArcEngine
 {
@@ -15,4 +15,4 @@ namespace ArcEngine
 	};
 }
 
-#endif
+#endif //ARC_PLATFORM_VISUAL_STUDIO

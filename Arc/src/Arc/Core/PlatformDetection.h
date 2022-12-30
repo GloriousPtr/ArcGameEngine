@@ -6,6 +6,7 @@
 	#ifdef _WIN64
 		/* Windows x64  */
 		#define ARC_PLATFORM_WINDOWS
+		#define ARC_PLATFORM_VISUAL_STUDIO
 		#define ARC_API(v) __declspec(v)
 	#else
 		/* Windows x86 */

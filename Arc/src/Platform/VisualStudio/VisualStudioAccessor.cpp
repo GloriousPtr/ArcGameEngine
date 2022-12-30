@@ -1,6 +1,6 @@
 #include "arcpch.h"
 
-#ifdef ARC_PLATFORM_WINDOWS
+#ifdef ARC_PLATFORM_VISUAL_STUDIO
 
 #include "VisualStudioAccessor.h"
 
@@ -486,4 +486,4 @@ namespace ArcEngine
 	}
 }
 
-#endif
+#endif //ARC_PLATFORM_VISUAL_STUDIO

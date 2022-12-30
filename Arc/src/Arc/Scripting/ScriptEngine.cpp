@@ -19,9 +19,9 @@
 #include "GCManager.h"
 #include "ScriptEngineRegistry.h"
 
-#ifdef ARC_PLATFORM_WINDOWS
+#ifdef ARC_PLATFORM_VISUAL_STUDIO
 #include "Platform/VisualStudio/VisualStudioAccessor.h"
-#endif
+#endif //ARC_PLATFORM_VISUAL_STUDIO
 
 namespace ArcEngine
 {
@@ -191,12 +191,12 @@ namespace ArcEngine
 
 		bool buildSuccess = false;
 
-#ifdef ARC_PLATFORM_WINDOWS
+#ifdef ARC_PLATFORM_VISUAL_STUDIO
 		if (!VisualStudioAccessor::GenerateProjectFiles())
 			return;
 
 		buildSuccess = VisualStudioAccessor::BuildSolution();
-#endif
+#endif //ARC_PLATFORM_VISUAL_STUDIO
 
 		std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 		auto timeTaken = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
