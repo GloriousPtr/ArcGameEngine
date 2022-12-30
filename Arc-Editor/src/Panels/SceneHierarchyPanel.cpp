@@ -4,6 +4,7 @@
 
 #include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui_internal.h>
+#include <imgui/misc/cpp/imgui_stdlib.h>
 #include <string>
 
 #include "../EditorLayer.h"
@@ -277,11 +278,7 @@ namespace ArcEngine
 				ImGui::SetKeyboardFocusHere();
 			}
 
-			char buffer[256] = {};
-			size_t minSize = glm::min(sizeof(buffer), tag.size());
-			std::strncpy(buffer, tag.c_str(), minSize);
-			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
-				tag = std::string(buffer);
+			ImGui::InputText("##Tag", &tag);
 
 			if (ImGui::IsItemDeactivated())
 			{

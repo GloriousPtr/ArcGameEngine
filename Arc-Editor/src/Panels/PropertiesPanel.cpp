@@ -2,6 +2,7 @@
 
 #include <icons/IconsMaterialDesignIcons.h>
 #include <imgui/imgui_internal.h>
+#include <imgui/misc/cpp/imgui_stdlib.h>
 
 #include <Arc/Scene/EntitySerializer.h>
 
@@ -353,11 +354,8 @@ namespace ArcEngine
 
 			if (entity.HasComponent<TagComponent>())
 			{
-				char buffer[256] = {};
-				std::strcpy(buffer, tag.Tag.c_str());
 				ImGui::SetNextItemWidth(tagWidth);
-				if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
-					tag.Tag = std::string(buffer);
+				ImGui::InputText("##Tag", &tag.Tag);
 			}
 
 			ImGui::SameLine();
