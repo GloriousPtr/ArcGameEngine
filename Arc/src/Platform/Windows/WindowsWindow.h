@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef ARC_PLATFORM_WINDOWS
+
 #include "Arc/Core/Window.h"
 
 #include <GLFW/glfw3.h>
@@ -57,3 +59,4 @@ namespace ArcEngine
 	};
 }
 
+#endif

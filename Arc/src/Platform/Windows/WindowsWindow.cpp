@@ -1,4 +1,7 @@
 #include "arcpch.h"
+
+#ifdef ARC_PLATFORM_WINDOWS
+
 #include "Platform/Windows/WindowsWindow.h"
 
 #include "Arc/Events/ApplicationEvent.h"
@@ -60,9 +63,7 @@ namespace ArcEngine
 					glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 			#endif
 
-#ifdef ARC_PLATFORM_WINDOWS
 			glfwWindowHint(GLFW_TITLEBAR, GLFW_FALSE);
-#endif
 			m_Window = glfwCreateWindow(static_cast<int>(props.Width), static_cast<int>(props.Height), m_Data.Title.c_str(), nullptr, nullptr);
 			++s_GLFWWindowCount;
 		}
@@ -181,12 +182,10 @@ namespace ArcEngine
 			data->EventCallback(event);
 		});
 
-#ifdef ARC_PLATFORM_WINDOWS
 		glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, [[maybe_unused]] int xPos, [[maybe_unused]] int yPos, int* hit)
 		{
 			*hit = static_cast<WindowData*>(glfwGetWindowUserPointer(window))->OverTitlebar ? 1 : 0;
 		});
-#endif
 	}
 
 	void WindowsWindow::Shutdown() const
@@ -252,3 +251,5 @@ namespace ArcEngine
 		m_Data.OverTitlebar = value;
 	}
 }
+
+#endif
