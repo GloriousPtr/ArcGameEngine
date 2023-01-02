@@ -3,5 +3,5 @@
 
 namespace ArcEngine
 {
-	std::function<void(std::string, std::string, std::string, int32_t, Log::Level)> ExternalConsoleSink::OnFlush;
+	std::function<void(std::string_view, const char*, const char*, int32_t, Log::Level)> ExternalConsoleSink::OnFlush;
 }

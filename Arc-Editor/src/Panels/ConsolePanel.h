@@ -18,7 +18,7 @@ namespace ArcEngine
 			int32_t Line;
 			Log::Level Level;
 
-			Message(uint32_t id, const std::string& message, const std::string& filepath, const std::string& function, int32_t line, Log::Level level = Log::Level::Trace);
+			Message(uint32_t id, std::string_view message, const char* filepath, const char* function, int32_t line, Log::Level level = Log::Level::Trace);
 			void OnImGuiRender() const;
 
 			static const char* GetLevelName(Log::Level level);
@@ -35,7 +35,7 @@ namespace ArcEngine
 		ConsolePanel& operator=(const ConsolePanel& other) = delete;
 		ConsolePanel& operator=(ConsolePanel&& other) = delete;
 
-		void AddMessage(const std::string& message, const std::string& filepath, const std::string& function, int32_t line, Log::Level level);
+		void AddMessage(std::string_view message, const char* filepath, const char* function, int32_t line, Log::Level level);
 		[[nodiscard]] const Message* GetRecentMessage() const;
 		void Clear();
 		void SetFocus() const;

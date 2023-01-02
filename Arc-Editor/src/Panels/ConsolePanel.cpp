@@ -27,7 +27,7 @@ namespace ArcEngine
 		s_MessageBufferRenderFilter |= Log::Level::Error;
 		s_MessageBufferRenderFilter |= Log::Level::Critical;
 
-		ExternalConsoleSink::SetConsoleSink_HandleFlush([this](const std::string& message, const std::string& filepath, const std::string& function, int32_t line, Log::Level level){ AddMessage(message, filepath, function, line, level); });
+		ExternalConsoleSink::SetConsoleSink_HandleFlush([this](std::string_view message, const char* filepath, const char* function, int32_t line, Log::Level level){ AddMessage(message, filepath, function, line, level); });
 		m_MessageBuffer = std::vector<Ref<ConsolePanel::Message>>(m_Capacity);
 	}
 
@@ -36,7 +36,7 @@ namespace ArcEngine
 		ExternalConsoleSink::SetConsoleSink_HandleFlush(nullptr);
 	}
 
-	void ConsolePanel::AddMessage(const std::string& message, const std::string& filepath, const std::string& function, int32_t line, Log::Level level)
+	void ConsolePanel::AddMessage(const std::string_view message, const char* filepath, const char* function, int32_t line, Log::Level level)
 	{
 		ARC_PROFILE_SCOPE()
 
@@ -242,8 +242,8 @@ namespace ArcEngine
 		ImGui::PopStyleVar();
 	}
 
-	ConsolePanel::Message::Message(uint32_t id, const std::string& message, const std::string& filepath, const std::string& function, int32_t line, Log::Level level)
-		: ID(id), Buffer(message), Filepath(filepath), Function(function), Line(line), Level(level)
+	ConsolePanel::Message::Message(uint32_t id, std::string_view message, const char* filepath, const char* function, int32_t line, Log::Level level)
+		: ID(id), Buffer(message.data(), message.size()), Filepath(filepath ? filepath : ""), Function(function ? function : ""), Line(line), Level(level)
 	{
 		ARC_PROFILE_SCOPE()
 	}
