@@ -1,8 +1,8 @@
 #include "arcpch.h"
 
-#ifdef ARC_PLATFORM_WINDOWS
+#if defined(ARC_PLATFORM_WINDOWS) || defined(ARC_PLATFORM_LINUX)
 
-#include "Platform/Windows/WindowsWindow.h"
+#include "Platform/GLFW/GlfwWindow.h"
 
 #include "Arc/Events/ApplicationEvent.h"
 #include "Arc/Events/MouseEvent.h"
@@ -16,28 +16,28 @@
 
 namespace ArcEngine
 {
-	uint8_t WindowsWindow::s_GLFWWindowCount = 0;
+	uint8_t GlfwWindow::s_GLFWWindowCount = 0;
 
 	static void GLFWErrorCallback(int error, const char* description)
 	{
 		ARC_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
 	}
 	
-	WindowsWindow::WindowsWindow(const WindowProps& props)
+	GlfwWindow::GlfwWindow(const WindowProps& props)
 	{
 		ARC_PROFILE_SCOPE()
 		
 		Init(props);
 	}
 	
-	WindowsWindow::~WindowsWindow()
+	GlfwWindow::~GlfwWindow()
 	{
 		ARC_PROFILE_SCOPE()
 		
 		Shutdown();
 	}
 
-	void WindowsWindow::Init(const WindowProps& props)
+	void GlfwWindow::Init(const WindowProps& props)
 	{
 		ARC_PROFILE_SCOPE()
 		
@@ -63,7 +63,10 @@ namespace ArcEngine
 					glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 			#endif
 
-			glfwWindowHint(GLFW_TITLEBAR, GLFW_FALSE);
+			#ifdef ARC_PLATFORM_WINDOWS
+				glfwWindowHint(GLFW_TITLEBAR, GLFW_FALSE);
+			#endif
+
 			m_Window = glfwCreateWindow(static_cast<int>(props.Width), static_cast<int>(props.Height), m_Data.Title.c_str(), nullptr, nullptr);
 			++s_GLFWWindowCount;
 		}
@@ -182,13 +185,15 @@ namespace ArcEngine
 			data->EventCallback(event);
 		});
 
+#ifdef ARC_PLATFORM_WINDOWS
 		glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, [[maybe_unused]] int xPos, [[maybe_unused]] int yPos, int* hit)
 		{
 			*hit = static_cast<WindowData*>(glfwGetWindowUserPointer(window))->OverTitlebar ? 1 : 0;
 		});
+#endif
 	}
 
-	void WindowsWindow::Shutdown() const
+	void GlfwWindow::Shutdown() const
 	{
 		ARC_PROFILE_SCOPE()
 		
@@ -199,7 +204,7 @@ namespace ArcEngine
 			glfwTerminate();
 	}
 
-	void WindowsWindow::OnUpdate()
+	void GlfwWindow::OnUpdate()
 	{
 		ARC_PROFILE_SCOPE()
 		
@@ -214,7 +219,7 @@ namespace ArcEngine
 		}
 	}
 
-	void WindowsWindow::SetVSync(bool enabled)
+	void GlfwWindow::SetVSync(bool enabled)
 	{
 		ARC_PROFILE_SCOPE()
 		
@@ -226,27 +231,27 @@ namespace ArcEngine
 		m_Data.VSync = enabled;
 	}
 
-	bool WindowsWindow::IsVSync() const
+	bool GlfwWindow::IsVSync() const
 	{
 		return m_Data.VSync;
 	}
 	
-	void WindowsWindow::Minimize()
+	void GlfwWindow::Minimize()
 	{
 		glfwIconifyWindow(m_Window);
 	}
 
-	void WindowsWindow::Maximize()
+	void GlfwWindow::Maximize()
 	{
 		glfwMaximizeWindow(m_Window);
 	}
 
-	void WindowsWindow::Restore()
+	void GlfwWindow::Restore()
 	{
 		glfwRestoreWindow(m_Window);
 	}
 
-	void WindowsWindow::RegisterOverTitlebar(bool value)
+	void GlfwWindow::RegisterOverTitlebar(bool value)
 	{
 		m_Data.OverTitlebar = value;
 	}

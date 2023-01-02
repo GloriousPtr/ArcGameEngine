@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef ARC_PLATFORM_WINDOWS
+#if defined(ARC_PLATFORM_WINDOWS) || defined(ARC_PLATFORM_LINUX)
 
 #include "Arc/Core/Window.h"
 
@@ -10,11 +10,11 @@ namespace ArcEngine
 {
 	class GraphicsContext;
 
-	class WindowsWindow : public Window
+	class GlfwWindow : public Window
 	{
 	public:
-		explicit WindowsWindow(const WindowProps& props);
-		~WindowsWindow() override;
+		explicit GlfwWindow(const WindowProps& props);
+		~GlfwWindow() override;
 		
 		void OnUpdate() override;
 
