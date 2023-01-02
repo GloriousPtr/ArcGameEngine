@@ -25,22 +25,6 @@ project "Arc"
 
 		"vendor/ImGuizmo/ImGuizmo.h",
 		"vendor/ImGuizmo/ImGuizmo.cpp",
-
-		"%{IncludeDir.glm}/util/glm.natvis",
-		"%{IncludeDir.yaml_cpp}/../src/contrib/yaml-cpp.natvis",
-		"%{IncludeDir.JoltPhysics}/Jolt/Jolt.natvis",
-		"%{IncludeDir.JoltPhysics}/entt/natvis/config.natvis",
-		"%{IncludeDir.JoltPhysics}/entt/natvis/container.natvis",
-		"%{IncludeDir.JoltPhysics}/entt/natvis/core.natvis",
-		"%{IncludeDir.JoltPhysics}/entt/natvis/entity.natvis",
-		"%{IncludeDir.JoltPhysics}/entt/natvis/graph.natvis",
-		"%{IncludeDir.JoltPhysics}/entt/natvis/locator.natvis",
-		"%{IncludeDir.JoltPhysics}/entt/natvis/meta.natvis",
-		"%{IncludeDir.JoltPhysics}/entt/natvis/platform.natvis",
-		"%{IncludeDir.JoltPhysics}/entt/natvis/poly.natvis",
-		"%{IncludeDir.JoltPhysics}/entt/natvis/process.natvis",
-		"%{IncludeDir.JoltPhysics}/entt/natvis/resource.natvis",
-		"%{IncludeDir.JoltPhysics}/entt/natvis/signal.natvis",
 	}
 
 	defines

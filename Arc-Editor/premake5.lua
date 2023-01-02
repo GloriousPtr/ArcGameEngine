@@ -16,10 +16,6 @@ project "Arc-Editor"
 	{
 		"src/**.h",
 		"src/**.cpp",
-
-		"%{IncludeDir.glm}/util/glm.natvis",
-		"%{IncludeDir.yaml_cpp}/../src/contrib/yaml-cpp.natvis",
-		"%{IncludeDir.ImGui}/misc/debuggers/imgui.natvis",
 	}
 
 	includedirs
