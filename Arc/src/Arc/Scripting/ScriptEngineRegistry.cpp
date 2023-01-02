@@ -24,19 +24,15 @@ namespace ArcEngine
 		([]()
 		{
 			char* nameCstr = nullptr;
-#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+			static std::string componentPrefix = "ArcEngine.";
+#if defined(__clang__) || defined(__llvm__) || defined(__GNUC__) || defined(__GNUG__)
 			constexpr size_t n = std::string_view("ArcEngine::").size();
-			std::string componentName = entt::type_id<Component>().name().substr(n).data();
-			size_t last = componentName.find_last_of(']');
-			std::string name = std::string("ArcEngine.") + componentName.substr(0, last);
-			nameCstr = name.data();
 #elif defined(_MSC_VER)
 			constexpr size_t n = std::string_view("struct ArcEngine::").size();
-			std::string componentName = entt::type_id<Component>().name().substr(n).data();
-			size_t last = componentName.find_first_of(">(");
-			std::string name = std::string("ArcEngine.") + componentName.substr(0, last);
-			nameCstr = name.data();
 #endif
+			const std::string componentName = static_cast<std::string>(entt::type_id<Component>().name().substr(n));
+			std::string name = componentPrefix + componentName;
+			nameCstr = name.data();
 			if (!nameCstr)
 			{
 				ARC_CORE_ASSERT(false, "Could not register component")
