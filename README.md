@@ -6,7 +6,7 @@
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcGameEngine&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcGameEngine)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcGameEngine&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcGameEngine)
 
-![Platform](https://img.shields.io/badge/platform-Windows-blue?style=flat-square)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-blue?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/MohitSethi99/ArcEngine?color=blue&style=flat-square)
 ![Size](https://img.shields.io/github/repo-size/MohitSethi99/ArcEngine?style=flat-square)
 
