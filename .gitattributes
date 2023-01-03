@@ -1,1 +1,68 @@
 * text=auto
+
+###### Git
+.gitattributes  text
+.gitignore      text
+.gitconfig      text
+.gitmodules     text
+
+# Sources
+*.c     text    diff=cpp
+*.cc    text    diff=cpp
+*.cxx   text    diff=cpp
+*.cpp   text    diff=cpp
+*.c++   text    diff=cpp
+*.hpp   text    diff=cpp
+*.h     text    diff=cpp
+*.h++   text    diff=cpp
+*.hh    text    diff=cpp
+*.cs    text    diff=csharp
+*.glsl  text
+
+## Project/Editor
+*.arcproj       eol=lf
+*.arc           eol=lf
+*.prefab        eol=lf
+*.mat           eol=lf
+*.ini           eol=lf
+
+#Image
+*.jpg   -text
+*.jpeg  -text
+*.png   -text
+*.gif   -text
+*.psd   -text
+*.ai    -text
+*.psb   -text
+
+#Audio
+*.mp3   -text
+*.wav   -text
+*.ogg   -text
+
+#Video
+*.mp4   -text
+*.mov   -text
+
+#3D Object
+*.FBX   -text
+*.fbx   -text
+*.obj   -text
+*.GLTF  -text
+*.gltf  -text
+
+#ETC
+*.bat   text    eol=crlf
+*.exe   binary
+*.dll   binary
+*.sh    text    eol=lf
+*.so    binary
+*.a     binary
+*.exr   -text
+*.tga   -text
+*.pdf   -text
+*.zip   -text
+*.ttf   -text
+*.csv   text
+*.tsv   text
+*.md    text
