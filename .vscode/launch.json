@@ -5,25 +5,82 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(Windows) Launch",
-            "type": "cppvsdbg",
-            "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug-Windows-x86_64/Arc-Editor/Arc-Editor.exe",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceRoot}/Arc-Editor",
-            "environment": [],
-            "console": "newExternalWindow",
-        },
-        {
-            "name": "(Linux) Launch",
+            "name": "Debug",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug-linux-x86_64/Arc-Editor/Arc-Editor",
+            "program": "${workspaceRoot}/bin/Debug-Windows-x86_64/Arc-Editor/Arc-Editor",
+            "cwd": "${workspaceRoot}/Arc-Editor",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceRoot}/Arc-Editor",
             "environment": [],
-        }
+            "preLaunchTask": "Build Debug",
+
+            "windows": {
+                "name": "Windows Launch",
+                "type": "cppvsdbg",
+                "request": "launch",
+                "program": "${workspaceRoot}/bin/Debug-Windows-x86_64/Arc-Editor/Arc-Editor.exe",
+                "console": "newExternalWindow",
+            },
+            
+            "linux": {
+                "name": "Linux Launch",
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "${workspaceRoot}/bin/Debug-linux-x86_64/Arc-Editor/Arc-Editor",
+            }
+        },
+        {
+            "name": "Release",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/Release-Windows-x86_64/Arc-Editor/Arc-Editor",
+            "cwd": "${workspaceRoot}/Arc-Editor",
+            "args": [],
+            "stopAtEntry": false,
+            "environment": [],
+            "preLaunchTask": "Build Release",
+
+            "windows": {
+                "name": "Windows Launch",
+                "type": "cppvsdbg",
+                "request": "launch",
+                "program": "${workspaceRoot}/bin/Release-Windows-x86_64/Arc-Editor/Arc-Editor.exe",
+                "console": "newExternalWindow",
+            },
+            
+            "linux": {
+                "name": "Linux Launch",
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "${workspaceRoot}/bin/Release-linux-x86_64/Arc-Editor/Arc-Editor",
+            }
+        },
+        {
+            "name": "Dist",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/Dist-Windows-x86_64/Arc-Editor/Arc-Editor",
+            "cwd": "${workspaceRoot}/Arc-Editor",
+            "args": [],
+            "stopAtEntry": false,
+            "environment": [],
+            "preLaunchTask": "Build Dist",
+
+            "windows": {
+                "name": "Windows Launch",
+                "type": "cppvsdbg",
+                "request": "launch",
+                "program": "${workspaceRoot}/bin/Dist-Windows-x86_64/Arc-Editor/Arc-Editor.exe",
+                "console": "newExternalWindow",
+            },
+            
+            "linux": {
+                "name": "Linux Launch",
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "${workspaceRoot}/bin/Dist-linux-x86_64/Arc-Editor/Arc-Editor",
+            }
+        },
     ]
 }

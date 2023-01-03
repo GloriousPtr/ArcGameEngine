@@ -69,9 +69,9 @@ jobs:
       fail-fast: false
       matrix:
         BUILD_CONFIGURATION:
-          - Debug
-          - Release
-          - Dist
+          - debug
+          - release
+          - dist
     steps:
       - uses: actions/checkout@v3
         with:
@@ -85,7 +85,7 @@ jobs:
         run: ./GenerateMake.sh
       
       - name: Run Build
-        run: make CSC=mcs -j$(nproc)
+        run: make config=${{matrix.BUILD_CONFIGURATION}} CSC=mcs -j$(nproc)
       
       - uses: actions/upload-artifact@v3
         with:
