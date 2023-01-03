@@ -51,7 +51,7 @@ namespace ArcEngine
 		AddIconFont(fontSize);
 
 		io.Fonts->TexGlyphPadding = 1;
-        for(int n = 0; n < io.Fonts->ConfigData.Size; n++)
+        for (int n = 0; n < io.Fonts->ConfigData.Size; n++)
         {
             ImFontConfig* fontConfig = &io.Fonts->ConfigData[n];
             fontConfig->RasterizerMultiply = 1.0f;

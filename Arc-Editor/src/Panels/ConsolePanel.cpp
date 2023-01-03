@@ -122,7 +122,7 @@ namespace ArcEngine
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-		for(int i = 0; i < 6; i++)
+		for (int i = 0; i < 6; i++)
 		{
 			ImGui::SameLine();
 			auto level = static_cast<Log::Level>(glm::pow(2, i));

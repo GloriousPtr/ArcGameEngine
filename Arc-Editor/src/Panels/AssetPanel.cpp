@@ -609,11 +609,10 @@ namespace ArcEngine
 		bool textureCreated = false;
 		if (ImGui::BeginTable("BodyTable", columnCount, flags))
 		{
-			for (int i = 0, len = static_cast<int>(m_DirectoryEntries.size()); i < len; ++i)
+			int i = 0;
+			for (auto& file : m_DirectoryEntries)
 			{
 				ImGui::PushID(i);
-
-				auto& file = m_DirectoryEntries[i];
 
 				bool isDir = file.IsDirectory;
 				const char* filename = file.Name.c_str();
