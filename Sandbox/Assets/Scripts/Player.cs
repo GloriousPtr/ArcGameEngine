@@ -8,7 +8,7 @@ namespace Sandbox
 		[SerializeField]
 		private float Speed = 5.0f;
 		[SerializeField]
-		private Vector2 Force = new(0.0f, 1.0f);
+		private Vector2 Force = new Vector2(0.0f, 1.0f);
 
 		private TransformComponent m_TransformComponent;
 		private Rigidbody2DComponent m_Rigidbody2D;

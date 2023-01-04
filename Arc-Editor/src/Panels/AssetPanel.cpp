@@ -88,6 +88,8 @@ namespace ArcEngine
 
 		{ FileType::Audio,		ICON_MDI_MICROPHONE },
 	};
+
+	inline static float s_LastDomainReloadTime = 0.0f;
 	
 	static bool DragDropTarget(const std::filesystem::path& dropPath)
 	{
@@ -276,8 +278,11 @@ namespace ArcEngine
 		Refresh();
 
 		static filewatch::FileWatch<std::string> watch(m_AssetsDirectory.string(),
-			[this](const std::string& path, const filewatch::Event change_type)
+			[this](const auto& path, const filewatch::Event change_type)
 			{
+				if (s_LastDomainReloadTime < 0.1f)
+					return;
+
 				Refresh();
 
 				std::filesystem::path filepath = path;
@@ -287,24 +292,27 @@ namespace ArcEngine
 					fileType = s_FileTypes.at(ext);
 
 				if (fileType == FileType::Script)
+				{
+					s_LastDomainReloadTime = 0.0f;
 					Application::Get().SubmitToMainThread([]() { ScriptEngine::ReloadAppDomain(); });
+				}
 
 				switch (change_type)
 				{
 					case filewatch::Event::added:
-						ARC_CORE_TRACE("The file was added to the directory: {}", path);
+						ARC_CORE_TRACE("The file was added to the directory: {}", filepath);
 						break;
 					case filewatch::Event::removed:
-						ARC_CORE_TRACE("The file was removed from the directory: {}", path);
+						ARC_CORE_TRACE("The file was removed from the directory: {}", filepath);
 						break;
 					case filewatch::Event::modified:
-						ARC_CORE_TRACE("The file was modified: {}; This can be a change in the time stamp or attributes.", path);
+						ARC_CORE_TRACE("The file was modified: {}; This can be a change in the time stamp or attributes.", filepath);
 						break;
 					case filewatch::Event::renamed_old:
-						ARC_CORE_TRACE("The file was renamed and this is the old name: {}", path);
+						ARC_CORE_TRACE("The file was renamed and this is the old name: {}", filepath);
 						break;
 					case filewatch::Event::renamed_new:
-						ARC_CORE_TRACE("The file was renamed and this is the new name: {}", path);
+						ARC_CORE_TRACE("The file was renamed and this is the new name: {}", filepath);
 						break;
 				}
 			}
@@ -316,6 +324,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		m_ElapsedTime += ts;
+		s_LastDomainReloadTime += ts;
 
 		if (ImGui::IsKeyPressed(ImGuiKey_Delete) && GImGui->ActiveId == 0)
 		{

@@ -9,7 +9,7 @@ namespace ArcEngine
 	template<typename... Component>
 	struct ComponentGroup;
 
-	using GCHandle = void*;
+	using GCHandle = uint32_t;
 
 	class ScriptEngineRegistry
 	{

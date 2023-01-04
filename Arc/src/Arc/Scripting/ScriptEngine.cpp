@@ -17,6 +17,7 @@
 #include "Arc/Scene/Scene.h"
 #include "MonoUtils.h"
 #include "GCManager.h"
+#include "ProjectBuilder.h"
 #include "ScriptEngineRegistry.h"
 
 #ifdef ARC_PLATFORM_VISUAL_STUDIO
@@ -81,7 +82,11 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		mono_set_assemblies_path("mono/lib");
+#if defined(ARC_PLATFORM_WINDOWS)
+		mono_set_assemblies_path("mono/Win64/lib");
+#elif defined(ARC_PLATFORM_LINUX)
+		mono_set_assemblies_path("mono/Linux/lib");
+#endif
 
 		s_Data = CreateScope<ScriptEngineData>();
 
@@ -148,7 +153,7 @@ namespace ArcEngine
 		s_Data->TooltipAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "TooltipAttribute");
 		s_Data->RangeAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "RangeAttribute");
 
-		GCManager::CollectGarbage();
+		//GCManager::CollectGarbage();
 	}
 
 	void ScriptEngine::LoadClientAssembly()
@@ -166,7 +171,7 @@ namespace ArcEngine
 			s_Data->AppAssembly = MonoUtils::LoadMonoAssembly(path, s_Data->EnableDebugging);
 			s_Data->AppImage = mono_assembly_get_image(s_Data->AppAssembly);
 
-			GCManager::CollectGarbage();
+			//GCManager::CollectGarbage();
 
 			s_Data->EntityClasses.clear();
 			LoadAssemblyClasses(s_Data->AppAssembly);
@@ -176,7 +181,7 @@ namespace ArcEngine
 		}
 		else
 		{
-			GCManager::CollectGarbage();
+			//GCManager::CollectGarbage();
 		}
 	}
 
@@ -189,14 +194,10 @@ namespace ArcEngine
 
 		std::chrono::high_resolution_clock::time_point begin = std::chrono::high_resolution_clock::now();
 
-		bool buildSuccess = false;
-
-#ifdef ARC_PLATFORM_VISUAL_STUDIO
-		if (!VisualStudioAccessor::GenerateProjectFiles())
+		if (!ProjectBuilder::GenerateProjectFiles())
 			return;
 
-		buildSuccess = VisualStudioAccessor::BuildSolution();
-#endif //ARC_PLATFORM_VISUAL_STUDIO
+		bool buildSuccess = ProjectBuilder::BuildProject();
 
 		std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 		auto timeTaken = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
@@ -338,12 +339,13 @@ namespace ArcEngine
 	////////////////////////////////////////////////////////////////////////
 	// Script Class ////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////
-	ScriptClass::ScriptClass(MonoClass* monoClass)
+	ScriptClass::ScriptClass(MonoClass* monoClass, bool loadFields)
 		: m_MonoClass(monoClass)
 	{
 		ARC_PROFILE_SCOPE()
 
-		LoadFields();
+		if (loadFields)
+			LoadFields();
 	}
 
 	ScriptClass::ScriptClass(const std::string& classNamespace, const std::string& className)

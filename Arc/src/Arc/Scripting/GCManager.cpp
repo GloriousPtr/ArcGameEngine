@@ -30,7 +30,7 @@ namespace ArcEngine
 			ARC_CORE_ERROR("Memory leak detected\n Not all GCHandles have been cleaned up!");
 
 			for (const auto& [handle, _] : s_GCState->StrongRefMap)
-				mono_gchandle_free_v2(handle);
+				mono_gchandle_free(handle);
 
 			s_GCState->StrongRefMap.clear();
 		}
@@ -40,7 +40,7 @@ namespace ArcEngine
 			ARC_CORE_ERROR("Memory leak detected\n Not all GCHandles have been cleaned up!");
 
 			for (const auto& [handle, _] : s_GCState->WeakRefMap)
-				mono_gchandle_free_v2(handle);
+				mono_gchandle_free(handle);
 
 			s_GCState->WeakRefMap.clear();
 		}
@@ -70,8 +70,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		GCHandle handle = weakReference
-			? mono_gchandle_new_weakref_v2(managedObject, pinned)
-			: mono_gchandle_new_v2(managedObject, pinned);
+			? mono_gchandle_new_weakref(managedObject, pinned)
+			: mono_gchandle_new(managedObject, pinned);
 
 		ARC_CORE_ASSERT(handle, "Failed to get valid GC Handle!")
 
@@ -90,7 +90,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		MonoObject* obj = mono_gchandle_get_target_v2(handle);
+		MonoObject* obj = mono_gchandle_get_target(handle);
 		if (obj == nullptr || mono_object_get_vtable(obj) == nullptr)
 			return nullptr;
 		return obj;
@@ -100,9 +100,9 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		if (mono_gchandle_get_target_v2(handle) != nullptr)
+		if (mono_gchandle_get_target(handle) != nullptr)
 		{
-			mono_gchandle_free_v2(handle);
+			mono_gchandle_free(handle);
 		}
 		else
 		{

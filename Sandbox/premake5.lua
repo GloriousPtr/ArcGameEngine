@@ -21,7 +21,7 @@ project "Sandbox"
     kind "SharedLib"
     language "C#"
     dotnetframework "4.8"
-    csversion "10.0"
+    csversion "7.2"
 
     targetdir ("Binaries")
 	objdir ("Intermediates")

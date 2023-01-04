@@ -4,7 +4,7 @@ typedef struct _MonoObject MonoObject;
 
 namespace ArcEngine
 {
-	using GCHandle = void*;
+	using GCHandle = uint32_t;
 
 	class GCManager
 	{

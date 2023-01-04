@@ -17,7 +17,7 @@ namespace ArcEngine
 	class Entity;
 	class Scene;
 
-	using GCHandle = void*;
+	using GCHandle = uint32_t;
 
 	enum class FieldType
 	{
@@ -112,7 +112,7 @@ namespace ArcEngine
 	{
 	public:
 		ScriptClass() = delete;
-		explicit ScriptClass(MonoClass* monoClass);
+		explicit ScriptClass(MonoClass* monoClass, bool loadFields = false);
 		ScriptClass(const std::string& classNamespace, const std::string& className);
 		
 		ScriptClass(const ScriptClass& other) = delete;
@@ -194,7 +194,7 @@ namespace ArcEngine
 		Ref<ScriptClass> m_EntityClass;
 		Ref<ScriptClass> m_ScriptClass;
 
-		GCHandle m_Handle = nullptr;
+		GCHandle m_Handle = 0;
 		MonoMethod* m_Constructor = nullptr;
 		MonoMethod* m_OnCreateMethod = nullptr;
 		MonoMethod* m_OnUpdateMethod = nullptr;

@@ -3,7 +3,6 @@ project "Arc-ScriptCore"
     language "C#"
     dotnetframework "4.8"
     csversion "7.2"
-    toolset "msc"
     
 	targetdir ("../Arc-Editor/Resources/Scripts")
 	objdir ("../Arc-Editor/Resources/Scripts/Intermediates")
