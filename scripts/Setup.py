@@ -38,4 +38,4 @@ if compiler == "llvm":
             s = s.replace("<PlatformToolset>ClangCL</PlatformToolset>", "<PlatformToolset>LLVM_v143</PlatformToolset>")
             with open(fpath, "w") as f:
                 f.write(s)
-    print("Generated project files for", compiler)
+print("Generated project files for", compiler)

@@ -79,13 +79,13 @@ jobs:
           submodules: true
 
       - name: Setup Clang
-        run: sudo apt update && ./Setup.sh
+        run: sudo apt update && ./scripts/InstallDependencies.sh
       
       - name: Generate Project Files
-        run: ./GenerateMake.sh
+        run: ./scripts/GenerateMake.sh
       
       - name: Run Build
-        run: make config=${{matrix.BUILD_CONFIGURATION}} CSC=mcs -j$(nproc)
+        run: make config=${{matrix.BUILD_CONFIGURATION}} -j$(nproc)
       
       - uses: actions/upload-artifact@v3
         with:

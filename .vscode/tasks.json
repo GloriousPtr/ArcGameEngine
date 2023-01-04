@@ -9,7 +9,7 @@
                 "command": "${workspaceRoot}/scripts/GenerateSolution.bat \n msbuild ${workspaceRoot}/Arc.sln /property:Configuration=Debug /property:GenerateFullPaths=true /t:build /consoleloggerparameters:NoSummary",
             },
             "linux": {
-                "command": "./GenerateMake.sh && make config=debug CSC=mcs -j$(nproc)",
+                "command": "./scripts/GenerateMake.sh && make config=debug -j$(nproc)",
             },
             "options": {
                 "cwd": ""
@@ -47,7 +47,7 @@
                 "command": "${workspaceRoot}/scripts/GenerateSolution.bat \n msbuild ${workspaceRoot}/Arc.sln /property:Configuration=Release /property:GenerateFullPaths=true /t:build /consoleloggerparameters:NoSummary",
             },
             "linux": {
-                "command": "./GenerateMake.sh && make config=release CSC=mcs -j$(nproc)",
+                "command": "./scripts/GenerateMake.sh && make config=release -j$(nproc)",
             },
             "options": {
                 "cwd": ""
@@ -85,7 +85,7 @@
                 "command": "${workspaceRoot}/scripts/GenerateSolution.bat \n msbuild ${workspaceRoot}/Arc.sln /property:Configuration=Dist /property:GenerateFullPaths=true /t:build /consoleloggerparameters:NoSummary",
             },
             "linux": {
-                "command": "./GenerateMake.sh && make config=dist CSC=mcs -j$(nproc)",
+                "command": "./scripts/GenerateMake.sh && make config=dist -j$(nproc)",
             },
             "options": {
                 "cwd": ""
