@@ -50,6 +50,7 @@ namespace ArcEngine
 
 	struct ScriptEngineData
 	{
+		MonoDomain* RootDomain = nullptr;
 		MonoDomain* AppDomain = nullptr;
 
 		MonoAssembly* CoreAssembly = nullptr;
@@ -102,12 +103,11 @@ namespace ArcEngine
 			mono_debug_init(MONO_DEBUG_FORMAT_MONO);
 		}
 
-		MonoDomain* rootDomain = mono_jit_init("ArcJITRuntime");
-		ARC_CORE_ASSERT(rootDomain)
-		mono_domain_set(rootDomain, false);
+		s_Data->RootDomain = mono_jit_init("ArcJITRuntime");
+		mono_domain_set(s_Data->RootDomain, false);
 
 		if (s_Data->EnableDebugging)
-			mono_debug_domain_create(rootDomain);
+			mono_debug_domain_create(s_Data->RootDomain);
 		
 		mono_thread_set_main(mono_thread_current());
 
@@ -125,12 +125,17 @@ namespace ArcEngine
 		s_Data->EntityFields.clear();
 		s_Data->EntityRuntimeInstances.clear();
 
-		GCManager::Shutdown();
-
-		mono_domain_set(mono_get_root_domain(), false);
+		mono_domain_set(s_Data->RootDomain, false);
 		if (s_Data->AppDomain)
 			mono_domain_unload(s_Data->AppDomain);
-		mono_jit_cleanup(mono_get_root_domain());
+
+		GCManager::CollectGarbage();
+		GCManager::Shutdown();
+
+		mono_jit_cleanup(s_Data->RootDomain);
+
+		s_Data->AppDomain = nullptr;
+		s_Data->RootDomain = nullptr;
 	}
 
 	void ScriptEngine::LoadCoreAssembly()
@@ -152,8 +157,6 @@ namespace ArcEngine
 		s_Data->HeaderAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "HeaderAttribute");
 		s_Data->TooltipAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "TooltipAttribute");
 		s_Data->RangeAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "RangeAttribute");
-
-		//GCManager::CollectGarbage();
 	}
 
 	void ScriptEngine::LoadClientAssembly()
@@ -171,17 +174,11 @@ namespace ArcEngine
 			s_Data->AppAssembly = MonoUtils::LoadMonoAssembly(path, s_Data->EnableDebugging);
 			s_Data->AppImage = mono_assembly_get_image(s_Data->AppAssembly);
 
-			//GCManager::CollectGarbage();
-
 			s_Data->EntityClasses.clear();
 			LoadAssemblyClasses(s_Data->AppAssembly);
 
 			ScriptEngineRegistry::ClearTypes();
 			ScriptEngineRegistry::RegisterTypes();
-		}
-		else
-		{
-			//GCManager::CollectGarbage();
 		}
 	}
 
@@ -212,7 +209,7 @@ namespace ArcEngine
 
 		if (s_Data->AppDomain)
 		{
-			mono_domain_set(mono_get_root_domain(), false);
+			mono_domain_set(s_Data->RootDomain, false);
 			mono_domain_unload(s_Data->AppDomain);
 			s_Data->AppDomain = nullptr;
 		}
@@ -223,6 +220,8 @@ namespace ArcEngine
 
 		LoadCoreAssembly();
 		LoadClientAssembly();
+
+		GCManager::CollectGarbage();
 	}
 
 	void ArcEngine::ScriptEngine::LoadAssemblyClasses(MonoAssembly* assembly)
