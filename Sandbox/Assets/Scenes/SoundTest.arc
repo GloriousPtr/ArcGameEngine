@@ -39,7 +39,7 @@ Entities:
       Friction: 0.5
       Restitution: 0
     AudioSourceComponent:
-      Filepath: Audio\ding.wav
+      Filepath: Audio/ding.wav
       VolumeMultiplier: 1
       PitchMultiplier: 1
       PlayOnAwake: true

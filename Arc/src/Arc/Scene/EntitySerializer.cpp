@@ -252,7 +252,10 @@ namespace ArcEngine
 			out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.Color;
 			out << YAML::Key << "SortingOrder" << YAML::Value << spriteRendererComponent.SortingOrder;
 			out << YAML::Key << "TilingFactor" << YAML::Value << spriteRendererComponent.TilingFactor;
-			out << YAML::Key << "TexturePath" << YAML::Value << (spriteRendererComponent.Texture ? Project::GetAssetRelativeFileSystemPath(spriteRendererComponent.Texture->GetPath()).string() : "");
+
+			std::string texturePath = spriteRendererComponent.Texture ? Project::GetAssetRelativeFileSystemPath(spriteRendererComponent.Texture->GetPath()).make_preferred().string() : "";
+			std::replace(texturePath.begin(), texturePath.end(), '\\', '/');
+			out << YAML::Key << "TexturePath" << YAML::Value << texturePath;
 
 			out << YAML::EndMap;
 		}
@@ -263,7 +266,11 @@ namespace ArcEngine
 			out << YAML::BeginMap;
 
 			const auto& skyLightComponent = entity.GetComponent<SkyLightComponent>();
-			out << YAML::Key << "TexturePath" << YAML::Value << (skyLightComponent.Texture ? Project::GetAssetRelativeFileSystemPath(skyLightComponent.Texture->GetPath()).string() : "");
+
+			std::string texturePath = skyLightComponent.Texture ? Project::GetAssetRelativeFileSystemPath(skyLightComponent.Texture->GetPath()).string() : "";
+			std::replace(texturePath.begin(), texturePath.end(), '\\', '/');
+			out << YAML::Key << "TexturePath" << YAML::Value << texturePath;
+
 			out << YAML::Key << "Intensity" << YAML::Value << skyLightComponent.Intensity;
 			out << YAML::Key << "Rotation" << YAML::Value << skyLightComponent.Rotation;
 
@@ -352,7 +359,9 @@ namespace ArcEngine
 			out << YAML::Key << "RotationBySpeed.MaxSpeed" << YAML::Value << particleProps.RotationBySpeed.MaxSpeed;
 			out << YAML::Key << "RotationBySpeed.Enabled" << YAML::Value << particleProps.RotationBySpeed.Enabled;
 
-			out << YAML::Key << "TexturePath" << YAML::Value << particleProps.Texture->GetPath();
+			std::string texturePath = particleProps.Texture ? Project::GetAssetRelativeFileSystemPath(particleProps.Texture->GetPath()).string() : "";
+			std::replace(texturePath.begin(), texturePath.end(), '\\', '/');
+			out << YAML::Key << "TexturePath" << YAML::Value << texturePath;
 
 			out << YAML::EndMap;
 		}
@@ -658,6 +667,7 @@ namespace ArcEngine
 			
 			const auto& meshComponent = entity.GetComponent<MeshComponent>();
 			std::string filepath = meshComponent.MeshGeometry ? Project::GetAssetRelativeFileSystemPath(meshComponent.MeshGeometry->GetFilepath()).string() : "";
+			std::replace(filepath.begin(), filepath.end(), '\\', '/');
 			out << YAML::Key << "Filepath" << YAML::Value << filepath;
 			out << YAML::Key << "SubmeshIndex" << YAML::Value << meshComponent.SubmeshIndex;
 			out << YAML::Key << "CullMode" << YAML::Value << static_cast<int>(meshComponent.CullMode);
@@ -734,8 +744,9 @@ namespace ArcEngine
 			out << YAML::BeginMap;
 
 			const auto& audioSourceComponent = entity.GetComponent<AudioSourceComponent>();
-			std::string f = (audioSourceComponent.Source ? Project::GetAssetRelativeFileSystemPath(audioSourceComponent.Source->GetPath()).string() : "");
-			out << YAML::Key << "Filepath" << YAML::Value << f;
+			std::string fp = (audioSourceComponent.Source ? Project::GetAssetRelativeFileSystemPath(audioSourceComponent.Source->GetPath()).string() : "");
+			std::replace(fp.begin(), fp.end(), '\\', '/');
+			out << YAML::Key << "Filepath" << YAML::Value << fp;
 			out << YAML::Key << "VolumeMultiplier" << YAML::Value << audioSourceComponent.Config.VolumeMultiplier;
 			out << YAML::Key << "PitchMultiplier" << YAML::Value << audioSourceComponent.Config.PitchMultiplier;
 			out << YAML::Key << "PlayOnAwake" << YAML::Value << audioSourceComponent.Config.PlayOnAwake;
