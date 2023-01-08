@@ -473,17 +473,20 @@ namespace ArcEngine
 			const char* fieldName = mono_field_get_name(monoField);
 
 			MonoType* fieldType = mono_field_get_type(monoField);
-			std::string typeName = mono_type_get_name(fieldType);
 
 			FieldType type = FieldType::Unknown;
-			const auto& fieldIt = s_ScriptFieldTypeMap.find(typeName);
-			if (fieldIt != s_ScriptFieldTypeMap.end())
-				type = fieldIt->second;
-
-			if (type == FieldType::Unknown)
 			{
-				ARC_CORE_WARN("Unsupported Field Type Name: {}", typeName);
-				continue;
+				char* typeName = mono_type_get_name(fieldType);
+				const auto& fieldIt = s_ScriptFieldTypeMap.find(typeName);
+				if (fieldIt != s_ScriptFieldTypeMap.end())
+					type = fieldIt->second;
+
+				if (type == FieldType::Unknown)
+				{
+					ARC_CORE_WARN("Unsupported Field Type Name: {}", typeName);
+					continue;
+				}
+				mono_free(typeName);
 			}
 
 			uint8_t accessibilityFlag = GetFieldAccessibility(monoField);
