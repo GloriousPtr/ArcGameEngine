@@ -771,6 +771,7 @@ namespace ArcEngine
 				}
 
 				ImGui::PopID();
+				++i;
 			}
 
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
