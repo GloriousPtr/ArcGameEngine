@@ -174,7 +174,7 @@ namespace ArcEngine
 					{
 						if (property.Type == MaterialPropertyType::Sampler2D)
 						{
-							auto slot = submesh.Mat->GetData<uint32_t>(name.c_str());
+							auto slot = submesh.Mat->GetData<uint32_t>(name);
 
 							if (!material.diffuse_texname.empty() &&
 								(name.find("albedo") != std::string::npos || name.find("Albedo") != std::string::npos ||

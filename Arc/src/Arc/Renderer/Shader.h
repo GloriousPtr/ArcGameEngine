@@ -21,6 +21,10 @@ namespace ArcEngine
 		MaterialPropertyType Type;
 		size_t SizeInBytes;
 		size_t OffsetInBytes;
+
+		std::string DisplayName;
+		bool IsSlider;
+		bool IsColor;
 	};
 
 	class Shader

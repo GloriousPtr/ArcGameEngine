@@ -322,13 +322,17 @@ namespace ArcEngine
 			GLenum type;
 			glGetActiveUniform(program, i, maxLength, nullptr, &size, &type, &name[0]);
 
-			constexpr const char* prefix = "u_Material.";
-			constexpr size_t prefixLength = std::string_view(prefix).size();
-			if (strncmp(name, prefix, prefixLength) == 0)
+			std::string nameStr(name);
+			static constexpr const char* prefix = "u_Material.";
+			static constexpr size_t prefixOffset = std::string_view(prefix).size();
+			if (nameStr.starts_with(prefix))
 			{
-				MaterialPropertyType propertyType = GetMaterialPropertyType(type);
-				size_t sizeInBytes = GetSizeInBytes(propertyType);
-				m_MaterialProperties.emplace(name, MaterialProperty{ propertyType, sizeInBytes, offset });
+				const MaterialPropertyType propertyType = GetMaterialPropertyType(type);
+				const size_t sizeInBytes = GetSizeInBytes(propertyType);
+				const bool isSlider = nameStr.ends_with("01");
+				const size_t sufixSize = isSlider ? 2 : 0;
+				const bool isColor = nameStr.find("color") != std::string::npos || nameStr.find("Color") != std::string::npos;
+				m_MaterialProperties.emplace(nameStr, MaterialProperty{ propertyType, sizeInBytes, offset, nameStr.substr(prefixOffset, nameStr.size() - prefixOffset - sufixSize), isSlider, isColor });
 				offset += sizeInBytes;
 			}
 		}

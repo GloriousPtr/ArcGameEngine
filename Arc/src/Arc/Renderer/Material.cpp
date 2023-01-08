@@ -158,7 +158,7 @@ namespace ArcEngine
 		m_Textures[slot] = texture;
 	}
 
-	Material::MaterialData Material::GetData_Internal(const char* name) const
+	Material::MaterialData Material::GetData_Internal(const std::string& name) const
 	{
 		ARC_PROFILE_SCOPE()
 
@@ -170,7 +170,7 @@ namespace ArcEngine
 		return nullptr;
 	}
 
-	void Material::SetData_Internal(const char* name, const MaterialData data) const
+	void Material::SetData_Internal(const std::string& name, const MaterialData data) const
 	{
 		ARC_PROFILE_SCOPE()
 

@@ -24,21 +24,21 @@ namespace ArcEngine
 		void SetTexture(uint32_t slot, Ref<Texture2D> texture);
 
 		template<typename T>
-		[[nodiscard]] T GetData(const char* name) const
+		[[nodiscard]] T GetData(const std::string& name) const
 		{
 			MaterialData value = GetData_Internal(name);
 			return *static_cast<T*>(value);
 		}
 
 		template<typename T>
-		void SetData(const char* name, T data) const
+		void SetData(const std::string& name, T data) const
 		{
 			SetData_Internal(name, &data);
 		}
 
 	private:
-		[[nodiscard]] MaterialData GetData_Internal(const char* name) const;
-		void SetData_Internal(const char* name, MaterialData data) const;
+		[[nodiscard]] MaterialData GetData_Internal(const std::string& name) const;
+		void SetData_Internal(const std::string& name, MaterialData data) const;
 
 	private:
 		Ref<Shader> m_Shader = nullptr;

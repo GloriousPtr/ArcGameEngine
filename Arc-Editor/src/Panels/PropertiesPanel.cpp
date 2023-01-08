@@ -186,10 +186,9 @@ namespace ArcEngine
 		UI::BeginProperties();
 
 		const auto& materialProperties = material->GetShader()->GetMaterialProperties();
-		for (const auto& [n, property] : materialProperties)
+		for (const auto& [name, property] : materialProperties)
 		{
-			const char* name = n.c_str();
-			const char* displayName = n.c_str() + 11;
+			const char* displayName = property.DisplayName.c_str();
 
 			switch (property.Type)
 			{
@@ -219,13 +218,10 @@ namespace ArcEngine
 				}
 				case MaterialPropertyType::Float:
 				{
-					const bool isSlider01 = n.find("01") != std::string::npos;
 					auto v = material->GetData<float>(name);
-					if (isSlider01)
+					if (name.ends_with("01"))
 					{
-						std::string displayName2 = displayName;
-						displayName2[displayName2.size() - 2] = '\0';
-						if (UI::Property(displayName2.c_str(), v, 0.0f, 1.0f))
+						if (UI::Property(displayName, v, 0.0f, 1.0f))
 							material->SetData(name, v);
 					}
 					else
@@ -244,18 +240,16 @@ namespace ArcEngine
 				}
 				case MaterialPropertyType::Float3:
 				{
-					const bool isColor = n.find("color") != std::string::npos || n.find("Color") != std::string::npos;
 					auto v = material->GetData<glm::vec3>(name);
-					if (UI::PropertyVector(displayName, v, isColor))
+					if (UI::PropertyVector(displayName, v, property.IsColor))
 						material->SetData(name, v);
 					break;
 				}
 				case MaterialPropertyType::Float4:
 				{
-					const bool isColor = n.find("color") != std::string::npos || n.find("Color") != std::string::npos;
 					auto v = material->GetData<glm::vec4>(name);
-					if (UI::PropertyVector(displayName, v, isColor))
-							material->SetData(name, v);
+					if (UI::PropertyVector(displayName, v, property.IsColor))
+						material->SetData(name, v);
 					break;
 				}
 			}
