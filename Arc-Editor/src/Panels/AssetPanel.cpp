@@ -806,8 +806,8 @@ namespace ArcEngine
 
 		m_CurrentDirectory = directory;
 		m_DirectoryEntries.clear();
-
-		for (auto& directoryEntry : std::filesystem::directory_iterator(directory))
+		auto directoryIt = std::filesystem::directory_iterator(directory);
+		for (auto& directoryEntry : directoryIt)
 		{
 			const auto& path = directoryEntry.path();
 			auto relativePath = std::filesystem::relative(path, m_AssetsDirectory);
@@ -821,7 +821,7 @@ namespace ArcEngine
 
 			std::string_view fileTypeString = s_FileTypesToString.at(FileType::Unknown);
 			const auto& fileStringTypeIt = s_FileTypesToString.find(fileType);
-			if (fileTypeIt != s_FileTypes.end())
+			if (fileStringTypeIt != s_FileTypesToString.end())
 				fileTypeString = fileStringTypeIt->second;
 
 			ImVec4 fileTypeColor = { 1.0f, 1.0f, 1.0f, 1.0f };

@@ -411,15 +411,11 @@ namespace ArcEngine
 
 				transform *= glm::translate(glm::mat4(1.0f), glm::vec3(pc.Offset, 0.0f));
 
-				for (size_t i = 0; i < pc.Points.size(); ++i)
+				size_t pointsSize = static_cast<int32_t>(pc.Points.size());
+				for (size_t i = 0; i < pointsSize; ++i)
 				{
-					glm::vec4 p0 = transform * glm::vec4(pc.Offset + pc.Points[i], 0.0f, 1.0f);
-					auto p1 = glm::vec4(0.0f);
-					if (i == pc.Points.size() - 1)
-						p1 = transform * glm::vec4(pc.Offset + pc.Points[0], 0.0f, 1.0f);
-					else
-						p1 = transform * glm::vec4(pc.Offset + pc.Points[i + 1], 0.0f, 1.0f);
-
+					auto p0 = transform * glm::vec4(pc.Offset + pc.Points[i], 0.0f, 1.0f);
+					auto p1 = transform * glm::vec4(pc.Offset + pc.Points[i % pointsSize], 0.0f, 1.0f);
 					Renderer2D::DrawLine(p0, p1, color);
 				}
 			}

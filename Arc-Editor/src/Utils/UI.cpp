@@ -334,6 +334,10 @@ namespace ArcEngine
 				modified = true;
 			}
 
+			bool disabled = pointsCount <= minElements;
+			if (disabled)
+				ImGui::BeginDisabled();
+
 			int i = 0;
 			int removeAt = -1;
 			for (T& p : v)
@@ -343,20 +347,17 @@ namespace ArcEngine
 				function(name.c_str(), p);
 				ImGui::TableNextColumn();
 
-				bool disabled = pointsCount <= minElements;
-				if (disabled)
-					ImGui::BeginDisabled();
-
 				if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_CLOSE)))
 					removeAt = i;
 
 				ImGui::PopID();
 
-				if (disabled)
-					ImGui::EndDisabled();
-
 				++i;
 			}
+
+			if (disabled)
+				ImGui::EndDisabled();
+
 			EndProperties();
 
 			if (removeAt > -1)

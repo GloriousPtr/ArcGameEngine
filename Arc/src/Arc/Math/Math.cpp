@@ -63,32 +63,6 @@ namespace ArcEngine
 		return true;
 	}
 
-	float Math::InverseLerp(float a, float b, float value)
-	{
-		float den = b - a;
-		if (den == 0.0f)
-			return 0.0f;
-		return (value - a) / den;
-	}
-
-	float Math::Lerp(float a, float b, float t)
-	{
-		return (1.0f - t) * a + t * b;
-	}
-
-	float Math::InverseLerpClamped(float a, float b, float value)
-	{
-		float den = b - a;
-		if (den == 0.0f)
-			return 0.0f;
-		return glm::clamp((value - a) / den, 0.0f, 1.0f);
-	}
-
-	float Math::LerpClamped(float a, float b, float t)
-	{
-		return glm::clamp((1.0f - t)* a + t * b, 0.0f, 1.0f);
-	}
-
 	// Gradually changes a value towards a desired goal over time.
 	float Math::SmoothDamp(float current, float target, float& currentVelocity, float smoothTime, float maxSpeed, float deltaTime)
 	{

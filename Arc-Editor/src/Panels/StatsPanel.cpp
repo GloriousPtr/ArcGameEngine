@@ -24,8 +24,9 @@ namespace ArcEngine
 		m_FrameTimes.emplace_back(ImGui::GetIO().Framerate);
 		for (uint32_t i = 0; i < size; i++)
 		{
-			m_FpsValues[i] = m_FrameTimes[i];
-			avg += m_FrameTimes[i];
+			float frameTime = m_FrameTimes[i];
+			m_FpsValues[i] = frameTime;
+			avg += frameTime;
 		}
 		
 		avg /= static_cast<float>(size);

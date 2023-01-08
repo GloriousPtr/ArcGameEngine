@@ -70,10 +70,10 @@ namespace ArcEngine
 			b2Fixture* a = contact->GetFixtureA();
 			b2Fixture* b = contact->GetFixtureB();
 
-			bool aSensor = a->IsSensor();
-			bool bSensor = b->IsSensor();
-			Entity e1 = { static_cast<entt::entity>(static_cast<uint32_t>(a->GetUserData().pointer)), m_Scene };
-			Entity e2 = { static_cast<entt::entity>(static_cast<uint32_t>(b->GetUserData().pointer)), m_Scene };
+			const bool aSensor = a->IsSensor();
+			const bool bSensor = b->IsSensor();
+			const Entity e1 = { static_cast<entt::entity>(static_cast<uint32_t>(a->GetUserData().pointer)), m_Scene };
+			const Entity e2 = { static_cast<entt::entity>(static_cast<uint32_t>(b->GetUserData().pointer)), m_Scene };
 
 			if (e1.HasComponent<BuoyancyEffector2DComponent>() && aSensor
 				&& !e2.HasComponent<BuoyancyEffector2DComponent>() && b->GetBody()->GetType() == b2_dynamicBody)
@@ -99,14 +99,11 @@ namespace ArcEngine
 			if (e1.HasComponent<ScriptComponent>())
 			{
 				const auto& sc = e1.GetComponent<ScriptComponent>();
-				if (bSensor)
+				for (const auto& className : sc.Classes)
 				{
-					for (const auto& className : sc.Classes)
+					if (bSensor)
 						ScriptEngine::GetInstance(e1, className)->InvokeOnSensorEnter2D(collisionData);
-				}
-				else
-				{
-					for (const auto& className : sc.Classes)
+					else
 						ScriptEngine::GetInstance(e1, className)->InvokeOnCollisionEnter2D(collisionData);
 				}
 			}
@@ -120,14 +117,11 @@ namespace ArcEngine
 			if (e2.HasComponent<ScriptComponent>())
 			{
 				const auto& sc = e2.GetComponent<ScriptComponent>();
-				if (aSensor)
+				for (const auto& className : sc.Classes)
 				{
-					for (const auto& className : sc.Classes)
+					if (aSensor)
 						ScriptEngine::GetInstance(e2, className)->InvokeOnSensorEnter2D(collisionData);
-				}
-				else
-				{
-					for (const auto& className : sc.Classes)
+					else
 						ScriptEngine::GetInstance(e2, className)->InvokeOnCollisionEnter2D(collisionData);
 				}
 			}
@@ -139,10 +133,10 @@ namespace ArcEngine
 
 			b2Fixture* a = contact->GetFixtureA();
 			b2Fixture* b = contact->GetFixtureB();
-			bool aSensor = a->IsSensor();
-			bool bSensor = b->IsSensor();
-			Entity e1 = { static_cast<entt::entity>(static_cast<uint32_t>(a->GetUserData().pointer)), m_Scene };
-			Entity e2 = { static_cast<entt::entity>(static_cast<uint32_t>(b->GetUserData().pointer)), m_Scene };
+			const bool aSensor = a->IsSensor();
+			const bool bSensor = b->IsSensor();
+			const Entity e1 = { static_cast<entt::entity>(static_cast<uint32_t>(a->GetUserData().pointer)), m_Scene };
+			const Entity e2 = { static_cast<entt::entity>(static_cast<uint32_t>(b->GetUserData().pointer)), m_Scene };
 
 			if (e1.HasComponent<BuoyancyEffector2DComponent>() && aSensor
 				&& !e2.HasComponent<BuoyancyEffector2DComponent>() && b->GetBody()->GetType() == b2_dynamicBody)
@@ -168,14 +162,11 @@ namespace ArcEngine
 			if (e1.HasComponent<ScriptComponent>())
 			{
 				const auto& sc = e1.GetComponent<ScriptComponent>();
-				if (bSensor)
+				for (const auto& className : sc.Classes)
 				{
-					for (const auto& className : sc.Classes)
+					if (bSensor)
 						ScriptEngine::GetInstance(e1, className)->InvokeOnSensorExit2D(collisionData);
-				}
-				else
-				{
-					for (const auto& className : sc.Classes)
+					else
 						ScriptEngine::GetInstance(e1, className)->InvokeOnCollisionExit2D(collisionData);
 				}
 			}
@@ -189,14 +180,11 @@ namespace ArcEngine
 			if (e2.HasComponent<ScriptComponent>())
 			{
 				const auto& sc = e2.GetComponent<ScriptComponent>();
-				if (aSensor)
+				for (const auto& className : sc.Classes)
 				{
-					for (const auto& className : sc.Classes)
+					if (aSensor)
 						ScriptEngine::GetInstance(e2, className)->InvokeOnSensorExit2D(collisionData);
-				}
-				else
-				{
-					for (const auto& className : sc.Classes)
+					else
 						ScriptEngine::GetInstance(e2, className)->InvokeOnCollisionExit2D(collisionData);
 				}
 			}
@@ -397,12 +385,8 @@ namespace ArcEngine
 			auto id = view.get<IDComponent>(e).ID;
 			Entity src = { e, other.get() };
 			Entity dst = newScene->GetEntity(id);
-			Entity srcParent = src.GetParent();
-			if (srcParent)
-			{
-				Entity dstParent = newScene->GetEntity(srcParent.GetUUID());
-				dst.SetParent(dstParent);
-			}
+			if (Entity srcParent = src.GetParent())
+				dst.SetParent(newScene->GetEntity(srcParent.GetUUID()));
 		}
 
 		auto& srcRegistry = other->m_Registry;
