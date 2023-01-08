@@ -38,7 +38,6 @@ namespace ArcEngine
 	using namespace Microsoft::WRL;
 
 	inline static constexpr const char* programId = "VisualStudio.DTE";
-	inline static constexpr const char* projGenId = "vs2022";
 	inline static ComPtr<EnvDTE80::DTE2> s_VsInstance = nullptr;
 	inline static std::future<void> s_OpenProjectFuture;
 	inline static std::future<void> s_OpenFileFuture;
