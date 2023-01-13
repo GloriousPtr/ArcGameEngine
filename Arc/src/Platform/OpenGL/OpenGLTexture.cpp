@@ -49,7 +49,7 @@ namespace ArcEngine
 		glDeleteTextures(1, &m_RendererID);
 	}
 
-	void OpenGLTexture2D::SetData(void* data, uint32_t size)
+	void OpenGLTexture2D::SetData(void* data, [[maybe_unused]] uint32_t size)
 	{
 		ARC_PROFILE_SCOPE()
 		

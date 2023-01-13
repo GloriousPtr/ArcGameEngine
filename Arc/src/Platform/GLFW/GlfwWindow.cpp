@@ -51,7 +51,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE("glfwInit")
 			
-			int success = glfwInit();
+			[[maybe_unused]] const int success = glfwInit();
 			ARC_CORE_ASSERT(success, "Could not initialize GLFW!")
 			glfwSetErrorCallback(GLFWErrorCallback);
 		}

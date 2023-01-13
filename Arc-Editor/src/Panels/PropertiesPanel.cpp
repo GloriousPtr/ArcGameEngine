@@ -63,19 +63,19 @@ namespace ArcEngine
 
 			auto& component = entity.GetComponent<T>();
 			
-			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+			const float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 			
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
 
-			size_t id = entt::type_id<T>().hash();
-			bool open = ImGui::TreeNodeEx(reinterpret_cast<void*>(id), treeFlags, "%s", reinterpret_cast<const char*>(name));
+			const size_t id = entt::type_id<T>().hash();
+			const bool open = ImGui::TreeNodeEx(reinterpret_cast<void*>(id), treeFlags, "%s", reinterpret_cast<const char*>(name));
 
 			bool removeComponent = false;
 			if(removable)
 			{
 				ImGui::PushID(static_cast<int>(id));
 
-				float frameHeight = ImGui::GetFrameHeight();
+				const float frameHeight = ImGui::GetFrameHeight();
 				ImGui::SameLine(ImGui::GetContentRegionMax().x - frameHeight * 1.2f);
 				if(ImGui::Button(StringUtils::FromChar8T(ICON_MDI_SETTINGS), ImVec2{ frameHeight * 1.2f, frameHeight }))
 					ImGui::OpenPopup("ComponentSettings");
@@ -114,15 +114,15 @@ namespace ArcEngine
 
 		std::string toRemove;
 		
-		float frameHeight = ImGui::GetFrameHeight();
-		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		const float frameHeight = ImGui::GetFrameHeight();
+		const float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 
 		for (auto it = component.Classes.begin(); it != component.Classes.end(); ++it)
 		{
 			const std::string& className = *it;
 
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
-			bool open = ImGui::TreeNodeEx(&it, treeFlags, "%s", className.c_str());
+			const bool open = ImGui::TreeNodeEx(&it, treeFlags, "%s", className.c_str());
 
 			{
 				ImGui::PushID(&it);
@@ -156,13 +156,12 @@ namespace ArcEngine
 					if (field.Hidden)
 						continue;
 
-					const char* header = field.Header.empty() ? nullptr : field.Header.c_str();
-					if (header)
+					if (!field.Header.empty())
 					{
 						UI::EndProperties();
 						ImGui::Spacing();
 						ImGui::Spacing();
-						ImGui::TextUnformatted(header);
+						ImGui::TextUnformatted(field.Header.c_str());
 						ImGui::Spacing();
 						UI::BeginProperties();
 					}
@@ -195,11 +194,13 @@ namespace ArcEngine
 				case MaterialPropertyType::None: break;
 				case MaterialPropertyType::Sampler2D:
 				{
-					auto slot = material->GetData<uint32_t>(name);
-					uint64_t tex = material->GetTexture(slot) ? material->GetTexture(slot)->GetRendererID() : 0;
-					Ref<Texture2D> tmp = material->GetTexture(slot);
-					if (UI::Property(displayName, tmp, tex))
-						material->SetTexture(slot, tmp);
+					const auto slot = material->GetData<uint32_t>(name);
+					if (Ref<Texture2D> tex = material->GetTexture(slot))
+					{
+						const uint64_t texId = material->GetTexture(slot) ? material->GetTexture(slot)->GetRendererID() : 0;
+						if (UI::Property(displayName, tex, texId))
+							material->SetTexture(slot, tex);
+					}
 					break;
 				}
 				case MaterialPropertyType::Bool:
@@ -335,14 +336,14 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		ImVec2 framePadding = ImGui::GetStyle().FramePadding;
-		float frameHeight = ImGui::GetFrameHeight();
+		const ImVec2 framePadding = ImGui::GetStyle().FramePadding;
+		const float frameHeight = ImGui::GetFrameHeight();
 
 		{
-			float regionX = ImGui::GetContentRegionAvail().x;
-			float addButtonSizeX = UI::GetIconButtonSize("  " ICON_MDI_PLUS, "Add  ").x;
-			ImVec2 lockButtonSize = ImVec2(frameHeight * 1.5f, frameHeight);
-			float tagWidth = regionX - ((addButtonSizeX + framePadding.x * 2.0f) + (lockButtonSize.x + framePadding.x * 2.0f));
+			const float regionX = ImGui::GetContentRegionAvail().x;
+			const float addButtonSizeX = UI::GetIconButtonSize("  " ICON_MDI_PLUS, "Add  ").x;
+			const ImVec2 lockButtonSize = ImVec2(frameHeight * 1.5f, frameHeight);
+			const float tagWidth = regionX - ((addButtonSizeX + framePadding.x * 2.0f) + (lockButtonSize.x + framePadding.x * 2.0f));
 
 			auto& tag = entity.GetComponent<TagComponent>();
 
@@ -430,7 +431,7 @@ namespace ArcEngine
 			{
 				for (auto [layer, layerData] : Scene::LayerCollisionMask)
 				{
-					bool isSelected = current == layerData.Name;
+					const bool isSelected = current == layerData.Name;
 					if (ImGui::Selectable(Scene::LayerCollisionMask.at(layer).Name.c_str(), isSelected))
 					{
 						current = Scene::LayerCollisionMask.at(layer).Name.c_str();
@@ -523,7 +524,7 @@ namespace ArcEngine
 		{
 			if (ImGui::Button(component.MeshGeometry ? component.MeshGeometry->GetFilepath() : "null", { ImGui::GetContentRegionAvail().x, ImGui::GetFrameHeight() }))
 			{
-				std::string filepath = FileDialogs::OpenFile("Mesh (*.assbin)\0*.assbin\0(*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
+				const std::string filepath = FileDialogs::OpenFile("Mesh (*.assbin)\0*.assbin\0(*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
 				if (!filepath.empty())
 				{
 					component.MeshGeometry = CreateRef<Mesh>(filepath.c_str());
@@ -545,7 +546,7 @@ namespace ArcEngine
 			{
 				UI::BeginProperties();
 
-				size_t submeshCount = component.MeshGeometry->GetSubmeshCount();
+				const size_t submeshCount = component.MeshGeometry->GetSubmeshCount();
 				if (submeshCount > 1)
 					UI::Property<size_t>("Submesh Index", component.SubmeshIndex, 0, submeshCount - 1);
 
@@ -637,7 +638,7 @@ namespace ArcEngine
 				if (UI::Property("Shadow Quality Type", shadowQualityType, shadowQualityTypeStrings, 3))
 					component.ShadowQuality = static_cast<LightComponent::ShadowQualityType>(shadowQualityType);
 
-				uint64_t textureID = component.ShadowMapFramebuffer->GetDepthAttachmentRendererID();
+				const uint64_t textureID = component.ShadowMapFramebuffer->GetDepthAttachmentRendererID();
 				ImGui::Image(reinterpret_cast<ImTextureID>(textureID), ImVec2{ 256, 256 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 			}
 
@@ -1074,7 +1075,7 @@ namespace ArcEngine
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 				for (const auto& [name, _] : classes)
 				{
-					bool notFound = std::ranges::find(component.Classes, name) == component.Classes.end();
+					const bool notFound = std::ranges::find(component.Classes, name) == component.Classes.end();
 					if (notFound && (!m_Filter.IsActive() || (m_Filter.IsActive() && m_Filter.PassFilter(name.c_str()))))
 					{
 						if (ImGui::MenuItem(name.c_str()))
@@ -1103,7 +1104,7 @@ namespace ArcEngine
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
 					const char* path = static_cast<char*>(payload->Data);
-					std::string ext = StringUtils::GetExtension(path);
+					const std::string ext = StringUtils::GetExtension(path);
 					if (ext == "mp3" || ext == "wav")
 						component.Source = CreateRef<AudioSource>(path);
 				}

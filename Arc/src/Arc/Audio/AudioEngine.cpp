@@ -16,7 +16,7 @@ namespace ArcEngine
 		config.listenerCount = 1;
 
 		s_Engine = new ma_engine();
-		ma_result result = ma_engine_init(nullptr, s_Engine);
+		[[maybe_unused]] const ma_result result = ma_engine_init(&config, s_Engine);
 		ARC_CORE_ASSERT(result == MA_SUCCESS, "Failed to initialize audio engine!")
 	}
 

@@ -76,8 +76,8 @@ namespace ArcEngine
 			return false;
 		}
 
-		std::filesystem::path solutionPath = Project::GetSolutionPath();
-		std::string buildConfig = static_cast<std::string>(Project::GetBuildConfigString());
+		const std::filesystem::path solutionPath = Project::GetSolutionPath();
+		const std::string buildConfig = static_cast<std::string>(Project::GetBuildConfigString());
 
 		constexpr const char* buildFlags = ""
 			" -nologo"																	// no microsoft branding in console
@@ -113,17 +113,20 @@ namespace ArcEngine
 		CloseHandle(processInfo.hThread);
 		CloseHandle(processInfo.hProcess);
 
+		if (onComplete)
+			onComplete();
+
 		// Errors
 		{
 			FILE* errors = nullptr;
 			fopen_s(&errors, "AssemblyBuildErrors.log", "r");
 
-			char buffer[4096];
 			if (errors != nullptr)
 			{
+				char buffer[4096];
 				while (fgets(buffer, sizeof(buffer), errors))
 				{
-					size_t newLine = std::string_view(buffer).size() - 1;
+					const size_t newLine = std::string_view(buffer).size() - 1;
 					buffer[newLine] = '\0';
 					ARC_APP_ERROR(buffer);
 					failed = true;
@@ -138,12 +141,12 @@ namespace ArcEngine
 			FILE* warns;
 			fopen_s(&warns, "AssemblyBuildWarnings.log", "r");
 
-			char buffer[1024];
 			if (warns != nullptr)
 			{
+				char buffer[1024];
 				while (fgets(buffer, sizeof(buffer), warns))
 				{
-					size_t newLine = std::string_view(buffer).size() - 1;
+					const size_t newLine = std::string_view(buffer).size() - 1;
 					buffer[newLine] = '\0';
 					ARC_APP_WARN(buffer);
 				}

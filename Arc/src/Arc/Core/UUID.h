@@ -7,7 +7,6 @@ namespace ArcEngine
 	public:
 		UUID();
 		UUID(uint64_t uuid);
-		UUID(const UUID&) = default;
 
 		operator uint64_t() const { return m_UUID; }
 	private:
@@ -20,7 +19,7 @@ namespace std
 	template<>
 	struct hash<ArcEngine::UUID>
 	{
-		std::size_t operator()(const ArcEngine::UUID& uuid) const
+		std::size_t operator()(const ArcEngine::UUID& uuid) const noexcept
 		{
 			return hash<uint64_t>()(uuid);
 		}

@@ -32,7 +32,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE()
 
-			bool multisampled = samples > 1;
+			const bool multisampled = samples > 1;
 			if (multisampled)
 			{
 				glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, internalFormat, static_cast<int>(width), static_cast<int>(height), GL_FALSE);
@@ -55,7 +55,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE()
 
-			bool multisampled = samples > 1;
+			const bool multisampled = samples > 1;
 			if (multisampled)
 			{
 				glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, format, static_cast<int>(width), static_cast<int>(height), GL_FALSE);
@@ -131,12 +131,12 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE("FramebufferConfigureAttachments")
 
-			bool multisample = m_Specification.Samples > 1;
+			const bool multisample = m_Specification.Samples > 1;
 			// Attachments
 			if (!m_ColorAttachmentSpecifications.empty())
 			{
 				m_ColorAttachments.resize(m_ColorAttachmentSpecifications.size());
-				auto colorAttachmentSize = static_cast<int32_t>(m_ColorAttachments.size());
+				const auto colorAttachmentSize = static_cast<int32_t>(m_ColorAttachments.size());
 				Utils::CreateTextures(multisample, m_ColorAttachments.data(), colorAttachmentSize);
 
 				for (int i = 0; i < colorAttachmentSize; ++i)
@@ -187,7 +187,7 @@ namespace ArcEngine
 			if (m_ColorAttachmentSpecifications.size() > 1)
 			{
 				ARC_CORE_ASSERT(m_ColorAttachments.size() <= 5)
-				GLenum buffers[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
+				constexpr GLenum buffers[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
 				glDrawBuffers(static_cast<int>(m_ColorAttachments.size()), buffers);
 			}
 			else if (m_ColorAttachments.empty())

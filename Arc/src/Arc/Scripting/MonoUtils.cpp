@@ -39,7 +39,7 @@ namespace ArcEngine
 			}
 		}
 
-		std::string pathString = assemblyPath.string();
+		const std::string pathString = assemblyPath.string();
 		MonoAssembly* assembly = mono_assembly_load_from_full(image, pathString.c_str(), &status, 0);
 		mono_image_close(image);
 
@@ -50,9 +50,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		bool hasError = !mono_error_ok(&error);
-
-		if (hasError)
+		if (!mono_error_ok(&error))
 		{
 			uint16_t errorCode = mono_error_get_error_code(&error);
 			const char* errorMessage = mono_error_get_message(&error);

@@ -10,7 +10,7 @@ namespace ArcEngine
 		using MaterialData = void*;
 
 	public:
-		explicit Material(const char* shaderPath = "assets/shaders/PBR.glsl");
+		explicit Material(const std::filesystem::path& shaderPath = "assets/shaders/PBR.glsl");
 		virtual ~Material();
 
 		Material(const Material& other) = default;
@@ -21,7 +21,7 @@ namespace ArcEngine
 		void Unbind() const;
 		[[nodiscard]] Ref<Shader> GetShader() const;
 		[[nodiscard]] Ref<Texture2D> GetTexture(uint32_t slot);
-		void SetTexture(uint32_t slot, Ref<Texture2D> texture);
+		void SetTexture(uint32_t slot, const Ref<Texture2D>& texture);
 
 		template<typename T>
 		[[nodiscard]] T GetData(const std::string& name) const

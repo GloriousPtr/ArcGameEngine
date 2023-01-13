@@ -15,10 +15,10 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		float cosYaw = glm::cos(m_Yaw);
-		float sinYaw = glm::sin(m_Yaw);
-		float cosPitch = glm::cos(m_Pitch);
-		float sinPitch = glm::sin(m_Pitch);
+		const float cosYaw = glm::cos(m_Yaw);
+		const float sinYaw = glm::sin(m_Yaw);
+		const float cosPitch = glm::cos(m_Pitch);
+		const float sinPitch = glm::sin(m_Pitch);
 
 		m_Forward.x = cosYaw * cosPitch;
 		m_Forward.y = sinPitch;

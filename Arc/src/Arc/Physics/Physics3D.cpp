@@ -19,8 +19,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		EntityLayer layer1 = BIT(inObject1);
-		EntityLayer layer2 = BIT(inObject2);
+		const EntityLayer layer1 = BIT(inObject1);
+		const EntityLayer layer2 = BIT(inObject2);
 		return	(layer1 & Scene::LayerCollisionMask.at(layer2).Flags) == layer1 &&
 				(layer2 & Scene::LayerCollisionMask.at(layer1).Flags) == layer2;
 	};
@@ -79,14 +79,14 @@ namespace ArcEngine
 			mObjectToBroadPhase[Physics3DLayer::OTHER15] = BroadPhaseLayers::DEFAULT;
 		}
 
-		JPH::uint GetNumBroadPhaseLayers() const override
+		[[nodiscard]] JPH::uint GetNumBroadPhaseLayers() const override
 		{
 			ARC_PROFILE_SCOPE()
 
 			return BroadPhaseLayers::NUM_LAYERS;
 		}
 
-		JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override
+		[[nodiscard]] JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override
 		{
 			ARC_PROFILE_SCOPE()
 
@@ -95,7 +95,7 @@ namespace ArcEngine
 		}
 
 #if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
-		const char* GetBroadPhaseLayerName(BroadPhaseLayer inLayer) const override
+		[[nodiscard]] const char* GetBroadPhaseLayerName(BroadPhaseLayer inLayer) const override
 		{
 			switch ((BroadPhaseLayer::Type)inLayer)
 			{

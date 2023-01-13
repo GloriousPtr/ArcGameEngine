@@ -123,6 +123,9 @@ namespace ArcEngine
 			}
 		}
 
+		if (onComplete)
+			onComplete();
+
 		return !failed;
 	}
 }

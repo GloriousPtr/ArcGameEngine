@@ -15,9 +15,9 @@ namespace ArcEngine
 
 	Ref<Project> Project::Load(const std::filesystem::path& path)
 	{
-		Ref<Project> project = CreateRef<Project>();
+		const Ref<Project> project = CreateRef<Project>();
 
-		ProjectSerializer serializer(project);
+		const ProjectSerializer serializer(project);
 		if (serializer.Deserialize(path))
 		{
 			project->m_ProjectDirectory = path.parent_path();
@@ -29,11 +29,10 @@ namespace ArcEngine
 			if (!std::filesystem::exists(GetScriptModuleDirectory()))
 				std::filesystem::create_directory(GetScriptModuleDirectory());
 
-			std::filesystem::path premakeFilepath = GetProjectDirectory() / "premake5.lua";
+			const std::filesystem::path premakeFilepath = GetProjectDirectory() / "premake5.lua";
 			if (!std::filesystem::exists(premakeFilepath))
 			{
-				std::string buffer;
-				Filesystem::ReadFileText("Resources/Templates/PremakeProjectTemplate.txt", buffer);
+				std::string buffer = Filesystem::ReadFileText("Resources/Templates/PremakeProjectTemplate.txt");
 				StringUtils::ReplaceString(buffer, "{PROJECT_NAME}", s_ActiveProject->GetConfig().Name);
 				Filesystem::WriteFileText(premakeFilepath, buffer);
 			}
@@ -46,7 +45,7 @@ namespace ArcEngine
 
 	bool Project::SaveActive(const std::filesystem::path& path)
 	{
-		ProjectSerializer serializer(s_ActiveProject);
+		const ProjectSerializer serializer(s_ActiveProject);
 		if (serializer.Serialize(path))
 		{
 			s_ActiveProject->m_ProjectDirectory = path.parent_path();

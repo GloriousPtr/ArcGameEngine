@@ -14,7 +14,21 @@
 #include "../EditorLayer.h"
 #include "../Utils/UI.h"
 #include "../Utils/EditorTheme.h"
+
+#if defined(__clang__) || defined(__llvm__)
+#	pragma clang diagnostic push
+#	pragma clang diagnostic ignored "-Weverything"
+#elif defined(_MSC_VER)
+#	pragma warning(push, 0)
+#endif
+
 #include "../Utils/FileWatch.hpp"
+
+#if defined(__clang__) || defined(__llvm__)
+#	pragma clang diagnostic pop
+#elif defined(_MSC_VER)
+#	pragma warning(pop)
+#endif
 
 namespace ArcEngine
 {
@@ -97,8 +111,8 @@ namespace ArcEngine
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity"))
 			{
-				Entity entity = *static_cast<Entity*>(payload->Data);
-				std::filesystem::path path = dropPath / std::string(entity.GetComponent<TagComponent>().Tag + ".prefab");
+				const Entity entity = *static_cast<Entity*>(payload->Data);
+				const std::filesystem::path path = dropPath / std::string(entity.GetComponent<TagComponent>().Tag + ".prefab");
 				EntitySerializer::SerializeEntityAsPrefab(path.string().c_str(), entity);
 				return true;
 			}
@@ -113,7 +127,7 @@ namespace ArcEngine
 	{
 		if (ImGui::BeginDragDropSource())
 		{
-			std::string pathStr = filepath.string();
+			const std::string pathStr = filepath.string();
 			ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", pathStr.c_str(), pathStr.length() + 1);
 			ImGui::TextUnformatted(filepath.filename().string().c_str());
 			ImGui::EndDragDropSource();
@@ -122,19 +136,19 @@ namespace ArcEngine
 
 	static void OpenFile(const std::filesystem::path& path)
 	{
-		std::string filepathString = path.string();
+		const std::string filepathString = path.string();
 		const char* filepath = filepathString.c_str();
-		std::string ext = path.extension().string();
+		const std::string ext = path.extension().string();
 		const auto& fileTypeIt = s_FileTypes.find(ext);
 		if (fileTypeIt != s_FileTypes.end())
 		{
-			FileType fileType = fileTypeIt->second;
+			const FileType fileType = fileTypeIt->second;
 			switch (fileType)
 			{
 				case FileType::Scene:
 					EditorLayer::GetInstance()->OpenScene(filepath);
 					break;
-				case FileType::Script:
+				case FileType::Script: [[fallthrough]];
 				case FileType::Shader:
 #ifdef ARC_PLATFORM_VISUAL_STUDIO
 					VisualStudioAccessor::OpenFile(filepath);
@@ -144,7 +158,7 @@ namespace ArcEngine
 				case FileType::Prefab:
 				case FileType::Texture:
 				case FileType::Cubemap:
-				case FileType::Model:
+				case FileType::Model: [[fallthrough]];
 				case FileType::Audio:
 					FileDialogs::OpenFileWithProgram(filepath);
 					break;
@@ -169,7 +183,7 @@ namespace ArcEngine
 
 			auto& entryPath = entry.path();
 
-			bool entryIsFile = !std::filesystem::is_directory(entryPath);
+			const bool entryIsFile = !std::filesystem::is_directory(entryPath);
 			if (entryIsFile)
 				nodeFlags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
@@ -252,7 +266,7 @@ namespace ArcEngine
 				}
 				else
 				{
-					for (const auto& e : std::filesystem::recursive_directory_iterator(entryPath))
+					for ([[maybe_unused]] const auto& e : std::filesystem::recursive_directory_iterator(entryPath))
 						(*count)--;
 				}
 			}
@@ -286,7 +300,7 @@ namespace ArcEngine
 				Refresh();
 
 				std::filesystem::path filepath = path;
-				std::string ext = filepath.extension().string();
+				const std::string ext = filepath.extension().string();
 				FileType fileType = FileType::Unknown;
 				if (s_FileTypes.contains(ext))
 					fileType = s_FileTypes.at(ext);
@@ -352,7 +366,7 @@ namespace ArcEngine
 		{
 			RenderHeader();
 			ImGui::Separator();
-			ImVec2 availableRegion = ImGui::GetContentRegionAvail();
+			const ImVec2 availableRegion = ImGui::GetContentRegionAvail();
 			if (ImGui::BeginTable("MainViewTable", 2, tableFlags, availableRegion))
 			{
 				ImGui::TableNextRow();
@@ -465,7 +479,7 @@ namespace ArcEngine
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.0f, 0.0f, 0.0f, 0.0f });
 		std::filesystem::path current = m_AssetsDirectory.parent_path();
 		std::filesystem::path directoryToOpen;
-		std::filesystem::path currentDirectory = std::filesystem::relative(m_CurrentDirectory, current);
+		const std::filesystem::path currentDirectory = std::filesystem::relative(m_CurrentDirectory, current);
 		for (auto& path : currentDirectory)
 		{
 			current /= path;
@@ -521,7 +535,7 @@ namespace ArcEngine
 				ImGui::PushStyleColor(ImGuiCol_HeaderHovered, EditorTheme::HeaderHoveredColor);
 			}
 
-			bool opened = ImGui::TreeNodeEx(m_AssetsDirectory.string().c_str(), nodeFlags, "");
+			const bool opened = ImGui::TreeNodeEx(m_AssetsDirectory.string().c_str(), nodeFlags, "");
 			ImGui::PopStyleColor(selected ? 2 : 1);
 
 			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
@@ -540,7 +554,7 @@ namespace ArcEngine
 			if (opened)
 			{
 				uint32_t count = 0;
-				for (const auto& entry : std::filesystem::recursive_directory_iterator(m_AssetsDirectory))
+				for ([[maybe_unused]] const auto& entry : std::filesystem::recursive_directory_iterator(m_AssetsDirectory))
 					count++;
 
 				const auto [isClicked, clickedNode] = DirectoryTreeViewRecursive(m_AssetsDirectory, &count, &selectionMask, treeNodeFlags);
@@ -573,18 +587,18 @@ namespace ArcEngine
 		std::filesystem::path directoryToOpen;
 		std::filesystem::path directoryToDelete;
 
-		float padding = 4.0f;
-		float scaledThumbnailSize = m_ThumbnailSize * ImGui::GetIO().FontGlobalScale;
-		float scaledThumbnailSizeX = scaledThumbnailSize * 0.55f;
-		float cellSize = scaledThumbnailSizeX + 2 * padding + scaledThumbnailSizeX * 0.1f;
+		constexpr float padding = 4.0f;
+		const float scaledThumbnailSize = m_ThumbnailSize * ImGui::GetIO().FontGlobalScale;
+		const float scaledThumbnailSizeX = scaledThumbnailSize * 0.55f;
+		const float cellSize = scaledThumbnailSizeX + 2 * padding + scaledThumbnailSizeX * 0.1f;
 
-		float overlayPaddingY = 6.0f * padding;
-		float thumbnailPadding = overlayPaddingY * 0.5f;
-		float thumbnailSize = scaledThumbnailSizeX - thumbnailPadding;
+		constexpr float overlayPaddingY = 6.0f * padding;
+		constexpr float thumbnailPadding = overlayPaddingY * 0.5f;
+		const float thumbnailSize = scaledThumbnailSizeX - thumbnailPadding;
 
-		ImVec2 backgroundThumbnailSize = { scaledThumbnailSizeX + padding * 2, scaledThumbnailSize + padding * 2 };
+		const ImVec2 backgroundThumbnailSize = { scaledThumbnailSizeX + padding * 2, scaledThumbnailSize + padding * 2 };
 
-		float panelWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ScrollbarSize;
+		const float panelWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ScrollbarSize;
 		int columnCount = static_cast<int>(panelWidth / cellSize);
 		if (columnCount < 1)
 			columnCount = 1;
@@ -608,22 +622,23 @@ namespace ArcEngine
 		}
 
 		ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImVec2 region = ImGui::GetContentRegionAvail();
+		const ImVec2 region = ImGui::GetContentRegionAvail();
 		ImGui::InvisibleButton("##DragDropTargetAssetPanelBody", region);
 		
 		ImGui::SetItemAllowOverlap();
 		ImGui::SetCursorPos(cursorPos);
 
-		bool anyItemHovered = false;
-		bool textureCreated = false;
 		if (ImGui::BeginTable("BodyTable", columnCount, flags))
 		{
+			bool anyItemHovered = false;
+			bool textureCreated = false;
+
 			int i = 0;
 			for (auto& file : m_DirectoryEntries)
 			{
 				ImGui::PushID(i);
 
-				bool isDir = file.IsDirectory;
+				const bool isDir = file.IsDirectory;
 				const char* filename = file.Name.c_str();
 
 				uint64_t textureId = m_DirectoryIcon->GetRendererID();
@@ -724,13 +739,13 @@ namespace ArcEngine
 					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
 
 					// Type Color frame
-					ImVec2 typeColorFrameSize = { scaledThumbnailSizeX, scaledThumbnailSizeX * 0.03f };
+					const ImVec2 typeColorFrameSize = { scaledThumbnailSizeX, scaledThumbnailSizeX * 0.03f };
 					ImGui::SetCursorPosX(cursorPos.x + padding);
 					ImGui::Image(reinterpret_cast<ImTextureID>(m_WhiteTexture->GetRendererID()), typeColorFrameSize, { 0, 0 }, { 1, 1 }, isDir ? ImVec4(0.0f, 0.0f, 0.0f, 0.0f) : file.FileTypeIndicatorColor);
 
-					ImVec2 rectMin = ImGui::GetItemRectMin();
-					ImVec2 rectSize = ImGui::GetItemRectSize();
-					ImRect clipRect = ImRect({ rectMin.x + padding * 1.0f, rectMin.y + padding * 2.0f },
+					const ImVec2 rectMin = ImGui::GetItemRectMin();
+					const ImVec2 rectSize = ImGui::GetItemRectSize();
+					const ImRect clipRect = ImRect({ rectMin.x + padding * 1.0f, rectMin.y + padding * 2.0f },
 						{ rectMin.x + rectSize.x, rectMin.y + scaledThumbnailSizeX - EditorTheme::SmallFont->FontSize - padding * 4.0f });
 					UI::ClippedText(clipRect.Min, clipRect.Max, filename, nullptr, nullptr, { 0, 0 }, nullptr, clipRect.GetSize().x);
 
@@ -750,7 +765,7 @@ namespace ArcEngine
 						| ImGuiTreeNodeFlags_SpanFullWidth
 						| ImGuiTreeNodeFlags_Leaf;
 
-					bool opened = ImGui::TreeNodeEx(file.Name.c_str(), teeNodeFlags, "");
+					const bool opened = ImGui::TreeNodeEx(file.Name.c_str(), teeNodeFlags, "");
 
 					if (ImGui::IsItemHovered())
 						anyItemHovered = true;
@@ -807,13 +822,13 @@ namespace ArcEngine
 
 		m_CurrentDirectory = directory;
 		m_DirectoryEntries.clear();
-		auto directoryIt = std::filesystem::directory_iterator(directory);
+		const auto directoryIt = std::filesystem::directory_iterator(directory);
 		for (auto& directoryEntry : directoryIt)
 		{
 			const auto& path = directoryEntry.path();
-			auto relativePath = std::filesystem::relative(path, m_AssetsDirectory);
-			std::string filename = relativePath.filename().string();
-			std::string extension = relativePath.extension().string();
+			const auto relativePath = std::filesystem::relative(path, m_AssetsDirectory);
+			const std::string filename = relativePath.filename().string();
+			const std::string extension = relativePath.extension().string();
 
 			auto fileType = FileType::Unknown;
 			const auto& fileTypeIt = s_FileTypes.find(extension);

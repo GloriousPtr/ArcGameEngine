@@ -118,7 +118,7 @@ namespace ArcEngine
 		ScriptClass(const ScriptClass& other) = delete;
 		ScriptClass(ScriptClass&& other) = delete;
 
-		[[nodiscard]] GCHandle Instantiate();
+		[[nodiscard]] GCHandle Instantiate() const;
 		[[nodiscard]] MonoMethod* GetMethod(const char* methodName, uint32_t parameterCount) const;
 		GCHandle InvokeMethod(GCHandle gcHandle, MonoMethod* method, void** params = nullptr) const;
 
@@ -149,7 +149,7 @@ namespace ArcEngine
 	class ScriptInstance
 	{
 	public:
-		ScriptInstance(Ref<ScriptClass>& scriptClass, UUID entityID);
+		ScriptInstance(const Ref<ScriptClass>& scriptClass, UUID entityID);
 
 		ScriptInstance(const ScriptInstance& other) = delete;
 		ScriptInstance(ScriptInstance&& other) = delete;
@@ -183,7 +183,7 @@ namespace ArcEngine
 			return GetFieldValueStringInternal(fieldName);
 		}
 
-		[[nodiscard]] const GCHandle GetHandle() const;
+		[[nodiscard]] GCHandle GetHandle() const;
 
 	private:
 		void GetFieldValueInternal(const std::string& name, void* value) const;

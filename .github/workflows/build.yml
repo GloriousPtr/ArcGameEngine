@@ -79,7 +79,7 @@ jobs:
           submodules: true
 
       - name: Setup Clang
-        run: sudo apt update && ./scripts/InstallDependencies.sh
+        run: sudo apt update && ./scripts/InstallDependenciesDeb.sh
       
       - name: Generate Project Files
         run: ./scripts/GenerateMake.sh

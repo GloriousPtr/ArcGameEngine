@@ -17,7 +17,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 		
 		glfwMakeContextCurrent(m_WindowHandle);
-		int status = gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
+		[[maybe_unused]] const int status = gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
 		ARC_CORE_ASSERT(status, "Failed to initialize Glad!")
 
 		ARC_CORE_INFO("OpenGL Info:");

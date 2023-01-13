@@ -14,7 +14,6 @@ namespace ArcEngine
 	public:
 		Entity() = default;
 		Entity(entt::entity handle, Scene* scene);
-		Entity(const Entity& other) = default;
 
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args) const
@@ -87,8 +86,8 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE()
 
 			auto& transform = GetRelationship();
-			UUID uuid = GetUUID();
-			Entity parentEntity = GetParent();
+			const UUID uuid = GetUUID();
+			const Entity parentEntity = GetParent();
 			
 			if (!parentEntity)
 				return;
@@ -111,8 +110,8 @@ namespace ArcEngine
 
 			const auto& transform = GetTransform();
 			const auto& rc = GetRelationship();
-			Entity parent = m_Scene->GetEntity(rc.Parent);
-			glm::mat4 parentTransform = parent ? parent.GetWorldTransform() : glm::mat4(1.0f);
+			const Entity parent = m_Scene->GetEntity(rc.Parent);
+			const glm::mat4 parentTransform = parent ? parent.GetWorldTransform() : glm::mat4(1.0f);
 			return parentTransform * glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);
 		}
 

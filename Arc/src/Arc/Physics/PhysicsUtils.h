@@ -20,11 +20,11 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE()
 
-			b2Vec2 dc(cp1.x - cp2.x, cp1.y - cp2.y);
-			b2Vec2 dp(s.x - e.x, s.y - e.y);
-			float n1 = cp1.x * cp2.y - cp1.y * cp2.x;
-			float n2 = s.x * e.y - s.y * e.x;
-			float n3 = 1.0f / (dc.x * dp.y - dc.y * dp.x);
+			const b2Vec2 dc(cp1.x - cp2.x, cp1.y - cp2.y);
+			const b2Vec2 dp(s.x - e.x, s.y - e.y);
+			const float n1 = cp1.x * cp2.y - cp1.y * cp2.x;
+			const float n2 = s.x * e.y - s.y * e.x;
+			const float n3 = 1.0f / (dc.x * dp.y - dc.y * dp.x);
 			return { (n1 * dp.x - n2 * dc.x) * n3, (n1 * dp.y - n2 * dc.y) * n3 };
 		}
 
@@ -36,7 +36,7 @@ namespace ArcEngine
 				return false;
 
 			const auto* circle = static_cast<b2CircleShape*>(fixture->GetShape());
-			b2Vec2 position = fixture->GetBody()->GetPosition();
+			const b2Vec2 position = fixture->GetBody()->GetPosition();
 			const float radius = circle->m_radius;
 
 			const float polyCountFloat = resolution * radius;
@@ -47,7 +47,7 @@ namespace ArcEngine
 			vertices.reserve(polyCount);
 			for (int i = 0; i < polyCount; ++i)
 			{
-				float radians = deltaRadians * static_cast<float>(i);
+				const float radians = deltaRadians * static_cast<float>(i);
 				b2Vec2 point = { glm::cos(radians), glm::sin(radians) };
 				vertices.emplace_back(position + (radius * point));
 			}
@@ -132,8 +132,8 @@ namespace ArcEngine
 		[[nodiscard]] static b2Vec2 ComputeCentroid(std::vector<b2Vec2> vs, float& area)
 		{
 			ARC_PROFILE_SCOPE()
-			
-			int count = static_cast<int>(vs.size());
+
+			const auto count = static_cast<int>(vs.size());
 			b2Assert(count >= 3);
 
 			b2Vec2 c = {};
@@ -142,7 +142,7 @@ namespace ArcEngine
 
 			// pRef is the reference point for forming triangles.
 			// Its location doesn't change the result (except for rounding error).
-			b2Vec2 pRef(0.0f, 0.0f);
+			const b2Vec2 pRef(0.0f, 0.0f);
 
 			constexpr float inv3 = 1.0f / 3.0f;
 
@@ -158,7 +158,7 @@ namespace ArcEngine
 
 				float D = b2Cross(e1, e2);
 
-				float triangleArea = 0.5f * D;
+				const float triangleArea = 0.5f * D;
 				area += triangleArea;
 
 				// Area weighted centroid
@@ -181,14 +181,14 @@ namespace ArcEngine
 			if (FindIntersectionOfFixtures(fluid, fixture, intersectionPoints))
 			{
 				float area = 0;
-				b2Vec2 centroid = ComputeCentroid(intersectionPoints, area);
-				float gravityMultiplier = flipGravity ? -1.0f : 1.0f;
+				const b2Vec2 centroid = ComputeCentroid(intersectionPoints, area);
+				const float gravityMultiplier = flipGravity ? -1.0f : 1.0f;
 
-				float displacedMass = density * area;
-				b2Vec2 buoyancyForce = displacedMass * gravityMultiplier * -gravity;
+				const float displacedMass = density * area;
+				const b2Vec2 buoyancyForce = displacedMass * gravityMultiplier * -gravity;
 				fixture->GetBody()->ApplyForce(buoyancyForce, centroid, true);
 
-				b2Vec2 flowForce = flowMagnitude * b2Vec2(glm::cos(flowAngleInRadians), glm::sin(flowAngleInRadians));
+				const b2Vec2 flowForce = flowMagnitude * b2Vec2(glm::cos(flowAngleInRadians), glm::sin(flowAngleInRadians));
 				fixture->GetBody()->ApplyForceToCenter(flowForce, true);
 
 				//apply drag separately for each polygon edge
@@ -206,21 +206,21 @@ namespace ArcEngine
 					b2Vec2 edge = v1 - v0;
 					b2Vec2 normal = b2Cross(-gravityMultiplier, edge); //gets perpendicular vector
 
-					float dragDot = b2Dot(normal, velDir);
+					const float dragDot = b2Dot(normal, velDir);
 					if (dragDot < 0)
 						continue; //normal points backwards - this is not a leading edge
 
-					float vel = velDir.Normalize();
-					float edgeLength = edge.Normalize();
+					const float vel = velDir.Normalize();
+					const float edgeLength = edge.Normalize();
 
-					float dragMag = dragDot * edgeLength * density * vel * vel;
-					b2Vec2 dragForce = dragMag * dragMultiplier * -velDir;
+					const float dragMag = dragDot * edgeLength * density * vel * vel;
+					const b2Vec2 dragForce = dragMag * dragMultiplier * -velDir;
 					fixture->GetBody()->ApplyForce(dragForce, midPoint, true);
 
 					//apply lift
-					float liftMag = b2Dot(edge, velDir) * dragMag;
-					b2Vec2 liftDir = b2Cross(gravityMultiplier, velDir); //gets perpendicular vector
-					b2Vec2 liftForce = liftMag * liftDir;
+					const float liftMag = b2Dot(edge, velDir) * dragMag;
+					const b2Vec2 liftDir = b2Cross(gravityMultiplier, velDir); //gets perpendicular vector
+					const b2Vec2 liftForce = liftMag * liftDir;
 					fixture->GetBody()->ApplyForce(liftForce, midPoint, true);
 				}
 			}

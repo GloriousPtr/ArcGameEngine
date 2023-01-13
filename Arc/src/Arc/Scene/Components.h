@@ -20,7 +20,6 @@ namespace ArcEngine
 		UUID ID;
 
 		IDComponent() = default;
-		IDComponent(const IDComponent&) = default;
 		IDComponent(const uint64_t id)
 			: ID(id) {}
 		operator uint64_t() { return ID; }
@@ -35,7 +34,6 @@ namespace ArcEngine
 		bool handled = true;
 
 		TagComponent() = default;
-		TagComponent(const TagComponent&) = default;
 		explicit TagComponent(const std::string& tag)
 			: Tag(tag) {}
 	};
@@ -46,26 +44,17 @@ namespace ArcEngine
 		glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
-
-		TransformComponent() = default;
-		TransformComponent(const TransformComponent&) = default;
 	};
 
 	struct RelationshipComponent
 	{
 		UUID Parent = 0;
 		std::vector<UUID> Children;
-
-		RelationshipComponent() = default;
-		RelationshipComponent(const RelationshipComponent&) = default;
 	};
 
 	struct PrefabComponent
 	{
 		UUID ID;
-
-		PrefabComponent() = default;
-		PrefabComponent(const PrefabComponent&) = default;
 	};
 
 	struct SpriteRendererComponent
@@ -74,9 +63,6 @@ namespace ArcEngine
 		Ref<Texture2D> Texture = nullptr;
 		int32_t SortingOrder = 0;
 		float TilingFactor = 1.0f;
-
-		SpriteRendererComponent() = default;
-		SpriteRendererComponent(const SpriteRendererComponent&) = default;
 	};
 
 	struct CameraComponent
@@ -84,9 +70,6 @@ namespace ArcEngine
 		SceneCamera Camera;
 		bool Primary = true;
 		bool FixedAspectRatio = false;
-
-		CameraComponent() = default;
-		CameraComponent(const CameraComponent&) = default;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -100,9 +83,6 @@ namespace ArcEngine
 		Ref<Mesh> MeshGeometry = nullptr;
 		size_t SubmeshIndex = 0;
 		CullModeType CullMode = CullModeType::Back;
-
-		MeshComponent() = default;
-		MeshComponent(const MeshComponent&) = default;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -114,9 +94,6 @@ namespace ArcEngine
 		Ref<TextureCubemap> Texture = nullptr;
 		float Intensity = 0.7f;
 		float Rotation = 0.0f;
-
-		SkyLightComponent() = default;
-		SkyLightComponent(const SkyLightComponent&) = default;
 	};
 
 	struct LightComponent
@@ -140,23 +117,7 @@ namespace ArcEngine
 
 		LightComponent()
 		{
-			FramebufferSpecification spec;
-			spec.Attachments = { FramebufferTextureFormat::Depth };
-			spec.Width = 2048;
-			spec.Height = 2048;
-			ShadowMapFramebuffer = Framebuffer::Create(spec);
-		}
-
-		LightComponent(const LightComponent& other)
-			:	Type(other.Type), UseColorTemperatureMode(other.UseColorTemperatureMode), Temperature(other.Temperature),
-				Color(other.Color), Intensity(other.Intensity), Range(other.Range),
-				CutOffAngle(other.CutOffAngle), OuterCutOffAngle(other.OuterCutOffAngle),
-				ShadowQuality(other.ShadowQuality)
-		{
-			FramebufferSpecification spec;
-			spec.Attachments = { FramebufferTextureFormat::Depth };
-			spec.Width = 2048;
-			spec.Height = 2048;
+			const FramebufferSpecification spec{ 2048, 2048, { FramebufferTextureFormat::Depth } };
 			ShadowMapFramebuffer = Framebuffer::Create(spec);
 		}
 	};
@@ -168,13 +129,6 @@ namespace ArcEngine
 		ParticleSystemComponent()
 			: System(CreateRef<ParticleSystem>())
 		{
-		}
-
-		ParticleSystemComponent(const ParticleSystemComponent& other)
-			: System(CreateRef<ParticleSystem>())
-		{
-			ParticleProperties props = other.System->GetProperties();
-			System->GetProperties() = props;
 		}
 	};
 
@@ -200,12 +154,9 @@ namespace ArcEngine
 
 		void* RuntimeBody = nullptr;
 
-		Rigidbody2DComponent() = default;
-		Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
-
 		// For interpolation/extrapolation
-		glm::vec3 PreviousTranslationRotation;
-		glm::vec3 TranslationRotation;
+		glm::vec3 PreviousTranslationRotation = glm::vec3(0.0f);
+		glm::vec3 TranslationRotation = glm::vec3(0.0f);
 	};
 
 	struct BoxCollider2DComponent
@@ -220,9 +171,6 @@ namespace ArcEngine
 		float Restitution = 0.0f;
 
 		void* RuntimeFixture = nullptr;
-
-		BoxCollider2DComponent() = default;
-		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
 	};
 
 	struct CircleCollider2DComponent
@@ -237,9 +185,6 @@ namespace ArcEngine
 		float Restitution = 0.0f;
 
 		void* RuntimeFixture = nullptr;
-
-		CircleCollider2DComponent() = default;
-		CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
 	};
 
 	struct PolygonCollider2DComponent
@@ -254,9 +199,6 @@ namespace ArcEngine
 		float Restitution = 0.0f;
 
 		void* RuntimeFixture = nullptr;
-
-		PolygonCollider2DComponent() = default;
-		PolygonCollider2DComponent(const PolygonCollider2DComponent&) = default;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -277,9 +219,6 @@ namespace ArcEngine
 		float BreakForce = FLT_MAX;
 
 		void* RuntimeJoint = nullptr;
-
-		DistanceJoint2DComponent() = default;
-		DistanceJoint2DComponent(const DistanceJoint2DComponent&) = default;
 	};
 
 	struct SpringJoint2DComponent
@@ -298,9 +237,6 @@ namespace ArcEngine
 		float BreakForce = FLT_MAX;
 
 		void* RuntimeJoint = nullptr;
-
-		SpringJoint2DComponent() = default;
-		SpringJoint2DComponent(const SpringJoint2DComponent&) = default;
 	};
 
 	struct HingeJoint2DComponent
@@ -321,9 +257,6 @@ namespace ArcEngine
 		float BreakTorque = FLT_MAX;
 
 		void* RuntimeJoint = nullptr;
-
-		HingeJoint2DComponent() = default;
-		HingeJoint2DComponent(const HingeJoint2DComponent&) = default;
 	};
 
 	struct SliderJoint2DComponent
@@ -345,9 +278,6 @@ namespace ArcEngine
 		float BreakTorque = FLT_MAX;
 
 		void* RuntimeJoint = nullptr;
-
-		SliderJoint2DComponent() = default;
-		SliderJoint2DComponent(const SliderJoint2DComponent&) = default;
 	};
 
 	struct WheelJoint2DComponent
@@ -371,9 +301,6 @@ namespace ArcEngine
 		float BreakTorque = FLT_MAX;
 
 		void* RuntimeJoint = nullptr;
-
-		WheelJoint2DComponent() = default;
-		WheelJoint2DComponent(const WheelJoint2DComponent&) = default;
 	};
 
 	struct BuoyancyEffector2DComponent
@@ -384,9 +311,6 @@ namespace ArcEngine
 
 		float FlowMagnitude = 0.0f;
 		float FlowAngle = glm::radians(0.0f);
-
-		BuoyancyEffector2DComponent() = default;
-		BuoyancyEffector2DComponent(const BuoyancyEffector2DComponent&) = default;
 	};
 
 	struct RigidbodyComponent
@@ -408,14 +332,11 @@ namespace ArcEngine
 
 		void* RuntimeBody = nullptr;
 
-		RigidbodyComponent() = default;
-		RigidbodyComponent(const RigidbodyComponent&) = default;
-
 		// For interpolation/extrapolation
-		glm::vec3 PreviousTranslation;
-		glm::quat PreviousRotation;
-		glm::vec3 Translation;
-		glm::quat Rotation;
+		glm::vec3 PreviousTranslation = glm::vec3(0.0f);
+		glm::quat PreviousRotation = glm::vec3(0.0f);
+		glm::vec3 Translation = glm::vec3(0.0f);
+		glm::quat Rotation = glm::vec3(0.0f);
 	};
 
 	struct BoxColliderComponent
@@ -426,9 +347,6 @@ namespace ArcEngine
 
 		float Friction = 0.5f;
 		float Restitution = 0.0f;
-
-		BoxColliderComponent() = default;
-		BoxColliderComponent(const BoxColliderComponent&) = default;
 	};
 
 	struct SphereColliderComponent
@@ -439,9 +357,6 @@ namespace ArcEngine
 
 		float Friction = 0.5f;
 		float Restitution = 0.0f;
-		
-		SphereColliderComponent() = default;
-		SphereColliderComponent(const SphereColliderComponent&) = default;
 	};
 
 	struct CapsuleColliderComponent
@@ -453,9 +368,6 @@ namespace ArcEngine
 
 		float Friction = 0.5f;
 		float Restitution = 0.0f;
-
-		CapsuleColliderComponent() = default;
-		CapsuleColliderComponent(const CapsuleColliderComponent&) = default;
 	};
 
 	struct TaperedCapsuleColliderComponent
@@ -468,9 +380,6 @@ namespace ArcEngine
 
 		float Friction = 0.5f;
 		float Restitution = 0.0f;
-
-		TaperedCapsuleColliderComponent() = default;
-		TaperedCapsuleColliderComponent(const TaperedCapsuleColliderComponent&) = default;
 	};
 
 	struct CylinderColliderComponent
@@ -482,9 +391,6 @@ namespace ArcEngine
 
 		float Friction = 0.5f;
 		float Restitution = 0.0f;
-
-		CylinderColliderComponent() = default;
-		CylinderColliderComponent(const CylinderColliderComponent&) = default;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -496,9 +402,6 @@ namespace ArcEngine
 	struct ScriptComponent
 	{
 		std::vector<std::string> Classes;
-
-		ScriptComponent() = default;
-		ScriptComponent(const ScriptComponent&) = default;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -510,9 +413,6 @@ namespace ArcEngine
 		AudioSourceConfig Config;
 
 		Ref<AudioSource> Source = nullptr;
-
-		AudioSourceComponent() = default;
-		AudioSourceComponent(const AudioSourceComponent&) = default;
 	};
 
 	struct AudioListenerComponent
@@ -521,9 +421,6 @@ namespace ArcEngine
 		AudioListenerConfig Config;
 
 		Ref<AudioListener> Listener;
-
-		AudioListenerComponent() = default;
-		AudioListenerComponent(const AudioListenerComponent&) = default;
 	};
 
 	template<typename... Component>

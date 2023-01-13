@@ -30,7 +30,7 @@ namespace ArcEngine
 		return ret;
 	}
 
-	std::string FileDialogs::OpenFile(const char* filter)
+	std::string FileDialogs::OpenFile([[maybe_unused]] const char* filter)
 	{
 		GtkWidget* dialog;
 		int res;
@@ -40,7 +40,7 @@ namespace ArcEngine
 			return "";
 		}
 
-		dialog = gtk_file_chooser_dialog_new("Open File", 0, GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, 0);
+		dialog = gtk_file_chooser_dialog_new("Open File", nullptr, GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, nullptr);
 
 		res = gtk_dialog_run(GTK_DIALOG(dialog));
 		std::string ret;
@@ -57,7 +57,7 @@ namespace ArcEngine
 		return ret;
 	}
 
-	std::string FileDialogs::SaveFile(const char* filter)
+	std::string FileDialogs::SaveFile([[maybe_unused]] const char* filter)
 	{
 		GtkWidget* dialog;
 		GtkFileChooser* chooser;

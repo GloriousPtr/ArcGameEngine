@@ -43,7 +43,7 @@ namespace ArcEngine
 		glDeleteTextures(1, &m_RadianceRendererID);
 	}
 
-	void OpenGLTextureCubemap::SetData(void* data, uint32_t size)
+	void OpenGLTextureCubemap::SetData([[maybe_unused]] void* data, [[maybe_unused]] uint32_t size)
 	{
 		ARC_PROFILE_SCOPE()
 		
@@ -96,7 +96,29 @@ namespace ArcEngine
 		m_Width = width;
 		m_Height = height;
 
-		constexpr GLenum internalFormat = GL_RGB16F, dataFormat = GL_RGB;
+		GLenum internalFormat = 0, dataFormat = 0;
+		switch (channels)
+		{
+			case 1:
+				internalFormat = GL_R16F;
+				dataFormat = GL_RED;
+				break;
+			case 2:
+				internalFormat = GL_RG16F;
+				dataFormat = GL_RG;
+				break;
+			case 3:
+				internalFormat = GL_RGB16F;
+				dataFormat = GL_RGB;
+				break;
+			case 4:
+				internalFormat = GL_RGBA16F;
+				dataFormat = GL_RGBA;
+				break;
+			default:
+				ARC_CORE_ERROR("Texture channel count is not within (1-4) range. Channel count: {}", channels);
+				break;
+		}
 
 		m_InternalFormat = internalFormat;
 		m_DataFormat = dataFormat;
@@ -230,16 +252,16 @@ namespace ArcEngine
 
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 		const int maxMipLevels = static_cast<int>(glm::log2(static_cast<float>(radianceMapSize))) + 1;
-		const auto radianceMapSizeFloat = static_cast<float>(radianceMapSize);
+		constexpr auto radianceMapSizeFloat = static_cast<float>(radianceMapSize);
 		for (int mip = 0; mip < maxMipLevels; ++mip)
 		{
-			float m = radianceMapSizeFloat * static_cast<float>(glm::pow(0.5f, mip));
+			const float m = radianceMapSizeFloat * static_cast<float>(glm::pow(0.5f, mip));
 			const int sz = static_cast<int>(m);
 			glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, sz, sz);
 			glViewport(0, 0, sz, sz);
 
-			float roughness = static_cast<float>(mip) / static_cast<float>(maxMipLevels - 1);
+			const float roughness = static_cast<float>(mip) / static_cast<float>(maxMipLevels - 1);
 			s_RadianceShader->SetFloat("u_Roughness", roughness);
 			for (unsigned int i = 0; i < 6; ++i)
 			{

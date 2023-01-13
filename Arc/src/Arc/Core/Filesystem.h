@@ -8,7 +8,7 @@ namespace ArcEngine
 	{
 	public:
 		[[nodiscard]] static Buffer ReadFileBinary(const std::filesystem::path& filepath);
-		static void ReadFileText(const std::filesystem::path& filepath, std::string& outString);
+		[[nodiscard]] static std::string ReadFileText(const std::filesystem::path& filepath);
 		static void WriteFileText(const std::filesystem::path& filepath, const std::string& buffer);
 	};
 }

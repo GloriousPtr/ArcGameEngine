@@ -10,8 +10,5 @@ namespace ArcEngine
 #if defined(ARC_PLATFORM_WINDOWS) || defined(ARC_PLATFORM_LINUX)
 		return CreateScope<GlfwWindow>(props);
 #endif
-
-		ARC_CORE_ASSERT(false, "Platform not supported!");
-		return nullptr;
 	}
 }

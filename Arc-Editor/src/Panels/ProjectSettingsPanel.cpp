@@ -3,6 +3,7 @@
 #include <icons/IconsMaterialDesignIcons.h>
 
 #include "../Utils/UI.h"
+#include <imgui/misc/cpp/imgui_stdlib.h>
 
 namespace ArcEngine
 {
@@ -23,7 +24,7 @@ namespace ArcEngine
 			{
 				if (layerCollisionMask.size() < 16)
 				{
-					float cursorPosY = ImGui::GetCursorPosY();
+					const float cursorPosY = ImGui::GetCursorPosY();
 					if (UI::IconButton("  " ICON_MDI_PLUS, "Add  "))
 						layerCollisionMask[BIT(layerCollisionMask.size())] = { "Layer", 0xFFFF, static_cast<uint8_t>(layerCollisionMask.size()) };
 
@@ -34,18 +35,13 @@ namespace ArcEngine
 				EntityLayer deletedLayer = 0;
 				for (auto& [layer, layerData] : layerCollisionMask)
 				{
-					constexpr size_t size = 256;
-					char buffer[size];
-					memcpy(buffer, layerData.Name.data(), size);
-
 					ImGui::PushID(i);
 
 					const bool disabled = i <= 1;
 					if (disabled)
 						ImGui::BeginDisabled();
 
-					if (ImGui::InputText("##LayerName", buffer, size))
-						layerData.Name = buffer;
+					ImGui::InputText("##LayerName", &layerData.Name);
 
 					if (disabled)
 					{
@@ -97,7 +93,7 @@ namespace ArcEngine
 							if (row == 0 && column == 0)
 								continue;
 
-							int r = row - 1;
+							const int r = row - 1;
 							if (column == 0 && row != 0)
 							{
 								EntityLayer rowLayer = BIT(r);
@@ -107,7 +103,7 @@ namespace ArcEngine
 								continue;
 							}
 
-							int c = colCount - 1 - column;
+							const int c = colCount - 1 - column;
 							if (row == 0 && column != 0)
 							{
 								EntityLayer colLayer = BIT(c);

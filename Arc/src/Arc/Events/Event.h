@@ -40,13 +40,13 @@ namespace ArcEngine
 		virtual ~Event() = default;
 		
 		bool Handled = false;
-		
-		virtual EventType GetEventType() const = 0;
-		virtual const char* GetName() const = 0;
-		virtual int GetCategoryFlags() const = 0;
-		virtual std::string ToString() const { return GetName(); }
 
-		bool IsInCategory(EventCategory category) const { return GetCategoryFlags() & category; }
+		[[nodiscard]] virtual EventType GetEventType() const = 0;
+		[[nodiscard]] virtual const char* GetName() const = 0;
+		[[nodiscard]] virtual int GetCategoryFlags() const = 0;
+		[[nodiscard]] virtual std::string ToString() const { return GetName(); }
+
+		[[nodiscard]] bool IsInCategory(EventCategory category) const { return GetCategoryFlags() & category; }
 	};
 
 	class EventDispatcher

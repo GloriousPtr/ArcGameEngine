@@ -102,7 +102,7 @@ namespace ArcEngine
 
 		// Cube-map
 		{
-			float vertices[108] = {
+			constexpr float vertices[108] = {
 				// back face
 				 0.5f, -0.5f, -0.5f,
 				 0.5f,  0.5f, -0.5f,
@@ -166,14 +166,14 @@ namespace ArcEngine
 
 		// Quad
 		{
-			float vertices[20] = {
+			constexpr float vertices[20] = {
 				 -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
 				  1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
 				  1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
 				 -1.0f,  1.0f, 0.0f, 0.0f, 1.0f
 			};
 
-			uint32_t indices[6] = {
+			constexpr uint32_t indices[6] = {
 				0, 1, 2,
 				0, 2, 3
 			};
@@ -237,7 +237,7 @@ namespace ArcEngine
 		s_Meshes.reserve(count);
 	}
 
-	void Renderer3D::SubmitMesh(const glm::mat4& transform, const Submesh& submesh, MeshComponent::CullModeType cullMode)
+	void Renderer3D::SubmitMesh(const glm::mat4& transform, Submesh& submesh, MeshComponent::CullModeType cullMode)
 	{
 		ARC_PROFILE_SCOPE()
 
@@ -401,7 +401,7 @@ namespace ArcEngine
 
 		renderGraphData->CompositePassTarget->Bind();
 		s_HdrShader->Bind();
-		glm::vec4 tonemappingParams = glm::vec4(static_cast<int>(Tonemapping), Exposure, 0.0f, 0.0f);
+		const glm::vec4 tonemappingParams = { static_cast<int>(Tonemapping), Exposure, 0.0f, 0.0f };
 		
 		s_HdrShader->SetFloat4("u_TonemappParams", tonemappingParams);
 		s_HdrShader->SetFloat("u_BloomStrength", UseBloom ? BloomStrength : 0.0f);
@@ -431,11 +431,11 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		if (!UseBloom)
-			return;
-		
-		glm::vec4 threshold = glm::vec4(BloomThreshold, BloomKnee, BloomKnee * 2.0f, 0.25f / BloomKnee);
-		glm::vec4 params = glm::vec4(BloomClamp, 2.0f, 0.0f, 0.0f);
+			if (!UseBloom)
+				return;
+
+		const glm::vec4 threshold = { BloomThreshold, BloomKnee, BloomKnee * 2.0f, 0.25f / BloomKnee };
+		glm::vec4 params = { BloomClamp, 2.0f, 0.0f, 0.0f };
 
 		{
 			ARC_PROFILE_SCOPE("Prefilter")
@@ -449,7 +449,7 @@ namespace ArcEngine
 			DrawQuad();
 		}
 
-		size_t blurSamples = renderGraphData->BlurSamples;
+		const size_t blurSamples = renderGraphData->BlurSamples;
 		FramebufferSpecification spec = renderGraphData->PrefilteredFramebuffer->GetSpecification();
 		{
 			ARC_PROFILE_SCOPE("Downsample")
@@ -482,7 +482,7 @@ namespace ArcEngine
 			s_BloomShader->SetFloat4("u_Params", params);
 			s_BloomShader->SetInt("u_Texture", 0);
 			s_BloomShader->SetInt("u_AdditiveTexture", 1);
-			size_t upsampleCount = blurSamples - 1;
+			const size_t upsampleCount = blurSamples - 1;
 			for (size_t i = upsampleCount; i > 0; i--)
 			{
 				renderGraphData->UpsampledFramebuffers[i]->Bind();
@@ -581,26 +581,20 @@ namespace ArcEngine
 		RenderCommand::SetClearColor(glm::vec4(0.0f));
 		RenderCommand::Clear();
 
-		const SkyLightComponent* skylightComponent = nullptr;
-		float skylightIntensity = 0.0f;
-		float skylightRotation = 0.0f;
 		{
 			ARC_PROFILE_SCOPE("Skylight")
 
 			if (s_Skylight)
 			{
-				skylightComponent = &(s_Skylight.GetComponent<SkyLightComponent>());
-				if (skylightComponent->Texture)
+				const auto& skylightComponent = s_Skylight.GetComponent<SkyLightComponent>();
+				if (skylightComponent.Texture)
 				{
 					RenderCommand::SetDepthMask(false);
 
-					skylightIntensity = skylightComponent->Intensity;
-					skylightRotation = skylightComponent->Rotation;
-
-					skylightComponent->Texture->Bind(0);
+					skylightComponent.Texture->Bind(0);
 					s_CubemapShader->Bind();
-					s_CubemapShader->SetFloat("u_Intensity", skylightIntensity);
-					s_CubemapShader->SetFloat("u_Rotation", skylightRotation);
+					s_CubemapShader->SetFloat("u_Intensity", skylightComponent.Intensity);
+					s_CubemapShader->SetFloat("u_Rotation", skylightComponent.Rotation);
 
 					DrawCube();
 
@@ -661,9 +655,10 @@ namespace ArcEngine
 			RenderCommand::Clear();
 
 			glm::mat4 transform = lightEntity.GetWorldTransform();
-			float near_plane = -100.0f, far_plane = 100.0f;
+			constexpr float nearPlane = -100.0f;
+			constexpr float farPlane = 100.0f;
 			
-			glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
+			glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, nearPlane, farPlane);
 			
 			glm::vec4 zDir = transform * glm::vec4(0, 0, 1, 0);
 

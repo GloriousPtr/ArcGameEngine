@@ -32,7 +32,7 @@ namespace ArcEngine
 	public:
 		virtual ~Shader() = default;
 
-		virtual void Recompile(const std::string& path) = 0;
+		virtual void Recompile(const std::filesystem::path& path) = 0;
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
@@ -50,16 +50,15 @@ namespace ArcEngine
 
 		[[nodiscard]] virtual const std::string& GetName() const = 0;
 
-		[[nodiscard]] static Ref<Shader> Create(const std::string& filepath);
-		[[nodiscard]] static Ref<Shader> Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
+		[[nodiscard]] static Ref<Shader> Create(const std::filesystem::path& filepath);
 
-		[[nodiscard]] static size_t GetSizeInBytes(MaterialPropertyType type)
+		[[nodiscard]] static constexpr size_t GetSizeInBytes(MaterialPropertyType type)
 		{
 			switch (type)
 			{
 				case MaterialPropertyType::None: return 0;
-				case MaterialPropertyType::Sampler2D: return sizeof(int32_t);
-				case MaterialPropertyType::Bool: return sizeof(int32_t);
+				case MaterialPropertyType::Sampler2D: [[fallthrough]];
+				case MaterialPropertyType::Bool: [[fallthrough]];
 				case MaterialPropertyType::Int: return sizeof(int32_t);
 				case MaterialPropertyType::Float: return sizeof(float);
 				case MaterialPropertyType::Float2: return sizeof(glm::vec2);
@@ -76,8 +75,7 @@ namespace ArcEngine
 	public:
 		void Add(const std::string& name, const Ref<Shader>& shader);
 		void Add(const Ref<Shader>& shader);
-		[[nodiscard]] Ref<Shader> Load(const std::string& filepath);
-		[[nodiscard]] Ref<Shader> Load(const std::string& name, const std::string& filepath);
+		[[nodiscard]] Ref<Shader> Load(const std::filesystem::path& filepath);
 		void ReloadAll();
 
 		[[nodiscard]] Ref<Shader> Get(const std::string& name);

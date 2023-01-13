@@ -345,7 +345,7 @@ namespace filewatch {
 		{
 			std::vector<BYTE> buffer(_buffer_size);
 			DWORD bytes_returned = 0;
-			OVERLAPPED overlapped_buffer{ 0 };
+			OVERLAPPED overlapped_buffer{ };
 
 			overlapped_buffer.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 			if (!overlapped_buffer.hEvent) {

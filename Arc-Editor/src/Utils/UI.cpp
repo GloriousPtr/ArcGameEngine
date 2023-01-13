@@ -4,8 +4,7 @@
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
-
-#include <stdlib.h>
+#include <imgui/misc/cpp/imgui_stdlib.h>
 
 namespace ArcEngine
 {
@@ -104,40 +103,8 @@ namespace ArcEngine
 	bool UI::Property(const char* label, std::string& value, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
-
-		bool modified = false;
-
-		// Small strings
-		if (value.size() < 255)
-		{
-			constexpr size_t size = 256;
-			char buffer[size];
-			memcpy(buffer, value.data(), size);
-
-			if (ImGui::InputText(s_IDBuffer, buffer, size))
-			{
-				value = buffer;
-				modified = true;
-			}
-		}
-		// Big strings
-		else
-		{
-			const size_t size = value.size() + 256;
-			char* buffer = new char[size];
-			memcpy(buffer, value.data(), size);
-
-			if (ImGui::InputText(s_IDBuffer, buffer, size))
-			{
-				value = buffer;
-				modified = true;
-			}
-
-			delete[] buffer;
-		}
-
+		const bool modified = ImGui::InputText(s_IDBuffer, &value);
 		EndPropertyGrid();
-
 		return modified;
 	}
 
@@ -238,7 +205,7 @@ namespace ArcEngine
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
 		if(ImGui::Button("x", xButtonSize))
 		{
-			texture = nullptr;
+			texture.reset();
 			changed = true;
 		}
 		ImGui::PopStyleColor(3);
@@ -296,7 +263,7 @@ namespace ArcEngine
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
 		if(ImGui::Button("x", xButtonSize ))
 		{
-			texture = nullptr;
+			texture.reset();
 			changed = true;
 		}
 		ImGui::PopStyleColor(3);
@@ -872,7 +839,7 @@ namespace ArcEngine
 		pos.y = IM_ROUND(pos.y);
 		const ImFont* font = GImGui->Font;
 		char c;
-		while ((c = *text++))
+		while ((c = *text++) != 0)
 		{
 			const ImFontGlyph* glyph = font->FindGlyph(c);
 			if (!glyph) continue;

@@ -30,10 +30,10 @@ namespace ArcEngine
 
 		void Load(const char* filepath);
 
-		Submesh& GetSubmesh(size_t index);
-		size_t GetSubmeshCount() const { return m_Submeshes.size(); }
-		const char* GetName() const { return m_Name.c_str(); }
-		const char* GetFilepath() const { return m_Filepath.c_str(); }
+		[[nodiscard]] Submesh& GetSubmesh(size_t index);
+		[[nodiscard]] size_t GetSubmeshCount() const { return m_Submeshes.size(); }
+		[[nodiscard]] const char* GetName() const { return m_Name.c_str(); }
+		[[nodiscard]] const char* GetFilepath() const { return m_Filepath.c_str(); }
 
 	private:
 		std::string m_Name;

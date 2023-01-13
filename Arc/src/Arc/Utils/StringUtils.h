@@ -31,7 +31,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE()
 
-			auto lastDot = filepath.find_last_of(".");
+			auto lastDot = filepath.find_last_of('.');
 			return static_cast<std::string>(filepath.substr(lastDot + 1, filepath.size() - lastDot));
 		}
 

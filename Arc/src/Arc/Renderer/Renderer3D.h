@@ -31,7 +31,7 @@ namespace ArcEngine
 		static void DrawCube();
 		static void DrawQuad();
 		static void ReserveMeshes(size_t count);
-		static void SubmitMesh(const glm::mat4& transform, const Submesh& submesh, MeshComponent::CullModeType cullMode);
+		static void SubmitMesh(const glm::mat4& transform, Submesh& submesh, MeshComponent::CullModeType cullMode);
 
 		[[nodiscard]] static ShaderLibrary& GetShaderLibrary() { return s_ShaderLibrary; }
 
@@ -59,10 +59,10 @@ namespace ArcEngine
 		struct MeshData
 		{
 			glm::mat4 Transform;
-			Submesh SubmeshGeometry;
+			Submesh& SubmeshGeometry;
 			MeshComponent::CullModeType CullMode;
 
-			MeshData(const glm::mat4& transform, const Submesh& submesh, const MeshComponent::CullModeType cullMode)
+			MeshData(const glm::mat4& transform, Submesh& submesh, const MeshComponent::CullModeType cullMode)
 				: Transform(transform), SubmeshGeometry(submesh), CullMode(cullMode)
 			{
 			}

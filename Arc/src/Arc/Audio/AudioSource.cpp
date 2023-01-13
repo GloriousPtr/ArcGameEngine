@@ -14,7 +14,7 @@ namespace ArcEngine
 
 		m_Sound = CreateScope<ma_sound>();
 
-		ma_result result = ma_sound_init_from_file(static_cast<ma_engine*>(AudioEngine::GetEngine()), filepath, MA_SOUND_FLAG_NO_SPATIALIZATION, nullptr, nullptr, m_Sound.get());
+		const ma_result result = ma_sound_init_from_file(static_cast<ma_engine*>(AudioEngine::GetEngine()), filepath, MA_SOUND_FLAG_NO_SPATIALIZATION, nullptr, nullptr, m_Sound.get());
 		if (result != MA_SUCCESS)
 			ARC_CORE_ERROR("Failed to initialize sound: {}", filepath);
 	}

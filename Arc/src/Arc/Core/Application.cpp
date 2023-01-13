@@ -6,7 +6,6 @@
 #include "Arc/Scripting/ScriptEngine.h"
 
 #include <GLFW/glfw3.h>
-#include <optick.config.h>
 
 extern "C"
 {
@@ -47,7 +46,7 @@ namespace ArcEngine
 		AudioEngine::Shutdown();
 		Renderer::Shutdown();
 
-		OPTICK_SHUTDOWN();
+		OPTICK_SHUTDOWN()
 	}
 
 	void Application::PushLayer(Layer* layer) const
@@ -100,9 +99,9 @@ namespace ArcEngine
 		while (m_Running)
 		{
 			ARC_PROFILE_FRAME("MainThread");
-			
-			float time = static_cast<float>(glfwGetTime());
-			Timestep timestep = time - m_LastFrameTime;
+
+			const auto time = static_cast<float>(glfwGetTime());
+			const Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
 			ExecuteMainThreadQueue();

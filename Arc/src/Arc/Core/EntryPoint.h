@@ -3,7 +3,7 @@
 
 extern ArcEngine::Application* ArcEngine::CreateApplication();
 
-int main(int argc, char** argv)
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 {
 	ArcEngine::Log::Init();
 	auto* app = ArcEngine::CreateApplication();

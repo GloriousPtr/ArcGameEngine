@@ -14,6 +14,6 @@ namespace ArcEngine
 		glm::vec3 Min;
 		glm::vec3 Max;
 
-		glm::vec3 GetPosition() const { return glm::vec3(Max.x - Min.x, Max.y - Min.y, Max.z - Min.z) * 0.5f; }
+		[[nodiscard]] glm::vec3 GetPosition() const { return glm::vec3(Max.x - Min.x, Max.y - Min.y, Max.z - Min.z) * 0.5f; }
 	};
 }

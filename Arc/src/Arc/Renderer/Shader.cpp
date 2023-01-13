@@ -6,24 +6,12 @@
 
 namespace ArcEngine
 {
-	Ref<Shader> Shader::Create(const std::string& filepath)
+	Ref<Shader> Shader::Create(const std::filesystem::path& filepath)
 	{
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
 			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLShader>(filepath);
-		}
-
-		ARC_CORE_ASSERT(false, "Unknown RendererAPI!")
-		return nullptr;
-	}
-
-	Ref<Shader> Shader::Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
-	{
-		switch (Renderer::GetAPI())
-		{
-			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
-			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLShader>(name, vertexSrc, fragmentSrc);
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!")
@@ -46,23 +34,13 @@ namespace ArcEngine
 		Add(name, shader);
 	}
 
-	Ref<Shader> ShaderLibrary::Load(const std::string& filepath)
+	Ref<Shader> ShaderLibrary::Load(const std::filesystem::path& filepath)
 	{
 		ARC_PROFILE_SCOPE()
 
 		auto shader = Shader::Create(filepath);
 		Add(shader);
-		m_ShaderPaths[shader->GetName()] = filepath;
-		return shader;
-	}
-
-	Ref<Shader> ShaderLibrary::Load(const std::string& name, const std::string& filepath)
-	{
-		ARC_PROFILE_SCOPE()
-
-		auto shader = Shader::Create(filepath);
-		Add(name, shader);
-		m_ShaderPaths[name] = filepath;
+		m_ShaderPaths[shader->GetName()] = filepath.string();
 		return shader;
 	}
 

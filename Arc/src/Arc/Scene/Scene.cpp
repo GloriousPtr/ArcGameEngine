@@ -189,15 +189,15 @@ namespace ArcEngine
 				}
 			}
 		}
-
-		void PreSolve(b2Contact* contact, const b2Manifold* oldManifold) override
+		
+		void PreSolve([[maybe_unused]] b2Contact* contact, [[maybe_unused]] const b2Manifold* oldManifold) override
 		{
 			ARC_PROFILE_SCOPE()
 
 			/* Handle pre solve */
 		}
 
-		void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) override
+		void PostSolve([[maybe_unused]] b2Contact* contact, [[maybe_unused]] const b2ContactImpulse* impulse) override
 		{
 			ARC_PROFILE_SCOPE()
 
@@ -208,18 +208,12 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE()
 
-			auto it = m_BuoyancyFixtures.begin();
-			auto end = m_BuoyancyFixtures.end();
-			while (it != end)
+			for (auto& [fluid, fixture] : m_BuoyancyFixtures)
 			{
-				b2Fixture* fluid = it->first;
-				b2Fixture* fixture = it->second;
-
 				Entity fluidEntity = { static_cast<entt::entity>(static_cast<uint32_t>(fluid->GetUserData().pointer)), m_Scene };
 				const auto& buoyancyComponent2D = fluidEntity.GetComponent<BuoyancyEffector2DComponent>();
-				b2Vec2 gravity = { m_Scene->Gravity.x, m_Scene->Gravity.y };
+				const b2Vec2 gravity = { m_Scene->Gravity.x, m_Scene->Gravity.y };
 				PhysicsUtils::HandleBuoyancy(fluid, fixture, gravity, buoyancyComponent2D.FlipGravity, buoyancyComponent2D.Density, buoyancyComponent2D.DragMultiplier, buoyancyComponent2D.FlowMagnitude, buoyancyComponent2D.FlowAngle);
-				++it;
 			}
 		}
 
@@ -270,7 +264,7 @@ namespace ArcEngine
 		}
 
 	public:
-		JPH::ValidateResult OnContactValidate(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::CollideShapeResult& inCollisionResult) override
+		JPH::ValidateResult OnContactValidate([[maybe_unused]] const JPH::Body& inBody1, [[maybe_unused]] const JPH::Body& inBody2, [[maybe_unused]] const JPH::CollideShapeResult& inCollisionResult) override
 		{
 			ARC_PROFILE_SCOPE()
 
@@ -291,7 +285,7 @@ namespace ArcEngine
 			OverrideContactSettings(inBody1, inBody2, inManifold, ioSettings);
 		}
 
-		void OnContactRemoved(const JPH::SubShapeIDPair& inSubShapePair) override
+		void OnContactRemoved([[maybe_unused]] const JPH::SubShapeIDPair& inSubShapePair) override
 		{
 			ARC_PROFILE_SCOPE()
 
@@ -302,14 +296,14 @@ namespace ArcEngine
 	class Physics3DBodyActivationListener : public JPH::BodyActivationListener
 	{
 	public:
-		void OnBodyActivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
+		void OnBodyActivated([[maybe_unused]] const JPH::BodyID& inBodyID, [[maybe_unused]] JPH::uint64 inBodyUserData) override
 		{
 			ARC_PROFILE_SCOPE()
 
 			/* Body Activated */
 		}
 
-		void OnBodyDeactivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
+		void OnBodyDeactivated([[maybe_unused]] const JPH::BodyID& inBodyID, [[maybe_unused]] JPH::uint64 inBodyUserData) override
 		{
 			ARC_PROFILE_SCOPE()
 
@@ -371,7 +365,7 @@ namespace ArcEngine
 		newScene->m_ViewportWidth = other->m_ViewportWidth;
 		newScene->m_ViewportHeight = other->m_ViewportHeight;
 
-		auto view = other->m_Registry.group<IDComponent, TagComponent>();
+		const auto view = other->m_Registry.group<IDComponent, TagComponent>();
 		for (auto it = view.rbegin(); it != view.rend(); ++it)
 		{
 			auto [id, tag] = view.get<IDComponent, TagComponent>(*it);
@@ -380,11 +374,10 @@ namespace ArcEngine
 			newEntity.GetComponent<TagComponent>().Layer = tag.Layer;
 		}
 
-		for (auto e : view)
+		for (const auto e : view)
 		{
-			auto id = view.get<IDComponent>(e).ID;
 			Entity src = { e, other.get() };
-			Entity dst = newScene->GetEntity(id);
+			Entity dst = newScene->GetEntity(view.get<IDComponent>(e).ID);
 			if (Entity srcParent = src.GetParent())
 				dst.SetParent(newScene->GetEntity(srcParent.GetUUID()));
 		}
@@ -691,7 +684,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE("Submit Particle Data")
 
-			auto particleSystemView = m_Registry.view<ParticleSystemComponent>();
+			const auto particleSystemView = m_Registry.view<ParticleSystemComponent>();
 			for (auto&& [e, psc] : particleSystemView.each())
 			{
 				if (psc.System->GetProperties().PlayOnAwake)
@@ -706,7 +699,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("OnCreate", Profile::Category::Script)
 
-			auto scriptView = m_Registry.view<ScriptComponent>();
+			const auto scriptView = m_Registry.view<ScriptComponent>();
 			for (auto &&[e, sc] : scriptView.each())
 			{
 				Entity entity = { e, this };
@@ -741,10 +734,10 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("OnDestroy", Profile::Category::Script)
 
-			auto scriptView = m_Registry.view<ScriptComponent>();
+			const auto scriptView = m_Registry.view<ScriptComponent>();
 			for (auto &&[e, sc] : scriptView.each())
 			{
-				Entity entity = { e, this };
+				const Entity entity = { e, this };
 				ARC_PROFILE_TAG("Entity", entity.GetTag().data())
 				ARC_PROFILE_TAG("EntityID", entity.GetUUID())
 
@@ -765,7 +758,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio)
 
-			auto view = m_Registry.view<AudioSourceComponent>();
+			const auto view = m_Registry.view<AudioSourceComponent>();
 			for (auto &&[e, ac] : view.each())
 			{
 				if (ac.Source)
@@ -781,7 +774,7 @@ namespace ArcEngine
 			#pragma region Physics3D
 			{
 				JPH::BodyInterface& bodyInterface = Physics3D::GetPhysicsSystem().GetBodyInterface();
-				auto view = m_Registry.view<RigidbodyComponent>();
+				const auto view = m_Registry.view<RigidbodyComponent>();
 				for (auto &&[e, rb] : view.each())
 				{
 					if (rb.RuntimeBody)
@@ -820,7 +813,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("VFX", Profile::Category::VFX)
 
-			auto particleSystemView = m_Registry.view<TransformComponent, ParticleSystemComponent>();
+			const auto particleSystemView = m_Registry.view<TransformComponent, ParticleSystemComponent>();
 			for (auto&& [e, tc, psc] : particleSystemView.each())
 				psc.System->OnUpdate(ts, tc.Translation);
 		}
@@ -844,7 +837,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("OnUpdate", Profile::Category::Script)
 
-			auto scriptView = m_Registry.view<ScriptComponent>();
+			const auto scriptView = m_Registry.view<ScriptComponent>();
 			for (auto &&[e, sc] : scriptView.each())
 			{
 				Entity entity = { e, this };
@@ -883,18 +876,18 @@ namespace ArcEngine
 				stepped = true;
 			}
 
-			float interpolationFactor = m_PhysicsFrameAccumulator / physicsTs;
+			const float interpolationFactor = m_PhysicsFrameAccumulator / physicsTs;
 
 			#pragma region Physics3D
 			{
 				const auto& bodyInterface = Physics3D::GetPhysicsSystem().GetBodyInterface();
-				auto view = m_Registry.group<RigidbodyComponent>(entt::get<TransformComponent>);
+				const auto view = m_Registry.group<RigidbodyComponent>(entt::get<TransformComponent>);
 				for (auto &&[e, rb, tc] : view.each())
 				{
 					if (!rb.RuntimeBody)
 						continue;
 
-					auto body = static_cast<const JPH::Body*>(rb.RuntimeBody);
+					const auto* body = static_cast<const JPH::Body*>(rb.RuntimeBody);
 
 					if (!bodyInterface.IsActive(body->GetID()))
 						continue;
@@ -933,7 +926,7 @@ namespace ArcEngine
 
 			#pragma region Physics2D
 			{
-				auto view = m_Registry.group<Rigidbody2DComponent>(entt::get<TransformComponent>);
+				const auto view = m_Registry.group<Rigidbody2DComponent>(entt::get<TransformComponent>);
 				for (auto &&[e, rb, tc] : view.each())
 				{
 					const auto* body = static_cast<b2Body*>(rb.RuntimeBody);
@@ -968,12 +961,12 @@ namespace ArcEngine
 					}
 				}
 
-				auto distanceJointView = m_Registry.view<DistanceJoint2DComponent>();
+				const auto distanceJointView = m_Registry.view<DistanceJoint2DComponent>();
 				for (auto &&[e, joint] : distanceJointView.each())
 				{
 					if (joint.RuntimeJoint)
 					{
-						auto j = static_cast<b2Joint*>(joint.RuntimeJoint);
+						auto* j = static_cast<b2Joint*>(joint.RuntimeJoint);
 
 						if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce)
 						{
@@ -983,12 +976,12 @@ namespace ArcEngine
 					}
 				}
 
-				auto springJointView = m_Registry.view<SpringJoint2DComponent>();
+				const auto springJointView = m_Registry.view<SpringJoint2DComponent>();
 				for (auto &&[e, joint] : springJointView.each())
 				{
 					if (joint.RuntimeJoint)
 					{
-						auto j = static_cast<b2Joint*>(joint.RuntimeJoint);
+						auto* j = static_cast<b2Joint*>(joint.RuntimeJoint);
 
 						if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce)
 						{
@@ -998,12 +991,12 @@ namespace ArcEngine
 					}
 				}
 
-				auto hingeJointView = m_Registry.view<HingeJoint2DComponent>();
+				const auto hingeJointView = m_Registry.view<HingeJoint2DComponent>();
 				for (auto &&[e, joint] : hingeJointView.each())
 				{
 					if (joint.RuntimeJoint)
 					{
-						auto j = static_cast<b2Joint*>(joint.RuntimeJoint);
+						auto* j = static_cast<b2Joint*>(joint.RuntimeJoint);
 
 						if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce
 							|| j->GetReactionTorque(physicsStepRate) > joint.BreakTorque)
@@ -1014,12 +1007,12 @@ namespace ArcEngine
 					}
 				}
 
-				auto sliderJointView = m_Registry.view<SliderJoint2DComponent>();
+				const auto sliderJointView = m_Registry.view<SliderJoint2DComponent>();
 				for (auto &&[e, joint] : sliderJointView.each())
 				{
 					if (joint.RuntimeJoint)
 					{
-						auto j = static_cast<b2Joint*>(joint.RuntimeJoint);
+						auto* j = static_cast<b2Joint*>(joint.RuntimeJoint);
 
 						if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce
 							|| j->GetReactionTorque(physicsStepRate) > joint.BreakTorque)
@@ -1030,12 +1023,12 @@ namespace ArcEngine
 					}
 				}
 
-				auto wheelJointView = m_Registry.view<WheelJoint2DComponent>();
+				const auto wheelJointView = m_Registry.view<WheelJoint2DComponent>();
 				for (auto &&[e, joint] : wheelJointView.each())
 				{
 					if (joint.RuntimeJoint)
 					{
-						auto j = static_cast<b2Joint*>(joint.RuntimeJoint);
+						auto* j = static_cast<b2Joint*>(joint.RuntimeJoint);
 
 						if (j->GetReactionForce(physicsStepRate).LengthSquared() > joint.BreakForce * joint.BreakForce
 							|| j->GetReactionTorque(physicsStepRate) > joint.BreakTorque)
@@ -1054,7 +1047,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Audio", Profile::Category::Audio)
 
-			auto listenerView = m_Registry.group<AudioListenerComponent>(entt::get<TransformComponent>);
+			const auto listenerView = m_Registry.group<AudioListenerComponent>(entt::get<TransformComponent>);
 			for (auto &&[e, ac, tc] : listenerView.each())
 			{
 				if (ac.Active)
@@ -1067,7 +1060,7 @@ namespace ArcEngine
 				}
 			}
 
-			auto sourceView = m_Registry.group<AudioSourceComponent>(entt::get<TransformComponent>);
+			const auto sourceView = m_Registry.group<AudioSourceComponent>(entt::get<TransformComponent>);
 			for (auto &&[e, ac, tc] : sourceView.each())
 			{
 				if (ac.Source)
@@ -1086,7 +1079,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("VFX", Profile::Category::VFX)
 
-			auto particleSystemView = m_Registry.view<TransformComponent, ParticleSystemComponent>();
+			const auto particleSystemView = m_Registry.view<TransformComponent, ParticleSystemComponent>();
 			for (auto&& [e, tc, psc] : particleSystemView.each())
 				psc.System->OnUpdate(ts, tc.Translation);
 		}
@@ -1097,7 +1090,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Camera", Profile::Category::Camera)
 
-			Entity cameraEntity = GetPrimaryCameraEntity();
+			const Entity cameraEntity = GetPrimaryCameraEntity();
 			if (!overrideCamera)
 			{
 				if (cameraEntity)
@@ -1117,8 +1110,6 @@ namespace ArcEngine
 			}
 		}
 
-		
-
 		OnRender(renderGraphData, cameraData);
 		#pragma endregion
 	}
@@ -1131,8 +1122,8 @@ namespace ArcEngine
 		m_ViewportHeight = height;
 
 		// Resize our non-FixedAspectRatio cameras
-		auto view = m_Registry.view<CameraComponent>();
-		for (auto entity : view)
+		const auto view = m_Registry.view<CameraComponent>();
+		for (const auto entity : view)
 		{
 			auto& cameraComponent = view.get<CameraComponent>(entity);
 			if (!cameraComponent.FixedAspectRatio)
@@ -1146,7 +1137,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_CATEGORY("Camera", Profile::Category::Camera)
 
-		auto view = m_Registry.view<CameraComponent>();
+		const auto view = m_Registry.view<CameraComponent>();
 		for (auto entity : view)
 		{
 			const auto& camera = view.get<CameraComponent>(entity);
@@ -1172,7 +1163,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE("Prepare Light Data")
 
-			auto view = m_Registry.view<LightComponent>();
+			const auto view = m_Registry.view<LightComponent>();
 			lights.reserve(view.size());
 			for (auto &&[entity, lc] : view.each())
 				lights.emplace_back(Entity(entity, this));
@@ -1181,7 +1172,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE("PrepareSkylightData")
 
-			auto view = m_Registry.view<SkyLightComponent>();
+			const auto view = m_Registry.view<SkyLightComponent>();
 			if (!view.empty())
 				skylight = Entity(*view.begin(), this);
 		}
@@ -1191,7 +1182,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE("Submit Mesh Data")
 
-			auto view = m_Registry.view<MeshComponent>();
+			const auto view = m_Registry.view<MeshComponent>();
 			Renderer3D::ReserveMeshes(view.size());
 			for (auto &&[entity, meshComponent] : view.each())
 			{
@@ -1208,14 +1199,14 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE("Submit Particle Data")
 
-			auto particleSystemView = m_Registry.view<ParticleSystemComponent>();
+			const auto particleSystemView = m_Registry.view<ParticleSystemComponent>();
 			for (auto&& [e, psc] : particleSystemView.each())
 				psc.System->OnRender();
 		}
 		{
 			ARC_PROFILE_SCOPE("Submit 2D Data")
 
-			auto view = m_Registry.view<SpriteRendererComponent>();
+			const auto view = m_Registry.view<SpriteRendererComponent>();
 			for (auto &&[entity, sprite] : view.each())
 			{
 				Renderer2D::DrawQuad(Entity(entity, this).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
@@ -1403,7 +1394,7 @@ namespace ArcEngine
 		fixtureDef.userData.pointer = static_cast<uint32_t>(entity);
 
 		auto layer = entity.GetComponent<TagComponent>().Layer;
-		auto collisionMaskIt = LayerCollisionMask.find(layer);
+		const auto collisionMaskIt = LayerCollisionMask.find(layer);
 		if (collisionMaskIt == LayerCollisionMask.end())
 			layer = Scene::DefaultLayer;
 		fixtureDef.filter.categoryBits = layer;
@@ -1436,7 +1427,7 @@ namespace ArcEngine
 		fixtureDef.userData.pointer = static_cast<uint32_t>(entity);
 
 		auto layer = entity.GetComponent<TagComponent>().Layer;
-		auto collisionMaskIt = LayerCollisionMask.find(layer);
+		const auto collisionMaskIt = LayerCollisionMask.find(layer);
 		if (collisionMaskIt == LayerCollisionMask.end())
 			layer = Scene::DefaultLayer;
 		fixtureDef.filter.categoryBits = layer;
@@ -1474,7 +1465,7 @@ namespace ArcEngine
 		fixtureDef.userData.pointer = static_cast<uint32_t>(entity);
 
 		auto layer = entity.GetComponent<TagComponent>().Layer;
-		auto collisionMaskIt = LayerCollisionMask.find(layer);
+		const auto collisionMaskIt = LayerCollisionMask.find(layer);
 		if (collisionMaskIt == LayerCollisionMask.end())
 			layer = Scene::DefaultLayer;
 		fixtureDef.filter.categoryBits = layer;
@@ -1491,147 +1482,147 @@ namespace ArcEngine
 	}
 
 	template<>
-	void Scene::OnComponentAdded<IDComponent>(Entity entity, IDComponent& component)
+	void Scene::OnComponentAdded<IDComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] IDComponent& component)
 	{
 		/* On IDComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component)
+	void Scene::OnComponentAdded<TransformComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] TransformComponent& component)
 	{
 		/* On TransformComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<RelationshipComponent>(Entity entity, RelationshipComponent& component)
+	void Scene::OnComponentAdded<RelationshipComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] RelationshipComponent& component)
 	{
 		/* On RelationshipComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<PrefabComponent>(Entity entity, PrefabComponent& component)
+	void Scene::OnComponentAdded<PrefabComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] PrefabComponent& component)
 	{
 		/* On PrefabComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
+	void Scene::OnComponentAdded<CameraComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] CameraComponent& component)
 	{
 		/* On CameraComponent added */
 		component.Camera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
 	}
 
 	template<>
-	void Scene::OnComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component)
+	void Scene::OnComponentAdded<SpriteRendererComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] SpriteRendererComponent& component)
 	{
 		/* On SpriteRendererComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent& component)
+	void Scene::OnComponentAdded<TagComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] TagComponent& component)
 	{
 		/* On TagComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& component)
+	void Scene::OnComponentAdded<MeshComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] MeshComponent& component)
 	{
 		/* On MeshComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<SkyLightComponent>(Entity entity, SkyLightComponent& component)
+	void Scene::OnComponentAdded<SkyLightComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] SkyLightComponent& component)
 	{
 		/* On SkyLightComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<LightComponent>(Entity entity, LightComponent& component)
+	void Scene::OnComponentAdded<LightComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] LightComponent& component)
 	{
 		/* On LightComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<ParticleSystemComponent>(Entity entity, ParticleSystemComponent& component)
+	void Scene::OnComponentAdded<ParticleSystemComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] ParticleSystemComponent& component)
 	{
 		/* On ParticleSystemComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& body)
+	void Scene::OnComponentAdded<Rigidbody2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] Rigidbody2DComponent& component)
 	{
 		/* On Rigidbody2DComponent added */
-		CreateRigidbody2D(entity, entity.GetComponent<TransformComponent>(), body);
+		CreateRigidbody2D(entity, entity.GetComponent<TransformComponent>(), component);
 	}
 
 	template<>
-	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& bc2d)
+	void Scene::OnComponentAdded<BoxCollider2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] BoxCollider2DComponent& component)
 	{
 		/* On BoxCollider2DComponent added */
 		if (entity.HasComponent<Rigidbody2DComponent>())
-			CreateBoxCollider2D(entity, entity.GetComponent<TransformComponent>(), entity.GetComponent<Rigidbody2DComponent>(), bc2d);
+			CreateBoxCollider2D(entity, entity.GetComponent<TransformComponent>(), entity.GetComponent<Rigidbody2DComponent>(), component);
 	}
 	
 	template<>
-	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& cc2d)
+	void Scene::OnComponentAdded<CircleCollider2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] CircleCollider2DComponent& component)
 	{
 		if (entity.HasComponent<Rigidbody2DComponent>())
-			CreateCircleCollider2D(entity, entity.GetComponent<TransformComponent>(), entity.GetComponent<Rigidbody2DComponent>(), cc2d);
+			CreateCircleCollider2D(entity, entity.GetComponent<TransformComponent>(), entity.GetComponent<Rigidbody2DComponent>(), component);
 	}
 
 	template<>
-	void Scene::OnComponentAdded<PolygonCollider2DComponent>(Entity entity, PolygonCollider2DComponent& pc2d)
+	void Scene::OnComponentAdded<PolygonCollider2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] PolygonCollider2DComponent& component)
 	{
 		/* On CircleCollider2DComponent added */
 		if (entity.HasComponent<Rigidbody2DComponent>())
-			CreatePolygonCollider2D(entity, entity.GetComponent<Rigidbody2DComponent>(), pc2d);
+			CreatePolygonCollider2D(entity, entity.GetComponent<Rigidbody2DComponent>(), component);
 	}
 
 	template<>
-	void Scene::OnComponentAdded<DistanceJoint2DComponent>(Entity entity, DistanceJoint2DComponent& component)
+	void Scene::OnComponentAdded<DistanceJoint2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] DistanceJoint2DComponent& component)
 	{
 		/* On DistanceJoint2DComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<SpringJoint2DComponent>(Entity entity, SpringJoint2DComponent& component)
+	void Scene::OnComponentAdded<SpringJoint2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] SpringJoint2DComponent& component)
 	{
 		/* On SpringJoint2DComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<HingeJoint2DComponent>(Entity entity, HingeJoint2DComponent& component)
+	void Scene::OnComponentAdded<HingeJoint2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] HingeJoint2DComponent& component)
 	{
 		/* On HingeJoint2DComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<SliderJoint2DComponent>(Entity entity, SliderJoint2DComponent& component)
+	void Scene::OnComponentAdded<SliderJoint2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] SliderJoint2DComponent& component)
 	{
 		/* On SliderJoint2DComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<WheelJoint2DComponent>(Entity entity, WheelJoint2DComponent& component)
+	void Scene::OnComponentAdded<WheelJoint2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] WheelJoint2DComponent& component)
 	{
 		/* On WheelJoint2DComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<BuoyancyEffector2DComponent>(Entity entity, BuoyancyEffector2DComponent& component)
+	void Scene::OnComponentAdded<BuoyancyEffector2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] BuoyancyEffector2DComponent& component)
 	{
 		/* On BuoyancyEffector2DComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<RigidbodyComponent>(Entity entity, RigidbodyComponent& body)
+	void Scene::OnComponentAdded<RigidbodyComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] RigidbodyComponent& component)
 	{
 		/* On RigidbodyComponent added */
-		CreateRigidbody(entity, entity.GetComponent<TransformComponent>(), body);
+		CreateRigidbody(entity, entity.GetComponent<TransformComponent>(), component);
 	}
 
 	template<>
-	void Scene::OnComponentAdded<BoxColliderComponent>(Entity entity, BoxColliderComponent& bc)
+	void Scene::OnComponentAdded<BoxColliderComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] BoxColliderComponent& component)
 	{
 		/* On BoxColliderComponent added */
 		if (entity.HasComponent<RigidbodyComponent>())
@@ -1639,7 +1630,7 @@ namespace ArcEngine
 	}
 
 	template<>
-	void Scene::OnComponentAdded<SphereColliderComponent>(Entity entity, SphereColliderComponent& sc)
+	void Scene::OnComponentAdded<SphereColliderComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] SphereColliderComponent& component)
 	{
 		/* On SphereColliderComponent added */
 		if (entity.HasComponent<RigidbodyComponent>())
@@ -1647,7 +1638,7 @@ namespace ArcEngine
 	}
 
 	template<>
-	void Scene::OnComponentAdded<CapsuleColliderComponent>(Entity entity, CapsuleColliderComponent& sc)
+	void Scene::OnComponentAdded<CapsuleColliderComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] CapsuleColliderComponent& component)
 	{
 		/* On SphereColliderComponent added */
 		if (entity.HasComponent<RigidbodyComponent>())
@@ -1655,7 +1646,7 @@ namespace ArcEngine
 	}
 
 	template<>
-	void Scene::OnComponentAdded<TaperedCapsuleColliderComponent>(Entity entity, TaperedCapsuleColliderComponent& sc)
+	void Scene::OnComponentAdded<TaperedCapsuleColliderComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] TaperedCapsuleColliderComponent& component)
 	{
 		/* On SphereColliderComponent added */
 		if (entity.HasComponent<RigidbodyComponent>())
@@ -1663,7 +1654,7 @@ namespace ArcEngine
 	}
 
 	template<>
-	void Scene::OnComponentAdded<CylinderColliderComponent>(Entity entity, CylinderColliderComponent& sc)
+	void Scene::OnComponentAdded<CylinderColliderComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] CylinderColliderComponent& component)
 	{
 		/* On SphereColliderComponent added */
 		if (entity.HasComponent<RigidbodyComponent>())
@@ -1671,19 +1662,19 @@ namespace ArcEngine
 	}
 
 	template<>
-	void Scene::OnComponentAdded<ScriptComponent>(Entity entity, ScriptComponent& component)
+	void Scene::OnComponentAdded<ScriptComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] ScriptComponent& component)
 	{
 		/* On ScriptComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<AudioSourceComponent>(Entity entity, AudioSourceComponent& component)
+	void Scene::OnComponentAdded<AudioSourceComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] AudioSourceComponent& component)
 	{
 		/* On AudioSourceComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<AudioListenerComponent>(Entity entity, AudioListenerComponent& component)
+	void Scene::OnComponentAdded<AudioListenerComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] AudioListenerComponent& component)
 	{
 		/* On AudioListenerComponent added */
 	}

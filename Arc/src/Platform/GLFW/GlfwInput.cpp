@@ -14,7 +14,7 @@ namespace ArcEngine
         ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
         auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-        int state = glfwGetKey(window, static_cast<int32_t>(key));
+        const int state = glfwGetKey(window, static_cast<int32_t>(key));
         return state == GLFW_PRESS || state == GLFW_REPEAT;
     }
 
@@ -23,7 +23,7 @@ namespace ArcEngine
         ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
         auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-        int state = glfwGetMouseButton(window, static_cast<int32_t>(button));
+        const int state = glfwGetMouseButton(window, static_cast<int32_t>(button));
         return state == GLFW_PRESS;
     }
 

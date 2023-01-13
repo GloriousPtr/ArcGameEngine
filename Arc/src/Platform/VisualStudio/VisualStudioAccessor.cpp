@@ -291,8 +291,8 @@ namespace ArcEngine
 			if (FAILED(result))
 				return;
 
-			CComBSTR bstrFilepath(filepath.c_str());
-			CComBSTR bstrKind(EnvDTE80::vsViewKindTextView);
+			const CComBSTR bstrFilepath(filepath.c_str());
+			const CComBSTR bstrKind(EnvDTE80::vsViewKindTextView);
 			ComPtr<EnvDTE80::Window> window;
 			itemOps->OpenFile(bstrFilepath, bstrKind, &window);
 
@@ -323,7 +323,7 @@ namespace ArcEngine
 
 	bool VisualStudioAccessor::AddFile(const std::string& filepath, bool open)
 	{
-		bool success = ProjectBuilder::GenerateProjectFiles();
+		const bool success = ProjectBuilder::GenerateProjectFiles();
 		if (open)
 			OpenFile(filepath);
 		return success;

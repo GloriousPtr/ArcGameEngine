@@ -7,14 +7,13 @@ namespace ArcEngine
 	class OpenGLShader : public Shader
 	{
 	public:
-		explicit OpenGLShader(const std::string& filepath);
-		OpenGLShader(const std::string& name, std::string_view vertexSrc, std::string_view fragmentSrc);
+		explicit OpenGLShader(const std::filesystem::path& filepath);
 		~OpenGLShader() override;
 
 		OpenGLShader(const OpenGLShader& other) = default;
 		OpenGLShader(OpenGLShader&& other) = default;
 
-		void Recompile(const std::string& filepath) override;
+		void Recompile(const std::filesystem::path& filepath) override;
 
 		void Bind() const override;
 		void Unbind() const override;

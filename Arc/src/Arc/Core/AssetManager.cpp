@@ -48,7 +48,7 @@ namespace ArcEngine
 		Application::Get().SubmitToMainThread([tex, path, width, height, data, channels]() { tex->Invalidate(path, width, height, data, channels); stbi_image_free(data); });
 	}
 
-	Ref<Texture2D> AssetManager::GetTexture2D(const std::string& path)
+	Ref<Texture2D>& AssetManager::GetTexture2D(const std::string& path)
 	{
 		ARC_PROFILE_SCOPE()
 
@@ -59,7 +59,7 @@ namespace ArcEngine
 		Ref<Texture2D> texture = Texture2D::Create();
 		m_Texture2DMap.emplace(path, texture);
 		m_Futures.push_back(std::async(std::launch::async, &LoadTexture2D, texture.get(), path));
-		return texture;
+		return m_Texture2DMap[path];
 	}
 
 	static void LoadTextureCubemap(TextureCubemap* tex, const std::string_view path)
@@ -78,7 +78,7 @@ namespace ArcEngine
 		Application::Get().SubmitToMainThread([tex, path, width, height, data, channels]() { tex->Invalidate(path, width, height, data, channels); stbi_image_free(data); });
 	}
 
-	Ref<TextureCubemap> AssetManager::GetTextureCubemap(const std::string& path)
+	Ref<TextureCubemap>& AssetManager::GetTextureCubemap(const std::string& path)
 	{
 		ARC_PROFILE_SCOPE()
 
@@ -89,10 +89,10 @@ namespace ArcEngine
 		Ref<TextureCubemap> texture = TextureCubemap::Create();
 		m_TextureCubeMap.emplace(path, texture);
 		m_Futures.push_back(std::async(std::launch::async, &LoadTextureCubemap, texture.get(), path));
-		return texture;
+		return m_TextureCubeMap[path];
 	}
 
-	Ref<Mesh> AssetManager::GetMesh(const std::string& path)
+	Ref<Mesh>& AssetManager::GetMesh(const std::string& path)
 	{
 		ARC_PROFILE_SCOPE()
 
@@ -102,6 +102,6 @@ namespace ArcEngine
 
 		Ref<Mesh> mesh = CreateRef<Mesh>(path.c_str());
 		m_MeshMap.emplace(path, mesh);
-		return mesh;
+		return m_MeshMap[path];
 	}
 }

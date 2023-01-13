@@ -1,9 +1,6 @@
 #pragma once
 
-// This ignores all warnings raised inside External headers
-#pragma warning(push, 0)
 #include <entt.hpp>
-#pragma warning(pop)
 
 #include "Arc/Core/UUID.h"
 #include "Arc/Core/Timestep.h"

@@ -28,7 +28,7 @@ namespace ArcEngine
 			}
 			UI::EndProperties();
 
-			ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
+			constexpr ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
 
 			if (ImGui::TreeNodeEx("Bloom", treeNodeFlags))
 			{

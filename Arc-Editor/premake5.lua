@@ -3,10 +3,12 @@ project "Arc-Editor"
 	language "C++"
 	cppdialect "C++20"
 	staticruntime "off"
-	warnings "default"
+	warnings "extra"
 	externalwarnings "off"
 	rtti "off"
 	postbuildmessage "================ Post-Build: Copying dependencies ================"
+
+	flags { "FatalWarnings" }
 
 	binDir = "%{wks.location}/bin/" .. outputdir
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
@@ -34,12 +36,7 @@ project "Arc-Editor"
 		"%{IncludeDir.optick}",
 		"%{IncludeDir.icons}",
 	}
-
-	libdirs
-	{
-		"%{LibDir.Mono}"
-	}
-
+	
 	links
 	{
 		"Arc",
@@ -66,7 +63,7 @@ project "Arc-Editor"
 		systemversion "latest"
 		links
 		{
-			"mono-2.0-sgen.lib",
+			"%{LibDir.Mono}/mono-2.0-sgen.lib",
 			"opengl.dll"
 		}
 
@@ -88,7 +85,6 @@ project "Arc-Editor"
 		postbuildcommands
 		{
 			'{COPY} "../Arc/vendor/mono/bin/Debug/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
-			'{COPY} "../Arc/vendor/mono/bin/Debug/libmonosgen-2.0.so" "%{cfg.targetdir}"',
 		}
 
 	filter "configurations:Release"
@@ -98,7 +94,6 @@ project "Arc-Editor"
 		postbuildcommands
 		{
 			'{COPY} "../Arc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
-			'{COPY} "../Arc/vendor/mono/bin/Release/libmonosgen-2.0.so" "%{cfg.targetdir}"',
 		}
 
 	filter "configurations:Dist"
@@ -109,5 +104,4 @@ project "Arc-Editor"
 		postbuildcommands
 		{
 			'{COPY} "../Arc/vendor/mono/bin/Release/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
-			'{COPY} "../Arc/vendor/mono/bin/Release/libmonosgen-2.0.so" "%{cfg.targetdir}"',
 		}

@@ -41,7 +41,7 @@ namespace ArcEngine
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
-		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 
 		// Setup Platform/Renderer bindings
 		ImGui_ImplGlfw_InitForOpenGL(window, true);

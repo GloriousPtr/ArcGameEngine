@@ -40,7 +40,7 @@ namespace ArcEngine
 
 		if (m_Playing && !m_Properties.Looping)
 			m_SystemTime += simTs;
-		float delay = m_Properties.StartDelay;
+		const float delay = m_Properties.StartDelay;
 		if (m_Playing && (m_Properties.Looping || (m_SystemTime <= delay + m_Properties.Duration && m_SystemTime > delay)))
 		{
 			// Emit particles in unit time
@@ -76,7 +76,7 @@ namespace ArcEngine
 
 			particle.LifeRemaining -= simTs;
 
-			float t = glm::clamp(particle.LifeRemaining / m_Properties.StartLifetime, 0.0f, 1.0f);
+			const float t = glm::clamp(particle.LifeRemaining / m_Properties.StartLifetime, 0.0f, 1.0f);
 			
 			glm::vec3 velocity = m_Properties.StartVelocity;
 			if (m_Properties.VelocityOverLifetime.Enabled)
@@ -89,7 +89,7 @@ namespace ArcEngine
 			force.y += m_Properties.GravityModifier * -9.8f;
 			velocity += force * simTs;
 
-			float velocityMagnitude = glm::length(velocity);
+			const float velocityMagnitude = glm::length(velocity);
 			
 			// Color
 			particle.Color = m_Properties.StartColor;
@@ -133,7 +133,7 @@ namespace ArcEngine
 
 	static float RandomFloat(float min, float max)
 	{
-		float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+		const float r = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
 		return min + r * (max - min);
 	}
 

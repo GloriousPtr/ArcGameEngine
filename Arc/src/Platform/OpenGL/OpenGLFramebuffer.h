@@ -35,6 +35,6 @@ namespace ArcEngine
 		FramebufferTextureSpecification m_DepthAttachmentSpecification;
 
 		std::vector<uint32_t> m_ColorAttachments;
-		uint32_t m_DepthAttachment;
+		uint32_t m_DepthAttachment = 0;
 	};
 }

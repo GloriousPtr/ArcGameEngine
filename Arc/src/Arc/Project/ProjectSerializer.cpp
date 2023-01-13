@@ -8,7 +8,7 @@
 
 namespace ArcEngine
 {
-	ProjectSerializer::ProjectSerializer(Ref<Project> project)
+	ProjectSerializer::ProjectSerializer(const Ref<Project>& project)
 		: m_Project(project)
 	{
 	}

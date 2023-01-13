@@ -62,6 +62,9 @@ namespace ArcEngine
 		SceneState m_SceneState = SceneState::Edit;
 		std::filesystem::path m_ScenePath = std::filesystem::path();
 
+		std::string m_TempProjectName;
+		std::string m_TempProjectPath;
+
 		EditorContext m_SelectedContext = {};
 
 		// Panels

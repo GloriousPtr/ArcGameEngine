@@ -11,7 +11,7 @@ namespace ArcEngine
 {
 	Ref<Texture2D> Material::s_WhiteTexture;
 
-	Material::Material(const char* shaderPath)
+	Material::Material(const std::filesystem::path& shaderPath)
 	{
 		ARC_PROFILE_SCOPE()
 
@@ -23,12 +23,7 @@ namespace ArcEngine
 		}
 
 		// Extract name from filepath
-		std::string filepath = shaderPath;
-		auto lastSlash = std::string(filepath).find_last_of("/\\");
-		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
-		auto lastDot = filepath.rfind('.');
-		auto count = lastDot == std::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
-		std::string name = filepath.substr(lastSlash, count);
+		const std::string name = shaderPath.filename().string();
 
 		if (!Renderer3D::GetShaderLibrary().Exists(name))
 			m_Shader = Renderer3D::GetShaderLibrary().Load(shaderPath);
@@ -150,10 +145,16 @@ namespace ArcEngine
 
 	Ref<Texture2D> Material::GetTexture(uint32_t slot)
 	{
-		return m_Textures.at(slot);
+		const auto it = m_Textures.find(slot);
+
+		[[likely]]
+		if (it != m_Textures.end())
+			return it->second;
+
+		return nullptr;
 	}
 
-	void Material::SetTexture(uint32_t slot, Ref<Texture2D> texture)
+	void Material::SetTexture(uint32_t slot, const Ref<Texture2D>& texture)
 	{
 		m_Textures[slot] = texture;
 	}

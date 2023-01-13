@@ -112,10 +112,10 @@ namespace ArcEngine
 
 		ImGui::SameLine();
 
-		float spacing = ImGui::GetStyle().ItemSpacing.x;
+		const float spacing = ImGui::GetStyle().ItemSpacing.x;
         ImGui::GetStyle().ItemSpacing.x = 2;
-        float levelButtonWidth = (ImGui::CalcTextSize(StringUtils::FromChar8T(Message::GetLevelIcon(Log::Level::Trace))) + ImGui::GetStyle().FramePadding * 2.0f).x;
-        float levelButtonWidths = (levelButtonWidth + ImGui::GetStyle().ItemSpacing.x) * 7;
+        const float levelButtonWidth = (ImGui::CalcTextSize(StringUtils::FromChar8T(Message::GetLevelIcon(Log::Level::Trace))) + ImGui::GetStyle().FramePadding * 2.0f).x;
+        const float levelButtonWidths = (levelButtonWidth + ImGui::GetStyle().ItemSpacing.x) * 7;
 
 		const float cursorPosX = ImGui::GetCursorPosX();
 		m_Filter.Draw("###ConsoleFilter", ImGui::GetContentRegionAvail().x - levelButtonWidths);
@@ -125,9 +125,9 @@ namespace ArcEngine
 		for (int i = 0; i < 6; i++)
 		{
 			ImGui::SameLine();
-			auto level = static_cast<Log::Level>(glm::pow(2, i));
+			const auto level = static_cast<Log::Level>(glm::pow(2, i));
 
-			bool levelEnabled = s_MessageBufferRenderFilter & level;
+			const bool levelEnabled = s_MessageBufferRenderFilter & level;
 			glm::vec4 c = Message::GetRenderColor(level);
 			if(levelEnabled)
 				ImGui::PushStyleColor(ImGuiCol_Text, { c.r, c.g, c.b, c.a });
@@ -265,7 +265,7 @@ namespace ArcEngine
 		glm::vec4 c = GetRenderColor(Level);
 		ImGui::PushStyleColor(ImGuiCol_Text, { c.r, c.g, c.b, c.a });
 		ImGui::PushFont(EditorTheme::BoldFont);
-		auto levelIcon = GetLevelIcon(Level);
+		const auto levelIcon = GetLevelIcon(Level);
 		ImGui::TreeNodeEx(&ID, flags, "%s  %s", StringUtils::FromChar8T(levelIcon), Buffer.c_str());
 		ImGui::PopFont();
 		ImGui::PopStyleColor();

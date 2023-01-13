@@ -22,10 +22,10 @@ namespace ArcEngine
 		out << YAML::BeginMap;
 		out << YAML::Key << "Scene" << YAML::Value << "Untitled";
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
-		auto view = m_Scene->m_Registry.view<IDComponent>();
+		const auto view = m_Scene->m_Registry.view<IDComponent>();
 		for (auto it = view.rbegin(); it != view.rend(); ++it)
 		{
-			Entity entity = { *it, m_Scene.get() };
+			const Entity entity = { *it, m_Scene.get() };
 			if (!entity)
 				return;
 
@@ -53,11 +53,10 @@ namespace ArcEngine
 		if (!data["Scene"])
 			return false;
 
-		std::string sceneName = data["Scene"].as<std::string>();
+		auto sceneName = data["Scene"].as<std::string>();
 		ARC_CORE_TRACE("Deserializing scene '{0}'", sceneName);
 
-		auto entities = data["Entities"];
-		if (entities)
+		if (auto entities = data["Entities"])
 		{
 			for (const auto& entity : entities)
 				EntitySerializer::DeserializeEntity(entity, *m_Scene, true);

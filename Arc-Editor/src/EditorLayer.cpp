@@ -3,6 +3,7 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
+#include <imgui/misc/cpp/imgui_stdlib.h>
 #include <icons/IconsMaterialDesignIcons.h>
 
 #include <Arc/Scene/SceneSerializer.h>
@@ -105,7 +106,7 @@ namespace ArcEngine
 
 		m_SceneHierarchyPanel.OnUpdate(ts);
 
-		bool useEditorCamera = m_SceneState == SceneState::Edit || m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
+		const bool useEditorCamera = m_SceneState == SceneState::Edit || m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
 		for (const auto& panel : m_Viewports)
 		{
 			if (panel->Showing)
@@ -503,6 +504,8 @@ namespace ArcEngine
 			if (m_ShowNewProjectModal)
 			{
 				m_ShowNewProjectModal = false;
+				m_TempProjectName.clear();
+				m_TempProjectPath.clear();
 				ImGui::OpenPopup("New Project");
 			}
 
@@ -510,43 +513,44 @@ namespace ArcEngine
 			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 			if (ImGui::BeginPopupModal("New Project", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 			{
-				static std::string prjName;
-				static std::string folderPath;
+				bool isValidPath = !m_TempProjectName.empty() && !m_TempProjectPath.empty();
+				if (!isValidPath)
+					ImGui::PushStyleColor(ImGuiCol_Text, { 0.8f, 0.3f, 0.2f, 1.0f });
 
-				constexpr size_t size = 256;
-				char buffer[size];
-				memcpy(buffer, prjName.data(), size);
 				ImGui::TextUnformatted("Project Name");
-				if (ImGui::InputText("##ProjectName", buffer, size))
-					prjName = buffer;
-
-				memcpy(buffer, folderPath.data(), size);
+				ImGui::InputText("##ProjectName", &m_TempProjectName);
 				ImGui::TextUnformatted("Location");
-				if (ImGui::InputText("##ProjectLocation", buffer, size))
-					folderPath = buffer;
+				ImGui::InputText("##ProjectLocation", &m_TempProjectPath);
 				ImGui::SameLine();
+
+				if (!isValidPath)
+					ImGui::PopStyleColor();
+
 				if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_FOLDER)))
-					folderPath = FileDialogs::OpenFolder();
+					m_TempProjectPath = FileDialogs::OpenFolder();
 
 				ImGui::Separator();
 
 				ImGui::SetItemDefaultFocus();
+
+				isValidPath = !m_TempProjectName.empty() && !m_TempProjectPath.empty();
+
+				ImGui::BeginDisabled(!isValidPath);
 				if (ImGui::Button("OK", ImVec2(120, 0)))
 				{
-					if (!prjName.empty() && !folderPath.empty())
-					{
-						const auto& project = Project::New();
-						project->GetConfig().Name = prjName;
-						std::filesystem::path projectDirPath = std::filesystem::path(folderPath) / prjName;
-						if (!std::filesystem::exists(projectDirPath))
-							std::filesystem::create_directories(projectDirPath);
+					const auto& project = Project::New();
+					project->GetConfig().Name = m_TempProjectName;
+					std::filesystem::path projectDirPath = std::filesystem::path(m_TempProjectPath) / m_TempProjectName;
+					if (!std::filesystem::exists(projectDirPath))
+						std::filesystem::create_directories(projectDirPath);
 
-						std::filesystem::path projectPath = projectDirPath / (prjName + ".arcproj");
-						SaveProject(projectPath);
-						OpenProject(projectPath);
-						ImGui::CloseCurrentPopup();
-					}
+					std::filesystem::path projectPath = projectDirPath / (m_TempProjectName + ".arcproj");
+					SaveProject(projectPath);
+					OpenProject(projectPath);
+					ImGui::CloseCurrentPopup();
 				}
+				ImGui::EndDisabled();
+
 				ImGui::SameLine();
 				if (ImGui::Button("Cancel", ImVec2(120, 0)))
 				{
@@ -580,7 +584,7 @@ namespace ArcEngine
 	{
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen_persistant = true;
-		bool opt_fullscreen = opt_fullscreen_persistant;
+		const bool opt_fullscreen = opt_fullscreen_persistant;
 		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoCloseButton;
 
 		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dock-able into,
@@ -615,22 +619,22 @@ namespace ArcEngine
 
 		// DockSpace
 
-		float frameHeight = ImGui::GetFrameHeight();
-		float menuBarSize = 1.0f * frameHeight;
-		float bottomMenuBarSize = 1.0f * frameHeight;
-		float dockSpaceOffsetY = ImGui::GetCursorPosY() + menuBarSize + (m_TopMenuBarHeight - frameHeight);
+		const float frameHeight = ImGui::GetFrameHeight();
+		const float menuBarSize = 1.0f * frameHeight;
+		const float bottomMenuBarSize = 1.0f * frameHeight;
+		const float dockSpaceOffsetY = ImGui::GetCursorPosY() + menuBarSize + (m_TopMenuBarHeight - frameHeight);
 
-		ImVec2 dockSpaceSize = ImVec2(viewport->Size.x, viewport->Size.y - (menuBarSize + bottomMenuBarSize + m_TopMenuBarHeight));
+		const ImVec2 dockSpaceSize = ImVec2(viewport->Size.x, viewport->Size.y - (menuBarSize + bottomMenuBarSize + m_TopMenuBarHeight));
 
 		ImGuiStyle& style = ImGui::GetStyle();
-		float minWinSizeX = style.WindowMinSize.x;
-		float minWinSizeY = style.WindowMinSize.y;
+		const float minWinSizeX = style.WindowMinSize.x;
+		const float minWinSizeY = style.WindowMinSize.y;
 		style.WindowMinSize.x = 370.0f;
 		style.WindowMinSize.y = 150.0f;
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
 			ImGui::SetCursorPosY(dockSpaceOffsetY);
-			ImGuiID dockspace_id = ImGui::GetID(name);
+			const ImGuiID dockspace_id = ImGui::GetID(name);
 			ImGui::DockSpace(dockspace_id, dockSpaceSize, dockspace_flags);
 		}
 
@@ -668,9 +672,9 @@ namespace ArcEngine
 				Ctrl+Alt+O			Open project
 		*/
 
-		bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
-		bool ctrl = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
-		bool alt = Input::IsKeyPressed(Key::LeftAlt) || Input::IsKeyPressed(Key::RightAlt);
+		const bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
+		const bool ctrl = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
+		const bool alt = Input::IsKeyPressed(Key::LeftAlt) || Input::IsKeyPressed(Key::RightAlt);
 
 		switch (e.GetKeyCode())
 		{
@@ -743,7 +747,7 @@ namespace ArcEngine
 				}
 				if (ctrl && shift)
 				{
-					Entity entity = m_ActiveScene->CreateEntity();
+					const Entity entity = m_ActiveScene->CreateEntity();
 					m_SelectedContext.Set(EditorContextType::Entity, reinterpret_cast<const char*>(&entity), sizeof(Entity));
 					return true;
 				}
@@ -754,7 +758,7 @@ namespace ArcEngine
 				}
 				if (alt && shift && m_SelectedContext.GetType() == EditorContextType::Entity)
 				{
-					Entity child = m_ActiveScene->CreateEntity();
+					const Entity child = m_ActiveScene->CreateEntity();
 					child.SetParent(*m_SelectedContext.As<Entity>());
 					m_SelectedContext.Set(EditorContextType::Entity, reinterpret_cast<const char*>(&child), sizeof(Entity));
 					return true;
@@ -817,7 +821,7 @@ namespace ArcEngine
 
 			if (!Project::GetActive()->GetConfig().StartScene.empty())
 			{
-				auto startScenePath = Project::GetAssetFileSystemPath(Project::GetActive()->GetConfig().StartScene);
+				const auto startScenePath = Project::GetAssetFileSystemPath(Project::GetActive()->GetConfig().StartScene);
 				OpenScene(startScenePath.string().c_str());
 			}
 
@@ -835,7 +839,7 @@ namespace ArcEngine
 
 	void EditorLayer::OpenProject()
 	{
-		std::string filepath = FileDialogs::OpenFile("Arc Scene (*.arcproj)\0*.arcproj\0");
+		const std::string filepath = FileDialogs::OpenFile("Arc Scene (*.arcproj)\0*.arcproj\0");
 		if (!filepath.empty())
 			OpenProject(filepath);
 	}
@@ -886,7 +890,7 @@ namespace ArcEngine
 		if (!m_Viewports.empty())
 			m_Viewports[0]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
 
-		SceneSerializer serializer(m_ActiveScene);
+		const SceneSerializer serializer(m_ActiveScene);
 		if (!serializer.Deserialize(filepath))
 			ARC_CORE_ERROR("Could not deserialize scene!");
 		m_ScenePath = filepath;
@@ -896,7 +900,7 @@ namespace ArcEngine
 	{
 		if (!m_ScenePath.empty())
 		{
-			SceneSerializer serializer(m_ActiveScene);
+			const SceneSerializer serializer(m_ActiveScene);
 			serializer.Serialize(m_ScenePath.string());
 		}
 		else
@@ -907,10 +911,10 @@ namespace ArcEngine
 
 	void EditorLayer::SaveSceneAs()
 	{
-		std::string filepath = FileDialogs::SaveFile("Arc Scene (*.arc)\0*.arc\0");
+		const std::string filepath = FileDialogs::SaveFile("Arc Scene (*.arc)\0*.arc\0");
 		if (!filepath.empty())
 		{
-			SceneSerializer serializer(m_ActiveScene);
+			const SceneSerializer serializer(m_ActiveScene);
 			serializer.Serialize(filepath);
 			m_ScenePath = filepath;
 		}

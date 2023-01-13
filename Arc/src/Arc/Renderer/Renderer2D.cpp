@@ -53,8 +53,10 @@ namespace ArcEngine
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 1; // 0 = white texture
 
-		glm::vec4 QuadVertexPositions[4];
-		
+		static constexpr glm::vec4 QuadVertexPositions[4] =	  { { -0.5f, -0.5f, 0.0f, 1.0f },
+																{  0.5f, -0.5f, 0.0f, 1.0f },
+																{  0.5f,  0.5f, 0.0f, 1.0f },
+																{ -0.5f,  0.5f, 0.0f, 1.0f } };
 		Renderer2D::Statistics Stats;
 	};
 
@@ -78,7 +80,7 @@ namespace ArcEngine
 
 		s_Data.QuadVertexBufferBase = new QuadVertex[Renderer2DData::MaxVertices];
 
-		auto quadIndices = new uint32_t[Renderer2DData::MaxIndices];
+		const auto quadIndices = new uint32_t[Renderer2DData::MaxIndices];
 
 		uint32_t offset = 0;
 		for (uint32_t i = 0; i < Renderer2DData::MaxIndices; i += 6)
@@ -125,11 +127,6 @@ namespace ArcEngine
 
 		// Set first texture slot to 0
 		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
-
-		s_Data.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
-		s_Data.QuadVertexPositions[1] = {  0.5f, -0.5f, 0.0f, 1.0f };
-		s_Data.QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
-		s_Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
 	}
 
 	void Renderer2D::Shutdown()
@@ -184,7 +181,7 @@ namespace ArcEngine
 
 		if(s_Data.QuadIndexCount)
 		{
-			auto dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Data.QuadVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Data.QuadVertexBufferBase));
+			const auto dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Data.QuadVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Data.QuadVertexBufferBase));
 			s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
 		
 			for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
@@ -196,7 +193,7 @@ namespace ArcEngine
 
 		if (s_Data.LineVertexCount)
 		{
-			auto dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Data.LineVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Data.LineVertexBufferBase));
+			const auto dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Data.LineVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Data.LineVertexBufferBase));
 			s_Data.LineVertexBuffer->SetData(s_Data.LineVertexBufferBase, dataSize);
 			s_Data.LineShader->Bind();
 			RenderCommand::DrawLines(s_Data.LineVertexArray, s_Data.LineVertexCount);
@@ -244,7 +241,7 @@ namespace ArcEngine
 
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
-			s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferPtr->Position = transform * Renderer2DData::QuadVertexPositions[i];
 			s_Data.QuadVertexBufferPtr->Color = color;
 			s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
 			s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
@@ -290,7 +287,7 @@ namespace ArcEngine
 
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
-			s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferPtr->Position = transform * Renderer2DData::QuadVertexPositions[i];
 			s_Data.QuadVertexBufferPtr->Color = tintColor;
 			s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
 			s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
@@ -322,10 +319,10 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		glm::vec3 p0 = glm::vec3(position.x - size.x * 0.5f, position.y - size.y * 0.5f, position.z);
-		glm::vec3 p1 = glm::vec3(position.x + size.x * 0.5f, position.y - size.y * 0.5f, position.z);
-		glm::vec3 p2 = glm::vec3(position.x + size.x * 0.5f, position.y + size.y * 0.5f, position.z);
-		glm::vec3 p3 = glm::vec3(position.x - size.x * 0.5f, position.y + size.y * 0.5f, position.z);
+		const glm::vec3 p0 = { position.x - size.x * 0.5f, position.y - size.y * 0.5f, position.z };
+		const glm::vec3 p1 = { position.x + size.x * 0.5f, position.y - size.y * 0.5f, position.z };
+		const glm::vec3 p2 = { position.x + size.x * 0.5f, position.y + size.y * 0.5f, position.z };
+		const glm::vec3 p3 = { position.x - size.x * 0.5f, position.y + size.y * 0.5f, position.z };
 
 		DrawLine(p0, p1, color);
 		DrawLine(p1, p2, color);
@@ -339,7 +336,7 @@ namespace ArcEngine
 
 		glm::vec3 lineVertices[4];
 		for (size_t i = 0; i < 4; i++)
-			lineVertices[i] = transform * s_Data.QuadVertexPositions[i];
+			lineVertices[i] = transform * Renderer2DData::QuadVertexPositions[i];
 
 		DrawLine(lineVertices[0], lineVertices[1], color);
 		DrawLine(lineVertices[1], lineVertices[2], color);

@@ -39,6 +39,6 @@ namespace ArcEngine
 		uint32_t m_RendererID = 0;
 		uint32_t m_IrradianceRendererID = 0;
 		uint32_t m_RadianceRendererID = 0;
-		GLenum m_InternalFormat, m_DataFormat;
+		GLenum m_InternalFormat = 0, m_DataFormat = 0;
 	};
 }

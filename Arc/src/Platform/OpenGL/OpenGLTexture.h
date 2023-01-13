@@ -22,7 +22,7 @@ namespace ArcEngine
 		[[nodiscard]] uint64_t GetRendererID() const override { return m_RendererID; }
 		[[nodiscard]] const std::string& GetPath() const override { return m_Path; }
 
-		void SetData(void* data, uint32_t size) override;
+		void SetData(void* data, [[maybe_unused]] uint32_t size) override;
 		void Invalidate(std::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels) override;
 
 		void Bind(uint32_t slot = 0) const override;
@@ -34,6 +34,6 @@ namespace ArcEngine
 		std::string m_Path;
 		uint32_t m_Width = 0, m_Height = 0;
 		uint32_t m_RendererID = 0;
-		GLenum m_InternalFormat, m_DataFormat;
+		GLenum m_InternalFormat = 0, m_DataFormat = 0;
 	};
 }

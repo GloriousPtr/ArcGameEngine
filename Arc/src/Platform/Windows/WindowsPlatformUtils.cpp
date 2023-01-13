@@ -28,12 +28,11 @@ namespace ArcEngine
 		bi.ulFlags = BIF_RETURNONLYFSDIRS;
 		bi.lpfn = nullptr;
 		bi.lParam = 0;
-		const auto* pidl = SHBrowseForFolder(&bi);
-		if (pidl)
+		if (const auto* pidl = SHBrowseForFolder(&bi))
 		{
 			if (SHGetPathFromIDList(pidl, szTitle))
 			{
-				_bstr_t b(szTitle);
+				const _bstr_t b(szTitle);
 				const char* c = b;
 				return c;
 			}
@@ -81,8 +80,8 @@ namespace ArcEngine
 
 	void FileDialogs::OpenFolderAndSelectItem(const char* path)
 	{
-		_bstr_t widePath(path);
-		if (LPITEMIDLIST pidl = ILCreateFromPath(widePath))
+		const _bstr_t widePath(path);
+		if (const LPITEMIDLIST pidl = ILCreateFromPath(widePath))
 		{
 			SHOpenFolderAndSelectItems(pidl, 0, nullptr, 0);
 			ILFree(pidl);
@@ -91,7 +90,7 @@ namespace ArcEngine
 
 	void FileDialogs::OpenFileWithProgram(const char* path)
 	{
-		_bstr_t widePath(path);
+		const _bstr_t widePath(path);
 		ShellExecute(nullptr, L"open", widePath, nullptr, nullptr, SW_RESTORE);
 	}
 }

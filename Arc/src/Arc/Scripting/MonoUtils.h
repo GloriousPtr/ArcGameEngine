@@ -13,6 +13,6 @@ namespace ArcEngine
 
 		[[nodiscard]] static bool CheckMonoError(MonoError& error);
 		[[nodiscard]] static std::string MonoStringToUTF8(MonoString* monoString);
-		[[nodiscard]] static MonoString* UTF8ToMonoString(const std::string& monoString);
+		[[nodiscard]] static MonoString* UTF8ToMonoString(const std::string& str);
 	};
 }

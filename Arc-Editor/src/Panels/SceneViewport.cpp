@@ -175,7 +175,7 @@ namespace ArcEngine
 			ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 			m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
-			uint64_t textureID = m_RenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
+			const uint64_t textureID = m_RenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
 			ImGui::Image(reinterpret_cast<ImTextureID>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 			if (m_SceneHierarchyPanel)
@@ -184,7 +184,7 @@ namespace ArcEngine
 			if (!m_SimulationRunning)
 			{
 				// Transform Gizmos
-				uint64_t id = reinterpret_cast<uint64_t>(&m_ID);
+				const uint64_t id = reinterpret_cast<uint64_t>(&m_ID);
 				ImGuizmo::SetID(static_cast<int>(id));
 				ImGuizmo::SetOrthographic(false);
 				ImGuizmo::SetDrawlist();
@@ -200,8 +200,7 @@ namespace ArcEngine
 					EditorContext context = EditorLayer::GetInstance()->GetContext();
 					if (context.IsValid(EditorContextType::Entity))
 					{
-						Entity selectedEntity = *context.As<Entity>();
-						if (selectedEntity)
+						if (const Entity selectedEntity = *context.As<Entity>())
 						{
 							// Entity Transform
 							auto& tc = selectedEntity.GetComponent<TransformComponent>();
@@ -327,9 +326,9 @@ namespace ArcEngine
 					m_MiniViewportRenderGraphData->RenderPassTarget->Unbind();
 
 					ImGui::SetItemAllowOverlap();
-					ImVec2 miniViewportSize = { m_ViewportSize.x * m_MiniViewportSizeMultiplier, m_ViewportSize.y * m_MiniViewportSizeMultiplier };
+					const ImVec2 miniViewportSize = { m_ViewportSize.x * m_MiniViewportSizeMultiplier, m_ViewportSize.y * m_MiniViewportSizeMultiplier };
 					ImGui::SetCursorPos({ endCursorPos.x - miniViewportSize.x - windowPadding.x, endCursorPos.y - miniViewportSize.y - windowPadding.y });
-					uint64_t textureId = m_MiniViewportRenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
+					const uint64_t textureId = m_MiniViewportRenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
 					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), ImVec2{ miniViewportSize.x, miniViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
 				}
 			}
@@ -348,7 +347,7 @@ namespace ArcEngine
 		{
 			constexpr glm::vec4 color = glm::vec4(1.0f);
 
-			auto view = m_Scene->GetAllEntitiesWith<TransformComponent, CameraComponent>();
+			const auto view = m_Scene->GetAllEntitiesWith<TransformComponent, CameraComponent>();
 			for (auto &&[entityHandle, tc, cam] : view.each())
 			{
 				Entity entity = { entityHandle, m_Scene.get() };
@@ -391,7 +390,7 @@ namespace ArcEngine
 		{
 			constexpr glm::vec4 color = { 0.32f, 0.53f, 0.78f, 1.0f };
 
-			auto boxColliderView = m_Scene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
+			const auto boxColliderView = m_Scene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
 			for (auto &&[entity, tc, bc] : boxColliderView.each())
 			{
 				glm::mat4 transform = Entity(entity, m_Scene.get()).GetWorldTransform();
@@ -399,7 +398,7 @@ namespace ArcEngine
 				Renderer2D::DrawRect(transform, color);
 			}
 
-			auto polygonColliderView = m_Scene->GetAllEntitiesWith<TransformComponent, PolygonCollider2DComponent>();
+			const auto polygonColliderView = m_Scene->GetAllEntitiesWith<TransformComponent, PolygonCollider2DComponent>();
 			for (auto &&[entity, tc, pc] : polygonColliderView.each())
 			{
 				auto transform = Entity(entity, m_Scene.get()).GetWorldTransform();
@@ -424,16 +423,14 @@ namespace ArcEngine
 		{
 			constexpr glm::vec4 color = { 0.2f, 0.8f, 0.2f, 1.0f };
 
-			auto view = m_Scene->GetAllEntitiesWith<TransformComponent, BoxColliderComponent>();
+			const auto view = m_Scene->GetAllEntitiesWith<TransformComponent, BoxColliderComponent>();
 			for (auto &&[entity, tc, bc] : view.each())
 			{
-				glm::mat4 transform = Entity(entity, m_Scene.get()).GetWorldTransform();
-				transform *= glm::translate(glm::mat4(1.0f), bc.Offset) * glm::scale(glm::mat4(1.0f), 4.0f * bc.Size);
-
-				glm::mat4 transformFront = glm::translate(transform, glm::vec3(0.0f, 0.0f, bc.Size.z));
-				glm::mat4 transformBack = glm::translate(transform, glm::vec3(0.0f, 0.0f, -bc.Size.z));
-				glm::mat4 transformLeft = glm::translate(transform, glm::vec3(-bc.Size.x, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-				glm::mat4 transformRight = glm::translate(transformLeft, glm::vec3(0.0f, 0.0f, 2.0f * bc.Size.x));
+				const glm::mat4 transform = Entity(entity, m_Scene.get()).GetWorldTransform() * glm::translate(glm::mat4(1.0f), bc.Offset) * glm::scale(glm::mat4(1.0f), 4.0f * bc.Size);
+				const glm::mat4 transformFront = glm::translate(transform, glm::vec3(0.0f, 0.0f, bc.Size.z));
+				const glm::mat4 transformBack = glm::translate(transform, glm::vec3(0.0f, 0.0f, -bc.Size.z));
+				const glm::mat4 transformLeft = glm::translate(transform, glm::vec3(-bc.Size.x, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				const glm::mat4 transformRight = glm::translate(transformLeft, glm::vec3(0.0f, 0.0f, 2.0f * bc.Size.x));
 
 				Renderer2D::DrawRect(transformFront, color);
 				Renderer2D::DrawRect(transformBack, color);

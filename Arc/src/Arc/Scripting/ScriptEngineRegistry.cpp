@@ -131,9 +131,9 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		std::string file = MonoUtils::MonoStringToUTF8(filepath);
-		std::string func = MonoUtils::MonoStringToUTF8(function);
-		std::string msg = MonoUtils::MonoStringToUTF8(formattedMessage);
+		const std::string file = MonoUtils::MonoStringToUTF8(filepath);
+		const std::string func = MonoUtils::MonoStringToUTF8(function);
+		const std::string msg = MonoUtils::MonoStringToUTF8(formattedMessage);
 
 		switch (level)
 		{
@@ -212,10 +212,10 @@ namespace ArcEngine
 
 		MonoType* monoType = mono_reflection_type_get_type(static_cast<MonoReflectionType*>(type));
 
-		auto it = s_GetComponentFuncs.find(monoType);
+		const auto it = s_GetComponentFuncs.find(monoType);
 		if (it != s_GetComponentFuncs.end())
 		{
-			if (GCHandle handle = it->second(GetEntity(entityID), monoType))
+			if (const GCHandle handle = it->second(GetEntity(entityID), monoType))
 				return GCManager::GetReferencedObject(handle);
 		}
 
@@ -337,6 +337,15 @@ namespace ArcEngine
 	// Rigid body 2D ///////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
+	inline b2Body* GetB2Body(const Rigidbody2DComponent& component)
+	{
+		[[likely]]
+		if (component.RuntimeBody)
+			return static_cast<b2Body*>(component.RuntimeBody);
+
+		return nullptr;
+	}
+
 	static void Rigidbody2DComponent_GetBodyType(uint64_t entityID, int32_t* outType)
 	{
 		ARC_PROFILE_SCOPE()
@@ -350,11 +359,8 @@ namespace ArcEngine
 
 		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
 		component.Type = static_cast<Rigidbody2DComponent::BodyType>(*type);
-		if (component.RuntimeBody)
-		{
-			auto* body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->SetType(static_cast<b2BodyType>(*type));
-		}
 	}
 
 	static void Rigidbody2DComponent_GetAutoMass(uint64_t entityID, bool* outAutoMass)
@@ -370,9 +376,8 @@ namespace ArcEngine
 
 		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
 		component.AutoMass = *autoMass;
-		if (component.RuntimeBody)
+		if (auto* body = GetB2Body(component))
 		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
 			if (!component.AutoMass)
 			{
 				b2MassData massData = body->GetMassData();
@@ -398,9 +403,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		if (component.RuntimeBody)
+		if (auto* body = GetB2Body(component))
 		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
 			if (!component.AutoMass)
 			{
 				component.Mass = glm::max(*mass, 0.011f);
@@ -428,11 +432,8 @@ namespace ArcEngine
 
 		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
 		component.LinearDrag = glm::max(*drag, 0.0f);
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->SetLinearDamping(component.LinearDrag);
-		}
 	}
 
 	static void Rigidbody2DComponent_GetAngularDrag(uint64_t entityID, float* outDrag)
@@ -448,11 +449,8 @@ namespace ArcEngine
 
 		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
 		component.AngularDrag = glm::max(*drag, 0.0f);
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->SetAngularDamping(component.AngularDrag);
-		}
 	}
 
 	static void Rigidbody2DComponent_GetAllowSleep(uint64_t entityID, bool* outState)
@@ -468,11 +466,8 @@ namespace ArcEngine
 
 		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
 		component.AllowSleep = *state;
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->SetSleepingAllowed(component.AllowSleep);
-		}
 	}
 
 	static void Rigidbody2DComponent_GetAwake(uint64_t entityID, bool* outState)
@@ -488,11 +483,8 @@ namespace ArcEngine
 
 		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
 		component.Awake = *state;
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->SetAwake(component.Awake);
-		}
 	}
 
 	static void Rigidbody2DComponent_GetContinuous(uint64_t entityID, bool* outState)
@@ -508,11 +500,8 @@ namespace ArcEngine
 
 		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
 		component.Continuous = *state;
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->SetBullet(component.Continuous);
-		}
 	}
 
 	static void Rigidbody2DComponent_GetFreezeRotation(uint64_t entityID, bool* outState)
@@ -528,11 +517,8 @@ namespace ArcEngine
 
 		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
 		component.FreezeRotation = *state;
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->SetFixedRotation(component.FreezeRotation);
-		}
 	}
 
 	static void Rigidbody2DComponent_GetGravityScale(uint64_t entityID, float* outGravityScale)
@@ -548,11 +534,8 @@ namespace ArcEngine
 
 		auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
 		component.GravityScale = *gravityScale;
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->SetGravityScale(component.GravityScale);
-		}
 	}
 
 	static void Rigidbody2DComponent_ApplyForceAtCenter(uint64_t entityID, const glm::vec2* force)
@@ -560,11 +543,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		const auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->ApplyForceToCenter({ force->x, force->y }, true);
-		}
 	}
 
 	static void Rigidbody2DComponent_ApplyForce(uint64_t entityID, const glm::vec2* force, const glm::vec2* point)
@@ -572,11 +552,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		const auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->ApplyForce({ force->x, force->y }, { point->x, point->y }, true);
-		}
 	}
 
 	static void Rigidbody2DComponent_ApplyLinearImpulse(uint64_t entityID, const glm::vec2* impulse, const glm::vec2* point)
@@ -584,11 +561,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		const auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->ApplyLinearImpulse({ impulse->x, impulse->y }, { point->x, point->y }, true);
-		}
 	}
 
 	static void Rigidbody2DComponent_ApplyLinearImpulseAtCenter(uint64_t entityID, const glm::vec2* impulse)
@@ -596,11 +570,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		const auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->ApplyLinearImpulseToCenter({ impulse->x, impulse->y }, true);
-		}
 	}
 
 	static void Rigidbody2DComponent_ApplyAngularImpulse(uint64_t entityID, const float* impulse)
@@ -608,11 +579,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		const auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->ApplyAngularImpulse(*impulse, true);
-		}
 	}
 
 	static void Rigidbody2DComponent_ApplyTorque(uint64_t entityID, const float* torque)
@@ -620,11 +588,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		const auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->ApplyTorque(*torque, true);
-		}
 	}
 
 	static void Rigidbody2DComponent_IsAwake(uint64_t entityID, bool* outAwake)
@@ -632,15 +597,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		const auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		if (component.RuntimeBody)
-		{
-			const auto body = static_cast<b2Body*>(component.RuntimeBody);
-			*outAwake = body->IsAwake();
-		}
-		else
-		{
-			*outAwake = false;
-		}
+		const auto* body = GetB2Body(component);
+		*outAwake = body ? body->IsAwake() : false;
 	}
 
 	static void Rigidbody2DComponent_IsSleeping(uint64_t entityID, bool* outSleeping)
@@ -657,11 +615,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		const auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->SetTransform({ position->x, position->y }, body->GetAngle());
-		}
 	}
 
 	static void Rigidbody2DComponent_MoveRotation(uint64_t entityID, const float* angleRadians)
@@ -669,11 +624,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		const auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->SetTransform(body->GetPosition(), *angleRadians);
-		}
 	}
 
 	static void Rigidbody2DComponent_GetVelocity(uint64_t entityID, glm::vec2* outVelocity)
@@ -681,10 +633,9 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		const auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		if (component.RuntimeBody)
+		if (const auto* body = GetB2Body(component))
 		{
-			const auto body = static_cast<b2Body*>(component.RuntimeBody);
-			b2Vec2 velocity = body->GetLinearVelocity();
+			const b2Vec2 velocity = body->GetLinearVelocity();
 			outVelocity->x = velocity.x;
 			outVelocity->y = velocity.y;
 		}
@@ -699,11 +650,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		const auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->SetLinearVelocity({ velocity->x, velocity->y });
-		}
 	}
 
 	static void Rigidbody2DComponent_GetAngularVelocity(uint64_t entityID, float* outVelocity)
@@ -711,15 +659,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		const auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		if (component.RuntimeBody)
-		{
-			const auto body = static_cast<b2Body*>(component.RuntimeBody);
-			*outVelocity = body->GetAngularVelocity();
-		}
-		else
-		{
-			*outVelocity = 0.0f;
-		}
+		const auto* body = GetB2Body(component);
+		*outVelocity = body ? body->GetAngularVelocity() : 0.0f;
 	}
 
 	static void Rigidbody2DComponent_SetAngularVelocity(uint64_t entityID, const float* velocity)
@@ -727,11 +668,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		const auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->SetAngularVelocity(*velocity);
-		}
 	}
 
 	static void Rigidbody2DComponent_Sleep(uint64_t entityID)
@@ -739,11 +677,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		const auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->SetAwake(false);
-		}
 	}
 
 	static void Rigidbody2DComponent_WakeUp(uint64_t entityID)
@@ -751,11 +686,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		const auto& component = GetEntity(entityID).GetComponent<Rigidbody2DComponent>();
-		if (component.RuntimeBody)
-		{
-			auto body = static_cast<b2Body*>(component.RuntimeBody);
+		if (auto* body = GetB2Body(component))
 			body->SetAwake(true);
-		}
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////

@@ -23,32 +23,14 @@ namespace ArcEngine
 		return 0;
 	}
 	
-	OpenGLShader::OpenGLShader(const std::string& filepath)
+	OpenGLShader::OpenGLShader(const std::filesystem::path& filepath)
 	{
 		ARC_PROFILE_SCOPE()
-		
-		std::string source;
-		Filesystem::ReadFileText(filepath, source);
-		auto shaderSources = PreProcess(source);
-		Compile(shaderSources);
-		
-		// Extract name from filepath
-		auto lastSlash = filepath.find_last_of("/\\");
-		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
-		auto lastDot = filepath.rfind('.');
-		auto count = lastDot == std::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
-		m_Name = filepath.substr(lastSlash, count);
-	}
 
-	OpenGLShader::OpenGLShader(const std::string& name, std::string_view vertexSrc, std::string_view fragmentSrc)
-		: m_Name(name)
-	{
-		ARC_PROFILE_SCOPE()
-		
-		std::unordered_map<GLenum, std::string> sources;
-		sources[GL_VERTEX_SHADER] = vertexSrc;
-		sources[GL_FRAGMENT_SHADER] = fragmentSrc;
-		Compile(sources);
+		const std::string source = Filesystem::ReadFileText(filepath);
+		const auto shaderSources = PreProcess(source);
+		Compile(shaderSources);
+		m_Name = filepath.filename().string();
 	}
 
 	OpenGLShader::~OpenGLShader()
@@ -58,15 +40,14 @@ namespace ArcEngine
 		glDeleteProgram(m_RendererID);
 	}
 
-	void OpenGLShader::Recompile(const std::string& filepath)
+	void OpenGLShader::Recompile(const std::filesystem::path& filepath)
 	{
 		ARC_PROFILE_SCOPE()
 
 		glDeleteProgram(m_RendererID);
 
-		std::string source;
-		Filesystem::ReadFileText(filepath, source);
-		auto shaderSources = PreProcess(source);
+		const std::string source = Filesystem::ReadFileText(filepath);
+		const auto shaderSources = PreProcess(source);
 		Compile(shaderSources);
 	}
 
@@ -207,17 +188,17 @@ namespace ArcEngine
 		std::unordered_map<GLenum, std::string> shaderSources;
 
 		constexpr const char* typeToken = "#type";
-		size_t typeTokenLength = std::string_view(typeToken).size();
+		constexpr size_t typeTokenLength = std::string_view(typeToken).size();
 		size_t pos = source.find(typeToken, 0);
 		while (pos != std::string::npos)
 		{
-			size_t eol = source.find_first_of("\r\n", pos);
+			const size_t eol = source.find_first_of("\r\n", pos);
 			ARC_CORE_ASSERT(eol != std::string::npos, "Syntax error")
-			size_t begin = pos + typeTokenLength + 1;
-			std::string type = static_cast<std::string>(source.substr(begin, eol - begin));
+			const size_t begin = pos + typeTokenLength + 1;
+			const std::string type = static_cast<std::string>(source.substr(begin, eol - begin));
 			ARC_CORE_ASSERT(ShaderTypeFromString(type), "Invalid shader type specified")
 
-			size_t nextLinePos = source.find_first_not_of("\r\n", eol);
+			const size_t nextLinePos = source.find_first_not_of("\r\n", eol);
 			pos = source.find(typeToken, nextLinePos);
 			shaderSources[ShaderTypeFromString(type)] = source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));
 		}
@@ -243,14 +224,14 @@ namespace ArcEngine
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
 		ARC_PROFILE_SCOPE()
-		
-		GLuint program = glCreateProgram();
+
+		const GLuint program = glCreateProgram();
 		ARC_CORE_ASSERT(shaderSources.size() <= 2, "We only support 2 shaders for now")
 		std::array<GLenum, 2> glShaderIDs = {};
 		int glShaderIDIndex = 0;
 		for (const auto& [type, source] : shaderSources)
 		{
-			GLuint shader = glCreateShader(type);
+			const GLuint shader = glCreateShader(type);
 			
 			const GLchar* sourceCStr = source.c_str();
 			glShaderSource(shader, 1, &sourceCStr, nullptr);
@@ -293,7 +274,7 @@ namespace ArcEngine
 			glGetProgramInfoLog(program, maxLength, &maxLength, infoLog.data());
 			
 			glDeleteProgram(program);
-			for (auto id : glShaderIDs)
+			for (const auto id : glShaderIDs)
 				glDeleteShader(id);
 
 			ARC_CORE_ERROR("{0}", infoLog.data());
@@ -301,7 +282,7 @@ namespace ArcEngine
 			return;
 		}
 
-		for (auto id : glShaderIDs)
+		for (const auto id : glShaderIDs)
 			glDetachShader(program, id);
 
 		m_RendererID = program;

@@ -40,11 +40,11 @@ namespace std
 	{
 		size_t operator()(ArcEngine::Vertex const& vertex) const noexcept
 		{
-			std::size_t h1 = std::hash<glm::vec3>{}(vertex.Position);
-			std::size_t h2 = std::hash<glm::vec2>{}(vertex.TexCoord);
-			std::size_t h3 = std::hash<glm::vec3>{}(vertex.Normal);
-			std::size_t h4 = std::hash<glm::vec3>{}(vertex.Tangent);
-			std::size_t h5 = std::hash<glm::vec3>{}(vertex.Bitangent);
+			const std::size_t h1 = std::hash<glm::vec3>{}(vertex.Position);
+			const std::size_t h2 = std::hash<glm::vec2>{}(vertex.TexCoord);
+			const std::size_t h3 = std::hash<glm::vec3>{}(vertex.Normal);
+			const std::size_t h4 = std::hash<glm::vec3>{}(vertex.Tangent);
+			const std::size_t h5 = std::hash<glm::vec3>{}(vertex.Bitangent);
 			return h1 ^ (h2 << 1) ^ (h3 << 2) ^ (h4 << 3) ^ (h5 << 4);
 		}
 	};
@@ -213,7 +213,7 @@ namespace ArcEngine
 							(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
 								name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
 						{
-							submesh.Mat->SetData(name.c_str(), 1);
+							submesh.Mat->SetData(name, 1);
 						}
 					}
 				}
