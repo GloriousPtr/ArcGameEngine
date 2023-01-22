@@ -77,6 +77,7 @@ project "Arc"
 
 	filter "system:windows"
 		systemversion "latest"
+		buildoptions { "/bigobj" }
 		links
 		{
 			"%{LibDir.Mono}/mono-2.0-sgen.lib",
