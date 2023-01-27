@@ -297,7 +297,7 @@ namespace ArcEngine
 				if (s_LastDomainReloadTime < 0.1f)
 					return;
 
-				Refresh();
+				Application::Get().SubmitToMainThread([this]() { Refresh(); });
 
 				std::filesystem::path filepath = path;
 				const std::string ext = filepath.extension().string();
