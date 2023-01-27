@@ -10,7 +10,7 @@
 ![GitHub](https://img.shields.io/github/license/MohitSethi99/ArcEngine?color=blue&style=flat-square)
 ![Size](https://img.shields.io/github/repo-size/MohitSethi99/ArcEngine?style=flat-square)
 
-![](https://github.com/MohitSethi99/ArcEngine/blob/main/.github/resources/Sponza.png)
+![ARC](https://MohitSethi99.github.io/images/ArcGameEngine/Sponza.jpg)
 
 ## About
 
@@ -58,7 +58,7 @@ Right now, Arc Game Engine is very bare-bones. Its most remarkable features are:
 
 ## Feature Showcase
 
-[![Arc Game Engine Showcase](https://github.com/MohitSethi99/ArcEngine/blob/main/.github/resources/VideoThumbnail.png)](https://youtu.be/bUqAVP7_XAw)
+[![Arc Game Engine Showcase](https://MohitSethi99.github.io/images/ArcGameEngine/VideoThumbnail.jpg)](https://youtu.be/bUqAVP7_XAw)
 
 ## Dependencies
 
