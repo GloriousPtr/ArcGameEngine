@@ -404,7 +404,7 @@ namespace ArcEngine
 		const glm::vec4 tonemappingParams = { static_cast<int>(Tonemapping), Exposure, 0.0f, 0.0f };
 		
 		s_HdrShader->SetFloat4("u_TonemappParams", tonemappingParams);
-		s_HdrShader->SetFloat("u_BloomStrength", UseBloom ? BloomStrength : 0.0f);
+		s_HdrShader->SetFloat("u_BloomStrength", UseBloom ? BloomStrength : -1.0f);
 		s_HdrShader->SetInt("u_Texture", 0);
 		s_HdrShader->SetInt("u_BloomTexture", 1);
 		s_HdrShader->SetInt("u_VignetteMask", 2);
@@ -413,8 +413,9 @@ namespace ArcEngine
 			renderGraphData->FXAAPassTarget->BindColorAttachment(0, 0);
 		else
 			renderGraphData->LightingPassTarget->BindColorAttachment(0, 0);
-		
-		renderGraphData->UpsampledFramebuffers[0]->BindColorAttachment(0, 1);
+
+		if (UseBloom)
+			renderGraphData->UpsampledFramebuffers[0]->BindColorAttachment(0, 1);
 
 		if (VignetteOffset.a > 0.0f)
 		{

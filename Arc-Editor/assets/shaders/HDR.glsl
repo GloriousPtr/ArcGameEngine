@@ -83,7 +83,10 @@ void main()
 {
 	const float gamma = 2.2;
     vec3 hdrColor = texture(u_Texture, v_TexCoord).rgb;
-	hdrColor += texture(u_BloomTexture, v_TexCoord).rgb * u_BloomStrength;
+	
+	if (u_BloomStrength > 0.0f)
+		hdrColor += texture(u_BloomTexture, v_TexCoord).rgb * u_BloomStrength;
+
     vec3 result = vec3(1.0, 0.0, 1.0);
 
 	uint type = uint(round(u_TonemappParams.x));
