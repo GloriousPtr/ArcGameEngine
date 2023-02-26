@@ -63,15 +63,20 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		std::string ext = StringUtils::GetExtension(filepath);
-		bool supportedFile = ext == "obj";
+		std::filesystem::path path = filepath;
+
+		if (!std::filesystem::exists(path))
+			return;
+
+		auto ext = path.extension();
+		bool supportedFile = ext == ".obj";
 		if (!supportedFile)
 		{
 			ARC_CORE_ERROR("{} file(s) not supported: {}", ext, filepath);
 			return;
 		}
 
-		if (ext == "obj")
+		if (ext == ".obj")
 		{
 			tinyobj::ObjReaderConfig reader_config;
 			tinyobj::ObjReader reader;
@@ -167,7 +172,6 @@ namespace ArcEngine
 					const auto& materialProperties = submesh.Mat->GetShader()->GetMaterialProperties();
 					bool normalMapApplied = false;
 
-					std::filesystem::path path = filepath;
 					std::filesystem::path dir = path.parent_path();
 
 					for (const auto& [name, property] : materialProperties)
@@ -221,7 +225,7 @@ namespace ArcEngine
 		}
 
 		m_Filepath = filepath;
-		m_Name = StringUtils::GetNameWithExtension(filepath);
+		m_Name = StringUtils::GetName(filepath);
 	}
 
 	Submesh& Mesh::GetSubmesh(size_t index)

@@ -253,7 +253,9 @@ namespace ArcEngine
 			out << YAML::Key << "SortingOrder" << YAML::Value << spriteRendererComponent.SortingOrder;
 			out << YAML::Key << "TilingFactor" << YAML::Value << spriteRendererComponent.TilingFactor;
 
-			std::string texturePath = spriteRendererComponent.Texture ? Project::GetAssetRelativeFileSystemPath(spriteRendererComponent.Texture->GetPath()).make_preferred().string() : "";
+			std::string texturePath = spriteRendererComponent.Texture ? spriteRendererComponent.Texture->GetPath() : "";
+			if (Project::IsPartOfProject(texturePath))
+				texturePath = Project::GetAssetRelativeFileSystemPath(texturePath).string();
 			std::replace(texturePath.begin(), texturePath.end(), '\\', '/');
 			out << YAML::Key << "TexturePath" << YAML::Value << texturePath;
 
@@ -267,7 +269,9 @@ namespace ArcEngine
 
 			const auto& skyLightComponent = entity.GetComponent<SkyLightComponent>();
 
-			std::string texturePath = skyLightComponent.Texture ? Project::GetAssetRelativeFileSystemPath(skyLightComponent.Texture->GetPath()).string() : "";
+			std::string texturePath = skyLightComponent.Texture ? skyLightComponent.Texture->GetPath() : "";
+			if (Project::IsPartOfProject(texturePath))
+				texturePath = Project::GetAssetRelativeFileSystemPath(texturePath).string();
 			std::replace(texturePath.begin(), texturePath.end(), '\\', '/');
 			out << YAML::Key << "TexturePath" << YAML::Value << texturePath;
 
@@ -359,7 +363,9 @@ namespace ArcEngine
 			out << YAML::Key << "RotationBySpeed.MaxSpeed" << YAML::Value << particleProps.RotationBySpeed.MaxSpeed;
 			out << YAML::Key << "RotationBySpeed.Enabled" << YAML::Value << particleProps.RotationBySpeed.Enabled;
 
-			std::string texturePath = particleProps.Texture ? Project::GetAssetRelativeFileSystemPath(particleProps.Texture->GetPath()).string() : "";
+			std::string texturePath = particleProps.Texture ? particleProps.Texture->GetPath() : "";
+			if (Project::IsPartOfProject(texturePath))
+				texturePath = Project::GetAssetRelativeFileSystemPath(texturePath).string();
 			std::replace(texturePath.begin(), texturePath.end(), '\\', '/');
 			out << YAML::Key << "TexturePath" << YAML::Value << texturePath;
 
@@ -666,7 +672,9 @@ namespace ArcEngine
 			out << YAML::BeginMap;
 			
 			const auto& meshComponent = entity.GetComponent<MeshComponent>();
-			std::string filepath = meshComponent.MeshGeometry ? Project::GetAssetRelativeFileSystemPath(meshComponent.MeshGeometry->GetFilepath()).string() : "";
+			std::string filepath = meshComponent.MeshGeometry ? meshComponent.MeshGeometry->GetFilepath() : "";
+			if (Project::IsPartOfProject(filepath))
+				filepath = Project::GetAssetRelativeFileSystemPath(filepath).string();
 			std::replace(filepath.begin(), filepath.end(), '\\', '/');
 			out << YAML::Key << "Filepath" << YAML::Value << filepath;
 			out << YAML::Key << "SubmeshIndex" << YAML::Value << meshComponent.SubmeshIndex;
@@ -744,9 +752,11 @@ namespace ArcEngine
 			out << YAML::BeginMap;
 
 			const auto& audioSourceComponent = entity.GetComponent<AudioSourceComponent>();
-			std::string fp = (audioSourceComponent.Source ? Project::GetAssetRelativeFileSystemPath(audioSourceComponent.Source->GetPath()).string() : "");
-			std::replace(fp.begin(), fp.end(), '\\', '/');
-			out << YAML::Key << "Filepath" << YAML::Value << fp;
+			std::string filepath = audioSourceComponent.Source ? audioSourceComponent.Source->GetPath() : "";
+			if (Project::IsPartOfProject(filepath))
+				filepath = Project::GetAssetRelativeFileSystemPath(filepath).string();
+			std::replace(filepath.begin(), filepath.end(), '\\', '/');
+			out << YAML::Key << "Filepath" << YAML::Value << filepath;
 			out << YAML::Key << "VolumeMultiplier" << YAML::Value << audioSourceComponent.Config.VolumeMultiplier;
 			out << YAML::Key << "PitchMultiplier" << YAML::Value << audioSourceComponent.Config.PitchMultiplier;
 			out << YAML::Key << "PlayOnAwake" << YAML::Value << audioSourceComponent.Config.PlayOnAwake;
@@ -892,8 +902,9 @@ namespace ArcEngine
 
 			if (!texturePath.empty())
 			{
-				std::filesystem::path path = texturePath;
-				path = Project::GetAssetFileSystemPath(path);
+				std::filesystem::path path = Project::GetAssetFileSystemPath(texturePath);
+				if (!std::filesystem::exists(path))
+					path = texturePath;
 				src.Texture = AssetManager::GetTexture2D(path.string());
 			}
 		}
@@ -908,8 +919,9 @@ namespace ArcEngine
 			TrySet(texturePath, skyLight["TexturePath"]);
 			if (!texturePath.empty())
 			{
-				std::filesystem::path path = texturePath;
-				path = Project::GetAssetFileSystemPath(path);
+				std::filesystem::path path = Project::GetAssetFileSystemPath(texturePath);
+				if (!std::filesystem::exists(path))
+					path = texturePath;
 				src.Texture = AssetManager::GetTextureCubemap(path.string());
 			}
 		}
@@ -995,8 +1007,9 @@ namespace ArcEngine
 			TrySet(texturePath, psComponent["TexturePath"]);
 			if (!texturePath.empty())
 			{
-				std::filesystem::path path = texturePath;
-				path = Project::GetAssetFileSystemPath(path);
+				std::filesystem::path path = Project::GetAssetFileSystemPath(texturePath);
+				if (!std::filesystem::exists(path))
+					path = texturePath;
 				props.Texture = AssetManager::GetTexture2D(path.string());
 			}
 		}
@@ -1231,8 +1244,9 @@ namespace ArcEngine
 
 			if (!filepath.empty())
 			{
-				std::filesystem::path path = filepath;
-				path = Project::GetAssetFileSystemPath(path);
+				std::filesystem::path path = Project::GetAssetFileSystemPath(filepath);
+				if (!std::filesystem::exists(path))
+					path = filepath;
 				src.MeshGeometry = AssetManager::GetMesh(path.string());
 			}
 		}
@@ -1330,8 +1344,9 @@ namespace ArcEngine
 
 			if (!filepath.empty())
 			{
-				std::filesystem::path path = filepath;
-				path = Project::GetAssetFileSystemPath(path);
+				std::filesystem::path path = Project::GetAssetFileSystemPath(filepath);
+				if (!std::filesystem::exists(path))
+					path = filepath;
 				src.Source = CreateRef<AudioSource>(path.string().c_str());
 			}
 		}

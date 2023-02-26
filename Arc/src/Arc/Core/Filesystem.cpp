@@ -5,6 +5,12 @@
 
 namespace ArcEngine
 {
+	bool Filesystem::IsPartOfDirectoryTree(const std::filesystem::path& filePath, const std::filesystem::path& rootPath)
+	{
+		const auto relPath = std::filesystem::relative(filePath, rootPath);
+		return relPath.empty() || relPath.string().front() != '.';
+	}
+
 	Buffer Filesystem::ReadFileBinary(const std::filesystem::path& filepath)
 	{
 		std::ifstream stream(filepath, std::ios::binary | std::ios::ate);

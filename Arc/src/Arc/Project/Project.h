@@ -75,9 +75,12 @@ namespace ArcEngine
 			return s_BuildConfigMap.at(s_ActiveProject->GetConfig().BuildConfiguration);
 		}
 
+
 		[[nodiscard]] ProjectConfig& GetConfig() { return m_Config; }
 
 		[[nodiscard]] static Ref<Project> GetActive() { return s_ActiveProject; }
+
+		[[nodiscard]] static bool IsPartOfProject(const std::filesystem::path& filepath);
 
 		[[nodiscard]] static Ref<Project> New();
 		[[nodiscard]] static Ref<Project> Load(const std::filesystem::path& path);

@@ -251,7 +251,7 @@ namespace ArcEngine
 				else if (const ImGuiPayload* assetPanelPayload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
 					const char* path = static_cast<char*>(assetPanelPayload->Data);
-					const std::string ext = StringUtils::GetExtension(path);
+					const auto ext = StringUtils::GetExtension(path);
 					if (ext == "prefab")
 					{
 						m_DraggedEntity = EntitySerializer::DeserializeEntityAsPrefab(path, *m_Context);
@@ -391,8 +391,8 @@ namespace ArcEngine
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 			{
 				const char* path = static_cast<char*>(payload->Data);
-				const std::string name = StringUtils::GetName(path);
-				const std::string ext = StringUtils::GetExtension(path);
+				const std::string name(StringUtils::GetName(path));
+				const auto ext = StringUtils::GetExtension(path);
 
 				if (ext == "prefab")
 				{
@@ -470,6 +470,40 @@ namespace ArcEngine
 				toSelect = m_Context->CreateEntity("Mesh");
 				toSelect.AddComponent<MeshComponent>();
 				ImGui::CloseCurrentPopup();
+			}
+
+			// Primitives
+			{
+				const char* filepath = nullptr;
+				if (ImGui::MenuItem("Cube"))
+				{
+					filepath = "Resources/Models/Primitives/Cube.obj";
+				}
+				if (ImGui::MenuItem("Sphere"))
+				{
+					filepath = "Resources/Models/Primitives/Sphere.obj";
+				}
+				if (ImGui::MenuItem("Plane"))
+				{
+					filepath = "Resources/Models/Primitives/Plane.obj";
+				}
+				if (ImGui::MenuItem("Quad"))
+				{
+					filepath = "Resources/Models/Primitives/Quad.obj";
+				}
+				if (ImGui::MenuItem("Torus"))
+				{
+					filepath = "Resources/Models/Primitives/Torus.obj";
+				}
+				if (filepath)
+				{
+					const auto& mesh = AssetManager::GetMesh(filepath);
+					toSelect = m_Context->CreateEntity(mesh->GetName());
+					auto& meshComponent = toSelect.AddComponent<MeshComponent>();
+					meshComponent.MeshGeometry = mesh;
+					meshComponent.SubmeshIndex = 0;
+					ImGui::CloseCurrentPopup();
+				}
 			}
 
 			ImGui::EndMenu();

@@ -1104,7 +1104,7 @@ namespace ArcEngine
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
 					const char* path = static_cast<char*>(payload->Data);
-					const std::string ext = StringUtils::GetExtension(path);
+					const auto ext = StringUtils::GetExtension(path);
 					if (ext == "mp3" || ext == "wav")
 						component.Source = CreateRef<AudioSource>(path);
 				}
@@ -1187,8 +1187,8 @@ namespace ArcEngine
 
 	void PropertiesPanel::DrawFileProperties(const char* filepath)
 	{
-		const std::string name = StringUtils::GetNameWithExtension(filepath);
-		const std::string& ext = StringUtils::GetExtension(name.c_str());
+		const auto name = StringUtils::GetNameWithExtension(filepath);
+		const auto ext = StringUtils::GetExtension(name);
 
 		if (ext == "prefab")
 		{
@@ -1208,7 +1208,7 @@ namespace ArcEngine
 			if (m_Scene)
 				m_Scene = nullptr;
 
-			ImGui::TextUnformatted(name.c_str());
+			ImGui::TextUnformatted(name.data());
 		}
 	}
 

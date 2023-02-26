@@ -221,7 +221,7 @@ namespace ArcEngine
 				DragDropTarget(entryPath);
 			DragDropFrom(entryPath);
 
-			std::string name = StringUtils::GetNameWithExtension(filepath);
+			auto name = StringUtils::GetNameWithExtension(filepath);
 
 			const char8_t* folderIcon = ICON_MDI_FILE;
 			if (entryIsFile)
@@ -245,7 +245,7 @@ namespace ArcEngine
 			ImGui::TextUnformatted(StringUtils::FromChar8T(folderIcon));
 			ImGui::PopStyleColor();
 			ImGui::SameLine();
-			ImGui::TextUnformatted(name.c_str());
+			ImGui::TextUnformatted(name.data());
 			m_CurrentlyVisibleItemsTreeView++;
 
 			(*count)--;

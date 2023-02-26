@@ -7,6 +7,12 @@
 
 namespace ArcEngine
 {
+	bool Project::IsPartOfProject(const std::filesystem::path& filepath)
+	{
+		ARC_CORE_ASSERT(s_ActiveProject)
+		return !filepath.empty() && Filesystem::IsPartOfDirectoryTree(filepath, Project::GetProjectDirectory());
+	}
+
 	Ref<Project> Project::New()
 	{
 		s_ActiveProject = CreateRef<Project>();

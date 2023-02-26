@@ -58,7 +58,7 @@ Entities:
       Friction: 0.5
       Restitution: 0.5
     MeshComponent:
-      Filepath: Models/Primitives/Cube.fbx
+      Filepath: Resources/Models/Primitives/Cube.obj
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 1304237688638990982
@@ -118,7 +118,7 @@ Entities:
       Friction: 0.5
       Restitution: 0
     MeshComponent:
-      Filepath: Models/Primitives/Cube.fbx
+      Filepath: Resources/Models/Primitives/Cube.obj
       SubmeshIndex: 0
       CullMode: 1
   - Entity: 4444126669705181132
@@ -139,3 +139,21 @@ Entities:
       TexturePath: Textures/Cubemap.hdr
       Intensity: 0.699999988
       Rotation: 0
+  - Entity: 1788361504626844316
+    TagComponent:
+      Tag: Sphere
+      Layer: 2
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 0
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Resources/Models/Primitives/Sphere.obj
+      SubmeshIndex: 0
+      CullMode: 1
