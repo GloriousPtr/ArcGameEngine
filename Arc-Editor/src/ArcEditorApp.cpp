@@ -11,7 +11,7 @@ namespace ArcEngine
 		ArcEditor()
 			: Application("Arc Editor")
 		{
-			PushLayer(new EditorLayer());
+			//PushLayer(new EditorLayer());
 		}
 
 		~ArcEditor() override = default;

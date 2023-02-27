@@ -8,6 +8,7 @@ namespace ArcEngine
 
 	class Dx12Window : public Window
 	{
+	public:
 		explicit Dx12Window(const WindowProps& props);
 		~Dx12Window() override;
 
@@ -18,14 +19,14 @@ namespace ArcEngine
 
 		// Window attributes
 		void SetEventCallBack(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
-		void SetVSync(bool enabled) override;
-		[[nodiscard]] bool IsVSync() const override;
+		void SetVSync(bool enabled) override { m_Data.VSync = enabled; }
+		[[nodiscard]] bool IsVSync() const override { return true; }
 
 		[[nodiscard]] bool IsMaximized() override { return false; }
-		void Minimize() override;
-		void Maximize() override;
-		void Restore() override;
-		void RegisterOverTitlebar(bool value) override;
+		void Minimize() override {}
+		void Maximize() override {}
+		void Restore() override {}
+		void RegisterOverTitlebar(bool value) override { m_Data.OverTitlebar = value; }
 
 		[[nodiscard]] WindowHandle GetNativeWindow() const override { return m_Window; }
 	private:

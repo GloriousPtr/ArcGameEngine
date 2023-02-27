@@ -11,7 +11,7 @@ namespace ArcEngine
 
 		enum class API
 		{
-			None = 0, OpenGL = 1
+			None = 0, OpenGL, Dx12
 		};
 	public:
 		virtual void Init() = 0;

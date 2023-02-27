@@ -27,13 +27,13 @@ namespace ArcEngine
 		m_Window = Window::Create(WindowProps(name));
 		m_Window->SetEventCallBack(ARC_BIND_EVENT_FN(Application::OnEvent));
 
-		Renderer::Init();
-		AudioEngine::Init();
-		ScriptEngine::Init();
+		//Renderer::Init();
+		//AudioEngine::Init();
+		//ScriptEngine::Init();
 
 		m_LayerStack = new LayerStack();
-		m_ImGuiLayer = new ImGuiLayer();
-		PushOverlay(m_ImGuiLayer);
+		//m_ImGuiLayer = new ImGuiLayer();
+		//PushOverlay(m_ImGuiLayer);
 	}
 
 	Application::~Application()
@@ -42,9 +42,9 @@ namespace ArcEngine
 		
 		delete m_LayerStack;
 
-		ScriptEngine::Shutdown();
-		AudioEngine::Shutdown();
-		Renderer::Shutdown();
+		//ScriptEngine::Shutdown();
+		//AudioEngine::Shutdown();
+		//Renderer::Shutdown();
 
 		OPTICK_SHUTDOWN()
 	}
@@ -115,14 +115,14 @@ namespace ArcEngine
 						layer->OnUpdate(timestep);	
 				}
 
-				m_ImGuiLayer->Begin();
+				//m_ImGuiLayer->Begin();
 				{
 					ARC_PROFILE_SCOPE("LayerStack OnImGuiRender")
 
 					for (Layer* layer : *m_LayerStack)
 						layer->OnImGuiRender();
 				}
-				m_ImGuiLayer->End();
+				//m_ImGuiLayer->End();
 			}
 			
 			m_Window->OnUpdate();
