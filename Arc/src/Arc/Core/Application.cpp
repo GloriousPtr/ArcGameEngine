@@ -5,7 +5,6 @@
 #include "Arc/Renderer/Renderer.h"
 #include "Arc/Scripting/ScriptEngine.h"
 
-#include <GLFW/glfw3.h>
 #include <optick.config.h>
 
 extern "C"
@@ -101,8 +100,8 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_FRAME("MainThread")
 
-			const auto time = static_cast<float>(glfwGetTime());
-			const Timestep timestep = time - m_LastFrameTime;
+			const auto time = std::chrono::high_resolution_clock::now();
+			const Timestep timestep = std::chrono::duration<float>(time - m_LastFrameTime).count();
 			m_LastFrameTime = time;
 
 			ExecuteMainThreadQueue();

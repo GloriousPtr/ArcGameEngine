@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mutex>
+#include <chrono>
 
 #include "Arc/Core/Base.h"
 
@@ -50,7 +51,7 @@ namespace ArcEngine
 		bool m_Running = true;
 		bool m_Minimized = false;
 		LayerStack* m_LayerStack;
-		float m_LastFrameTime = 0.0f;
+		std::chrono::steady_clock::time_point m_LastFrameTime;
 
 		std::vector<std::function<void()>> m_MainThreadQueue;
 		std::mutex m_MainThreadQueueMutex;
