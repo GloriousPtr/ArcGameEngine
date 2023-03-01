@@ -1,6 +1,6 @@
 #include "arcpch.h"
 
-#if defined(ARC_PLATFORM_WINDOWS) || defined(ARC_PLATFORM_LINUX)
+#if defined(ARC_PLATFORM_LINUX)
 
 #include "Arc/Core/Application.h"
 #include "Arc/Core/Input.h"
