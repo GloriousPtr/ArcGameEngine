@@ -229,6 +229,7 @@ namespace ArcEngine
 		m_Context->Init();
 
 		SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&m_Data);
+		SetVSync(true);
 	}
 
 	void Dx12Window::Shutdown() const

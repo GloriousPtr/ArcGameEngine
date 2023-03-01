@@ -35,7 +35,7 @@ namespace ArcEngine
 		// Window attributes
 		void SetEventCallBack(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
 		void SetVSync(bool enabled) override { m_Data.VSync = enabled; }
-		[[nodiscard]] bool IsVSync() const override { return true; }
+		[[nodiscard]] bool IsVSync() const override { return m_Data.VSync; }
 
 		[[nodiscard]] bool IsMaximized() override { return false; }
 		void Minimize() override {}
