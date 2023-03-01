@@ -156,6 +156,8 @@ namespace ArcEngine
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
 
+	uint8_t Dx12Window::s_WindowCount = 0;
+
 	Dx12Window::Dx12Window(const WindowProps& props)
 	{
 		ARC_PROFILE_SCOPE()
@@ -221,6 +223,7 @@ namespace ArcEngine
 		// Show the window
 		ShowWindow(hwnd, SW_SHOWDEFAULT);
 		UpdateWindow(hwnd);
+		++s_WindowCount;
 
 		m_Context = GraphicsContext::Create(m_Window);
 		m_Context->Init();
@@ -235,5 +238,6 @@ namespace ArcEngine
 		DestroyWindow(static_cast<HWND>(m_Window));
 		const _bstr_t wideTitle(m_Data.Title.c_str());
 		UnregisterClassW(wideTitle, static_cast<HINSTANCE>(m_Data.HInstance));
+		--s_WindowCount;
 	}
 }
