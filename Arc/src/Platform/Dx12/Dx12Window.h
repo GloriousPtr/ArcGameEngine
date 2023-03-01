@@ -9,6 +9,21 @@ namespace ArcEngine
 	class Dx12Window : public Window
 	{
 	public:
+		struct WindowData
+		{
+			std::string Title;
+			unsigned int Width = 0;
+			unsigned int Height = 0;
+			bool VSync = true;
+
+			bool OverTitlebar = false;
+
+			EventCallbackFn EventCallback;
+
+			void* HInstance = nullptr;
+		};
+
+	public:
 		explicit Dx12Window(const WindowProps& props);
 		~Dx12Window() override;
 
@@ -36,20 +51,6 @@ namespace ArcEngine
 	private:
 		WindowHandle m_Window = nullptr;
 		Scope<GraphicsContext> m_Context;
-
-		struct WindowData
-		{
-			std::string Title;
-			unsigned int Width = 0;
-			unsigned int Height = 0;
-			bool VSync = true;
-
-			bool OverTitlebar = false;
-
-			EventCallbackFn EventCallback;
-
-			void* HInstance = nullptr;
-		};
 
 		WindowData m_Data;
 

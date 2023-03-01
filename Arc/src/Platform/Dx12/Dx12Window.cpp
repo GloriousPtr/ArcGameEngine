@@ -1,6 +1,11 @@
 #include "arcpch.h"
 #include "Dx12Window.h"
 
+#include "Arc/Core/Input.h"
+#include "Arc/Events/ApplicationEvent.h"
+#include "Arc/Events/MouseEvent.h"
+#include "Arc/Events/KeyEvent.h"
+
 #include "Platform/OpenGL/OpenGLContext.h"
 
 #include <comutil.h>
@@ -23,15 +28,132 @@ namespace ArcEngine
 
 		switch (msg)
 		{
-		case WM_SYSCOMMAND:
-			if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
-				return 0;
-			break;
-		case WM_DESTROY:
-			::PostQuitMessage(0);
-			return 0;
+			case WM_SYSCOMMAND:
+			{
+				if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
+					return 0;
+				break;
+			}
 		}
-		return ::DefWindowProc(hWnd, msg, wParam, lParam);
+
+		// Handle and dispatch events
+		auto windowData = reinterpret_cast<Dx12Window::WindowData*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+		if (windowData)
+		{
+			switch (msg)
+			{
+				case WM_SYSCOMMAND:
+					if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
+						return 0;
+					break;
+
+				case WM_MOUSEMOVE:
+				{
+					int xPos = LOWORD(lParam);
+					int yPos = HIWORD(lParam);
+					MouseMovedEvent event(static_cast<float>(xPos), static_cast<float>(yPos));
+					windowData->EventCallback(event);
+					return 0;
+				}
+
+				case WM_MOUSEWHEEL:
+				{
+					int yOffset = GET_WHEEL_DELTA_WPARAM(wParam) / 120;
+					MouseScrolledEvent event(0.0f, static_cast<float>(yOffset));
+					windowData->EventCallback(event);
+					return 0;
+				}
+
+				// Mouse Button Release
+				case WM_LBUTTONUP:
+				{
+					MouseButtonReleasedEvent event(Mouse::ButtonLeft);
+					windowData->EventCallback(event);
+					return 0;
+				}
+				case WM_RBUTTONUP:
+				{
+					MouseButtonReleasedEvent event(Mouse::ButtonRight);
+					windowData->EventCallback(event);
+					return 0;
+				}
+				case WM_MBUTTONUP:
+				{
+					MouseButtonReleasedEvent event(Mouse::ButtonMiddle);
+					windowData->EventCallback(event);
+					return 0;
+				}
+
+				// Mouse Button Pressed
+				case WM_LBUTTONDOWN:
+				{
+					MouseButtonPressedEvent event(Mouse::ButtonLeft);
+					windowData->EventCallback(event);
+					return 0;
+				}
+				case WM_RBUTTONDOWN:
+				{
+					MouseButtonPressedEvent event(Mouse::ButtonRight);
+					windowData->EventCallback(event);
+					return 0;
+				}
+				case WM_MBUTTONDOWN:
+				{
+					MouseButtonPressedEvent event(Mouse::ButtonMiddle);
+					windowData->EventCallback(event);
+					return 0;
+				}
+
+				// Key typed
+				case WM_CHAR:
+				{
+					auto key = static_cast<KeyCode>(wParam);
+					KeyTypedEvent event(static_cast<KeyCode>(key));
+					windowData->EventCallback(event);
+					return 0;
+				}
+
+				// Key Pressed/Release
+				case WM_KEYUP:
+				{
+					auto key = static_cast<KeyCode>(wParam);
+					KeyReleasedEvent event(static_cast<KeyCode>(key));
+					windowData->EventCallback(event);
+					return 0;
+				}
+				case WM_KEYDOWN:
+				{
+					auto key = static_cast<KeyCode>(wParam);
+					auto repeatCount = static_cast<uint16_t>(lParam);
+					KeyPressedEvent event(static_cast<KeyCode>(key), repeatCount);
+					windowData->EventCallback(event);
+					return 0;
+				}
+
+				// Resize
+				case WM_SIZE:
+				{
+					int width = LOWORD(lParam);
+					int height = HIWORD(lParam);
+					windowData->Width = width;
+					windowData->Height = height;
+					WindowResizeEvent event(width, height);
+					windowData->EventCallback(event);
+					return 0;
+				}
+
+				// Close
+				case WM_DESTROY:
+				{
+					WindowCloseEvent event;
+					windowData->EventCallback(event);
+					PostQuitMessage(0);
+					return 0;
+				}
+			}
+		}
+
+		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
 
 	Dx12Window::Dx12Window(const WindowProps& props)
@@ -102,6 +224,8 @@ namespace ArcEngine
 
 		m_Context = GraphicsContext::Create(m_Window);
 		m_Context->Init();
+
+		SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&m_Data);
 	}
 
 	void Dx12Window::Shutdown() const
