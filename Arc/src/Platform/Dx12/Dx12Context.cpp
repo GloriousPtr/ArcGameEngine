@@ -224,9 +224,9 @@ namespace ArcEngine
 #ifdef ARC_DEBUG
 #ifdef ENABLE_DX12_DEBUG_MESSAGES
 		ID3D12InfoQueue1* infoQueue1;
-		HRESULT hr = s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue1));
+		HRESULT result = s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue1));
 		
-		if (SUCCEEDED(hr))
+		if (SUCCEEDED(result))
 		{
 			infoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
 			infoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
@@ -239,8 +239,8 @@ namespace ArcEngine
 			ARC_CORE_WARN("Could not enable enable DX12 debug messages on console window!");
 
 			ID3D12InfoQueue* infoQueue;
-			hr = s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue));
-			if (SUCCEEDED(hr))
+			result = s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue));
+			if (SUCCEEDED(result))
 			{
 				infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
 				infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
@@ -255,8 +255,8 @@ namespace ArcEngine
 #else
 		ARC_CORE_WARN("Support for DX12 debug messages on console window is disabled, define ENABLE_DX12_DEBUG_MESSAGES to enable the support, it requires Windows 11 SDK!");
 		ID3D12InfoQueue* infoQueue;
-		HRESULT hr = s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue));
-		if (SUCCEEDED(hr))
+		HRESULT result = s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue));
+		if (SUCCEEDED(result))
 		{
 			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
 			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
