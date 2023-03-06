@@ -57,6 +57,7 @@ namespace ArcEngine
 	{
 		Dx12Fence Fence;
 		ID3D12Resource* RtvBuffer;
+		D3D12_CPU_DESCRIPTOR_HANDLE RtvHandle;
 		ID3D12CommandAllocator* CommandAllocator;
 		ID3D12GraphicsCommandList7* CommandList;
 
@@ -91,6 +92,7 @@ namespace ArcEngine
 		}
 	}
 
+	inline static IDXGIFactory7* s_Factory;
 	inline static ID3D12Device10* s_Device;
 	inline static ID3D12CommandQueue* s_CommandQueue;
 	inline static IDXGISwapChain4* s_Swapchain;
@@ -170,6 +172,7 @@ namespace ArcEngine
 		s_Swapchain->Release();
 		s_CommandQueue->Release();
 		s_Device->Release();
+		s_Factory->Release();
 	}
 
 	void Dx12Context::Init()
@@ -193,12 +196,11 @@ namespace ArcEngine
 		dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 #endif
 
-		IDXGIFactory7* factory;
-		ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory)), "Failed to create DXGI Factory")
+		ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&s_Factory)), "Failed to create DXGI Factory")
 
 		const D3D_FEATURE_LEVEL minFeatureLevel = D3D_FEATURE_LEVEL_12_0;
 		IDXGIAdapter4* adapter;
-		GetHardwareAdapter(factory, &adapter, minFeatureLevel);
+		GetHardwareAdapter(s_Factory, &adapter, minFeatureLevel);
 
 		DXGI_ADAPTER_DESC3 adapterDesc;
 		adapter->GetDesc3(&adapterDesc);
@@ -276,20 +278,6 @@ namespace ArcEngine
 		ThrowIfFailed(s_Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&s_CommandQueue)), "Failed to create command queue");
 		s_CommandQueue->SetName(L"Main D3D12 Command Queue");
 
-		// Create Swapchain
-		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-		swapChainDesc.BufferCount = FrameCount;
-		swapChainDesc.Width = m_Width;
-		swapChainDesc.Height = m_Height;
-		swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-		swapChainDesc.SampleDesc.Count = 1;
-		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
-		IDXGISwapChain1* newSwapchain;
-		if (SUCCEEDED(factory->CreateSwapChainForHwnd(s_CommandQueue, m_Hwnd, &swapChainDesc, nullptr, nullptr, &newSwapchain)))
-			s_Swapchain = static_cast<IDXGISwapChain4*>(newSwapchain);
-
 		// Create Fences
 		for (auto& frame : s_Frames)
 		{
@@ -306,27 +294,10 @@ namespace ArcEngine
 		s_Device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&s_RtvHeap));
 		s_RtvHeap->SetName(L"Main RTV Heap");
 
-		// Create RTV
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(s_RtvHeap->GetCPUDescriptorHandleForHeapStart());
-		int tempInt = 0;
-		for (auto& frame : s_Frames)
-		{
-			s_Swapchain->GetBuffer(tempInt, IID_PPV_ARGS(&(frame.RtvBuffer)));
-			s_Device->CreateRenderTargetView(frame.RtvBuffer, nullptr, rtvHandle);
-			rtvHandle.Offset(1, s_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
-
-			std::string rtvFrameName = fmt::format("RTV Frame {}", tempInt);
-			_bstr_t wRtvFrameName(rtvFrameName.c_str());
-			frame.RtvBuffer->SetName(wRtvFrameName);
-
-			++tempInt;
-		}
-
-		// Factory no longer needed
-		factory->Release();
+		CreateSwapchain(s_RtvHeap);
 
 		// Create allocators and command lists
-		tempInt = 0;
+		int tempInt = 0;
 		for (auto& frame : s_Frames)
 		{
 			s_Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&(frame.CommandAllocator)));
@@ -342,8 +313,6 @@ namespace ArcEngine
 
 			++tempInt;
 		}
-
-		Dx12Frame::CurrentBackBuffer = s_Swapchain->GetCurrentBackBufferIndex();
 	}
 
 	void Dx12Context::SwapBuffers()
@@ -353,11 +322,24 @@ namespace ArcEngine
 		auto& frame = s_Frames[Dx12Frame::CurrentBackBuffer];
 
 		{
+			const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<float>(m_Width), static_cast<float>(m_Height), 0.0f, 1.0f };
+			const D3D12_RECT scissorRect = { 0, 0, static_cast<LONG>(m_Width), static_cast<LONG>(m_Height) };
+
 			frame.CommandAllocator->Reset();
+			auto* commandList = frame.CommandList;
+			commandList->Reset(frame.CommandAllocator, nullptr);
 
-			frame.CommandList->Reset(frame.CommandAllocator, nullptr);
+			const D3D12_RESOURCE_BARRIER toRtvBarrier = CD3DX12_RESOURCE_BARRIER::Transition(frame.RtvBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			commandList->ResourceBarrier(1, &toRtvBarrier);
+			constexpr float clearColor[] = {0.5f, 0.1f, 0.5f, 1.0f};
+			commandList->ClearRenderTargetView(frame.RtvHandle, clearColor, 0, nullptr);
+			commandList->OMSetRenderTargets(1, &(frame.RtvHandle), false, nullptr);
+			commandList->RSSetViewports(1, &viewport);
+			commandList->RSSetScissorRects(1, &scissorRect);
+			const D3D12_RESOURCE_BARRIER toPresentBarrier = CD3DX12_RESOURCE_BARRIER::Transition(frame.RtvBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+			commandList->ResourceBarrier(1, &toPresentBarrier);
 
-			frame.CommandList->Close();
+			commandList->Close();
 		}
 
 		ID3D12CommandList* commandLists[] = { frame.CommandList };
@@ -378,5 +360,56 @@ namespace ArcEngine
 	{
 		m_SyncInterval = value;
 		m_PresentFlags |= m_SyncInterval == 0 ? DXGI_PRESENT_ALLOW_TEARING : 0;
+	}
+
+	void Dx12Context::CreateSwapchain(ID3D12DescriptorHeap* rtvHeap) const
+	{
+		// Create Swapchain
+		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+		swapChainDesc.BufferCount = FrameCount;
+		swapChainDesc.Width = m_Width;
+		swapChainDesc.Height = m_Height;
+		swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+		swapChainDesc.SampleDesc.Count = 1;
+		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING | DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+		IDXGISwapChain1* newSwapchain;
+		if (SUCCEEDED(s_Factory->CreateSwapChainForHwnd(s_CommandQueue, m_Hwnd, &swapChainDesc, nullptr, nullptr, &newSwapchain)))
+			s_Swapchain = reinterpret_cast<IDXGISwapChain4*>(newSwapchain);
+
+		// Create RTV
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart());
+		int tempInt = 0;
+		for (auto& frame : s_Frames)
+		{
+			s_Swapchain->GetBuffer(tempInt, IID_PPV_ARGS(&(frame.RtvBuffer)));
+			s_Device->CreateRenderTargetView(frame.RtvBuffer, nullptr, rtvHandle);
+			frame.RtvHandle = rtvHandle;
+			rtvHandle.Offset(1, s_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
+
+			std::string rtvFrameName = fmt::format("RTV Frame {}", tempInt);
+			_bstr_t wRtvFrameName(rtvFrameName.c_str());
+			frame.RtvBuffer->SetName(wRtvFrameName);
+
+			++tempInt;
+		}
+
+		Dx12Frame::CurrentBackBuffer = s_Swapchain->GetCurrentBackBufferIndex();
+	}
+
+	void Dx12Context::ResizeSwapchain(uint32_t width, uint32_t height)
+	{
+		m_Width = width;
+		m_Height = height;
+
+		for (auto& frame : s_Frames)
+		{
+			frame.RtvBuffer->Release();
+			frame.RtvBuffer = nullptr;
+		}
+
+		s_Swapchain->Release();
+		CreateSwapchain(s_RtvHeap);
 	}
 }

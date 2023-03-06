@@ -2,6 +2,7 @@
 
 #include "Arc/Core/Base.h"
 #include "Arc/Events/Event.h"
+#include "Arc/Renderer/GraphicsContext.h"
 
 namespace ArcEngine
 {
@@ -42,6 +43,7 @@ namespace ArcEngine
 		virtual void Restore() = 0;
 		virtual void RegisterOverTitlebar(bool value) = 0;
 
+		[[nodiscard]] virtual Scope<GraphicsContext>& GetGraphicsContext() = 0;
 		[[nodiscard]] virtual WindowHandle GetNativeWindow() const = 0;
 		
 		[[nodiscard]] static Scope<Window> Create(const WindowProps& props = WindowProps());

@@ -43,7 +43,9 @@ namespace ArcEngine
 		void Restore() override {}
 		void RegisterOverTitlebar(bool value) override { m_Data.OverTitlebar = value; }
 
+		[[nodiscard]] Scope<GraphicsContext>& GetGraphicsContext() override { return m_Context; }
 		[[nodiscard]] WindowHandle GetNativeWindow() const override { return m_Window; }
+
 	private:
 		void Init(const WindowProps& props);
 		void Shutdown() const;

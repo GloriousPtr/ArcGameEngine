@@ -27,7 +27,7 @@ namespace ArcEngine
 		m_Window = Window::Create(WindowProps(name));
 		m_Window->SetEventCallBack(ARC_BIND_EVENT_FN(Application::OnEvent));
 
-		//Renderer::Init();
+		Renderer::Init();
 		//AudioEngine::Init();
 		//ScriptEngine::Init();
 
@@ -44,7 +44,7 @@ namespace ArcEngine
 
 		//ScriptEngine::Shutdown();
 		//AudioEngine::Shutdown();
-		//Renderer::Shutdown();
+		Renderer::Shutdown();
 
 		OPTICK_SHUTDOWN()
 	}
