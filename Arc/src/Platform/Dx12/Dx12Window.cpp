@@ -236,4 +236,10 @@ namespace ArcEngine
 		UnregisterClassW(wideTitle, static_cast<HINSTANCE>(m_Data.HInstance));
 		--s_WindowCount;
 	}
+
+	void Dx12Window::SetVSync(bool enabled)
+	{
+		m_Data.VSync = enabled;
+		m_Context->SetSyncInterval(enabled ? 1 : 0);
+	}
 }

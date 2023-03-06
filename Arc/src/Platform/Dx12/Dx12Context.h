@@ -15,10 +15,13 @@ namespace ArcEngine
 
 		void Init() override;
 		void SwapBuffers() override;
+		void SetSyncInterval(uint32_t value) override;
 
 	private:
 		HWND m_Hwnd;
 		uint32_t m_Width = 0;
 		uint32_t m_Height = 0;
+		uint32_t m_SyncInterval = 1;
+		uint32_t m_PresentFlags = 0;
 	};
 }

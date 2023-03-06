@@ -60,7 +60,6 @@ namespace ArcEngine
 		ID3D12CommandAllocator* CommandAllocator;
 		ID3D12GraphicsCommandList7* CommandList;
 
-		inline static uint32_t CurrentFenceValue = 0;
 		inline static uint32_t CurrentBackBuffer = 0;
 	};
 
@@ -94,7 +93,7 @@ namespace ArcEngine
 
 	inline static ID3D12Device10* s_Device;
 	inline static ID3D12CommandQueue* s_CommandQueue;
-	inline static IDXGISwapChain1* s_Swapchain;
+	inline static IDXGISwapChain4* s_Swapchain;
 
 	inline static ID3D12DescriptorHeap* s_RtvHeap;
 	inline static Dx12Frame s_Frames[Dx12Context::FrameCount];
@@ -159,7 +158,6 @@ namespace ArcEngine
 #endif // ENABLE_DX12_DEBUG_MESSAGES
 #endif // ILLUMINO_DEBUG
 
-		WaitForFence(s_Fence[s_CurrentBackBuffer], s_FenceValue[s_CurrentBackBuffer], s_FenceEvent[s_CurrentBackBuffer]);
 		for (const auto& frame : s_Frames)
 		{
 			frame.RtvBuffer->Release();
@@ -287,7 +285,10 @@ namespace ArcEngine
 		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		swapChainDesc.SampleDesc.Count = 1;
-		factory->CreateSwapChainForHwnd(s_CommandQueue, m_Hwnd, &swapChainDesc, nullptr, nullptr, &s_Swapchain);
+		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+		IDXGISwapChain1* newSwapchain;
+		if (SUCCEEDED(factory->CreateSwapChainForHwnd(s_CommandQueue, m_Hwnd, &swapChainDesc, nullptr, nullptr, &newSwapchain)))
+			s_Swapchain = static_cast<IDXGISwapChain4*>(newSwapchain);
 
 		// Create Fences
 		for (auto& frame : s_Frames)
@@ -337,15 +338,45 @@ namespace ArcEngine
 			std::string cmdListName = fmt::format("Command List {}", tempInt);
 			_bstr_t wCmdListName(cmdListName.c_str());
 			frame.CommandList->SetName(wCmdListName);
+			frame.CommandList->Close();
 
 			++tempInt;
 		}
 
-		WaitForFence(s_Fence[s_CurrentBackBuffer], s_FenceValue[s_CurrentBackBuffer], s_FenceEvent[s_CurrentBackBuffer]);
+		Dx12Frame::CurrentBackBuffer = s_Swapchain->GetCurrentBackBufferIndex();
 	}
 
 	void Dx12Context::SwapBuffers()
 	{
 		ARC_PROFILE_SCOPE()
+
+		auto& frame = s_Frames[Dx12Frame::CurrentBackBuffer];
+
+		{
+			frame.CommandAllocator->Reset();
+
+			frame.CommandList->Reset(frame.CommandAllocator, nullptr);
+
+			frame.CommandList->Close();
+		}
+
+		ID3D12CommandList* commandLists[] = { frame.CommandList };
+		s_CommandQueue->ExecuteCommandLists(1, commandLists);
+
+		s_Swapchain->Present(m_SyncInterval, m_PresentFlags);
+
+		const auto fenceValue = frame.Fence.Value;
+		s_CommandQueue->Signal(frame.Fence.Fence, fenceValue);
+		++frame.Fence.Value;
+
+		WaitForFence(frame.Fence.Fence, fenceValue, frame.Fence.Event);
+
+		Dx12Frame::CurrentBackBuffer = s_Swapchain->GetCurrentBackBufferIndex();
+	}
+
+	void Dx12Context::SetSyncInterval(uint32_t value)
+	{
+		m_SyncInterval = value;
+		m_PresentFlags |= m_SyncInterval == 0 ? DXGI_PRESENT_ALLOW_TEARING : 0;
 	}
 }

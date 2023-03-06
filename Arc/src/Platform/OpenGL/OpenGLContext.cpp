@@ -34,4 +34,9 @@ namespace ArcEngine
 		
 		glfwSwapBuffers(m_WindowHandle);
 	}
+
+	void OpenGLContext::SetSyncInterval(uint32_t value)
+	{
+		glfwSwapInterval(static_cast<int>(value));
+	}
 }

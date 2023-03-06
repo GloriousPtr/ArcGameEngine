@@ -222,12 +222,8 @@ namespace ArcEngine
 	void GlfwWindow::SetVSync(bool enabled)
 	{
 		ARC_PROFILE_SCOPE()
-		
-		if (enabled)
-			glfwSwapInterval(1);
-		else
-			glfwSwapInterval(0);
 
+		m_Context->SetSyncInterval(enabled ? 1 : 0);
 		m_Data.VSync = enabled;
 	}
 

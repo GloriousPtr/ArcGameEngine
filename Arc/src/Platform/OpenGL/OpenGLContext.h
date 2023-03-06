@@ -12,6 +12,8 @@ namespace ArcEngine
 
 		void Init() override;
 		void SwapBuffers() override;
+		void SetSyncInterval(uint32_t value) override;
+
 	private:
 		GLFWwindow* m_WindowHandle;
 	};
