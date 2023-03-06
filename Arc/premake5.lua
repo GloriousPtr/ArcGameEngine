@@ -8,7 +8,7 @@ project "Arc"
 	rtti "off"
 	postbuildmessage "================ Post-Build: Copying dependencies ================"
 
-	flags { "FatalWarnings" }
+	--flags { "FatalWarnings" }
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -81,7 +81,11 @@ project "Arc"
 		links
 		{
 			"%{LibDir.Mono}/mono-2.0-sgen.lib",
-			"opengl.dll"
+			"opengl.dll",
+			"d3dcompiler",
+			"dxguid",
+			"d3d12",
+			"dxgi",
 		}
 
 	filter "system:linux"

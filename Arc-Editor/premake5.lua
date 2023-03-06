@@ -64,7 +64,11 @@ project "Arc-Editor"
 		links
 		{
 			"%{LibDir.Mono}/mono-2.0-sgen.lib",
-			"opengl.dll"
+			"opengl.dll",
+			"d3dcompiler",
+			"dxguid",
+			"d3d12",
+			"dxgi",
 		}
 
 	filter "system:linux"
