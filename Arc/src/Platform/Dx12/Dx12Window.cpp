@@ -167,22 +167,6 @@ namespace ArcEngine
 		Shutdown();
 	}
 
-	void Dx12Window::OnUpdate()
-	{
-		ARC_PROFILE_SCOPE()
-
-		// Poll and handle messages (inputs, window resize, etc.)
-		// See the WndProc() function below for our to dispatch events to the Win32 backend.
-		MSG msg;
-		while (PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-
-		m_Context->SwapBuffers();
-	}
-
 	void Dx12Window::Init(const WindowProps& props)
 	{
 		ARC_PROFILE_SCOPE()
@@ -235,6 +219,22 @@ namespace ArcEngine
 		const _bstr_t wideTitle(m_Data.Title.c_str());
 		UnregisterClassW(wideTitle, static_cast<HINSTANCE>(m_Data.HInstance));
 		--s_WindowCount;
+	}
+
+	void Dx12Window::OnUpdate()
+	{
+		ARC_PROFILE_SCOPE()
+
+			// Poll and handle messages (inputs, window resize, etc.)
+			// See the WndProc() function below for our to dispatch events to the Win32 backend.
+			MSG msg;
+		while (PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		m_Context->SwapBuffers();
 	}
 
 	void Dx12Window::SetVSync(bool enabled)

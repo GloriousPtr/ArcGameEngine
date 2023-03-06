@@ -108,12 +108,12 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
+		ARC_CORE_ASSERT(hwnd, "Handle is null!")
+
 		RECT clientRect;
 		GetClientRect(m_Hwnd, &clientRect);
 		m_Width = clientRect.right - clientRect.left;
 		m_Height = clientRect.bottom - clientRect.top;
-
-		ARC_CORE_ASSERT(hwnd, "Handle is null!")
 	}
 
 	Dx12Context::~Dx12Context()
