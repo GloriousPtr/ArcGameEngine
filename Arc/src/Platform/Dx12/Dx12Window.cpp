@@ -42,15 +42,10 @@ namespace ArcEngine
 		{
 			switch (msg)
 			{
-				case WM_SYSCOMMAND:
-					if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
-						return 0;
-					break;
-
 				case WM_MOUSEMOVE:
 				{
-					int xPos = LOWORD(lParam);
-					int yPos = HIWORD(lParam);
+					const int xPos = LOWORD(lParam);
+					const int yPos = HIWORD(lParam);
 					MouseMovedEvent event(static_cast<float>(xPos), static_cast<float>(yPos));
 					windowData->EventCallback(event);
 					return 0;
@@ -58,7 +53,7 @@ namespace ArcEngine
 
 				case WM_MOUSEWHEEL:
 				{
-					int yOffset = GET_WHEEL_DELTA_WPARAM(wParam) / 120;
+					const int yOffset = GET_WHEEL_DELTA_WPARAM(wParam) / 120;
 					MouseScrolledEvent event(0.0f, static_cast<float>(yOffset));
 					windowData->EventCallback(event);
 					return 0;
@@ -107,7 +102,7 @@ namespace ArcEngine
 				// Key typed
 				case WM_CHAR:
 				{
-					auto key = static_cast<KeyCode>(wParam);
+					const auto key = static_cast<KeyCode>(wParam);
 					KeyTypedEvent event(static_cast<KeyCode>(key));
 					windowData->EventCallback(event);
 					return 0;
@@ -116,15 +111,15 @@ namespace ArcEngine
 				// Key Pressed/Release
 				case WM_KEYUP:
 				{
-					auto key = static_cast<KeyCode>(wParam);
+					const auto key = static_cast<KeyCode>(wParam);
 					KeyReleasedEvent event(static_cast<KeyCode>(key));
 					windowData->EventCallback(event);
 					return 0;
 				}
 				case WM_KEYDOWN:
 				{
-					auto key = static_cast<KeyCode>(wParam);
-					auto repeatCount = static_cast<uint16_t>(lParam);
+					const auto key = static_cast<KeyCode>(wParam);
+					const auto repeatCount = static_cast<uint16_t>(lParam);
 					KeyPressedEvent event(static_cast<KeyCode>(key), repeatCount);
 					windowData->EventCallback(event);
 					return 0;
@@ -133,8 +128,8 @@ namespace ArcEngine
 				// Resize
 				case WM_SIZE:
 				{
-					int width = LOWORD(lParam);
-					int height = HIWORD(lParam);
+					const int width = LOWORD(lParam);
+					const int height = HIWORD(lParam);
 					windowData->Width = width;
 					windowData->Height = height;
 					WindowResizeEvent event(width, height);
