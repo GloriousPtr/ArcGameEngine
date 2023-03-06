@@ -11,7 +11,7 @@ namespace ArcEngine
 
 	public:
 		explicit Dx12Context(HWND hwnd);
-		~Dx12Context();
+		~Dx12Context() override;
 
 		void Init() override;
 		void SwapBuffers() override;
