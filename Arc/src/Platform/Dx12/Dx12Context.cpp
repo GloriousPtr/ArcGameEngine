@@ -46,6 +46,24 @@ namespace ArcEngine
 		}
 	}
 
+	struct Dx12Fence
+	{
+		ID3D12Fence* Fence;
+		uint64_t Value;
+		HANDLE Event;
+	};
+
+	struct Dx12Frame
+	{
+		Dx12Fence Fence;
+		ID3D12Resource* RtvBuffer;
+		ID3D12CommandAllocator* CommandAllocator;
+		ID3D12GraphicsCommandList7* CommandList;
+
+		inline static uint32_t CurrentFenceValue = 0;
+		inline static uint32_t CurrentBackBuffer = 0;
+	};
+
 	static void DebugMessageCallback(
 		[[maybe_unused]] D3D12_MESSAGE_CATEGORY category,
 		[[maybe_unused]] D3D12_MESSAGE_SEVERITY severity,
@@ -77,16 +95,9 @@ namespace ArcEngine
 	inline static ID3D12Device10* s_Device;
 	inline static ID3D12CommandQueue* s_CommandQueue;
 	inline static IDXGISwapChain1* s_Swapchain;
-	inline static uint32_t s_CurrentBackBuffer = 0;
-	inline static ID3D12Fence* s_Fence[Dx12Context::FrameCount];
-	inline static uint32_t s_FenceValue[Dx12Context::FrameCount];
-	inline static HANDLE s_FenceEvent[Dx12Context::FrameCount];
-	inline static uint32_t s_CurrentFenceValue = 0;
 
 	inline static ID3D12DescriptorHeap* s_RtvHeap;
-	inline static ID3D12Resource* s_RtvBuffer[Dx12Context::FrameCount];
-	inline static ID3D12CommandAllocator* s_CmdAllocator[Dx12Context::FrameCount];
-	inline static ID3D12GraphicsCommandList7* s_CmdList[Dx12Context::FrameCount];
+	inline static Dx12Frame s_Frames[Dx12Context::FrameCount];
 
 #ifdef ARC_DEBUG
 #define ENABLE_DX12_DEBUG_MESSAGES
@@ -149,25 +160,12 @@ namespace ArcEngine
 #endif // ILLUMINO_DEBUG
 
 		WaitForFence(s_Fence[s_CurrentBackBuffer], s_FenceValue[s_CurrentBackBuffer], s_FenceEvent[s_CurrentBackBuffer]);
-
-		for (auto& resource : s_RtvBuffer)
+		for (const auto& frame : s_Frames)
 		{
-			resource->Release();
-		}
-
-		for (auto& fence : s_Fence)
-		{
-			fence->Release();
-		}
-
-		for (auto& cmdList : s_CmdList)
-		{
-			cmdList->Release();
-		}
-
-		for (auto& cmdAllocator : s_CmdAllocator)
-		{
-			cmdAllocator->Release();
+			frame.RtvBuffer->Release();
+			frame.Fence.Fence->Release();
+			frame.CommandList->Release();
+			frame.CommandAllocator->Release();
 		}
 
 		s_RtvHeap->Release();
@@ -292,12 +290,11 @@ namespace ArcEngine
 		factory->CreateSwapChainForHwnd(s_CommandQueue, m_Hwnd, &swapChainDesc, nullptr, nullptr, &s_Swapchain);
 
 		// Create Fences
-		s_CurrentFenceValue = 1;
-		for (size_t i = 0; i < FrameCount; ++i)
+		for (auto& frame : s_Frames)
 		{
-			s_FenceEvent[i] = CreateEvent(nullptr, false, false, nullptr);
-			s_FenceValue[i] = 0;
-			s_Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&s_Fence[i]));
+			frame.Fence.Event = CreateEvent(nullptr, false, false, nullptr);
+			frame.Fence.Value = 0;
+			s_Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&(frame.Fence.Fence)));
 		}
 
 		// Create RTVHeap
@@ -310,32 +307,38 @@ namespace ArcEngine
 
 		// Create RTV
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(s_RtvHeap->GetCPUDescriptorHandleForHeapStart());
-		for (size_t i = 0; i < FrameCount; ++i)
+		int tempInt = 0;
+		for (auto& frame : s_Frames)
 		{
-			s_Swapchain->GetBuffer(i, IID_PPV_ARGS(&s_RtvBuffer[i]));
-			s_Device->CreateRenderTargetView(s_RtvBuffer[i], nullptr, rtvHandle);
+			s_Swapchain->GetBuffer(tempInt, IID_PPV_ARGS(&(frame.RtvBuffer)));
+			s_Device->CreateRenderTargetView(frame.RtvBuffer, nullptr, rtvHandle);
 			rtvHandle.Offset(1, s_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
 
-			std::string rtvFrameName = fmt::format("RTV Frame {}", i);
+			std::string rtvFrameName = fmt::format("RTV Frame {}", tempInt);
 			_bstr_t wRtvFrameName(rtvFrameName.c_str());
-			s_RtvBuffer[i]->SetName(wRtvFrameName);
+			frame.RtvBuffer->SetName(wRtvFrameName);
+
+			++tempInt;
 		}
 
 		// Factory no longer needed
 		factory->Release();
 
 		// Create allocators and command lists
-		for (size_t i = 0; i < FrameCount; ++i)
+		tempInt = 0;
+		for (auto& frame : s_Frames)
 		{
-			s_Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&s_CmdAllocator[i]));
-			s_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, s_CmdAllocator[i], nullptr, IID_PPV_ARGS(&s_CmdList[i]));
+			s_Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&(frame.CommandAllocator)));
+			s_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, frame.CommandAllocator, nullptr, IID_PPV_ARGS(&(frame.CommandList)));
 
-			std::string cmdAllocatorName = fmt::format("Command Allocator {}", i);
+			std::string cmdAllocatorName = fmt::format("Command Allocator {}", tempInt);
 			_bstr_t wCmdAllocatorName(cmdAllocatorName.c_str());
-			s_CmdAllocator[0]->SetName(wCmdAllocatorName);
-			std::string cmdListName = fmt::format("Command List {}", i);
+			frame.CommandAllocator->SetName(wCmdAllocatorName);
+			std::string cmdListName = fmt::format("Command List {}", tempInt);
 			_bstr_t wCmdListName(cmdListName.c_str());
-			s_CmdList[0]->SetName(wCmdListName);
+			frame.CommandList->SetName(wCmdListName);
+
+			++tempInt;
 		}
 
 		WaitForFence(s_Fence[s_CurrentBackBuffer], s_FenceValue[s_CurrentBackBuffer], s_FenceEvent[s_CurrentBackBuffer]);
