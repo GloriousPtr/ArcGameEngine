@@ -32,14 +32,16 @@ namespace ArcEngine
 		//ScriptEngine::Init();
 
 		m_LayerStack = new LayerStack();
-		//m_ImGuiLayer = new ImGuiLayer();
-		//PushOverlay(m_ImGuiLayer);
+		m_ImGuiLayer = new ImGuiLayer();
+		PushOverlay(m_ImGuiLayer);
 	}
 
 	Application::~Application()
 	{
 		ARC_PROFILE_SCOPE()
-		
+
+		PopOverlay(m_ImGuiLayer);
+		delete m_ImGuiLayer;
 		delete m_LayerStack;
 
 		//ScriptEngine::Shutdown();
@@ -49,22 +51,6 @@ namespace ArcEngine
 		OPTICK_SHUTDOWN()
 	}
 
-	void Application::PushLayer(Layer* layer) const
-	{
-		ARC_PROFILE_SCOPE()
-
-		m_LayerStack->PushLayer(layer);
-		layer->OnAttach();
-	}
-
-	void Application::PushOverlay(Layer* layer) const
-	{
-		ARC_PROFILE_SCOPE()
-		
-		m_LayerStack->PushOverlay(layer);
-		layer->OnAttach();
-	}
-	
 	void Application::Close()
 	{
 		ARC_PROFILE_SCOPE()
@@ -115,14 +101,16 @@ namespace ArcEngine
 						layer->OnUpdate(timestep);	
 				}
 
-				//m_ImGuiLayer->Begin();
+				RenderCommand::BeginFrame();
+				m_ImGuiLayer->Begin();
 				{
 					ARC_PROFILE_SCOPE("LayerStack OnImGuiRender")
 
 					for (Layer* layer : *m_LayerStack)
 						layer->OnImGuiRender();
 				}
-				//m_ImGuiLayer->End();
+				m_ImGuiLayer->End();
+				RenderCommand::EndFrame();
 			}
 			
 			m_Window->OnUpdate();

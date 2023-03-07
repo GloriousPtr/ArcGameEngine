@@ -1,6 +1,8 @@
 #include "arcpch.h"
 #include "Dx12RendererAPI.h"
 
+#include <d3d12.h>
+
 #include "Arc/Core/Application.h"
 #include "Arc/Core/Window.h"
 #include "Dx12Context.h"
@@ -10,6 +12,16 @@ namespace ArcEngine
 	void Dx12RendererAPI::Init()
 	{
 		m_Context = reinterpret_cast<Dx12Context*>(Application::Get().GetWindow().GetGraphicsContext().get());
+	}
+
+	void Dx12RendererAPI::BeginFrame()
+	{
+		m_Context->OnBeginFrame();
+	}
+
+	void Dx12RendererAPI::EndFrame()
+	{
+		m_Context->OnEndFrame();
 	}
 
 	void Dx12RendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)

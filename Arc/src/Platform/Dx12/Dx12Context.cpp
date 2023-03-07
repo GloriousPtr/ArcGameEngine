@@ -4,13 +4,17 @@
 #include <dxgi1_6.h>
 #include <d3d12.h>
 #include <comutil.h>
+#include <wrl.h>
 #include "d3dx12.h"
 
 #ifdef ARC_DEBUG
 #include <dxgidebug.h>
 #endif
 
+#include <backends/imgui_impl_dx12.h>
+
 #include "DxHelper.h"
+#include "Dx12Resources.h"
 
 namespace ArcEngine
 {
@@ -48,18 +52,22 @@ namespace ArcEngine
 
 	struct Dx12Fence
 	{
-		ID3D12Fence* Fence;
-		uint64_t Value;
-		HANDLE Event;
+		ID3D12Fence* Fence = nullptr;
+		uint64_t Value{};
+		HANDLE Event{};
 	};
 
 	struct Dx12Frame
 	{
-		Dx12Fence Fence;
-		ID3D12Resource* RtvBuffer;
-		D3D12_CPU_DESCRIPTOR_HANDLE RtvHandle;
-		ID3D12CommandAllocator* CommandAllocator;
-		ID3D12GraphicsCommandList7* CommandList;
+		Dx12Fence Fence{};
+		ID3D12Resource* RtvBuffer = nullptr;
+		DescriptorHandle RtvHandle{};
+		ID3D12CommandAllocator* CommandAllocator = nullptr;
+		ID3D12GraphicsCommandList7* CommandList = nullptr;
+
+		std::vector<IUnknown*> DeferredReleases{};
+		bool DeferedReleasesFlag = false;
+		bool DeferedReleasesFlagHandles = false;
 
 		inline static uint32_t CurrentBackBuffer = 0;
 	};
@@ -96,9 +104,16 @@ namespace ArcEngine
 	inline static ID3D12Device10* s_Device;
 	inline static ID3D12CommandQueue* s_CommandQueue;
 	inline static IDXGISwapChain4* s_Swapchain;
-
-	inline static ID3D12DescriptorHeap* s_RtvHeap;
 	inline static Dx12Frame s_Frames[Dx12Context::FrameCount];
+
+	inline static std::mutex s_DeferredReleasesMutex{};
+	inline static DescriptorHeap s_RtvDescHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_RTV };
+	inline static DescriptorHeap s_DsvDescHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_DSV };
+	inline static DescriptorHeap s_SrvDescHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV };
+	inline static DescriptorHeap s_UavDescHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV };
+
+	inline static Microsoft::WRL::ComPtr<ID3D12InfoQueue1> s_InfoQueue1 = nullptr;
+	inline static Microsoft::WRL::ComPtr<ID3D12InfoQueue> s_InfoQueue = nullptr;
 
 #ifdef ARC_DEBUG
 #define ENABLE_DX12_DEBUG_MESSAGES
@@ -122,57 +137,76 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-#ifdef ARC_DEBUG
-#ifdef ENABLE_DX12_DEBUG_MESSAGES
-		ID3D12InfoQueue1* infoQueue1;
-		HRESULT hr = s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue1));
-
-		if (SUCCEEDED(hr))
+		for (auto& frame : s_Frames)
 		{
-			infoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, false);
-			infoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, false);
-			infoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, false);
-			infoQueue1->UnregisterMessageCallback(s_DebugCallbackCookie);
-			infoQueue1->Release();
-		}
-		else
-		{
-			ID3D12InfoQueue* infoQueue;
-			hr = s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue));
-			if (SUCCEEDED(hr))
-			{
-				infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, false);
-				infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, false);
-				infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, false);
-				infoQueue->Release();
-			}
-		}
-#else
-		ID3D12InfoQueue* infoQueue;
-		HRESULT hr = s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue));
-		if (SUCCEEDED(hr))
-		{
-			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, false);
-			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, false);
-			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, false);
-			infoQueue->Release();
-		}
-#endif // ENABLE_DX12_DEBUG_MESSAGES
-#endif // ILLUMINO_DEBUG
-
-		for (const auto& frame : s_Frames)
-		{
+			s_RtvDescHeap.Free(frame.RtvHandle);
 			frame.RtvBuffer->Release();
 			frame.Fence.Fence->Release();
 			frame.CommandList->Release();
 			frame.CommandAllocator->Release();
 		}
 
-		s_RtvHeap->Release();
+		for (uint32_t i = 0; i < FrameCount; ++i)
+			ProcessDeferredReleases(i);
+
+		s_RtvDescHeap.Release();
+		s_DsvDescHeap.Release();
+		s_SrvDescHeap.Release();
+		s_UavDescHeap.Release();
+
+		for (uint32_t i = 0; i < FrameCount; ++i)
+			ProcessDeferredReleases(i);
+
 		s_Swapchain->Release();
 		s_CommandQueue->Release();
+
+#ifdef ARC_DEBUG
+#ifdef ENABLE_DX12_DEBUG_MESSAGES
+		HRESULT hr = s_Device->QueryInterface(IID_PPV_ARGS(&s_InfoQueue1));
+		
+		if (SUCCEEDED(hr))
+		{
+			s_InfoQueue = nullptr;
+		}
+		else
+		{
+			hr = s_Device->QueryInterface(IID_PPV_ARGS(&s_InfoQueue));
+			if (SUCCEEDED(hr))
+			{
+				s_InfoQueue1 = nullptr;
+			}
+		}
+#else
+		HRESULT hr = s_Device->QueryInterface(IID_PPV_ARGS(&s_InfoQueue));
+		if (SUCCEEDED(hr))
+			s_InfoQueue1 = nullptr;
+#endif // ENABLE_DX12_DEBUG_MESSAGES
+#endif // ILLUMINO_DEBUG
+
 		s_Device->Release();
 		s_Factory->Release();
+
+#ifdef ARC_DEBUG
+		if (s_InfoQueue1)
+		{
+			s_InfoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, false);
+			s_InfoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, false);
+			s_InfoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, false);
+			s_InfoQueue1->UnregisterMessageCallback(s_DebugCallbackCookie);
+			s_InfoQueue1 = nullptr;
+		}
+		if (s_InfoQueue)
+		{
+			s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, false);
+			s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, false);
+			s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, false);
+			s_InfoQueue = nullptr;
+		}
+		IDXGIDebug1* dxgiDebug;
+		DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug));
+		dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
+		dxgiDebug->Release();
+#endif
 	}
 
 	void Dx12Context::Init()
@@ -182,7 +216,7 @@ namespace ArcEngine
 		UINT dxgiFactoryFlags = 0;
 
 #ifdef ARC_DEBUG
-		ID3D12Debug* debug;
+		ID3D12Debug6* debug;
 		D3D12GetDebugInterface(IID_PPV_ARGS(&debug));
 		debug->EnableDebugLayer();
 		debug->Release();
@@ -223,29 +257,25 @@ namespace ArcEngine
 
 #ifdef ARC_DEBUG
 #ifdef ENABLE_DX12_DEBUG_MESSAGES
-		ID3D12InfoQueue1* infoQueue1;
-		HRESULT result = s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue1));
+		HRESULT result = s_Device->QueryInterface(IID_PPV_ARGS(&s_InfoQueue1));
 		
 		if (SUCCEEDED(result))
 		{
-			infoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
-			infoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-			infoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
-			infoQueue1->RegisterMessageCallback(DebugMessageCallback, D3D12_MESSAGE_CALLBACK_IGNORE_FILTERS, nullptr, &s_DebugCallbackCookie);
-			infoQueue1->Release();
+			s_InfoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
+			s_InfoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+			s_InfoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+			s_InfoQueue1->RegisterMessageCallback(DebugMessageCallback, D3D12_MESSAGE_CALLBACK_IGNORE_FILTERS, nullptr, &s_DebugCallbackCookie);
 		}
 		else
 		{
 			ARC_CORE_WARN("Could not enable enable DX12 debug messages on console window!");
 
-			ID3D12InfoQueue* infoQueue;
-			result = s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue));
+			result = s_Device->QueryInterface(IID_PPV_ARGS(&s_InfoQueue));
 			if (SUCCEEDED(result))
 			{
-				infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
-				infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-				infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
-				infoQueue->Release();
+				s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
+				s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+				s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
 			}
 			else
 			{
@@ -254,14 +284,12 @@ namespace ArcEngine
 		}
 #else
 		ARC_CORE_WARN("Support for DX12 debug messages on console window is disabled, define ENABLE_DX12_DEBUG_MESSAGES to enable the support, it requires Windows 11 SDK!");
-		ID3D12InfoQueue* infoQueue;
 		HRESULT result = s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue));
 		if (SUCCEEDED(result))
 		{
-			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
-			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
-			infoQueue->Release();
+			s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
+			s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+			s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
 		}
 		else
 		{
@@ -269,6 +297,18 @@ namespace ArcEngine
 		}
 #endif // ENABLE_DX12_DEBUG_MESSAGES
 #endif // ARC_CORE_DEBUG
+
+		bool heapInitResult = true;
+		heapInitResult &= s_RtvDescHeap.Init(512, false);
+		heapInitResult &= s_DsvDescHeap.Init(512, false);
+		heapInitResult &= s_SrvDescHeap.Init(4096, true);
+		heapInitResult &= s_UavDescHeap.Init(512, false);
+		ARC_CORE_ASSERT(heapInitResult)
+
+		s_RtvDescHeap.Heap()->SetName(L"RTV Descriptor Heap");
+		s_DsvDescHeap.Heap()->SetName(L"DSV Descriptor Heap");
+		s_SrvDescHeap.Heap()->SetName(L"SRV Descriptor Heap");
+		s_UavDescHeap.Heap()->SetName(L"UAV Descriptor Heap");
 
 		// Create command queue
 		D3D12_COMMAND_QUEUE_DESC queueDesc = {};
@@ -286,15 +326,7 @@ namespace ArcEngine
 			s_Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&(frame.Fence.Fence)));
 		}
 
-		// Create RTVHeap
-		D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-		rtvHeapDesc.NumDescriptors = FrameCount;
-		rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		s_Device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&s_RtvHeap));
-		s_RtvHeap->SetName(L"Main RTV Heap");
-
-		CreateSwapchain(s_RtvHeap);
+		CreateSwapchain();
 
 		// Create allocators and command lists
 		int tempInt = 0;
@@ -319,39 +351,32 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		auto& frame = s_Frames[Dx12Frame::CurrentBackBuffer];
+		auto& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
 
-		{
-			const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<float>(m_Width), static_cast<float>(m_Height), 0.0f, 1.0f };
-			const D3D12_RECT scissorRect = { 0, 0, static_cast<LONG>(m_Width), static_cast<LONG>(m_Height) };
-
-			frame.CommandAllocator->Reset();
-			auto* commandList = frame.CommandList;
-			commandList->Reset(frame.CommandAllocator, nullptr);
-
-			const D3D12_RESOURCE_BARRIER toRtvBarrier = CD3DX12_RESOURCE_BARRIER::Transition(frame.RtvBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-			commandList->ResourceBarrier(1, &toRtvBarrier);
-			constexpr float clearColor[] = {0.5f, 0.1f, 0.5f, 1.0f};
-			commandList->ClearRenderTargetView(frame.RtvHandle, clearColor, 0, nullptr);
-			commandList->OMSetRenderTargets(1, &(frame.RtvHandle), false, nullptr);
-			commandList->RSSetViewports(1, &viewport);
-			commandList->RSSetScissorRects(1, &scissorRect);
-			const D3D12_RESOURCE_BARRIER toPresentBarrier = CD3DX12_RESOURCE_BARRIER::Transition(frame.RtvBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-			commandList->ResourceBarrier(1, &toPresentBarrier);
-
-			commandList->Close();
-		}
-
-		ID3D12CommandList* commandLists[] = { frame.CommandList };
+		ID3D12CommandList* commandLists[] = { backFrame.CommandList };
 		s_CommandQueue->ExecuteCommandLists(1, commandLists);
 
 		s_Swapchain->Present(m_SyncInterval, m_PresentFlags);
 
-		const auto fenceValue = frame.Fence.Value;
-		s_CommandQueue->Signal(frame.Fence.Fence, fenceValue);
-		++frame.Fence.Value;
+		const auto fenceValue = backFrame.Fence.Value;
+		s_CommandQueue->Signal(backFrame.Fence.Fence, fenceValue);
+		++backFrame.Fence.Value;
 
-		WaitForFence(frame.Fence.Fence, fenceValue, frame.Fence.Event);
+		WaitForFence(backFrame.Fence.Fence, fenceValue, backFrame.Fence.Event);
+
+		if (m_ShouldResize)
+		{
+			for (auto& frame : s_Frames)
+			{
+				s_RtvDescHeap.Free(frame.RtvHandle);
+				frame.RtvBuffer->Release();
+				frame.RtvBuffer = nullptr;
+			}
+
+			s_Swapchain->Release();
+			CreateSwapchain();
+			m_ShouldResize = false;
+		}
 
 		Dx12Frame::CurrentBackBuffer = s_Swapchain->GetCurrentBackBufferIndex();
 	}
@@ -362,7 +387,82 @@ namespace ArcEngine
 		m_PresentFlags |= m_SyncInterval == 0 ? DXGI_PRESENT_ALLOW_TEARING : 0;
 	}
 
-	void Dx12Context::CreateSwapchain(ID3D12DescriptorHeap* rtvHeap) const
+	ID3D12Device10* Dx12Context::GetDevice()
+	{
+		return s_Device;
+	}
+
+	ID3D12CommandAllocator* Dx12Context::GetCommandAllocator()
+	{
+		return s_Frames[Dx12Frame::CurrentBackBuffer].CommandAllocator;
+	}
+
+	ID3D12GraphicsCommandList7* Dx12Context::GetGraphicsCommandList()
+	{
+		return s_Frames[Dx12Frame::CurrentBackBuffer].CommandList;
+	}
+
+	DescriptorHeap* Dx12Context::GetSrvHeap()
+	{
+		return &s_SrvDescHeap;
+	}
+
+	int Dx12Context::GetSwapChainFormat()
+	{
+		DXGI_SWAP_CHAIN_DESC1 desc;
+		s_Swapchain->GetDesc1(&desc);
+		return desc.Format;
+	}
+
+	uint32_t Dx12Context::GetCurrentFrameIndex()
+	{
+		return Dx12Frame::CurrentBackBuffer;
+	}
+
+	void Dx12Context::SetDeferredReleaseFlag()
+	{
+		s_Frames[Dx12Frame::CurrentBackBuffer].DeferedReleasesFlagHandles = true;
+	}
+
+	void Dx12Context::OnBeginFrame() const
+	{
+		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<float>(m_Width), static_cast<float>(m_Height), 0.0f, 1.0f };
+		const D3D12_RECT scissorRect = { 0, 0, static_cast<long>(m_Width), static_cast<long>(m_Height) };
+
+		const auto& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
+		auto* commandList = backFrame.CommandList;
+
+		backFrame.CommandAllocator->Reset();
+		commandList->Reset(backFrame.CommandAllocator, nullptr);
+
+		if (backFrame.DeferedReleasesFlag || backFrame.DeferedReleasesFlagHandles)
+		{
+			ProcessDeferredReleases(Dx12Frame::CurrentBackBuffer);
+		}
+
+		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backFrame.RtvBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		commandList->ResourceBarrier(1, &barrier);
+
+		constexpr float clearColor[] = { 0.5f, 0.1f, 0.5f, 1.0f };
+		commandList->ClearRenderTargetView(backFrame.RtvHandle.CPU, clearColor, 0, nullptr);
+		commandList->OMSetRenderTargets(1, &(backFrame.RtvHandle.CPU), false, nullptr);
+
+		ID3D12DescriptorHeap* srv = s_SrvDescHeap.Heap();
+		commandList->SetDescriptorHeaps(1, &srv);
+		commandList->RSSetViewports(1, &viewport);
+		commandList->RSSetScissorRects(1, &scissorRect);
+	}
+
+	void Dx12Context::OnEndFrame() const
+	{
+		const auto& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
+
+		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backFrame.RtvBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+		backFrame.CommandList->ResourceBarrier(1, &barrier);
+		backFrame.CommandList->Close();
+	}
+
+	void Dx12Context::CreateSwapchain() const
 	{
 		// Create Swapchain
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
@@ -379,14 +479,12 @@ namespace ArcEngine
 			s_Swapchain = reinterpret_cast<IDXGISwapChain4*>(newSwapchain);
 
 		// Create RTV
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart());
 		int tempInt = 0;
 		for (auto& frame : s_Frames)
 		{
 			s_Swapchain->GetBuffer(tempInt, IID_PPV_ARGS(&(frame.RtvBuffer)));
-			s_Device->CreateRenderTargetView(frame.RtvBuffer, nullptr, rtvHandle);
-			frame.RtvHandle = rtvHandle;
-			rtvHandle.Offset(1, s_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
+			frame.RtvHandle = s_RtvDescHeap.Allocate();
+			s_Device->CreateRenderTargetView(frame.RtvBuffer, nullptr, frame.RtvHandle.CPU);
 
 			std::string rtvFrameName = fmt::format("RTV Frame {}", tempInt);
 			_bstr_t wRtvFrameName(rtvFrameName.c_str());
@@ -400,16 +498,47 @@ namespace ArcEngine
 
 	void Dx12Context::ResizeSwapchain(uint32_t width, uint32_t height)
 	{
+		if (width == 0 || height == 0)
+			return;
+
+		m_ShouldResize = true;
 		m_Width = width;
 		m_Height = height;
+	}
 
-		for (auto& frame : s_Frames)
+	void Dx12Context::ProcessDeferredReleases(uint32_t frameIndex)
+	{
+		std::lock_guard lock(s_DeferredReleasesMutex);
+
+		Dx12Frame& backFrame = s_Frames[frameIndex];
+
+		if (backFrame.DeferedReleasesFlagHandles)
 		{
-			frame.RtvBuffer->Release();
-			frame.RtvBuffer = nullptr;
+			backFrame.DeferedReleasesFlagHandles = false;
+			s_RtvDescHeap.ProcessDeferredFree(frameIndex);
+			s_DsvDescHeap.ProcessDeferredFree(frameIndex);
+			s_SrvDescHeap.ProcessDeferredFree(frameIndex);
+			s_UavDescHeap.ProcessDeferredFree(frameIndex);
 		}
 
-		s_Swapchain->Release();
-		CreateSwapchain(s_RtvHeap);
+		if (backFrame.DeferedReleasesFlag)
+		{
+			backFrame.DeferedReleasesFlag = false;
+			auto& resources = backFrame.DeferredReleases;
+			for (auto& resource : resources)
+			{
+				resource->Release();
+				resource = nullptr;
+			}
+			resources.clear();
+		}
+	}
+
+	void Dx12Context::DeferredRelease(IUnknown* resource)
+	{
+		Dx12Frame& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
+		std::lock_guard lock(s_DeferredReleasesMutex);
+		backFrame.DeferredReleases.push_back(resource);
+		backFrame.DeferedReleasesFlag = true;
 	}
 }

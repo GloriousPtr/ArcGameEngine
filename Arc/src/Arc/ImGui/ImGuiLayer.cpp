@@ -1,9 +1,19 @@
 #include "arcpch.h"
 #include "ImGuiLayer.h"
 
+#ifdef ARC_PLATFORM_LINUX
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
+#endif
+#ifdef ARC_PLATFORM_WINDOWS
+#include <backends/imgui_impl_win32.h>
+#include <backends/imgui_impl_dx12.h>
+#include <d3d12.h>
+#include "Platform/Dx12/Dx12Context.h"
+#include "Platform/Dx12/Dx12Resources.h"
+#endif
+
 #include <imgui.h>
 #include <ImGuizmo.h>
 
@@ -11,6 +21,10 @@
 
 namespace ArcEngine
 {
+#ifdef ARC_PLATFORM_WINDOWS
+	static inline DescriptorHandle s_DescriptorHandle{};
+#endif
+
 	ImGuiLayer::ImGuiLayer()
 		: Layer("ImGuiLayer")
 	{
@@ -41,11 +55,23 @@ namespace ArcEngine
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
+#ifdef ARC_PLATFORM_LINUX
 		auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-
-		// Setup Platform/Renderer bindings
+		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
 		ImGui_ImplOpenGL3_Init("#version 410");
+#endif
+#ifdef ARC_PLATFORM_WINDOWS
+		auto hwnd = static_cast<HWND>(Application::Get().GetWindow().GetNativeWindow());
+		auto* device = Dx12Context::GetDevice();
+		auto* srvHeap = Dx12Context::GetSrvHeap();
+		s_DescriptorHandle = srvHeap->Allocate();
+
+		// Setup Platform/Renderer backends
+		ImGui_ImplWin32_Init(hwnd);
+		ImGui_ImplDX12_Init(device,	Dx12Context::FrameCount, static_cast<DXGI_FORMAT>(Dx12Context::GetSwapChainFormat()),
+			srvHeap->Heap(), s_DescriptorHandle.CPU, s_DescriptorHandle.GPU);
+#endif
 
 		{
 			ImGuizmo::Style* imguizmoStyle  = &ImGuizmo::GetStyle();
@@ -72,10 +98,19 @@ namespace ArcEngine
 	void ImGuiLayer::OnDetach()
 	{
 		ARC_PROFILE_SCOPE()
-		
+
+#ifdef ARC_PLATFORM_LINUX
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
+#endif
+#ifdef ARC_PLATFORM_WINDOWS
+		ImGui_ImplDX12_Shutdown();
+		ImGui_ImplWin32_Shutdown();
+#endif
+
 		ImGui::DestroyContext();
+
+		Dx12Context::GetSrvHeap()->Free(s_DescriptorHandle);
 	}
 
 	void ImGuiLayer::OnEvent([[maybe_unused]] Event& e)
@@ -91,9 +126,16 @@ namespace ArcEngine
 	void ImGuiLayer::Begin() const
 	{
 		ARC_PROFILE_SCOPE()
-		
+
+#ifdef ARC_PLATFORM_LINUX
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
+#endif
+#ifdef ARC_PLATFORM_WINDOWS
+		ImGui_ImplDX12_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+#endif
+
 		ImGui::NewFrame();
 		ImGuizmo::BeginFrame();
 	}
@@ -101,24 +143,42 @@ namespace ArcEngine
 	void ImGuiLayer::End() const
 	{
 		ARC_PROFILE_SCOPE()
-		
+
+		bool open = true;
+		ImGui::ShowDemoWindow(&open);
+
 		ImGuiIO& io = ImGui::GetIO();
 		const Window& window = Application::Get().GetWindow();
 		io.DisplaySize = ImVec2(static_cast<float>(window.GetWidth()), static_cast<float>(window.GetHeight()));
+
+#ifdef ARC_PLATFORM_WINDOWS
+		auto* commandList = Dx12Context::GetGraphicsCommandList();
+#endif
 
 		{
 			ARC_PROFILE_SCOPE("ImGui::End::Render")
 			// Rendering
 			ImGui::Render();
+#ifdef ARC_PLATFORM_LINUX
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#endif
+#ifdef ARC_PLATFORM_WINDOWS
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
+#endif
 		}
 
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
+#ifdef ARC_PLATFORM_LINUX
 			GLFWwindow* backup_current_context = glfwGetCurrentContext();
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backup_current_context);
+#endif
+#ifdef ARC_PLATFORM_WINDOWS
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault(nullptr, commandList);
+#endif
 		}
 	}
 }
