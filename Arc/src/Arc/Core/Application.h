@@ -25,8 +25,10 @@ namespace ArcEngine
 
 		void OnEvent(Event& e);
 
-		void PushLayer(Layer* layer) const;
-		void PushOverlay(Layer* layer) const;
+		void PushLayer(Layer* layer) const { m_LayerStack->PushLayer(layer); }
+		void PushOverlay(Layer* overlay) const { m_LayerStack->PushOverlay(overlay); }
+		void PopLayer(Layer* layer) const { m_LayerStack->PopLayer(layer); }
+		void PopOverlay(Layer* overlay) const { m_LayerStack->PopOverlay(overlay); }
 
 		[[nodiscard]] Window& GetWindow() const { return *m_Window; }
 

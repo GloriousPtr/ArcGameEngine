@@ -40,7 +40,9 @@ namespace ArcEngine
 	Application::~Application()
 	{
 		ARC_PROFILE_SCOPE()
-		
+
+		PopOverlay(m_ImGuiLayer);
+		delete m_ImGuiLayer;
 		delete m_LayerStack;
 
 		ScriptEngine::Shutdown();
@@ -48,22 +50,6 @@ namespace ArcEngine
 		Renderer::Shutdown();
 
 		OPTICK_SHUTDOWN()
-	}
-
-	void Application::PushLayer(Layer* layer) const
-	{
-		ARC_PROFILE_SCOPE()
-
-		m_LayerStack->PushLayer(layer);
-		layer->OnAttach();
-	}
-
-	void Application::PushOverlay(Layer* layer) const
-	{
-		ARC_PROFILE_SCOPE()
-		
-		m_LayerStack->PushOverlay(layer);
-		layer->OnAttach();
 	}
 	
 	void Application::Close()
