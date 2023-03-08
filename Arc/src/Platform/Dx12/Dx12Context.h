@@ -38,11 +38,12 @@ namespace ArcEngine
 		static DescriptorHeap* GetSrvHeap();
 		
 	private:
+		void CreateRTV() const;
 		void CreateSwapchain() const;
 		void ResizeSwapchain(uint32_t width, uint32_t height);
 
 		static void ProcessDeferredReleases(uint32_t frameIndex);
-		static void DeferredRelease(IUnknown* resource);
+		static void DeferredRelease(IUnknown** resource);
 
 	private:
 		HWND m_Hwnd;

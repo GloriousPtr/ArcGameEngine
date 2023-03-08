@@ -65,7 +65,7 @@ namespace ArcEngine
 		ID3D12CommandAllocator* CommandAllocator = nullptr;
 		ID3D12GraphicsCommandList7* CommandList = nullptr;
 
-		std::vector<IUnknown*> DeferredReleases{};
+		std::vector<IUnknown**> DeferredReleases{};
 		bool DeferedReleasesFlag = false;
 		bool DeferedReleasesFlagHandles = false;
 
@@ -373,8 +373,10 @@ namespace ArcEngine
 				frame.RtvBuffer = nullptr;
 			}
 
-			s_Swapchain->Release();
-			CreateSwapchain();
+			DXGI_SWAP_CHAIN_DESC1 swapchainDesc;
+			s_Swapchain->GetDesc1(&swapchainDesc);
+			s_Swapchain->ResizeBuffers(swapchainDesc.BufferCount, m_Width, m_Height, swapchainDesc.Format, swapchainDesc.Flags);
+			CreateRTV();
 			m_ShouldResize = false;
 		}
 
@@ -462,22 +464,8 @@ namespace ArcEngine
 		backFrame.CommandList->Close();
 	}
 
-	void Dx12Context::CreateSwapchain() const
+	void Dx12Context::CreateRTV() const
 	{
-		// Create Swapchain
-		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-		swapChainDesc.BufferCount = FrameCount;
-		swapChainDesc.Width = m_Width;
-		swapChainDesc.Height = m_Height;
-		swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-		swapChainDesc.SampleDesc.Count = 1;
-		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING | DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
-		IDXGISwapChain1* newSwapchain;
-		if (SUCCEEDED(s_Factory->CreateSwapChainForHwnd(s_CommandQueue, m_Hwnd, &swapChainDesc, nullptr, nullptr, &newSwapchain)))
-			s_Swapchain = reinterpret_cast<IDXGISwapChain4*>(newSwapchain);
-
 		// Create RTV
 		int tempInt = 0;
 		for (auto& frame : s_Frames)
@@ -492,6 +480,25 @@ namespace ArcEngine
 
 			++tempInt;
 		}
+	}
+
+	void Dx12Context::CreateSwapchain() const
+	{
+		// Create Swapchain
+		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+		swapChainDesc.BufferCount = FrameCount;
+		swapChainDesc.Width = m_Width;
+		swapChainDesc.Height = m_Height;
+		swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+		swapChainDesc.SampleDesc.Count = 1;
+		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING | DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+		IDXGISwapChain1* newSwapchain;
+		s_Factory->CreateSwapChainForHwnd(s_CommandQueue, m_Hwnd, &swapChainDesc, nullptr, nullptr, &newSwapchain);
+		s_Swapchain = reinterpret_cast<IDXGISwapChain4*>(newSwapchain);
+		
+		CreateRTV();
 
 		Dx12Frame::CurrentBackBuffer = s_Swapchain->GetCurrentBackBufferIndex();
 	}
@@ -527,14 +534,14 @@ namespace ArcEngine
 			auto& resources = backFrame.DeferredReleases;
 			for (auto& resource : resources)
 			{
-				resource->Release();
-				resource = nullptr;
+				(*resource)->Release();
+				*resource = nullptr;
 			}
 			resources.clear();
 		}
 	}
 
-	void Dx12Context::DeferredRelease(IUnknown* resource)
+	void Dx12Context::DeferredRelease(IUnknown** resource)
 	{
 		Dx12Frame& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
 		std::lock_guard lock(s_DeferredReleasesMutex);

@@ -55,7 +55,7 @@ namespace ArcEngine
 	void DescriptorHeap::Release()
 	{
 		ARC_CORE_ASSERT(!m_Size)
-		Dx12Context::DeferredRelease(m_Heap);
+		Dx12Context::DeferredRelease(reinterpret_cast<IUnknown**>(&m_Heap));
 	}
 
 	void DescriptorHeap::ProcessDeferredFree(uint32_t frameIndex)
