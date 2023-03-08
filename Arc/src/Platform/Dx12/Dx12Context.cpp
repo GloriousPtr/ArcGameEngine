@@ -30,24 +30,31 @@ namespace ArcEngine
 		return "Unknown Vendor";
 	}
 
-	static void GetHardwareAdapter(IDXGIFactory7* pFactory, IDXGIAdapter4** ppAdapter, D3D_FEATURE_LEVEL minFeatureLevel)
+	template<typename Adapter, typename Device>
+	static bool GetHardwareAdapter(auto* pFactory, Adapter** ppAdapter, Device** ppDevice, D3D_FEATURE_LEVEL minFeatureLevel)
 	{
+		using namespace Microsoft::WRL;
+
 		*ppAdapter = nullptr;
+		*ppDevice = nullptr;
 		for (UINT adapterIndex = 0; ; ++adapterIndex)
 		{
-			IDXGIAdapter4* pAdapter = nullptr;
-			if (DXGI_ERROR_NOT_FOUND == pFactory->EnumAdapterByGpuPreference(adapterIndex, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&pAdapter)))
-			{
+			Adapter* adapter = nullptr;
+			if (DXGI_ERROR_NOT_FOUND == pFactory->EnumAdapterByGpuPreference(adapterIndex, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter)))
 				break;
+
+			Device* device;
+			if (SUCCEEDED(D3D12CreateDevice(adapter, minFeatureLevel, IID_PPV_ARGS(&device))))
+			{
+				*ppAdapter = adapter;
+				*ppDevice = device;
+				return true;
 			}
 
-			if (SUCCEEDED(D3D12CreateDevice(pAdapter, minFeatureLevel, _uuidof(ID3D12Device), nullptr)))
-			{
-				*ppAdapter = pAdapter;
-				return;
-			}
-			pAdapter->Release();
+			adapter->Release();
+			device->Release();
 		}
+		return false;
 	}
 
 	struct Dx12Fence
@@ -63,7 +70,7 @@ namespace ArcEngine
 		ID3D12Resource* RtvBuffer = nullptr;
 		DescriptorHandle RtvHandle{};
 		ID3D12CommandAllocator* CommandAllocator = nullptr;
-		ID3D12GraphicsCommandList7* CommandList = nullptr;
+		ID3D12GraphicsCommandList6* CommandList = nullptr;
 
 		std::vector<IUnknown**> DeferredReleases{};
 		bool DeferedReleasesFlag = false;
@@ -101,7 +108,7 @@ namespace ArcEngine
 	}
 
 	inline static IDXGIFactory7* s_Factory;
-	inline static ID3D12Device10* s_Device;
+	inline static ID3D12Device8* s_Device;
 	inline static ID3D12CommandQueue* s_CommandQueue;
 	inline static IDXGISwapChain4* s_Swapchain;
 	inline static Dx12Frame s_Frames[Dx12Context::FrameCount];
@@ -111,9 +118,6 @@ namespace ArcEngine
 	inline static DescriptorHeap s_DsvDescHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_DSV };
 	inline static DescriptorHeap s_SrvDescHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV };
 	inline static DescriptorHeap s_UavDescHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV };
-
-	inline static Microsoft::WRL::ComPtr<ID3D12InfoQueue1> s_InfoQueue1 = nullptr;
-	inline static Microsoft::WRL::ComPtr<ID3D12InfoQueue> s_InfoQueue = nullptr;
 
 #ifdef ARC_DEBUG
 #define ENABLE_DX12_DEBUG_MESSAGES
@@ -136,6 +140,8 @@ namespace ArcEngine
 	Dx12Context::~Dx12Context()
 	{
 		ARC_PROFILE_SCOPE()
+
+		using namespace Microsoft::WRL;
 
 		for (auto& frame : s_Frames)
 		{
@@ -162,50 +168,49 @@ namespace ArcEngine
 
 #ifdef ARC_DEBUG
 #ifdef ENABLE_DX12_DEBUG_MESSAGES
-		HRESULT hr = s_Device->QueryInterface(IID_PPV_ARGS(&s_InfoQueue1));
-		
-		if (SUCCEEDED(hr))
+		ID3D12InfoQueue1* infoQueue1 = nullptr;
+		ID3D12InfoQueue* infoQueue = nullptr;
+		if (FAILED(s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue1))))
 		{
-			s_InfoQueue = nullptr;
-		}
-		else
-		{
-			hr = s_Device->QueryInterface(IID_PPV_ARGS(&s_InfoQueue));
-			if (SUCCEEDED(hr))
-			{
-				s_InfoQueue1 = nullptr;
-			}
+			if (FAILED(s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
+				infoQueue = nullptr;
+
+			infoQueue1 = nullptr;
 		}
 #else
-		HRESULT hr = s_Device->QueryInterface(IID_PPV_ARGS(&s_InfoQueue));
-		if (SUCCEEDED(hr))
-			s_InfoQueue1 = nullptr;
+		ID3D12InfoQueue* infoQueue;
+		if (FAILED(s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
+			infoQueue = nullptr;
 #endif // ENABLE_DX12_DEBUG_MESSAGES
+
+		ComPtr<ID3D12DebugDevice2> debugDevice;
+		s_Device->QueryInterface(IID_PPV_ARGS(&debugDevice));
 #endif // ILLUMINO_DEBUG
 
 		s_Device->Release();
 		s_Factory->Release();
 
 #ifdef ARC_DEBUG
-		if (s_InfoQueue1)
+		if (infoQueue1)
 		{
-			s_InfoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, false);
-			s_InfoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, false);
-			s_InfoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, false);
-			s_InfoQueue1->UnregisterMessageCallback(s_DebugCallbackCookie);
-			s_InfoQueue1 = nullptr;
+			infoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, false);
+			infoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, false);
+			infoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, false);
+			infoQueue1->UnregisterMessageCallback(s_DebugCallbackCookie);
+			infoQueue1->Release();
 		}
-		if (s_InfoQueue)
+		else if (infoQueue)
 		{
-			s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, false);
-			s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, false);
-			s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, false);
-			s_InfoQueue = nullptr;
+			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, false);
+			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, false);
+			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, false);
+			infoQueue->Release();
 		}
-		IDXGIDebug1* dxgiDebug;
-		DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug));
-		dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
-		dxgiDebug->Release();
+		
+		if (debugDevice)
+		{
+			debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_SUMMARY | D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL);
+		}
 #endif
 	}
 
@@ -213,19 +218,26 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
+		using namespace Microsoft::WRL;
+
 		UINT dxgiFactoryFlags = 0;
 
 #ifdef ARC_DEBUG
-		ID3D12Debug6* debug;
-		D3D12GetDebugInterface(IID_PPV_ARGS(&debug));
-		debug->EnableDebugLayer();
-		debug->Release();
+		{
+			ComPtr<ID3D12Debug3> debugController;
+			if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
+				debugController->EnableDebugLayer();
+			else
+				ARC_CORE_WARN("Failed to enable DirectX 12 debug layer. Make sure Graphics Tools (Apps & features/Optional features) is installed for it to work!");
+		}
 
-		IDXGIInfoQueue* dxgiInfoQueue;
-		DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiInfoQueue));
-		dxgiInfoQueue->GetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_ERROR);
-		dxgiInfoQueue->GetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_CORRUPTION);
-		dxgiInfoQueue->Release();
+		{
+			ComPtr<IDXGIInfoQueue> dxgiInfoQueue;
+			DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiInfoQueue));
+			dxgiInfoQueue->GetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_WARNING);
+			dxgiInfoQueue->GetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_ERROR);
+			dxgiInfoQueue->GetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_CORRUPTION);
+		}
 
 		dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 #endif
@@ -234,66 +246,67 @@ namespace ArcEngine
 
 		const D3D_FEATURE_LEVEL minFeatureLevel = D3D_FEATURE_LEVEL_12_0;
 		IDXGIAdapter4* adapter;
-		GetHardwareAdapter(s_Factory, &adapter, minFeatureLevel);
+		GetHardwareAdapter(s_Factory, &adapter, &s_Device, minFeatureLevel);
 
-		DXGI_ADAPTER_DESC3 adapterDesc;
-		adapter->GetDesc3(&adapterDesc);
-
-		// Create device
-		ThrowIfFailed(D3D12CreateDevice(adapter, minFeatureLevel, IID_PPV_ARGS(&s_Device)), "Failed to find a compatible device")
+		ARC_CORE_ASSERT(adapter, "Failed to adapter");
+		ARC_CORE_ASSERT(s_Device, "Failed to create device");
 		s_Device->SetName(L"Main D3D12 Device");
-
-		// Adapter no longer needed
-		adapter->Release();
-
 		{
 			// Logging info
+			DXGI_ADAPTER_DESC3 adapterDesc;
+			adapter->GetDesc3(&adapterDesc);
+
 			ARC_CORE_INFO("DirectX Info:");
 			_bstr_t wcDesc(adapterDesc.Description);
 			const char* desc = wcDesc;
 			ARC_CORE_INFO("  Vendor: {}", GetVendorName(adapterDesc.VendorId));
 			ARC_CORE_INFO("  Renderer: {}", desc);
 		}
+		// Adapter no longer needed
+		adapter->Release();
 
 #ifdef ARC_DEBUG
 #ifdef ENABLE_DX12_DEBUG_MESSAGES
-		HRESULT result = s_Device->QueryInterface(IID_PPV_ARGS(&s_InfoQueue1));
-		
-		if (SUCCEEDED(result))
 		{
-			s_InfoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
-			s_InfoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-			s_InfoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
-			s_InfoQueue1->RegisterMessageCallback(DebugMessageCallback, D3D12_MESSAGE_CALLBACK_IGNORE_FILTERS, nullptr, &s_DebugCallbackCookie);
-		}
-		else
-		{
-			ARC_CORE_WARN("Could not enable enable DX12 debug messages on console window!");
-
-			result = s_Device->QueryInterface(IID_PPV_ARGS(&s_InfoQueue));
-			if (SUCCEEDED(result))
+			ComPtr<ID3D12InfoQueue1> infoQueue1;
+			if (SUCCEEDED(s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue1))))
 			{
-				s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
-				s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-				s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+				infoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
+				infoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+				infoQueue1->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+				infoQueue1->RegisterMessageCallback(DebugMessageCallback, D3D12_MESSAGE_CALLBACK_IGNORE_FILTERS, nullptr, &s_DebugCallbackCookie);
 			}
 			else
 			{
-				ARC_CORE_ERROR("Could not enable debugging support for the device!");
+				ARC_CORE_WARN("Could not enable enable DX12 debug messages on console window!");
+				ComPtr<ID3D12InfoQueue> infoQueue;
+				if (SUCCEEDED(s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
+				{
+					infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
+					infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+					infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+				}
+				else
+				{
+					ARC_CORE_ERROR("Could not enable debugging support for the device!");
+				}
 			}
 		}
 #else
-		ARC_CORE_WARN("Support for DX12 debug messages on console window is disabled, define ENABLE_DX12_DEBUG_MESSAGES to enable the support, it requires Windows 11 SDK!");
-		HRESULT result = s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue));
-		if (SUCCEEDED(result))
 		{
-			s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
-			s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-			s_InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
-		}
-		else
-		{
-			ARC_CORE_ERROR("Could not enable debugging support for the DX12 device!");
+			ARC_CORE_WARN("Support for DX12 debug messages on console window is disabled, define ENABLE_DX12_DEBUG_MESSAGES to enable the support, it requires Windows 11 SDK!");
+			ComPtr<ID3D12InfoQueue> infoQueue;
+			HRESULT result = s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue));
+			if (SUCCEEDED(result))
+			{
+				infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
+				infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+				infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+			}
+			else
+			{
+				ARC_CORE_ERROR("Could not enable debugging support for the DX12 device!");
+			}
 		}
 #endif // ENABLE_DX12_DEBUG_MESSAGES
 #endif // ARC_CORE_DEBUG
@@ -389,7 +402,7 @@ namespace ArcEngine
 		m_PresentFlags |= m_SyncInterval == 0 ? DXGI_PRESENT_ALLOW_TEARING : 0;
 	}
 
-	ID3D12Device10* Dx12Context::GetDevice()
+	ID3D12Device8* Dx12Context::GetDevice()
 	{
 		return s_Device;
 	}
@@ -399,7 +412,7 @@ namespace ArcEngine
 		return s_Frames[Dx12Frame::CurrentBackBuffer].CommandAllocator;
 	}
 
-	ID3D12GraphicsCommandList7* Dx12Context::GetGraphicsCommandList()
+	ID3D12GraphicsCommandList6* Dx12Context::GetGraphicsCommandList()
 	{
 		return s_Frames[Dx12Frame::CurrentBackBuffer].CommandList;
 	}

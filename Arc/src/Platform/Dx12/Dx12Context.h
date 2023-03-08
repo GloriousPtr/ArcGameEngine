@@ -3,9 +3,9 @@
 #include "Arc/Renderer/GraphicsContext.h"
 
 class IUnknown;
-class ID3D12Device10;
+class ID3D12Device8;
 class ID3D12CommandAllocator;
-class ID3D12GraphicsCommandList7;
+class ID3D12GraphicsCommandList6;
 class ID3D12DescriptorHeap;
 
 namespace ArcEngine
@@ -28,9 +28,9 @@ namespace ArcEngine
 		void OnBeginFrame() const;
 		void OnEndFrame() const;
 
-		static ID3D12Device10* GetDevice();
+		static ID3D12Device8* GetDevice();
 		static ID3D12CommandAllocator* GetCommandAllocator();
-		static ID3D12GraphicsCommandList7* GetGraphicsCommandList();
+		static ID3D12GraphicsCommandList6* GetGraphicsCommandList();
 		static int GetSwapChainFormat();
 		static uint32_t GetCurrentFrameIndex();
 		static void SetDeferredReleaseFlag();
