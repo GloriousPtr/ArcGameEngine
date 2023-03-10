@@ -78,14 +78,20 @@ project "Arc"
 	filter "system:windows"
 		systemversion "latest"
 		buildoptions { "/bigobj" }
+		externalincludedirs
+		{
+			"%{IncludeDir.DXC}"
+		}
 		links
 		{
 			"%{LibDir.Mono}/mono-2.0-sgen.lib",
 			"opengl.dll",
-			"d3dcompiler",
-			"dxguid",
-			"d3d12",
-			"dxgi",
+
+			-- DirectX
+			"%{LibDir.DXC}/dxcompiler.lib",
+			"dxguid.lib",
+			"d3d12.lib",
+			"dxgi.lib",
 		}
 
 	filter "system:linux"

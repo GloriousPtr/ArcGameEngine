@@ -46,13 +46,18 @@ workspace "Arc"
 
 -- Library directories relavtive to root folder (solution directory)
 LibDir = {}
+LibDir["DXC"] = "%{wks.location}/Arc/vendor/dxc/dxc/lib/x64"
 filter "configurations:Debug"
 	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Debug"
 filter "configurations:Release"
 	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Release"
 filter "configurations:Dist"
 	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Release"
-	
+
+-- Bin directories relavtive to root folder (solution directory)
+BinDir = {}
+BinDir["DXC"] = "%{wks.location}/Arc/vendor/dxc/dxc/bin/x64"
+
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}";
 
 -- Include directories relavtive to root folder (solution directory)
@@ -73,6 +78,7 @@ IncludeDir["icons"] = "%{wks.location}/Arc/vendor/icons/include"
 IncludeDir["JoltPhysics"] = "%{wks.location}/Arc/vendor/JoltPhysics/JoltPhysics"
 IncludeDir["tinyobj"] = "%{wks.location}/Arc/vendor/tinyobj"
 IncludeDir["tinygltf"] = "%{wks.location}/Arc/vendor/tinygltf"
+IncludeDir["DXC"] = "%{wks.location}/Arc/vendor/dxc"
 
 group "Dependencies"
 	include "Arc/vendor/GLFW"

@@ -14,6 +14,9 @@
 
 /**/Makefile
 
+# DirectXShaderCompiler (v1.7.2212.1) 2023_03_01
+!Arc/vendor/dxc/**
+
 # ArcEngine files
 *.log
 Arc-Editor/Resources/Scripts

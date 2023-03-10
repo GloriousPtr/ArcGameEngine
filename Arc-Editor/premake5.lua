@@ -57,6 +57,10 @@ project "Arc-Editor"
 		'{COPY} "../Arc-Editor/mono" "%{cfg.targetdir}"/mono',
 		'{COPY} "../Arc-Editor/Resources" "%{cfg.targetdir}"/Resources',
 		'{COPY} "../Arc-Editor/imgui.ini" "%{cfg.targetdir}"',
+
+		-- DirectX
+		'{COPY} "%{BinDir.DXC}/dxcompiler.dll" "%{cfg.targetdir}"',
+		'{COPY} "%{BinDir.DXC}/dxil.dll" "%{cfg.targetdir}"',
 	}
 
 	filter "system:windows"
@@ -65,10 +69,12 @@ project "Arc-Editor"
 		{
 			"%{LibDir.Mono}/mono-2.0-sgen.lib",
 			"opengl.dll",
-			"d3dcompiler",
-			"dxguid",
-			"d3d12",
-			"dxgi",
+
+			-- DirectX
+			"%{LibDir.DXC}/dxcompiler.lib",
+			"dxguid.lib",
+			"d3d12.lib",
+			"dxgi.lib",
 		}
 
 	filter "system:linux"
