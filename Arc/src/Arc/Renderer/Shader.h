@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Arc/Renderer/Buffer.h"
 #include "Arc/Utils/StringUtils.h"
 
 namespace ArcEngine
@@ -50,7 +51,7 @@ namespace ArcEngine
 
 		[[nodiscard]] virtual const std::string& GetName() const = 0;
 
-		[[nodiscard]] static Ref<Shader> Create(const std::filesystem::path& filepath);
+		[[nodiscard]] static Ref<Shader> Create(const std::filesystem::path& filepath, const BufferLayout& layout = {});
 
 		[[nodiscard]] static constexpr size_t GetSizeInBytes(MaterialPropertyType type)
 		{
