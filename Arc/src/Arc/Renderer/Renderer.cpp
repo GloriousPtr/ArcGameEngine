@@ -3,6 +3,9 @@
 #include "Arc/Renderer/Renderer2D.h"
 #include "Arc/Renderer/Renderer3D.h"
 
+#include "Shader.h"
+#include "Buffer.h"
+
 namespace ArcEngine
 {
 	Renderer::SceneData* Renderer::s_SceneData = new Renderer::SceneData;
@@ -12,6 +15,16 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 		
 		RenderCommand::Init();
+
+		auto s = Shader::Create("assets/shaders/TestShader.hlsl",
+		{
+			{ ShaderDataType::Float3, "POSITION"  },
+			{ ShaderDataType::Float3, "NORMAL"    },
+			{ ShaderDataType::Float3, "TANGENT"   },
+			{ ShaderDataType::Float3, "BINORMAL" },
+			{ ShaderDataType::Float2, "TEXCOORD"  }
+		});
+
 		//Renderer2D::Init();
 		//Renderer3D::Init();
 	}
