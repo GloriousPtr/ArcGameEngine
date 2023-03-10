@@ -2,17 +2,15 @@
 
 #include <ArcEngine.h>
 
+#include "Panels/AssetPanel.h"
 #include "Panels/ConsolePanel.h"
 #include "Panels/EditorContext.h"
+#include "Panels/PropertiesPanel.h"
 #include "Panels/SceneHierarchyPanel.h"
+#include "Panels/SceneViewport.h"
 
 namespace ArcEngine
 {
-	class AssetPanel;
-	class PropertiesPanel;
-	class SceneViewport;
-	class BasePanel;
-
 	class EditorLayer : public Layer
 	{
 	public:

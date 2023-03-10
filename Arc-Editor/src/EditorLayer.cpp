@@ -10,11 +10,8 @@
 #include <Arc/Scripting/ScriptEngine.h>
 #include <Arc/Utils/PlatformUtils.h>
 
-#include "Panels/AssetPanel.h"
 #include "Panels/ProjectSettingsPanel.h"
-#include "Panels/PropertiesPanel.h"
 #include "Panels/RendererSettingsPanel.h"
-#include "Panels/SceneViewport.h"
 #include "Panels/StatsPanel.h"
 
 #include "Utils/EditorTheme.h"
