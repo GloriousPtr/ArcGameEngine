@@ -1,8 +1,6 @@
 #include "arcpch.h"
 #include "Dx12RendererAPI.h"
 
-#include <d3d12.h>
-
 #include "Arc/Core/Application.h"
 #include "Arc/Core/Window.h"
 #include "Dx12Context.h"
