@@ -2,11 +2,11 @@
 
 #include "Arc/Renderer/GraphicsContext.h"
 
-class IUnknown;
-class ID3D12Device8;
-class ID3D12CommandAllocator;
-class ID3D12GraphicsCommandList6;
-class ID3D12DescriptorHeap;
+struct IUnknown;
+struct ID3D12Device8;
+struct ID3D12CommandAllocator;
+struct ID3D12GraphicsCommandList6;
+struct ID3D12DescriptorHeap;
 
 namespace ArcEngine
 {
