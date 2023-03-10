@@ -52,7 +52,16 @@ filter "configurations:Release"
 	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Release"
 filter "configurations:Dist"
 	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Release"
-	
+
+-- Bin directories relavtive to root folder (solution directory)
+BinDir = {}
+filter "configurations:Debug"
+	BinDir["Mono"] = "%{wks.location}/Arc/vendor/mono/bin/Debug"
+filter "configurations:Release"
+	BinDir["Mono"] = "%{wks.location}/Arc/vendor/mono/bin/Release"
+filter "configurations:Dist"
+	BinDir["Mono"] = "%{wks.location}/Arc/vendor/mono/bin/Release"
+
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}";
 
 -- Include directories relavtive to root folder (solution directory)
