@@ -57,6 +57,12 @@ filter "configurations:Dist"
 -- Bin directories relavtive to root folder (solution directory)
 BinDir = {}
 BinDir["DXC"] = "%{wks.location}/Arc/vendor/dxc/dxc/bin/x64"
+filter "configurations:Debug"
+	BinDir["Mono"] = "%{wks.location}/Arc/vendor/mono/bin/Debug"
+filter "configurations:Release"
+	BinDir["Mono"] = "%{wks.location}/Arc/vendor/mono/bin/Release"
+filter "configurations:Dist"
+	BinDir["Mono"] = "%{wks.location}/Arc/vendor/mono/bin/Release"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}";
 
