@@ -11,6 +11,7 @@ namespace ArcEngine
 		static void Shutdown();
 		
 		static void OnWindowResize(uint32_t width, uint32_t height);
+		static void OnRender();
 		
 		[[nodiscard]] inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
 	private:

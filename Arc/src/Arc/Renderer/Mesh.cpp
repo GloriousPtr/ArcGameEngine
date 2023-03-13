@@ -149,7 +149,7 @@ namespace ArcEngine
 
 				Ref<VertexArray> vertexArray = VertexArray::Create();
 
-				Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(reinterpret_cast<float*>(vertices.data()), (sizeof(Vertex) * vertices.size()));
+				Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(reinterpret_cast<float*>(vertices.data()), (sizeof(Vertex) * vertices.size()), sizeof(Vertex));
 				vertexBuffer->SetLayout({
 					{ ShaderDataType::Float3, "a_Position" },
 					{ ShaderDataType::Float2, "a_TexCoord" },

@@ -109,6 +109,10 @@ namespace ArcEngine
 					for (Layer* layer : *m_LayerStack)
 						layer->OnImGuiRender();
 				}
+				// TEMP
+				{
+					Renderer::OnRender();
+				}
 				m_ImGuiLayer->End();
 				RenderCommand::EndFrame();
 			}

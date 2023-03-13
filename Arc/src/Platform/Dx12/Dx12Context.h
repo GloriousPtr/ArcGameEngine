@@ -2,6 +2,7 @@
 
 #include "Arc/Renderer/GraphicsContext.h"
 
+struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct IUnknown;
 struct ID3D12Device8;
 struct ID3D12CommandAllocator;
@@ -29,8 +30,9 @@ namespace ArcEngine
 		void OnEndFrame() const;
 
 		static ID3D12Device8* GetDevice();
-		static ID3D12CommandAllocator* GetCommandAllocator();
 		static ID3D12GraphicsCommandList6* GetGraphicsCommandList();
+		static ID3D12GraphicsCommandList6* GetUploadCommandList();
+		static D3D12_CPU_DESCRIPTOR_HANDLE GetRtv();
 		static int GetSwapChainFormat();
 		static uint32_t GetCurrentFrameIndex();
 		static void SetDeferredReleaseFlag();

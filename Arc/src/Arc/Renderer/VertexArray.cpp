@@ -3,6 +3,7 @@
 
 #include "Arc/Renderer/Renderer.h"
 #include "Platform/OpenGL/OpenGLVertexArray.h"
+#include "Platform/Dx12/Dx12VertexArray.h"
 
 namespace ArcEngine
 {
@@ -12,6 +13,7 @@ namespace ArcEngine
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
 			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLVertexArray>();
+			case RendererAPI::API::Dx12:	return CreateRef<Dx12VertexArray>();
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!")

@@ -155,7 +155,7 @@ namespace ArcEngine
 				 0.5f,  0.5f,  0.5f,
 			};
 
-			Ref<VertexBuffer> cubeVertexBuffer = VertexBuffer::Create(vertices, 108 * sizeof(float));
+			Ref<VertexBuffer> cubeVertexBuffer = VertexBuffer::Create(vertices, 108 * sizeof(float), 3 * sizeof(float));
 			cubeVertexBuffer->SetLayout({
 				{ ShaderDataType::Float3, "a_Position" }
 			});
@@ -180,7 +180,7 @@ namespace ArcEngine
 
 			s_QuadVertexArray = VertexArray::Create();
 
-			Ref<VertexBuffer> quadVertexBuffer = VertexBuffer::Create(vertices, 20 * sizeof(float));
+			Ref<VertexBuffer> quadVertexBuffer = VertexBuffer::Create(vertices, 20 * sizeof(float), 5 * sizeof(float));
 			quadVertexBuffer->SetLayout({
 				{ ShaderDataType::Float3, "a_Position" },
 				{ ShaderDataType::Float2, "a_TexCoord" }

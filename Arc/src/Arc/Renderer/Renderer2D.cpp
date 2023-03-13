@@ -65,17 +65,20 @@ namespace ArcEngine
 	void Renderer2D::Init()
 	{
 		ARC_PROFILE_SCOPE()
-		
-		s_Data.QuadVertexArray = VertexArray::Create();
-		
-		s_Data.QuadVertexBuffer = VertexBuffer::Create(Renderer2DData::MaxVertices * sizeof(QuadVertex));
-		s_Data.QuadVertexBuffer->SetLayout({
+
+		BufferLayout quadBufferLayout
+		{
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float4, "a_Color" },
 			{ ShaderDataType::Float2, "a_TexCoord" },
 			{ ShaderDataType::Float, "a_TexIndex" },
 			{ ShaderDataType::Float, "a_TilingFactor" },
-		});
+		};
+
+		s_Data.QuadVertexArray = VertexArray::Create();
+		
+		s_Data.QuadVertexBuffer = VertexBuffer::Create(Renderer2DData::MaxVertices * sizeof(QuadVertex), sizeof(QuadVertex));
+		s_Data.QuadVertexBuffer->SetLayout(quadBufferLayout);
 		s_Data.QuadVertexArray->AddVertexBuffer(s_Data.QuadVertexBuffer);
 
 		s_Data.QuadVertexBufferBase = new QuadVertex[Renderer2DData::MaxVertices];
@@ -101,13 +104,15 @@ namespace ArcEngine
 		delete[] quadIndices;
 
 		// Lines
+		BufferLayout lineBufferLayout
 		{
-			s_Data.LineVertexArray = VertexArray::Create();
-			s_Data.LineVertexBuffer = VertexBuffer::Create(Renderer2DData::MaxVertices * sizeof(LineVertex));
-			s_Data.LineVertexBuffer->SetLayout({
 				{ ShaderDataType::Float3, "a_Position" },
 				{ ShaderDataType::Float4, "a_Color" }
-			});
+		};
+		{
+			s_Data.LineVertexArray = VertexArray::Create();
+			s_Data.LineVertexBuffer = VertexBuffer::Create(Renderer2DData::MaxVertices * sizeof(LineVertex), sizeof(LineVertex));
+			s_Data.LineVertexBuffer->SetLayout(lineBufferLayout);
 			s_Data.LineVertexArray->AddVertexBuffer(s_Data.LineVertexBuffer);
 			s_Data.LineVertexBufferBase = new LineVertex[Renderer2DData::MaxVertices];
 		}
@@ -120,8 +125,8 @@ namespace ArcEngine
 		for (uint32_t i = 0; i < Renderer2DData::MaxTextureSlots; i++)
 			samplers[i] = static_cast<int32_t>(i);
 		
-		s_Data.LineShader = Shader::Create("assets/shaders/Renderer2D_Line.glsl");
-		s_Data.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
+		s_Data.LineShader = Shader::Create("assets/shaders/Renderer2D_Line.glsl", lineBufferLayout);
+		s_Data.TextureShader = Shader::Create("assets/shaders/Texture.glsl", quadBufferLayout);
 		s_Data.TextureShader->Bind();
 		s_Data.TextureShader->SetIntArray("u_Textures", samplers, Renderer2DData::MaxTextureSlots);
 
