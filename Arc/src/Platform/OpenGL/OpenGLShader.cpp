@@ -121,13 +121,6 @@ namespace ArcEngine
 		UploadUniformMat4(name, value);
 	}
 
-	void OpenGLShader::SetUniformBlock(const std::string& name, uint32_t blockIndex)
-	{
-		ARC_PROFILE_SCOPE()
-
-		glUniformBlockBinding(m_RendererID, glGetUniformBlockIndex(m_RendererID, name.c_str()), blockIndex);
-	}
-
 	void OpenGLShader::UploadUniformInt(const std::string& name, int value)
 	{
 		glUniform1i(GetLocation(name), value);

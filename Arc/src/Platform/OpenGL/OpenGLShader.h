@@ -26,7 +26,6 @@ namespace ArcEngine
 		void SetFloat4(const std::string& name, const glm::vec4& value) override;
 		void SetMat3(const std::string& name, const glm::mat3& value) override;
 		void SetMat4(const std::string& name, const glm::mat4& value) override;
-		void SetUniformBlock(const std::string& name, uint32_t blockIndex) override;
 
 		[[nodiscard]] std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality>& GetMaterialProperties() override { return m_MaterialProperties; }
 

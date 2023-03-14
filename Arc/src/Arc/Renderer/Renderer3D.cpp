@@ -49,6 +49,9 @@ namespace ArcEngine
 	glm::vec4 Renderer3D::VignetteOffset = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);	// xy: offset, z: useMask, w: enable/disable effect
 	Ref<Texture2D> Renderer3D::VignetteMask = nullptr;
 
+	inline static uint32_t s_NumDirectionalLights = 0;
+	inline static uint32_t s_NumPointLights = 0;
+
 	struct PointLightData
 	{
 		glm::vec4 Position;
@@ -86,17 +89,6 @@ namespace ArcEngine
 		s_BloomShader = s_ShaderLibrary.Load("assets/shaders/Bloom.glsl");
 		s_Shader = s_ShaderLibrary.Load("assets/shaders/PBR.glsl");
 		s_LightingShader = s_ShaderLibrary.Load("assets/shaders/LightingPass.glsl");
-
-		s_Shader->Bind();
-		s_Shader->SetUniformBlock("Camera", 0);
-
-		s_CubemapShader->Bind();
-		s_CubemapShader->SetUniformBlock("Camera", 0);
-
-		s_LightingShader->Bind();
-		s_LightingShader->SetUniformBlock("Camera", 0);
-		s_LightingShader->SetUniformBlock("PointLightBuffer", 1);
-		s_LightingShader->SetUniformBlock("DirectionalLightBuffer", 2);
 
 		// Cube-map
 		{
@@ -289,18 +281,19 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		s_UbCamera->Bind(0);
-		s_UbCamera->SetData(&cameraData, 0, sizeof(CameraData));
+		s_UbCamera->SetData(&cameraData, sizeof(CameraData), 0);
 	}
 
 	void Renderer3D::SetupLightsData()
 	{
 		ARC_PROFILE_SCOPE()
 
+		s_NumPointLights = 0;
+		s_NumDirectionalLights = 0;
+
 		{
 			uint32_t numLights = 0;
 			constexpr uint32_t size = sizeof(PointLightData);
-
-			s_UbPointLights->Bind(0);
 
 			for (Entity e : s_SceneLights)
 			{
@@ -325,20 +318,19 @@ namespace ArcEngine
 					zDir
 				};
 
-				s_UbPointLights->SetData(&pointLightData, size * numLights, size);
+				const uint32_t offset = size * numLights;
+				s_UbPointLights->Bind(offset);
+				s_UbPointLights->SetData(&pointLightData, size, offset);
 
 				numLights++;
 			}
 
-			// Pass number of lights within the scene
-			s_UbPointLights->SetData(&numLights, MAX_NUM_LIGHTS * size, sizeof(uint32_t));
+			s_NumPointLights = numLights;
 		}
 
 		{
 			uint32_t numLights = 0;
 			constexpr uint32_t size = sizeof(DirectionalLightData);
-
-			s_UbDirectionalLights->Bind(0);
 
 			for (Entity e : s_SceneLights)
 			{
@@ -366,13 +358,14 @@ namespace ArcEngine
 					dirLightViewProj
 				};
 
-				s_UbDirectionalLights->SetData(&dirLightData, size * numLights, size);
+				const uint32_t offset = size * numLights;
+				s_UbPointLights->Bind(offset);
+				s_UbDirectionalLights->SetData(&dirLightData, size, offset);
 
 				numLights++;
 			}
 
-			// Pass number of lights within the scene
-			s_UbDirectionalLights->SetData(&numLights, MAX_NUM_DIR_LIGHTS * size, sizeof(uint32_t));
+			s_NumDirectionalLights = numLights;
 		}
 	}
 
@@ -498,6 +491,9 @@ namespace ArcEngine
 		RenderCommand::Clear();
 
 		s_LightingShader->Bind();
+
+		s_LightingShader->SetInt("u_NumPointLights", static_cast<int>(s_NumPointLights));
+		s_LightingShader->SetInt("u_NumDirectionalLights", static_cast<int>(s_NumDirectionalLights));
 
 		s_LightingShader->SetInt("u_Albedo", 0);
 		s_LightingShader->SetInt("u_Normal", 1);

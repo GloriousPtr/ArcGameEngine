@@ -62,6 +62,7 @@ namespace ArcEngine
 
 	private:
 		uint32_t m_RendererID = 0;
+		uint32_t m_RegisterIndex = 0;
 		uint32_t m_Size = 0;
 	};
 }

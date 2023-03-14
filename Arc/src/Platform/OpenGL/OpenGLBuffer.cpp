@@ -101,6 +101,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
+		m_RegisterIndex = registerIndex;
 		m_Size = size;
 
 		size *= count;
@@ -122,7 +123,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		glBindBufferRange(GL_UNIFORM_BUFFER, 0, m_RendererID, offset, m_Size);
+		glBindBufferRange(GL_UNIFORM_BUFFER, m_RegisterIndex, m_RendererID, offset, m_Size);
 	}
 
 	void OpenGLConstantBuffer::Unbind() const

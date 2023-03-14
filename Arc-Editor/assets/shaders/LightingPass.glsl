@@ -66,7 +66,6 @@ struct PointLight
 layout (std140, binding = 1) uniform PointLightBuffer
 {
     PointLight u_PointLights[MAX_NUM_LIGHTS];
-    uint u_NumPointLights;
 };
 
 struct DirectionalLight
@@ -87,7 +86,6 @@ struct DirectionalLight
 layout (std140, binding = 2) uniform DirectionalLightBuffer
 {
     DirectionalLight u_DirectionalLights[MAX_NUM_DIR_LIGHTS];
-    uint u_NumDirectionalLights;
 };
 
 //Employ stochastic sampling
@@ -172,6 +170,9 @@ uniform sampler2D u_DirectionalShadowMap[MAX_NUM_DIR_LIGHTS];
 
 uniform float u_IrradianceIntensity;
 uniform float u_EnvironmentRotation;
+
+uniform int u_NumPointLights;
+uniform int u_NumDirectionalLights;
 
 struct PBRParameters
 {

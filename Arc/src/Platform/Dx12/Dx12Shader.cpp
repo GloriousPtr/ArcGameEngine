@@ -83,10 +83,6 @@ namespace ArcEngine
 	{
 	}
 
-	void Dx12Shader::SetUniformBlock(const std::string& name, uint32_t blockIndex)
-	{
-	}
-
 	std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality>& Dx12Shader::GetMaterialProperties()
 	{
 		std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality> map;
