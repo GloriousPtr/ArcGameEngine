@@ -363,12 +363,15 @@ namespace ArcEngine
 			{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3 },
 		};
 
-		constexpr uint32_t numParameteres = 4;
+		constexpr uint32_t numParameteres = 7;
 		CD3DX12_ROOT_PARAMETER parameters[numParameteres];
-		parameters[0].InitAsDescriptorTable(static_cast<uint32_t>(ranges.size()), ranges.data());
-		parameters[1].InitAsConstantBufferView(0, 0);
-		parameters[2].InitAsConstantBufferView(1, 0);
-		parameters[3].InitAsConstantBufferView(2, 0);
+		parameters[0].InitAsDescriptorTable(1, &ranges[0]);
+		parameters[1].InitAsDescriptorTable(1, &ranges[1]);
+		parameters[2].InitAsDescriptorTable(1, &ranges[2]);
+		parameters[3].InitAsDescriptorTable(1, &ranges[3]);
+		parameters[4].InitAsConstantBufferView(0, 0);
+		parameters[5].InitAsConstantBufferView(1, 0);
+		parameters[6].InitAsConstantBufferView(2, 0);
 
 		constexpr uint32_t numSamplers = 1;
 		CD3DX12_STATIC_SAMPLER_DESC samplers[1];

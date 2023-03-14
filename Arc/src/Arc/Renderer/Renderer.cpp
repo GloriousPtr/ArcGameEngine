@@ -21,6 +21,7 @@ namespace ArcEngine
 		Ref<Shader> shader;
 		Ref<ConstantBuffer> transform;
 		Ref<ConstantBuffer> cam;
+		Ref<Texture2D> tex;
 
 		glm::mat4 view;
 		glm::mat4 projection;
@@ -49,39 +50,42 @@ namespace ArcEngine
 		});
 		*/
 
-		s_Data->shader = Shader::Create("assets/shaders/FlatColor.hlsl",
+		const BufferLayout layout
 		{
 			{ ShaderDataType::Float3, "POSITION" },
-			{ ShaderDataType::Float4, "COLOR"    },
-		});
-
-		struct Vertex
-		{
-			glm::vec3 Position;
-			glm::vec4 Color;
+			{ ShaderDataType::Float2, "TEXCOORD" }
 		};
 
-		Vertex vertices[] =
+		s_Data->shader = Shader::Create("assets/shaders/FlatColor.hlsl", layout);
+
+		// Quad
 		{
-			{ glm::vec3(-0.5f, 0.0f, 0.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) },
-			{ glm::vec3(0.0f, 0.5f, 0.0f),  glm::vec4(0.0f, 1.0f, 0.0f, 1.0f) },
-			{ glm::vec3(0.5f, 0.0f, 0.0f),  glm::vec4(0.0f, 0.0f, 1.0f, 1.0f) }
-		};
+			constexpr float vertices[20] = {
+				 -0.5f,  0.5f, 0.0f, 0.0f, 0.0f, // top left
+				  0.5f, -0.5f, 0.0f, 1.0f, 1.0f, // bottom right
+				 -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom left
+				  0.5f,  0.5f, 0.0f, 1.0f, 0.0f  // top right
+			};
+			constexpr uint32_t indices[6] = {
+				0, 1, 2,
+				0, 3, 1
+			};
+			s_Data->va = VertexArray::Create();
+			Ref<VertexBuffer> quadVertexBuffer = VertexBuffer::Create(vertices, 20 * sizeof(float), 5 * sizeof(float));
+			quadVertexBuffer->SetLayout(layout);
+			s_Data->va->AddVertexBuffer(quadVertexBuffer);
+			Ref<IndexBuffer> quadIndexBuffer = IndexBuffer::Create(indices, 6);
+			s_Data->va->SetIndexBuffer(quadIndexBuffer);
+		}
 
-		uint32_t indices[] = { 0, 1, 2 };
+		s_Data->tex = Texture2D::Create("Resources/Textures/Texel Density Texture 1.png");
 
-		Ref<VertexBuffer> vb = VertexBuffer::Create((float*)(&vertices[0]), sizeof(vertices), sizeof(Vertex));
-		Ref<IndexBuffer> ib = IndexBuffer::Create(indices, 3);
-		s_Data->va = VertexArray::Create();
-		s_Data->va->AddVertexBuffer(vb);
-		s_Data->va->SetIndexBuffer(ib);
-
-		s_Data->transform = ConstantBuffer::Create(sizeof(glm::mat4), 2, 2);
-		s_Data->cam = ConstantBuffer::Create(sizeof(glm::mat4), 1, 1);
+		s_Data->transform = ConstantBuffer::Create(sizeof(glm::mat4), 100, 5);
+		s_Data->cam = ConstantBuffer::Create(sizeof(glm::mat4), 1, 4);
 
 		s_Data->width = 1600;
 		s_Data->height = 900;
-		s_Data->view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f });
+		s_Data->view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f });
 		s_Data->projection = glm::perspective(glm::radians(45.0f), 1600.0f / 900.0f, 0.01f, 1000.0f);
 
 		//Renderer2D::Init();
@@ -114,13 +118,13 @@ namespace ArcEngine
 		static glm::vec3 cameraPosition = { 0.0f, 0.0f, 1.0f };
 		static float fov = 45.0f;
 
-		static glm::vec3 position1	= { 0.5f, 0.0f, 0.0f };
+		static glm::vec3 position1	= { 1.0f, 0.0f, 0.0f };
 		static glm::vec3 rotation1	= { 0.0f, 0.0f, 0.0f };
-		static glm::vec3 scale1		= { 0.5f, 1.0f, 1.0f };
+		static glm::vec3 scale1		= { 1.0f, 1.0f, 1.0f };
 
-		static glm::vec3 position2	= { 0.5f, 0.0f, 0.0f };
+		static glm::vec3 position2	= {-2.0f, 0.0f, 0.0f };
 		static glm::vec3 rotation2	= { 0.0f, 0.0f, 0.0f };
-		static glm::vec3 scale2		= { 0.5f, 1.0f, 1.0f };
+		static glm::vec3 scale2		= { 1.0f, 1.0f, 1.0f };
 
 		static glm::vec4 clearColor = { 0.1f, 0.1f, 0.1f, 1.0f };
 
@@ -162,6 +166,8 @@ namespace ArcEngine
 		glm::mat4 viewProj = s_Data->projection * s_Data->view;
 		s_Data->cam->Bind(0);
 		s_Data->cam->SetData(&viewProj, sizeof(viewProj), 0);
+
+		s_Data->tex->Bind(2);
 
 		glm::mat4 transform1 = glm::translate(glm::mat4(1.0f), position1) * glm::toMat4(glm::quat(rotation1)) * glm::scale(glm::mat4(1.0f), scale1);
 		s_Data->transform->Bind(0);

@@ -61,6 +61,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
+		ARC_CORE_ASSERT(width == m_Width && height == m_Height)
 		InvalidateImpl(path, width, height, data, channels);
 	}
 

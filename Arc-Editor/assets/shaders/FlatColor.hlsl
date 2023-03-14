@@ -1,16 +1,13 @@
-static const float PI = 3.141592653589793;
-static const float EPSILON = 1.17549435E-38;
-
 struct VertexIn
 {
 	float3 Position		: POSITION;
-	float4 Color		: COLOR;
+	float2 UV			: TEXCOORD;
 };
 
 struct VertexOut
 {
 	float4 Position			: SV_POSITION;
-	float4 Color			: COLOR;
+	float2 UV				: TEXCOORD;
 };
 
 struct Camera
@@ -32,7 +29,7 @@ VertexOut VS_Main(VertexIn v)
 
 	float4 worldPosition = mul(float4(v.Position, 1.0), c_Properties.Model);
 	output.Position = mul(worldPosition, c_Camera.ViewProjection);
-	output.Color = v.Color;
+	output.UV = v.UV;
 
 	return output;
 }
@@ -66,5 +63,6 @@ ConstantBuffer<MaterialData> c_Material : register(b2);
 
 float4 PS_Main(VertexOut input) : SV_TARGET
 {
-	return float4(input.Color);
+	float4 color = u_Albedo.Sample(u_Sampler, input.UV);
+	return float4(color);
 }
