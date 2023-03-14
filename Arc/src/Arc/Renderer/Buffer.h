@@ -140,9 +140,9 @@ namespace ArcEngine
 	public:
 		virtual ~ConstantBuffer() = default;
 
-		virtual void Bind(uint32_t offset) const = 0;
+		virtual void Bind(uint32_t index) const = 0;
 		virtual void Unbind() const = 0;
-		virtual void SetData(const void* data, uint32_t size, uint32_t offset) = 0;
+		virtual void SetData(const void* data, uint32_t size, uint32_t index) = 0;
 
 		[[nodiscard]] static Ref<ConstantBuffer> Create(uint32_t size, uint32_t count, uint32_t registerIndex);
 	};

@@ -55,14 +55,15 @@ namespace ArcEngine
 		OpenGLConstantBuffer(const OpenGLConstantBuffer& other) = default;
 		OpenGLConstantBuffer(OpenGLConstantBuffer&& other) = default;
 
-		void Bind(uint32_t offset) const override;
+		void Bind(uint32_t index) const override;
 		void Unbind() const override;
 
-		void SetData(const void* data, uint32_t size, uint32_t offset) override;
+		void SetData(const void* data, uint32_t size, uint32_t index) override;
 
 	private:
 		uint32_t m_RendererID = 0;
 		uint32_t m_RegisterIndex = 0;
 		uint32_t m_Size = 0;
+		uint32_t m_Count = 0;
 	};
 }

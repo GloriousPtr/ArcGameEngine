@@ -103,13 +103,15 @@ namespace ArcEngine
 
 		m_RegisterIndex = registerIndex;
 		m_Size = size;
+		m_Count = count;
 
-		size *= count;
+		const uint32_t allocationSize = size * count;
+
 		glCreateBuffers(1, &m_RendererID);
 		glBindBuffer(GL_UNIFORM_BUFFER, m_RendererID);
-		glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+		glBufferData(GL_UNIFORM_BUFFER, allocationSize, nullptr, GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-		glBindBufferRange(GL_UNIFORM_BUFFER, registerIndex, m_RendererID, 0, size);
+		glBindBufferRange(GL_UNIFORM_BUFFER, registerIndex, m_RendererID, 0, allocationSize);
 	}
 
 	OpenGLConstantBuffer::~OpenGLConstantBuffer()
@@ -119,10 +121,12 @@ namespace ArcEngine
 		glDeleteBuffers(1, &m_RendererID);
 	}
 
-	void OpenGLConstantBuffer::Bind(uint32_t offset) const
+	void OpenGLConstantBuffer::Bind(uint32_t index) const
 	{
 		ARC_PROFILE_SCOPE()
+		ARC_CORE_ASSERT(m_Count > index, "Constant buffer index can't be greater than count! Overflow!")
 
+		const uint32_t offset = m_Size * index;
 		glBindBufferRange(GL_UNIFORM_BUFFER, m_RegisterIndex, m_RendererID, offset, m_Size);
 	}
 
@@ -133,10 +137,12 @@ namespace ArcEngine
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
-	void OpenGLConstantBuffer::SetData(const void* data, uint32_t size, uint32_t offset)
+	void OpenGLConstantBuffer::SetData(const void* data, uint32_t size, uint32_t index)
 	{
 		ARC_PROFILE_SCOPE()
+		ARC_CORE_ASSERT(m_Count > index, "Constant buffer index can't be greater than count! Overflow!")
 
+		const uint32_t offset = m_Size * index;
 		glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
 	}
 }

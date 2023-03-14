@@ -139,15 +139,15 @@ namespace ArcEngine
 
 	Dx12ConstantBuffer::Dx12ConstantBuffer(uint32_t size, uint32_t count, uint32_t registerIndex)
 	{
-		m_Size = size;
-		size = (size + 255) &~ 255;
-
-		size *= count;
-
 		m_RegisterIndex = registerIndex;
+		m_Size = size;
+		m_Count = count;
+		m_AlignedSize = (size + 255) &~ 255;
+
+		const uint32_t allocationSize = m_AlignedSize * count;
 
 		const CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);
-		const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(size);
+		const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(allocationSize);
 
 		for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
 		{
@@ -155,7 +155,7 @@ namespace ArcEngine
 
 			D3D12_CONSTANT_BUFFER_VIEW_DESC desc{};
 			desc.BufferLocation = m_Resource[i]->GetGPUVirtualAddress();
-			desc.SizeInBytes = size;
+			desc.SizeInBytes = allocationSize;
 			m_Handle[i] = Dx12Context::GetSrvHeap()->Allocate();
 			Dx12Context::GetDevice()->CreateConstantBufferView(&desc, m_Handle[i].CPU);
 		}
@@ -172,18 +172,18 @@ namespace ArcEngine
 		}
 	}
 
-	void Dx12ConstantBuffer::SetData(const void* data, uint32_t size, uint32_t offset)
+	void Dx12ConstantBuffer::SetData(const void* data, uint32_t size, uint32_t index)
 	{
-		const uint32_t alignedSize = (size + 255) & ~255;
-		offset = (offset / size) * alignedSize;
-		SetBufferData(m_Resource[Dx12Context::GetCurrentFrameIndex()], data, size, offset);
+		ARC_CORE_ASSERT(m_Count > index, "Constant buffer index can't be greater than count! Overflow!")
+
+		SetBufferData(m_Resource[Dx12Context::GetCurrentFrameIndex()], data, size, m_AlignedSize * index);
 	}
 
-	void Dx12ConstantBuffer::Bind(uint32_t offset) const
+	void Dx12ConstantBuffer::Bind(uint32_t index) const
 	{
-		const uint32_t alignedSize = (m_Size + 255) & ~255;
-		offset = (offset / m_Size) * alignedSize;
-		const auto gpuVirtualAddress = m_Resource[Dx12Context::GetCurrentFrameIndex()]->GetGPUVirtualAddress() + offset;
+		ARC_CORE_ASSERT(m_Count > index, "Constant buffer index can't be greater than count! Overflow!")
+
+		const auto gpuVirtualAddress = m_Resource[Dx12Context::GetCurrentFrameIndex()]->GetGPUVirtualAddress() + m_AlignedSize * index;
 		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(m_RegisterIndex, gpuVirtualAddress);
 	}
 

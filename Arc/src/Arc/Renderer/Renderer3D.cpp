@@ -318,9 +318,8 @@ namespace ArcEngine
 					zDir
 				};
 
-				const uint32_t offset = size * numLights;
-				s_UbPointLights->Bind(offset);
-				s_UbPointLights->SetData(&pointLightData, size, offset);
+				s_UbPointLights->Bind(numLights);
+				s_UbPointLights->SetData(&pointLightData, size, numLights);
 
 				numLights++;
 			}
@@ -358,9 +357,8 @@ namespace ArcEngine
 					dirLightViewProj
 				};
 
-				const uint32_t offset = size * numLights;
-				s_UbPointLights->Bind(offset);
-				s_UbDirectionalLights->SetData(&dirLightData, size, offset);
+				s_UbPointLights->Bind(numLights);
+				s_UbDirectionalLights->SetData(&dirLightData, size, numLights);
 
 				numLights++;
 			}
