@@ -10,7 +10,7 @@ namespace ArcEngine
 {
 	class Shader;
 	class ShaderLibrary;
-	class UniformBuffer;
+	class ConstantBuffer;
 	struct Submesh;
 	struct RenderGraphData;
 	class Entity;
@@ -82,9 +82,9 @@ namespace ArcEngine
 		static Ref<Shader> s_BloomShader;
 		static Ref<VertexArray> s_QuadVertexArray;
 		static Ref<VertexArray> s_CubeVertexArray;
-		static Ref<UniformBuffer> s_UbCamera;
-		static Ref<UniformBuffer> s_UbPointLights;
-		static Ref<UniformBuffer> s_UbDirectionalLights;
+		static Ref<ConstantBuffer> s_UbCamera;
+		static Ref<ConstantBuffer> s_UbPointLights;
+		static Ref<ConstantBuffer> s_UbDirectionalLights;
 
 		static Entity s_Skylight;
 		static std::vector<Entity> s_SceneLights;

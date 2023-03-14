@@ -36,15 +36,13 @@ namespace ArcEngine
 		Dx12Context::GetDevice()->CreateCommittedResource(&defaultHeap, D3D12_HEAP_FLAG_NONE, &desc, initialState, nullptr, IID_PPV_ARGS(resource));
 	}
 
-	static void SetBufferData(ID3D12Resource* resource, const void* data, uint32_t size)
+	static void SetBufferData(ID3D12Resource* resource, const void* data, uint32_t size, uint32_t offset = 0)
 	{
-		void* vertexDataBegin;
-		D3D12_RANGE readRange;
-		readRange.Begin = 0;
-		readRange.End = 0;
-
-		resource->Map(0, &readRange, &vertexDataBegin);
-		memcpy(vertexDataBegin, data, size);
+		constexpr D3D12_RANGE readRange{ 0, 0 };
+		void* dst;
+		resource->Map(0, &readRange, &dst);
+		dst = (char*)dst + offset;
+		memcpy(dst, data, size);
 		resource->Unmap(0, nullptr);
 	}
 
@@ -133,6 +131,63 @@ namespace ArcEngine
 	}
 
 	void Dx12IndexBuffer::Unbind() const
+	{
+	}
+
+
+
+
+	Dx12ConstantBuffer::Dx12ConstantBuffer(uint32_t size, uint32_t count, uint32_t registerIndex)
+	{
+		m_Size = size;
+		size = (size + 255) &~ 255;
+
+		size *= count;
+
+		m_RegisterIndex = registerIndex;
+
+		const CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);
+		const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(size);
+
+		for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
+		{
+			Dx12Context::GetDevice()->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_Resource[i]));
+
+			D3D12_CONSTANT_BUFFER_VIEW_DESC desc{};
+			desc.BufferLocation = m_Resource[i]->GetGPUVirtualAddress();
+			desc.SizeInBytes = size;
+			m_Handle[i] = Dx12Context::GetSrvHeap()->Allocate();
+			Dx12Context::GetDevice()->CreateConstantBufferView(&desc, m_Handle[i].CPU);
+		}
+	}
+
+	Dx12ConstantBuffer::~Dx12ConstantBuffer()
+	{
+		for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
+		{
+			Dx12Context::GetSrvHeap()->Free(m_Handle[i]);
+
+			if (m_Resource[i])
+				m_Resource[i]->Release();
+		}
+	}
+
+	void Dx12ConstantBuffer::SetData(const void* data, uint32_t size, uint32_t offset)
+	{
+		const uint32_t alignedSize = (size + 255) & ~255;
+		offset = (offset / size) * alignedSize;
+		SetBufferData(m_Resource[Dx12Context::GetCurrentFrameIndex()], data, size, offset);
+	}
+
+	void Dx12ConstantBuffer::Bind(uint32_t offset) const
+	{
+		const uint32_t alignedSize = (m_Size + 255) & ~255;
+		offset = (offset / m_Size) * alignedSize;
+		const auto gpuVirtualAddress = m_Resource[Dx12Context::GetCurrentFrameIndex()]->GetGPUVirtualAddress() + offset;
+		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(m_RegisterIndex, gpuVirtualAddress);
+	}
+
+	void Dx12ConstantBuffer::Unbind() const
 	{
 	}
 }

@@ -46,23 +46,22 @@ namespace ArcEngine
 		uint32_t m_Count = 0;
 	};
 
-	class OpenGLUniformBuffer : public UniformBuffer
+	class OpenGLConstantBuffer : public ConstantBuffer
 	{
 	public:
-		OpenGLUniformBuffer();
-		~OpenGLUniformBuffer() override;
+		OpenGLConstantBuffer(uint32_t size, uint32_t count, uint32_t registerIndex);
+		~OpenGLConstantBuffer() override;
 
-		OpenGLUniformBuffer(const OpenGLUniformBuffer& other) = default;
-		OpenGLUniformBuffer(OpenGLUniformBuffer&& other) = default;
+		OpenGLConstantBuffer(const OpenGLConstantBuffer& other) = default;
+		OpenGLConstantBuffer(OpenGLConstantBuffer&& other) = default;
 
-		void Bind() const override;
+		void Bind(uint32_t offset) const override;
 		void Unbind() const override;
 
-		void SetData(const void* data, uint32_t offset, uint32_t size) override;
-		void SetLayout(const BufferLayout& layout, uint32_t blockIndex, uint32_t count) override;
+		void SetData(const void* data, uint32_t size, uint32_t offset) override;
 
 	private:
 		uint32_t m_RendererID = 0;
-		BufferLayout m_Layout;
+		uint32_t m_Size = 0;
 	};
 }

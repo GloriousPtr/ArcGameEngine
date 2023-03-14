@@ -28,9 +28,9 @@ namespace ArcEngine
 	Ref<Shader> Renderer3D::s_BloomShader;
 	Ref<VertexArray> Renderer3D::s_QuadVertexArray;
 	Ref<VertexArray> Renderer3D::s_CubeVertexArray;
-	Ref<UniformBuffer> Renderer3D::s_UbCamera;
-	Ref<UniformBuffer> Renderer3D::s_UbPointLights;
-	Ref<UniformBuffer> Renderer3D::s_UbDirectionalLights;
+	Ref<ConstantBuffer> Renderer3D::s_UbCamera;
+	Ref<ConstantBuffer> Renderer3D::s_UbPointLights;
+	Ref<ConstantBuffer> Renderer3D::s_UbDirectionalLights;
 
 	Entity Renderer3D::s_Skylight;
 	std::vector<Entity> Renderer3D::s_SceneLights;
@@ -49,33 +49,31 @@ namespace ArcEngine
 	glm::vec4 Renderer3D::VignetteOffset = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);	// xy: offset, z: useMask, w: enable/disable effect
 	Ref<Texture2D> Renderer3D::VignetteMask = nullptr;
 
+	struct PointLightData
+	{
+		glm::vec4 Position;
+		glm::vec4 Color;
+		glm::vec4 AttenFactors;
+		glm::vec4 LightDir;
+	};
+
+	struct DirectionalLightData
+	{
+		glm::vec4 Position;
+		glm::vec4 Color;
+		glm::vec4 LightDir;
+		glm::mat4 DirLightViewProj;
+	};
+
 	void Renderer3D::Init()
 	{
 		ARC_PROFILE_SCOPE()
 
-		s_UbCamera = UniformBuffer::Create();
-		s_UbCamera->SetLayout({
-			{ ShaderDataType::Mat4, "u_View" },
-			{ ShaderDataType::Mat4, "u_Projection" },
-			{ ShaderDataType::Mat4, "u_ViewProjection" },
-			{ ShaderDataType::Float4, "u_CameraPosition" }
-		}, 0);
+		static_assert(sizeof(CameraData) == sizeof(glm::mat4) * 3 + sizeof(glm::vec3));
 
-		s_UbPointLights = UniformBuffer::Create();
-		s_UbPointLights->SetLayout({
-			{ ShaderDataType::Float4, "u_Position" },
-			{ ShaderDataType::Float4, "u_Color" },
-			{ ShaderDataType::Float4, "u_AttenFactors" },
-			{ ShaderDataType::Float4, "u_LightDir" },
-		}, 1, MAX_NUM_LIGHTS + 1);
-
-		s_UbDirectionalLights = UniformBuffer::Create();
-		s_UbDirectionalLights->SetLayout({
-			{ ShaderDataType::Float4, "u_Position" },
-			{ ShaderDataType::Float4, "u_Color" },
-			{ ShaderDataType::Float4, "u_LightDir" },
-			{ ShaderDataType::Mat4, "u_DirLightViewProj" },
-		}, 2, MAX_NUM_DIR_LIGHTS + 1);
+		s_UbCamera = ConstantBuffer::Create(sizeof(CameraData), 1, 0);
+		s_UbPointLights = ConstantBuffer::Create(sizeof(PointLightData), MAX_NUM_LIGHTS + 1, 1);
+		s_UbDirectionalLights = ConstantBuffer::Create(sizeof(DirectionalLightData), MAX_NUM_DIR_LIGHTS + 1, 2);
 
 		s_BRDFLutTexture = Texture2D::Create("Resources/Renderer/BRDF_LUT.jpg");
 
@@ -290,8 +288,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		static_assert(sizeof(CameraData) == sizeof(glm::mat4) * 3 + sizeof(glm::vec3));
-		s_UbCamera->Bind();
+		s_UbCamera->Bind(0);
 		s_UbCamera->SetData(&cameraData, 0, sizeof(CameraData));
 	}
 
@@ -300,18 +297,10 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		{
-			struct PointLightData
-			{
-				glm::vec4 Position;
-				glm::vec4 Color;
-				glm::vec4 AttenFactors;
-				glm::vec4 LightDir;
-			};
-
 			uint32_t numLights = 0;
 			constexpr uint32_t size = sizeof(PointLightData);
 
-			s_UbPointLights->Bind();
+			s_UbPointLights->Bind(0);
 
 			for (Entity e : s_SceneLights)
 			{
@@ -346,18 +335,10 @@ namespace ArcEngine
 		}
 
 		{
-			struct DirectionalLightData
-			{
-				glm::vec4 Position;
-				glm::vec4 Color;
-				glm::vec4 LightDir;
-				glm::mat4 DirLightViewProj;
-			};
-
 			uint32_t numLights = 0;
 			constexpr uint32_t size = sizeof(DirectionalLightData);
 
-			s_UbDirectionalLights->Bind();
+			s_UbDirectionalLights->Bind(0);
 
 			for (Entity e : s_SceneLights)
 			{

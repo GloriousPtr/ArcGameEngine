@@ -50,4 +50,21 @@ namespace ArcEngine
 		ID3D12Resource*						m_Resource = nullptr;
 		D3D12_INDEX_BUFFER_VIEW				m_BufferView{};
 	};
+
+	class Dx12ConstantBuffer : public ConstantBuffer
+	{
+	public:
+		Dx12ConstantBuffer(uint32_t size, uint32_t count, uint32_t registerIndex);
+		~Dx12ConstantBuffer() override;
+
+		void SetData(const void* data, uint32_t size, uint32_t offset) override;
+		void Bind(uint32_t offset) const override;
+		void Unbind() const override;
+
+	private:
+		DescriptorHandle				m_Handle[Dx12Context::FrameCount]{};
+		ID3D12Resource*					m_Resource[Dx12Context::FrameCount]{};
+		uint32_t						m_Size = 0;
+		uint32_t						m_RegisterIndex = 0;
+	};
 }

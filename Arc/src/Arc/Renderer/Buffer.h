@@ -135,16 +135,15 @@ namespace ArcEngine
 		[[nodiscard]] static Ref<IndexBuffer> Create(const uint32_t* indices, size_t count);
 	};
 
-	class UniformBuffer
+	class ConstantBuffer
 	{
 	public:
-		virtual ~UniformBuffer() = default;
+		virtual ~ConstantBuffer() = default;
 
-		virtual void Bind() const = 0;
+		virtual void Bind(uint32_t offset) const = 0;
 		virtual void Unbind() const = 0;
-		virtual void SetData(const void* data, uint32_t offset, uint32_t size) = 0;
-		virtual void SetLayout(const BufferLayout& layout, uint32_t blockIndex, uint32_t count = 1) = 0;
+		virtual void SetData(const void* data, uint32_t size, uint32_t offset) = 0;
 
-		[[nodiscard]] static Ref<UniformBuffer> Create();
+		[[nodiscard]] static Ref<ConstantBuffer> Create(uint32_t size, uint32_t count, uint32_t registerIndex);
 	};
 }

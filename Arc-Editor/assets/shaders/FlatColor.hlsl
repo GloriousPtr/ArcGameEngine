@@ -3,7 +3,7 @@ static const float EPSILON = 1.17549435E-38;
 
 struct VertexIn
 {
-	float4 Position		: POSITION;
+	float3 Position		: POSITION;
 	float4 Color		: COLOR;
 };
 
@@ -16,7 +16,6 @@ struct VertexOut
 struct Camera
 {
 	row_major float4x4 ViewProjection;
-	float4 CameraPosition;
 };
 
 struct Properties
@@ -31,7 +30,8 @@ VertexOut VS_Main(VertexIn v)
 {
 	VertexOut output;
 
-	output.Position = v.Position;
+	float4 worldPosition = mul(float4(v.Position, 1.0), c_Properties.Model);
+	output.Position = mul(worldPosition, c_Camera.ViewProjection);
 	output.Color = v.Color;
 
 	return output;

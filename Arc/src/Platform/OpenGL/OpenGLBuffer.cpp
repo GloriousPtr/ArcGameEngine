@@ -97,57 +97,45 @@ namespace ArcEngine
 	// UniformBuffer /////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////
 	
-	OpenGLUniformBuffer::OpenGLUniformBuffer()
+	OpenGLConstantBuffer::OpenGLConstantBuffer(uint32_t size, uint32_t count, uint32_t registerIndex)
 	{
 		ARC_PROFILE_SCOPE()
 
+		m_Size = size;
+
+		size *= count;
 		glCreateBuffers(1, &m_RendererID);
 		glBindBuffer(GL_UNIFORM_BUFFER, m_RendererID);
+		glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		glBindBufferRange(GL_UNIFORM_BUFFER, registerIndex, m_RendererID, 0, size);
 	}
 
-	OpenGLUniformBuffer::~OpenGLUniformBuffer()
+	OpenGLConstantBuffer::~OpenGLConstantBuffer()
 	{
 		ARC_PROFILE_SCOPE()
 
 		glDeleteBuffers(1, &m_RendererID);
 	}
 
-	void OpenGLUniformBuffer::Bind() const
+	void OpenGLConstantBuffer::Bind(uint32_t offset) const
 	{
 		ARC_PROFILE_SCOPE()
 
-		glBindBuffer(GL_UNIFORM_BUFFER, m_RendererID);
+		glBindBufferRange(GL_UNIFORM_BUFFER, 0, m_RendererID, offset, m_Size);
 	}
 
-	void OpenGLUniformBuffer::Unbind() const
+	void OpenGLConstantBuffer::Unbind() const
 	{
 		ARC_PROFILE_SCOPE()
 
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
-	void OpenGLUniformBuffer::SetData(const void* data, uint32_t offset, uint32_t size)
+	void OpenGLConstantBuffer::SetData(const void* data, uint32_t size, uint32_t offset)
 	{
 		ARC_PROFILE_SCOPE()
 
 		glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
-	}
-
-	void OpenGLUniformBuffer::SetLayout(const BufferLayout& layout, uint32_t blockIndex, uint32_t count)
-	{
-		ARC_PROFILE_SCOPE()
-
-		m_Layout = layout;
-
-		uint32_t size = 0;
-		for (const auto& element : m_Layout)
-			size += ShaderDataTypeSize(element.Type);
-
-		size *= count;
-
-		glBindBuffer(GL_UNIFORM_BUFFER, m_RendererID);
-		glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-		glBindBufferRange(GL_UNIFORM_BUFFER, blockIndex, m_RendererID, 0, size);
 	}
 }

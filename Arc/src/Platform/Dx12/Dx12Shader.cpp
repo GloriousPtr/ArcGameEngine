@@ -95,7 +95,7 @@ namespace ArcEngine
 
 	const std::string& Dx12Shader::GetName() const
 	{
-		return "";
+		return m_Name;
 	}
 
 
