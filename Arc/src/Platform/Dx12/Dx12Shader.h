@@ -42,6 +42,5 @@ namespace ArcEngine
 		std::string									m_Name;
 		ID3D12RootSignature*						m_RootSignature = nullptr;
 		ID3D12PipelineState*						m_PipelineState = nullptr;
-		std::vector<D3D12_INPUT_ELEMENT_DESC>		m_InputLayout{};
 	};
 }

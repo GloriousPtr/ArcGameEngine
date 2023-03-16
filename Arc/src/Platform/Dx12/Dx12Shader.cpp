@@ -13,7 +13,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		SetInputLayoutFromBufferLayout(layout);
+		//SetInputLayoutFromBufferLayout(layout);
 		m_Name = filepath.filename().string();
 		Compile(filepath);
 	}
@@ -41,6 +41,9 @@ namespace ArcEngine
 	void Dx12Shader::Bind() const
 	{
 		ARC_PROFILE_SCOPE()
+
+		if (!m_RootSignature || !m_PipelineState)
+			return;
 
 		auto* commandList = Dx12Context::GetGraphicsCommandList();
 		commandList->SetGraphicsRootSignature(m_RootSignature);
@@ -124,7 +127,7 @@ namespace ArcEngine
 		ShaderModel shaderModel,
 		const std::vector<const wchar_t*>& arguments,
 		const std::vector<const wchar_t*>& defines,
-		Microsoft::WRL::ComPtr<IDxcUtils> utils)
+		Microsoft::WRL::ComPtr<IDxcBlob>* reflection)
 	{
 		using namespace Microsoft::WRL;
 
@@ -184,119 +187,42 @@ namespace ArcEngine
 			return nullptr;
 		}
 
-#if 0
-		ComPtr<IDxcBlob> reflection;
-		compileResult->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(&reflection), nullptr);
-		if (reflection != nullptr)
-		{
-			// Create reflection interface.
-			DxcBuffer reflectionData{};
-			reflectionData.Encoding = DXC_CP_ACP;
-			reflectionData.Ptr = reflection->GetBufferPointer();
-			reflectionData.Size = reflection->GetBufferSize();
-
-			ComPtr<ID3D12ShaderReflection> reflect;
-			utils->CreateReflection(&reflectionData, IID_PPV_ARGS(&reflect));
-
-			// Use reflection interface here.
-			D3D12_SHADER_DESC shaderDesc;
-			reflect->GetDesc(&shaderDesc);
-			ARC_CORE_DEBUG("======================= Input ================================");
-			for (uint32_t i = 0; i < shaderDesc.InputParameters; ++i)
-			{
-				D3D12_SIGNATURE_PARAMETER_DESC paramDesc;
-				reflect->GetInputParameterDesc(i, &paramDesc);
-				ARC_CORE_DEBUG("\tSemanticName: {}", paramDesc.SemanticName);
-				ARC_CORE_DEBUG("\tSemanticIndex: {}", paramDesc.SemanticIndex);
-				ARC_CORE_DEBUG("\tRegister: {}", paramDesc.Register);
-				ARC_CORE_DEBUG("\tStream: {}", paramDesc.Stream);
-				ARC_CORE_DEBUG("\tComponentType: {}", paramDesc.ComponentType);
-			}
-			ARC_CORE_DEBUG("======================= CB ================================");
-			for (uint32_t i = 0; i < shaderDesc.ConstantBuffers; ++i)
-			{
-				D3D12_SHADER_BUFFER_DESC desc;
-				reflect->GetConstantBufferByIndex(i)->GetDesc(&desc);
-				ARC_CORE_DEBUG("\tName: {}", desc.Name);
-				ARC_CORE_DEBUG("\tSize: {}", desc.Size);
-				ARC_CORE_DEBUG("\tType: {}", desc.Type);
-				ARC_CORE_DEBUG("\tVariables: {}", desc.Variables);
-			}
-			ARC_CORE_DEBUG("======================= Resources ================================");
-			for (uint32_t i = 0; i < shaderDesc.BoundResources; ++i)
-			{
-				D3D12_SHADER_INPUT_BIND_DESC desc;
-				reflect->GetResourceBindingDesc(i, &desc);
-				ARC_CORE_DEBUG("\tName: {}", desc.Name);
-				ARC_CORE_DEBUG("\tBindPoint: {}", desc.BindPoint);
-				ARC_CORE_DEBUG("\tBindCount: {}", desc.BindCount);
-				ARC_CORE_DEBUG("\tType: {}", desc.Type);
-				ARC_CORE_DEBUG("\tSpace: {}", desc.Space);
-			}
-		}
-#endif
+		if (reflection)
+			compileResult->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(reflection->GetAddressOf()), nullptr);
 
 		ComPtr<IDxcBlob> shader;
 		compileResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr);
 		return shader;
 	}
 
-	void Dx12Shader::SetInputLayoutFromBufferLayout(const BufferLayout& layout)
+	static DXGI_FORMAT GetFormatFromMaskComponents(BYTE mask, D3D_REGISTER_COMPONENT_TYPE componentType)
 	{
-		m_InputLayout.reserve(layout.GetElements().size());
-		for (const auto& element : layout)
+		if (mask == 1)
 		{
-			DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN;
-			UINT semanticCount = 0;
-			switch (element.Type)
-			{
-				case ShaderDataType::Float:		format = DXGI_FORMAT_R32_FLOAT;
-					semanticCount = 1;
-					break;
-				case ShaderDataType::Float2:	format = DXGI_FORMAT_R32G32_FLOAT;
-					semanticCount = 1;
-					break;
-				case ShaderDataType::Float3:	format = DXGI_FORMAT_R32G32B32_FLOAT;
-					semanticCount = 1;
-					break;
-				case ShaderDataType::Float4:	format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-					semanticCount = 1;
-					break;
-				case ShaderDataType::Mat3:		format = DXGI_FORMAT_R32G32B32_FLOAT;
-					semanticCount = 3;
-					break;
-				case ShaderDataType::Mat4:		format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-					semanticCount = 4;
-					break;
-				case ShaderDataType::Int:		format = DXGI_FORMAT_R32G32_SINT;
-					semanticCount = 1;
-					break;
-				case ShaderDataType::Int2:		format = DXGI_FORMAT_R32G32_SINT;
-					semanticCount = 1;
-					break;
-				case ShaderDataType::Int3:		format = DXGI_FORMAT_R32G32B32_SINT;
-					semanticCount = 1;
-					break;
-				case ShaderDataType::Int4:		format = DXGI_FORMAT_R32G32B32A32_SINT;
-					semanticCount = 1;
-					break;
-				case ShaderDataType::Bool:		format = DXGI_FORMAT_R32_SINT;
-					semanticCount = 1;
-					break;
-			}
-
-			ARC_CORE_ASSERT(format != DXGI_FORMAT_UNKNOWN, "Unknown DXGI_FORMAT type")
-			ARC_CORE_ASSERT(semanticCount != 0, "semanticCount cannot be zero")
-
-			const auto classification = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-
-			UINT step = static_cast<UINT>(element.Size) / semanticCount;
-			for (UINT inputSemantic = 0; inputSemantic < semanticCount; ++inputSemantic)
-			{
-				UINT offset = static_cast<UINT>(element.Offset) + inputSemantic * step;
-				m_InputLayout.push_back({ element.Name.c_str(), inputSemantic, format, 0, offset, classification, 0 });
-			}
+			if (componentType == D3D_REGISTER_COMPONENT_UINT32)			return DXGI_FORMAT_R32_UINT;
+			else if (componentType == D3D_REGISTER_COMPONENT_SINT32)		return DXGI_FORMAT_R32_SINT;
+			else if (componentType == D3D_REGISTER_COMPONENT_FLOAT32)		return DXGI_FORMAT_R32_FLOAT;
 		}
+		else if (mask <= 3)
+		{
+			if (componentType == D3D_REGISTER_COMPONENT_UINT32)			return DXGI_FORMAT_R32G32_UINT;
+			else if (componentType == D3D_REGISTER_COMPONENT_SINT32)		return DXGI_FORMAT_R32G32_SINT;
+			else if (componentType == D3D_REGISTER_COMPONENT_FLOAT32)		return DXGI_FORMAT_R32G32_FLOAT;
+		}
+		else if (mask <= 7)
+		{
+			if (componentType == D3D_REGISTER_COMPONENT_UINT32)			return DXGI_FORMAT_R32G32B32_UINT;
+			else if (componentType == D3D_REGISTER_COMPONENT_SINT32)		return DXGI_FORMAT_R32G32B32_SINT;
+			else if (componentType == D3D_REGISTER_COMPONENT_FLOAT32)		return DXGI_FORMAT_R32G32B32_FLOAT;
+		}
+		else if (mask <= 15)
+		{
+			if (componentType == D3D_REGISTER_COMPONENT_UINT32)			return DXGI_FORMAT_R32G32B32A32_UINT;
+			else if (componentType == D3D_REGISTER_COMPONENT_SINT32)		return DXGI_FORMAT_R32G32B32A32_SINT;
+			else if (componentType == D3D_REGISTER_COMPONENT_FLOAT32)		return DXGI_FORMAT_R32G32B32A32_FLOAT;
+		}
+
+		return DXGI_FORMAT_UNKNOWN;
 	}
 
 	void Dx12Shader::Compile(const std::filesystem::path& filepath)
@@ -344,15 +270,159 @@ namespace ArcEngine
 
 		const std::vector<const wchar_t*> defines;
 
+
 		// Compile shaders
-		ComPtr<IDxcBlob> vertexShader = CompileShader(filepath, shaderSource, includeHandler, ShaderModel::Vertex, arguments, defines, utils);
-		ComPtr<IDxcBlob> pixelShader = CompileShader(filepath, shaderSource, includeHandler, ShaderModel::Pixel, arguments, defines, utils);
+		ComPtr<IDxcBlob> vertexReflection;
+		ComPtr<IDxcBlob> pixelReflection;
+		ComPtr<IDxcBlob> vertexShader = CompileShader(filepath, shaderSource, includeHandler, ShaderModel::Vertex, arguments, defines, &vertexReflection);
+		ComPtr<IDxcBlob> pixelShader = CompileShader(filepath, shaderSource, includeHandler, ShaderModel::Pixel, arguments, defines, &pixelReflection);
 
 		if (!vertexShader || !pixelShader)
 		{
 			ARC_CORE_ERROR("Failed to compile shader: {}", filepath);
 			return;
 		}
+
+
+
+
+		struct Layout
+		{
+			std::string Name;
+			uint32_t Index;
+			DXGI_FORMAT Format;
+		};
+		std::vector<Layout> inputLayout;
+		std::vector<Layout> outputLayout;
+
+
+		if (vertexReflection)
+		{
+			// Create reflection interface.
+			DxcBuffer reflectionData{};
+			reflectionData.Encoding = DXC_CP_ACP;
+			reflectionData.Ptr = vertexReflection->GetBufferPointer();
+			reflectionData.Size = vertexReflection->GetBufferSize();
+
+			ComPtr<ID3D12ShaderReflection> reflect;
+			utils->CreateReflection(&reflectionData, IID_PPV_ARGS(&reflect));
+
+			// Use reflection interface here.
+			D3D12_SHADER_DESC shaderDesc;
+			reflect->GetDesc(&shaderDesc);
+
+			// Create InputLayout from reflection
+			for (uint32_t i = 0; i < shaderDesc.InputParameters; ++i)
+			{
+				D3D12_SIGNATURE_PARAMETER_DESC desc;
+				reflect->GetInputParameterDesc(i, &desc);
+
+				DXGI_FORMAT format = GetFormatFromMaskComponents(desc.Mask, desc.ComponentType);
+				if (format == DXGI_FORMAT_UNKNOWN)
+				{
+					ARC_CORE_ERROR("Unknown format for SemanticName: {}, SemanticIndex: {}", desc.SemanticName, desc.SemanticIndex);
+					return;
+				}
+				inputLayout.emplace_back(desc.SemanticName, desc.SemanticIndex, format);
+			}
+
+#if 0
+			ARC_CORE_DEBUG("======================= CB ================================");
+			for (uint32_t i = 0; i < shaderDesc.ConstantBuffers; ++i)
+			{
+				D3D12_SHADER_BUFFER_DESC desc;
+				reflect->GetConstantBufferByIndex(i)->GetDesc(&desc);
+				ARC_CORE_DEBUG("\tName: {}", desc.Name);
+				ARC_CORE_DEBUG("\tSize: {}", desc.Size);
+				ARC_CORE_DEBUG("\tType: {}", desc.Type);
+				ARC_CORE_DEBUG("\tVariables: {}", desc.Variables);
+			}
+			ARC_CORE_DEBUG("======================= Resources ================================");
+			for (uint32_t i = 0; i < shaderDesc.BoundResources; ++i)
+			{
+				D3D12_SHADER_INPUT_BIND_DESC desc;
+				reflect->GetResourceBindingDesc(i, &desc);
+				ARC_CORE_DEBUG("\tName: {}", desc.Name);
+				ARC_CORE_DEBUG("\tBindPoint: {}", desc.BindPoint);
+				ARC_CORE_DEBUG("\tBindCount: {}", desc.BindCount);
+				ARC_CORE_DEBUG("\tType: {}", desc.Type);
+				ARC_CORE_DEBUG("\tSpace: {}", desc.Space);
+			}
+#endif
+		}
+
+		if (pixelReflection)
+		{
+			// Create reflection interface.
+			DxcBuffer reflectionData{};
+			reflectionData.Encoding = DXC_CP_ACP;
+			reflectionData.Ptr = pixelReflection->GetBufferPointer();
+			reflectionData.Size = pixelReflection->GetBufferSize();
+
+			ComPtr<ID3D12ShaderReflection> reflect;
+			utils->CreateReflection(&reflectionData, IID_PPV_ARGS(&reflect));
+
+			// Use reflection interface here.
+			D3D12_SHADER_DESC shaderDesc;
+			reflect->GetDesc(&shaderDesc);
+
+			for (uint32_t i = 0; i < shaderDesc.OutputParameters; ++i)
+			{
+				D3D12_SIGNATURE_PARAMETER_DESC desc;
+				reflect->GetOutputParameterDesc(i, &desc);
+
+				DXGI_FORMAT format = GetFormatFromMaskComponents(desc.Mask, desc.ComponentType);
+				if (format == DXGI_FORMAT_UNKNOWN)
+				{
+					ARC_CORE_ERROR("Unknown format for SemanticName: {}, SemanticIndex: {}", desc.SemanticName, desc.SemanticIndex);
+					return;
+				}
+				outputLayout.emplace_back(desc.SemanticName, desc.SemanticIndex, format);
+			}
+#if 0
+			ARC_CORE_DEBUG("======================= CB ================================");
+			for (uint32_t i = 0; i < shaderDesc.ConstantBuffers; ++i)
+			{
+				D3D12_SHADER_BUFFER_DESC desc;
+				reflect->GetConstantBufferByIndex(i)->GetDesc(&desc);
+				ARC_CORE_DEBUG("\tName: {}", desc.Name);
+				ARC_CORE_DEBUG("\tSize: {}", desc.Size);
+				ARC_CORE_DEBUG("\tType: {}", desc.Type);
+				ARC_CORE_DEBUG("\tVariables: {}", desc.Variables);
+			}
+			ARC_CORE_DEBUG("======================= Resources ================================");
+			for (uint32_t i = 0; i < shaderDesc.BoundResources; ++i)
+			{
+				D3D12_SHADER_INPUT_BIND_DESC desc;
+				reflect->GetResourceBindingDesc(i, &desc);
+				ARC_CORE_DEBUG("\tName: {}", desc.Name);
+				ARC_CORE_DEBUG("\tBindPoint: {}", desc.BindPoint);
+				ARC_CORE_DEBUG("\tBindCount: {}", desc.BindCount);
+				ARC_CORE_DEBUG("\tType: {}", desc.Type);
+				ARC_CORE_DEBUG("\tSpace: {}", desc.Space);
+			}
+#endif
+		}
+
+		std::vector<D3D12_INPUT_ELEMENT_DESC> psoInputLayout;
+		psoInputLayout.reserve(inputLayout.size());
+		for (auto& i : inputLayout)
+		{
+			constexpr auto classification = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			psoInputLayout.emplace_back(i.Name.c_str(), i.Index, i.Format, 0, D3D12_APPEND_ALIGNED_ELEMENT, classification, 0);
+		}
+
+
+
+
+
+
+
+
+
+
+
+		
 
 		// Root Signature /////////////////////////////////////////////////////////////////////
 		const std::vector<CD3DX12_DESCRIPTOR_RANGE> ranges =
@@ -433,13 +503,14 @@ namespace ArcEngine
 		psoDesc.DepthStencilState.StencilEnable = FALSE;
 
 		// InputLayout
-		psoDesc.InputLayout.NumElements = static_cast<uint32_t>(m_InputLayout.size());
-		psoDesc.InputLayout.pInputElementDescs = m_InputLayout.data();
+		psoDesc.InputLayout.NumElements = static_cast<uint32_t>(psoInputLayout.size());
+		psoDesc.InputLayout.pInputElementDescs = psoInputLayout.data();
 
 		psoDesc.SampleMask = 0xFFFFFFFF;
 		psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		psoDesc.NumRenderTargets = 1;
-		psoDesc.RTVFormats[0] = DXGI_FORMAT_R16G16B16A16_FLOAT;
+		psoDesc.NumRenderTargets = static_cast<uint32_t>(outputLayout.size());
+		for (size_t i = 0; i < outputLayout.size(); ++i)
+			psoDesc.RTVFormats[i] = outputLayout[i].Format;
 		psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 		psoDesc.SampleDesc.Count = 1;
 		psoDesc.SampleDesc.Quality = 0;

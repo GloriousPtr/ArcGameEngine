@@ -56,7 +56,7 @@ namespace ArcEngine
 		FramebufferSpecification spec{};
 		spec.Width = 1600;
 		spec.Height = 900;
-		spec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::Depth };
+		spec.Attachments = { FramebufferTextureFormat::RGBA32F, FramebufferTextureFormat::Depth };
 		s_Data->fb = Framebuffer::Create(spec);
 
 		const BufferLayout layout
