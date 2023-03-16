@@ -40,7 +40,7 @@ namespace ArcEngine
 			
 			{
 				FramebufferSpecification spec;
-				spec.Attachments = { FramebufferTextureFormat::R11G11B10 };
+				spec.Attachments = { FramebufferTextureFormat::R11G11B10F };
 				spec.Width = width;
 				spec.Height = height;
 				CompositePassTarget = Framebuffer::Create(spec);
@@ -62,7 +62,7 @@ namespace ArcEngine
 
 			{
 				FramebufferSpecification spec;
-				spec.Attachments = { FramebufferTextureFormat::R11G11B10 };
+				spec.Attachments = { FramebufferTextureFormat::R11G11B10F };
 				spec.Width = width;
 				spec.Height = height;
 				LightingPassTarget = Framebuffer::Create(spec);
@@ -72,7 +72,7 @@ namespace ArcEngine
 			width /= 2;
 			height /= 2;
 			FramebufferSpecification bloomSpec;
-			bloomSpec.Attachments = { FramebufferTextureFormat::R11G11B10 };
+			bloomSpec.Attachments = { FramebufferTextureFormat::R11G11B10F };
 			bloomSpec.Width = width;
 			bloomSpec.Height = height;
 			PrefilteredFramebuffer = Framebuffer::Create(bloomSpec);
@@ -89,7 +89,7 @@ namespace ArcEngine
 					break;
 
 				FramebufferSpecification blurSpec;
-				blurSpec.Attachments = { FramebufferTextureFormat::R11G11B10 };
+				blurSpec.Attachments = { FramebufferTextureFormat::R11G11B10F };
 				blurSpec.Width = width;
 				blurSpec.Height = height;
 				TempBlurFramebuffers[i] = Framebuffer::Create(bloomSpec);

@@ -17,6 +17,8 @@ namespace ArcEngine
 
 	struct Data
 	{
+		Ref<Framebuffer> fb;
+
 		Ref<VertexArray> va;
 		Ref<Shader> shader;
 		Ref<ConstantBuffer> transform;
@@ -27,6 +29,7 @@ namespace ArcEngine
 		glm::mat4 projection;
 		uint32_t width;
 		uint32_t height;
+		bool fbResizing = false;
 	};
 
 	inline static Scope<Data> s_Data;
@@ -49,6 +52,12 @@ namespace ArcEngine
 			{ ShaderDataType::Float2, "TEXCOORD"  }
 		});
 		*/
+
+		FramebufferSpecification spec{};
+		spec.Width = 1600;
+		spec.Height = 900;
+		spec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::Depth };
+		s_Data->fb = Framebuffer::Create(spec);
 
 		const BufferLayout layout
 		{
@@ -83,10 +92,10 @@ namespace ArcEngine
 		s_Data->transform = ConstantBuffer::Create(sizeof(glm::mat4), 100, 5);
 		s_Data->cam = ConstantBuffer::Create(sizeof(glm::mat4), 1, 4);
 
-		s_Data->width = 1600;
-		s_Data->height = 900;
+		s_Data->width = spec.Width;
+		s_Data->height = spec.Height;
 		s_Data->view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f });
-		s_Data->projection = glm::perspective(glm::radians(45.0f), 1600.0f / 900.0f, 0.01f, 1000.0f);
+		s_Data->projection = glm::perspective(glm::radians(45.0f), (float)spec.Width / (float)spec.Height, 0.01f, 1000.0f);
 
 		//Renderer2D::Init();
 		//Renderer3D::Init();
@@ -110,7 +119,6 @@ namespace ArcEngine
 
 		s_Data->width = width;
 		s_Data->height = height;
-		s_Data->projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.01f, 1000.0f);
 	}
 
 	void Renderer::OnRender()
@@ -118,13 +126,13 @@ namespace ArcEngine
 		static glm::vec3 cameraPosition = { 0.0f, 0.0f, 1.0f };
 		static float fov = 45.0f;
 
-		static glm::vec3 position1	= { 1.0f, 0.0f, 0.0f };
-		static glm::vec3 rotation1	= { 0.0f, 0.0f, 0.0f };
-		static glm::vec3 scale1		= { 1.0f, 1.0f, 1.0f };
+		static glm::vec3 position1 = { 1.0f, 0.0f, 0.0f };
+		static glm::vec3 rotation1 = { 0.0f, 0.0f, 0.0f };
+		static glm::vec3 scale1 = { 1.0f, 1.0f, 1.0f };
 
-		static glm::vec3 position2	= {-2.0f, 0.0f, 0.0f };
-		static glm::vec3 rotation2	= { 0.0f, 0.0f, 0.0f };
-		static glm::vec3 scale2		= { 1.0f, 1.0f, 1.0f };
+		static glm::vec3 position2 = { -2.0f, 0.0f, 0.0f };
+		static glm::vec3 rotation2 = { 0.0f, 0.0f, 0.0f };
+		static glm::vec3 scale2 = { 1.0f, 1.0f, 1.0f };
 
 		static glm::vec4 clearColor = { 0.1f, 0.1f, 0.1f, 1.0f };
 
@@ -158,25 +166,50 @@ namespace ArcEngine
 		ImGui::End();
 
 
+		s_Data->fb->Bind();
+		{
+			RenderCommand::SetClearColor(clearColor);
+			s_Data->shader->Bind();
 
+			glm::mat4 viewProj = s_Data->projection * s_Data->view;
+			s_Data->cam->Bind(0);
+			s_Data->cam->SetData(&viewProj, sizeof(viewProj), 0);
 
-		RenderCommand::SetClearColor(clearColor);
-		s_Data->shader->Bind();
+			s_Data->tex->Bind(2);
 
-		glm::mat4 viewProj = s_Data->projection * s_Data->view;
-		s_Data->cam->Bind(0);
-		s_Data->cam->SetData(&viewProj, sizeof(viewProj), 0);
+			glm::mat4 transform1 = glm::translate(glm::mat4(1.0f), position1) * glm::toMat4(glm::quat(rotation1)) * glm::scale(glm::mat4(1.0f), scale1);
+			s_Data->transform->Bind(0);
+			s_Data->transform->SetData(&transform1, sizeof(glm::mat4), 0);
+			RenderCommand::DrawIndexed(s_Data->va);
 
-		s_Data->tex->Bind(2);
+			glm::mat4 transform2 = glm::translate(glm::mat4(1.0f), position2) * glm::toMat4(glm::quat(rotation2)) * glm::scale(glm::mat4(1.0f), scale2);
+			s_Data->transform->Bind(1);
+			s_Data->transform->SetData(&transform2, sizeof(glm::mat4), 1);
+			RenderCommand::DrawIndexed(s_Data->va);
+		}
+		s_Data->fb->Unbind();
 
-		glm::mat4 transform1 = glm::translate(glm::mat4(1.0f), position1) * glm::toMat4(glm::quat(rotation1)) * glm::scale(glm::mat4(1.0f), scale1);
-		s_Data->transform->Bind(0);
-		s_Data->transform->SetData(&transform1, sizeof(glm::mat4), 0);
-		RenderCommand::DrawIndexed(s_Data->va);
+		static float viewportWidth = 1600;
+		static float viewportHeight = 900;
 
-		glm::mat4 transform2 = glm::translate(glm::mat4(1.0f), position2) * glm::toMat4(glm::quat(rotation2)) * glm::scale(glm::mat4(1.0f), scale2);
-		s_Data->transform->Bind(1);
-		s_Data->transform->SetData(&transform2, sizeof(glm::mat4), 1);
-		RenderCommand::DrawIndexed(s_Data->va);
+		s_Data->projection = glm::perspective(glm::radians(fov), viewportWidth / viewportHeight, 0.01f, 1000.0f);
+
+		ImGui::Begin("Viewport");
+		ImGui::Image((ImTextureID) s_Data->fb->GetColorAttachmentRendererID(0), { viewportWidth, viewportHeight });
+		ImVec2 size = ImGui::GetWindowSize();
+		viewportWidth = size.x;
+		viewportHeight = size.y;
+		ImGui::End();
+
+		const auto& specs = s_Data->fb->GetSpecification();
+		bool shouldResize = specs.Width != static_cast<uint32_t>(viewportWidth) || specs.Height != static_cast<uint32_t>(viewportHeight);
+		if (!s_Data->fbResizing && shouldResize)
+		{
+			s_Data->fbResizing = true;
+			s_Data->fb->Resize(viewportWidth, viewportHeight);
+		}
+
+		if (s_Data->fbResizing && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+			s_Data->fbResizing = false;
 	}
 }

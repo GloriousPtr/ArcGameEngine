@@ -10,7 +10,7 @@ namespace ArcEngine
 		RGBA8,
 		RGBA16F,
 		RGBA32F,
-		R11G11B10,
+		R11G11B10F,
 		RG16F,
 		R32I,
 
@@ -68,5 +68,8 @@ namespace ArcEngine
 		[[nodiscard]] virtual const FramebufferSpecification& GetSpecification() const = 0;
 		
 		[[nodiscard]] static Ref<Framebuffer> Create(const FramebufferSpecification& spec);
+
+	protected:
+		static constexpr uint32_t s_MaxFramebufferSize = 8192;
 	};
 }

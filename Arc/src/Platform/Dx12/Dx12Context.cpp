@@ -145,6 +145,9 @@ namespace ArcEngine
 	inline static DescriptorHeap s_SrvDescHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV };
 	inline static DescriptorHeap s_UavDescHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV };
 
+	inline static uint32_t s_Width = 0;
+	inline static uint32_t s_Height = 0;
+
 #ifdef ARC_DEBUG
 #define ENABLE_DX12_DEBUG_MESSAGES
 	static DWORD s_DebugCallbackCookie;
@@ -159,8 +162,8 @@ namespace ArcEngine
 
 		RECT clientRect;
 		GetClientRect(m_Hwnd, &clientRect);
-		m_Width = clientRect.right - clientRect.left;
-		m_Height = clientRect.bottom - clientRect.top;
+		s_Width = clientRect.right - clientRect.left;
+		s_Height = clientRect.bottom - clientRect.top;
 	}
 
 	Dx12Context::~Dx12Context()
@@ -432,7 +435,7 @@ namespace ArcEngine
 
 			DXGI_SWAP_CHAIN_DESC1 swapchainDesc;
 			s_Swapchain->GetDesc1(&swapchainDesc);
-			s_Swapchain->ResizeBuffers(swapchainDesc.BufferCount, m_Width, m_Height, swapchainDesc.Format, swapchainDesc.Flags);
+			s_Swapchain->ResizeBuffers(swapchainDesc.BufferCount, s_Width, s_Height, swapchainDesc.Format, swapchainDesc.Flags);
 			CreateRTV();
 			m_ShouldResize = false;
 		}
@@ -478,6 +481,26 @@ namespace ArcEngine
 		return &s_SrvDescHeap;
 	}
 
+	DescriptorHeap* Dx12Context::GetRtvHeap()
+	{
+		return &s_RtvDescHeap;
+	}
+
+	DescriptorHeap* Dx12Context::GetDsvHeap()
+	{
+		return &s_DsvDescHeap;
+	}
+
+	uint32_t Dx12Context::GetWidth()
+	{
+		return s_Width;
+	}
+
+	uint32_t Dx12Context::GetHeight()
+	{
+		return s_Height;
+	}
+
 	int Dx12Context::GetSwapChainFormat()
 	{
 		DXGI_SWAP_CHAIN_DESC1 desc;
@@ -497,8 +520,8 @@ namespace ArcEngine
 
 	void Dx12Context::OnBeginFrame() const
 	{
-		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<float>(m_Width), static_cast<float>(m_Height), 0.0f, 1.0f };
-		const D3D12_RECT scissorRect = { 0, 0, static_cast<long>(m_Width), static_cast<long>(m_Height) };
+		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<float>(s_Width), static_cast<float>(s_Height), 0.0f, 1.0f };
+		const D3D12_RECT scissorRect = { 0, 0, static_cast<long>(s_Width), static_cast<long>(s_Height) };
 
 		const auto& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
 		auto* commandList = backFrame.GraphicsCommandList;
@@ -553,9 +576,9 @@ namespace ArcEngine
 		// Create Swapchain
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
 		swapChainDesc.BufferCount = FrameCount;
-		swapChainDesc.Width = m_Width;
-		swapChainDesc.Height = m_Height;
-		swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		swapChainDesc.Width = s_Width;
+		swapChainDesc.Height = s_Height;
+		swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		swapChainDesc.SampleDesc.Count = 1;
@@ -575,8 +598,8 @@ namespace ArcEngine
 			return;
 
 		m_ShouldResize = true;
-		m_Width = width;
-		m_Height = height;
+		s_Width = width;
+		s_Height = height;
 	}
 
 	void Dx12Context::ProcessDeferredReleases(uint32_t frameIndex)

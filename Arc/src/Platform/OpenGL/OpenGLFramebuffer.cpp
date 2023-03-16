@@ -5,8 +5,6 @@
 
 namespace ArcEngine
 {
-	static constexpr uint32_t s_MaxFramebufferSize = 8192;
-
 	namespace Utils
 	{
 		static GLenum TextureTarget(bool multisampled)
@@ -153,7 +151,7 @@ namespace ArcEngine
 						case FramebufferTextureFormat::RGBA32F:
 							Utils::AttachColorTexture(m_ColorAttachments[i], static_cast<int>(m_Specification.Samples), GL_RGBA32F, GL_RGBA, m_Specification.Width, m_Specification.Height, i);
 							break;
-						case FramebufferTextureFormat::R11G11B10:
+						case FramebufferTextureFormat::R11G11B10F:
 							Utils::AttachColorTexture(m_ColorAttachments[i], static_cast<int>(m_Specification.Samples), GL_R11F_G11F_B10F, GL_RGB, m_Specification.Width, m_Specification.Height, i);
 							break;
 						case FramebufferTextureFormat::RG16F:

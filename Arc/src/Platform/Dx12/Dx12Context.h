@@ -38,19 +38,22 @@ namespace ArcEngine
 		static void SetDeferredReleaseFlag();
 
 		static DescriptorHeap* GetSrvHeap();
-		
+		static DescriptorHeap* GetRtvHeap();
+		static DescriptorHeap* GetDsvHeap();
+		static void DeferredRelease(IUnknown** resource);
+
+		static uint32_t GetWidth();
+		static uint32_t GetHeight();
+
 	private:
 		void CreateRTV() const;
 		void CreateSwapchain() const;
 		void ResizeSwapchain(uint32_t width, uint32_t height);
 
 		static void ProcessDeferredReleases(uint32_t frameIndex);
-		static void DeferredRelease(IUnknown** resource);
 
 	private:
 		HWND m_Hwnd;
-		uint32_t m_Width = 0;
-		uint32_t m_Height = 0;
 		uint32_t m_SyncInterval = 1;
 		uint32_t m_PresentFlags = 0;
 		bool m_ShouldResize = false;
