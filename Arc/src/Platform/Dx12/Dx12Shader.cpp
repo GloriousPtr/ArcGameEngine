@@ -86,6 +86,11 @@ namespace ArcEngine
 	{
 	}
 
+	void Dx12Shader::SetData(uint32_t slot, uint32_t num32BitValues, void* data)
+	{
+		Dx12Context::GetGraphicsCommandList()->SetGraphicsRoot32BitConstants(slot, num32BitValues, data, 0);
+	}
+
 	std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality>& Dx12Shader::GetMaterialProperties()
 	{
 		std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality> map;
@@ -110,8 +115,8 @@ namespace ArcEngine
 
 	inline static std::map<ShaderModel, const wchar_t*> s_TargetMap
 	{
-		{ ShaderModel::Vertex,		L"vs_6_5" },
-		{ ShaderModel::Fragment,	L"ps_6_5" },
+		{ ShaderModel::Vertex,		L"vs_6_6" },
+		{ ShaderModel::Fragment,	L"ps_6_6" },
 	};
 
 	inline static std::map<ShaderModel, const wchar_t*> s_EntryPointMap
@@ -199,25 +204,25 @@ namespace ArcEngine
 	{
 		if (mask == 1)
 		{
-			if (componentType == D3D_REGISTER_COMPONENT_UINT32)			return DXGI_FORMAT_R32_UINT;
+			if (componentType == D3D_REGISTER_COMPONENT_UINT32)				return DXGI_FORMAT_R32_UINT;
 			else if (componentType == D3D_REGISTER_COMPONENT_SINT32)		return DXGI_FORMAT_R32_SINT;
 			else if (componentType == D3D_REGISTER_COMPONENT_FLOAT32)		return DXGI_FORMAT_R32_FLOAT;
 		}
 		else if (mask <= 3)
 		{
-			if (componentType == D3D_REGISTER_COMPONENT_UINT32)			return DXGI_FORMAT_R32G32_UINT;
+			if (componentType == D3D_REGISTER_COMPONENT_UINT32)				return DXGI_FORMAT_R32G32_UINT;
 			else if (componentType == D3D_REGISTER_COMPONENT_SINT32)		return DXGI_FORMAT_R32G32_SINT;
 			else if (componentType == D3D_REGISTER_COMPONENT_FLOAT32)		return DXGI_FORMAT_R32G32_FLOAT;
 		}
 		else if (mask <= 7)
 		{
-			if (componentType == D3D_REGISTER_COMPONENT_UINT32)			return DXGI_FORMAT_R32G32B32_UINT;
+			if (componentType == D3D_REGISTER_COMPONENT_UINT32)				return DXGI_FORMAT_R32G32B32_UINT;
 			else if (componentType == D3D_REGISTER_COMPONENT_SINT32)		return DXGI_FORMAT_R32G32B32_SINT;
 			else if (componentType == D3D_REGISTER_COMPONENT_FLOAT32)		return DXGI_FORMAT_R32G32B32_FLOAT;
 		}
 		else if (mask <= 15)
 		{
-			if (componentType == D3D_REGISTER_COMPONENT_UINT32)			return DXGI_FORMAT_R32G32B32A32_UINT;
+			if (componentType == D3D_REGISTER_COMPONENT_UINT32)				return DXGI_FORMAT_R32G32B32A32_UINT;
 			else if (componentType == D3D_REGISTER_COMPONENT_SINT32)		return DXGI_FORMAT_R32G32B32A32_SINT;
 			else if (componentType == D3D_REGISTER_COMPONENT_FLOAT32)		return DXGI_FORMAT_R32G32B32A32_FLOAT;
 		}
@@ -425,30 +430,24 @@ namespace ArcEngine
 		
 
 		// Root Signature /////////////////////////////////////////////////////////////////////
-		const std::vector<CD3DX12_DESCRIPTOR_RANGE> ranges =
-		{
-			{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0 },
-			{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1 },
-			{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2 },
-			{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3 },
-		};
-
-		constexpr uint32_t numParameteres = 7;
+		constexpr uint32_t numParameteres = 3;
 		CD3DX12_ROOT_PARAMETER parameters[numParameteres];
-		parameters[0].InitAsDescriptorTable(1, &ranges[0]);
-		parameters[1].InitAsDescriptorTable(1, &ranges[1]);
-		parameters[2].InitAsDescriptorTable(1, &ranges[2]);
-		parameters[3].InitAsDescriptorTable(1, &ranges[3]);
-		parameters[4].InitAsConstantBufferView(0, 0);
-		parameters[5].InitAsConstantBufferView(1, 0);
-		parameters[6].InitAsConstantBufferView(2, 0);
+		parameters[0].InitAsConstants(1, 0, 0, D3D12_SHADER_VISIBILITY_ALL);
+		parameters[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_VERTEX);
+		parameters[2].InitAsConstantBufferView(2, 0, D3D12_SHADER_VISIBILITY_VERTEX);
 
 		constexpr uint32_t numSamplers = 1;
 		CD3DX12_STATIC_SAMPLER_DESC samplers[1];
 		samplers[0].Init(0, D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT);
 
 		CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc;
-		rootSigDesc.Init(numParameteres, parameters, numSamplers, samplers, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+		constexpr auto flags =
+			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
+			D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED;
+			//D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED;
+
+		rootSigDesc.Init(numParameteres, parameters, numSamplers, samplers, flags);
 
 		ComPtr<ID3DBlob> rootBlob;
 		ComPtr<ID3DBlob> errorBlob;

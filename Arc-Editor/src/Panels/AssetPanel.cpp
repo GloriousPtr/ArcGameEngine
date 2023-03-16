@@ -641,7 +641,7 @@ namespace ArcEngine
 				const bool isDir = file.IsDirectory;
 				const char* filename = file.Name.c_str();
 
-				uint64_t textureId = m_DirectoryIcon->GetRendererID();
+				uint64_t textureId = static_cast<uint64_t>(m_DirectoryIcon->GetRendererID());
 				if (!isDir)
 				{
 					if (file.Type == FileType::Texture)
@@ -728,10 +728,12 @@ namespace ArcEngine
 						EditorLayer::GetInstance()->ResetContext();
 					}
 
+					const ImTextureID whiteTexId = reinterpret_cast<ImTextureID>(static_cast<uint64_t>(m_WhiteTexture->GetRendererID()));
+
 					// Foreground Image
 					ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
 					ImGui::SetItemAllowOverlap();
-					ImGui::Image(reinterpret_cast<ImTextureID>(m_WhiteTexture->GetRendererID()), { backgroundThumbnailSize.x - padding * 2.0f, backgroundThumbnailSize.y - padding * 2.0f }, { 0, 0 }, { 1, 1 }, EditorTheme::WindowBgAlternativeColor);
+					ImGui::Image(whiteTexId, { backgroundThumbnailSize.x - padding * 2.0f, backgroundThumbnailSize.y - padding * 2.0f }, { 0, 0 }, { 1, 1 }, EditorTheme::WindowBgAlternativeColor);
 
 					// Thumbnail Image
 					ImGui::SetCursorPos({ cursorPos.x + thumbnailPadding * 0.75f, cursorPos.y + thumbnailPadding });
@@ -741,7 +743,7 @@ namespace ArcEngine
 					// Type Color frame
 					const ImVec2 typeColorFrameSize = { scaledThumbnailSizeX, scaledThumbnailSizeX * 0.03f };
 					ImGui::SetCursorPosX(cursorPos.x + padding);
-					ImGui::Image(reinterpret_cast<ImTextureID>(m_WhiteTexture->GetRendererID()), typeColorFrameSize, { 0, 0 }, { 1, 1 }, isDir ? ImVec4(0.0f, 0.0f, 0.0f, 0.0f) : file.FileTypeIndicatorColor);
+					ImGui::Image(whiteTexId, typeColorFrameSize, { 0, 0 }, { 1, 1 }, isDir ? ImVec4(0.0f, 0.0f, 0.0f, 0.0f) : file.FileTypeIndicatorColor);
 
 					const ImVec2 rectMin = ImGui::GetItemRectMin();
 					const ImVec2 rectSize = ImGui::GetItemRectSize();

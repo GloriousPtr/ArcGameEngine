@@ -26,6 +26,7 @@ namespace ArcEngine
 		void SetFloat4(const std::string& name, const glm::vec4& value) override;
 		void SetMat3(const std::string& name, const glm::mat3& value) override;
 		void SetMat4(const std::string& name, const glm::mat4& value) override;
+		void SetData(uint32_t slot, uint32_t num32BitValues, void* data) override {}
 
 		[[nodiscard]] std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality>& GetMaterialProperties() override { return m_MaterialProperties; }
 
@@ -46,7 +47,7 @@ namespace ArcEngine
 		[[nodiscard]] int GetLocation(const std::string& name);
 		[[nodiscard]] std::unordered_map<uint32_t, std::string> PreProcess(std::string_view source) const;
 		void Compile(const std::unordered_map<uint32_t, std::string>& shaderSources);
-
+		
 	private:
 		uint32_t m_RendererID = 0;
 		std::string m_Name;

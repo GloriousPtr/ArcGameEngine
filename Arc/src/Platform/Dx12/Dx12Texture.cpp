@@ -42,6 +42,11 @@ namespace ArcEngine
 			m_Image->Release();
 	}
 
+	uint32_t Dx12Texture2D::GetRendererID() const
+	{
+		return static_cast<uint32_t>(m_Handle.GPU.ptr - m_HeapStart.ptr) / Dx12Context::GetSrvHeap()->DescriptorSize();
+	}
+
 	void Dx12Texture2D::SetData(void* data, uint32_t size)
 	{
 		ARC_PROFILE_SCOPE()
@@ -59,8 +64,7 @@ namespace ArcEngine
 	void Dx12Texture2D::Bind(uint32_t slot) const
 	{
 		ARC_PROFILE_SCOPE()
-
-		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(slot, m_Handle.GPU);
+			
 	}
 
 	void Dx12Texture2D::InvalidateImpl(std::string_view path, uint32_t width, uint32_t height, const void* data,
@@ -119,6 +123,7 @@ namespace ArcEngine
 		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 
 		m_Handle = Dx12Context::GetSrvHeap()->Allocate();
+		m_HeapStart = Dx12Context::GetSrvHeap()->GpuStart();
 		Dx12Context::GetDevice()->CreateShaderResourceView(m_Image, &srvDesc, m_Handle.CPU);
 	}
 }

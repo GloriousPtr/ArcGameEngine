@@ -21,9 +21,10 @@ namespace ArcEngine
 
 		Ref<VertexArray> va;
 		Ref<Shader> shader;
-		Ref<ConstantBuffer> transform;
 		Ref<ConstantBuffer> cam;
-		Ref<Texture2D> tex;
+		Ref<ConstantBuffer> transform;
+		Ref<Texture2D> tex1;
+		Ref<Texture2D> tex2;
 
 		glm::mat4 view;
 		glm::mat4 projection;
@@ -87,10 +88,11 @@ namespace ArcEngine
 			s_Data->va->SetIndexBuffer(quadIndexBuffer);
 		}
 
-		s_Data->tex = Texture2D::Create("Resources/Textures/Texel Density Texture 1.png");
+		s_Data->tex1 = Texture2D::Create("Resources/Textures/Texel Density Texture 1.png");
+		s_Data->tex2 = Texture2D::Create("Resources/Textures/Texel Density Texture 2.png");
 
-		s_Data->transform = ConstantBuffer::Create(sizeof(glm::mat4), 100, 5);
-		s_Data->cam = ConstantBuffer::Create(sizeof(glm::mat4), 1, 4);
+		s_Data->cam = ConstantBuffer::Create(sizeof(glm::mat4), 1, 1);
+		s_Data->transform = ConstantBuffer::Create(sizeof(glm::mat4), 100, 2);
 
 		s_Data->width = spec.Width;
 		s_Data->height = spec.Height;
@@ -175,16 +177,20 @@ namespace ArcEngine
 			s_Data->cam->Bind(0);
 			s_Data->cam->SetData(&viewProj, sizeof(viewProj), 0);
 
-			s_Data->tex->Bind(2);
+			//s_Data->tex->Bind(2);
 
 			glm::mat4 transform1 = glm::translate(glm::mat4(1.0f), position1) * glm::toMat4(glm::quat(rotation1)) * glm::scale(glm::mat4(1.0f), scale1);
 			s_Data->transform->Bind(0);
 			s_Data->transform->SetData(&transform1, sizeof(glm::mat4), 0);
+			uint32_t id = s_Data->tex1->GetRendererID();
+			s_Data->shader->SetData(0, 1, &id);
 			RenderCommand::DrawIndexed(s_Data->va);
 
 			glm::mat4 transform2 = glm::translate(glm::mat4(1.0f), position2) * glm::toMat4(glm::quat(rotation2)) * glm::scale(glm::mat4(1.0f), scale2);
 			s_Data->transform->Bind(1);
 			s_Data->transform->SetData(&transform2, sizeof(glm::mat4), 1);
+			id = s_Data->tex2->GetRendererID();
+			s_Data->shader->SetData(0, 1, &id);
 			RenderCommand::DrawIndexed(s_Data->va);
 		}
 		s_Data->fb->Unbind();

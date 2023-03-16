@@ -45,6 +45,7 @@ namespace ArcEngine
 		virtual void SetFloat4(const std::string& name, const glm::vec4& value) = 0;
 		virtual void SetMat3(const std::string& name, const glm::mat3& value) = 0;
 		virtual void SetMat4(const std::string& name, const glm::mat4& value) = 0;
+		virtual void SetData(uint32_t slot, uint32_t num32BitValues, void* data) = 0;
 		
 		[[nodiscard]] virtual std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality>& GetMaterialProperties() = 0;
 

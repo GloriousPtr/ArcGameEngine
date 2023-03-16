@@ -1,3 +1,10 @@
+struct MaterialData
+{
+	uint AlbedoTexture;
+};
+
+ConstantBuffer<MaterialData> Material : register(b0);
+
 struct VertexIn
 {
 	float3 Position		: POSITION;
@@ -20,8 +27,8 @@ struct Properties
 	row_major float4x4 Model;
 };
 
-ConstantBuffer<Camera> c_Camera : register(b0);
-ConstantBuffer<Properties> c_Properties : register(b1);
+ConstantBuffer<Camera> c_Camera : register(b1);
+ConstantBuffer<Properties> c_Properties : register(b2);
 
 VertexOut VS_Main(VertexIn v)
 {
@@ -34,35 +41,11 @@ VertexOut VS_Main(VertexIn v)
 	return output;
 }
 
-struct PointLight
-{
-	float4 Position;			// xyz: position, w: radius
-	float4 Color;				// rgb: color, a: intensity
-};
-
-struct DirectionalLight
-{
-	float4 Direction;
-	float4 Color;				// rgb: color, a: intensity
-};
-
-StructuredBuffer<DirectionalLight> u_DirectionalLights : register (t0);
-StructuredBuffer<PointLight> u_PointLights : register (t1);
-
-Texture2D u_Albedo : register(t2);
-Texture2D u_NormalMap : register(t3);
-
 SamplerState u_Sampler : register(s0);
-
-struct MaterialData
-{
-	float4 MRAO;
-};
-
-ConstantBuffer<MaterialData> c_Material : register(b2);
 
 float4 PS_Main(VertexOut input) : SV_TARGET
 {
-	float4 color = u_Albedo.Sample(u_Sampler, input.UV);
+	Texture2D albedo = ResourceDescriptorHeap[Material.AlbedoTexture];
+	float4 color = albedo.Sample(u_Sampler, input.UV);
 	return float4(color);
 }

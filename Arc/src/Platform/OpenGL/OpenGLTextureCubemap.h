@@ -18,7 +18,7 @@ namespace ArcEngine
 
 		[[nodiscard]] uint32_t GetWidth() const override { return m_Width; }
 		[[nodiscard]] uint32_t GetHeight() const override { return m_Height; }
-		[[nodiscard]] uint64_t GetRendererID() const override { return m_RendererID; }
+		[[nodiscard]] uint32_t GetRendererID() const override { return m_RendererID; }
 		[[nodiscard]] uint64_t GetHRDRendererID() const override { return m_HRDRendererID; }
 		[[nodiscard]] const std::string& GetPath() const override { return m_Path; }
 
