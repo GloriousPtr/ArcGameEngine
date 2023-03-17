@@ -116,7 +116,7 @@ project "Arc"
 		symbols "on"
 		postbuildcommands
 		{
-			'{COPY} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
+			'{COPYFILE} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
 		}
 
 	filter "configurations:Release"
@@ -125,7 +125,7 @@ project "Arc"
 		optimize "speed"
 		postbuildcommands
 		{
-			'{COPY} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
+			'{COPYFILE} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
 		}
 
 	filter "configurations:Dist"
@@ -135,5 +135,5 @@ project "Arc"
 		symbols "off"
 		postbuildcommands
 		{
-			'{COPY} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
+			'{COPYFILE} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
 		}

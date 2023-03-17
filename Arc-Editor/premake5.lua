@@ -52,15 +52,16 @@ project "Arc-Editor"
 
 	postbuildcommands
 	{
-		'{COPY} "../vendor" "%{binDir}"/vendor',
-		'{COPY} "../Arc-Editor/assets" "%{cfg.targetdir}"/assets',
-		'{COPY} "../Arc-Editor/mono" "%{cfg.targetdir}"/mono',
-		'{COPY} "../Arc-Editor/Resources" "%{cfg.targetdir}"/Resources',
-		'{COPY} "../Arc-Editor/imgui.ini" "%{cfg.targetdir}"',
+		'{COPYDIR} "../vendor" "%{binDir}"/vendor',
+		'{COPYDIR} "../Arc-Editor/assets" "%{cfg.targetdir}"/assets',
+		'{COPYDIR} "../Arc-Editor/mono" "%{cfg.targetdir}"/mono',
+		'{COPYDIR} "../Arc-Editor/Resources" "%{cfg.targetdir}"/Resources',
+		'{COPYFILE} "../Arc-Editor/imgui.ini" "%{cfg.targetdir}"',
 
-		-- DirectX
-		'{COPY} "%{BinDir.DXC}/dxcompiler.dll" "%{cfg.targetdir}"',
-		'{COPY} "%{BinDir.DXC}/dxil.dll" "%{cfg.targetdir}"',
+		'{ECHO} "Copying DirectX 12 Shader Compiler and Agility SDK files"',
+		-- DirectXShader
+		'{COPYFILE} "%{BinDir.DXC}/dxcompiler.dll" "%{cfg.targetdir}"',
+		'{COPYFILE} "%{BinDir.DXC}/dxil.dll" "%{cfg.targetdir}"',
 		-- AgilitySDK
 		'{MKDIR} "%{cfg.targetdir}/D3D12"',
 		'{MOVE} "%{cfg.targetdir}/D3D12Core.dll" "%{cfg.targetdir}/D3D12"',
@@ -100,7 +101,7 @@ project "Arc-Editor"
 		symbols "on"
 		postbuildcommands
 		{
-			'{COPY} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
+			'{COPYFILE} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
 		}
 
 	filter "configurations:Release"
@@ -109,7 +110,7 @@ project "Arc-Editor"
 		optimize "speed"
 		postbuildcommands
 		{
-			'{COPY} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
+			'{COPYFILE} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
 		}
 
 	filter "configurations:Dist"
@@ -119,5 +120,5 @@ project "Arc-Editor"
 		symbols "off"
 		postbuildcommands
 		{
-			'{COPY} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
+			'{COPYFILE} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
 		}
