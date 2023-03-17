@@ -257,20 +257,22 @@ namespace ArcEngine
 		{
 			ComPtr<ID3D12Debug3> debugController;
 			if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
+			{
 				debugController->EnableDebugLayer();
+
+				ComPtr<IDXGIInfoQueue> dxgiInfoQueue;
+				DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiInfoQueue));
+				dxgiInfoQueue->GetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_WARNING);
+				dxgiInfoQueue->GetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_ERROR);
+				dxgiInfoQueue->GetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_CORRUPTION);
+
+				dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
+			}
 			else
+			{
 				ARC_CORE_WARN("Failed to enable DirectX 12 debug layer. Make sure Graphics Tools (Apps & features/Optional features) is installed for it to work!");
+			}
 		}
-
-		{
-			ComPtr<IDXGIInfoQueue> dxgiInfoQueue;
-			DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiInfoQueue));
-			dxgiInfoQueue->GetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_WARNING);
-			dxgiInfoQueue->GetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_ERROR);
-			dxgiInfoQueue->GetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_CORRUPTION);
-		}
-
-		dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 #endif
 
 		ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&s_Factory)), "Failed to create DXGI Factory")
