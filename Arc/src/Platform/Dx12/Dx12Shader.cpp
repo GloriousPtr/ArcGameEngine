@@ -455,7 +455,7 @@ namespace ArcEngine
 		if (FAILED(hr))
 		{
 			if (errorBlob)
-				ARC_CORE_ERROR("Failed to serialize Root Signature. Error: {}", errorBlob->GetBufferPointer());
+				ARC_CORE_ERROR("Failed to serialize Root Signature. Error: {}", static_cast<const char*>(errorBlob->GetBufferPointer()));
 
 			return;
 		}
