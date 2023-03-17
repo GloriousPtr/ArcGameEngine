@@ -61,6 +61,12 @@ project "Arc-Editor"
 		-- DirectX
 		'{COPY} "%{BinDir.DXC}/dxcompiler.dll" "%{cfg.targetdir}"',
 		'{COPY} "%{BinDir.DXC}/dxil.dll" "%{cfg.targetdir}"',
+		-- AgilitySDK
+		'{MKDIR} "%{cfg.targetdir}/D3D12"',
+		'{MOVE} "%{cfg.targetdir}/D3D12Core.dll" "%{cfg.targetdir}/D3D12"',
+		'{MOVE} "%{cfg.targetdir}/D3D12Core.pdb" "%{cfg.targetdir}/D3D12"',
+		'{MOVE} "%{cfg.targetdir}/D3D12SDKLayers.dll" "%{cfg.targetdir}/D3D12"',
+		'{MOVE} "%{cfg.targetdir}/D3D12SDKLayers.pdb" "%{cfg.targetdir}/D3D12"',
 	}
 
 	filter "system:windows"

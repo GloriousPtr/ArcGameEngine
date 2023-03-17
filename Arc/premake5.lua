@@ -78,6 +78,10 @@ project "Arc"
 	filter "system:windows"
 		systemversion "latest"
 		buildoptions { "/bigobj" }
+		nuget
+		{
+			"Microsoft.Direct3D.D3D12:1.608.3"
+		}
 		externalincludedirs
 		{
 			"%{IncludeDir.DXC}"
