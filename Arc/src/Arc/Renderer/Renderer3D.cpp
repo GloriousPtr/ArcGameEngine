@@ -35,7 +35,6 @@ namespace ArcEngine
 	Entity Renderer3D::s_Skylight;
 	std::vector<Entity> Renderer3D::s_SceneLights;
 
-	ShaderLibrary Renderer3D::s_ShaderLibrary;
 	Renderer3D::TonemappingType Renderer3D::Tonemapping = Renderer3D::TonemappingType::ACES;
 	float Renderer3D::Exposure = 1.0f;
 	bool Renderer3D::UseBloom = true;
@@ -80,15 +79,15 @@ namespace ArcEngine
 
 		s_BRDFLutTexture = Texture2D::Create("Resources/Renderer/BRDF_LUT.jpg");
 
-		s_ShaderLibrary = ShaderLibrary();
-		s_ShadowMapShader = s_ShaderLibrary.Load("assets/shaders/DepthShader.glsl");
-		s_CubemapShader = s_ShaderLibrary.Load("assets/shaders/Cubemap.glsl");
-		s_GaussianBlurShader = s_ShaderLibrary.Load("assets/shaders/GaussianBlur.glsl");
-		s_FxaaShader = s_ShaderLibrary.Load("assets/shaders/FXAA.glsl");
-		s_HdrShader = s_ShaderLibrary.Load("assets/shaders/HDR.glsl");
-		s_BloomShader = s_ShaderLibrary.Load("assets/shaders/Bloom.glsl");
-		s_Shader = s_ShaderLibrary.Load("assets/shaders/PBR.glsl");
-		s_LightingShader = s_ShaderLibrary.Load("assets/shaders/LightingPass.glsl");
+		auto& shaderLibrary = Renderer::GetShaderLibrary();
+		s_ShadowMapShader = shaderLibrary.Load("assets/shaders/DepthShader.glsl");
+		s_CubemapShader = shaderLibrary.Load("assets/shaders/Cubemap.glsl");
+		s_GaussianBlurShader = shaderLibrary.Load("assets/shaders/GaussianBlur.glsl");
+		s_FxaaShader = shaderLibrary.Load("assets/shaders/FXAA.glsl");
+		s_HdrShader = shaderLibrary.Load("assets/shaders/HDR.glsl");
+		s_BloomShader = shaderLibrary.Load("assets/shaders/Bloom.glsl");
+		s_Shader = shaderLibrary.Load("assets/shaders/PBR.glsl");
+		s_LightingShader = shaderLibrary.Load("assets/shaders/LightingPass.glsl");
 
 		// Cube-map
 		{

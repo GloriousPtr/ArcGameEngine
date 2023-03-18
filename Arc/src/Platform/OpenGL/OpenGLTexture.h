@@ -19,10 +19,11 @@ namespace ArcEngine
 
 		[[nodiscard]] uint32_t GetWidth() const override { return m_Width; }
 		[[nodiscard]] uint32_t GetHeight() const override { return m_Height; }
-		[[nodiscard]] uint32_t GetRendererID() const override { return m_RendererID; }
+		[[nodiscard]] uint64_t GetRendererID() const override { return m_RendererID; }
+		[[nodiscard]] uint32_t GetIndex() const override { return 0; }
 		[[nodiscard]] const std::string& GetPath() const override { return m_Path; }
 
-		void SetData(void* data, [[maybe_unused]] uint32_t size) override;
+		void SetData(const TextureData data, [[maybe_unused]] uint32_t size) override;
 		void Invalidate(std::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels) override;
 
 		void Bind(uint32_t slot = 0) const override;

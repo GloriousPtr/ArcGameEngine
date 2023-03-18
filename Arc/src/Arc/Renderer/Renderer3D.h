@@ -9,7 +9,6 @@ struct aiNode;
 namespace ArcEngine
 {
 	class Shader;
-	class ShaderLibrary;
 	class ConstantBuffer;
 	struct Submesh;
 	struct RenderGraphData;
@@ -32,8 +31,6 @@ namespace ArcEngine
 		static void DrawQuad();
 		static void ReserveMeshes(size_t count);
 		static void SubmitMesh(const glm::mat4& transform, Submesh& submesh, MeshComponent::CullModeType cullMode);
-
-		[[nodiscard]] static ShaderLibrary& GetShaderLibrary() { return s_ShaderLibrary; }
 
 		struct Statistics
 		{
@@ -69,7 +66,6 @@ namespace ArcEngine
 		};
 
 		static Statistics s_Stats;
-		static ShaderLibrary s_ShaderLibrary;
 		static std::vector<Renderer3D::MeshData> s_Meshes;
 		static Ref<Texture2D> s_BRDFLutTexture;
 		static Ref<Shader> s_Shader;

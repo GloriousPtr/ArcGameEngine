@@ -10,7 +10,7 @@ namespace ArcEngine
 		using MaterialData = void*;
 
 	public:
-		explicit Material(const std::filesystem::path& shaderPath = "assets/shaders/PBR.glsl");
+		explicit Material(const std::filesystem::path& shaderPath = "assets/shaders/FlatColor.hlsl");
 		virtual ~Material();
 
 		Material(const Material& other) = default;
@@ -45,7 +45,5 @@ namespace ArcEngine
 		char* m_Buffer = nullptr;
 		size_t m_BufferSizeInBytes = 0;
 		std::unordered_map<uint32_t, Ref<Texture2D>> m_Textures;
-
-		static Ref<Texture2D> s_WhiteTexture;
 	};
 }

@@ -11,20 +11,21 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
 
+#include "Material.h"
+
 namespace ArcEngine
 {
 	Renderer::SceneData* Renderer::s_SceneData = new Renderer::SceneData;
+	Scope<ShaderLibrary> Renderer::s_ShaderLibrary;
 
 	struct Data
 	{
 		Ref<Framebuffer> fb;
 
-		Ref<VertexArray> va;
 		Ref<Shader> shader;
 		Ref<ConstantBuffer> cam;
 		Ref<ConstantBuffer> transform;
-		Ref<Texture2D> tex1;
-		Ref<Texture2D> tex2;
+		Ref<Mesh> mesh;
 
 		glm::mat4 view;
 		glm::mat4 projection;
@@ -39,20 +40,11 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
+		s_ShaderLibrary = CreateScope<ShaderLibrary>();
+
 		s_Data = CreateScope<Data>();
 
 		RenderCommand::Init();
-
-		/*
-		shader = Shader::Create("assets/shaders/TestShader.hlsl",
-		{
-			{ ShaderDataType::Float3, "POSITION"  },
-			{ ShaderDataType::Float3, "NORMAL"    },
-			{ ShaderDataType::Float3, "TANGENT"   },
-			{ ShaderDataType::Float3, "BINORMAL"  },
-			{ ShaderDataType::Float2, "TEXCOORD"  }
-		});
-		*/
 
 		FramebufferSpecification spec{};
 		spec.Width = 1600;
@@ -60,39 +52,11 @@ namespace ArcEngine
 		spec.Attachments = { FramebufferTextureFormat::RGBA32F, FramebufferTextureFormat::Depth };
 		s_Data->fb = Framebuffer::Create(spec);
 
-		const BufferLayout layout
-		{
-			{ ShaderDataType::Float3, "POSITION" },
-			{ ShaderDataType::Float2, "TEXCOORD" }
-		};
+		s_Data->shader = Shader::Create("assets/shaders/FlatColor.hlsl");
+		s_Data->mesh = CreateRef<Mesh>("../Sandbox/Assets/Models/sponza/sponza.obj");
 
-		s_Data->shader = Shader::Create("assets/shaders/FlatColor.hlsl", layout);
-
-		// Quad
-		{
-			constexpr float vertices[20] = {
-				 -0.5f,  0.5f, 0.0f, 0.0f, 0.0f, // top left
-				  0.5f, -0.5f, 0.0f, 1.0f, 1.0f, // bottom right
-				 -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom left
-				  0.5f,  0.5f, 0.0f, 1.0f, 0.0f  // top right
-			};
-			constexpr uint32_t indices[6] = {
-				0, 1, 2,
-				0, 3, 1
-			};
-			s_Data->va = VertexArray::Create();
-			Ref<VertexBuffer> quadVertexBuffer = VertexBuffer::Create(vertices, 20 * sizeof(float), 5 * sizeof(float));
-			quadVertexBuffer->SetLayout(layout);
-			s_Data->va->AddVertexBuffer(quadVertexBuffer);
-			Ref<IndexBuffer> quadIndexBuffer = IndexBuffer::Create(indices, 6);
-			s_Data->va->SetIndexBuffer(quadIndexBuffer);
-		}
-
-		s_Data->tex1 = Texture2D::Create("Resources/Textures/Texel Density Texture 1.png");
-		s_Data->tex2 = Texture2D::Create("Resources/Textures/Texel Density Texture 2.png");
-
-		s_Data->cam = ConstantBuffer::Create(sizeof(glm::mat4), 1, 1);
-		s_Data->transform = ConstantBuffer::Create(sizeof(glm::mat4), 100, 2);
+		s_Data->cam = ConstantBuffer::Create(sizeof(glm::mat4), 1, 0);
+		s_Data->transform = ConstantBuffer::Create(sizeof(glm::mat4), 100, 1);
 
 		s_Data->width = spec.Width;
 		s_Data->height = spec.Height;
@@ -106,6 +70,9 @@ namespace ArcEngine
 	void Renderer::Shutdown()
 	{
 		ARC_PROFILE_SCOPE()
+
+		s_ShaderLibrary = nullptr;
+		delete s_SceneData;
 
 		s_Data = nullptr;
 
@@ -132,10 +99,6 @@ namespace ArcEngine
 		static glm::vec3 rotation1 = { 0.0f, 0.0f, 0.0f };
 		static glm::vec3 scale1 = { 1.0f, 1.0f, 1.0f };
 
-		static glm::vec3 position2 = { -2.0f, 0.0f, 0.0f };
-		static glm::vec3 rotation2 = { 0.0f, 0.0f, 0.0f };
-		static glm::vec3 scale2 = { 1.0f, 1.0f, 1.0f };
-
 		static glm::vec4 clearColor = { 0.1f, 0.1f, 0.1f, 1.0f };
 
 		ImGui::Begin("Settings");
@@ -155,15 +118,6 @@ namespace ArcEngine
 			if (ImGui::DragFloat3("Rotation 1", glm::value_ptr(degrees1), 0.1f))
 				rotation1 = glm::radians(degrees1);
 			ImGui::DragFloat3("Scale 1", glm::value_ptr(scale1), 0.1f);
-
-			ImGui::Separator();
-
-			ImGui::DragFloat3("Position 2", glm::value_ptr(position2), 0.1f);
-			glm::vec3 degrees2 = glm::degrees(rotation2);
-			if (ImGui::DragFloat3("Rotation 2", glm::value_ptr(degrees2), 0.1f))
-				rotation2 = glm::radians(degrees2);
-			ImGui::DragFloat3("Scale 2", glm::value_ptr(scale2), 0.1f);
-
 		}
 		ImGui::End();
 
@@ -177,21 +131,17 @@ namespace ArcEngine
 			s_Data->cam->Bind(0);
 			s_Data->cam->SetData(&viewProj, sizeof(viewProj), 0);
 
-			//s_Data->tex->Bind(2);
-
 			glm::mat4 transform1 = glm::translate(glm::mat4(1.0f), position1) * glm::toMat4(glm::quat(rotation1)) * glm::scale(glm::mat4(1.0f), scale1);
+
 			s_Data->transform->Bind(0);
 			s_Data->transform->SetData(&transform1, sizeof(glm::mat4), 0);
-			uint32_t id = s_Data->tex1->GetRendererID();
-			s_Data->shader->SetData(0, 1, &id);
-			RenderCommand::DrawIndexed(s_Data->va);
-
-			glm::mat4 transform2 = glm::translate(glm::mat4(1.0f), position2) * glm::toMat4(glm::quat(rotation2)) * glm::scale(glm::mat4(1.0f), scale2);
-			s_Data->transform->Bind(1);
-			s_Data->transform->SetData(&transform2, sizeof(glm::mat4), 1);
-			id = s_Data->tex2->GetRendererID();
-			s_Data->shader->SetData(0, 1, &id);
-			RenderCommand::DrawIndexed(s_Data->va);
+			const size_t submeshCount = s_Data->mesh->GetSubmeshCount();
+			for (size_t i = 0; i < submeshCount; ++i)
+			{
+				const auto& submesh = s_Data->mesh->GetSubmesh(i);
+				submesh.Mat->Bind();
+				RenderCommand::DrawIndexed(submesh.Geometry);
+			}
 		}
 		s_Data->fb->Unbind();
 

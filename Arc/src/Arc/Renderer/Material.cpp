@@ -3,32 +3,24 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Renderer3D.h"
+#include "Renderer.h"
 #include "Shader.h"
 #include "Texture.h"
+#include "Arc/Core/AssetManager.h"
 
 namespace ArcEngine
 {
-	Ref<Texture2D> Material::s_WhiteTexture;
-
 	Material::Material(const std::filesystem::path& shaderPath)
 	{
 		ARC_PROFILE_SCOPE()
 
-		if (!s_WhiteTexture)
-		{
-			s_WhiteTexture = Texture2D::Create(1, 1);
-			uint32_t whiteTextureData = 0xffffffff;
-			s_WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
-		}
-
 		// Extract name from filepath
 		const std::string name = shaderPath.filename().string();
 
-		if (!Renderer3D::GetShaderLibrary().Exists(name))
-			m_Shader = Renderer3D::GetShaderLibrary().Load(shaderPath);
+		if (!Renderer::GetShaderLibrary().Exists(name))
+			m_Shader = Renderer::GetShaderLibrary().Load(shaderPath);
 		else
-			m_Shader = Renderer3D::GetShaderLibrary().Get(name);
+			m_Shader = Renderer::GetShaderLibrary().Get(name);
 
 		Invalidate();
 	}
@@ -59,7 +51,8 @@ namespace ArcEngine
 		auto one = glm::vec4(1.0);
 		for (auto& [name, property] : materialProperties)
 		{
-			if (property.Type == MaterialPropertyType::Sampler2D)
+			if (property.Type == MaterialPropertyType::Texture2D ||
+				property.Type == MaterialPropertyType::Texture2DBindless)
 			{
 				memcpy(m_Buffer + property.OffsetInBytes, &slot, sizeof(uint32_t));
 				m_Textures.emplace(slot, nullptr);
@@ -92,39 +85,49 @@ namespace ArcEngine
 			switch (property.Type)
 			{
 				case MaterialPropertyType::None : break;
-				case MaterialPropertyType::Sampler2D :
+				case MaterialPropertyType::Texture2D :
 				{
 					m_Shader->SetInt(name, static_cast<int>(slot));
 					if (m_Textures.at(slot))
 						m_Textures.at(slot)->Bind(slot);
 					else
-						s_WhiteTexture->Bind(slot);
+						AssetManager::WhiteTexture()->Bind(slot);
+					break;
+				}
+				case MaterialPropertyType::Texture2DBindless :
+				{
+					m_Shader->SetUInt(name, (m_Textures.at(slot) ? m_Textures.at(slot) : AssetManager::WhiteTexture())->GetIndex(), property.BindingOffset);
 					break;
 				}
 				case MaterialPropertyType::Bool :
 				case MaterialPropertyType::Int :
 				{
-					m_Shader->SetInt(name, *reinterpret_cast<int32_t*>(bufferStart));
+					m_Shader->SetInt(name, *reinterpret_cast<int32_t*>(bufferStart), property.BindingOffset);
+					break;
+				}
+				case MaterialPropertyType::UInt :
+				{
+					m_Shader->SetUInt(name, *reinterpret_cast<uint32_t*>(bufferStart), property.BindingOffset);
 					break;
 				}
 				case MaterialPropertyType::Float :
 				{
-					m_Shader->SetFloat(name, *reinterpret_cast<float*>(bufferStart));
+					m_Shader->SetFloat(name, *reinterpret_cast<float*>(bufferStart), property.BindingOffset);
 					break;
 				}
 				case MaterialPropertyType::Float2 :
 				{
-					m_Shader->SetFloat2(name, *reinterpret_cast<glm::vec2*>(bufferStart));
+					m_Shader->SetFloat2(name, *reinterpret_cast<glm::vec2*>(bufferStart), property.BindingOffset);
 					break;
 				}
 				case MaterialPropertyType::Float3 :
 				{
-					m_Shader->SetFloat3(name, *reinterpret_cast<glm::vec3*>(bufferStart));
+					m_Shader->SetFloat3(name, *reinterpret_cast<glm::vec3*>(bufferStart), property.BindingOffset);
 					break;
 				}
 				case MaterialPropertyType::Float4 :
 				{
-					m_Shader->SetFloat4(name, *reinterpret_cast<glm::vec4*>(bufferStart));
+					m_Shader->SetFloat4(name, *reinterpret_cast<glm::vec4*>(bufferStart), property.BindingOffset);
 					break;
 				}
 			}

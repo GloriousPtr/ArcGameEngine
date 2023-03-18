@@ -10,6 +10,8 @@
 
 namespace ArcEngine
 {
+	inline static Ref<Texture2D> s_WhiteTexture;
+	inline static Ref<Texture2D> s_BlackTexture;
 	inline static std::unordered_map<std::string, Ref<Texture2D>, UM_StringTransparentEquality> m_Texture2DMap;
 	inline static std::unordered_map<std::string, Ref<TextureCubemap>, UM_StringTransparentEquality> m_TextureCubeMap;
 	inline static std::unordered_map<std::string, Ref<Mesh>, UM_StringTransparentEquality> m_MeshMap;
@@ -19,17 +21,36 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		/* Init stuff here */
+		s_WhiteTexture = Texture2D::Create(1, 1);
+		uint32_t whiteTextureData = 0xffffffff;
+		s_WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
+
+		s_BlackTexture = Texture2D::Create(1, 1);
+		uint32_t blackTextureData = 0x000000ff;
+		s_BlackTexture->SetData(&blackTextureData, sizeof(uint32_t));
 	}
 
 	void AssetManager::Shutdown()
 	{
 		ARC_PROFILE_SCOPE()
 
+		s_WhiteTexture.reset();
+		s_BlackTexture.reset();
+
 		m_Texture2DMap.clear();
 		m_TextureCubeMap.clear();
 		m_MeshMap.clear();
 		m_Futures.clear();
+	}
+
+	const Ref<Texture2D>& AssetManager::WhiteTexture()
+	{
+		return s_WhiteTexture;
+	}
+
+	const Ref<Texture2D>& AssetManager::BlackTexture()
+	{
+		return s_BlackTexture;
 	}
 
 	static void LoadTexture2D(Texture2D* tex, const std::string_view path)
@@ -56,9 +77,9 @@ namespace ArcEngine
 		if (it != m_Texture2DMap.end())
 			return it->second;
 
-		Ref<Texture2D> texture = Texture2D::Create();
+		Ref<Texture2D> texture = Texture2D::Create(path);
 		m_Texture2DMap.emplace(path, texture);
-		m_Futures.push_back(std::async(std::launch::async, &LoadTexture2D, texture.get(), path));
+		//m_Futures.push_back(std::async(std::launch::async, &LoadTexture2D, texture.get(), path));
 		return m_Texture2DMap[path];
 	}
 

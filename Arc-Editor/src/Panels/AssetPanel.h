@@ -66,7 +66,6 @@ namespace ArcEngine
 		ImGuiTextFilter m_Filter;
 		float m_ElapsedTime = 0.0f;
 
-		Ref<Texture2D> m_WhiteTexture;
 		Ref<Texture2D> m_DirectoryIcon;
 		Ref<Texture2D> m_FileIcon;
 	};

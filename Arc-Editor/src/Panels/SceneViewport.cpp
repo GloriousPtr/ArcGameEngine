@@ -35,6 +35,13 @@ namespace ArcEngine
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized fb is invalid
 			(spec.Width != static_cast<uint32_t>(m_ViewportSize.x) || spec.Height != static_cast<uint32_t>(m_ViewportSize.y)))
 		{
+			m_Resizing = true;
+		}
+
+		if (m_Resizing && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+		{
+			m_Resizing = false;
+
 			auto miniViewportSize = m_ViewportSize * m_MiniViewportSizeMultiplier;
 			m_MiniViewportRenderGraphData->Resize(static_cast<uint32_t>(miniViewportSize.x), static_cast<uint32_t>(miniViewportSize.y));
 

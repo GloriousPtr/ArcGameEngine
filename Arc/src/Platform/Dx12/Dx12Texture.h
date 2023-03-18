@@ -18,10 +18,11 @@ namespace ArcEngine
 
 		[[nodiscard]] uint32_t GetWidth() const override { return m_Width; }
 		[[nodiscard]] uint32_t GetHeight() const override { return m_Height; }
-		[[nodiscard]] uint32_t GetRendererID() const override;
+		[[nodiscard]] uint64_t GetRendererID() const override { return m_Handle.GPU.ptr; }
+		[[nodiscard]] uint32_t GetIndex() const override;
 		[[nodiscard]] const std::string& GetPath() const override { return m_Path; }
 
-		void SetData(void* data, [[maybe_unused]] uint32_t size) override;
+		void SetData(const TextureData data, [[maybe_unused]] uint32_t size) override;
 		void Invalidate(std::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels) override;
 
 		void Bind(uint32_t slot = 0) const override;
@@ -30,11 +31,11 @@ namespace ArcEngine
 		void InvalidateImpl(std::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels);
 
 	private:
-		std::string m_Path;
+		std::string m_Path{};
 		uint32_t m_Width = 0, m_Height = 0;
-		DescriptorHandle m_Handle;
-		D3D12_GPU_DESCRIPTOR_HANDLE m_HeapStart;
-		ID3D12Resource* m_Image;
-		ID3D12Resource* m_UploadImage;
+		DescriptorHandle m_Handle{};
+		D3D12_GPU_DESCRIPTOR_HANDLE m_HeapStart{};
+		ID3D12Resource* m_Image = nullptr;
+		ID3D12Resource* m_UploadImage = nullptr;
 	};
 }

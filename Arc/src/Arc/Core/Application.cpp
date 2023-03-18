@@ -2,6 +2,7 @@
 #include "Arc/Core/Application.h"
 
 #include "Arc/Audio/AudioEngine.h"
+#include "Arc/Core/AssetManager.h"
 #include "Arc/Renderer/Renderer.h"
 #include "Arc/Scripting/ScriptEngine.h"
 
@@ -27,6 +28,7 @@ namespace ArcEngine
 		m_Window = Window::Create(WindowProps(name));
 		m_Window->SetEventCallBack(ARC_BIND_EVENT_FN(Application::OnEvent));
 
+		AssetManager::Init();
 		Renderer::Init();
 		AudioEngine::Init();
 		ScriptEngine::Init();
@@ -47,6 +49,7 @@ namespace ArcEngine
 		ScriptEngine::Shutdown();
 		AudioEngine::Shutdown();
 		Renderer::Shutdown();
+		AssetManager::Shutdown();
 
 		OPTICK_SHUTDOWN()
 	}

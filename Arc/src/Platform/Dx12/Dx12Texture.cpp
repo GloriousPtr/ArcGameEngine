@@ -8,6 +8,7 @@
 namespace ArcEngine
 {
 	Dx12Texture2D::Dx12Texture2D(uint32_t width, uint32_t height)
+		: m_Width(width), m_Height(height)
 	{
 	}
 
@@ -42,29 +43,31 @@ namespace ArcEngine
 			m_Image->Release();
 	}
 
-	uint32_t Dx12Texture2D::GetRendererID() const
+	uint32_t Dx12Texture2D::GetIndex() const
 	{
 		return static_cast<uint32_t>(m_Handle.GPU.ptr - m_HeapStart.ptr) / Dx12Context::GetSrvHeap()->DescriptorSize();
 	}
 
-	void Dx12Texture2D::SetData(void* data, uint32_t size)
+	void Dx12Texture2D::SetData(const TextureData data, uint32_t size)
 	{
 		ARC_PROFILE_SCOPE()
 
+		ARC_CORE_ASSERT(m_Width * m_Height == size / 4)
+
+		InvalidateImpl("", m_Width, m_Height, data, 4);
 	}
 
 	void Dx12Texture2D::Invalidate(std::string_view path, uint32_t width, uint32_t height, const void* data,
 		uint32_t channels)
 	{
-		ARC_CORE_ASSERT(width == m_Width && height == m_Height)
-
 		InvalidateImpl(path, width, height, data, channels);
 	}
 
 	void Dx12Texture2D::Bind(uint32_t slot) const
 	{
 		ARC_PROFILE_SCOPE()
-			
+
+		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(slot, m_Handle.GPU);
 	}
 
 	void Dx12Texture2D::InvalidateImpl(std::string_view path, uint32_t width, uint32_t height, const void* data,

@@ -155,12 +155,14 @@ namespace ArcEngine
 		auto* commandList = Dx12Context::GetGraphicsCommandList();
 		const auto backFrame = Dx12Context::GetCurrentFrameIndex();
 
-		commandList->OMSetRenderTargets(m_RtvHandles[backFrame].size(), m_RtvHandles[backFrame].data(), true, &m_DepthAttachment[backFrame].DsvHandle.CPU);
+		const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_DepthAttachment[backFrame].DsvHandle.CPU;
+		commandList->OMSetRenderTargets(m_RtvHandles[backFrame].size(), m_RtvHandles[backFrame].data(), true, dsvHandle.ptr != 0 ? &dsvHandle : nullptr);
 
 		const auto& rtvHandles = m_RtvHandles[backFrame];
 		for (const auto& rtv : rtvHandles)
 			commandList->ClearRenderTargetView(rtv, glm::value_ptr(m_ClearColor), 0, nullptr);
-		commandList->ClearDepthStencilView(m_DepthAttachment[backFrame].DsvHandle.CPU, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, m_ClearDepth.r, m_ClearDepth.g, 0, nullptr);
+		if (dsvHandle.ptr != 0)
+			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, m_ClearDepth.r, m_ClearDepth.g, 0, nullptr);
 
 		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, (float)m_Specification.Width, (float)m_Specification.Height, 0.0f, 1.0f };
 		const D3D12_RECT scissor = { 0, 0, m_Specification.Width, m_Specification.Height };
@@ -224,6 +226,7 @@ namespace ArcEngine
 			attachments.clear();
 		for (auto& attachment : m_ReleasedDepthAttachment)
 			attachment = {};
+
 		m_ReleasedColorAttachments = m_ColorAttachments;
 		m_ReleasedDepthAttachment = m_DepthAttachment;
 		

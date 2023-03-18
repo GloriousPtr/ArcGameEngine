@@ -80,7 +80,7 @@ namespace ArcEngine
 		ID3D12CommandAllocator* UploadCommandAllocator = nullptr;
 		ID3D12GraphicsCommandList6* UploadCommandList = nullptr;
 
-		std::vector<IUnknown**> DeferredReleases{};
+		std::vector<IUnknown*> DeferredReleases{};
 		bool DeferedReleasesFlag = false;
 		bool DeferedReleasesFlagHandles = false;
 
@@ -627,16 +627,15 @@ namespace ArcEngine
 		{
 			backFrame.DeferedReleasesFlag = false;
 			auto& resources = backFrame.DeferredReleases;
-			for (auto& resource : resources)
+			for (const auto& resource : resources)
 			{
-				(*resource)->Release();
-				*resource = nullptr;
+				resource->Release();
 			}
 			resources.clear();
 		}
 	}
 
-	void Dx12Context::DeferredRelease(IUnknown** resource)
+	void Dx12Context::DeferredRelease(IUnknown* resource)
 	{
 		Dx12Frame& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
 		std::lock_guard lock(s_DeferredReleasesMutex);

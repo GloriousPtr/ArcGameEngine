@@ -79,6 +79,7 @@ namespace ArcEngine
 		if (ext == ".obj")
 		{
 			tinyobj::ObjReaderConfig reader_config;
+
 			tinyobj::ObjReader reader;
 
 			if (!reader.ParseFromFile(filepath, reader_config))
@@ -120,17 +121,17 @@ namespace ArcEngine
 						Vertex vertex;
 						vertex.Position.x = attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 0];
 						vertex.Position.y = attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 1];
-						vertex.Position.z = attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 2];
+						vertex.Position.z = -attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 2];
 						if (idx.texcoord_index >= 0)
 						{
 							vertex.TexCoord.x = attrib.texcoords[2 * static_cast<size_t>(idx.texcoord_index) + 0];
-							vertex.TexCoord.y = attrib.texcoords[2 * static_cast<size_t>(idx.texcoord_index) + 1];
+							vertex.TexCoord.y = 1.0f - attrib.texcoords[2 * static_cast<size_t>(idx.texcoord_index) + 1];
 						}
 						if (idx.normal_index >= 0)
 						{
 							vertex.Normal.x = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 0];
 							vertex.Normal.y = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 1];
-							vertex.Normal.z = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 2];
+							vertex.Normal.z = -attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 2];
 						}
 
 						if (uniqueVertices.count(vertex) == 0)
@@ -176,7 +177,8 @@ namespace ArcEngine
 
 					for (const auto& [name, property] : materialProperties)
 					{
-						if (property.Type == MaterialPropertyType::Sampler2D)
+						if (property.Type == MaterialPropertyType::Texture2D ||
+							property.Type == MaterialPropertyType::Texture2DBindless)
 						{
 							auto slot = submesh.Mat->GetData<uint32_t>(name);
 

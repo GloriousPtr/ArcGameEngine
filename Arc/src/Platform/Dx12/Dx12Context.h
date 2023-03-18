@@ -40,7 +40,7 @@ namespace ArcEngine
 		static DescriptorHeap* GetSrvHeap();
 		static DescriptorHeap* GetRtvHeap();
 		static DescriptorHeap* GetDsvHeap();
-		static void DeferredRelease(IUnknown** resource);
+		static void DeferredRelease(IUnknown* resource);
 
 		static uint32_t GetWidth();
 		static uint32_t GetHeight();

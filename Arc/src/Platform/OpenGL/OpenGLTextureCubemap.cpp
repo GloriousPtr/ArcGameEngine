@@ -43,7 +43,7 @@ namespace ArcEngine
 		glDeleteTextures(1, &m_RadianceRendererID);
 	}
 
-	void OpenGLTextureCubemap::SetData([[maybe_unused]] void* data, [[maybe_unused]] uint32_t size)
+	void OpenGLTextureCubemap::SetData([[maybe_unused]] const TextureData data, [[maybe_unused]] uint32_t size)
 	{
 		ARC_PROFILE_SCOPE()
 		

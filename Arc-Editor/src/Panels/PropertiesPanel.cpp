@@ -192,7 +192,7 @@ namespace ArcEngine
 			switch (property.Type)
 			{
 				case MaterialPropertyType::None: break;
-				case MaterialPropertyType::Sampler2D:
+				case MaterialPropertyType::Texture2D:
 				{
 					const auto slot = material->GetData<uint32_t>(name);
 					if (Ref<Texture2D> tex = material->GetTexture(slot))
@@ -213,6 +213,13 @@ namespace ArcEngine
 				case MaterialPropertyType::Int:
 				{
 					auto v = material->GetData<int32_t>(name);
+					if (UI::Property(displayName, v))
+						material->SetData(name, v);
+					break;
+				}
+				case MaterialPropertyType::UInt:
+				{
+					auto v = material->GetData<uint32_t>(name);
 					if (UI::Property(displayName, v))
 						material->SetData(name, v);
 					break;

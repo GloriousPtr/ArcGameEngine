@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Arc/Renderer/RenderCommand.h"
+#include "Arc/Renderer/Shader.h"
 
 namespace ArcEngine
 {
@@ -14,6 +15,7 @@ namespace ArcEngine
 		static void OnRender();
 		
 		[[nodiscard]] inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
+		[[nodiscard]] inline static ShaderLibrary& GetShaderLibrary() { return *s_ShaderLibrary; }
 	private:
 		struct SceneData
 		{
@@ -21,5 +23,6 @@ namespace ArcEngine
 		};
 
 		static SceneData* s_SceneData;
+		static Scope<ShaderLibrary> s_ShaderLibrary;
 	};
 }

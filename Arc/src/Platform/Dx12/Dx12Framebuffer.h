@@ -51,7 +51,8 @@ namespace ArcEngine
 				{
 					if (deferred)
 					{
-						Dx12Context::DeferredRelease(reinterpret_cast<IUnknown**>(&Resource));
+						Dx12Context::DeferredRelease(Resource);
+						Resource = nullptr;
 					}
 					else
 					{
@@ -81,7 +82,8 @@ namespace ArcEngine
 				{
 					if (deferred)
 					{
-						Dx12Context::DeferredRelease(reinterpret_cast<IUnknown**>(&Resource));
+						Dx12Context::DeferredRelease(Resource);
+						Resource = nullptr;
 					}
 					else
 					{

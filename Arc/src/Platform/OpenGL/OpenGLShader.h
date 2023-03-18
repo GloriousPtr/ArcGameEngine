@@ -18,15 +18,15 @@ namespace ArcEngine
 		void Bind() const override;
 		void Unbind() const override;
 
-		void SetInt(const std::string& name, int value) override;
-		void SetIntArray(const std::string& name, const int* values, uint32_t count) override;
-		void SetFloat(const std::string& name, float value) override;
-		void SetFloat2(const std::string& name, const glm::vec2& value) override;
-		void SetFloat3(const std::string& name, const glm::vec3& value) override;
-		void SetFloat4(const std::string& name, const glm::vec4& value) override;
-		void SetMat3(const std::string& name, const glm::mat3& value) override;
-		void SetMat4(const std::string& name, const glm::mat4& value) override;
-		void SetData(uint32_t slot, uint32_t num32BitValues, void* data) override {}
+		void SetInt(const std::string& name, int value, uint32_t offset = 0) override;
+		void SetUInt(const std::string& name, unsigned int value, uint32_t offset = 0) override;
+		void SetIntArray(const std::string& name, const int* values, uint32_t count, uint32_t offset = 0) override;
+		void SetFloat(const std::string& name, float value, uint32_t offset = 0) override;
+		void SetFloat2(const std::string& name, const glm::vec2& value, uint32_t offset = 0) override;
+		void SetFloat3(const std::string& name, const glm::vec3& value, uint32_t offset = 0) override;
+		void SetFloat4(const std::string& name, const glm::vec4& value, uint32_t offset = 0) override;
+		void SetMat3(const std::string& name, const glm::mat3& value, uint32_t offset = 0) override;
+		void SetMat4(const std::string& name, const glm::mat4& value, uint32_t offset = 0) override;
 
 		[[nodiscard]] std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality>& GetMaterialProperties() override { return m_MaterialProperties; }
 

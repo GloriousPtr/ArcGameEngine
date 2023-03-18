@@ -49,7 +49,7 @@ namespace ArcEngine
 		glDeleteTextures(1, &m_RendererID);
 	}
 
-	void OpenGLTexture2D::SetData(void* data, [[maybe_unused]] uint32_t size)
+	void OpenGLTexture2D::SetData(const TextureData data, [[maybe_unused]] uint32_t size)
 	{
 		ARC_PROFILE_SCOPE()
 		
@@ -61,7 +61,6 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		ARC_CORE_ASSERT(width == m_Width && height == m_Height)
 		InvalidateImpl(path, width, height, data, channels);
 	}
 

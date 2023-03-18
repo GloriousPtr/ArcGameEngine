@@ -178,6 +178,8 @@ namespace ArcEngine
 		uint64_t id = overrideTextureID;
 		if (id == 0)
 			id = texture == nullptr ? 0 : texture->GetHRDRendererID();
+		if (id == 0)
+			id = AssetManager::BlackTexture()->GetRendererID();
 		ImGui::ImageButton(reinterpret_cast<ImTextureID>(id), { buttonSize, buttonSize }, { 1, 1 }, { 0, 0 }, 0);
 		if (texture && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 		{
@@ -236,6 +238,8 @@ namespace ArcEngine
 		uint64_t id = overrideTextureID;
 		if (id == 0)
 			id = texture == nullptr ? 0 : texture->GetRendererID();
+		if (id == 0)
+			id = AssetManager::BlackTexture()->GetRendererID();
 		ImGui::ImageButton(reinterpret_cast<ImTextureID>(id), { buttonSize, buttonSize }, { 1, 1 }, { 0, 0 }, 0);
 		if (texture && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 		{

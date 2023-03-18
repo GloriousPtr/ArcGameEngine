@@ -280,10 +280,6 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		m_WhiteTexture = Texture2D::Create(1, 1);
-		uint32_t whiteTextureData = 0xffffffff;
-		m_WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
-
 		m_DirectoryIcon = Texture2D::Create("Resources/Icons/ContentBrowser/DirectoryIcon.png");
 		m_FileIcon = Texture2D::Create("Resources/Icons/ContentBrowser/FileIcon.png");
 
@@ -641,7 +637,7 @@ namespace ArcEngine
 				const bool isDir = file.IsDirectory;
 				const char* filename = file.Name.c_str();
 
-				uint64_t textureId = static_cast<uint64_t>(m_DirectoryIcon->GetRendererID());
+				uint64_t textureId = m_DirectoryIcon->GetRendererID();
 				if (!isDir)
 				{
 					if (file.Type == FileType::Texture)
@@ -658,7 +654,7 @@ namespace ArcEngine
 						}
 						else
 						{
-							textureId = 0;
+							textureId = AssetManager::BlackTexture()->GetRendererID();
 						}
 					}
 					else
@@ -728,7 +724,7 @@ namespace ArcEngine
 						EditorLayer::GetInstance()->ResetContext();
 					}
 
-					const ImTextureID whiteTexId = reinterpret_cast<ImTextureID>(static_cast<uint64_t>(m_WhiteTexture->GetRendererID()));
+					const ImTextureID whiteTexId = reinterpret_cast<ImTextureID>(AssetManager::WhiteTexture()->GetRendererID());
 
 					// Foreground Image
 					ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });

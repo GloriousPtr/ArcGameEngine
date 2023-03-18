@@ -65,56 +65,61 @@ namespace ArcEngine
 		glUseProgram(0);
 	}
 
-	void OpenGLShader::SetInt(const std::string& name, int value)
+	void OpenGLShader::SetInt(const std::string& name, int value, uint32_t offset)
 	{
 		ARC_PROFILE_SCOPE()
 		
 		UploadUniformInt(name, value);
 	}
 
-	void OpenGLShader::SetIntArray(const std::string& name, const int* values, uint32_t count)
+	void OpenGLShader::SetUInt(const std::string& name, unsigned value, uint32_t offset)
+	{
+		glUniform1ui(GetLocation(name), value);
+	}
+
+	void OpenGLShader::SetIntArray(const std::string& name, const int* values, uint32_t count, uint32_t offset)
 	{
 		ARC_PROFILE_SCOPE()
 		
 		UploadUniformIntArray(name, values, count);		
 	}
 
-	void OpenGLShader::SetFloat(const std::string& name, float value)
+	void OpenGLShader::SetFloat(const std::string& name, float value, uint32_t offset)
 	{
 		ARC_PROFILE_SCOPE()
 		
 		UploadUniformFloat(name, value);
 	}
 
-	void OpenGLShader::SetFloat2(const std::string& name, const glm::vec2& value)
+	void OpenGLShader::SetFloat2(const std::string& name, const glm::vec2& value, uint32_t offset)
 	{
 		ARC_PROFILE_SCOPE()
 		
 		UploadUniformFloat2(name, value);
 	}
 
-	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
+	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value, uint32_t offset)
 	{
 		ARC_PROFILE_SCOPE()
 		
 		UploadUniformFloat3(name, value);
 	}
 
-	void OpenGLShader::SetFloat4(const std::string& name, const glm::vec4& value)
+	void OpenGLShader::SetFloat4(const std::string& name, const glm::vec4& value, uint32_t offset)
 	{
 		ARC_PROFILE_SCOPE()
 		
 		UploadUniformFloat4(name, value);
 	}
 
-	void OpenGLShader::SetMat3(const std::string& name, const glm::mat3& value)
+	void OpenGLShader::SetMat3(const std::string& name, const glm::mat3& value, uint32_t offset)
 	{
 		ARC_PROFILE_SCOPE()
 		
 		UploadUniformMat3(name, value);
 	}
 
-	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
+	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value, uint32_t offset)
 	{
 		ARC_PROFILE_SCOPE()
 		
@@ -203,9 +208,11 @@ namespace ArcEngine
 	{
 		switch (property)
 		{
-			case GL_SAMPLER_2D:		return MaterialPropertyType::Sampler2D;
+			case GL_TEXTURE_2D:		return MaterialPropertyType::Texture2D;
+			case GL_SAMPLER_2D:		return MaterialPropertyType::Texture2D;
 			case GL_BOOL:			return MaterialPropertyType::Bool;
 			case GL_INT:			return MaterialPropertyType::Int;
+			case GL_UNSIGNED_INT:	return MaterialPropertyType::UInt;
 			case GL_FLOAT:			return MaterialPropertyType::Float;
 			case GL_FLOAT_VEC2:		return MaterialPropertyType::Float2;
 			case GL_FLOAT_VEC3:		return MaterialPropertyType::Float3;
@@ -305,8 +312,18 @@ namespace ArcEngine
 				const size_t sizeInBytes = GetSizeInBytes(propertyType);
 				const bool isSlider = nameStr.ends_with("01");
 				const size_t sufixSize = isSlider ? 2 : 0;
-				const bool isColor = nameStr.find("color") != std::string::npos || nameStr.find("Color") != std::string::npos;
-				m_MaterialProperties.emplace(nameStr, MaterialProperty{ propertyType, sizeInBytes, offset, nameStr.substr(prefixOffset, nameStr.size() - prefixOffset - sufixSize), isSlider, isColor });
+
+				MaterialProperty property{};
+				property.Type = propertyType;
+				property.SizeInBytes = sizeInBytes;
+				property.OffsetInBytes = offset;
+				property.BindingOffset = 0;
+				property.IsSlider = isSlider;
+				property.DisplayName = nameStr.substr(prefixOffset, nameStr.size() - prefixOffset - sufixSize);
+				property.IsColor = nameStr.find("color") != std::string::npos || nameStr.find("Color") != std::string::npos;
+				property.Slot = 0;
+				
+				m_MaterialProperties.emplace(nameStr, property);
 				offset += sizeInBytes;
 			}
 		}
