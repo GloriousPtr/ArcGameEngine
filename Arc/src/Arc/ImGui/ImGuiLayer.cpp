@@ -2,9 +2,6 @@
 #include "ImGuiLayer.h"
 
 #ifdef ARC_PLATFORM_LINUX
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_opengl3.h>
-#include <GLFW/glfw3.h>
 #endif
 #ifdef ARC_PLATFORM_WINDOWS
 #include <backends/imgui_impl_win32.h>
@@ -58,8 +55,6 @@ namespace ArcEngine
 #ifdef ARC_PLATFORM_LINUX
 		auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		// Setup Platform/Renderer backends
-		ImGui_ImplGlfw_InitForOpenGL(window, true);
-		ImGui_ImplOpenGL3_Init("#version 410");
 #endif
 #ifdef ARC_PLATFORM_WINDOWS
 		auto hwnd = static_cast<HWND>(Application::Get().GetWindow().GetNativeWindow());
@@ -100,8 +95,6 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 #ifdef ARC_PLATFORM_LINUX
-		ImGui_ImplOpenGL3_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
 #endif
 #ifdef ARC_PLATFORM_WINDOWS
 		ImGui_ImplDX12_Shutdown();
@@ -128,8 +121,6 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 #ifdef ARC_PLATFORM_LINUX
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
 #endif
 #ifdef ARC_PLATFORM_WINDOWS
 		ImGui_ImplDX12_NewFrame();
@@ -160,7 +151,6 @@ namespace ArcEngine
 			// Rendering
 			ImGui::Render();
 #ifdef ARC_PLATFORM_LINUX
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 #endif
 #ifdef ARC_PLATFORM_WINDOWS
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
@@ -170,10 +160,6 @@ namespace ArcEngine
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 #ifdef ARC_PLATFORM_LINUX
-			GLFWwindow* backup_current_context = glfwGetCurrentContext();
-			ImGui::UpdatePlatformWindows();
-			ImGui::RenderPlatformWindowsDefault();
-			glfwMakeContextCurrent(backup_current_context);
 #endif
 #ifdef ARC_PLATFORM_WINDOWS
 			ImGui::UpdatePlatformWindows();

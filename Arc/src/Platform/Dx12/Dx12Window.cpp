@@ -6,8 +6,6 @@
 #include "Arc/Events/MouseEvent.h"
 #include "Arc/Events/KeyEvent.h"
 
-#include "Platform/OpenGL/OpenGLContext.h"
-
 #include <comutil.h>
 #include <imgui.h>
 

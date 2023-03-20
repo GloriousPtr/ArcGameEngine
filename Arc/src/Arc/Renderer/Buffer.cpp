@@ -3,7 +3,6 @@
 
 #include "Arc/Renderer/Renderer.h"
 
-#include "Platform/OpenGL/OpenGLBuffer.h"
 #include "Platform/Dx12/Dx12Buffer.h"
 
 namespace ArcEngine
@@ -13,7 +12,6 @@ namespace ArcEngine
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
-			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLVertexBuffer>(size);
 			case RendererAPI::API::Dx12:	return CreateRef<Dx12VertexBuffer>(size, stride);
 		}
 
@@ -26,7 +24,6 @@ namespace ArcEngine
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
-			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLVertexBuffer>(vertices, size);
 			case RendererAPI::API::Dx12:	return CreateRef<Dx12VertexBuffer>(vertices, size, stride);
 		}
 
@@ -39,7 +36,6 @@ namespace ArcEngine
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
-			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLIndexBuffer>(indices, static_cast<uint32_t>(count));
 			case RendererAPI::API::Dx12:	return CreateRef<Dx12IndexBuffer>(indices, static_cast<uint32_t>(count));
 		}
 
@@ -52,7 +48,6 @@ namespace ArcEngine
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
-			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLConstantBuffer>(size, count, registerIndex);
 			case RendererAPI::API::Dx12:	return CreateRef<Dx12ConstantBuffer>(size, count, registerIndex);
 		}
 

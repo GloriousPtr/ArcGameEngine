@@ -3,8 +3,6 @@
 
 #include "Arc/Renderer/Renderer.h"
 #include "Platform/Dx12/Dx12Texture.h"
-#include "Platform/OpenGL/OpenGLTexture.h"
-#include "Platform/OpenGL/OpenGLTextureCubemap.h"
 
 namespace ArcEngine
 {
@@ -13,7 +11,6 @@ namespace ArcEngine
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
-			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLTexture2D>();
 			case RendererAPI::API::Dx12:	return CreateRef<Dx12Texture2D>();
 		}
 
@@ -26,7 +23,6 @@ namespace ArcEngine
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
-			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLTexture2D>(width, height);
 			case RendererAPI::API::Dx12:	return CreateRef<Dx12Texture2D>(width, height);
 		}
 
@@ -39,7 +35,6 @@ namespace ArcEngine
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
-			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLTexture2D>(path);
 			case RendererAPI::API::Dx12:	return CreateRef<Dx12Texture2D>(path);
 		}
 
@@ -52,7 +47,6 @@ namespace ArcEngine
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
-			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLTextureCubemap>();
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!")
@@ -64,7 +58,6 @@ namespace ArcEngine
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
-			case RendererAPI::API::OpenGL:	return CreateRef<OpenGLTextureCubemap>(path);
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!")
