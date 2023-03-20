@@ -21,22 +21,11 @@ namespace ArcEngine
 		void Bind() const override;
 		void Unbind() const override;
 
-		void SetInt(const std::string& name, int value, uint32_t offset = 0) override;
-		void SetUInt(const std::string& name, unsigned int value, uint32_t offset = 0) override;
-		void SetIntArray(const std::string& name, const int* values, uint32_t count, uint32_t offset = 0) override;
-		void SetFloat(const std::string& name, float value, uint32_t offset = 0) override;
-		void SetFloat2(const std::string& name, const glm::vec2& value, uint32_t offset = 0) override;
-		void SetFloat3(const std::string& name, const glm::vec3& value, uint32_t offset = 0) override;
-		void SetFloat4(const std::string& name, const glm::vec4& value, uint32_t offset = 0) override;
-		void SetMat3(const std::string& name, const glm::mat3& value, uint32_t offset = 0) override;
-		void SetMat4(const std::string& name, const glm::mat4& value, uint32_t offset = 0) override;
-
-		[[nodiscard]] MaterialPropertyMap& GetMaterialProperties() override { return m_MaterialProperties; }
-
+		[[nodiscard]] MaterialPropertyMap& GetMaterialProperties() override;
 		[[nodiscard]] const std::string& GetName() const override;
 
 	private:
-		void SetData(uint32_t slot, uint32_t num32BitValues, const void* data, uint32_t offset);
+		void SetDataImpl(const std::string& name, const void* value, uint32_t size, uint32_t offset) override;
 		void Compile(const std::filesystem::path& filepath);
 
 	private:

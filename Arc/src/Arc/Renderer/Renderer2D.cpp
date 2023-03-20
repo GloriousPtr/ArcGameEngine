@@ -119,7 +119,7 @@ namespace ArcEngine
 		s_Data.LineShader = Shader::Create("assets/shaders/Renderer2D_Line.glsl");
 		s_Data.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
 		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetIntArray("u_Textures", samplers, Renderer2DData::MaxTextureSlots);
+		s_Data.TextureShader->SetData("u_Textures", samplers, 0, sizeof(int32_t) * Renderer2DData::MaxTextureSlots);
 
 		// Set first texture slot to 0
 		s_Data.TextureSlots[0] = AssetManager::WhiteTexture();
@@ -138,10 +138,10 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 		
 		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetMat4("u_ViewProjection", viewProjection);
+		s_Data.TextureShader->SetData("u_ViewProjection", viewProjection);
 
 		s_Data.LineShader->Bind();
-		s_Data.LineShader->SetMat4("u_ViewProjection", viewProjection);
+		s_Data.LineShader->SetData("u_ViewProjection", viewProjection);
 
 		StartBatch();
 	}

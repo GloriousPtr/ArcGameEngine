@@ -56,54 +56,9 @@ namespace ArcEngine
 	{
 	}
 
-	void Dx12Shader::SetInt(const std::string& name, int value, uint32_t offset)
+	MaterialPropertyMap& Dx12Shader::GetMaterialProperties()
 	{
-		SetData(m_MaterialProperties.at(name).Slot, 1, &value, offset);
-	}
-
-	void Dx12Shader::SetUInt(const std::string& name, unsigned int value, uint32_t offset)
-	{
-		SetData(m_MaterialProperties.at(name).Slot, 1, &value, offset);
-	}
-
-	void Dx12Shader::SetIntArray(const std::string& name, const int* values, uint32_t count, uint32_t offset)
-	{
-		SetData(m_MaterialProperties.at(name).Slot, count, values, offset);
-	}
-
-	void Dx12Shader::SetFloat(const std::string& name, float value, uint32_t offset)
-	{
-		SetData(m_MaterialProperties.at(name).Slot, 1, &value, offset);
-	}
-
-	void Dx12Shader::SetFloat2(const std::string& name, const glm::vec2& value, uint32_t offset)
-	{
-		SetData(m_MaterialProperties.at(name).Slot, 2, glm::value_ptr(value), offset);
-	}
-
-	void Dx12Shader::SetFloat3(const std::string& name, const glm::vec3& value, uint32_t offset)
-	{
-		SetData(m_MaterialProperties.at(name).Slot, 3, glm::value_ptr(value), offset);
-	}
-
-	void Dx12Shader::SetFloat4(const std::string& name, const glm::vec4& value, uint32_t offset)
-	{
-		SetData(m_MaterialProperties.at(name).Slot, 4, glm::value_ptr(value), offset);
-	}
-
-	void Dx12Shader::SetMat3(const std::string& name, const glm::mat3& value, uint32_t offset)
-	{
-		SetData(m_MaterialProperties.at(name).Slot, 3 * 3, glm::value_ptr(value), offset);
-	}
-
-	void Dx12Shader::SetMat4(const std::string& name, const glm::mat4& value, uint32_t offset)
-	{
-		SetData(m_MaterialProperties.at(name).Slot, 4 * 4, glm::value_ptr(value), offset);
-	}
-
-	void Dx12Shader::SetData(uint32_t slot, uint32_t num32BitValues, const void* data, uint32_t offset)
-	{
-		Dx12Context::GetGraphicsCommandList()->SetGraphicsRoot32BitConstants(slot, num32BitValues, data, offset);
+		return m_MaterialProperties;
 	}
 
 	const std::string& Dx12Shader::GetName() const
@@ -111,7 +66,11 @@ namespace ArcEngine
 		return m_Name;
 	}
 
-
+	void Dx12Shader::SetDataImpl(const std::string& name, const void* data, uint32_t size, uint32_t offset)
+	{
+		const int32_t slot = m_MaterialProperties.at(name).Slot;
+		Dx12Context::GetGraphicsCommandList()->SetGraphicsRoot32BitConstants(slot, size / 4, data, offset);
+	}
 
 	enum class ShaderModel
 	{

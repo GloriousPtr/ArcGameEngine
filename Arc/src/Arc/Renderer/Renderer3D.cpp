@@ -254,8 +254,8 @@ namespace ArcEngine
 		{
 			renderGraphData->FXAAPassTarget->Bind();
 			s_FxaaShader->Bind();
-			s_FxaaShader->SetFloat2("u_Threshold", FXAAThreshold);
-			s_FxaaShader->SetInt("u_Texture", 0);
+			s_FxaaShader->SetData("u_Threshold", FXAAThreshold);
+			s_FxaaShader->SetData("u_Texture", 0);
 			renderGraphData->LightingPassTarget->BindColorAttachment(0, 0);
 			DrawQuad();
 		}
@@ -374,11 +374,11 @@ namespace ArcEngine
 		s_HdrShader->Bind();
 		const glm::vec4 tonemappingParams = { static_cast<int>(Tonemapping), Exposure, 0.0f, 0.0f };
 		
-		s_HdrShader->SetFloat4("u_TonemappParams", tonemappingParams);
-		s_HdrShader->SetFloat("u_BloomStrength", UseBloom ? BloomStrength : -1.0f);
-		s_HdrShader->SetInt("u_Texture", 0);
-		s_HdrShader->SetInt("u_BloomTexture", 1);
-		s_HdrShader->SetInt("u_VignetteMask", 2);
+		s_HdrShader->SetData("u_TonemappParams", tonemappingParams);
+		s_HdrShader->SetData("u_BloomStrength", UseBloom ? BloomStrength : -1.0f);
+		s_HdrShader->SetData("u_Texture", 0);
+		s_HdrShader->SetData("u_BloomTexture", 1);
+		s_HdrShader->SetData("u_VignetteMask", 2);
 		
 		if (UseFXAA)
 			renderGraphData->FXAAPassTarget->BindColorAttachment(0, 0);
@@ -390,11 +390,11 @@ namespace ArcEngine
 
 		if (VignetteOffset.a > 0.0f)
 		{
-			s_HdrShader->SetFloat4("u_VignetteColor", VignetteColor);
+			s_HdrShader->SetData("u_VignetteColor", VignetteColor);
 			if (VignetteMask)
 				VignetteMask->Bind(2);
 		}
-		s_HdrShader->SetFloat4("u_VignetteOffset", VignetteOffset);
+		s_HdrShader->SetData("u_VignetteOffset", VignetteOffset);
 
 		DrawQuad();
 	}
@@ -414,9 +414,9 @@ namespace ArcEngine
 
 			renderGraphData->PrefilteredFramebuffer->Bind();
 			s_BloomShader->Bind();
-			s_BloomShader->SetFloat4("u_Threshold", threshold);
-			s_BloomShader->SetFloat4("u_Params", params);
-			s_BloomShader->SetInt("u_Texture", 0);
+			s_BloomShader->SetData("u_Threshold", threshold);
+			s_BloomShader->SetData("u_Params", params);
+			s_BloomShader->SetData("u_Texture", 0);
 			renderGraphData->LightingPassTarget->BindColorAttachment(0, 0);
 			DrawQuad();
 		}
@@ -427,11 +427,11 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE("Downsample")
 
 			s_GaussianBlurShader->Bind();
-			s_GaussianBlurShader->SetInt("u_Texture", 0);
+			s_GaussianBlurShader->SetData("u_Texture", 0);
 			for (size_t i = 0; i < blurSamples; i++)
 			{
 				renderGraphData->TempBlurFramebuffers[i]->Bind();
-				s_GaussianBlurShader->SetInt("u_Horizontal", static_cast<int>(true));
+				s_GaussianBlurShader->SetData("u_Horizontal", static_cast<int>(true));
 				if (i == 0)
 					renderGraphData->PrefilteredFramebuffer->BindColorAttachment(0, 0);
 				else
@@ -439,7 +439,7 @@ namespace ArcEngine
 				DrawQuad();
 
 				renderGraphData->DownsampledFramebuffers[i]->Bind();
-				s_GaussianBlurShader->SetInt("u_Horizontal", static_cast<int>(false));
+				s_GaussianBlurShader->SetData("u_Horizontal", static_cast<int>(false));
 				renderGraphData->TempBlurFramebuffers[i]->BindColorAttachment(0, 0);
 				DrawQuad();
 			}
@@ -449,11 +449,11 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE("Upsample")
 
 			s_BloomShader->Bind();
-			s_BloomShader->SetFloat4("u_Threshold", threshold);
+			s_BloomShader->SetData("u_Threshold", threshold);
 			params = glm::vec4(BloomClamp, 3.0f, 1.0f, 1.0f);
-			s_BloomShader->SetFloat4("u_Params", params);
-			s_BloomShader->SetInt("u_Texture", 0);
-			s_BloomShader->SetInt("u_AdditiveTexture", 1);
+			s_BloomShader->SetData("u_Params", params);
+			s_BloomShader->SetData("u_Texture", 0);
+			s_BloomShader->SetData("u_AdditiveTexture", 1);
 			const size_t upsampleCount = blurSamples - 1;
 			for (size_t i = upsampleCount; i > 0; i--)
 			{
@@ -474,7 +474,7 @@ namespace ArcEngine
 
 			renderGraphData->UpsampledFramebuffers[0]->Bind();
 			params = glm::vec4(BloomClamp, 3.0f, 1.0f, 0.0f);
-			s_BloomShader->SetFloat4("u_Params", params);
+			s_BloomShader->SetData("u_Params", params);
 			renderGraphData->UpsampledFramebuffers[1]->BindColorAttachment(0, 0);
 			DrawQuad();
 		}
@@ -489,23 +489,23 @@ namespace ArcEngine
 
 		s_LightingShader->Bind();
 
-		s_LightingShader->SetInt("u_NumPointLights", static_cast<int>(s_NumPointLights));
-		s_LightingShader->SetInt("u_NumDirectionalLights", static_cast<int>(s_NumDirectionalLights));
+		s_LightingShader->SetData("u_NumPointLights", static_cast<int>(s_NumPointLights));
+		s_LightingShader->SetData("u_NumDirectionalLights", static_cast<int>(s_NumDirectionalLights));
 
-		s_LightingShader->SetInt("u_Albedo", 0);
-		s_LightingShader->SetInt("u_Normal", 1);
-		s_LightingShader->SetInt("u_MetallicRoughnessAO", 2);
-		s_LightingShader->SetInt("u_Emission", 3);
-		s_LightingShader->SetInt("u_Depth", 4);
+		s_LightingShader->SetData("u_Albedo", 0);
+		s_LightingShader->SetData("u_Normal", 1);
+		s_LightingShader->SetData("u_MetallicRoughnessAO", 2);
+		s_LightingShader->SetData("u_Emission", 3);
+		s_LightingShader->SetData("u_Depth", 4);
 
-		s_LightingShader->SetInt("u_IrradianceMap", 5);
-		s_LightingShader->SetInt("u_RadianceMap", 6);
-		s_LightingShader->SetInt("u_BRDFLutMap", 7);
+		s_LightingShader->SetData("u_IrradianceMap", 5);
+		s_LightingShader->SetData("u_RadianceMap", 6);
+		s_LightingShader->SetData("u_BRDFLutMap", 7);
 
 		int32_t samplers[MAX_NUM_DIR_LIGHTS];
 		for (uint32_t i = 0; i < MAX_NUM_DIR_LIGHTS; i++)
 			samplers[i] = static_cast<int32_t>(i + 8);
-		s_LightingShader->SetIntArray("u_DirectionalShadowMap", samplers, MAX_NUM_DIR_LIGHTS);
+		s_LightingShader->SetData("u_DirectionalShadowMap", samplers, sizeof(int32_t) * MAX_NUM_DIR_LIGHTS);
 
 		renderGraphData->RenderPassTarget->BindColorAttachment(0, 0);
 		renderGraphData->RenderPassTarget->BindColorAttachment(1, 1);
@@ -518,8 +518,8 @@ namespace ArcEngine
 			const SkyLightComponent& skylightComponent = s_Skylight.GetComponent<SkyLightComponent>();
 			if (skylightComponent.Texture)
 			{
-				s_LightingShader->SetFloat("u_IrradianceIntensity", skylightComponent.Intensity);
-				s_LightingShader->SetFloat("u_EnvironmentRotation", skylightComponent.Rotation);
+				s_LightingShader->SetData("u_IrradianceIntensity", skylightComponent.Intensity);
+				s_LightingShader->SetData("u_EnvironmentRotation", skylightComponent.Rotation);
 				skylightComponent.Texture->BindIrradianceMap(5);
 				skylightComponent.Texture->BindRadianceMap(6);
 			}
@@ -568,8 +568,8 @@ namespace ArcEngine
 
 					skylightComponent.Texture->Bind(0);
 					s_CubemapShader->Bind();
-					s_CubemapShader->SetFloat("u_Intensity", skylightComponent.Intensity);
-					s_CubemapShader->SetFloat("u_Rotation", skylightComponent.Rotation);
+					s_CubemapShader->SetData("u_Intensity", skylightComponent.Intensity);
+					s_CubemapShader->SetData("u_Rotation", skylightComponent.Rotation);
 
 					DrawCube();
 
@@ -585,7 +585,7 @@ namespace ArcEngine
 			for (const auto& meshData : s_Meshes)
 			{
 				meshData.SubmeshGeometry.Mat->Bind();
-				s_Shader->SetMat4("u_Model", meshData.Transform);
+				s_Shader->SetData("u_Model", meshData.Transform);
 				
 				if (currentCullMode != meshData.CullMode)
 				{
@@ -644,12 +644,12 @@ namespace ArcEngine
 			glm::mat4 dirLightViewProj = lightProjection * dirLightView;
 
 			s_ShadowMapShader->Bind();
-			s_ShadowMapShader->SetMat4("u_ViewProjection", dirLightViewProj);
+			s_ShadowMapShader->SetData("u_ViewProjection", dirLightViewProj);
 
 			for (auto it = s_Meshes.rbegin(); it != s_Meshes.rend(); ++it)
 			{
 				const MeshData& meshData = *it;
-				s_ShadowMapShader->SetMat4("u_Model", meshData.Transform);
+				s_ShadowMapShader->SetData("u_Model", meshData.Transform);
 				RenderCommand::DrawIndexed(meshData.SubmeshGeometry.Geometry);
 			}
 		}
