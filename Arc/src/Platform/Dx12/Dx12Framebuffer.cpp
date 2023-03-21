@@ -7,26 +7,6 @@
 
 namespace ArcEngine
 {
-	static DXGI_FORMAT GetDxgiFormat(FramebufferTextureFormat format)
-	{
-		switch(format)
-		{
-			case FramebufferTextureFormat::None:				return DXGI_FORMAT_UNKNOWN;
-			case FramebufferTextureFormat::RGBA8:				return DXGI_FORMAT_R8G8B8A8_UNORM;
-			case FramebufferTextureFormat::RGBA16F:				return DXGI_FORMAT_R16G16B16A16_FLOAT;
-			case FramebufferTextureFormat::RGBA32F:				return DXGI_FORMAT_R32G32B32A32_FLOAT;
-			case FramebufferTextureFormat::R11G11B10F:			return DXGI_FORMAT_R11G11B10_FLOAT;
-			case FramebufferTextureFormat::RG16F:				return DXGI_FORMAT_R16G16_FLOAT;
-			case FramebufferTextureFormat::R32I:				return DXGI_FORMAT_R32_SINT;
-			case FramebufferTextureFormat::DEPTH24STENCIL8:		return DXGI_FORMAT_D32_FLOAT;
-
-			default: ARC_CORE_ERROR("Invalid framebuffer format: {}", (int)format); return DXGI_FORMAT_UNKNOWN;
-		}
-
-		ARC_CORE_ERROR("Invalid framebuffer format: {}", (int)format);
-		return DXGI_FORMAT_UNKNOWN;
-	}
-
 	Dx12Framebuffer::Dx12Framebuffer(const FramebufferSpecification& spec)
 		: m_Specification(spec)
 	{
@@ -38,10 +18,6 @@ namespace ArcEngine
 	Dx12Framebuffer::~Dx12Framebuffer()
 	{
 		ARC_PROFILE_SCOPE()
-
-		auto* srvDescriptorHeap = Dx12Context::GetSrvHeap();
-		auto* rtvDescriptorHeap = Dx12Context::GetRtvHeap();
-		auto* dsvDescriptorHeap = Dx12Context::GetDsvHeap();
 
 		for (auto& depthAttachment : m_DepthAttachment)
 			depthAttachment.Release(false);
@@ -158,12 +134,6 @@ namespace ArcEngine
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_DepthAttachment[backFrame].DsvHandle.CPU;
 		commandList->OMSetRenderTargets(m_RtvHandles[backFrame].size(), m_RtvHandles[backFrame].data(), true, dsvHandle.ptr != 0 ? &dsvHandle : nullptr);
 
-		const auto& rtvHandles = m_RtvHandles[backFrame];
-		for (const auto& rtv : rtvHandles)
-			commandList->ClearRenderTargetView(rtv, glm::value_ptr(m_ClearColor), 0, nullptr);
-		if (dsvHandle.ptr != 0)
-			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, m_ClearDepth.r, m_ClearDepth.g, 0, nullptr);
-
 		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, (float)m_Specification.Width, (float)m_Specification.Height, 0.0f, 1.0f };
 		const D3D12_RECT scissor = { 0, 0, m_Specification.Width, m_Specification.Height };
 
@@ -191,6 +161,20 @@ namespace ArcEngine
 		commandList->RSSetScissorRects(1, &scissorRect);
 
 		TransitionTo(D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+	}
+
+	void Dx12Framebuffer::Clear()
+	{
+		auto* commandList = Dx12Context::GetGraphicsCommandList();
+		const auto backFrame = Dx12Context::GetCurrentFrameIndex();
+
+		const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_DepthAttachment[backFrame].DsvHandle.CPU;
+
+		const auto& rtvHandles = m_RtvHandles[backFrame];
+		for (const auto& rtv : rtvHandles)
+			commandList->ClearRenderTargetView(rtv, glm::value_ptr(m_ClearColor), 0, nullptr);
+		if (dsvHandle.ptr != 0)
+			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, m_ClearDepth.r, m_ClearDepth.g, 0, nullptr);
 	}
 
 	void Dx12Framebuffer::BindColorAttachment(uint32_t index, uint32_t slot)
@@ -261,9 +245,12 @@ namespace ArcEngine
 			attachment.State = colorAttachmentState;
 			++numBarriers;
 		}
-		barriers[numBarriers] = CD3DX12_RESOURCE_BARRIER::Transition(m_DepthAttachment[backFrame].Resource, m_DepthAttachment[backFrame].State, depthAttachmentState);
-		m_DepthAttachment[backFrame].State = depthAttachmentState;
-		++numBarriers;
+		if (m_DepthAttachment[backFrame].Resource)
+		{
+			barriers[numBarriers] = CD3DX12_RESOURCE_BARRIER::Transition(m_DepthAttachment[backFrame].Resource, m_DepthAttachment[backFrame].State, depthAttachmentState);
+			m_DepthAttachment[backFrame].State = depthAttachmentState;
+			++numBarriers;
+		}
 		Dx12Context::GetGraphicsCommandList()->ResourceBarrier(numBarriers, barriers);
 	}
 }

@@ -1,6 +1,7 @@
 #include "arcpch.h"
 #include "Arc/Renderer/Shader.h"
 
+#include "PipelineState.h"
 #include "Arc/Renderer/Renderer.h"
 #include "Platform/Dx12/Dx12Shader.h"
 
@@ -18,60 +19,51 @@ namespace ArcEngine
 		return nullptr;
 	}
 
-	void ShaderLibrary::Add(const std::string& name, const Ref<Shader>& shader)
+	Ref<PipelineState> PipelineLibrary::Load(const std::filesystem::path& shaderPath, const PipelineSpecification& spec)
 	{
 		ARC_PROFILE_SCOPE()
 
+		const auto& name = shaderPath.filename().string();
 		ARC_CORE_ASSERT(!Exists(name), "Shader already exists!")
-		m_Shaders[name] = shader;
+
+		const auto shader = Shader::Create(shaderPath);
+		if (!shader)
+			return nullptr;
+
+		auto pipeline = PipelineState::Create(shader, spec);
+		m_Pipelines[name] = pipeline;
+		m_ShaderPaths[shader->GetName()] = shaderPath.string();
+
+		return pipeline;
 	}
 
-	void ShaderLibrary::Add(const Ref<Shader>& shader)
-	{
-		ARC_PROFILE_SCOPE()
-
-		auto& name = shader->GetName();
-		Add(name, shader);
-	}
-
-	Ref<Shader> ShaderLibrary::Load(const std::filesystem::path& filepath)
-	{
-		ARC_PROFILE_SCOPE()
-
-		auto shader = Shader::Create(filepath);
-		Add(shader);
-		m_ShaderPaths[shader->GetName()] = filepath.string();
-		return shader;
-	}
-
-	void ShaderLibrary::ReloadAll()
+	void PipelineLibrary::ReloadAll()
 	{
 		ARC_PROFILE_SCOPE()
 
 		std::string shaderName;
-		for (const auto& [name, shader] : m_Shaders)
+		for (const auto& [name, pipeline] : m_Pipelines)
 		{
 			const auto& it = m_ShaderPaths.find(name);
 			if (it == m_ShaderPaths.end())
 				continue;
 
-			shader->Recompile(it->second);
+			//pipeline->Recompile(it->second);
 		}
 	}
 
-	Ref<Shader> ShaderLibrary::Get(const std::string& name)
+	Ref<PipelineState> PipelineLibrary::Get(const std::string& name)
 	{
 		ARC_PROFILE_SCOPE()
 
-		ARC_CORE_ASSERT(Exists(name), "Shader not found!")
-		return m_Shaders[name];
+		ARC_CORE_ASSERT(Exists(name), "Pipeline not found!")
+		return m_Pipelines[name];
 	}
 
-	bool ShaderLibrary::Exists(const std::string& name) const
+	bool PipelineLibrary::Exists(const std::string& name) const
 	{
 		ARC_PROFILE_SCOPE()
 
-		return m_Shaders.contains(name);
+		return m_Pipelines.contains(name);
 	}
-
 }

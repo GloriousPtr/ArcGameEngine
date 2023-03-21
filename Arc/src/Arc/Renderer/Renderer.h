@@ -15,7 +15,7 @@ namespace ArcEngine
 		static void OnRender();
 		
 		[[nodiscard]] inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
-		[[nodiscard]] inline static ShaderLibrary& GetShaderLibrary() { return *s_ShaderLibrary; }
+		[[nodiscard]] inline static PipelineLibrary& GetPipelineLibrary() { return *s_PipelineLibrary; }
 	private:
 		struct SceneData
 		{
@@ -23,6 +23,6 @@ namespace ArcEngine
 		};
 
 		static SceneData* s_SceneData;
-		static Scope<ShaderLibrary> s_ShaderLibrary;
+		static Scope<PipelineLibrary> s_PipelineLibrary;
 	};
 }

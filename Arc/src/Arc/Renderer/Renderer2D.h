@@ -1,9 +1,10 @@
 #pragma once
 
+#include "Framebuffer.h"
+
 namespace ArcEngine
 {
 	class Texture2D;
-	struct RenderGraphData;
 
 	class Renderer2D
 	{
@@ -12,7 +13,7 @@ namespace ArcEngine
 		static void Shutdown();
 		
 		static void BeginScene(const glm::mat4& viewProjection);
-		static void EndScene(const Ref<RenderGraphData>& renderGraphData);
+		static void EndScene();
 		static void Flush();
 
 		//Primitives

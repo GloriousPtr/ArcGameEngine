@@ -56,6 +56,7 @@ namespace ArcEngine
 		
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
+		virtual void Clear() = 0;
 
 		virtual void BindColorAttachment(uint32_t index, uint32_t slot) = 0;
 		virtual void BindDepthAttachment(uint32_t slot) = 0;
@@ -68,6 +69,16 @@ namespace ArcEngine
 		[[nodiscard]] virtual const FramebufferSpecification& GetSpecification() const = 0;
 		
 		[[nodiscard]] static Ref<Framebuffer> Create(const FramebufferSpecification& spec);
+
+		[[nodiscard]] static bool IsDepthFormat(FramebufferTextureFormat format)
+		{
+			switch (format)
+			{
+				case FramebufferTextureFormat::DEPTH24STENCIL8: return true;
+			}
+
+			return false;
+		}
 
 	protected:
 		static constexpr uint32_t s_MaxFramebufferSize = 8192;

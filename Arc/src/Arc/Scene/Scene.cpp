@@ -1158,7 +1158,7 @@ namespace ArcEngine
 	void Scene::OnRender(const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData)
 	{
 		ARC_PROFILE_CATEGORY("Rendering", Profile::Category::Rendering)
-
+			/*
 		std::vector<Entity> lights;
 		{
 			ARC_PROFILE_SCOPE("Prepare Light Data")
@@ -1194,7 +1194,8 @@ namespace ArcEngine
 			}
 		}
 		Renderer3D::EndScene(renderGraphData);
-
+		*/
+		renderGraphData->CompositePassTarget->Bind();
 		Renderer2D::BeginScene(cameraData.ViewProjection);
 		{
 			ARC_PROFILE_SCOPE("Submit Particle Data")
@@ -1212,7 +1213,8 @@ namespace ArcEngine
 				Renderer2D::DrawQuad(Entity(entity, this).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
 			}
 		}
-		Renderer2D::EndScene(renderGraphData);
+		Renderer2D::EndScene();
+		renderGraphData->CompositePassTarget->Unbind();
 	}
 
 	void Scene::CreateRigidbody(Entity entity, const TransformComponent& transform, RigidbodyComponent& component) const

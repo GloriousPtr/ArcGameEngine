@@ -17,15 +17,8 @@ namespace ArcEngine
 		void SetClearColor(const glm::vec4& color) override;
 		void Clear() override;
 		void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) override;
-		void Draw(const Ref<VertexArray>& vertexArray, uint32_t count) override;
-		void DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount) override;
-		void EnableCulling() override;
-		void DisableCulling() override;
-		void FrontCull() override;
-		void BackCull() override;
-		void SetDepthMask(bool value) override;
-		void SetDepthTest(bool value) override;
-		void SetBlendState(bool value) override;
+		void Draw(const Ref<VertexBuffer>& vertexArray, uint32_t vertexCount) override;
+		void DrawLines(const Ref<VertexBuffer>& vertexBuffer, uint32_t vertexCount) override;
 
 	private:
 		Dx12Context* m_Context = nullptr;

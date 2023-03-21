@@ -9,11 +9,13 @@ struct aiNode;
 namespace ArcEngine
 {
 	class Shader;
+	class PipelineState;
 	class ConstantBuffer;
 	struct Submesh;
 	struct RenderGraphData;
 	class Entity;
 	struct CameraData;
+	class VertexBuffer;
 
 	class Renderer3D
 	{
@@ -68,16 +70,16 @@ namespace ArcEngine
 		static Statistics s_Stats;
 		static std::vector<Renderer3D::MeshData> s_Meshes;
 		static Ref<Texture2D> s_BRDFLutTexture;
-		static Ref<Shader> s_Shader;
-		static Ref<Shader> s_LightingShader;
-		static Ref<Shader> s_ShadowMapShader;
-		static Ref<Shader> s_CubemapShader;
-		static Ref<Shader> s_GaussianBlurShader;
-		static Ref<Shader> s_FxaaShader;
-		static Ref<Shader> s_HdrShader;
-		static Ref<Shader> s_BloomShader;
+		static Ref<PipelineState> s_Shader;
+		static Ref<PipelineState> s_LightingShader;
+		static Ref<PipelineState> s_ShadowMapShader;
+		static Ref<PipelineState> s_CubemapShader;
+		static Ref<PipelineState> s_GaussianBlurShader;
+		static Ref<PipelineState> s_FxaaShader;
+		static Ref<PipelineState> s_HdrShader;
+		static Ref<PipelineState> s_BloomShader;
 		static Ref<VertexArray> s_QuadVertexArray;
-		static Ref<VertexArray> s_CubeVertexArray;
+		static Ref<VertexBuffer> s_CubeVertexBuffer;
 		static Ref<ConstantBuffer> s_UbCamera;
 		static Ref<ConstantBuffer> s_UbPointLights;
 		static Ref<ConstantBuffer> s_UbDirectionalLights;

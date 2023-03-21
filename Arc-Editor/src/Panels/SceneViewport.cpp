@@ -141,8 +141,10 @@ namespace ArcEngine
 
 		// Update scene
 		m_RenderGraphData->RenderPassTarget->Bind();
-		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
-		RenderCommand::Clear();
+
+		m_RenderGraphData->CompositePassTarget->Clear();
+//		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+//		RenderCommand::Clear();
 
 		if (m_SimulationRunning)
 		{
@@ -183,7 +185,7 @@ namespace ArcEngine
 			m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
 			const uint64_t textureID = m_RenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
-			ImGui::Image(reinterpret_cast<ImTextureID>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+			ImGui::Image(reinterpret_cast<ImTextureID>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y });
 
 			if (m_SceneHierarchyPanel)
 				m_SceneHierarchyPanel->DragDropTarget();
@@ -329,6 +331,7 @@ namespace ArcEngine
 					};
 
 					m_MiniViewportRenderGraphData->RenderPassTarget->Bind();
+					m_MiniViewportRenderGraphData->CompositePassTarget->Clear();
 					m_Scene->OnRender(m_MiniViewportRenderGraphData, cameraData);
 					m_MiniViewportRenderGraphData->RenderPassTarget->Unbind();
 
@@ -336,7 +339,7 @@ namespace ArcEngine
 					const ImVec2 miniViewportSize = { m_ViewportSize.x * m_MiniViewportSizeMultiplier, m_ViewportSize.y * m_MiniViewportSizeMultiplier };
 					ImGui::SetCursorPos({ endCursorPos.x - miniViewportSize.x - windowPadding.x, endCursorPos.y - miniViewportSize.y - windowPadding.y });
 					const uint64_t textureId = m_MiniViewportRenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
-					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), ImVec2{ miniViewportSize.x, miniViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
+					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), ImVec2{ miniViewportSize.x, miniViewportSize.y }, ImVec2{ 0, 0 }, ImVec2{ 1, 1 }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
 				}
 			}
 
@@ -350,6 +353,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_CATEGORY("Debug Rendering", Profile::Category::Debug)
 
+		m_RenderGraphData->CompositePassTarget->Bind();
 		Renderer2D::BeginScene(m_EditorCamera.GetViewProjection());
 		{
 			constexpr glm::vec4 color = glm::vec4(1.0f);
@@ -446,6 +450,7 @@ namespace ArcEngine
 			}
 		}
 
-		Renderer2D::EndScene(m_RenderGraphData);
+		Renderer2D::EndScene();
+		m_RenderGraphData->CompositePassTarget->Unbind();
 	}
 }

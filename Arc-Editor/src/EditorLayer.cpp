@@ -234,7 +234,7 @@ namespace ArcEngine
 
 							if (ImGui::MenuItem("Reload Shaders"))
 							{
-								Renderer::GetShaderLibrary().ReloadAll();
+								Renderer::GetPipelineLibrary().ReloadAll();
 								Renderer3D::Init();
 							}
 

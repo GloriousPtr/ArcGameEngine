@@ -1,9 +1,11 @@
 #pragma once
 
+#include "PipelineState.h"
+
 namespace ArcEngine
 {
 	class Texture2D;
-	class Shader;
+	class ConstantBuffer;
 
 	class Material
 	{
@@ -19,8 +21,10 @@ namespace ArcEngine
 		void Invalidate();
 		void Bind() const;
 		void Unbind() const;
-		[[nodiscard]] Ref<Shader> GetShader() const;
+
 		[[nodiscard]] Ref<Texture2D> GetTexture(uint32_t slot);
+		[[nodiscard]] MaterialPropertyMap& GetProperties() const { return m_Pipeline->GetMaterialProperties(); }
+
 		void SetTexture(uint32_t slot, const Ref<Texture2D>& texture);
 
 		template<typename T>
@@ -41,9 +45,10 @@ namespace ArcEngine
 		void SetData_Internal(const std::string& name, MaterialData data) const;
 
 	private:
-		Ref<Shader> m_Shader = nullptr;
+		Ref<PipelineState> m_Pipeline = nullptr;
 		char* m_Buffer = nullptr;
 		size_t m_BufferSizeInBytes = 0;
 		std::unordered_map<uint32_t, Ref<Texture2D>> m_Textures;
+		std::unordered_map<uint32_t, Ref<ConstantBuffer>> m_ConstantBuffers;
 	};
 }

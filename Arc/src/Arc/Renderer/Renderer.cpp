@@ -16,13 +16,13 @@
 namespace ArcEngine
 {
 	Renderer::SceneData* Renderer::s_SceneData = new Renderer::SceneData;
-	Scope<ShaderLibrary> Renderer::s_ShaderLibrary;
+	Scope<PipelineLibrary> Renderer::s_PipelineLibrary;
 
 	struct Data
 	{
 		Ref<Framebuffer> fb;
 
-		Ref<Shader> shader;
+		Ref<PipelineState> pipeline;
 		Ref<ConstantBuffer> cam;
 		Ref<ConstantBuffer> transform;
 		Ref<Mesh> mesh;
@@ -40,11 +40,13 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		s_ShaderLibrary = CreateScope<ShaderLibrary>();
+		RenderCommand::Init();
 
+		s_PipelineLibrary = CreateScope<PipelineLibrary>();
+
+		/*
 		s_Data = CreateScope<Data>();
 
-		RenderCommand::Init();
 
 		FramebufferSpecification spec{};
 		spec.Width = 1600;
@@ -52,7 +54,7 @@ namespace ArcEngine
 		spec.Attachments = { FramebufferTextureFormat::RGBA32F, FramebufferTextureFormat::Depth };
 		s_Data->fb = Framebuffer::Create(spec);
 
-		s_Data->shader = Shader::Create("assets/shaders/FlatColor.hlsl");
+		s_Data->pipeline = s_PipelineLibrary->Load("assets/shaders/FlatColor.hlsl", { FramebufferTextureFormat::RGBA32F, FramebufferTextureFormat::Depth });
 		s_Data->mesh = CreateRef<Mesh>("../Sandbox/Assets/Models/sponza/sponza.obj");
 
 		s_Data->cam = ConstantBuffer::Create(sizeof(glm::mat4), 1, 0);
@@ -62,8 +64,9 @@ namespace ArcEngine
 		s_Data->height = spec.Height;
 		s_Data->view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f });
 		s_Data->projection = glm::perspective(glm::radians(45.0f), (float)spec.Width / (float)spec.Height, 0.01f, 1000.0f);
+		*/
 
-		//Renderer2D::Init();
+		Renderer2D::Init();
 		//Renderer3D::Init();
 	}
 
@@ -71,12 +74,12 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		s_ShaderLibrary = nullptr;
+		s_PipelineLibrary = nullptr;
 		delete s_SceneData;
 
 		s_Data = nullptr;
 
-		//Renderer2D::Shutdown();
+		Renderer2D::Shutdown();
 		//Renderer3D::Shutdown();
 	}
 
@@ -86,12 +89,13 @@ namespace ArcEngine
 
 		RenderCommand::SetViewport(0, 0, width, height);
 
-		s_Data->width = width;
-		s_Data->height = height;
+		//s_Data->width = width;
+		//s_Data->height = height;
 	}
 
 	void Renderer::OnRender()
 	{
+		/*
 		static glm::vec3 cameraPosition = { 0.0f, 0.0f, 1.0f };
 		static float fov = 45.0f;
 
@@ -125,22 +129,23 @@ namespace ArcEngine
 		s_Data->fb->Bind();
 		{
 			RenderCommand::SetClearColor(clearColor);
-			s_Data->shader->Bind();
-
-			glm::mat4 viewProj = s_Data->projection * s_Data->view;
-			s_Data->cam->Bind(0);
-			s_Data->cam->SetData(&viewProj, sizeof(viewProj), 0);
-
-			glm::mat4 transform1 = glm::translate(glm::mat4(1.0f), position1) * glm::toMat4(glm::quat(rotation1)) * glm::scale(glm::mat4(1.0f), scale1);
-
-			s_Data->transform->Bind(0);
-			s_Data->transform->SetData(&transform1, sizeof(glm::mat4), 0);
-			const size_t submeshCount = s_Data->mesh->GetSubmeshCount();
-			for (size_t i = 0; i < submeshCount; ++i)
+			if (s_Data->pipeline && s_Data->pipeline->Bind())
 			{
-				const auto& submesh = s_Data->mesh->GetSubmesh(i);
-				submesh.Mat->Bind();
-				RenderCommand::DrawIndexed(submesh.Geometry);
+				glm::mat4 viewProj = s_Data->projection * s_Data->view;
+				s_Data->cam->Bind(0);
+				s_Data->cam->SetData(&viewProj, sizeof(viewProj), 0);
+
+				glm::mat4 transform1 = glm::translate(glm::mat4(1.0f), position1) * glm::toMat4(glm::quat(rotation1)) * glm::scale(glm::mat4(1.0f), scale1);
+
+				s_Data->transform->Bind(0);
+				s_Data->transform->SetData(&transform1, sizeof(glm::mat4), 0);
+				const size_t submeshCount = s_Data->mesh->GetSubmeshCount();
+				for (size_t i = 0; i < submeshCount; ++i)
+				{
+					const auto& submesh = s_Data->mesh->GetSubmesh(i);
+					submesh.Mat->Bind();
+					RenderCommand::DrawIndexed(submesh.Geometry);
+				}
 			}
 		}
 		s_Data->fb->Unbind();
@@ -167,5 +172,6 @@ namespace ArcEngine
 
 		if (s_Data->fbResizing && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 			s_Data->fbResizing = false;
+			*/
 	}
 }

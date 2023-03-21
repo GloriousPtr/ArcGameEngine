@@ -1,10 +1,13 @@
 #include "arcpch.h"
 #include "Material.h"
 
+#include <ranges>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Buffer.h"
 #include "Renderer.h"
 #include "Shader.h"
+#include "PipelineState.h"
 #include "Texture.h"
 #include "Arc/Core/AssetManager.h"
 
@@ -16,12 +19,9 @@ namespace ArcEngine
 
 		// Extract name from filepath
 		const std::string name = shaderPath.filename().string();
+		ARC_CORE_ASSERT(Renderer::GetPipelineLibrary().Exists(name))
 
-		if (!Renderer::GetShaderLibrary().Exists(name))
-			m_Shader = Renderer::GetShaderLibrary().Load(shaderPath);
-		else
-			m_Shader = Renderer::GetShaderLibrary().Get(name);
-
+		m_Pipeline = Renderer::GetPipelineLibrary().Get(name);
 		Invalidate();
 	}
 
@@ -39,26 +39,31 @@ namespace ArcEngine
 		delete[] m_Buffer;
 
 		m_BufferSizeInBytes = 0;
-		const auto& materialProperties = m_Shader->GetMaterialProperties();
+		const auto& materialProperties = m_Pipeline->GetMaterialProperties();
 
-		for (const auto& [_, property] : materialProperties)
+		for (const auto& property : materialProperties | std::views::values)
 			m_BufferSizeInBytes += property.SizeInBytes;
 
 		m_Buffer = new char[m_BufferSizeInBytes];
 		memset(m_Buffer, 0, m_BufferSizeInBytes);
 		
 		uint32_t slot = 0;
-		auto one = glm::vec4(1.0);
+		auto one = glm::vec4(1.0, 0.0f, 1.0f, 1.0f);
 		for (auto& [name, property] : materialProperties)
 		{
+			int slot = property.Slot;
 			if (property.Type == MaterialPropertyType::Texture2D ||
 				property.Type == MaterialPropertyType::Texture2DBindless)
 			{
 				memcpy(m_Buffer + property.OffsetInBytes, &slot, sizeof(uint32_t));
 				m_Textures.emplace(slot, nullptr);
-				slot++;
 			}
-			else if (property.Type == MaterialPropertyType::Float ||
+			else
+			{
+				m_ConstantBuffers.emplace(slot, ConstantBuffer::Create(static_cast<uint32_t>(property.SizeInBytes), 1, property.Slot));
+			}
+
+			if (property.Type == MaterialPropertyType::Float ||
 				property.Type == MaterialPropertyType::Float2 ||
 				property.Type == MaterialPropertyType::Float3 ||
 				property.Type == MaterialPropertyType::Float4)
@@ -75,60 +80,44 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		const auto& materialProperties = m_Shader->GetMaterialProperties();
+		const auto& materialProperties = m_Pipeline->GetMaterialProperties();
 
-		m_Shader->Bind();
-		for (const auto& [name, property] : materialProperties)
+		[[likely]]
+		if (m_Pipeline->Bind())
 		{
-			char* bufferStart = m_Buffer + property.OffsetInBytes;
-			uint32_t slot = *reinterpret_cast<uint32_t*>(bufferStart);
-			switch (property.Type)
+			for (const auto& [name, property] : materialProperties)
 			{
-				case MaterialPropertyType::None : break;
-				case MaterialPropertyType::Texture2D :
+				const uint32_t slot = property.Slot;
+
+				switch (property.Type)
 				{
-					m_Shader->SetData(name, static_cast<int>(slot), 0, property.BindingOffset);
-					if (m_Textures.at(slot))
-						m_Textures.at(slot)->Bind(slot);
-					else
-						AssetManager::WhiteTexture()->Bind(slot);
-					break;
-				}
-				case MaterialPropertyType::Texture2DBindless :
-				{
-					m_Shader->SetData(name, (m_Textures.at(slot) ? m_Textures.at(slot) : AssetManager::WhiteTexture())->GetIndex(), 0, property.BindingOffset);
-					break;
-				}
-				case MaterialPropertyType::Bool :
-				case MaterialPropertyType::Int :
-				{
-					m_Shader->SetData(name, *reinterpret_cast<int32_t*>(bufferStart), 0, property.BindingOffset);
-					break;
-				}
-				case MaterialPropertyType::UInt :
-				{
-					m_Shader->SetData(name, *reinterpret_cast<uint32_t*>(bufferStart), 0, property.BindingOffset);
-					break;
-				}
-				case MaterialPropertyType::Float :
-				{
-					m_Shader->SetData(name, *reinterpret_cast<float*>(bufferStart), 0, property.BindingOffset);
-					break;
-				}
-				case MaterialPropertyType::Float2 :
-				{
-					m_Shader->SetData(name, *reinterpret_cast<glm::vec2*>(bufferStart), 0, property.BindingOffset);
-					break;
-				}
-				case MaterialPropertyType::Float3 :
-				{
-					m_Shader->SetData(name, *reinterpret_cast<glm::vec3*>(bufferStart), 0, property.BindingOffset);
-					break;
-				}
-				case MaterialPropertyType::Float4 :
-				{
-					m_Shader->SetData(name, *reinterpret_cast<glm::vec4*>(bufferStart), 0, property.BindingOffset);
-					break;
+					case MaterialPropertyType::None: break;
+					case MaterialPropertyType::Texture2D:
+					{
+						if (m_Textures.at(slot))
+							m_Textures.at(slot)->Bind(property.Slot);
+						else
+							AssetManager::WhiteTexture()->Bind(property.Slot);
+						break;
+					}
+					case MaterialPropertyType::Texture2DBindless:
+					{
+						m_Pipeline->SetData(name, (m_Textures.at(slot) ? m_Textures.at(slot) : AssetManager::WhiteTexture())->GetIndex(), 0, property.BindingOffset);
+						break;
+					}
+					case MaterialPropertyType::Bool:
+					case MaterialPropertyType::Int:
+					case MaterialPropertyType::UInt:
+					case MaterialPropertyType::Float:
+					case MaterialPropertyType::Float2:
+					case MaterialPropertyType::Float3:
+					case MaterialPropertyType::Float4:
+					{
+						const Ref<ConstantBuffer> constantBuffer = m_ConstantBuffers.at(slot);
+						constantBuffer->Bind(0);
+						constantBuffer->SetData(m_Buffer + property.OffsetInBytes, static_cast<uint32_t>(property.SizeInBytes), 0);
+						break;
+					}
 				}
 			}
 		}
@@ -138,12 +127,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		m_Shader->Unbind();
-	}
-
-	Ref<Shader> Material::GetShader() const
-	{
-		return m_Shader;
+		m_Pipeline->Unbind();
 	}
 
 	Ref<Texture2D> Material::GetTexture(uint32_t slot)
@@ -166,8 +150,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		const auto& materialProperties = m_Shader->GetMaterialProperties();
-		const auto& materialProperty = m_Shader->GetMaterialProperties().find(name);
+		const auto& materialProperties = m_Pipeline->GetMaterialProperties();
+		const auto& materialProperty = m_Pipeline->GetMaterialProperties().find(name);
 		if (materialProperty != materialProperties.end())
 			return m_Buffer + materialProperty->second.OffsetInBytes;
 
@@ -178,8 +162,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		const auto& materialProperties = m_Shader->GetMaterialProperties();
-		const auto& property = m_Shader->GetMaterialProperties().find(name);
+		const auto& materialProperties = m_Pipeline->GetMaterialProperties();
+		const auto& property = m_Pipeline->GetMaterialProperties().find(name);
 		if (property != materialProperties.end())
 			memcpy(m_Buffer + property->second.OffsetInBytes, data, property->second.SizeInBytes);
 	}

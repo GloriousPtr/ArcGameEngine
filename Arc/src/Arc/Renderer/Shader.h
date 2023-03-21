@@ -1,11 +1,21 @@
 #pragma once
 
-#include "Arc/Renderer/Buffer.h"
 #include "Arc/Utils/StringUtils.h"
-#include "glm/gtc/type_ptr.hpp"
 
 namespace ArcEngine
 {
+	struct PipelineSpecification;
+	class PipelineState;
+
+	enum class ShaderType
+	{
+		None = 0,
+		Vertex,
+		Pixel,
+
+		Fragment = Pixel
+	};
+
 	enum class MaterialPropertyType
 	{
 		None = 0,
@@ -47,38 +57,24 @@ namespace ArcEngine
 		virtual ~Shader() = default;
 
 		virtual void Recompile(const std::filesystem::path& path) = 0;
-		virtual void Bind() const = 0;
-		virtual void Unbind() const = 0;
 
-		[[nodiscard]] virtual MaterialPropertyMap& GetMaterialProperties() = 0;
 		[[nodiscard]] virtual const std::string& GetName() const = 0;
 
-		template<typename T>
-		void SetData(const std::string& name, const T& data, uint32_t size = 0, uint32_t offset = 0)
-		{
-			SetDataImpl(name, &data, (size == 0 ? sizeof(T) : size), offset);
-		}
-		
-	private:
-		virtual void SetDataImpl(const std::string& name, const void* data, uint32_t size, uint32_t offset) = 0;
-
-	public:
 		[[nodiscard]] static Ref<Shader> Create(const std::filesystem::path& filepath);
 	};
 
-	class ShaderLibrary
+	class PipelineLibrary
 	{
 	public:
-		void Add(const std::string& name, const Ref<Shader>& shader);
-		void Add(const Ref<Shader>& shader);
-		Ref<Shader> Load(const std::filesystem::path& filepath);
+		Ref<PipelineState> Load(const std::filesystem::path& shaderPath, const PipelineSpecification& spec);
 		void ReloadAll();
 
-		[[nodiscard]] Ref<Shader> Get(const std::string& name);
+		[[nodiscard]] Ref<PipelineState> Get(const std::string& name);
 
 		[[nodiscard]] bool Exists(const std::string& name) const;
 	private:
-		std::unordered_map<std::string, Ref<Shader>, UM_StringTransparentEquality> m_Shaders;
+
+		std::unordered_map<std::string, Ref<PipelineState>, UM_StringTransparentEquality> m_Pipelines;
 		std::unordered_map<std::string, std::string, UM_StringTransparentEquality> m_ShaderPaths;
 	};
 }

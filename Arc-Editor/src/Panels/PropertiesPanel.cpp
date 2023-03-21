@@ -184,7 +184,7 @@ namespace ArcEngine
 	{
 		UI::BeginProperties();
 
-		const auto& materialProperties = material->GetShader()->GetMaterialProperties();
+		const auto& materialProperties = material->GetProperties();
 		for (const auto& [name, property] : materialProperties)
 		{
 			const char* displayName = property.DisplayName.c_str();

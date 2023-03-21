@@ -46,43 +46,23 @@ namespace ArcEngine
 		indexCount = indexCount == 0 ? vertexArray->GetIndexBuffer()->GetCount() : indexCount;
 
 		auto* commandList = Dx12Context::GetGraphicsCommandList();
-		commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		commandList->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
 	}
 
-	void Dx12RendererAPI::Draw(const Ref<VertexArray>& vertexArray, uint32_t count)
+	void Dx12RendererAPI::Draw(const Ref<VertexBuffer>& vertexBuffer, uint32_t vertexCount)
 	{
+		vertexBuffer->Bind();
+		auto* commandList = Dx12Context::GetGraphicsCommandList();
+		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		commandList->DrawInstanced(vertexCount, 1, 0, 0);
 	}
 
-	void Dx12RendererAPI::DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
+	void Dx12RendererAPI::DrawLines(const Ref<VertexBuffer>& vertexBuffer, uint32_t vertexCount)
 	{
-	}
-
-	void Dx12RendererAPI::EnableCulling()
-	{
-	}
-
-	void Dx12RendererAPI::DisableCulling()
-	{
-	}
-
-	void Dx12RendererAPI::FrontCull()
-	{
-	}
-
-	void Dx12RendererAPI::BackCull()
-	{
-	}
-
-	void Dx12RendererAPI::SetDepthMask(bool value)
-	{
-	}
-
-	void Dx12RendererAPI::SetDepthTest(bool value)
-	{
-	}
-
-	void Dx12RendererAPI::SetBlendState(bool value)
-	{
+		vertexBuffer->Bind();
+		auto* commandList = Dx12Context::GetGraphicsCommandList();
+		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+		commandList->DrawInstanced(vertexCount, 1, 0, 0);
 	}
 }

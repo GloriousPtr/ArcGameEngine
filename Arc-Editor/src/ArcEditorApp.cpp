@@ -11,14 +11,14 @@ namespace ArcEngine
 		ArcEditor()
 			: Application("Arc Editor")
 		{
-			//m_EditorLayer = new EditorLayer();
-			//PushLayer(m_EditorLayer);
+			m_EditorLayer = new EditorLayer();
+			PushLayer(m_EditorLayer);
 		}
 
 		~ArcEditor() override
 		{
-			//PopLayer(m_EditorLayer);
-			//delete m_EditorLayer;
+			PopLayer(m_EditorLayer);
+			delete m_EditorLayer;
 		}
 
 	private:

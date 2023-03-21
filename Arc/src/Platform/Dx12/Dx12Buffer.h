@@ -20,11 +20,7 @@ namespace ArcEngine
 
 		void SetData(const void* data, uint32_t size) override;
 
-		[[nodiscard]] const BufferLayout& GetLayout() const override { return m_Layout; }
-		void SetLayout(const BufferLayout& layout) override { m_Layout = layout; }
-
 	private:
-		BufferLayout						m_Layout{};
 		ID3D12Resource*						m_UploadResource = nullptr;
 		ID3D12Resource*						m_Resource = nullptr;
 		D3D12_VERTEX_BUFFER_VIEW			m_BufferView{};

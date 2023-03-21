@@ -4,11 +4,9 @@
 #include "d3dx12.h"
 
 #include <comutil.h>
+#include <ranges>
 #include <dxc/inc/dxcapi.h>
-#include <dxc/inc/d3d12shader.h>
 #include <wrl.h>
-
-#include <glm/gtc/type_ptr.hpp>
 
 namespace ArcEngine
 {
@@ -24,41 +22,22 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		if (m_PipelineState)
-			m_PipelineState->Release();
-		if(m_RootSignature)
-			m_RootSignature->Release();
+		for (auto& shader : m_ShaderBlobs | std::views::values)
+			shader->Release();
+
+		for (auto& reflection : m_ReflectionBlobs | std::views::values)
+			reflection->Release();
 	}
 
 	void Dx12Shader::Recompile(const std::filesystem::path& path)
 	{
-		if (m_PipelineState)
-			m_PipelineState->Release();
-		if (m_RootSignature)
-			m_RootSignature->Release();
+		for (auto& shader : m_ShaderBlobs | std::views::values)
+			shader->Release();
+
+		for (auto& reflection : m_ReflectionBlobs | std::views::values)
+			reflection->Release();
 
 		Compile(path);
-	}
-
-	void Dx12Shader::Bind() const
-	{
-		ARC_PROFILE_SCOPE()
-
-		if (!m_RootSignature || !m_PipelineState)
-			return;
-
-		auto* commandList = Dx12Context::GetGraphicsCommandList();
-		commandList->SetGraphicsRootSignature(m_RootSignature);
-		commandList->SetPipelineState(m_PipelineState);
-	}
-
-	void Dx12Shader::Unbind() const
-	{
-	}
-
-	MaterialPropertyMap& Dx12Shader::GetMaterialProperties()
-	{
-		return m_MaterialProperties;
 	}
 
 	const std::string& Dx12Shader::GetName() const
@@ -66,41 +45,26 @@ namespace ArcEngine
 		return m_Name;
 	}
 
-	void Dx12Shader::SetDataImpl(const std::string& name, const void* data, uint32_t size, uint32_t offset)
+	inline static std::map<ShaderType, const wchar_t*> s_TargetMap
 	{
-		const int32_t slot = m_MaterialProperties.at(name).Slot;
-		Dx12Context::GetGraphicsCommandList()->SetGraphicsRoot32BitConstants(slot, size / 4, data, offset);
-	}
-
-	enum class ShaderModel
-	{
-		None = 0,
-		Vertex,
-		Fragment,
-
-		Pixel = Fragment
+		{ ShaderType::Vertex,		L"vs_6_6" },
+		{ ShaderType::Pixel,		L"ps_6_6" },
 	};
 
-	inline static std::map<ShaderModel, const wchar_t*> s_TargetMap
+	inline static std::map<ShaderType, const wchar_t*> s_EntryPointMap
 	{
-		{ ShaderModel::Vertex,		L"vs_6_6" },
-		{ ShaderModel::Fragment,	L"ps_6_6" },
+		{ ShaderType::Vertex,		L"VS_Main" },
+		{ ShaderType::Pixel,		L"PS_Main" },
 	};
 
-	inline static std::map<ShaderModel, const wchar_t*> s_EntryPointMap
-	{
-		{ ShaderModel::Vertex,		L"VS_Main" },
-		{ ShaderModel::Fragment,	L"PS_Main" },
-	};
-
-	static Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
+	static IDxcBlob* CompileShader(
 		const std::filesystem::path& filepath,
 		const Microsoft::WRL::ComPtr<IDxcBlobEncoding>& encodedBlob,
 		const Microsoft::WRL::ComPtr<IDxcIncludeHandler>& includeHandler,
-		ShaderModel shaderModel,
+		ShaderType shaderModel,
 		const std::vector<const wchar_t*>& arguments,
 		const std::vector<const wchar_t*>& defines,
-		Microsoft::WRL::ComPtr<IDxcBlob>* reflection)
+		IDxcBlob** reflection)
 	{
 		using namespace Microsoft::WRL;
 
@@ -161,151 +125,11 @@ namespace ArcEngine
 		}
 
 		if (reflection)
-			compileResult->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(reflection->GetAddressOf()), nullptr);
+			compileResult->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(reflection), nullptr);
 
-		ComPtr<IDxcBlob> shader;
+		IDxcBlob* shader;
 		compileResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr);
 		return shader;
-	}
-
-	static DXGI_FORMAT GetFormatFromMaskComponents(BYTE mask, D3D_REGISTER_COMPONENT_TYPE componentType)
-	{
-		if (mask == 1)
-		{
-			if (componentType == D3D_REGISTER_COMPONENT_UINT32)			return DXGI_FORMAT_R32_UINT;
-			if (componentType == D3D_REGISTER_COMPONENT_SINT32)			return DXGI_FORMAT_R32_SINT;
-			if (componentType == D3D_REGISTER_COMPONENT_FLOAT32)		return DXGI_FORMAT_R32_FLOAT;
-		}
-		else if (mask <= 3)
-		{
-			if (componentType == D3D_REGISTER_COMPONENT_UINT32)			return DXGI_FORMAT_R32G32_UINT;
-			if (componentType == D3D_REGISTER_COMPONENT_SINT32)			return DXGI_FORMAT_R32G32_SINT;
-			if (componentType == D3D_REGISTER_COMPONENT_FLOAT32)		return DXGI_FORMAT_R32G32_FLOAT;
-		}
-		else if (mask <= 7)
-		{
-			if (componentType == D3D_REGISTER_COMPONENT_UINT32)			return DXGI_FORMAT_R32G32B32_UINT;
-			if (componentType == D3D_REGISTER_COMPONENT_SINT32)			return DXGI_FORMAT_R32G32B32_SINT;
-			if (componentType == D3D_REGISTER_COMPONENT_FLOAT32)		return DXGI_FORMAT_R32G32B32_FLOAT;
-		}
-		else if (mask <= 15)
-		{
-			if (componentType == D3D_REGISTER_COMPONENT_UINT32)			return DXGI_FORMAT_R32G32B32A32_UINT;
-			if (componentType == D3D_REGISTER_COMPONENT_SINT32)			return DXGI_FORMAT_R32G32B32A32_SINT;
-			if (componentType == D3D_REGISTER_COMPONENT_FLOAT32)		return DXGI_FORMAT_R32G32B32A32_FLOAT;
-		}
-
-		return DXGI_FORMAT_UNKNOWN;
-	}
-
-	static MaterialPropertyType GetVariableType(const D3D12_SHADER_TYPE_DESC& desc)
-	{
-		switch (desc.Type)
-		{
-			case D3D_SVT_TEXTURE2D:			return MaterialPropertyType::Texture2D;
-			case D3D_SVT_BOOL:				return MaterialPropertyType::Bool;
-			case D3D_SVT_INT:				return MaterialPropertyType::Int;
-			case D3D_SVT_UINT:				return MaterialPropertyType::UInt;
-			case D3D_SVT_FLOAT:
-			{
-				if (desc.Columns == 1)		return MaterialPropertyType::Float;
-				if (desc.Columns == 2)		return MaterialPropertyType::Float2;
-				if (desc.Columns == 3)		return MaterialPropertyType::Float3;
-				if (desc.Columns == 4)		return MaterialPropertyType::Float4;
-			}
-		}
-
-		return MaterialPropertyType::None;
-	}
-
-	static void AppendMaterials(const Microsoft::WRL::ComPtr<ID3D12ShaderReflection>& reflection,
-		std::vector<D3D12_ROOT_PARAMETER>& outRootParams,
-		std::vector<D3D12_DESCRIPTOR_RANGE>& outDescriptors,
-		MaterialPropertyMap& outMaterialProperties)
-	{
-		D3D12_SHADER_DESC shaderDesc;
-		reflection->GetDesc(&shaderDesc);
-
-		outRootParams.reserve(outRootParams.size() + shaderDesc.BoundResources);
-		for (uint32_t i = 0; i < shaderDesc.BoundResources; ++i)
-		{
-			D3D12_SHADER_INPUT_BIND_DESC shaderInputBindDesc{};
-			reflection->GetResourceBindingDesc(i, &shaderInputBindDesc);
-
-			auto* cb = reflection->GetConstantBufferByIndex(i);
-			D3D12_SHADER_BUFFER_DESC constantBufferDesc{};
-			cb->GetDesc(&constantBufferDesc);
-
-			bool supported = shaderInputBindDesc.Type != D3D_SIT_SAMPLER;
-			bool tex = shaderInputBindDesc.Type == D3D_SIT_TEXTURE;
-			bool cbuffer = shaderInputBindDesc.Type == D3D_SIT_CBUFFER;
-			bool rootConstants = cbuffer && shaderInputBindDesc.BindPoint == 0;
-
-			bool bindlessTextures = std::string("Textures") == shaderInputBindDesc.Name;
-			bool materialProperties = std::string("MaterialProperties") == shaderInputBindDesc.Name;
-			if (supported)
-			{
-				CD3DX12_ROOT_PARAMETER rootParameter;
-				if (rootConstants)
-				{
-					rootParameter.InitAsConstants(glm::min(64u, constantBufferDesc.Size / 4), shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space);
-				}
-				else if (tex)
-				{
-					CD3DX12_DESCRIPTOR_RANGE range;
-					range.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, shaderInputBindDesc.BindCount, shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space);
-					size_t index = outDescriptors.size();
-					outDescriptors.push_back(range);
-					rootParameter.InitAsDescriptorTable(1, &outDescriptors[index]);
-				}
-				else if (cbuffer)
-				{
-					rootParameter.InitAsConstantBufferView(shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space);
-				}
-				outRootParams.emplace_back(rootParameter);
-
-				if (bindlessTextures || materialProperties)
-				{
-					uint32_t offset = 0;
-					for (uint32_t var = 0; var < constantBufferDesc.Variables; ++var)
-					{
-						auto* variable = cb->GetVariableByIndex(var);
-
-						auto* variableType = variable->GetType();
-						D3D12_SHADER_TYPE_DESC variableTypeDesc;
-						variableType->GetDesc(&variableTypeDesc);
-						MaterialPropertyType type = GetVariableType(variableTypeDesc);
-						if (type == MaterialPropertyType::None)
-						{
-							ARC_CORE_ERROR("Unsupported type in shader cbuffer!");
-							continue;
-						}
-
-						D3D12_SHADER_VARIABLE_DESC variableDesc;
-						variable->GetDesc(&variableDesc);
-
-						std::string variableName = variableDesc.Name;
-
-						if (bindlessTextures && type == MaterialPropertyType::UInt)
-							type = MaterialPropertyType::Texture2DBindless;
-
-						MaterialProperty property{};
-						property.Type = type;
-						property.SizeInBytes = variableDesc.Size;
-						property.OffsetInBytes = offset;
-						property.BindingOffset = var;
-						property.IsSlider = variableName.ends_with("01");
-						property.DisplayName = variableDesc.Name + (property.IsSlider ? 2 : 0);
-						property.IsColor = variableName.find("color") != std::string::npos || variableName.find("Color") != std::string::npos;
-						property.Slot = static_cast<int32_t>(outRootParams.size()) - 1;
-
-						outMaterialProperties.emplace(variableDesc.Name, property);
-
-						offset += variableDesc.Size;
-					}
-				}
-			}
-		}
 	}
 
 	void Dx12Shader::Compile(const std::filesystem::path& filepath)
@@ -320,8 +144,8 @@ namespace ArcEngine
 			return;
 		}
 
-		ComPtr<IDxcBlobEncoding> shaderSource;
-		hr = utils->LoadFile(filepath.c_str(), nullptr, &shaderSource);
+		ComPtr<IDxcBlobEncoding> source;
+		hr = utils->LoadFile(filepath.c_str(), nullptr, &source);
 		if (FAILED(hr))
 		{
 			ARC_CORE_ERROR("Loading shader failed: {}", filepath);
@@ -335,9 +159,9 @@ namespace ArcEngine
 			return;
 		}
 
-		ARC_CORE_ASSERT(shaderSource, shaderSource->GetBufferSize());
+		ARC_CORE_ASSERT(source, source->GetBufferSize());
 
-		const std::vector<const wchar_t*> arguments
+		const std::vector<const wchar_t*> args
 		{
 #ifdef ARC_DEBUG
 			DXC_ARG_DEBUG,
@@ -349,231 +173,26 @@ namespace ArcEngine
 			DXC_ARG_WARNINGS_ARE_ERRORS,
 			L"-Qstrip_reflect",
 			L"-Qstrip_debug",
+			L"-I", L"assets/shaders",
 		};
 
-		const std::vector<const wchar_t*> defines;
-
+		const std::vector<const wchar_t*> defs;
 
 		// Compile shaders
-		ComPtr<IDxcBlob> vertexReflection;
-		ComPtr<IDxcBlob> pixelReflection;
-		ComPtr<IDxcBlob> vertexShader = CompileShader(filepath, shaderSource, includeHandler, ShaderModel::Vertex, arguments, defines, &vertexReflection);
-		ComPtr<IDxcBlob> pixelShader = CompileShader(filepath, shaderSource, includeHandler, ShaderModel::Pixel, arguments, defines, &pixelReflection);
-
+		IDxcBlob* vertReflection = nullptr;
+		IDxcBlob* pixelReflection = nullptr;
+		auto* vertexShader = CompileShader(filepath, source, includeHandler, ShaderType::Vertex, args, defs, &vertReflection);
+		auto* pixelShader = CompileShader(filepath, source, includeHandler, ShaderType::Pixel, args, defs, &pixelReflection);
+		
 		if (!vertexShader || !pixelShader)
 		{
 			ARC_CORE_ERROR("Failed to compile shader: {}", filepath);
 			return;
 		}
 
-
-
-		_bstr_t shaderName = m_Name.c_str();
-		struct Layout
-		{
-			std::string Name;
-			uint32_t Index;
-			DXGI_FORMAT Format;
-		};
-		std::vector<Layout> inputLayout;
-		std::vector<Layout> outputLayout;
-		std::vector<D3D12_ROOT_PARAMETER> rootParams;
-		std::vector<D3D12_DESCRIPTOR_RANGE> rootDescriptors;
-
-		if (vertexReflection)
-		{
-			// Create reflection interface.
-			DxcBuffer reflectionData{};
-			reflectionData.Encoding = DXC_CP_ACP;
-			reflectionData.Ptr = vertexReflection->GetBufferPointer();
-			reflectionData.Size = vertexReflection->GetBufferSize();
-
-			ComPtr<ID3D12ShaderReflection> reflect;
-			utils->CreateReflection(&reflectionData, IID_PPV_ARGS(&reflect));
-
-			// Use reflection interface here.
-			D3D12_SHADER_DESC shaderDesc;
-			reflect->GetDesc(&shaderDesc);
-
-			// Create InputLayout from reflection
-			for (uint32_t i = 0; i < shaderDesc.InputParameters; ++i)
-			{
-				D3D12_SIGNATURE_PARAMETER_DESC desc;
-				reflect->GetInputParameterDesc(i, &desc);
-
-				DXGI_FORMAT format = GetFormatFromMaskComponents(desc.Mask, desc.ComponentType);
-				if (format == DXGI_FORMAT_UNKNOWN)
-				{
-					ARC_CORE_ERROR("Unknown format for SemanticName: {}, SemanticIndex: {}", desc.SemanticName, desc.SemanticIndex);
-					return;
-				}
-				inputLayout.emplace_back(desc.SemanticName, desc.SemanticIndex, format);
-			}
-
-			// Get root parameters from shader reflection data.
-			AppendMaterials(reflect, rootParams, rootDescriptors, m_MaterialProperties);
-		}
-
-		if (pixelReflection)
-		{
-			// Create reflection interface.
-			DxcBuffer reflectionData{};
-			reflectionData.Encoding = DXC_CP_ACP;
-			reflectionData.Ptr = pixelReflection->GetBufferPointer();
-			reflectionData.Size = pixelReflection->GetBufferSize();
-
-			ComPtr<ID3D12ShaderReflection> reflect;
-			utils->CreateReflection(&reflectionData, IID_PPV_ARGS(&reflect));
-
-			// Use reflection interface here.
-			D3D12_SHADER_DESC shaderDesc;
-			reflect->GetDesc(&shaderDesc);
-
-			for (uint32_t i = 0; i < shaderDesc.OutputParameters; ++i)
-			{
-				D3D12_SIGNATURE_PARAMETER_DESC desc;
-				reflect->GetOutputParameterDesc(i, &desc);
-
-				DXGI_FORMAT format = GetFormatFromMaskComponents(desc.Mask, desc.ComponentType);
-				if (format == DXGI_FORMAT_UNKNOWN)
-				{
-					ARC_CORE_ERROR("Unknown format for SemanticName: {}, SemanticIndex: {}", desc.SemanticName, desc.SemanticIndex);
-					return;
-				}
-				outputLayout.emplace_back(desc.SemanticName, desc.SemanticIndex, format);
-			}
-
-			AppendMaterials(reflect, rootParams, rootDescriptors, m_MaterialProperties);
-		}
-
-		std::vector<D3D12_INPUT_ELEMENT_DESC> psoInputLayout;
-		psoInputLayout.reserve(inputLayout.size());
-		for (auto& i : inputLayout)
-		{
-			constexpr auto classification = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-			psoInputLayout.emplace_back(i.Name.c_str(), i.Index, i.Format, 0, D3D12_APPEND_ALIGNED_ELEMENT, classification, 0);
-		}
-
-
-
-
-
-
-
-
-
-
-
-		
-
-		// Root Signature /////////////////////////////////////////////////////////////////////
-		/*constexpr uint32_t numParameteres = 3;
-		CD3DX12_ROOT_PARAMETER parameters[numParameteres];
-		parameters[0].InitAsConstants(1, 0, 0, D3D12_SHADER_VISIBILITY_ALL);
-		parameters[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_VERTEX);
-		parameters[2].InitAsConstantBufferView(2, 0, D3D12_SHADER_VISIBILITY_VERTEX);
-
-		constexpr uint32_t numSamplers = 1;
-		CD3DX12_STATIC_SAMPLER_DESC samplers[1];
-		samplers[0].Init(0, D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT);
-
-		CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc;
-
-		constexpr auto flags =
-			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-			D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED;
-			//D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED;
-
-		rootSigDesc.Init(numParameteres, parameters, numSamplers, samplers, flags);
-		*/
-
-		constexpr uint32_t numSamplers = 1;
-		CD3DX12_STATIC_SAMPLER_DESC samplers[1];
-		samplers[0].Init(0, D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT);
-		 
-		// Create root signature.
-		D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
-		rootSigDesc.NumParameters = static_cast<uint32_t>(rootParams.size());
-		rootSigDesc.pParameters = rootParams.data();
-		rootSigDesc.NumStaticSamplers = numSamplers;
-		rootSigDesc.pStaticSamplers = samplers;
-		rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-							D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED;
-
-		ComPtr<ID3DBlob> rootBlob;
-		ComPtr<ID3DBlob> errorBlob;
-		hr = D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rootBlob, &errorBlob);
-		if (FAILED(hr))
-		{
-			if (errorBlob)
-				ARC_CORE_ERROR("Failed to serialize Root Signature. Error: {}", static_cast<const char*>(errorBlob->GetBufferPointer()));
-
-			return;
-		}
-
-		hr = Dx12Context::GetDevice()->CreateRootSignature(0, rootBlob->GetBufferPointer(), rootBlob->GetBufferSize(), IID_PPV_ARGS(&m_RootSignature));
-		if (FAILED(hr))
-		{
-			ARC_CORE_ERROR("Failed to create Root Signature. Shader: {}", filepath);
-			return;
-		}
-		m_RootSignature->SetName(shaderName);
-
-		// PSO /////////////////////////////////////////////////////////////////////
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
-		psoDesc.pRootSignature = m_RootSignature;
-		psoDesc.VS.pShaderBytecode = vertexShader->GetBufferPointer();
-		psoDesc.VS.BytecodeLength = vertexShader->GetBufferSize();
-		psoDesc.PS.pShaderBytecode = pixelShader->GetBufferPointer();
-		psoDesc.PS.BytecodeLength = pixelShader->GetBufferSize();
-
-		// BlendState
-		D3D12_RENDER_TARGET_BLEND_DESC blendDesc;
-		blendDesc.BlendEnable = TRUE;
-		blendDesc.LogicOpEnable = FALSE;
-		blendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-		blendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-		blendDesc.BlendOp = D3D12_BLEND_OP_ADD;
-		blendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
-		blendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
-		blendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
-		blendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
-		blendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-		psoDesc.BlendState.AlphaToCoverageEnable = FALSE;
-		psoDesc.BlendState.IndependentBlendEnable = FALSE;
-		for (auto& renderTargetDesc : psoDesc.BlendState.RenderTarget)
-			renderTargetDesc = blendDesc;
-
-		// RasterizerState
-		psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-
-		// DepthStencilState
-		psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-		psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
-		psoDesc.DepthStencilState.DepthEnable = TRUE;
-		psoDesc.DepthStencilState.StencilEnable = FALSE;
-
-		// InputLayout
-		psoDesc.InputLayout.NumElements = static_cast<uint32_t>(psoInputLayout.size());
-		psoDesc.InputLayout.pInputElementDescs = psoInputLayout.data();
-
-		psoDesc.SampleMask = 0xFFFFFFFF;
-		psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		psoDesc.NumRenderTargets = static_cast<uint32_t>(outputLayout.size());
-		for (size_t i = 0; i < outputLayout.size(); ++i)
-			psoDesc.RTVFormats[i] = outputLayout[i].Format;
-		psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
-		psoDesc.SampleDesc.Count = 1;
-		psoDesc.SampleDesc.Quality = 0;
-		psoDesc.NodeMask = 0;
-
-		auto* device = Dx12Context::GetDevice();
-		hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_PipelineState));
-		if (FAILED(hr))
-		{
-			ARC_CORE_ERROR("Failed to create Pipeline State. Shader: {}", filepath);
-		}
-
-		m_PipelineState->SetName(shaderName);
+		m_ShaderBlobs[ShaderType::Vertex] = vertexShader;
+		m_ShaderBlobs[ShaderType::Pixel] = pixelShader;
+		m_ReflectionBlobs[ShaderType::Vertex] = vertReflection;
+		m_ReflectionBlobs[ShaderType::Pixel] = pixelReflection;
 	}
 }

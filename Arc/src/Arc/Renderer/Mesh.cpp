@@ -151,13 +151,6 @@ namespace ArcEngine
 				Ref<VertexArray> vertexArray = VertexArray::Create();
 
 				Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(reinterpret_cast<float*>(vertices.data()), (sizeof(Vertex) * vertices.size()), sizeof(Vertex));
-				vertexBuffer->SetLayout({
-					{ ShaderDataType::Float3, "a_Position" },
-					{ ShaderDataType::Float2, "a_TexCoord" },
-					{ ShaderDataType::Float3, "a_Normal" },
-					{ ShaderDataType::Float3, "a_Tangent" },
-					{ ShaderDataType::Float3, "a_Bitangent" },
-				});
 				vertexArray->AddVertexBuffer(vertexBuffer);
 
 				Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices.data(), indices.size());
@@ -170,7 +163,7 @@ namespace ArcEngine
 					const auto& material = materials.at(materialId);
 					
 					
-					const auto& materialProperties = submesh.Mat->GetShader()->GetMaterialProperties();
+					const auto& materialProperties = submesh.Mat->GetProperties();
 					bool normalMapApplied = false;
 
 					std::filesystem::path dir = path.parent_path();

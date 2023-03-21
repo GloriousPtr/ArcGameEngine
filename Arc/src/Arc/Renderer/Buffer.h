@@ -115,9 +115,6 @@ namespace ArcEngine
 
 		virtual void SetData(const void* data, uint32_t size) = 0;
 		
-		[[nodiscard]] virtual const BufferLayout& GetLayout() const = 0;
-		virtual void SetLayout(const BufferLayout& layout) = 0;
-		
 		[[nodiscard]] static Ref<VertexBuffer> Create(uint32_t size, uint32_t stride);
 		[[nodiscard]] static Ref<VertexBuffer> Create(const float* vertices, uint32_t size, uint32_t stride);
 	};
