@@ -4,7 +4,7 @@
 #ifdef ARC_PLATFORM_LINUX
 #endif
 #ifdef ARC_PLATFORM_WINDOWS
-#include <backends/imgui_impl_win32.h>
+#include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_dx12.h>
 #include <d3d12.h>
 #include "Platform/Dx12/Dx12Context.h"
@@ -57,13 +57,13 @@ namespace ArcEngine
 		// Setup Platform/Renderer backends
 #endif
 #ifdef ARC_PLATFORM_WINDOWS
-		auto hwnd = static_cast<HWND>(Application::Get().GetWindow().GetNativeWindow());
+		auto hwnd = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		auto* device = Dx12Context::GetDevice();
 		auto* srvHeap = Dx12Context::GetSrvHeap();
 		s_DescriptorHandle = srvHeap->Allocate();
 
 		// Setup Platform/Renderer backends
-		ImGui_ImplWin32_Init(hwnd);
+		ImGui_ImplGlfw_InitForOther(hwnd, true);
 		ImGui_ImplDX12_Init(device,	Dx12Context::FrameCount, static_cast<DXGI_FORMAT>(Dx12Context::GetSwapChainFormat()),
 			srvHeap->Heap(), s_DescriptorHandle.CPU, s_DescriptorHandle.GPU);
 #endif
@@ -98,7 +98,7 @@ namespace ArcEngine
 #endif
 #ifdef ARC_PLATFORM_WINDOWS
 		ImGui_ImplDX12_Shutdown();
-		ImGui_ImplWin32_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
 #endif
 
 		ImGui::DestroyContext();
@@ -120,12 +120,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-#ifdef ARC_PLATFORM_LINUX
-#endif
-#ifdef ARC_PLATFORM_WINDOWS
 		ImGui_ImplDX12_NewFrame();
-		ImGui_ImplWin32_NewFrame();
-#endif
+		ImGui_ImplGlfw_NewFrame();
 
 		ImGui::NewFrame();
 		ImGuizmo::BeginFrame();

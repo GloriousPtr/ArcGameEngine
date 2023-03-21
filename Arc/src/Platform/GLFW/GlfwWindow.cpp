@@ -1,8 +1,8 @@
 #include "arcpch.h"
+#include "GlfwWindow.h"
 
-#if defined(ARC_PLATFORM_LINUX)
-
-#include "Platform/GLFW/GlfwWindow.h"
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
 
 #include "Arc/Events/ApplicationEvent.h"
 #include "Arc/Events/MouseEvent.h"
@@ -10,7 +10,7 @@
 
 #include "Arc/Renderer/Renderer.h"
 
-#include "Platform/OpenGL/OpenGLContext.h"
+#include "Platform/Dx12/Dx12Context.h"
 
 #include "Arc/Core/Input.h"
 
@@ -58,13 +58,10 @@ namespace ArcEngine
 
 		{
 			ARC_PROFILE_SCOPE("glfwCreateWindow")
-			#ifdef ARC_DEBUG
-				if (Renderer::GetAPI() == RendererAPI::API::OpenGL)
-					glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-			#endif
 
 			#ifdef ARC_PLATFORM_WINDOWS
-				glfwWindowHint(GLFW_TITLEBAR, GLFW_FALSE);
+			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+			glfwWindowHint(GLFW_TITLEBAR, GLFW_FALSE);
 			#endif
 
 			m_Window = glfwCreateWindow(static_cast<int>(props.Width), static_cast<int>(props.Height), m_Data.Title.c_str(), nullptr, nullptr);
@@ -72,7 +69,8 @@ namespace ArcEngine
 		}
 
 		Maximize();
-		m_Context = GraphicsContext::Create(m_Window);
+		HWND hwnd = glfwGetWin32Window(m_Window);
+		m_Context = GraphicsContext::Create(hwnd);
 		m_Context->Init();
 		
 		glfwSetWindowUserPointer(m_Window, &m_Data);
@@ -252,5 +250,3 @@ namespace ArcEngine
 		m_Data.OverTitlebar = value;
 	}
 }
-
-#endif

@@ -1,7 +1,5 @@
 #include "arcpch.h"
 
-#if defined(ARC_PLATFORM_LINUX)
-
 #include "Arc/Core/Application.h"
 #include "Arc/Core/Input.h"
 
@@ -44,5 +42,3 @@ namespace ArcEngine
         glfwSetCursorPos(window, static_cast<double>(position.x), static_cast<double>(position.y));
     }
 }
-
-#endif
