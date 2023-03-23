@@ -19,7 +19,8 @@ namespace ArcEngine
 	{
 		glm::vec4 Position;
 		glm::vec4 Color;
-		glm::vec4 TexCoord;
+		glm::vec2 TexCoord;
+		glm::vec4 TilingOffset;
 		uint32_t TexIndex;
 	};
 
@@ -37,8 +38,6 @@ namespace ArcEngine
 		static constexpr uint32_t MaxTextureSlots = 32;
 
 		Ref<ConstantBuffer> CameraConstantBuffer;
-		Ref<ConstantBuffer> TextureConstantBuffer;
-
 		Ref<VertexArray> QuadVertexArray;
 		Ref<VertexBuffer> QuadVertexBuffer;
 		Ref<PipelineState> TexturePipeline;
@@ -54,7 +53,7 @@ namespace ArcEngine
 		LineVertex* LineVertexBufferBase = nullptr;
 		LineVertex* LineVertexBufferPtr = nullptr;
 
-		std::array<glm::uvec4, MaxTextureSlots> TextureSlots;
+		std::array<uint32_t, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 1; // 0 = white texture
 
 		static constexpr glm::vec4 QuadVertexPositions[4] =	  { { -0.5f, -0.5f, 0.0f, 1.0f },
@@ -62,7 +61,7 @@ namespace ArcEngine
 																{  0.5f,  0.5f, 0.0f, 1.0f },
 																{ -0.5f,  0.5f, 0.0f, 1.0f } };
 
-		static constexpr glm::vec2 TextureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+		static constexpr glm::vec2 TextureCoords[] = { { 0.0f, 1.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f } };
 
 		Renderer2D::Statistics Stats;
 	};
@@ -124,7 +123,6 @@ namespace ArcEngine
 		}
 
 		s_Data->CameraConstantBuffer = ConstantBuffer::Create(sizeof(glm::mat4), 1, s_Data->TexturePipeline->GetSlot("Camera"));
-		s_Data->TextureConstantBuffer = ConstantBuffer::Create(sizeof(uint32_t) * Renderer2DData::MaxTextureSlots, 1, s_Data->TexturePipeline->GetSlot("Textures"));
 
 		{
 			const PipelineSpecification linePippelineSpec
@@ -139,7 +137,7 @@ namespace ArcEngine
 			s_Data->LinePipeline = pipelineLibrary.Load("assets/shaders/Line.hlsl", linePippelineSpec);
 		}
 
-		s_Data->TextureSlots[0].x = AssetManager::WhiteTexture()->GetIndex();
+		s_Data->TextureSlots[0] = AssetManager::WhiteTexture()->GetIndex();
 	}
 
 	void Renderer2D::Shutdown()
@@ -152,17 +150,15 @@ namespace ArcEngine
 		s_Data.reset();
 	}
 
-	void Renderer2D::BeginScene(const glm::mat4& viewProjection)
+	void Renderer2D::BeginScene(const CameraData& viewProjection)
 	{
 		ARC_PROFILE_SCOPE()
 
 		if (s_Data->TexturePipeline->Bind())
 		{
 			s_Data->CameraConstantBuffer->Bind(0);
-			s_Data->CameraConstantBuffer->SetData(glm::value_ptr(viewProjection), sizeof(viewProjection), 0);
+			s_Data->CameraConstantBuffer->SetData(&viewProjection, sizeof(CameraData), 0);
 		}
-
-		//s_Data->LineShader->SetData("u_ViewProjection", viewProjection);
 
 		StartBatch();
 	}
@@ -195,8 +191,7 @@ namespace ArcEngine
 		{
 			const auto dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Data->QuadVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Data->QuadVertexBufferBase));
 			s_Data->QuadVertexBuffer->SetData(s_Data->QuadVertexBufferBase, dataSize);
-			s_Data->TextureConstantBuffer->Bind(0);
-			s_Data->TextureConstantBuffer->SetData(s_Data->TextureSlots.data(), sizeof(glm::vec4) * (s_Data->TextureSlotIndex), 0);
+			s_Data->TexturePipeline->SetData("Textures", s_Data->TextureSlots.data(), sizeof(uint32_t) * s_Data->TextureSlotIndex);
 			RenderCommand::DrawIndexed(s_Data->QuadVertexArray, s_Data->QuadIndexCount);
 			s_Data->Stats.DrawCalls++;
 		}
@@ -218,12 +213,12 @@ namespace ArcEngine
 		StartBatch();
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec2& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
+	void Renderer2D::DrawQuad(const glm::vec2& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& tintColor, glm::vec2 tiling, glm::vec2 offset)
 	{
-		DrawQuad({ position.x, position.y, 0.0f }, rotation, size, texture, tintColor, tilingFactor);
+		DrawQuad({ position.x, position.y, 0.0f }, rotation, size, texture, tintColor, tiling, offset);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& tintColor, glm::vec2 tiling, glm::vec2 offset)
 	{
 		ARC_PROFILE_SCOPE()
 		
@@ -231,7 +226,7 @@ namespace ArcEngine
 								* glm::rotate(glm::mat4(1.0f), rotation, { 0.0f, 0.0f, 1.0f })
 								* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-		DrawQuad(transform, texture, tintColor, tilingFactor);
+		DrawQuad(transform, texture, tintColor, tiling, offset);
 	}
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
@@ -240,7 +235,8 @@ namespace ArcEngine
 		
 		constexpr size_t quadVertexCount = 4;
 		constexpr uint32_t textureIndex = 0; // White Texture
-		constexpr float tilingFactor = 1.0f;
+		constexpr float tiling = 1.0f;
+		constexpr float offset = 0.0f;
 		
 		if(s_Data->QuadIndexCount >= Renderer2DData::MaxIndices)
 			NextBatch();
@@ -249,7 +245,8 @@ namespace ArcEngine
 		{
 			s_Data->QuadVertexBufferPtr->Position = transform * Renderer2DData::QuadVertexPositions[i];
 			s_Data->QuadVertexBufferPtr->Color = color;
-			s_Data->QuadVertexBufferPtr->TexCoord = glm::vec4(Renderer2DData::TextureCoords[i].x, Renderer2DData::TextureCoords[i].y, tilingFactor, tilingFactor);
+			s_Data->QuadVertexBufferPtr->TexCoord = Renderer2DData::TextureCoords[i];
+			s_Data->QuadVertexBufferPtr->TilingOffset = glm::vec4(tiling, tiling, offset, offset);
 			s_Data->QuadVertexBufferPtr->TexIndex = textureIndex;
 			s_Data->QuadVertexBufferPtr++;
 		}
@@ -259,7 +256,7 @@ namespace ArcEngine
 		s_Data->Stats.QuadCount++;
 	}
 
-	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec4& tintColor, float tilingFactor)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec4& tintColor, glm::vec2 tiling, glm::vec2 offset)
 	{
 		ARC_PROFILE_SCOPE()
 
@@ -269,7 +266,7 @@ namespace ArcEngine
 		{
 			for (uint32_t i = 1; i < s_Data->TextureSlotIndex; i++)
 			{
-				if(s_Data->TextureSlots[i].x == texture->GetIndex())
+				if(s_Data->TextureSlots[i] == texture->GetIndex())
 				{
 					textureIndex = i;
 					break;
@@ -282,7 +279,7 @@ namespace ArcEngine
 					NextBatch();
 				
 				textureIndex = s_Data->TextureSlotIndex;
-				s_Data->TextureSlots[s_Data->TextureSlotIndex].x = texture->GetIndex();
+				s_Data->TextureSlots[textureIndex] = texture->GetIndex();
 				s_Data->TextureSlotIndex++;
 			}
 		}
@@ -293,7 +290,8 @@ namespace ArcEngine
 		{
 			s_Data->QuadVertexBufferPtr->Position = transform * Renderer2DData::QuadVertexPositions[i];
 			s_Data->QuadVertexBufferPtr->Color = tintColor;
-			s_Data->QuadVertexBufferPtr->TexCoord = glm::vec4(Renderer2DData::TextureCoords[i].x, Renderer2DData::TextureCoords[i].y, tilingFactor, tilingFactor);
+			s_Data->QuadVertexBufferPtr->TexCoord = Renderer2DData::TextureCoords[i];
+			s_Data->QuadVertexBufferPtr->TilingOffset = glm::vec4(tiling, offset);
 			s_Data->QuadVertexBufferPtr->TexIndex = textureIndex;
 			s_Data->QuadVertexBufferPtr++;
 		}

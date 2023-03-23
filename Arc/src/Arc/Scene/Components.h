@@ -62,7 +62,8 @@ namespace ArcEngine
 		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
 		Ref<Texture2D> Texture = nullptr;
 		int32_t SortingOrder = 0;
-		float TilingFactor = 1.0f;
+		glm::vec2 Tiling = glm::vec2(1.0f);
+		glm::vec2 Offset = glm::vec2(0.0f);
 	};
 
 	struct CameraComponent

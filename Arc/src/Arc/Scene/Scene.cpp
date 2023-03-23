@@ -821,10 +821,10 @@ namespace ArcEngine
 
 		CameraData cameraData =
 		{
-			camera.GetView(),
-			camera.GetProjection(),
-			camera.GetViewProjection(),
-			camera.GetPosition()
+			.View = camera.GetView(),
+			.Projection = camera.GetProjection(),
+			.ViewProjection = camera.GetViewProjection(),
+			.Position = glm::vec4(camera.GetPosition(), 1.0f)
 		};
 		OnRender(renderGraphData, cameraData);
 	}
@@ -1098,7 +1098,7 @@ namespace ArcEngine
 					cameraData.View = glm::inverse(cameraEntity.GetWorldTransform());
 					cameraData.Projection = cameraEntity.GetComponent<CameraComponent>().Camera.GetProjection();
 					cameraData.ViewProjection = cameraData.Projection * cameraData.View;
-					cameraData.Position = cameraEntity.GetTransform().Translation;
+					cameraData.Position = glm::vec4(cameraEntity.GetTransform().Translation, 1.0f);
 				}
 			}
 			else
@@ -1106,7 +1106,7 @@ namespace ArcEngine
 				cameraData.View = overrideCamera->GetView();
 				cameraData.Projection = overrideCamera->GetProjection();
 				cameraData.ViewProjection = overrideCamera->GetViewProjection();
-				cameraData.Position = overrideCamera->GetPosition();
+				cameraData.Position = glm::vec4(overrideCamera->GetPosition(), 1.0f);
 			}
 		}
 
@@ -1196,7 +1196,7 @@ namespace ArcEngine
 		Renderer3D::EndScene(renderGraphData);
 		*/
 		renderGraphData->CompositePassTarget->Bind();
-		Renderer2D::BeginScene(cameraData.ViewProjection);
+		Renderer2D::BeginScene(cameraData);
 		{
 			ARC_PROFILE_SCOPE("Submit Particle Data")
 
@@ -1210,7 +1210,7 @@ namespace ArcEngine
 			const auto view = m_Registry.view<SpriteRendererComponent>();
 			for (auto &&[entity, sprite] : view.each())
 			{
-				Renderer2D::DrawQuad(Entity(entity, this).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
+				Renderer2D::DrawQuad(Entity(entity, this).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.Tiling, sprite.Offset);
 			}
 		}
 		Renderer2D::EndScene();

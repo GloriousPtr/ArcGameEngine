@@ -4,6 +4,7 @@
 
 namespace ArcEngine
 {
+	struct CameraData;
 	class Texture2D;
 
 	class Renderer2D
@@ -12,16 +13,16 @@ namespace ArcEngine
 		static void Init();
 		static void Shutdown();
 		
-		static void BeginScene(const glm::mat4& viewProjection);
+		static void BeginScene(const CameraData& viewProjection);
 		static void EndScene();
 		static void Flush();
 
 		//Primitives
-		static void DrawQuad(const glm::vec2& position, float rotation, const glm::vec2& size, const Ref<Texture2D>& texture = nullptr, const glm::vec4& tintColor = glm::vec4(1.0f), float tilingFactor = 1.0f);
-		static void DrawQuad(const glm::vec3& position, float rotation, const glm::vec2& size, const Ref<Texture2D>& texture = nullptr, const glm::vec4& tintColor = glm::vec4(1.0f), float tilingFactor = 1.0f);
+		static void DrawQuad(const glm::vec2& position, float rotation, const glm::vec2& size, const Ref<Texture2D>& texture = nullptr, const glm::vec4& tintColor = glm::vec4(1.0f), glm::vec2 tiling = glm::vec2(1.0f), glm::vec2 offset = glm::vec2(0.0f));
+		static void DrawQuad(const glm::vec3& position, float rotation, const glm::vec2& size, const Ref<Texture2D>& texture = nullptr, const glm::vec4& tintColor = glm::vec4(1.0f), glm::vec2 tiling = glm::vec2(1.0f), glm::vec2 offset = glm::vec2(0.0f));
 
 		static void DrawQuad(const glm::mat4& transform, const glm::vec4& color);
-		static void DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture = nullptr, const glm::vec4& tintColor = glm::vec4(1.0f), float tilingFactor = 1.0f);
+		static void DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture = nullptr, const glm::vec4& tintColor = glm::vec4(1.0f), glm::vec2 tiling = glm::vec2(1.0f), glm::vec2 offset = glm::vec2(0.0f));
 
 		static void DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color);
 

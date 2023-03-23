@@ -102,7 +102,8 @@ namespace ArcEngine
 					}
 					case MaterialPropertyType::Texture2DBindless:
 					{
-						m_Pipeline->SetData(name, (m_Textures.at(slot) ? m_Textures.at(slot) : AssetManager::WhiteTexture())->GetIndex(), 0, property.BindingOffset);
+						const uint32_t index = (m_Textures.at(slot) ? m_Textures.at(slot) : AssetManager::WhiteTexture())->GetIndex();
+						m_Pipeline->SetData(name, &index, sizeof(uint32_t), property.BindingOffset);
 						break;
 					}
 					case MaterialPropertyType::Bool:

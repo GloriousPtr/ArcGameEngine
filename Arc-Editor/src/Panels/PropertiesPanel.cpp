@@ -523,7 +523,8 @@ namespace ArcEngine
 			UI::Property("Texture", component.Texture);
 			if (UI::Property("Sorting Order", component.SortingOrder))
 				entity.GetScene()->SortForSprites();
-			UI::Property("Tiling Factor", component.TilingFactor);
+			UI::PropertyVector("Tiling", component.Tiling);
+			UI::PropertyVector("Offset", component.Offset);
 			UI::EndProperties();
 		});
 

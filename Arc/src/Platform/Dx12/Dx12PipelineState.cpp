@@ -83,19 +83,23 @@ namespace ArcEngine
 			D3D12_SHADER_BUFFER_DESC constantBufferDesc{};
 			cb->GetDesc(&constantBufferDesc);
 
+			std::string bufferName = shaderInputBindDesc.Name;
+
 			bool supported = shaderInputBindDesc.Type != D3D_SIT_SAMPLER;
 			bool tex = shaderInputBindDesc.Type == D3D_SIT_TEXTURE;
 			bool cbuffer = shaderInputBindDesc.Type == D3D_SIT_CBUFFER;
-			bool rootConstants = cbuffer && shaderInputBindDesc.BindPoint == 0;
-
-			bool bindlessTextures = rootConstants && std::string("Textures") == shaderInputBindDesc.Name;
-			bool materialProperties = std::string("MaterialProperties") == shaderInputBindDesc.Name;
+			bool bindlessTextures = cbuffer && bufferName == "Textures";
+			bool materialProperties = bufferName == "MaterialProperties";
 			if (supported)
 			{
 				CD3DX12_ROOT_PARAMETER rootParameter;
-				if (rootConstants)
+				if (cbuffer && bufferName == "Textures")
 				{
-					rootParameter.InitAsConstants(constantBufferDesc.Size / 4, shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space);
+					rootParameter.InitAsConstants(32u, shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space);
+				}
+				else if (cbuffer && bufferName == "Transform")
+				{
+					rootParameter.InitAsConstants(16u, shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space);
 				}
 				else if (tex)
 				{
@@ -109,9 +113,8 @@ namespace ArcEngine
 				{
 					rootParameter.InitAsConstantBufferView(shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space);
 				}
-				uint32_t slot = static_cast<int32_t>(outRootParams.size());
+				int32_t slot = static_cast<int32_t>(outRootParams.size());
 				outRootParams.emplace_back(rootParameter);
-
 
 
 
@@ -151,7 +154,8 @@ namespace ArcEngine
 						property.IsColor = variableName.find("color") != std::string::npos || variableName.find("Color") != std::string::npos;
 						property.Slot = slot;
 
-						outMaterialProperties.emplace(variableDesc.Name, property);
+						outMaterialProperties.emplace(variableName, property);
+						bufferMap.emplace(variableName, slot);
 
 						offset += variableDesc.Size;
 					}
@@ -164,17 +168,16 @@ namespace ArcEngine
 					property.OffsetInBytes = offset;
 					property.BindingOffset = 0;
 					property.IsSlider = false;
-					property.DisplayName = shaderInputBindDesc.Name;
+					property.DisplayName = bufferName;
 					property.IsColor = false;
 					property.Slot = slot;
 
-					outMaterialProperties.emplace(shaderInputBindDesc.Name, property);
+					outMaterialProperties.emplace(bufferName, property);
 
 					offset += property.SizeInBytes;
 				}
 
-				bufferMap.emplace(shaderInputBindDesc.Name, slot);
-
+				bufferMap.emplace(bufferName, slot);
 			}
 		}
 	}
@@ -471,7 +474,7 @@ namespace ArcEngine
 
 	void Dx12PipelineState::SetDataImpl(const std::string& name, const void* data, uint32_t size, uint32_t offset)
 	{
-		const int32_t slot = m_MaterialProperties.at(name).Slot;
+		const int32_t slot = m_BufferMap.at(name);
 		Dx12Context::GetGraphicsCommandList()->SetGraphicsRoot32BitConstants(slot, size / 4, data, offset);
 	}
 }

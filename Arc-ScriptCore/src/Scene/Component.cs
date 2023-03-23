@@ -131,18 +131,33 @@ namespace ArcEngine
 		}
 
 		/// <summary>
-		/// Tiling factor for repeated tiling
+		/// Tiling for repeated tiling
 		/// </summary>
-		public float tilingFactor
+		public Vector2 tiling
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				InternalCalls.SpriteRendererComponent_GetTilingFactor(entityID, out float v);
+				InternalCalls.SpriteRendererComponent_GetTiling(entityID, out Vector2 v);
 				return v;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			set => InternalCalls.SpriteRendererComponent_SetTilingFactor(entityID, ref value);
+			set => InternalCalls.SpriteRendererComponent_SetTiling(entityID, ref value);
+		}
+
+		/// <summary>
+		/// Offset for the sprite
+		/// </summary>
+		public Vector2 offset
+		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get
+			{
+				InternalCalls.SpriteRendererComponent_GetOffset(entityID, out Vector2 v);
+				return v;
+			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			set => InternalCalls.SpriteRendererComponent_SetOffset(entityID, ref value);
 		}
 	}
 

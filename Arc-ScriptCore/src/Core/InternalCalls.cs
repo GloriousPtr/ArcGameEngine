@@ -71,10 +71,13 @@ namespace ArcEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void SpriteRendererComponent_SetColor(ulong entityID, ref Color tint);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void SpriteRendererComponent_GetTilingFactor(ulong entityID, out float tiling);
+		internal static extern void SpriteRendererComponent_GetTiling(ulong entityID, out Vector2 tiling);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void SpriteRendererComponent_SetTilingFactor(ulong entityID, ref float tiling);
-
+		internal static extern void SpriteRendererComponent_SetTiling(ulong entityID, ref Vector2 tiling);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void SpriteRendererComponent_GetOffset(ulong entityID, out Vector2 offset);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void SpriteRendererComponent_SetOffset(ulong entityID, ref Vector2 offset);
 		#endregion
 
 		#region Rigidbody2DComponent

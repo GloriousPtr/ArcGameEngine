@@ -324,10 +324,10 @@ namespace ArcEngine
 					const glm::mat4 proj = selectedEntity.GetComponent<CameraComponent>().Camera.GetProjection();
 					CameraData cameraData =
 					{
-						view,
-						proj,
-						proj * view,
-						selectedEntity.GetTransform().Translation
+						.View = view,
+						.Projection = proj,
+						.ViewProjection = proj * view,
+						.Position = glm::vec4(selectedEntity.GetTransform().Translation, 1.0f)
 					};
 
 					m_MiniViewportRenderGraphData->RenderPassTarget->Bind();
@@ -353,8 +353,16 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_CATEGORY("Debug Rendering", Profile::Category::Debug)
 
+		const CameraData cameraData
+		{
+			.View = m_EditorCamera.GetView(),
+			.Projection = m_EditorCamera.GetProjection(),
+			.ViewProjection = m_EditorCamera.GetViewProjection(),
+			.Position = glm::vec4(m_EditorCamera.GetPosition(), 1.0f)
+		};
+
 		m_RenderGraphData->CompositePassTarget->Bind();
-		Renderer2D::BeginScene(m_EditorCamera.GetViewProjection());
+		Renderer2D::BeginScene(cameraData);
 		{
 			constexpr glm::vec4 color = glm::vec4(1.0f);
 

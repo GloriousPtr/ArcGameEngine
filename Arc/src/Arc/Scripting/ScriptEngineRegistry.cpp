@@ -319,18 +319,32 @@ namespace ArcEngine
 		GetEntity(entityID).GetComponent<SpriteRendererComponent>().Color = *tint;
 	}
 
-	static void SpriteRendererComponent_GetTilingFactor(uint64_t entityID, float* outTiling)
+	static void SpriteRendererComponent_GetTiling(uint64_t entityID, glm::vec2* outTiling)
 	{
 		ARC_PROFILE_SCOPE()
 
-		*outTiling = GetEntity(entityID).GetComponent<SpriteRendererComponent>().TilingFactor;
+		*outTiling = GetEntity(entityID).GetComponent<SpriteRendererComponent>().Tiling;
 	}
 
-	static void SpriteRendererComponent_SetTilingFactor(uint64_t entityID, const float* tiling)
+	static void SpriteRendererComponent_SetTiling(uint64_t entityID, const glm::vec2* tiling)
 	{
 		ARC_PROFILE_SCOPE()
 
-		GetEntity(entityID).GetComponent<SpriteRendererComponent>().TilingFactor = *tiling;
+		GetEntity(entityID).GetComponent<SpriteRendererComponent>().Tiling = *tiling;
+	}
+
+	static void SpriteRendererComponent_GetOffset(uint64_t entityID, glm::vec2* outOffset)
+	{
+		ARC_PROFILE_SCOPE()
+
+		*outOffset = GetEntity(entityID).GetComponent<SpriteRendererComponent>().Offset;
+	}
+
+	static void SpriteRendererComponent_SetOffset(uint64_t entityID, const glm::vec2* outOffset)
+	{
+		ARC_PROFILE_SCOPE()
+
+			GetEntity(entityID).GetComponent<SpriteRendererComponent>().Offset = *outOffset;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -1057,8 +1071,10 @@ namespace ArcEngine
 		///////////////////////////////////////////////////////////////
 		ARC_ADD_INTERNAL_CALL(SpriteRendererComponent_GetColor);
 		ARC_ADD_INTERNAL_CALL(SpriteRendererComponent_SetColor);
-		ARC_ADD_INTERNAL_CALL(SpriteRendererComponent_GetTilingFactor);
-		ARC_ADD_INTERNAL_CALL(SpriteRendererComponent_SetTilingFactor);
+		ARC_ADD_INTERNAL_CALL(SpriteRendererComponent_GetTiling);
+		ARC_ADD_INTERNAL_CALL(SpriteRendererComponent_SetTiling);
+		ARC_ADD_INTERNAL_CALL(SpriteRendererComponent_GetOffset);
+		ARC_ADD_INTERNAL_CALL(SpriteRendererComponent_SetOffset);
 
 		///////////////////////////////////////////////////////////////
 		// Rigidbody 2D ///////////////////////////////////////////////

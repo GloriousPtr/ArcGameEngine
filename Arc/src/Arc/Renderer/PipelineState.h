@@ -31,10 +31,9 @@ namespace ArcEngine
 		[[nodiscard]] virtual MaterialPropertyMap& GetMaterialProperties() = 0;
 		[[nodiscard]] virtual uint32_t GetSlot(const std::string_view& name) = 0;
 
-		template<typename T>
-		void SetData(const std::string& name, const T& data, uint32_t size = 0, uint32_t offset = 0)
+		void SetData(const std::string& name, const void* data, uint32_t size, uint32_t offset = 0)
 		{
-			SetDataImpl(name, &data, (size == 0 ? sizeof(T) : size), offset);
+			SetDataImpl(name, data, size, offset);
 		}
 
 	private:

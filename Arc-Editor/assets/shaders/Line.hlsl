@@ -1,4 +1,4 @@
-#include "ConstantData.hlsli"
+#include "Common.hlsli"
 
 struct VertexIn
 {
