@@ -31,6 +31,22 @@ namespace ArcEngine
 		return buffer;
 	}
 
+	bool Filesystem::WriteFileBinary(const std::filesystem::path& filepath, Buffer& buffer)
+	{
+		const auto parentPath = filepath.parent_path();
+		if (!std::filesystem::exists(parentPath))
+			std::filesystem::create_directories(parentPath);
+
+		std::ofstream stream(filepath, std::ios::binary | std::ios::out);
+
+		if (!stream)
+			return false;
+
+		stream.write(buffer.As<const char>(), buffer.Size);
+		stream.close();
+		return true;
+	}
+
 	std::string Filesystem::ReadFileText(const std::filesystem::path& filepath)
 	{
 		ARC_PROFILE_SCOPE()

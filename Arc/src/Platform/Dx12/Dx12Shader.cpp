@@ -1,12 +1,15 @@
-#include <arcpch.h>
+#include "arcpch.h"
 #include "Dx12Shader.h"
 
 #include "d3dx12.h"
 
 #include <comutil.h>
-#include <ranges>
 #include <dxc/inc/dxcapi.h>
 #include <wrl.h>
+
+#include <ranges>
+
+#include "Arc/Core/Filesystem.h"
 
 namespace ArcEngine
 {
@@ -83,11 +86,19 @@ namespace ArcEngine
 		}
 
 		// Prepare args
+		std::wstring pdbParentPath = filepath.parent_path().c_str();
+		pdbParentPath += L"/Debug/";
+		std::wstring pdbName = std::wstring(filepath.filename().stem());
+		pdbName += L"_";
+		pdbName += s_TargetMap.at(shaderModel);
+		pdbName += L".pdb";
+		const std::filesystem::path pdbPath = pdbParentPath + pdbName;
 		std::vector args
 		{
 			filepath.filename().c_str(),
 			L"-E", s_EntryPointMap.at(shaderModel),
 			L"-T", s_TargetMap.at(shaderModel),
+			L"-Fd", pdbPath.c_str()
 		};
 		args.reserve(args.size() + arguments.size() + defines.size());
 		
@@ -126,6 +137,24 @@ namespace ArcEngine
 
 		if (reflection)
 			compileResult->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(reflection), nullptr);
+
+		// Write PDB for PIX
+		{
+			ComPtr<IDxcBlob> pdb = nullptr;
+			ComPtr<IDxcBlobUtf16> pPDBName = nullptr;
+			hr = compileResult->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pdb), &pPDBName);
+			if (SUCCEEDED(hr))
+			{
+				ScopedBuffer buffer(pdb->GetBufferSize());
+				memcpy(buffer.Data(), pdb->GetBufferPointer(), buffer.Size());
+				if (!Filesystem::WriteFileBinary(pPDBName->GetStringPointer(), buffer))
+					ARC_CORE_ERROR("Failed to write PDB to disk: {}", pdbPath);
+			}
+			else
+			{
+				ARC_CORE_ERROR("Failed to create PDB for {}", filepath);
+			}
+		}
 
 		IDxcBlob* shader;
 		compileResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr);
@@ -169,10 +198,12 @@ namespace ArcEngine
 #else
 			DXC_ARG_OPTIMIZATION_LEVEL3,
 #endif
-			DXC_ARG_ALL_RESOURCES_BOUND,
-			DXC_ARG_WARNINGS_ARE_ERRORS,
+#ifdef ARC_DIST
 			L"-Qstrip_reflect",
 			L"-Qstrip_debug",
+#endif
+			DXC_ARG_ALL_RESOURCES_BOUND,
+			DXC_ARG_WARNINGS_ARE_ERRORS,
 			L"-I", L"assets/shaders",
 		};
 
