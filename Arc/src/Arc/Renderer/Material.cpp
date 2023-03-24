@@ -28,98 +28,100 @@ namespace ArcEngine
 	Material::~Material()
 	{
 		ARC_PROFILE_SCOPE()
-
-		delete[] m_Buffer;
 	}
 
 	void Material::Invalidate()
 	{
 		ARC_PROFILE_SCOPE()
 
-		delete[] m_Buffer;
+		m_TextureBuffer.clear();
+		m_CBBuffer.clear();
+		m_Textures.clear();
+		m_ConstantBuffer.reset();
 
-		m_BufferSizeInBytes = 0;
 		const auto& materialProperties = m_Pipeline->GetMaterialProperties();
+		uint32_t whiteTexId = AssetManager::WhiteTexture()->GetIndex();
 
-		for (const auto& property : materialProperties | std::views::values)
-			m_BufferSizeInBytes += property.SizeInBytes;
-
-		m_Buffer = new char[m_BufferSizeInBytes];
-		memset(m_Buffer, 0, m_BufferSizeInBytes);
-		
-		uint32_t slot = 0;
-		auto one = glm::vec4(1.0, 0.0f, 1.0f, 1.0f);
+		glm::vec4 one(1.0);
+		size_t cbSize = 0;
+		uint32_t cbSlot = 0;
 		for (auto& [name, property] : materialProperties)
 		{
-			int slot = property.Slot;
-			if (property.Type == MaterialPropertyType::Texture2D ||
-				property.Type == MaterialPropertyType::Texture2DBindless)
+			if (property.Type == MaterialPropertyType::Texture2D)
 			{
-				memcpy(m_Buffer + property.OffsetInBytes, &slot, sizeof(uint32_t));
-				m_Textures.emplace(slot, nullptr);
+				const uint32_t texIndex = static_cast<uint32_t>(m_Textures.size());
+				const uint32_t buffIndex = static_cast<uint32_t>(m_TextureBuffer.size());
+				m_Indices.emplace(name, MaterialData(property.Type, texIndex, buffIndex, property.SizeInBytes));
+				m_TextureBuffer.emplace_back(property.Slot, texIndex);
+				m_Textures.push_back(nullptr);
+			}
+			else if (property.Type == MaterialPropertyType::Texture2DBindless)
+			{
+				const uint32_t texIndex = static_cast<uint32_t>(m_Textures.size());
+				const uint32_t buffIndex = static_cast<uint32_t>(m_BindlessTextureBuffer.size());
+				m_Indices.emplace(name, MaterialData(property.Type, texIndex, buffIndex, property.SizeInBytes));
+				m_BindlessTextureBuffer.emplace_back(whiteTexId);
+				m_Textures.push_back(nullptr);
 			}
 			else
 			{
-				m_ConstantBuffers.emplace(slot, ConstantBuffer::Create(static_cast<uint32_t>(property.SizeInBytes), 1, property.Slot));
-			}
+				cbSize += property.SizeInBytes;
+				cbSlot = property.Slot;
 
-			if (property.Type == MaterialPropertyType::Float ||
-				property.Type == MaterialPropertyType::Float2 ||
-				property.Type == MaterialPropertyType::Float3 ||
-				property.Type == MaterialPropertyType::Float4)
-			{
-				if (name.find("albedo") != std::string::npos || name.find("Albedo") != std::string::npos)
-					memcpy(m_Buffer + property.OffsetInBytes, glm::value_ptr(one), property.SizeInBytes);
-				if (name.find("roughness") != std::string::npos || name.find("Roughness") != std::string::npos)
-					memcpy(m_Buffer + property.OffsetInBytes, glm::value_ptr(one), property.SizeInBytes);
+				const uint32_t buffIndex = static_cast<uint32_t>(m_CBBuffer.size());
+				m_Indices.emplace(name, MaterialData(property.Type, 0, buffIndex, property.SizeInBytes));
+				m_CBBuffer.push_back({});
+				memset(&(m_CBBuffer[buffIndex]), 0, 16);
+
+				if (property.Type == MaterialPropertyType::Float ||
+					property.Type == MaterialPropertyType::Float2 ||
+					property.Type == MaterialPropertyType::Float3 ||
+					property.Type == MaterialPropertyType::Float4)
+				{
+					const bool setDefaultValue =	name.find("albedo") != std::string::npos ||
+													name.find("Albedo") != std::string::npos ||
+													name.find("roughness") != std::string::npos ||
+													name.find("Roughness") != std::string::npos;
+
+					if (setDefaultValue)
+					{
+						memcpy(&(m_CBBuffer[buffIndex]), glm::value_ptr(one), property.SizeInBytes);
+					}
+					if (name.find("AlphaCutoffThreshold") != std::string::npos)
+					{
+						glm::vec4 epsilon(0.01f);
+						memcpy(&(m_CBBuffer[buffIndex]), glm::value_ptr(epsilon), property.SizeInBytes);
+					}
+				}
 			}
 		}
+
+		m_ConstantBuffer = ConstantBuffer::Create(static_cast<uint32_t>(cbSize), 1, cbSlot);
 	}
 
 	void Material::Bind() const
 	{
 		ARC_PROFILE_SCOPE()
 
-		const auto& materialProperties = m_Pipeline->GetMaterialProperties();
-
 		[[likely]]
 		if (m_Pipeline->Bind())
 		{
-			for (const auto& [name, property] : materialProperties)
+			for (auto& t : m_TextureBuffer)
 			{
-				const uint32_t slot = property.Slot;
+				if (m_Textures[t.Index])
+					m_Textures[t.Index]->Bind(t.Slot);
+				else
+					AssetManager::WhiteTexture()->Bind(t.Slot);
+			}
 
-				switch (property.Type)
-				{
-					case MaterialPropertyType::None: break;
-					case MaterialPropertyType::Texture2D:
-					{
-						if (m_Textures.at(slot))
-							m_Textures.at(slot)->Bind(property.Slot);
-						else
-							AssetManager::WhiteTexture()->Bind(property.Slot);
-						break;
-					}
-					case MaterialPropertyType::Texture2DBindless:
-					{
-						const uint32_t index = (m_Textures.at(slot) ? m_Textures.at(slot) : AssetManager::WhiteTexture())->GetIndex();
-						m_Pipeline->SetData(name, &index, sizeof(uint32_t), property.BindingOffset);
-						break;
-					}
-					case MaterialPropertyType::Bool:
-					case MaterialPropertyType::Int:
-					case MaterialPropertyType::UInt:
-					case MaterialPropertyType::Float:
-					case MaterialPropertyType::Float2:
-					case MaterialPropertyType::Float3:
-					case MaterialPropertyType::Float4:
-					{
-						const Ref<ConstantBuffer> constantBuffer = m_ConstantBuffers.at(slot);
-						constantBuffer->Bind(0);
-						constantBuffer->SetData(m_Buffer + property.OffsetInBytes, static_cast<uint32_t>(property.SizeInBytes), 0);
-						break;
-					}
-				}
+			if (!m_BindlessTextureBuffer.empty())
+			{
+				m_Pipeline->SetData("Textures", m_BindlessTextureBuffer.data(), sizeof(uint32_t) * m_BindlessTextureBuffer.size(), 0);
+			}
+			if (!m_CBBuffer.empty())
+			{
+				m_ConstantBuffer->Bind(0);
+				m_ConstantBuffer->SetData(m_CBBuffer.data(), sizeof(float) * 4 * m_CBBuffer.size(), 0);
 			}
 		}
 	}
@@ -131,41 +133,53 @@ namespace ArcEngine
 		m_Pipeline->Unbind();
 	}
 
-	Ref<Texture2D> Material::GetTexture(uint32_t slot)
+	Ref<Texture2D> Material::GetTexture(const std::string_view& name)
 	{
-		const auto it = m_Textures.find(slot);
-
+		const auto it = m_Indices.find(name.data());
 		[[likely]]
-		if (it != m_Textures.end())
-			return it->second;
+		if (it != m_Indices.end())
+		{
+			return m_Textures[it->second.Index];
+		}
 
 		return nullptr;
 	}
 
-	void Material::SetTexture(uint32_t slot, const Ref<Texture2D>& texture)
+	void Material::SetTexture(const std::string_view& name, const Ref<Texture2D>& texture)
 	{
-		m_Textures[slot] = texture;
+		const auto it = m_Indices.find(name.data());
+		[[likely]]
+		if (it != m_Indices.end())
+		{
+			m_Textures[it->second.Index] = texture;
+			if (it->second.Type == MaterialPropertyType::Texture2DBindless)
+				m_BindlessTextureBuffer[it->second.BufferIndex] = texture->GetIndex();
+		}
 	}
 
-	Material::MaterialData Material::GetData_Internal(const std::string& name) const
+	void* Material::GetData_Internal(const std::string_view& name)
 	{
 		ARC_PROFILE_SCOPE()
 
-		const auto& materialProperties = m_Pipeline->GetMaterialProperties();
-		const auto& materialProperty = m_Pipeline->GetMaterialProperties().find(name);
-		if (materialProperty != materialProperties.end())
-			return m_Buffer + materialProperty->second.OffsetInBytes;
+		const auto it = m_Indices.find(name.data());
+		[[likely]]
+		if (it != m_Indices.end())
+		{
+			return glm::value_ptr(m_CBBuffer[it->second.BufferIndex]);
+		}
 
 		return nullptr;
 	}
 
-	void Material::SetData_Internal(const std::string& name, const MaterialData data) const
+	void Material::SetData_Internal(const std::string_view& name, const void* data)
 	{
 		ARC_PROFILE_SCOPE()
 
-		const auto& materialProperties = m_Pipeline->GetMaterialProperties();
-		const auto& property = m_Pipeline->GetMaterialProperties().find(name);
-		if (property != materialProperties.end())
-			memcpy(m_Buffer + property->second.OffsetInBytes, data, property->second.SizeInBytes);
+		const auto it = m_Indices.find(name.data());
+		[[likely]]
+		if (it != m_Indices.end())
+		{
+			memcpy(glm::value_ptr(m_CBBuffer[it->second.BufferIndex]), data, it->second.SizeInBytes);
+		}
 	}
 }

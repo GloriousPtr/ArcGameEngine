@@ -176,7 +176,7 @@ namespace ArcEngine
 	{
 		ARC_CORE_ASSERT(m_Count > index, "Constant buffer index can't be greater than count! Overflow!")
 
-		SetBufferData(m_Resource[Dx12Context::GetCurrentFrameIndex()], data, size, m_AlignedSize * index);
+		SetBufferData(m_Resource[Dx12Context::GetCurrentFrameIndex()], data, size == 0 ? m_Size : size, m_AlignedSize * index);
 	}
 
 	void Dx12ConstantBuffer::Bind(uint32_t index) const

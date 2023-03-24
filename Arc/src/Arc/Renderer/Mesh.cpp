@@ -162,7 +162,6 @@ namespace ArcEngine
 				{
 					const auto& material = materials.at(materialId);
 					
-					
 					const auto& materialProperties = submesh.Mat->GetProperties();
 					bool normalMapApplied = false;
 
@@ -173,14 +172,12 @@ namespace ArcEngine
 						if (property.Type == MaterialPropertyType::Texture2D ||
 							property.Type == MaterialPropertyType::Texture2DBindless)
 						{
-							auto slot = submesh.Mat->GetData<uint32_t>(name);
-
 							if (!material.diffuse_texname.empty() &&
 								(name.find("albedo") != std::string::npos || name.find("Albedo") != std::string::npos ||
 									name.find("diff") != std::string::npos || name.find("Diff") != std::string::npos))
 							{
 								std::string pathStr = (dir / material.diffuse_texname).string();
-								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(pathStr));
+								submesh.Mat->SetTexture(name, AssetManager::GetTexture2D(pathStr));
 							}
 
 							if (!material.normal_texname.empty() &&
@@ -188,7 +185,7 @@ namespace ArcEngine
 									name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
 							{
 								std::string pathStr = (dir / material.normal_texname).string();
-								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(pathStr));
+								submesh.Mat->SetTexture(name, AssetManager::GetTexture2D(pathStr));
 								normalMapApplied = true;
 							}
 							else if (!material.bump_texname.empty() &&
@@ -196,7 +193,7 @@ namespace ArcEngine
 									name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
 							{
 								std::string pathStr = (dir / material.bump_texname).string();
-								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(pathStr));
+								submesh.Mat->SetTexture(name, AssetManager::GetTexture2D(pathStr));
 								normalMapApplied = true;
 							}
 
@@ -204,7 +201,7 @@ namespace ArcEngine
 								(name.find("emissi") != std::string::npos || name.find("Emissi") != std::string::npos))
 							{
 								std::string pathStr = (dir / material.emissive_texname).string();
-								submesh.Mat->SetTexture(slot, AssetManager::GetTexture2D(pathStr));
+								submesh.Mat->SetTexture(name, AssetManager::GetTexture2D(pathStr));
 							}
 						}
 

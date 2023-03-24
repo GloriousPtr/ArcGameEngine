@@ -147,8 +147,6 @@ namespace ArcEngine
 						MaterialProperty property{};
 						property.Type = type;
 						property.SizeInBytes = variableDesc.Size;
-						property.OffsetInBytes = offset;
-						property.BindingOffset = var;
 						property.IsSlider = variableName.ends_with("01");
 						property.DisplayName = variableDesc.Name + (property.IsSlider ? 2 : 0);
 						property.IsColor = variableName.find("color") != std::string::npos || variableName.find("Color") != std::string::npos;
@@ -165,8 +163,6 @@ namespace ArcEngine
 					MaterialProperty property{};
 					property.Type = MaterialPropertyType::Texture2D;
 					property.SizeInBytes = sizeof(uint32_t);
-					property.OffsetInBytes = offset;
-					property.BindingOffset = 0;
 					property.IsSlider = false;
 					property.DisplayName = bufferName;
 					property.IsColor = false;

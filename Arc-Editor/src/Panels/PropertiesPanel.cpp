@@ -192,15 +192,12 @@ namespace ArcEngine
 			switch (property.Type)
 			{
 				case MaterialPropertyType::None: break;
+				case MaterialPropertyType::Texture2DBindless:
 				case MaterialPropertyType::Texture2D:
 				{
-					const auto slot = material->GetData<uint32_t>(name);
-					if (Ref<Texture2D> tex = material->GetTexture(slot))
-					{
-						const uint64_t texId = material->GetTexture(slot) ? material->GetTexture(slot)->GetRendererID() : 0;
-						if (UI::Property(displayName, tex, texId))
-							material->SetTexture(slot, tex);
-					}
+					Ref<Texture2D> tex = material->GetTexture(name);
+					if (UI::Property(displayName, tex, tex ? tex->GetRendererID() : 0))
+						material->SetTexture(name, tex);
 					break;
 				}
 				case MaterialPropertyType::Bool:

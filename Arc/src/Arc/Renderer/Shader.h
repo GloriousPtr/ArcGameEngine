@@ -16,41 +16,6 @@ namespace ArcEngine
 		Fragment = Pixel
 	};
 
-	enum class MaterialPropertyType
-	{
-		None = 0,
-		Texture2D,
-		Texture2DBindless,
-		Bool,
-		Int,
-		UInt,
-		Float,
-		Float2,
-		Float3,
-		Float4,
-	};
-
-	struct MaterialProperty
-	{
-		MaterialPropertyType Type;
-		size_t SizeInBytes;
-		size_t OffsetInBytes;
-		uint32_t BindingOffset;
-
-		std::string DisplayName;
-		bool IsSlider;
-		bool IsColor;
-
-		int32_t Slot = -1;
-
-		[[nodiscard]] bool IsValid() const
-		{
-			return Slot != -1;
-		}
-	};
-
-	using MaterialPropertyMap = std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality>;
-
 	class Shader
 	{
 	public:
