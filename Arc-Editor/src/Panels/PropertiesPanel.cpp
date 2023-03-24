@@ -640,7 +640,7 @@ namespace ArcEngine
 					component.ShadowQuality = static_cast<LightComponent::ShadowQualityType>(shadowQualityType);
 
 				const uint64_t textureID = component.ShadowMapFramebuffer->GetDepthAttachmentRendererID();
-				ImGui::Image(reinterpret_cast<ImTextureID>(textureID), ImVec2{ 256, 256 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+				ImGui::Image(reinterpret_cast<ImTextureID>(textureID), ImVec2{ 256, 256 }, ARC_UI_UV_0, ARC_UI_UV_1);
 			}
 
 			UI::EndProperties();

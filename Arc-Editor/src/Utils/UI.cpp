@@ -180,13 +180,13 @@ namespace ArcEngine
 			id = texture == nullptr ? 0 : texture->GetHRDRendererID();
 		if (id == 0)
 			id = AssetManager::BlackTexture()->GetRendererID();
-		ImGui::ImageButton(reinterpret_cast<ImTextureID>(id), { buttonSize, buttonSize }, { 1, 1 }, { 0, 0 }, 0);
+		ImGui::ImageButton(reinterpret_cast<ImTextureID>(id), { buttonSize, buttonSize }, ARC_UI_UV_0, ARC_UI_UV_1, 0);
 		if (texture && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 		{
 			ImGui::BeginTooltip();
 			ImGui::TextUnformatted(texture->GetPath().c_str());
 			ImGui::Spacing();
-			ImGui::Image(reinterpret_cast<ImTextureID>(id), { tooltipSize, tooltipSize }, { 1, 1 }, { 0, 0 });
+			ImGui::Image(reinterpret_cast<ImTextureID>(id), { tooltipSize, tooltipSize }, ARC_UI_UV_0, ARC_UI_UV_1);
 			ImGui::EndTooltip();
 		}
 		if (ImGui::BeginDragDropTarget())
@@ -240,13 +240,13 @@ namespace ArcEngine
 			id = texture == nullptr ? 0 : texture->GetRendererID();
 		if (id == 0)
 			id = AssetManager::BlackTexture()->GetRendererID();
-		ImGui::ImageButton(reinterpret_cast<ImTextureID>(id), { buttonSize, buttonSize }, { 1, 1 }, { 0, 0 }, 0);
+		ImGui::ImageButton(reinterpret_cast<ImTextureID>(id), { buttonSize, buttonSize }, ARC_UI_UV_0, ARC_UI_UV_1, 0);
 		if (texture && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 		{
 			ImGui::BeginTooltip();
 			ImGui::TextUnformatted(texture->GetPath().c_str());
 			ImGui::Spacing();
-			ImGui::Image(reinterpret_cast<ImTextureID>(id), { tooltipSize, tooltipSize }, { 1, 1 }, { 0, 0 });
+			ImGui::Image(reinterpret_cast<ImTextureID>(id), { tooltipSize, tooltipSize }, ARC_UI_UV_0, ARC_UI_UV_1);
 			ImGui::EndTooltip();
 		}
 		if (ImGui::BeginDragDropTarget())

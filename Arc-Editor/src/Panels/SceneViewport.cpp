@@ -185,7 +185,7 @@ namespace ArcEngine
 			m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
 			const uint64_t textureID = m_RenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
-			ImGui::Image(reinterpret_cast<ImTextureID>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y });
+			ImGui::Image(reinterpret_cast<ImTextureID>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ARC_UI_UV_0, ARC_UI_UV_1);
 
 			if (m_SceneHierarchyPanel)
 				m_SceneHierarchyPanel->DragDropTarget();
@@ -340,7 +340,7 @@ namespace ArcEngine
 					const ImVec2 miniViewportSize = { m_ViewportSize.x * m_MiniViewportSizeMultiplier, m_ViewportSize.y * m_MiniViewportSizeMultiplier };
 					ImGui::SetCursorPos({ endCursorPos.x - miniViewportSize.x - windowPadding.x, endCursorPos.y - miniViewportSize.y - windowPadding.y });
 					const uint64_t textureId = m_MiniViewportRenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
-					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), ImVec2{ miniViewportSize.x, miniViewportSize.y }, ImVec2{ 0, 0 }, ImVec2{ 1, 1 }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
+					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), ImVec2{ miniViewportSize.x, miniViewportSize.y }, ARC_UI_UV_0, ARC_UI_UV_1, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
 				}
 			}
 #endif

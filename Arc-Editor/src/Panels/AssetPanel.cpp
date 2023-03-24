@@ -734,7 +734,7 @@ namespace ArcEngine
 					// Thumbnail Image
 					ImGui::SetCursorPos({ cursorPos.x + thumbnailPadding * 0.75f, cursorPos.y + thumbnailPadding });
 					ImGui::SetItemAllowOverlap();
-					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), { thumbnailSize, thumbnailSize }, ARC_UI_UV_0, ARC_UI_UV_1);
 
 					// Type Color frame
 					const ImVec2 typeColorFrameSize = { scaledThumbnailSizeX, scaledThumbnailSizeX * 0.03f };
@@ -775,7 +775,7 @@ namespace ArcEngine
 
 					ImGui::SameLine();
 					ImGui::SetCursorPosX(ImGui::GetCursorPosX() - lineHeight);
-					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), { lineHeight, lineHeight }, { 0, 1 }, { 1, 0 });
+					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), { lineHeight, lineHeight }, ARC_UI_UV_0, ARC_UI_UV_1);
 					ImGui::SameLine();
 					ImGui::TextUnformatted(filename);
 

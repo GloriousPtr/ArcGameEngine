@@ -9,6 +9,9 @@ struct ImRect;
 
 namespace ArcEngine
 {
+#define ARC_UI_UV_0 { 0, 0 }
+#define ARC_UI_UV_1 { 1, 1 }
+
 	class UI
 	{
 	public:
