@@ -310,6 +310,7 @@ namespace ArcEngine
 				ImGui::EndGroup();
 			}
 
+#if 0
 			// Showing mini camera viewport if selected entity has a CameraComponent
 			ImVec2 endCursorPos = ImGui::GetContentRegionMax();
 			EditorContext context = EditorLayer::GetInstance()->GetContext();
@@ -342,6 +343,7 @@ namespace ArcEngine
 					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), ImVec2{ miniViewportSize.x, miniViewportSize.y }, ImVec2{ 0, 0 }, ImVec2{ 1, 1 }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
 				}
 			}
+#endif
 
 			OnEnd();
 		}
