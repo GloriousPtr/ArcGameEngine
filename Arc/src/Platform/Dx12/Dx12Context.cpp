@@ -460,8 +460,8 @@ namespace ArcEngine
 	{
 		m_SyncInterval = value;
 		m_PresentFlags = m_SyncInterval == 0 ?
-							m_PresentFlags | DXGI_FEATURE_PRESENT_ALLOW_TEARING :
-							m_PresentFlags & ~DXGI_FEATURE_PRESENT_ALLOW_TEARING;
+							m_PresentFlags | DXGI_PRESENT_ALLOW_TEARING :
+							m_PresentFlags & ~DXGI_PRESENT_ALLOW_TEARING;
 	}
 
 	ID3D12Device8* Dx12Context::GetDevice()
