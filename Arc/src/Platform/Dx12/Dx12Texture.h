@@ -3,6 +3,11 @@
 #include "Arc/Renderer/Texture.h"
 #include "Platform/Dx12/Dx12Resources.h"
 
+namespace D3D12MA
+{
+	class Allocation;
+}
+
 namespace ArcEngine
 {
 	class Dx12Texture2D : public Texture2D
@@ -31,11 +36,12 @@ namespace ArcEngine
 		void InvalidateImpl(std::string_view path, uint32_t width, uint32_t height, const void* data, uint32_t channels);
 
 	private:
-		std::string m_Path{};
-		uint32_t m_Width = 0, m_Height = 0;
-		DescriptorHandle m_Handle{};
-		D3D12_GPU_DESCRIPTOR_HANDLE m_HeapStart{};
-		ID3D12Resource* m_Image = nullptr;
-		ID3D12Resource* m_UploadImage = nullptr;
+		std::string							m_Path{};
+		uint32_t							m_Width = 0;
+		uint32_t							m_Height = 0;
+		DescriptorHandle					m_Handle{};
+		D3D12_GPU_DESCRIPTOR_HANDLE			m_HeapStart{};
+		D3D12MA::Allocation*				m_ImageAllocation = nullptr;
+		D3D12MA::Allocation*				m_UploadImageAllocation = nullptr;
 	};
 }

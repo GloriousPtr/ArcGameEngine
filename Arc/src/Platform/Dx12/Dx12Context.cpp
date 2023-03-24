@@ -15,6 +15,7 @@
 
 #include "DxHelper.h"
 #include "Dx12Resources.h"
+#include "Dx12Allocator.h"
 
 extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 608; }
 
@@ -138,6 +139,7 @@ namespace ArcEngine
 	}
 
 	inline static IDXGIFactory7* s_Factory;
+	inline static IDXGIAdapter4* s_Adapter;
 	inline static ID3D12Device8* s_Device;
 	inline static ID3D12CommandQueue* s_CommandQueue;
 	inline static IDXGISwapChain4* s_Swapchain;
@@ -200,6 +202,7 @@ namespace ArcEngine
 
 		s_Swapchain->Release();
 		s_CommandQueue->Release();
+		Dx12Allocator::Shutdown();
 
 #ifdef ARC_DEBUG
 #ifdef ENABLE_DX12_DEBUG_MESSAGES
@@ -223,6 +226,7 @@ namespace ArcEngine
 #endif // ILLUMINO_DEBUG
 
 		s_Device->Release();
+		s_Adapter->Release();
 		s_Factory->Release();
 
 #ifdef ARC_DEBUG
@@ -282,16 +286,15 @@ namespace ArcEngine
 		ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&s_Factory)), "Failed to create DXGI Factory")
 
 		const D3D_FEATURE_LEVEL minFeatureLevel = D3D_FEATURE_LEVEL_12_0;
-		IDXGIAdapter4* adapter;
-		GetHardwareAdapter(s_Factory, &adapter, &s_Device, minFeatureLevel);
+		GetHardwareAdapter(s_Factory, &s_Adapter, &s_Device, minFeatureLevel);
 
-		ARC_CORE_ASSERT(adapter, "Failed to adapter");
+		ARC_CORE_ASSERT(s_Adapter, "Failed to adapter");
 		ARC_CORE_ASSERT(s_Device, "Failed to create device");
 		s_Device->SetName(L"Main D3D12 Device");
 		{
 			// Logging info
 			DXGI_ADAPTER_DESC3 adapterDesc;
-			adapter->GetDesc3(&adapterDesc);
+			s_Adapter->GetDesc3(&adapterDesc);
 
 			ARC_CORE_INFO("DirectX Info:");
 			_bstr_t wcDesc(adapterDesc.Description);
@@ -299,8 +302,6 @@ namespace ArcEngine
 			ARC_CORE_INFO("  Vendor: {}", GetVendorName(adapterDesc.VendorId));
 			ARC_CORE_INFO("  Renderer: {}", desc);
 		}
-		// Adapter no longer needed
-		adapter->Release();
 
 #ifdef ARC_DEBUG
 #ifdef ENABLE_DX12_DEBUG_MESSAGES
@@ -367,6 +368,8 @@ namespace ArcEngine
 		queueDesc.NodeMask = 0;
 		ThrowIfFailed(s_Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&s_CommandQueue)), "Failed to create command queue");
 		s_CommandQueue->SetName(L"Main D3D12 Command Queue");
+
+		Dx12Allocator::Init(s_Adapter, s_Device);
 
 		// Create Fences
 		for (auto& frame : s_Frames)

@@ -1,8 +1,15 @@
 #pragma once
 
+#include <D3D12MemAlloc.h>
+
 #include "Arc/Renderer/Framebuffer.h"
 
 #include "Platform/Dx12/Dx12Resources.h"
+
+namespace D3D12MA
+{
+	class Allocation;
+}
 
 namespace ArcEngine
 {
@@ -35,10 +42,10 @@ namespace ArcEngine
 
 		struct ColorFrame
 		{
-			D3D12_RESOURCE_STATES State;
-			ID3D12Resource* Resource = nullptr;
-			DescriptorHandle SrvHandle{};
-			DescriptorHandle RtvHandle{};
+			D3D12_RESOURCE_STATES		State;
+			D3D12MA::Allocation*		Allocation = nullptr;
+			DescriptorHandle			SrvHandle{};
+			DescriptorHandle			RtvHandle{};
 
 			void Release(bool deferred)
 			{
@@ -48,17 +55,17 @@ namespace ArcEngine
 					Dx12Context::GetSrvHeap()->Free(SrvHandle);
 				if (RtvHandle.IsValid())
 					Dx12Context::GetRtvHeap()->Free(RtvHandle);
-				if (Resource)
+				if (Allocation)
 				{
 					if (deferred)
 					{
-						Dx12Context::DeferredRelease(Resource);
-						Resource = nullptr;
+						Dx12Context::DeferredRelease(Allocation);
+						Allocation = nullptr;
 					}
 					else
 					{
-						Resource->Release();
-						Resource = nullptr;
+						Allocation->Release();
+						Allocation = nullptr;
 					}
 				}
 			}
@@ -66,10 +73,10 @@ namespace ArcEngine
 
 		struct DepthFrame
 		{
-			D3D12_RESOURCE_STATES State;
-			ID3D12Resource* Resource = nullptr;
-			DescriptorHandle SrvHandle{};
-			DescriptorHandle DsvHandle{};
+			D3D12_RESOURCE_STATES		State;
+			D3D12MA::Allocation*		Allocation = nullptr;
+			DescriptorHandle			SrvHandle{};
+			DescriptorHandle			DsvHandle{};
 
 			void Release(bool deferred)
 			{
@@ -79,30 +86,30 @@ namespace ArcEngine
 					Dx12Context::GetSrvHeap()->Free(SrvHandle);
 				if (DsvHandle.IsValid())
 					Dx12Context::GetDsvHeap()->Free(DsvHandle);
-				if (Resource)
+				if (Allocation)
 				{
 					if (deferred)
 					{
-						Dx12Context::DeferredRelease(Resource);
-						Resource = nullptr;
+						Dx12Context::DeferredRelease(Allocation);
+						Allocation = nullptr;
 					}
 					else
 					{
-						Resource->Release();
-						Resource = nullptr;
+						Allocation->Release();
+						Allocation = nullptr;
 					}
 				}
 			}
 		};
 
-		std::array<std::vector<ColorFrame>, Dx12Context::FrameCount> m_ColorAttachments{};
-		std::array<std::vector<D3D12_CPU_DESCRIPTOR_HANDLE>, Dx12Context::FrameCount> m_RtvHandles;
-		std::array<DepthFrame, Dx12Context::FrameCount> m_DepthAttachment{};
-		glm::vec4 m_ClearColor = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
-		glm::vec2 m_ClearDepth = glm::vec2(1.0f, 0.0f);
+		std::array<std::vector<ColorFrame>, Dx12Context::FrameCount>						m_ColorAttachments{};
+		std::array<std::vector<D3D12_CPU_DESCRIPTOR_HANDLE>, Dx12Context::FrameCount>		m_RtvHandles;
+		std::array<DepthFrame, Dx12Context::FrameCount>										m_DepthAttachment{};
+		glm::vec4																			m_ClearColor = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+		glm::vec2																			m_ClearDepth = glm::vec2(1.0f, 0.0f);
 
-		std::array<std::vector<ColorFrame>, Dx12Context::FrameCount> m_ReleasedColorAttachments{};
-		std::array<DepthFrame, Dx12Context::FrameCount> m_ReleasedDepthAttachment{};
+		std::array<std::vector<ColorFrame>, Dx12Context::FrameCount>						m_ReleasedColorAttachments{};
+		std::array<DepthFrame, Dx12Context::FrameCount>										m_ReleasedDepthAttachment{};
 
 	public:
 

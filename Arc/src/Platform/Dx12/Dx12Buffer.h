@@ -3,6 +3,11 @@
 #include "Arc/Renderer/Buffer.h"
 #include "Platform/Dx12/Dx12Resources.h"
 
+namespace D3D12MA
+{
+	class Allocation;
+}
+
 namespace ArcEngine
 {
 	class Dx12VertexBuffer : public VertexBuffer
@@ -20,8 +25,8 @@ namespace ArcEngine
 		void SetData(const void* data, uint32_t size) override;
 
 	private:
-		ID3D12Resource*						m_UploadResource = nullptr;
-		ID3D12Resource*						m_Resource = nullptr;
+		D3D12MA::Allocation*				m_UploadAllocation = nullptr;
+		D3D12MA::Allocation*				m_Allocation = nullptr;
 		D3D12_VERTEX_BUFFER_VIEW			m_BufferView{};
 	};
 
@@ -40,8 +45,8 @@ namespace ArcEngine
 
 	private:
 		uint32_t							m_Count = 0;
-		ID3D12Resource*						m_UploadResource = nullptr;
-		ID3D12Resource*						m_Resource = nullptr;
+		D3D12MA::Allocation*				m_UploadAllocation = nullptr;
+		D3D12MA::Allocation*				m_Allocation = nullptr;
 		D3D12_INDEX_BUFFER_VIEW				m_BufferView{};
 	};
 
@@ -56,7 +61,7 @@ namespace ArcEngine
 
 	private:
 		DescriptorHandle				m_Handle[Dx12Context::FrameCount]{};
-		ID3D12Resource*					m_Resource[Dx12Context::FrameCount]{};
+		D3D12MA::Allocation*			m_Allocation[Dx12Context::FrameCount]{};
 		uint32_t						m_RegisterIndex = 0;
 		uint32_t						m_Size = 0;
 		uint32_t						m_Count = 0;

@@ -1,9 +1,10 @@
 #include "arcpch.h"
 #include "Dx12Texture.h"
 
-#include <stb_image.h>
-
 #include "d3dx12.h"
+#include "Dx12Allocator.h"
+
+#include <stb_image.h>
 
 namespace ArcEngine
 {
@@ -37,10 +38,10 @@ namespace ArcEngine
 
 		Dx12Context::GetSrvHeap()->Free(m_Handle);
 
-		if (m_UploadImage)
-			m_UploadImage->Release();
-		if(m_Image)
-			m_Image->Release();
+		if (m_UploadImageAllocation)
+			m_UploadImageAllocation->Release();
+		if (m_ImageAllocation)
+			m_ImageAllocation->Release();
 	}
 
 	uint32_t Dx12Texture2D::GetIndex() const
@@ -98,14 +99,16 @@ namespace ArcEngine
 				break;
 		}
 
-		const auto heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 		const auto resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(format, width, height, 1, 1);
-		Dx12Context::GetDevice()->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&m_Image));
+		Dx12Allocator::CreateTextureResource(D3D12_HEAP_TYPE_DEFAULT, &resourceDesc, D3D12_RESOURCE_STATE_COPY_DEST, &m_ImageAllocation);
+		ID3D12Resource* resource = m_ImageAllocation->GetResource();
 
-		const auto uploadHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-		const auto uploadBufferSize = GetRequiredIntermediateSize(m_Image, 0, 1);
+		D3D12MA::ALLOCATION_DESC uploadAllocation{};
+		uploadAllocation.HeapType = D3D12_HEAP_TYPE_UPLOAD;
+		const auto uploadBufferSize = GetRequiredIntermediateSize(resource, 0, 1);
 		const auto uploadBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
-		Dx12Context::GetDevice()->CreateCommittedResource(&uploadHeapProps, D3D12_HEAP_FLAG_NONE, &uploadBufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_UploadImage));
+		Dx12Allocator::CreateTextureResource(D3D12_HEAP_TYPE_UPLOAD, &uploadBufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, &m_UploadImageAllocation);
+		ID3D12Resource* uploadResource = m_UploadImageAllocation->GetResource();
 
 		D3D12_SUBRESOURCE_DATA srcData{};
 		srcData.pData = data;
@@ -113,8 +116,8 @@ namespace ArcEngine
 		srcData.SlicePitch = width * height * 4;
 
 		auto* commandList = Dx12Context::GetUploadCommandList();
-		UpdateSubresources(commandList, m_Image, m_UploadImage, 0, 0, 1, &srcData);
-		const auto transition = CD3DX12_RESOURCE_BARRIER::Transition(m_Image, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		UpdateSubresources(commandList, resource, uploadResource, 0, 0, 1, &srcData);
+		const auto transition = CD3DX12_RESOURCE_BARRIER::Transition(resource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		commandList->ResourceBarrier(1, &transition);
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -127,6 +130,6 @@ namespace ArcEngine
 
 		m_Handle = Dx12Context::GetSrvHeap()->Allocate();
 		m_HeapStart = Dx12Context::GetSrvHeap()->GpuStart();
-		Dx12Context::GetDevice()->CreateShaderResourceView(m_Image, &srvDesc, m_Handle.CPU);
+		Dx12Context::GetDevice()->CreateShaderResourceView(resource, &srvDesc, m_Handle.CPU);
 	}
 }

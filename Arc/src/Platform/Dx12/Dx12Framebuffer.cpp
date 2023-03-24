@@ -2,6 +2,7 @@
 #include "Dx12Framebuffer.h"
 
 #include "d3dx12.h"
+#include "Dx12Allocator.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -32,8 +33,9 @@ namespace ArcEngine
 	void Dx12Framebuffer::Invalidate()
 	{
 		ARC_PROFILE_SCOPE()
-			
-		D3D12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+
+		D3D12MA::ALLOCATION_DESC allocationDesc{};
+		allocationDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
@@ -76,15 +78,16 @@ namespace ArcEngine
 
 				for (auto& depthAttachment : m_DepthAttachment)
 				{
-					ID3D12Resource* resource;
+					D3D12MA::Allocation* allocation;
 					DescriptorHandle srvHandle = srvDescriptorHeap->Allocate();
 					DescriptorHandle dsvHandle = dsvDescriptorHeap->Allocate();
 
-					device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &depthDesc, state, &defaultDepthClear, IID_PPV_ARGS(&resource));
+					Dx12Allocator::CreateRtvResource(D3D12_HEAP_TYPE_DEFAULT, &depthDesc, state, &defaultDepthClear, &allocation);
+					ID3D12Resource* resource = allocation->GetResource();
 					device->CreateShaderResourceView(resource, &srvDesc, srvHandle.CPU);
 					device->CreateDepthStencilView(resource, &dsvDesc, dsvHandle.CPU);
 
-					depthAttachment = { state, resource, srvHandle, dsvHandle };
+					depthAttachment = { state, allocation, srvHandle, dsvHandle };
 
 					resource->SetName(L"Depth Resource");
 				}
@@ -103,17 +106,18 @@ namespace ArcEngine
 				rtvDesc.Format = format;
 
 				int i = 0;
-				for (auto& attachment : m_ColorAttachments)
+				for (auto& colorAttachment : m_ColorAttachments)
 				{
-					ID3D12Resource* resource;
+					D3D12MA::Allocation* allocation;
 					DescriptorHandle srvHandle = srvDescriptorHeap->Allocate();
 					DescriptorHandle rtvHandle = rtvDescriptorHeap->Allocate();
 
-					device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &colorDesc, state, &defaultColorClear, IID_PPV_ARGS(&resource));
+					Dx12Allocator::CreateRtvResource(D3D12_HEAP_TYPE_DEFAULT, &colorDesc, state, &defaultColorClear, &allocation);
+					ID3D12Resource* resource = allocation->GetResource();
 					device->CreateShaderResourceView(resource, &srvDesc, srvHandle.CPU);
 					device->CreateRenderTargetView(resource, &rtvDesc, rtvHandle.CPU);
 
-					attachment.emplace_back(state, resource, srvHandle, rtvHandle);
+					colorAttachment.emplace_back(state, allocation, srvHandle, rtvHandle);
 					m_RtvHandles[i].emplace_back(rtvHandle.CPU);
 
 					resource->SetName(L"Color Resource");
@@ -245,13 +249,13 @@ namespace ArcEngine
 		auto& colorAttachments = m_ColorAttachments[backFrame];
 		for (auto& attachment : colorAttachments)
 		{
-			barriers[numBarriers] = CD3DX12_RESOURCE_BARRIER::Transition(attachment.Resource, attachment.State, colorAttachmentState);
+			barriers[numBarriers] = CD3DX12_RESOURCE_BARRIER::Transition(attachment.Allocation->GetResource(), attachment.State, colorAttachmentState);
 			attachment.State = colorAttachmentState;
 			++numBarriers;
 		}
-		if (m_DepthAttachment[backFrame].Resource)
+		if (m_DepthAttachment[backFrame].Allocation)
 		{
-			barriers[numBarriers] = CD3DX12_RESOURCE_BARRIER::Transition(m_DepthAttachment[backFrame].Resource, m_DepthAttachment[backFrame].State, depthAttachmentState);
+			barriers[numBarriers] = CD3DX12_RESOURCE_BARRIER::Transition(m_DepthAttachment[backFrame].Allocation->GetResource(), m_DepthAttachment[backFrame].State, depthAttachmentState);
 			m_DepthAttachment[backFrame].State = depthAttachmentState;
 			++numBarriers;
 		}
