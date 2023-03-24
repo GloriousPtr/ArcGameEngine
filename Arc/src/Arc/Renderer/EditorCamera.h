@@ -35,12 +35,12 @@ namespace ArcEngine
 		float m_NearClip = 0.03f;
 		float m_FarClip = 2000.0f;
 
-		glm::vec3 m_Position = glm::vec3(0, 0, -10);
+		glm::vec3 m_Position = glm::vec3(0, 0, 10);
 		glm::vec3 m_Forward = glm::vec3(0, 0, 1);
 		glm::vec3 m_Right = glm::vec3(1, 0, 0);
 		glm::vec3 m_Up = glm::vec3(0, 1, 0);
 
-		float m_Yaw = glm::radians(90.0f);															// In radians
+		float m_Yaw = glm::radians(-90.0f);															// In radians
 		float m_Pitch = glm::radians(0.0f);															// In radians
 
 		glm::mat4 m_ViewMatrix = glm::mat4(1.0f);
