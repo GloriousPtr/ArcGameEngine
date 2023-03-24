@@ -555,10 +555,6 @@ namespace ArcEngine
 				if (submeshCount > 1)
 					UI::Property<size_t>("Submesh Index", component.SubmeshIndex, 0, submeshCount - 1);
 
-				const char* cullModeTypeStrings[] = { "Front", "Back", "Double Sided" };
-				int cullMode = static_cast<int>(component.CullMode);
-				if (UI::Property("Cull Mode", cullMode, cullModeTypeStrings, 3))
-					component.CullMode = static_cast<MeshComponent::CullModeType>(cullMode);
 				UI::EndProperties();
 
 				constexpr ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed

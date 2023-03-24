@@ -40,7 +40,7 @@ namespace ArcEngine
 			
 			{
 				FramebufferSpecification spec;
-				spec.Attachments = { FramebufferTextureFormat::R11G11B10F };
+				spec.Attachments = { FramebufferTextureFormat::R11G11B10F, FramebufferTextureFormat::Depth };
 				spec.Width = width;
 				spec.Height = height;
 				CompositePassTarget = Framebuffer::Create(spec);

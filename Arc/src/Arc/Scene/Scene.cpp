@@ -1158,7 +1158,7 @@ namespace ArcEngine
 	void Scene::OnRender(const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData)
 	{
 		ARC_PROFILE_CATEGORY("Rendering", Profile::Category::Rendering)
-			/*
+
 		std::vector<Entity> lights;
 		{
 			ARC_PROFILE_SCOPE("Prepare Light Data")
@@ -1176,7 +1176,7 @@ namespace ArcEngine
 			if (!view.empty())
 				skylight = Entity(*view.begin(), this);
 		}
-
+		
 		Renderer3D::BeginScene(cameraData, skylight, std::move(lights));
 		// Meshes
 		{
@@ -1189,12 +1189,12 @@ namespace ArcEngine
 				if (meshComponent.MeshGeometry && meshComponent.MeshGeometry->GetSubmeshCount() != 0)
 				{
 					ARC_CORE_ASSERT(meshComponent.MeshGeometry->GetSubmeshCount() > meshComponent.SubmeshIndex, "Trying to access submesh index that does not exist!")
-					Renderer3D::SubmitMesh(Entity(entity, this).GetWorldTransform(), meshComponent.MeshGeometry->GetSubmesh(meshComponent.SubmeshIndex), meshComponent.CullMode);
+					Renderer3D::SubmitMesh(Entity(entity, this).GetWorldTransform(), meshComponent.MeshGeometry->GetSubmesh(meshComponent.SubmeshIndex));
 				}
 			}
 		}
 		Renderer3D::EndScene(renderGraphData);
-		*/
+		
 		renderGraphData->CompositePassTarget->Bind();
 		Renderer2D::BeginScene(cameraData);
 		{

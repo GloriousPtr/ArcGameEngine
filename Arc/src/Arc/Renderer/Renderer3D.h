@@ -32,7 +32,7 @@ namespace ArcEngine
 		static void DrawCube();
 		static void DrawQuad();
 		static void ReserveMeshes(size_t count);
-		static void SubmitMesh(const glm::mat4& transform, Submesh& submesh, MeshComponent::CullModeType cullMode);
+		static void SubmitMesh(const glm::mat4& transform, Submesh& submesh);
 
 		struct Statistics
 		{
@@ -54,23 +54,8 @@ namespace ArcEngine
 		static void RenderPass(const Ref<Framebuffer>& renderTarget);
 		static void ShadowMapPass();
 
+#if 0
 	private:
-		struct MeshData
-		{
-			glm::mat4 Transform;
-			Submesh& SubmeshGeometry;
-			MeshComponent::CullModeType CullMode;
-
-			MeshData(const glm::mat4& transform, Submesh& submesh, const MeshComponent::CullModeType cullMode)
-				: Transform(transform), SubmeshGeometry(submesh), CullMode(cullMode)
-			{
-			}
-		};
-
-		static Statistics s_Stats;
-		static std::vector<Renderer3D::MeshData> s_Meshes;
-		static Ref<Texture2D> s_BRDFLutTexture;
-		static Ref<PipelineState> s_Shader;
 		static Ref<PipelineState> s_LightingShader;
 		static Ref<PipelineState> s_ShadowMapShader;
 		static Ref<PipelineState> s_CubemapShader;
@@ -80,7 +65,6 @@ namespace ArcEngine
 		static Ref<PipelineState> s_BloomShader;
 		static Ref<VertexArray> s_QuadVertexArray;
 		static Ref<VertexBuffer> s_CubeVertexBuffer;
-		static Ref<ConstantBuffer> s_UbCamera;
 		static Ref<ConstantBuffer> s_UbPointLights;
 		static Ref<ConstantBuffer> s_UbDirectionalLights;
 
@@ -103,5 +87,6 @@ namespace ArcEngine
 		static glm::vec4 VignetteColor;			// rgb: color, a: intensity
 		static glm::vec4 VignetteOffset;		// xy: offset, z: useMask, w: enable/disable effect
 		static Ref<Texture2D> VignetteMask;
+#endif
 	};
 }

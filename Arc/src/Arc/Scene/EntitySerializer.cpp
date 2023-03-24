@@ -679,7 +679,6 @@ namespace ArcEngine
 			std::replace(filepath.begin(), filepath.end(), '\\', '/');
 			out << YAML::Key << "Filepath" << YAML::Value << filepath;
 			out << YAML::Key << "SubmeshIndex" << YAML::Value << meshComponent.SubmeshIndex;
-			out << YAML::Key << "CullMode" << YAML::Value << static_cast<int>(meshComponent.CullMode);
 			
 			out << YAML::EndMap;
 		}
@@ -1242,7 +1241,6 @@ namespace ArcEngine
 			std::string filepath;
 			TrySet(filepath, meshComponent["Filepath"]);
 			TrySet(src.SubmeshIndex, meshComponent["SubmeshIndex"]);
-			TrySetEnum(src.CullMode, meshComponent["CullMode"]);
 
 			if (!filepath.empty())
 			{

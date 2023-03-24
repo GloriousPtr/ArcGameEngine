@@ -79,11 +79,8 @@ namespace ArcEngine
 
 	struct MeshComponent
 	{
-		enum class CullModeType { Unknown = -1, Front, Back, DoubleSided };
-
 		Ref<Mesh> MeshGeometry = nullptr;
 		size_t SubmeshIndex = 0;
-		CullModeType CullMode = CullModeType::Back;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////
