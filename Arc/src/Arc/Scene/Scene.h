@@ -66,8 +66,6 @@ namespace ArcEngine
 		void OnRuntimeStop();
 
 		void OnViewportResize(uint32_t width, uint32_t height);
-		void MarkViewportDirty() { m_ViewportDirty = true; }
-		[[nodiscard]] bool IsViewportDirty() const { return m_ViewportDirty; }
 		[[nodiscard]] Entity GetPrimaryCameraEntity();
 		void SortForSprites();
 
@@ -103,7 +101,6 @@ namespace ArcEngine
 		Physics3DBodyActivationListener* m_BodyActivationListener3D = nullptr;
 
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
-		bool m_ViewportDirty = true;
 
 		float m_PhysicsFrameAccumulator = 0.0f;
 	};

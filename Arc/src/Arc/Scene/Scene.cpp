@@ -1118,6 +1118,9 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
+		if (m_ViewportWidth == width && m_ViewportHeight == height)
+			return;
+
 		m_ViewportWidth = width;
 		m_ViewportHeight = height;
 
@@ -1129,8 +1132,6 @@ namespace ArcEngine
 			if (!cameraComponent.FixedAspectRatio)
 				cameraComponent.Camera.SetViewportSize(width, height);
 		}
-
-		m_ViewportDirty = false;
 	}
 
 	Entity Scene::GetPrimaryCameraEntity()

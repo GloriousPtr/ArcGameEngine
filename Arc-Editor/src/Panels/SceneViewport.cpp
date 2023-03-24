@@ -36,25 +36,20 @@ namespace ArcEngine
 			(spec.Width != static_cast<uint32_t>(m_ViewportSize.x) || spec.Height != static_cast<uint32_t>(m_ViewportSize.y)))
 		{
 			m_Resizing = true;
+			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 		}
 
+		glm::ivec2 viewportSize = { static_cast<uint32_t>(m_ViewportSize.x) , static_cast<uint32_t>(m_ViewportSize.y) };
 		if (m_Resizing && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 		{
 			m_Resizing = false;
 
 			auto miniViewportSize = m_ViewportSize * m_MiniViewportSizeMultiplier;
 			m_MiniViewportRenderGraphData->Resize(static_cast<uint32_t>(miniViewportSize.x), static_cast<uint32_t>(miniViewportSize.y));
+			m_RenderGraphData->Resize(viewportSize.x, viewportSize.y);
+		}
 
-			uint32_t w = static_cast<uint32_t>(m_ViewportSize.x);
-			uint32_t h = static_cast<uint32_t>(m_ViewportSize.y);
-			m_RenderGraphData->Resize(w, h);
-			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
-			m_Scene->OnViewportResize(w, h);
-		}
-		else if (m_Scene->IsViewportDirty())
-		{
-			m_Scene->OnViewportResize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
-		}
+		m_Scene->OnViewportResize(viewportSize.x, viewportSize.y);
 
 		if (!m_SimulationRunning && m_UseEditorCamera)
 		{
@@ -140,12 +135,7 @@ namespace ArcEngine
 		m_EditorCamera.OnUpdate(timestep);
 
 		// Update scene
-		m_RenderGraphData->RenderPassTarget->Bind();
-
 		m_RenderGraphData->CompositePassTarget->Clear();
-//		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
-//		RenderCommand::Clear();
-
 		if (m_SimulationRunning)
 		{
 			m_Scene->OnUpdateRuntime(timestep, m_RenderGraphData, m_UseEditorCamera ? &m_EditorCamera : nullptr);
@@ -157,8 +147,6 @@ namespace ArcEngine
 			m_Scene->OnUpdateEditor(timestep, m_RenderGraphData, m_EditorCamera);
 			OnOverlayRender();
 		}
-
-		m_RenderGraphData->RenderPassTarget->Unbind();
 	}
 
 	void SceneViewport::OnImGuiRender()

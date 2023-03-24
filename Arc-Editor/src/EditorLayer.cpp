@@ -857,7 +857,6 @@ namespace ArcEngine
 			propertyPanel->ForceSetContext(m_SelectedContext);
 
 		m_ActiveScene = CreateRef<Scene>();
-		m_ActiveScene->MarkViewportDirty();
 		m_EditorScene = m_ActiveScene;
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
@@ -879,7 +878,6 @@ namespace ArcEngine
 
 		m_ActiveScene = CreateRef<Scene>();
 		m_ActiveScene->OnViewportResize(1, 1);
-		m_ActiveScene->MarkViewportDirty();
 		m_EditorScene = m_ActiveScene;
 		ScriptEngine::SetScene(m_ActiveScene.get());
 
