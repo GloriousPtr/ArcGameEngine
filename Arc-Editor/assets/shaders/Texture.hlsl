@@ -14,7 +14,6 @@ struct VertexOut
 	float4 Position			: SV_POSITION;
 	float4 Color			: COLOR;
 	float2 UV				: TEXCOORD;
-	float4 TilingOffset		: TILINGOFFSET;
 	uint TexIndex			: TEXINDEX;
 };
 
@@ -22,10 +21,9 @@ VertexOut VS_Main(VertexIn v)
 {
 	VertexOut output;
 
-	output.Position = mul(float4(v.Position.xyz, 1.0), ViewProjection);
+	output.Position = mul(ViewProjection, float4(v.Position.xyz, 1.0));
 	output.Color = v.Color;
-	output.UV = v.UV;
-	output.TilingOffset = v.TilingOffset;
+	output.UV = v.UV * v.TilingOffset.xy + v.TilingOffset.zw;
 	output.TexIndex = v.TexIndex;
 
 	return output;
@@ -108,6 +106,6 @@ float4 PS_Main(VertexOut v) : SV_TARGET
 	}
 
 	Texture2D albedo = ResourceDescriptorHeap[NonUniformResourceIndex(texIndex)];
-	float4 color = albedo.Sample(Sampler, v.UV.xy * v.TilingOffset.xy + v.TilingOffset.zw) * v.Color;
+	float4 color = albedo.Sample(Sampler, v.UV) * v.Color;
 	return color;
 }

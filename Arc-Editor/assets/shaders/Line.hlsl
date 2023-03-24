@@ -16,7 +16,7 @@ VertexOut VS_Main(VertexIn v)
 {
 	VertexOut output;
 
-	output.Position = mul(float4(v.Position.xyz, 1.0), ViewProjection);
+	output.Position = mul(ViewProjection, float4(v.Position.xyz, 1.0));
 	output.Color = v.Color;
 
 	return output;
