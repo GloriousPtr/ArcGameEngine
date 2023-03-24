@@ -84,10 +84,13 @@ project "Arc"
 		}
 		externalincludedirs
 		{
-			"%{IncludeDir.DXC}"
+			"%{IncludeDir.DXC}",
+			"%{IncludeDir.D3D12MA}",
 		}
 		links
 		{
+			"D3D12MA",
+
 			"%{LibDir.Mono}/mono-2.0-sgen.lib",
 			"opengl.dll",
 

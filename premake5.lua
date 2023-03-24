@@ -27,6 +27,7 @@ workspace "Arc"
 		"%{wks.location}/Arc/vendor/imgui/misc/debuggers/imgui.natvis",
 		"%{wks.location}/Arc/vendor/yaml-cpp/src/contrib/yaml-cpp.natvis",
 		"%{IncludeDir.JoltPhysics}/Jolt/Jolt.natvis",
+		"%{IncludeDir.D3D12MA}/../src/D3D12MemAlloc.natvis",
 		"%{IncludeDir.entt}/../natvis/config.natvis",
 		"%{IncludeDir.entt}/../natvis/container.natvis",
 		"%{IncludeDir.entt}/../natvis/core.natvis",
@@ -85,6 +86,7 @@ IncludeDir["JoltPhysics"] = "%{wks.location}/Arc/vendor/JoltPhysics/JoltPhysics"
 IncludeDir["tinyobj"] = "%{wks.location}/Arc/vendor/tinyobj"
 IncludeDir["tinygltf"] = "%{wks.location}/Arc/vendor/tinygltf"
 IncludeDir["DXC"] = "%{wks.location}/Arc/vendor/dxc"
+IncludeDir["D3D12MA"] = "%{wks.location}/Arc/vendor/D3D12MA/D3D12MemoryAllocator/include"
 
 group "Dependencies"
 	include "Arc/vendor/GLFW"
@@ -94,6 +96,7 @@ group "Dependencies"
 	include "Arc/vendor/optick"
 	include "Arc/vendor/box2d"
 	include "Arc/vendor/JoltPhysics"
+	include "Arc/vendor/D3D12MA"
 
 group ""
 
