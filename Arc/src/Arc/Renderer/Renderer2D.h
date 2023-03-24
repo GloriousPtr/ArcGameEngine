@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Framebuffer.h"
-
 namespace ArcEngine
 {
 	struct CameraData;

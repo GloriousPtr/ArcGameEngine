@@ -25,10 +25,10 @@ namespace ArcEngine
 		void SetDataImpl(const std::string& name, const void* value, uint32_t size, uint32_t offset) override;
 
 	private:
-		ID3D12RootSignature*							m_RootSignature = nullptr;
-		ID3D12PipelineState*							m_PipelineState = nullptr;
-		MaterialPropertyMap								m_MaterialProperties;
-		BufferMap										m_BufferMap;
-		PipelineSpecification							m_Specification;
+		ID3D12RootSignature*		m_RootSignature = nullptr;
+		ID3D12PipelineState*		m_PipelineState = nullptr;
+		MaterialPropertyMap			m_MaterialProperties;
+		BufferMap					m_BufferMap;
+		PipelineSpecification		m_Specification;
 	};
 }
