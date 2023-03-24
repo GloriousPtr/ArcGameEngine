@@ -34,6 +34,8 @@ namespace ArcEngine
 
 	void Dx12Shader::Recompile(const std::filesystem::path& path)
 	{
+		ARC_PROFILE_SCOPE()
+
 		for (auto& shader : m_ShaderBlobs | std::views::values)
 			shader->Release();
 
@@ -69,6 +71,8 @@ namespace ArcEngine
 		const std::vector<const wchar_t*>& defines,
 		IDxcBlob** reflection)
 	{
+		ARC_PROFILE_SCOPE()
+
 		using namespace Microsoft::WRL;
 
 		if (!s_TargetMap.contains(shaderModel) || !s_EntryPointMap.contains(shaderModel))
@@ -163,6 +167,8 @@ namespace ArcEngine
 
 	void Dx12Shader::Compile(const std::filesystem::path& filepath)
 	{
+		ARC_PROFILE_SCOPE()
+
 		using namespace Microsoft::WRL;
 		
 		ComPtr<IDxcUtils> utils = nullptr;

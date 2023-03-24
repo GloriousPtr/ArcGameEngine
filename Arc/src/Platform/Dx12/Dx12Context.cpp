@@ -528,6 +528,8 @@ namespace ArcEngine
 
 	void Dx12Context::OnBeginFrame() const
 	{
+		ARC_PROFILE_SCOPE()
+
 		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<float>(s_Width), static_cast<float>(s_Height), 0.0f, 1.0f };
 		const D3D12_RECT scissorRect = { 0, 0, static_cast<long>(s_Width), static_cast<long>(s_Height) };
 
@@ -554,6 +556,8 @@ namespace ArcEngine
 
 	void Dx12Context::OnEndFrame() const
 	{
+		ARC_PROFILE_SCOPE()
+
 		const auto& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
 
 		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backFrame.RtvBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
@@ -563,6 +567,8 @@ namespace ArcEngine
 
 	void Dx12Context::CreateRTV() const
 	{
+		ARC_PROFILE_SCOPE()
+
 		// Create RTV
 		int tempInt = 0;
 		for (auto& frame : s_Frames)
@@ -581,6 +587,8 @@ namespace ArcEngine
 
 	void Dx12Context::CreateSwapchain() const
 	{
+		ARC_PROFILE_SCOPE()
+
 		// Create Swapchain
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
 		swapChainDesc.BufferCount = FrameCount;
@@ -612,6 +620,8 @@ namespace ArcEngine
 
 	void Dx12Context::ProcessDeferredReleases(uint32_t frameIndex)
 	{
+		ARC_PROFILE_SCOPE()
+
 		std::lock_guard lock(s_DeferredReleasesMutex);
 
 		Dx12Frame& backFrame = s_Frames[frameIndex];

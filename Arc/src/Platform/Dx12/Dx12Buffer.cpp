@@ -48,6 +48,8 @@ namespace ArcEngine
 
 	Dx12VertexBuffer::Dx12VertexBuffer(uint32_t size, uint32_t stride)
 	{
+		ARC_PROFILE_SCOPE()
+
 		CreateBuffer(&m_Resource, size, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COMMON);
 		m_BufferView.BufferLocation = m_Resource->GetGPUVirtualAddress();
 		m_BufferView.StrideInBytes = stride;
@@ -58,6 +60,8 @@ namespace ArcEngine
 
 	Dx12VertexBuffer::Dx12VertexBuffer(const float* vertices, uint32_t size, uint32_t stride)
 	{
+		ARC_PROFILE_SCOPE()
+
 		CreateBuffer(&m_Resource, size, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COMMON);
 		m_BufferView.BufferLocation = m_Resource->GetGPUVirtualAddress();
 		m_BufferView.StrideInBytes = stride;
@@ -70,6 +74,8 @@ namespace ArcEngine
 
 	Dx12VertexBuffer::~Dx12VertexBuffer()
 	{
+		ARC_PROFILE_SCOPE()
+
 		if (m_UploadResource)
 			m_UploadResource->Release();
 		if (m_Resource)
@@ -78,11 +84,15 @@ namespace ArcEngine
 
 	void Dx12VertexBuffer::Bind() const
 	{
+		ARC_PROFILE_SCOPE()
+
 		Dx12Context::GetGraphicsCommandList()->IASetVertexBuffers(0, 1, &m_BufferView);
 	}
 
 	void Dx12VertexBuffer::SetData(const void* data, uint32_t size)
 	{
+		ARC_PROFILE_SCOPE()
+
 		const auto toCommonBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_Resource, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
 		Dx12Context::GetUploadCommandList()->ResourceBarrier(1, &toCommonBarrier);
 
@@ -101,6 +111,8 @@ namespace ArcEngine
 	Dx12IndexBuffer::Dx12IndexBuffer(const uint32_t* indices, uint32_t count)
 		: m_Count(count)
 	{
+		ARC_PROFILE_SCOPE()
+
 		const uint32_t size = count * sizeof(uint32_t);
 
 		CreateBuffer(&m_Resource, size, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COMMON);
@@ -115,6 +127,8 @@ namespace ArcEngine
 
 	Dx12IndexBuffer::~Dx12IndexBuffer()
 	{
+		ARC_PROFILE_SCOPE()
+
 		if (m_UploadResource)
 			m_UploadResource->Release();
 		if (m_Resource)
@@ -123,12 +137,16 @@ namespace ArcEngine
 
 	void Dx12IndexBuffer::Bind() const
 	{
+		ARC_PROFILE_SCOPE()
+
 		Dx12Context::GetGraphicsCommandList()->IASetIndexBuffer(&m_BufferView);
 	}
 
 
 	Dx12ConstantBuffer::Dx12ConstantBuffer(uint32_t size, uint32_t count, uint32_t registerIndex)
 	{
+		ARC_PROFILE_SCOPE()
+
 		m_RegisterIndex = registerIndex;
 		m_Size = size;
 		m_Count = count;
@@ -153,6 +171,8 @@ namespace ArcEngine
 
 	Dx12ConstantBuffer::~Dx12ConstantBuffer()
 	{
+		ARC_PROFILE_SCOPE()
+
 		for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
 		{
 			Dx12Context::GetSrvHeap()->Free(m_Handle[i]);
@@ -164,6 +184,8 @@ namespace ArcEngine
 
 	void Dx12ConstantBuffer::SetData(const void* data, uint32_t size, uint32_t index)
 	{
+		ARC_PROFILE_SCOPE()
+
 		ARC_CORE_ASSERT(m_Count > index, "Constant buffer index can't be greater than count! Overflow!")
 
 		SetBufferData(m_Resource[Dx12Context::GetCurrentFrameIndex()], data, size == 0 ? m_Size : size, m_AlignedSize * index);
@@ -171,6 +193,8 @@ namespace ArcEngine
 
 	void Dx12ConstantBuffer::Bind(uint32_t index) const
 	{
+		ARC_PROFILE_SCOPE()
+
 		ARC_CORE_ASSERT(m_Count > index, "Constant buffer index can't be greater than count! Overflow!")
 
 		const auto gpuVirtualAddress = m_Resource[Dx12Context::GetCurrentFrameIndex()]->GetGPUVirtualAddress() + m_AlignedSize * index;

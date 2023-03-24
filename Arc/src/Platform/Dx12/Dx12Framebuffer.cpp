@@ -165,6 +165,8 @@ namespace ArcEngine
 
 	void Dx12Framebuffer::Clear()
 	{
+		ARC_PROFILE_SCOPE()
+
 		auto* commandList = Dx12Context::GetGraphicsCommandList();
 		const auto backFrame = Dx12Context::GetCurrentFrameIndex();
 
@@ -234,6 +236,8 @@ namespace ArcEngine
 
 	void Dx12Framebuffer::TransitionTo(D3D12_RESOURCE_STATES colorAttachmentState, D3D12_RESOURCE_STATES depthAttachmentState)
 	{
+		ARC_PROFILE_SCOPE()
+
 		const auto backFrame = Dx12Context::GetCurrentFrameIndex();
 
 		D3D12_RESOURCE_BARRIER barriers[20];

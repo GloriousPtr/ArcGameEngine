@@ -135,6 +135,8 @@ namespace ArcEngine
 
 	Ref<Texture2D> Material::GetTexture(const std::string_view& name)
 	{
+		ARC_PROFILE_SCOPE()
+
 		const auto it = m_Indices.find(name.data());
 		[[likely]]
 		if (it != m_Indices.end())
@@ -147,6 +149,8 @@ namespace ArcEngine
 
 	void Material::SetTexture(const std::string_view& name, const Ref<Texture2D>& texture)
 	{
+		ARC_PROFILE_SCOPE()
+
 		const auto it = m_Indices.find(name.data());
 		[[likely]]
 		if (it != m_Indices.end())

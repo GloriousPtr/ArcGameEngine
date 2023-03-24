@@ -189,6 +189,8 @@ namespace ArcEngine
 
 		if(s_Data->QuadIndexCount && s_Data->TexturePipeline->Bind())
 		{
+			ARC_PROFILE_SCOPE("Draw Quads")
+
 			const auto dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Data->QuadVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Data->QuadVertexBufferBase));
 			s_Data->QuadVertexBuffer->SetData(s_Data->QuadVertexBufferBase, dataSize);
 			s_Data->TexturePipeline->SetData("Textures", s_Data->TextureSlots.data(), sizeof(uint32_t) * s_Data->TextureSlotIndex);
@@ -198,6 +200,8 @@ namespace ArcEngine
 		
 		if (s_Data->LineVertexCount && s_Data->LinePipeline->Bind())
 		{
+			ARC_PROFILE_SCOPE("Draw Lines")
+
 			const auto dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Data->LineVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Data->LineVertexBufferBase));
 			s_Data->LineVertexBuffer->SetData(s_Data->LineVertexBufferBase, dataSize);
 			RenderCommand::DrawLines(s_Data->LineVertexBuffer, s_Data->LineVertexCount);
@@ -207,8 +211,6 @@ namespace ArcEngine
 
 	void Renderer2D::NextBatch()
 	{
-		ARC_PROFILE_SCOPE()
-
 		Flush();
 		StartBatch();
 	}
@@ -347,15 +349,11 @@ namespace ArcEngine
 
 	void Renderer2D::ResetStats()
 	{
-		ARC_PROFILE_SCOPE()
-
 		memset(&s_Data->Stats, 0, sizeof(Statistics));
 	}
 
 	Renderer2D::Statistics Renderer2D::GetStats()
 	{
-		ARC_PROFILE_SCOPE()
-
 		return s_Data->Stats;
 	}
 }

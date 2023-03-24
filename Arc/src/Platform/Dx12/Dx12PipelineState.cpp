@@ -68,6 +68,8 @@ namespace ArcEngine
 		MaterialPropertyMap& outMaterialProperties,
 		BufferMap& bufferMap)
 	{
+		ARC_PROFILE_SCOPE()
+
 		D3D12_SHADER_DESC shaderDesc;
 		reflection->GetDesc(&shaderDesc);
 
@@ -181,6 +183,8 @@ namespace ArcEngine
 	Dx12PipelineState::Dx12PipelineState(const Ref<Shader>& shader, const PipelineSpecification& spec)
 		: m_Specification(spec)
 	{
+		ARC_PROFILE_SCOPE()
+
 		using Microsoft::WRL::ComPtr;
 
 		const auto* dxShader = reinterpret_cast<const Dx12Shader*>(shader.get());
@@ -440,6 +444,8 @@ namespace ArcEngine
 
 	Dx12PipelineState::~Dx12PipelineState()
 	{
+		ARC_PROFILE_SCOPE()
+
 		if (m_PipelineState)
 			m_PipelineState->Release();
 		if (m_RootSignature)
@@ -448,6 +454,8 @@ namespace ArcEngine
 
 	bool Dx12PipelineState::Bind()
 	{
+		ARC_PROFILE_SCOPE()
+
 		if (!m_RootSignature || !m_PipelineState)
 			return false;
 
@@ -459,6 +467,8 @@ namespace ArcEngine
 
 	bool Dx12PipelineState::Unbind()
 	{
+		ARC_PROFILE_SCOPE()
+
 		if (!m_RootSignature || !m_PipelineState)
 			return false;
 
@@ -470,6 +480,8 @@ namespace ArcEngine
 
 	void Dx12PipelineState::SetDataImpl(const std::string& name, const void* data, uint32_t size, uint32_t offset)
 	{
+		ARC_PROFILE_SCOPE()
+
 		const int32_t slot = m_BufferMap.at(name);
 		Dx12Context::GetGraphicsCommandList()->SetGraphicsRoot32BitConstants(slot, size / 4, data, offset);
 	}
