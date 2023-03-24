@@ -47,6 +47,8 @@ namespace ArcEngine
 		uint32_t Samples = 1;
 
 		bool SwapChainTarget = false;
+
+		std::string Name = "Unknown Framebuffer";
 	};
 	
 	class Framebuffer

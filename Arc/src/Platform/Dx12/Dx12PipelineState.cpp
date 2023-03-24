@@ -6,6 +6,7 @@
 #include <dxc/inc/dxcapi.h>
 #include <dxc/inc/d3d12shader.h>
 
+#include "DxHelper.h"
 #include "d3dx12.h"
 #include "Dx12Framebuffer.h"
 #include "Dx12Shader.h"
@@ -201,7 +202,7 @@ namespace ArcEngine
 			return;
 		}
 
-		_bstr_t shaderName = shader->GetName().c_str();
+		_bstr_t shaderName = ToWCSTR(shader->GetName().c_str());
 		struct Layout
 		{
 			std::string Name;

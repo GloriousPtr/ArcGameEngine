@@ -43,6 +43,7 @@ namespace ArcEngine
 				spec.Attachments = { FramebufferTextureFormat::R11G11B10F, FramebufferTextureFormat::Depth };
 				spec.Width = width;
 				spec.Height = height;
+				spec.Name = "Composite Pass Framebuffer";
 				CompositePassTarget = Framebuffer::Create(spec);
 			}
 
@@ -57,6 +58,7 @@ namespace ArcEngine
 				};
 				spec.Width = width;
 				spec.Height = height;
+				spec.Name = "Render Pass Framebuffer";
 				RenderPassTarget = Framebuffer::Create(spec);
 			}
 
@@ -65,7 +67,9 @@ namespace ArcEngine
 				spec.Attachments = { FramebufferTextureFormat::R11G11B10F };
 				spec.Width = width;
 				spec.Height = height;
+				spec.Name = "Lighting Pass Framebuffer";
 				LightingPassTarget = Framebuffer::Create(spec);
+				spec.Name = "FXAA Pass Framebuffer";
 				FXAAPassTarget = Framebuffer::Create(spec);
 			}
 
@@ -75,6 +79,7 @@ namespace ArcEngine
 			bloomSpec.Attachments = { FramebufferTextureFormat::R11G11B10F };
 			bloomSpec.Width = width;
 			bloomSpec.Height = height;
+			bloomSpec.Name = "Prefiltered Pass Framebuffer";
 			PrefilteredFramebuffer = Framebuffer::Create(bloomSpec);
 
 			BlurSamples = 0;
@@ -92,6 +97,7 @@ namespace ArcEngine
 				blurSpec.Attachments = { FramebufferTextureFormat::R11G11B10F };
 				blurSpec.Width = width;
 				blurSpec.Height = height;
+				blurSpec.Name = std::format("Blur Spec Pass Framebuffer {}", i);
 				TempBlurFramebuffers[i] = Framebuffer::Create(bloomSpec);
 				DownsampledFramebuffers[i] = Framebuffer::Create(blurSpec);
 				UpsampledFramebuffers[i] = Framebuffer::Create(blurSpec);

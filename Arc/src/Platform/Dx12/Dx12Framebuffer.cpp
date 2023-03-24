@@ -1,6 +1,7 @@
 #include "arcpch.h"
 #include "Dx12Framebuffer.h"
 
+#include "DxHelper.h"
 #include "d3dx12.h"
 #include "Dx12Allocator.h"
 
@@ -76,6 +77,7 @@ namespace ArcEngine
 				dsvDesc.Texture2D.MipSlice = 0;
 				dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
 
+				int i = 0;
 				for (auto& depthAttachment : m_DepthAttachment)
 				{
 					D3D12MA::Allocation* allocation;
@@ -89,7 +91,9 @@ namespace ArcEngine
 
 					depthAttachment = { state, allocation, srvHandle, dsvHandle };
 
-					resource->SetName(L"Depth Resource");
+					std::string resourceName = fmt::format("Depth Resource ({}): {}", i, m_Specification.Name);
+					NameResource(allocation, resourceName.c_str())
+					++i;
 				}
 			}
 			else
@@ -120,8 +124,8 @@ namespace ArcEngine
 					colorAttachment.emplace_back(state, allocation, srvHandle, rtvHandle);
 					m_RtvHandles[i].emplace_back(rtvHandle.CPU);
 
-					resource->SetName(L"Color Resource");
-
+					std::string resourceName = fmt::format("Color Resource ({}): {}", i, m_Specification.Name);
+					NameResource(allocation, resourceName.c_str())
 					++i;
 				}
 			}
