@@ -81,10 +81,6 @@ namespace ArcEngine
 		Dx12Context::GetGraphicsCommandList()->IASetVertexBuffers(0, 1, &m_BufferView);
 	}
 
-	void Dx12VertexBuffer::Unbind() const
-	{
-	}
-
 	void Dx12VertexBuffer::SetData(const void* data, uint32_t size)
 	{
 		const auto toCommonBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_Resource, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
@@ -129,12 +125,6 @@ namespace ArcEngine
 	{
 		Dx12Context::GetGraphicsCommandList()->IASetIndexBuffer(&m_BufferView);
 	}
-
-	void Dx12IndexBuffer::Unbind() const
-	{
-	}
-
-
 
 
 	Dx12ConstantBuffer::Dx12ConstantBuffer(uint32_t size, uint32_t count, uint32_t registerIndex)
@@ -185,9 +175,5 @@ namespace ArcEngine
 
 		const auto gpuVirtualAddress = m_Resource[Dx12Context::GetCurrentFrameIndex()]->GetGPUVirtualAddress() + m_AlignedSize * index;
 		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(m_RegisterIndex, gpuVirtualAddress);
-	}
-
-	void Dx12ConstantBuffer::Unbind() const
-	{
 	}
 }

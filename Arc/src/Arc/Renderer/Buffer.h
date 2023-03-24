@@ -111,7 +111,6 @@ namespace ArcEngine
 		virtual ~VertexBuffer() = default;
 		
 		virtual void Bind() const = 0;
-		virtual void Unbind() const = 0;
 
 		virtual void SetData(const void* data, uint32_t size) = 0;
 		
@@ -125,7 +124,6 @@ namespace ArcEngine
 		virtual ~IndexBuffer() = default;
 
 		virtual void Bind() const = 0;
-		virtual void Unbind() const = 0;
 
 		[[nodiscard]] virtual uint32_t GetCount() const = 0;
 
@@ -138,7 +136,6 @@ namespace ArcEngine
 		virtual ~ConstantBuffer() = default;
 
 		virtual void Bind(uint32_t index) const = 0;
-		virtual void Unbind() const = 0;
 		virtual void SetData(const void* data, uint32_t size, uint32_t index) = 0;
 
 		[[nodiscard]] static Ref<ConstantBuffer> Create(uint32_t size, uint32_t count, uint32_t registerIndex);

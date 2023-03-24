@@ -17,10 +17,6 @@ namespace ArcEngine
 		m_IndexBuffer->Bind();
 	}
 
-	void Dx12VertexArray::Unbind() const
-	{
-	}
-
 	void Dx12VertexArray::AddVertexBuffer(Ref<VertexBuffer>& vertexBuffer)
 	{
 		m_VertexBuffers.push_back(vertexBuffer);

@@ -13,7 +13,6 @@ namespace ArcEngine
 		virtual ~VertexArray() = default;
 		
 		virtual void Bind() const = 0;
-		virtual void Unbind() const = 0;
 
 		virtual void AddVertexBuffer(Ref<VertexBuffer>& vertexBuffer) = 0;
 		virtual void SetIndexBuffer(Ref<IndexBuffer>& indexBuffer) = 0;

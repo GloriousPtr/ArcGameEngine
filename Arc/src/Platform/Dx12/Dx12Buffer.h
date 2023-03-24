@@ -16,7 +16,6 @@ namespace ArcEngine
 		Dx12VertexBuffer(Dx12VertexBuffer&& other) = default;
 
 		void Bind() const override;
-		void Unbind() const override;
 
 		void SetData(const void* data, uint32_t size) override;
 
@@ -36,7 +35,6 @@ namespace ArcEngine
 		Dx12IndexBuffer(Dx12IndexBuffer&& other) = default;
 
 		void Bind() const override;
-		void Unbind() const override;
 
 		[[nodiscard]] uint32_t GetCount() const override { return m_Count; }
 
@@ -55,7 +53,6 @@ namespace ArcEngine
 
 		void SetData(const void* data, uint32_t size, uint32_t index) override;
 		void Bind(uint32_t index) const override;
-		void Unbind() const override;
 
 	private:
 		DescriptorHandle				m_Handle[Dx12Context::FrameCount]{};

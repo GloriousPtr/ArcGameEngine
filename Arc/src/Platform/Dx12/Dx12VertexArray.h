@@ -14,7 +14,6 @@ namespace ArcEngine
 		Dx12VertexArray(Dx12VertexArray&& other) = default;
 
 		void Bind() const override;
-		void Unbind() const override;
 		void AddVertexBuffer(Ref<VertexBuffer>& vertexBuffer) override;
 		void SetIndexBuffer(Ref<IndexBuffer>& indexBuffer) override;
 		[[nodiscard]] const std::vector<Ref<VertexBuffer>>& GetVertexBuffer() const override { return m_VertexBuffers; }
