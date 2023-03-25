@@ -21,11 +21,11 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		s_WhiteTexture = Texture2D::Create(1, 1);
+		s_WhiteTexture = Texture2D::Create(1, 1, TextureFormat::RGBA8);
 		uint32_t whiteTextureData = 0xffffffff;
 		s_WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 
-		s_BlackTexture = Texture2D::Create(1, 1);
+		s_BlackTexture = Texture2D::Create(1, 1, TextureFormat::RGBA8);
 		uint32_t blackTextureData = 0x000000ff;
 		s_BlackTexture->SetData(&blackTextureData, sizeof(uint32_t));
 	}
@@ -66,7 +66,7 @@ namespace ArcEngine
 			data = stbi_load(path.data(), &width, &height, &channels, 0);
 		}
 		ARC_CORE_ASSERT(data, "Failed to load image!")
-		Application::Get().SubmitToMainThread([tex, path, width, height, data, channels]() { tex->Invalidate(path, width, height, data, channels); stbi_image_free(data); });
+		Application::Get().SubmitToMainThread([tex, path, width, height, data]() { tex->Invalidate(path, width, height, data); stbi_image_free(data); });
 	}
 
 	Ref<Texture2D>& AssetManager::GetTexture2D(const std::string& path)
@@ -77,7 +77,7 @@ namespace ArcEngine
 		if (it != m_Texture2DMap.end())
 			return it->second;
 
-		Ref<Texture2D> texture = Texture2D::Create(path);
+		Ref<Texture2D> texture = Texture2D::Create(path, TextureFormat::RGBA8);
 		m_Texture2DMap.emplace(path, texture);
 		//m_Futures.push_back(std::async(std::launch::async, &LoadTexture2D, texture.get(), path));
 		return m_Texture2DMap[path];
@@ -96,7 +96,7 @@ namespace ArcEngine
 			data = stbi_loadf(path.data(), &width, &height, &channels, 0);
 		}
 		ARC_CORE_ASSERT(data, "Failed to load image!")
-		Application::Get().SubmitToMainThread([tex, path, width, height, data, channels]() { tex->Invalidate(path, width, height, data, channels); stbi_image_free(data); });
+		Application::Get().SubmitToMainThread([tex, path, width, height, data]() { tex->Invalidate(path, width, height, data); stbi_image_free(data); });
 	}
 
 	Ref<TextureCubemap>& AssetManager::GetTextureCubemap(const std::string& path)

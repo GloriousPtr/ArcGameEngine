@@ -6,16 +6,28 @@
 
 #include <stb_image.h>
 
+#include "DxHelper.h"
+
 namespace ArcEngine
 {
-	Dx12Texture2D::Dx12Texture2D(uint32_t width, uint32_t height)
-		: m_Width(width), m_Height(height)
+	Dx12Texture2D::Dx12Texture2D(TextureFormat format)
+		: m_Format(format)
 	{
+		m_Channels = ChannelCountFromFormat(m_Format);
 	}
 
-	Dx12Texture2D::Dx12Texture2D(const std::string& path)
+	Dx12Texture2D::Dx12Texture2D(uint32_t width, uint32_t height, TextureFormat format)
+		: m_Format(format), m_Width(width), m_Height(height)
+	{
+		m_Channels = ChannelCountFromFormat(m_Format);
+	}
+
+	Dx12Texture2D::Dx12Texture2D(const std::string& path, TextureFormat format)
+		: m_Format(format)
 	{
 		ARC_PROFILE_SCOPE()
+
+		m_Channels = ChannelCountFromFormat(m_Format);
 
 		stbi_set_flip_vertically_on_load(0);
 
@@ -23,11 +35,11 @@ namespace ArcEngine
 		stbi_uc* data = nullptr;
 		{
 			ARC_PROFILE_SCOPE("stbi_load Texture")
-			data = stbi_load(path.c_str(), &width, &height, &channels, 4);
+			data = stbi_load(path.c_str(), &width, &height, &channels, static_cast<int>(m_Channels));
 		}
 		ARC_CORE_ASSERT(data, "Failed to load image!")
 
-		InvalidateImpl(path, width, height, data, channels);
+		InvalidateImpl(path, width, height, data);
 
 		stbi_image_free(data);
 	}
@@ -53,15 +65,16 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		ARC_CORE_ASSERT(m_Width * m_Height == size / 4)
+		ARC_CORE_ASSERT(m_Width * m_Height == size / m_Channels)
 
-		InvalidateImpl("", m_Width, m_Height, data, 4);
+		InvalidateImpl("", m_Width, m_Height, data);
 	}
 
-	void Dx12Texture2D::Invalidate(std::string_view path, uint32_t width, uint32_t height, const void* data,
-		uint32_t channels)
+	void Dx12Texture2D::Invalidate(std::string_view path, uint32_t width, uint32_t height, const void* data)
 	{
-		InvalidateImpl(path, width, height, data, channels);
+		ARC_PROFILE_SCOPE()
+
+		InvalidateImpl(path, width, height, data);
 	}
 
 	void Dx12Texture2D::Bind(uint32_t slot) const
@@ -71,65 +84,15 @@ namespace ArcEngine
 		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(slot, m_Handle.GPU);
 	}
 
-	void Dx12Texture2D::InvalidateImpl(std::string_view path, uint32_t width, uint32_t height, const void* data,
-		uint32_t channels)
+	void Dx12Texture2D::InvalidateImpl(std::string_view path, uint32_t width, uint32_t height, const void* data)
 	{
-		ARC_PROFILE_SCOPE()
-
 		m_Width = width;
 		m_Height = height;
-
-		DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		switch (channels)
-		{
-			case 1:
-				format = DXGI_FORMAT_R8_UNORM;
-				break;
-			case 2:
-				format = DXGI_FORMAT_R8G8_UNORM;
-				break;
-			case 3:
-				format = DXGI_FORMAT_R8G8B8A8_UNORM;
-				break;
-			case 4:
-				format = DXGI_FORMAT_R8G8B8A8_UNORM;
-				break;
-			default:
-				ARC_CORE_ERROR("Texture channel count is not within (1-4) range. Channel count: {}", channels);
-				break;
-		}
-
-		const auto resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(format, width, height, 1, 1);
-		Dx12Allocator::CreateTextureResource(D3D12_HEAP_TYPE_DEFAULT, &resourceDesc, D3D12_RESOURCE_STATE_COPY_DEST, &m_ImageAllocation);
-		ID3D12Resource* resource = m_ImageAllocation->GetResource();
-
-		D3D12MA::ALLOCATION_DESC uploadAllocation{};
-		uploadAllocation.HeapType = D3D12_HEAP_TYPE_UPLOAD;
-		const auto uploadBufferSize = GetRequiredIntermediateSize(resource, 0, 1);
-		const auto uploadBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
-		Dx12Allocator::CreateTextureResource(D3D12_HEAP_TYPE_UPLOAD, &uploadBufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, &m_UploadImageAllocation);
-		ID3D12Resource* uploadResource = m_UploadImageAllocation->GetResource();
-
-		D3D12_SUBRESOURCE_DATA srcData{};
-		srcData.pData = data;
-		srcData.RowPitch = width * 4;
-		srcData.SlicePitch = width * height * 4;
-
-		auto* commandList = Dx12Context::GetUploadCommandList();
-		UpdateSubresources(commandList, resource, uploadResource, 0, 0, 1, &srcData);
-		const auto transition = CD3DX12_RESOURCE_BARRIER::Transition(resource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		commandList->ResourceBarrier(1, &transition);
-
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.Format = format;
-		srvDesc.Texture2D.MipLevels = 1;
-		srvDesc.Texture2D.MostDetailedMip = 0;
-		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+		m_Path = path;
 
 		m_Handle = Dx12Context::GetSrvHeap()->Allocate();
 		m_HeapStart = Dx12Context::GetSrvHeap()->GpuStart();
-		Dx12Context::GetDevice()->CreateShaderResourceView(resource, &srvDesc, m_Handle.CPU);
+
+		Dx12Utils::CreateTexture(&m_ImageAllocation, &m_UploadImageAllocation, D3D12_SRV_DIMENSION_TEXTURE2D, Dx12Utils::Dx12FormatFromTextureFormat(m_Format), m_Width, m_Height, 1, m_Channels, data, &m_Handle, nullptr);
 	}
 }

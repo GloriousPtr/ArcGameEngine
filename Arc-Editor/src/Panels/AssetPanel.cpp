@@ -280,8 +280,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		m_DirectoryIcon = Texture2D::Create("Resources/Icons/ContentBrowser/DirectoryIcon.png");
-		m_FileIcon = Texture2D::Create("Resources/Icons/ContentBrowser/FileIcon.png");
+		m_DirectoryIcon = AssetManager::GetTexture2D("Resources/Icons/ContentBrowser/DirectoryIcon.png");
+		m_FileIcon = AssetManager::GetTexture2D("Resources/Icons/ContentBrowser/FileIcon.png");
 
 		m_AssetsDirectory = Project::GetAssetDirectory();
 		m_CurrentDirectory = m_AssetsDirectory;
