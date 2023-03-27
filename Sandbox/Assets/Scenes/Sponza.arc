@@ -87,6 +87,25 @@ Entities:
       CutOffAngle: 12.5
       OuterCutOffAngle: 17.5
       ShadowQuality: 2
+  - Entity: 6631891353277229707
+    TagComponent:
+      Tag: Sky Light
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 0
+      ChildrenCount: 2
+      Children:
+        0: 34557238050364489
+        1: 13464390929186834787
+    SkyLightComponent:
+      TexturePath: Textures/Cubemap.hdr
+      Intensity: 0.699999988
+      Rotation: 0
   - Entity: 3496615779418459996
     TagComponent:
       Tag: sponza_sponza_vase_round
