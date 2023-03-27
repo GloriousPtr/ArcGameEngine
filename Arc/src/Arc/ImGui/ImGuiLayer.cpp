@@ -131,9 +131,6 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		bool open = true;
-		ImGui::ShowDemoWindow(&open);
-
 		ImGuiIO& io = ImGui::GetIO();
 		const Window& window = Application::Get().GetWindow();
 		io.DisplaySize = ImVec2(static_cast<float>(window.GetWidth()), static_cast<float>(window.GetHeight()));
