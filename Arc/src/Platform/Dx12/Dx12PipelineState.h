@@ -22,6 +22,8 @@ namespace ArcEngine
 
 	private:
 		void SetDataImpl(const std::string& name, const void* value, uint32_t size, uint32_t offset) override;
+		void MakeGraphicsPipeline(const Ref<Shader>& shader);
+		void MakeComputePipeline(const Ref<Shader>& shader);
 
 	private:
 		ID3D12RootSignature*		m_RootSignature = nullptr;

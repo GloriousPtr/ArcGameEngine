@@ -13,11 +13,12 @@
 
 namespace ArcEngine
 {
-	Dx12Shader::Dx12Shader(const std::filesystem::path& filepath)
+	Dx12Shader::Dx12Shader(const std::filesystem::path& filepath, ShaderType type)
 	{
 		ARC_PROFILE_SCOPE()
 
 		m_Name = filepath.filename().string();
+		m_Type = type;
 		Compile(filepath);
 	}
 
@@ -54,12 +55,14 @@ namespace ArcEngine
 	{
 		{ ShaderType::Vertex,		L"vs_6_6" },
 		{ ShaderType::Pixel,		L"ps_6_6" },
+		{ ShaderType::Compute,		L"cs_6_6" },
 	};
 
 	inline static std::map<ShaderType, const wchar_t*> s_EntryPointMap
 	{
 		{ ShaderType::Vertex,		L"VS_Main" },
 		{ ShaderType::Pixel,		L"PS_Main" },
+		{ ShaderType::Compute,		L"CS_Main" },
 	};
 
 	static IDxcBlob* CompileShader(
@@ -216,20 +219,37 @@ namespace ArcEngine
 		const std::vector<const wchar_t*> defs;
 
 		// Compile shaders
-		IDxcBlob* vertReflection = nullptr;
-		IDxcBlob* pixelReflection = nullptr;
-		auto* vertexShader = CompileShader(filepath, source, includeHandler, ShaderType::Vertex, args, defs, &vertReflection);
-		auto* pixelShader = CompileShader(filepath, source, includeHandler, ShaderType::Pixel, args, defs, &pixelReflection);
-		
-		if (!vertexShader || !pixelShader)
+		if (m_Type == ShaderType::Pixel || m_Type == ShaderType::Vertex)
 		{
-			ARC_CORE_ERROR("Failed to compile shader: {}", filepath);
-			return;
-		}
+			IDxcBlob* vertReflection = nullptr;
+			IDxcBlob* pixelReflection = nullptr;
+			auto* vertexShader = CompileShader(filepath, source, includeHandler, ShaderType::Vertex, args, defs, &vertReflection);
+			auto* pixelShader = CompileShader(filepath, source, includeHandler, ShaderType::Pixel, args, defs, &pixelReflection);
 
-		m_ShaderBlobs[ShaderType::Vertex] = vertexShader;
-		m_ShaderBlobs[ShaderType::Pixel] = pixelShader;
-		m_ReflectionBlobs[ShaderType::Vertex] = vertReflection;
-		m_ReflectionBlobs[ShaderType::Pixel] = pixelReflection;
+			if (!vertexShader || !pixelShader)
+			{
+				ARC_CORE_ERROR("Failed to compile shader: {}", filepath);
+				return;
+			}
+
+			m_ShaderBlobs[ShaderType::Vertex] = vertexShader;
+			m_ShaderBlobs[ShaderType::Pixel] = pixelShader;
+			m_ReflectionBlobs[ShaderType::Vertex] = vertReflection;
+			m_ReflectionBlobs[ShaderType::Pixel] = pixelReflection;
+		}
+		else if (m_Type == ShaderType::Compute)
+		{
+			IDxcBlob* computeReflection = nullptr;
+			auto* computeShader = CompileShader(filepath, source, includeHandler, ShaderType::Compute, args, defs, &computeReflection);
+
+			if (!computeShader)
+			{
+				ARC_CORE_ERROR("Failed to compile shader: {}", filepath);
+				return;
+			}
+
+			m_ShaderBlobs[ShaderType::Compute] = computeShader;
+			m_ReflectionBlobs[ShaderType::Compute] = computeReflection;
+		}
 	}
 }

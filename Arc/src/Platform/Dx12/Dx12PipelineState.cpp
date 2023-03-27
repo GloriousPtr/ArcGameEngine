@@ -64,8 +64,9 @@ namespace ArcEngine
 	}
 
 	static void AppendMaterials(const Microsoft::WRL::ComPtr<ID3D12ShaderReflection>& reflection,
-		std::vector<D3D12_ROOT_PARAMETER>& outRootParams,
-		std::vector<D3D12_DESCRIPTOR_RANGE>& outDescriptors,
+		std::vector<D3D12_ROOT_PARAMETER1>& outRootParams,
+		std::array<D3D12_DESCRIPTOR_RANGE1, 20>& outDescriptors,
+		uint32_t* outDescriptorsEnd,
 		MaterialPropertyMap& outMaterialProperties,
 		BufferMap& bufferMap)
 	{
@@ -88,96 +89,125 @@ namespace ArcEngine
 
 			std::string bufferName = shaderInputBindDesc.Name;
 
+			if (bufferMap.contains(bufferName))
+				continue;
+
 			bool supported = shaderInputBindDesc.Type != D3D_SIT_SAMPLER;
 			bool tex = shaderInputBindDesc.Type == D3D_SIT_TEXTURE;
 			bool cbuffer = shaderInputBindDesc.Type == D3D_SIT_CBUFFER;
 			bool bindlessTextures = cbuffer && bufferName == "Textures";
 			bool materialProperties = bufferName == "MaterialProperties";
-			if (supported)
+
+			CD3DX12_ROOT_PARAMETER1 rootParameter;
+			switch (shaderInputBindDesc.Type)
 			{
-				CD3DX12_ROOT_PARAMETER rootParameter;
-				if (cbuffer && bufferName == "Textures")
-				{
-					rootParameter.InitAsConstants(32u, shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space);
-				}
-				else if (cbuffer && bufferName == "Transform")
-				{
-					rootParameter.InitAsConstants(16u, shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space);
-				}
-				else if (tex)
-				{
-					CD3DX12_DESCRIPTOR_RANGE range;
-					range.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, shaderInputBindDesc.BindCount, shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space);
-					size_t index = outDescriptors.size();
-					outDescriptors.push_back(range);
-					rootParameter.InitAsDescriptorTable(1, &outDescriptors[index]);
-				}
-				else if (cbuffer)
-				{
-					rootParameter.InitAsConstantBufferView(shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space);
-				}
-				int32_t slot = static_cast<int32_t>(outRootParams.size());
-				outRootParams.emplace_back(rootParameter);
-
-
-
-
-
-				if (bindlessTextures || materialProperties)
-				{
-					for (uint32_t var = 0; var < constantBufferDesc.Variables; ++var)
+				case D3D_SIT_CBUFFER:
 					{
-						auto* variable = cb->GetVariableByIndex(var);
-
-						auto* variableType = variable->GetType();
-						D3D12_SHADER_TYPE_DESC variableTypeDesc;
-						variableType->GetDesc(&variableTypeDesc);
-						MaterialPropertyType type = GetVariableType(variableTypeDesc);
-						if (type == MaterialPropertyType::None)
+						if (bufferName == "Transform")
 						{
-							ARC_CORE_ERROR("Unsupported type in shader cbuffer!");
-							continue;
+							rootParameter.InitAsConstants(16u, shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space);
 						}
-
-						D3D12_SHADER_VARIABLE_DESC variableDesc;
-						variable->GetDesc(&variableDesc);
-
-						std::string variableName = variableDesc.Name;
-
-						if (bindlessTextures && type == MaterialPropertyType::UInt)
-							type = MaterialPropertyType::Texture2DBindless;
-
-						MaterialProperty property{};
-						property.Type = type;
-						property.SizeInBytes = variableDesc.Size;
-						property.IsSlider = variableName.ends_with("01");
-						property.DisplayName = variableDesc.Name + (property.IsSlider ? 2 : 0);
-						property.IsColor = variableName.find("color") != std::string::npos || variableName.find("Color") != std::string::npos;
-						property.Slot = slot;
-
-						outMaterialProperties.emplace(variableName, property);
-						bufferMap.emplace(variableName, slot);
-
-						offset += variableDesc.Size;
+						else if (bufferName == "Textures")
+						{
+							rootParameter.InitAsConstants(32u, shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space);
+						}
+						else
+						{
+							rootParameter.InitAsConstantBufferView(shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space);
+							rootParameter.Descriptor.Flags = D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC;
+						}
 					}
-				}
-				else if(tex)
+					break;
+				case D3D_SIT_TEXTURE:
+					{
+						CD3DX12_DESCRIPTOR_RANGE1 range;
+						range.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, shaderInputBindDesc.BindCount, shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space);
+						size_t index = *outDescriptorsEnd;
+						outDescriptors[index] = range;
+						rootParameter.InitAsDescriptorTable(1, &outDescriptors[index]);
+						++(*outDescriptorsEnd);
+					}
+					break;
+				case D3D_SIT_UAV_RWTYPED:
+					{
+						CD3DX12_DESCRIPTOR_RANGE1 range;
+						range.Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, shaderInputBindDesc.BindCount, shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space);
+						size_t index = *outDescriptorsEnd;
+						outDescriptors[index] = range;
+						rootParameter.InitAsDescriptorTable(1, &outDescriptors[index]);
+						++(*outDescriptorsEnd);
+					}
+					break;
+				case D3D_SIT_SAMPLER:
+				case D3D_SIT_STRUCTURED:
+				case D3D_SIT_TBUFFER:
+				case D3D_SIT_UAV_RWSTRUCTURED:
+				case D3D_SIT_BYTEADDRESS:
+				case D3D_SIT_UAV_RWBYTEADDRESS:
+				case D3D_SIT_UAV_APPEND_STRUCTURED:
+				case D3D_SIT_UAV_CONSUME_STRUCTURED:
+				case D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
+				case D3D_SIT_RTACCELERATIONSTRUCTURE:
+				case D3D_SIT_UAV_FEEDBACKTEXTURE:
+				default: continue;
+			}
+			const int32_t slot = static_cast<int32_t>(outRootParams.size());
+			outRootParams.emplace_back(rootParameter);
+
+			if (bindlessTextures || materialProperties)
+			{
+				for (uint32_t var = 0; var < constantBufferDesc.Variables; ++var)
 				{
+					auto* variable = cb->GetVariableByIndex(var);
+
+					auto* variableType = variable->GetType();
+					D3D12_SHADER_TYPE_DESC variableTypeDesc;
+					variableType->GetDesc(&variableTypeDesc);
+					MaterialPropertyType type = GetVariableType(variableTypeDesc);
+					if (type == MaterialPropertyType::None)
+					{
+						ARC_CORE_ERROR("Unsupported type in shader cbuffer!");
+						continue;
+					}
+
+					D3D12_SHADER_VARIABLE_DESC variableDesc;
+					variable->GetDesc(&variableDesc);
+
+					std::string variableName = variableDesc.Name;
+
+					if (bindlessTextures && type == MaterialPropertyType::UInt)
+						type = MaterialPropertyType::Texture2DBindless;
+
 					MaterialProperty property{};
-					property.Type = MaterialPropertyType::Texture2D;
-					property.SizeInBytes = sizeof(uint32_t);
-					property.IsSlider = false;
-					property.DisplayName = bufferName;
-					property.IsColor = false;
+					property.Type = type;
+					property.SizeInBytes = variableDesc.Size;
+					property.IsSlider = variableName.ends_with("01");
+					property.DisplayName = variableDesc.Name + (property.IsSlider ? 2 : 0);
+					property.IsColor = variableName.find("color") != std::string::npos || variableName.find("Color") != std::string::npos;
 					property.Slot = slot;
 
-					outMaterialProperties.emplace(bufferName, property);
+					outMaterialProperties.emplace(variableName, property);
+					bufferMap.emplace(variableName, slot);
 
-					offset += property.SizeInBytes;
+					offset += variableDesc.Size;
 				}
-
-				bufferMap.emplace(bufferName, slot);
 			}
+			else if(tex)
+			{
+				MaterialProperty property{};
+				property.Type = MaterialPropertyType::Texture2D;
+				property.SizeInBytes = sizeof(uint32_t);
+				property.IsSlider = false;
+				property.DisplayName = bufferName;
+				property.IsColor = false;
+				property.Slot = slot;
+
+				outMaterialProperties.emplace(bufferName, property);
+
+				offset += property.SizeInBytes;
+			}
+
+			bufferMap.emplace(bufferName, slot);
 		}
 	}
 
@@ -186,7 +216,74 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
+		switch(m_Specification.Type)
+		{
+			case ShaderType::None:  ARC_CORE_ASSERT(false, "Failed to create pipeline with unknown type") break;
+			case ShaderType::Vertex:
+			case ShaderType::Pixel: MakeGraphicsPipeline(shader); break;
+			case ShaderType::Compute: MakeComputePipeline(shader); break;
+			default: ARC_CORE_ASSERT(false, "Failed to create pipeline with unknown type")
+		}
+	}
+
+	Dx12PipelineState::~Dx12PipelineState()
+	{
+		ARC_PROFILE_SCOPE()
+
+		if (m_PipelineState)
+			m_PipelineState->Release();
+		if (m_RootSignature)
+			m_RootSignature->Release();
+	}
+
+	bool Dx12PipelineState::Bind() const
+	{
+		ARC_PROFILE_SCOPE()
+
+		if (!m_RootSignature || !m_PipelineState)
+			return false;
+
+		auto* commandList = Dx12Context::GetGraphicsCommandList();
+
+		ID3D12DescriptorHeap* descriptorHeap = Dx12Context::GetSrvHeap()->Heap();
+		commandList->SetDescriptorHeaps(1, &descriptorHeap);
+
+		if (m_Specification.Type == ShaderType::Vertex || m_Specification.Type == ShaderType::Pixel)
+			commandList->SetGraphicsRootSignature(m_RootSignature);
+		else if (m_Specification.Type == ShaderType::Compute)
+			commandList->SetComputeRootSignature(m_RootSignature);
+
+		commandList->SetPipelineState(m_PipelineState);
+
+		return true;
+	}
+
+	bool Dx12PipelineState::Unbind() const
+	{
+		ARC_PROFILE_SCOPE()
+
+		if (!m_RootSignature || !m_PipelineState)
+			return false;
+
+		auto* commandList = Dx12Context::GetGraphicsCommandList();
+		commandList->SetGraphicsRootSignature(nullptr);
+		commandList->SetPipelineState(nullptr);
+		return true;
+	}
+
+	void Dx12PipelineState::SetDataImpl(const std::string& name, const void* data, uint32_t size, uint32_t offset)
+	{
+		ARC_PROFILE_SCOPE()
+
+		const int32_t slot = m_BufferMap.at(name);
+		Dx12Context::GetGraphicsCommandList()->SetGraphicsRoot32BitConstants(slot, size / 4, data, offset);
+	}
+
+	void Dx12PipelineState::MakeGraphicsPipeline(const Ref<Shader>& shader)
+	{
 		using Microsoft::WRL::ComPtr;
+
+		const auto& graphicsSpec = m_Specification.GraphicsPipelineSpecs;
 
 		const auto* dxShader = reinterpret_cast<const Dx12Shader*>(shader.get());
 		const ComPtr<IDxcBlob> vertexShader = dxShader->m_ShaderBlobs.at(ShaderType::Vertex);
@@ -211,8 +308,9 @@ namespace ArcEngine
 		};
 		std::vector<Layout> inputLayout;
 		std::vector<Layout> outputLayout;
-		std::vector<D3D12_ROOT_PARAMETER> rootParams;
-		std::vector<D3D12_DESCRIPTOR_RANGE> rootDescriptors;
+		std::vector<D3D12_ROOT_PARAMETER1> rootParams;
+		std::array<D3D12_DESCRIPTOR_RANGE1, 20> rootDescriptors;
+		uint32_t rootDescriptorsEnd = 0;
 
 		if (vertexReflection)
 		{
@@ -245,7 +343,7 @@ namespace ArcEngine
 			}
 
 			// Get root parameters from shader reflection data.
-			AppendMaterials(reflect, rootParams, rootDescriptors, m_MaterialProperties, m_BufferMap);
+			AppendMaterials(reflect, rootParams, rootDescriptors, &rootDescriptorsEnd, m_MaterialProperties, m_BufferMap);
 		}
 
 		if (pixelReflection)
@@ -263,7 +361,7 @@ namespace ArcEngine
 			D3D12_SHADER_DESC shaderDesc;
 			reflect->GetDesc(&shaderDesc);
 
-			if (m_Specification.OutputFormats.empty())
+			if (graphicsSpec.OutputFormats.empty())
 			{
 				ARC_CORE_WARN("Generating output layout from reflection as none was provided to the pipeline: {}", shader->GetName());
 				for (uint32_t i = 0; i < shaderDesc.OutputParameters; ++i)
@@ -281,7 +379,7 @@ namespace ArcEngine
 				}
 			}
 
-			AppendMaterials(reflect, rootParams, rootDescriptors, m_MaterialProperties, m_BufferMap);
+			AppendMaterials(reflect, rootParams, rootDescriptors, &rootDescriptorsEnd, m_MaterialProperties, m_BufferMap);
 		}
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> psoInputLayout;
@@ -298,17 +396,22 @@ namespace ArcEngine
 		samplers[0].Init(0, D3D12_FILTER_ANISOTROPIC);
 
 		// Create root signature.
-		D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
-		rootSigDesc.NumParameters = static_cast<uint32_t>(rootParams.size());
-		rootSigDesc.pParameters = rootParams.data();
-		rootSigDesc.NumStaticSamplers = numSamplers;
-		rootSigDesc.pStaticSamplers = samplers;
-		rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-			D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED;
+		D3D12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc
+		{
+			.Version = D3D_ROOT_SIGNATURE_VERSION_1_1,
+			.Desc_1_1
+			{
+				.NumParameters = static_cast<uint32_t>(rootParams.size()),
+				.pParameters = rootParams.data(),
+				.NumStaticSamplers = numSamplers,
+				.pStaticSamplers = samplers,
+				.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED
+			}
+		};
 
 		ComPtr<ID3DBlob> rootBlob;
 		ComPtr<ID3DBlob> errorBlob;
-		hr = D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rootBlob, &errorBlob);
+		hr = D3D12SerializeVersionedRootSignature(&rootSigDesc, &rootBlob, &errorBlob);
 		if (FAILED(hr))
 		{
 			if (errorBlob)
@@ -324,6 +427,16 @@ namespace ArcEngine
 			return;
 		}
 		m_RootSignature->SetName(shaderName);
+
+
+
+
+
+
+
+
+
+
 
 
 		// PSO /////////////////////////////////////////////////////////////////////
@@ -353,13 +466,13 @@ namespace ArcEngine
 
 		// RasterizerState
 		psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-		switch(m_Specification.CullMode)
+		switch (graphicsSpec.CullMode)
 		{
 			case CullModeType::None:		psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE; break;
 			case CullModeType::Back:		psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK; break;
 			case CullModeType::Front:		psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_FRONT; break;
 		}
-		switch(m_Specification.FillMode)
+		switch (graphicsSpec.FillMode)
 		{
 			case FillModeType::Solid:		psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID; break;
 			case FillModeType::Wireframe:	psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME; break;
@@ -373,31 +486,25 @@ namespace ArcEngine
 		psoDesc.InputLayout.pInputElementDescs = psoInputLayout.data();
 
 		psoDesc.SampleMask = 0xFFFFFFFF;
-		switch(m_Specification.Primitive)
+		switch (graphicsSpec.Primitive)
 		{
 			case PrimitiveType::Triangle:	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; break;
 			case PrimitiveType::Line:		psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE; break;
 			case PrimitiveType::Point:		psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT; break;
 		}
 
-
-
-		bool depthEnabled = false;
-		if (m_Specification.EnableDepth)
+		if (graphicsSpec.EnableDepth && Framebuffer::IsDepthFormat(graphicsSpec.DepthFormat))
 		{
-			for (auto& format : m_Specification.OutputFormats)
-			{
-				if (Framebuffer::IsDepthFormat(format))
-				{
-					depthEnabled = true;
-					psoDesc.DSVFormat = Dx12Framebuffer::GetDxgiFormat(format);
-					break;
-				}
-			}
+			psoDesc.DSVFormat = Dx12Framebuffer::GetDxgiFormat(graphicsSpec.DepthFormat);
+			psoDesc.DepthStencilState.DepthEnable = true;
 		}
-		psoDesc.DepthStencilState.DepthEnable = depthEnabled;
+		else
+		{
+			psoDesc.DepthStencilState.DepthEnable = false;
+		}
 		psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-		switch(m_Specification.DepthFunc)
+
+		switch (graphicsSpec.DepthFunc)
 		{
 			case DepthFuncType::None:			psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_NONE; break;
 			case DepthFuncType::Never:			psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_NEVER; break;
@@ -410,10 +517,6 @@ namespace ArcEngine
 			case DepthFuncType::Always:			psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS; break;
 		}
 
-
-
-
-
 		if (!outputLayout.empty())
 		{
 			psoDesc.NumRenderTargets = static_cast<uint32_t>(outputLayout.size());
@@ -422,19 +525,16 @@ namespace ArcEngine
 		}
 		else
 		{
-			const uint32_t numRenderTargets = static_cast<uint32_t>(m_Specification.OutputFormats.size());
+			const uint32_t numRenderTargets = static_cast<uint32_t>(graphicsSpec.OutputFormats.size());
 			psoDesc.NumRenderTargets = numRenderTargets;
 			for (size_t i = 0; i < numRenderTargets; ++i)
-				psoDesc.RTVFormats[i] = Dx12Framebuffer::GetDxgiFormat(m_Specification.OutputFormats[i]);
+				psoDesc.RTVFormats[i] = Dx12Framebuffer::GetDxgiFormat(graphicsSpec.OutputFormats[i]);
 		}
 		psoDesc.SampleDesc.Count = 1;
 		psoDesc.SampleDesc.Quality = 0;
 		psoDesc.NodeMask = 0;
 
-
-
-		auto* device = Dx12Context::GetDevice();
-		hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_PipelineState));
+		hr = Dx12Context::GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_PipelineState));
 		if (FAILED(hr))
 		{
 			ARC_CORE_ERROR("Failed to create Pipeline State. Shader: {}", shader->GetName());
@@ -443,47 +543,96 @@ namespace ArcEngine
 		m_PipelineState->SetName(shaderName);
 	}
 
-	Dx12PipelineState::~Dx12PipelineState()
+	void Dx12PipelineState::MakeComputePipeline(const Ref<Shader>& shader)
 	{
-		ARC_PROFILE_SCOPE()
+		using Microsoft::WRL::ComPtr;
 
-		if (m_PipelineState)
-			m_PipelineState->Release();
-		if (m_RootSignature)
-			m_RootSignature->Release();
-	}
+		const auto* dxShader = reinterpret_cast<const Dx12Shader*>(shader.get());
+		const ComPtr<IDxcBlob> computeShader = dxShader->m_ShaderBlobs.at(ShaderType::Compute);
+		const ComPtr<IDxcBlob> computeReflection = dxShader->m_ReflectionBlobs.at(ShaderType::Compute);
 
-	bool Dx12PipelineState::Bind()
-	{
-		ARC_PROFILE_SCOPE()
+		ComPtr<IDxcUtils> utils = nullptr;
+		HRESULT hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&utils));
+		if (FAILED(hr))
+		{
+			ARC_CORE_ERROR("DxcUtils creation failed!");
+			return;
+		}
 
-		if (!m_RootSignature || !m_PipelineState)
-			return false;
+		_bstr_t shaderName = ToWCSTR(shader->GetName().c_str());
+		std::vector<D3D12_ROOT_PARAMETER1> rootParams;
+		std::array<D3D12_DESCRIPTOR_RANGE1, 20> rootDescriptors;
+		uint32_t rootDescriptorsEnd = 0;
 
-		auto* commandList = Dx12Context::GetGraphicsCommandList();
-		commandList->SetGraphicsRootSignature(m_RootSignature);
-		commandList->SetPipelineState(m_PipelineState);
-		return true;
-	}
+		if (computeReflection)
+		{
+			// Create reflection interface.
+			DxcBuffer reflectionData{};
+			reflectionData.Encoding = DXC_CP_ACP;
+			reflectionData.Ptr = computeReflection->GetBufferPointer();
+			reflectionData.Size = computeReflection->GetBufferSize();
 
-	bool Dx12PipelineState::Unbind()
-	{
-		ARC_PROFILE_SCOPE()
+			ComPtr<ID3D12ShaderReflection> reflect;
+			utils->CreateReflection(&reflectionData, IID_PPV_ARGS(&reflect));
 
-		if (!m_RootSignature || !m_PipelineState)
-			return false;
+			// Use reflection interface here.
+			D3D12_SHADER_DESC shaderDesc;
+			reflect->GetDesc(&shaderDesc);
 
-		auto* commandList = Dx12Context::GetGraphicsCommandList();
-		commandList->SetGraphicsRootSignature(nullptr);
-		commandList->SetPipelineState(nullptr);
-		return true;
-	}
+			// Get root parameters from shader reflection data.
+			AppendMaterials(reflect, rootParams, rootDescriptors, &rootDescriptorsEnd, m_MaterialProperties, m_BufferMap);
+		}
 
-	void Dx12PipelineState::SetDataImpl(const std::string& name, const void* data, uint32_t size, uint32_t offset)
-	{
-		ARC_PROFILE_SCOPE()
+		constexpr uint32_t numSamplers = 1;
+		CD3DX12_STATIC_SAMPLER_DESC samplers[1];
+		samplers[0].Init(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
 
-		const int32_t slot = m_BufferMap.at(name);
-		Dx12Context::GetGraphicsCommandList()->SetGraphicsRoot32BitConstants(slot, size / 4, data, offset);
+		// Create root signature.
+		D3D12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc
+		{
+			.Version = D3D_ROOT_SIGNATURE_VERSION_1_1,
+			.Desc_1_1
+			{
+				.NumParameters = static_cast<uint32_t>(rootParams.size()),
+				.pParameters = rootParams.data(),
+				.NumStaticSamplers = numSamplers,
+				.pStaticSamplers = samplers,
+				.Flags = D3D12_ROOT_SIGNATURE_FLAG_NONE
+			}
+		};
+
+		ComPtr<ID3DBlob> rootBlob;
+		ComPtr<ID3DBlob> errorBlob;
+		hr = D3D12SerializeVersionedRootSignature(&rootSigDesc, &rootBlob, &errorBlob);
+		if (FAILED(hr))
+		{
+			if (errorBlob)
+				ARC_CORE_ERROR("Failed to serialize Root Signature. Error: {}", static_cast<const char*>(errorBlob->GetBufferPointer()));
+
+			return;
+		}
+
+		auto* device = Dx12Context::GetDevice();
+
+		hr = device->CreateRootSignature(0, rootBlob->GetBufferPointer(), rootBlob->GetBufferSize(), IID_PPV_ARGS(&m_RootSignature));
+		if (FAILED(hr))
+		{
+			ARC_CORE_ERROR("Failed to create Root Signature. Shader: {}", shader->GetName());
+			return;
+		}
+		m_RootSignature->SetName(shaderName);
+
+		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc = {};
+		psoDesc.pRootSignature = m_RootSignature;
+		psoDesc.CS.pShaderBytecode = computeShader->GetBufferPointer();
+		psoDesc.CS.BytecodeLength = computeShader->GetBufferSize();
+
+		hr = device->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&m_PipelineState));
+		if (FAILED(hr))
+		{
+			ARC_CORE_ERROR("Failed to create Pipeline State. Shader: {}", shader->GetName());
+		}
+
+		m_PipelineState->SetName(shaderName);
 	}
 }

@@ -12,6 +12,7 @@ namespace ArcEngine
 		None = 0,
 		Vertex,
 		Pixel,
+		Compute,
 
 		Fragment = Pixel
 	};
@@ -25,7 +26,7 @@ namespace ArcEngine
 
 		[[nodiscard]] virtual const std::string& GetName() const = 0;
 
-		[[nodiscard]] static Ref<Shader> Create(const std::filesystem::path& filepath);
+		[[nodiscard]] static Ref<Shader> Create(const std::filesystem::path& filepath, ShaderType type);
 	};
 
 	class PipelineLibrary
@@ -40,6 +41,7 @@ namespace ArcEngine
 	private:
 
 		std::unordered_map<std::string, Ref<PipelineState>, UM_StringTransparentEquality> m_Pipelines;
+		std::unordered_map<std::string, Ref<Shader>, UM_StringTransparentEquality> m_Shaders;
 		std::unordered_map<std::string, std::string, UM_StringTransparentEquality> m_ShaderPaths;
 	};
 }

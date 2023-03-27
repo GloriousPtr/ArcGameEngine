@@ -97,16 +97,23 @@ namespace ArcEngine
 
 		auto& pipelineLibrary = Renderer::GetPipelineLibrary();
 
-		PipelineSpecification spec
 		{
-			.CullMode = CullModeType::Back,
-			.Primitive = PrimitiveType::Triangle,
-			.FillMode = FillModeType::Solid,
-			.EnableDepth = true,
-			.DepthFunc = DepthFuncType::Less,
-			.OutputFormats = {FramebufferTextureFormat::R11G11B10F, FramebufferTextureFormat::Depth}
-		};
-		s_Data->RenderPipeline = pipelineLibrary.Load("assets/shaders/PBR.hlsl", spec);
+			PipelineSpecification spec
+			{
+				.Type = ShaderType::Pixel,
+				.GraphicsPipelineSpecs
+				{
+					.CullMode = CullModeType::Back,
+					.Primitive = PrimitiveType::Triangle,
+					.FillMode = FillModeType::Solid,
+					.EnableDepth = true,
+					.DepthFunc = DepthFuncType::Less,
+					.DepthFormat = FramebufferTextureFormat::Depth,
+					.OutputFormats = {FramebufferTextureFormat::R11G11B10F}
+				}
+			};
+			s_Data->RenderPipeline = pipelineLibrary.Load("assets/shaders/PBR.hlsl", spec);
+		}
 
 		s_Data->CameraCB = ConstantBuffer::Create(sizeof(CameraData), 1, s_Data->RenderPipeline->GetSlot("Camera"));
 

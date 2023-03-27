@@ -112,12 +112,16 @@ namespace ArcEngine
 		{
 			const PipelineSpecification texture2dPippelineSpec
 			{
-				.CullMode = CullModeType::None,
-				.Primitive = PrimitiveType::Triangle,
-				.FillMode = FillModeType::Solid,
-				.EnableDepth = false,
-				.DepthFunc = DepthFuncType::Less,
-				.OutputFormats = { FramebufferTextureFormat::R11G11B10F }
+				.Type = ShaderType::Pixel,
+				.GraphicsPipelineSpecs
+				{
+					.CullMode = CullModeType::None,
+					.Primitive = PrimitiveType::Triangle,
+					.FillMode = FillModeType::Solid,
+					.EnableDepth = false,
+					.DepthFunc = DepthFuncType::Less,
+					.OutputFormats = { FramebufferTextureFormat::R11G11B10F }
+				}
 			};
 			s_Data->TexturePipeline = pipelineLibrary.Load("assets/shaders/Texture.hlsl", texture2dPippelineSpec);
 		}
@@ -127,12 +131,16 @@ namespace ArcEngine
 		{
 			const PipelineSpecification linePippelineSpec
 			{
-				.CullMode = CullModeType::None,
-				.Primitive = PrimitiveType::Line,
-				.FillMode = FillModeType::Solid,
-				.EnableDepth = false,
-				.DepthFunc = DepthFuncType::Less,
-				.OutputFormats = { FramebufferTextureFormat::R11G11B10F }
+				.Type = ShaderType::Pixel,
+				.GraphicsPipelineSpecs
+				{
+					.CullMode = CullModeType::None,
+					.Primitive = PrimitiveType::Line,
+					.FillMode = FillModeType::Solid,
+					.EnableDepth = false,
+					.DepthFunc = DepthFuncType::Less,
+					.OutputFormats = { FramebufferTextureFormat::R11G11B10F }
+				}
 			};
 			s_Data->LinePipeline = pipelineLibrary.Load("assets/shaders/Line.hlsl", linePippelineSpec);
 		}

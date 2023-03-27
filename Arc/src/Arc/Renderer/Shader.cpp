@@ -7,12 +7,12 @@
 
 namespace ArcEngine
 {
-	Ref<Shader> Shader::Create(const std::filesystem::path& filepath)
+	Ref<Shader> Shader::Create(const std::filesystem::path& filepath, ShaderType type)
 	{
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
-			case RendererAPI::API::Dx12:	return CreateRef<Dx12Shader>(filepath);
+			case RendererAPI::API::Dx12:	return CreateRef<Dx12Shader>(filepath, type);
 		}
 
 		ARC_CORE_ASSERT(false, "Unknown RendererAPI!")
@@ -26,12 +26,13 @@ namespace ArcEngine
 		const auto& name = shaderPath.filename().string();
 		ARC_CORE_ASSERT(!Exists(name), "Shader already exists!")
 
-		const auto shader = Shader::Create(shaderPath);
+		const auto shader = Shader::Create(shaderPath, spec.Type);
 		if (!shader)
 			return nullptr;
 
 		auto pipeline = PipelineState::Create(shader, spec);
 		m_Pipelines[name] = pipeline;
+		m_Shaders[name] = shader;
 		m_ShaderPaths[shader->GetName()] = shaderPath.string();
 
 		return pipeline;

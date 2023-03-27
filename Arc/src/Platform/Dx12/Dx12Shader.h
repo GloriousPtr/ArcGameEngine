@@ -10,7 +10,7 @@ namespace ArcEngine
 	class Dx12Shader : public Shader
 	{
 	public:
-		explicit Dx12Shader(const std::filesystem::path& filepath);
+		explicit Dx12Shader(const std::filesystem::path& filepath, ShaderType type);
 		~Dx12Shader() override;
 
 		Dx12Shader(const Dx12Shader& other) = default;
@@ -27,6 +27,7 @@ namespace ArcEngine
 		friend class Dx12PipelineState;
 
 		std::string										m_Name;
+		ShaderType										m_Type;
 		std::unordered_map<ShaderType, IDxcBlob*>		m_ShaderBlobs;
 		std::unordered_map<ShaderType, IDxcBlob*>		m_ReflectionBlobs;
 	};

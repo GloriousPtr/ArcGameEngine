@@ -10,14 +10,21 @@ namespace ArcEngine
 	enum class FillModeType { Solid, Wireframe };
 	enum class DepthFuncType { None = 0, Never, Less, Equal, LessEqual, Greater, NotEqual, GreaterEqual, Always };
 
-	struct PipelineSpecification
+	struct GraphicsPipelineSpecification
 	{
 		CullModeType CullMode = CullModeType::Back;
 		PrimitiveType Primitive = PrimitiveType::Triangle;
 		FillModeType FillMode = FillModeType::Solid;
 		bool EnableDepth = false;
 		DepthFuncType DepthFunc = DepthFuncType::Less;
+		FramebufferTextureFormat DepthFormat = FramebufferTextureFormat::Depth;
 		std::vector<FramebufferTextureFormat> OutputFormats{};
+	};
+
+	struct PipelineSpecification
+	{
+		ShaderType Type = ShaderType::None;
+		GraphicsPipelineSpecification GraphicsPipelineSpecs{};
 	};
 
 	enum class MaterialPropertyType
