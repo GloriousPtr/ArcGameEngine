@@ -7,15 +7,11 @@
 #include <stb_image.h>
 
 #include "DxHelper.h"
+#include "Arc/Renderer/PipelineState.h"
+#include "Arc/Renderer/Renderer.h"
 
 namespace ArcEngine
 {
-	Dx12Texture2D::Dx12Texture2D(TextureFormat format)
-		: m_Format(format)
-	{
-		m_Channels = ChannelCountFromFormat(m_Format);
-	}
-
 	Dx12Texture2D::Dx12Texture2D(uint32_t width, uint32_t height, TextureFormat format)
 		: m_Format(format), m_Width(width), m_Height(height)
 	{

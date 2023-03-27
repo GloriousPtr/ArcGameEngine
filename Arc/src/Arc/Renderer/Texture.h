@@ -64,7 +64,6 @@ namespace ArcEngine
 	class Texture2D : public Texture
 	{
 	public:
-		[[nodiscard]] static Ref<Texture2D> Create(TextureFormat format);
 		[[nodiscard]] static Ref<Texture2D> Create(uint32_t width, uint32_t height, TextureFormat format);
 		[[nodiscard]] static Ref<Texture2D> Create(const std::string& path, TextureFormat format);
 	};

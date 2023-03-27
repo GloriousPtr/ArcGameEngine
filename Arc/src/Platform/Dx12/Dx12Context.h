@@ -7,6 +7,7 @@ struct IUnknown;
 struct ID3D12Device8;
 struct ID3D12CommandAllocator;
 struct ID3D12GraphicsCommandList6;
+struct ID3D12CommandQueue;
 struct ID3D12DescriptorHeap;
 
 namespace ArcEngine
@@ -29,15 +30,18 @@ namespace ArcEngine
 		void OnBeginFrame() const;
 		void OnEndFrame() const;
 
+		static void WaitForGpu();
 		static ID3D12Device8* GetDevice();
+		static ID3D12CommandQueue* GetCommandQueue();
+		static ID3D12CommandAllocator* GetGraphicsCommandAllocator();
 		static ID3D12GraphicsCommandList6* GetGraphicsCommandList();
-		static ID3D12GraphicsCommandList6* GetUploadCommandList();
 		static D3D12_CPU_DESCRIPTOR_HANDLE GetRtv();
 		static int GetSwapChainFormat();
 		static uint32_t GetCurrentFrameIndex();
 		static void SetDeferredReleaseFlag();
 
 		static DescriptorHeap* GetSrvHeap();
+		static DescriptorHeap* GetUavHeap();
 		static DescriptorHeap* GetRtvHeap();
 		static DescriptorHeap* GetDsvHeap();
 		static void DeferredRelease(IUnknown* resource);

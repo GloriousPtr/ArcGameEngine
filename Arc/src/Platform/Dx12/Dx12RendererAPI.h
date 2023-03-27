@@ -20,6 +20,10 @@ namespace ArcEngine
 		void Draw(const Ref<VertexBuffer>& vertexArray, uint32_t vertexCount) override;
 		void DrawLines(const Ref<VertexBuffer>& vertexBuffer, uint32_t vertexCount) override;
 
+		void ComputeDispatch(uint32_t threadGroupCountX, uint32_t threadGroupCountY, uint32_t threadGroupCountZ) override;
+
+		void Execute() override;
+
 	private:
 		Dx12Context* m_Context = nullptr;
 	};

@@ -53,22 +53,6 @@ namespace ArcEngine
 		return s_BlackTexture;
 	}
 
-	static void LoadTexture2D(Texture2D* tex, const std::string_view path)
-	{
-		ARC_PROFILE_THREAD("IO Thread")
-
-		stbi_set_flip_vertically_on_load(1);
-		int width, height, channels;
-		stbi_uc* data = nullptr;
-		{
-			ARC_PROFILE_SCOPE("stbi_load Texture")
-
-			data = stbi_load(path.data(), &width, &height, &channels, 0);
-		}
-		ARC_CORE_ASSERT(data, "Failed to load image!")
-		Application::Get().SubmitToMainThread([tex, path, width, height, data]() { tex->Invalidate(path, width, height, data); stbi_image_free(data); });
-	}
-
 	Ref<Texture2D>& AssetManager::GetTexture2D(const std::string& path)
 	{
 		ARC_PROFILE_SCOPE()
@@ -79,7 +63,6 @@ namespace ArcEngine
 
 		Ref<Texture2D> texture = Texture2D::Create(path, TextureFormat::RGBA8);
 		m_Texture2DMap.emplace(path, texture);
-		//m_Futures.push_back(std::async(std::launch::async, &LoadTexture2D, texture.get(), path));
 		return m_Texture2DMap[path];
 	}
 

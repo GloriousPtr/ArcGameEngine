@@ -62,7 +62,7 @@ namespace ArcEngine
 
 		CreateBuffer(&m_UploadAllocation, size, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ);
 		SetBufferData(m_UploadAllocation, vertices, size);
-		Dx12Context::GetUploadCommandList()->CopyBufferRegion(m_Allocation->GetResource(), 0, m_UploadAllocation->GetResource(), 0, size);
+		Dx12Context::GetGraphicsCommandList()->CopyBufferRegion(m_Allocation->GetResource(), 0, m_UploadAllocation->GetResource(), 0, size);
 	}
 
 	Dx12VertexBuffer::~Dx12VertexBuffer()
@@ -90,13 +90,13 @@ namespace ArcEngine
 		ID3D12Resource* uploadResource = m_UploadAllocation->GetResource();
 
 		const auto toCommonBarrier = CD3DX12_RESOURCE_BARRIER::Transition(resource, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
-		Dx12Context::GetUploadCommandList()->ResourceBarrier(1, &toCommonBarrier);
+		Dx12Context::GetGraphicsCommandList()->ResourceBarrier(1, &toCommonBarrier);
 
 		SetBufferData(m_UploadAllocation, data, size);
-		Dx12Context::GetUploadCommandList()->CopyBufferRegion(resource, 0, uploadResource, 0, size);
+		Dx12Context::GetGraphicsCommandList()->CopyBufferRegion(resource, 0, uploadResource, 0, size);
 
 		const auto toVertexBarrier = CD3DX12_RESOURCE_BARRIER::Transition(resource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-		Dx12Context::GetUploadCommandList()->ResourceBarrier(1, &toVertexBarrier);
+		Dx12Context::GetGraphicsCommandList()->ResourceBarrier(1, &toVertexBarrier);
 	}
 
 
@@ -118,7 +118,7 @@ namespace ArcEngine
 
 		CreateBuffer(&m_UploadAllocation, size, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ);
 		SetBufferData(m_UploadAllocation, indices, size);
-		Dx12Context::GetUploadCommandList()->CopyBufferRegion(m_Allocation->GetResource(), 0, m_UploadAllocation->GetResource(), 0, size);
+		Dx12Context::GetGraphicsCommandList()->CopyBufferRegion(m_Allocation->GetResource(), 0, m_UploadAllocation->GetResource(), 0, size);
 	}
 
 	Dx12IndexBuffer::~Dx12IndexBuffer()

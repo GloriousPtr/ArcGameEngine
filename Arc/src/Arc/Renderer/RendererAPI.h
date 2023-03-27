@@ -26,6 +26,10 @@ namespace ArcEngine
 		virtual void Draw(const Ref<VertexBuffer>& vertexBuffer, uint32_t vertexCount) = 0;
 		virtual void DrawLines(const Ref<VertexBuffer>& vertexBuffer, uint32_t vertexCount) = 0;
 
+		virtual void ComputeDispatch(uint32_t threadGroupCountX, uint32_t threadGroupCountY, uint32_t threadGroupCountZ) = 0;
+
+		virtual void Execute() = 0;
+
 		[[nodiscard]] static API GetAPI() { return s_API; }
 		[[nodiscard]] static Scope<RendererAPI> Create();
 	

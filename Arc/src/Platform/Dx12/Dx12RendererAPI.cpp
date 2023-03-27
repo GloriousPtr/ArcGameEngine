@@ -6,8 +6,9 @@
 
 #include "Arc/Core/Application.h"
 #include "Arc/Core/Window.h"
-#include "Dx12Context.h"
 #include "Arc/Renderer/VertexArray.h"
+#include "Dx12Context.h"
+#include "Dx12Resources.h"
 
 namespace ArcEngine
 {
@@ -74,5 +75,26 @@ namespace ArcEngine
 		auto* commandList = Dx12Context::GetGraphicsCommandList();
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 		commandList->DrawInstanced(vertexCount, 1, 0, 0);
+	}
+
+	void Dx12RendererAPI::ComputeDispatch(uint32_t threadGroupCountX, uint32_t threadGroupCountY, uint32_t threadGroupCountZ)
+	{
+		Dx12Context::GetGraphicsCommandList()->Dispatch(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
+	}
+
+	void Dx12RendererAPI::Execute()
+	{
+		auto* commandList = Dx12Context::GetGraphicsCommandList();
+
+		commandList->Close();
+		ID3D12CommandList* commandLists[] = { Dx12Context::GetGraphicsCommandList() };
+		Dx12Context::GetCommandQueue()->ExecuteCommandLists(1, commandLists);
+
+		Dx12Context::WaitForGpu();
+		Dx12Context::GetGraphicsCommandAllocator()->Reset();
+		commandList->Reset(Dx12Context::GetGraphicsCommandAllocator(), nullptr);
+
+		ID3D12DescriptorHeap* descriptorHeap = Dx12Context::GetSrvHeap()->Heap();
+		commandList->SetDescriptorHeaps(1, &descriptorHeap);
 	}
 }

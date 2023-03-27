@@ -13,7 +13,6 @@ namespace ArcEngine
 	class Dx12Texture2D : public Texture2D
 	{
 	public:
-		explicit Dx12Texture2D(TextureFormat format);
 		Dx12Texture2D(uint32_t width, uint32_t height, TextureFormat format);
 		Dx12Texture2D(const std::string& path, TextureFormat format);
 		~Dx12Texture2D() override;

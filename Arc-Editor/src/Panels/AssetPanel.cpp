@@ -654,13 +654,18 @@ namespace ArcEngine
 						}
 						else
 						{
-							textureId = AssetManager::BlackTexture()->GetRendererID();
+							textureId = 0;
 						}
 					}
 					else
 					{
 						textureId = m_FileIcon->GetRendererID();
 					}
+				}
+
+				if (textureId == 0)
+				{
+					textureId = AssetManager::BlackTexture()->GetRendererID();
 				}
 
 				ImGui::TableNextColumn();

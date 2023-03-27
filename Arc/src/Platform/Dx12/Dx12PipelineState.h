@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Arc/Renderer/Framebuffer.h"
 #include "Arc/Renderer/PipelineState.h"
 
 #include "Dx12Resources.h"
@@ -15,8 +14,8 @@ namespace ArcEngine
 		Dx12PipelineState(const Ref<Shader>& shader, const PipelineSpecification& spec);
 		~Dx12PipelineState() override;
 
-		[[nodiscard]] bool Bind() override;
-		bool Unbind() override;
+		[[nodiscard]] bool Bind() const override;
+		bool Unbind() const override;
 
 		[[nodiscard]] MaterialPropertyMap& GetMaterialProperties() override { return m_MaterialProperties; }
 		[[nodiscard]] uint32_t GetSlot(const std::string_view& name) override { return m_BufferMap.at(name.data()); }

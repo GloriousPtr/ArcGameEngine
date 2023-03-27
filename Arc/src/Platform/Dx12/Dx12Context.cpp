@@ -78,9 +78,6 @@ namespace ArcEngine
 		ID3D12CommandAllocator* GraphicsCommandAllocator = nullptr;
 		ID3D12GraphicsCommandList6* GraphicsCommandList = nullptr;
 
-		ID3D12CommandAllocator* UploadCommandAllocator = nullptr;
-		ID3D12GraphicsCommandList6* UploadCommandList = nullptr;
-
 		std::vector<IUnknown*> DeferredReleases{};
 		bool DeferedReleasesFlag = false;
 		bool DeferedReleasesFlagHandles = false;
@@ -96,17 +93,6 @@ namespace ArcEngine
 		void CloseGraphicsCommands() const
 		{
 			GraphicsCommandList->Close();
-		}
-
-		void ResetUploadCommands() const
-		{
-			UploadCommandAllocator->Reset();
-			UploadCommandList->Reset(UploadCommandAllocator, nullptr);
-		}
-
-		void CloseUploadCommands() const
-		{
-			UploadCommandList->Close();
 		}
 	};
 
@@ -124,17 +110,6 @@ namespace ArcEngine
 			case D3D12_MESSAGE_SEVERITY_CORRUPTION:		ARC_CORE_CRITICAL(pDescription); return;
 			case D3D12_MESSAGE_SEVERITY_ERROR:			ARC_CORE_ERROR(pDescription); return;
 			case D3D12_MESSAGE_SEVERITY_WARNING:		ARC_CORE_WARN(pDescription); return;
-		}
-	}
-
-	static void WaitForFence(ID3D12Fence* fence, uint64_t completionValue, HANDLE waitEvent)
-	{
-		ARC_PROFILE_SCOPE()
-
-		if (fence->GetCompletedValue() < completionValue)
-		{
-			fence->SetEventOnCompletion(completionValue, waitEvent);
-			WaitForSingleObject(waitEvent, INFINITE);
 		}
 	}
 
@@ -178,6 +153,9 @@ namespace ArcEngine
 
 		using namespace Microsoft::WRL;
 
+		WaitForGpu();
+		CloseHandle(s_Frames[Dx12Frame::CurrentBackBuffer].Fence.Event);
+
 		for (auto& frame : s_Frames)
 		{
 			s_RtvDescHeap.Free(frame.RtvHandle);
@@ -185,8 +163,6 @@ namespace ArcEngine
 			frame.Fence.Fence->Release();
 			frame.GraphicsCommandList->Release();
 			frame.GraphicsCommandAllocator->Release();
-			frame.UploadCommandList->Release();
-			frame.UploadCommandAllocator->Release();
 		}
 
 		for (uint32_t i = 0; i < FrameCount; ++i)
@@ -386,21 +362,17 @@ namespace ArcEngine
 			s_Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&(frame.GraphicsCommandAllocator)));
 			s_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, frame.GraphicsCommandAllocator, nullptr, IID_PPV_ARGS(&(frame.GraphicsCommandList)));
 
-			s_Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&(frame.UploadCommandAllocator)));
-			s_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, frame.UploadCommandAllocator, nullptr, IID_PPV_ARGS(&(frame.UploadCommandList)));
-
 			std::string cmdAllocatorName = fmt::format("Graphics Command Allocator {}", tempInt);
 			NameResource(frame.GraphicsCommandAllocator, cmdAllocatorName.c_str())
 			std::string cmdListName = fmt::format("Graphics Command List {}", tempInt);
 			NameResource(frame.GraphicsCommandList, cmdListName.c_str())
 
 			frame.GraphicsCommandList->Close();
-			frame.UploadCommandList->Close();
 
 			++tempInt;
 		}
 
-		s_Frames[Dx12Frame::CurrentBackBuffer].ResetUploadCommands();
+		s_Frames[Dx12Frame::CurrentBackBuffer].ResetGraphicsCommands();
 	}
 
 	void Dx12Context::SwapBuffers()
@@ -409,28 +381,23 @@ namespace ArcEngine
 
 		auto& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
 
-		backFrame.CloseUploadCommands();
+		backFrame.CloseGraphicsCommands();
 
-
-
-		constexpr uint32_t numCommandList = 2;
+		constexpr uint32_t numCommandList = 1;
 		const std::array<ID3D12CommandList*, numCommandList> commandLists
 		{
-			backFrame.GraphicsCommandList,
-			backFrame.UploadCommandList
+			backFrame.GraphicsCommandList
 		};
 		s_CommandQueue->ExecuteCommandLists(numCommandList, commandLists.data());
 
+		WaitForGpu();
+
 		s_Swapchain->Present(m_SyncInterval, m_PresentFlags);
-
-		const auto fenceValue = backFrame.Fence.Value;
-		s_CommandQueue->Signal(backFrame.Fence.Fence, fenceValue);
-		++backFrame.Fence.Value;
-
-		WaitForFence(backFrame.Fence.Fence, fenceValue, backFrame.Fence.Event);
 
 		if (m_ShouldResize)
 		{
+			WaitForGpu();
+
 			for (auto& frame : s_Frames)
 			{
 				s_RtvDescHeap.Free(frame.RtvHandle);
@@ -447,12 +414,7 @@ namespace ArcEngine
 
 		Dx12Frame::CurrentBackBuffer = s_Swapchain->GetCurrentBackBufferIndex();
 
-
-
-
-
-
-		s_Frames[Dx12Frame::CurrentBackBuffer].ResetUploadCommands();
+		s_Frames[Dx12Frame::CurrentBackBuffer].ResetGraphicsCommands();
 	}
 
 	void Dx12Context::SetSyncInterval(uint32_t value)
@@ -468,14 +430,19 @@ namespace ArcEngine
 		return s_Device;
 	}
 
+	ID3D12CommandQueue* Dx12Context::GetCommandQueue()
+	{
+		return s_CommandQueue;
+	}
+
+	ID3D12CommandAllocator* Dx12Context::GetGraphicsCommandAllocator()
+	{
+		return s_Frames[Dx12Frame::CurrentBackBuffer].GraphicsCommandAllocator;
+	}
+
 	ID3D12GraphicsCommandList6* Dx12Context::GetGraphicsCommandList()
 	{
 		return s_Frames[Dx12Frame::CurrentBackBuffer].GraphicsCommandList;
-	}
-
-	ID3D12GraphicsCommandList6* Dx12Context::GetUploadCommandList()
-	{
-		return s_Frames[Dx12Frame::CurrentBackBuffer].UploadCommandList;
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE Dx12Context::GetRtv()
@@ -486,6 +453,11 @@ namespace ArcEngine
 	DescriptorHeap* Dx12Context::GetSrvHeap()
 	{
 		return &s_SrvDescHeap;
+	}
+
+	DescriptorHeap* Dx12Context::GetUavHeap()
+	{
+		return &s_UavDescHeap;
 	}
 
 	DescriptorHeap* Dx12Context::GetRtvHeap()
@@ -535,7 +507,7 @@ namespace ArcEngine
 		const auto& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
 		auto* commandList = backFrame.GraphicsCommandList;
 
-		backFrame.ResetGraphicsCommands();
+		//backFrame.ResetGraphicsCommands();
 
 		if (backFrame.DeferedReleasesFlag || backFrame.DeferedReleasesFlagHandles)
 		{
@@ -547,8 +519,8 @@ namespace ArcEngine
 
 		commandList->OMSetRenderTargets(1, &(backFrame.RtvHandle.CPU), false, nullptr);
 
-		ID3D12DescriptorHeap* srv = s_SrvDescHeap.Heap();
-		commandList->SetDescriptorHeaps(1, &srv);
+		ID3D12DescriptorHeap* descriptorHeaps[1] = { s_SrvDescHeap.Heap() };
+		commandList->SetDescriptorHeaps(1, descriptorHeaps);
 		commandList->RSSetViewports(1, &viewport);
 		commandList->RSSetScissorRects(1, &scissorRect);
 	}
@@ -561,7 +533,18 @@ namespace ArcEngine
 
 		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backFrame.RtvBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 		backFrame.GraphicsCommandList->ResourceBarrier(1, &barrier);
-		backFrame.CloseGraphicsCommands();
+		//backFrame.CloseGraphicsCommands();
+	}
+
+	void Dx12Context::WaitForGpu()
+	{
+		auto& fence = s_Frames[Dx12Frame::CurrentBackBuffer].Fence;
+		UINT64& fenceValue = fence.Value;
+		++fenceValue;
+
+		s_CommandQueue->Signal(fence.Fence, fenceValue);
+		fence.Fence->SetEventOnCompletion(fenceValue, fence.Event);
+		WaitForSingleObject(fence.Event, INFINITE);
 	}
 
 	void Dx12Context::CreateRTV() const

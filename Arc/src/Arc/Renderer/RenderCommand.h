@@ -51,6 +51,16 @@ namespace ArcEngine
 			s_RendererAPI->DrawLines(vertexBuffer, vertexCount);
 		}
 
+		inline static void ComputeDispatch(uint32_t threadGroupX, uint32_t threadGroupY, uint32_t threadGroupZ)
+		{
+			s_RendererAPI->ComputeDispatch(threadGroupX, threadGroupY, threadGroupZ);
+		}
+
+		inline static void Execute()
+		{
+			s_RendererAPI->Execute();
+		}
+
 	private:
 		static Scope<RendererAPI> s_RendererAPI;
 	};

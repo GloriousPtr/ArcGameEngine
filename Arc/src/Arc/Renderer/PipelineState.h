@@ -58,8 +58,8 @@ namespace ArcEngine
 	public:
 		virtual ~PipelineState() = default;
 
-		[[nodiscard]] virtual bool Bind() = 0;
-		virtual bool Unbind() = 0;
+		[[nodiscard]] virtual bool Bind() const = 0;
+		virtual bool Unbind() const = 0;
 
 		[[nodiscard]] virtual MaterialPropertyMap& GetMaterialProperties() = 0;
 		[[nodiscard]] virtual uint32_t GetSlot(const std::string_view& name) = 0;

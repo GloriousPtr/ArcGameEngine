@@ -609,6 +609,7 @@ namespace ArcEngine
 			}
 			renderTarget->Unbind();
 		}
+			RenderCommand::Execute();
 #if 0
 		renderTarget->Bind();
 		//RenderCommand::SetBlendState(false);

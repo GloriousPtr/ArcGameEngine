@@ -196,6 +196,8 @@ namespace ArcEngine
 			s_Data->TexturePipeline->SetData("Textures", s_Data->TextureSlots.data(), sizeof(uint32_t) * s_Data->TextureSlotIndex);
 			RenderCommand::DrawIndexed(s_Data->QuadVertexArray, s_Data->QuadIndexCount);
 			s_Data->Stats.DrawCalls++;
+
+			RenderCommand::Execute();
 		}
 		
 		if (s_Data->LineVertexCount && s_Data->LinePipeline->Bind())
@@ -206,6 +208,8 @@ namespace ArcEngine
 			s_Data->LineVertexBuffer->SetData(s_Data->LineVertexBufferBase, dataSize);
 			RenderCommand::DrawLines(s_Data->LineVertexBuffer, s_Data->LineVertexCount);
 			s_Data->Stats.DrawCalls++;
+
+			RenderCommand::Execute();
 		}
 	}
 
