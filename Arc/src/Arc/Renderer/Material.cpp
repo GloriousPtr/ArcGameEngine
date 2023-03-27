@@ -157,7 +157,7 @@ namespace ArcEngine
 		{
 			m_Textures[it->second.Index] = texture;
 			if (it->second.Type == MaterialPropertyType::Texture2DBindless)
-				m_BindlessTextureBuffer[it->second.BufferIndex] = texture->GetIndex();
+				m_BindlessTextureBuffer[it->second.BufferIndex] = texture ? texture->GetIndex() : AssetManager::WhiteTexture()->GetIndex();
 		}
 	}
 
