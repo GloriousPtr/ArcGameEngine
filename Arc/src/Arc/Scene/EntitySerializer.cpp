@@ -923,7 +923,7 @@ namespace ArcEngine
 				std::filesystem::path path = Project::GetAssetFileSystemPath(texturePath);
 				if (!std::filesystem::exists(path))
 					path = texturePath;
-				src.Texture = AssetManager::GetTextureCubemap(path.string());
+				src.Texture = AssetManager::GetTextureCube(path.string());
 			}
 		}
 

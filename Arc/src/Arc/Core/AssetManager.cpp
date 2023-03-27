@@ -13,7 +13,7 @@ namespace ArcEngine
 	inline static Ref<Texture2D> s_WhiteTexture;
 	inline static Ref<Texture2D> s_BlackTexture;
 	inline static std::unordered_map<std::string, Ref<Texture2D>, UM_StringTransparentEquality> m_Texture2DMap;
-	inline static std::unordered_map<std::string, Ref<TextureCubemap>, UM_StringTransparentEquality> m_TextureCubeMap;
+	inline static std::unordered_map<std::string, Ref<TextureCube>, UM_StringTransparentEquality> m_TextureCubeMap;
 	inline static std::unordered_map<std::string, Ref<Mesh>, UM_StringTransparentEquality> m_MeshMap;
 	inline static std::vector<std::future<void>> m_Futures;
 
@@ -66,23 +66,7 @@ namespace ArcEngine
 		return m_Texture2DMap[path];
 	}
 
-	static void LoadTextureCubemap(TextureCubemap* tex, const std::string_view path)
-	{
-		ARC_PROFILE_THREAD("IO Thread")
-
-		stbi_set_flip_vertically_on_load(1);
-		int width, height, channels;
-		float* data = nullptr;
-		{
-			ARC_PROFILE_SCOPE("stbi_load Texture")
-
-			data = stbi_loadf(path.data(), &width, &height, &channels, 0);
-		}
-		ARC_CORE_ASSERT(data, "Failed to load image!")
-		Application::Get().SubmitToMainThread([tex, path, width, height, data]() { tex->Invalidate(path, width, height, data); stbi_image_free(data); });
-	}
-
-	Ref<TextureCubemap>& AssetManager::GetTextureCubemap(const std::string& path)
+	Ref<TextureCube>& AssetManager::GetTextureCube(const std::string& path)
 	{
 		ARC_PROFILE_SCOPE()
 
@@ -90,9 +74,8 @@ namespace ArcEngine
 		if (it != m_TextureCubeMap.end())
 			return it->second;
 
-		Ref<TextureCubemap> texture = TextureCubemap::Create();
+		Ref<TextureCube> texture = TextureCube::Create(path, TextureFormat::RGBA16F);
 		m_TextureCubeMap.emplace(path, texture);
-		m_Futures.push_back(std::async(std::launch::async, &LoadTextureCubemap, texture.get(), path));
 		return m_TextureCubeMap[path];
 	}
 

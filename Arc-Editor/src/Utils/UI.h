@@ -109,7 +109,7 @@ namespace ArcEngine
 		static bool Property(const char* label, int& value, const char** dropdownStrings, int count, const char* tooltip = nullptr);
 
 		// 2D/3D Textures
-		static bool Property(const char* label, Ref<TextureCubemap>& texture, uint64_t overrideTextureID = 0, const char* tooltip = nullptr);
+		static bool Property(const char* label, Ref<TextureCube>& texture, uint64_t overrideTextureID = 0, const char* tooltip = nullptr);
 		static bool Property(const char* label, Ref<Texture2D>& texture, uint64_t overrideTextureID = 0, const char* tooltip = nullptr);
 
 		template<typename T, typename Fn>

@@ -35,7 +35,6 @@ namespace ArcEngine
 		[[nodiscard]] virtual const std::string& GetPath() const = 0;
 
 		virtual void SetData(const TextureData data, [[maybe_unused]] uint32_t size) = 0;
-		virtual void Invalidate(std::string_view path, uint32_t width, uint32_t height, const void* data) = 0;
 		
 		virtual void Bind(uint32_t slot = 0) const = 0;
 
@@ -68,11 +67,10 @@ namespace ArcEngine
 		[[nodiscard]] static Ref<Texture2D> Create(const std::string& path, TextureFormat format);
 	};
 
-	class TextureCubemap : public Texture
+	class TextureCube : public Texture
 	{
 	public:
-		[[nodiscard]] static Ref<TextureCubemap> Create();
-		[[nodiscard]] static Ref<TextureCubemap> Create(const std::string& path);
+		[[nodiscard]] static Ref<TextureCube> Create(const std::string& path, TextureFormat format);
 
 		virtual void BindIrradianceMap(uint32_t slot) const = 0;
 		virtual void BindRadianceMap(uint32_t slot) const = 0;

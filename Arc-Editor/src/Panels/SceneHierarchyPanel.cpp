@@ -404,7 +404,7 @@ namespace ArcEngine
 				}
 				else if (ext == "hdr")
 				{
-					m_Context->CreateEntity(name).AddComponent<SkyLightComponent>().Texture = AssetManager::GetTextureCubemap(path);
+					m_Context->CreateEntity(name).AddComponent<SkyLightComponent>().Texture = AssetManager::GetTextureCube(path);
 				}
 				else if (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "bmp")
 				{

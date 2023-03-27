@@ -158,7 +158,7 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// 2D/3D Textures ///////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, Ref<TextureCubemap>& texture, uint64_t overrideTextureID, const char* tooltip)
+	bool UI::Property(const char* label, Ref<TextureCube>& texture, uint64_t overrideTextureID, const char* tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
 
@@ -194,7 +194,7 @@ namespace ArcEngine
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 			{
 				const char* path = static_cast<char*>(payload->Data);
-				texture = AssetManager::GetTextureCubemap(path);
+				texture = AssetManager::GetTextureCube(path);
 				changed = true;
 			}
 			ImGui::EndDragDropTarget();

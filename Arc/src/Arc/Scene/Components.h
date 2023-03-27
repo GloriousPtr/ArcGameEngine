@@ -89,7 +89,7 @@ namespace ArcEngine
 
 	struct SkyLightComponent
 	{
-		Ref<TextureCubemap> Texture = nullptr;
+		Ref<TextureCube> Texture = nullptr;
 		float Intensity = 0.7f;
 		float Rotation = 0.0f;
 	};
