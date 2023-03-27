@@ -27,13 +27,25 @@ namespace ArcEngine
 		}
 	};
 
+	struct SkyboxData
+	{
+		glm::mat4 SkyboxViewProjection;
+		glm::vec2 RotationIntensity;
+	};
+
 	struct Renderer3DData
 	{
 		Renderer3D::Statistics Stats;
 		std::vector<MeshData> Meshes;
 		Ref<ConstantBuffer> CameraCB;
+		Ref<ConstantBuffer> CubemapCB;
 		Ref<Texture2D> BRDFLutTexture;
 		Ref<PipelineState> RenderPipeline;
+		Ref<PipelineState> CubemapPipeline;
+
+		Ref<VertexBuffer> CubeVertexBuffer;
+
+		Entity Skylight;
 	};
 
 	inline static Scope<Renderer3DData> s_Data;
@@ -115,7 +127,24 @@ namespace ArcEngine
 			s_Data->RenderPipeline = pipelineLibrary.Load("assets/shaders/PBR.hlsl", spec);
 		}
 
+		{
+			PipelineSpecification spec
+			{
+				.Type = ShaderType::Pixel,
+				.GraphicsPipelineSpecs
+				{
+					.CullMode = CullModeType::Front,
+					.Primitive = PrimitiveType::Triangle,
+					.FillMode = FillModeType::Solid,
+					.EnableDepth = false,
+					.OutputFormats = {FramebufferTextureFormat::R11G11B10F}
+				}
+			};
+			s_Data->CubemapPipeline = pipelineLibrary.Load("assets/shaders/Cubemap.hlsl", spec);
+		}
+
 		s_Data->CameraCB = ConstantBuffer::Create(sizeof(CameraData), 1, s_Data->RenderPipeline->GetSlot("Camera"));
+		s_Data->CubemapCB = ConstantBuffer::Create(sizeof(SkyboxData), 1, s_Data->CubemapPipeline->GetSlot("SkyboxData"));
 
 #if 0
 		s_BRDFLutTexture = Texture2D::Create("Resources/Renderer/BRDF_LUT.jpg");
@@ -130,7 +159,7 @@ namespace ArcEngine
 		s_HdrShader = pipelineLibrary.Load("assets/shaders/HDR.glsl", spec);
 		s_BloomShader = pipelineLibrary.Load("assets/shaders/Bloom.glsl", spec);
 		s_LightingShader = pipelineLibrary.Load("assets/shaders/LightingPass.glsl", spec);
-
+#endif
 		// Cube-map
 		{
 			constexpr float vertices[108] = {
@@ -186,9 +215,9 @@ namespace ArcEngine
 				 0.5f,  0.5f,  0.5f,
 			};
 
-			s_CubeVertexBuffer = VertexBuffer::Create(vertices, 108 * sizeof(float), 3 * sizeof(float));
+			s_Data->CubeVertexBuffer = VertexBuffer::Create(vertices, 108 * sizeof(float), 3 * sizeof(float));
 		}
-
+#if 0
 		// Quad
 		{
 			constexpr float vertices[20] = {
@@ -226,15 +255,28 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
+		s_Data->Skylight = cubemap;
+
 		if (s_Data->RenderPipeline->Bind())
 		{
 			SetupCameraData(cameraData);
-#if 0
-			s_Skylight = cubemap;
-			s_SceneLights = std::move(lights);
-			SetupLightsData();
-#endif
 		}
+
+		if (cubemap && s_Data->CubemapPipeline->Bind())
+		{
+			auto& sky = cubemap.GetComponent<SkyLightComponent>();
+			const SkyboxData data
+			{
+				.SkyboxViewProjection = cameraData.Projection * glm::mat4(glm::mat3(cameraData.View)),
+				.RotationIntensity = { sky.Rotation, sky.Intensity }
+			};
+			s_Data->CubemapCB->Bind(0);
+			s_Data->CubemapCB->SetData(&data, sizeof(SkyboxData), 0);
+		}
+#if 0
+		s_SceneLights = std::move(lights);
+		SetupLightsData();
+#endif
 	}
 
 	void Renderer3D::EndScene(const Ref<RenderGraphData>& renderTarget)
@@ -248,7 +290,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		//RenderCommand::Draw(s_CubeVertexBuffer, 36);
+		RenderCommand::Draw(s_Data->CubeVertexBuffer, 36);
 	}
 
 	void Renderer3D::DrawQuad()
@@ -597,13 +639,35 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
+		bool shouldExecute = false;
+		if (s_Data->Skylight)
+		{
+			ARC_PROFILE_SCOPE("Draw Skylight")
+
+			[[likely]]
+			if (s_Data->CubemapPipeline->Bind())
+			{
+				renderTarget->Bind();
+				const auto& skylightComponent = s_Data->Skylight.GetComponent<SkyLightComponent>();
+				if (skylightComponent.Texture)
+				{
+					s_Data->CubemapCB->Bind(0);
+					skylightComponent.Texture->Bind(s_Data->CubemapPipeline->GetSlot("EnvironmentTexture"));
+					DrawCube();
+				}
+				renderTarget->Unbind();
+				shouldExecute = true;
+			}
+		}
+
 		[[likely]]
 		if (s_Data->RenderPipeline->Bind())
 		{
 			ARC_PROFILE_SCOPE("Draw Meshes")
 
+			s_Data->CameraCB->Bind(0);
+
 			renderTarget->Bind();
-			int i = 0;
 			for (const auto& meshData : s_Data->Meshes)
 			{
 				meshData.SubmeshGeometry.Mat->Bind();
@@ -611,12 +675,14 @@ namespace ArcEngine
 				RenderCommand::DrawIndexed(meshData.SubmeshGeometry.Geometry);
 				s_Data->Stats.DrawCalls++;
 				s_Data->Stats.IndexCount += meshData.SubmeshGeometry.Geometry->GetIndexBuffer()->GetCount();
-
-				++i;
 			}
 			renderTarget->Unbind();
+			shouldExecute = true;
 		}
+
+		if (shouldExecute)
 			RenderCommand::Execute();
+
 #if 0
 		renderTarget->Bind();
 		//RenderCommand::SetBlendState(false);
