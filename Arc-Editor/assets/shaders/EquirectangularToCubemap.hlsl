@@ -3,8 +3,7 @@
 
 // Converts equirectangular (lat-long) projection texture into a proper cubemap.
 
-static const float PI = 3.141592;
-static const float TwoPI = 2 * PI;
+#include "MathsConstants.hlsli"
 
 Texture2D InputTexture : register(t0);
 RWTexture2DArray<float4> OutputTexture : register(u0);

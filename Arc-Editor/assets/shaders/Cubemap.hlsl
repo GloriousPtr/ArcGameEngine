@@ -1,4 +1,5 @@
 #include "Common.hlsli"
+#include "MathsConstants.hlsli"
 
 struct VertexIn
 {
@@ -41,5 +42,6 @@ float4 PS_Main(VertexOut input) : SV_TARGET
 {
 	float3 envVector = normalize(input.VertexPosition);
 	float3 color = EnvironmentTexture.Sample(Sampler, RotateVectorAboutY(RotationIntensity.x, envVector)).rgb * RotationIntensity.y;
+	color = pow(color, 1.0 / Gamma);
 	return float4(color, 1.0);
 }
