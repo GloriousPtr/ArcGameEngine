@@ -229,7 +229,7 @@ namespace ArcEngine
 			case ShaderType::Vertex:
 			case ShaderType::Pixel: MakeGraphicsPipeline(shader); break;
 			case ShaderType::Compute: MakeComputePipeline(shader); break;
-			default: ARC_CORE_ASSERT(false, "Failed to create pipeline with unknown type")
+			default: ARC_CORE_ASSERT(false, "Failed to create pipeline with unknown type") break;
 		}
 	}
 

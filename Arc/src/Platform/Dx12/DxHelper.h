@@ -174,6 +174,7 @@ namespace ArcEngine::Dx12Utils
 					break;
 				default:
 					ARC_CORE_ASSERT(false, "Unknown texture dimensions!")
+					break;
 			}
 
 			Dx12Context::GetDevice()->CreateShaderResourceView(resource, &srvDesc, srvHandle->CPU);
