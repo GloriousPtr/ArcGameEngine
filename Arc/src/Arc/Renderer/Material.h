@@ -37,7 +37,7 @@ namespace ArcEngine
 		void Unbind() const;
 
 		[[nodiscard]] Ref<Texture2D> GetTexture(const std::string_view& name);
-		[[nodiscard]] MaterialPropertyMap& GetProperties() const { return m_Pipeline->GetMaterialProperties(); }
+		[[nodiscard]] std::vector<MaterialProperty>& GetProperties() const { return m_Pipeline->GetMaterialProperties(); }
 
 		void SetTexture(const std::string_view& name, const Ref<Texture2D>& texture);
 
@@ -63,7 +63,7 @@ namespace ArcEngine
 		MaterialDataMap					m_Indices;
 		std::vector<TextureSlot>		m_TextureBuffer;
 		std::vector<uint32_t>			m_BindlessTextureBuffer;
-		std::vector<glm::vec4>			m_CBBuffer;
+		std::vector<float>				m_CBBuffer;
 		std::vector<Ref<Texture2D>>		m_Textures;
 		Ref<ConstantBuffer>				m_ConstantBuffer;
 	};

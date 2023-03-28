@@ -17,7 +17,7 @@ namespace ArcEngine
 		[[nodiscard]] bool Bind() const override;
 		bool Unbind() const override;
 
-		[[nodiscard]] MaterialPropertyMap& GetMaterialProperties() override { return m_MaterialProperties; }
+		[[nodiscard]] std::vector<MaterialProperty>& GetMaterialProperties() override { return m_MaterialProperties; }
 		[[nodiscard]] uint32_t GetSlot(const std::string_view& name) override { return m_BufferMap.at(name.data()); }
 
 	private:
@@ -26,10 +26,10 @@ namespace ArcEngine
 		void MakeComputePipeline(const Ref<Shader>& shader);
 
 	private:
-		ID3D12RootSignature*		m_RootSignature = nullptr;
-		ID3D12PipelineState*		m_PipelineState = nullptr;
-		MaterialPropertyMap			m_MaterialProperties;
-		BufferMap					m_BufferMap;
-		PipelineSpecification		m_Specification;
+		ID3D12RootSignature*				m_RootSignature = nullptr;
+		ID3D12PipelineState*				m_PipelineState = nullptr;
+		std::vector<MaterialProperty>		m_MaterialProperties;
+		BufferMap							m_BufferMap;
+		PipelineSpecification				m_Specification;
 	};
 }

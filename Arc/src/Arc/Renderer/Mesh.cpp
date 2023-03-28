@@ -167,49 +167,49 @@ namespace ArcEngine
 
 					std::filesystem::path dir = path.parent_path();
 
-					for (const auto& [name, property] : materialProperties)
+					for (const auto& property : materialProperties)
 					{
 						if (property.Type == MaterialPropertyType::Texture2D ||
 							property.Type == MaterialPropertyType::Texture2DBindless)
 						{
 							if (!material.diffuse_texname.empty() &&
-								(name.find("albedo") != std::string::npos || name.find("Albedo") != std::string::npos ||
-									name.find("diff") != std::string::npos || name.find("Diff") != std::string::npos))
+								(property.Name.find("albedo") != std::string::npos || property.Name.find("Albedo") != std::string::npos ||
+									property.Name.find("diff") != std::string::npos || property.Name.find("Diff") != std::string::npos))
 							{
 								std::string pathStr = (dir / material.diffuse_texname).string();
-								submesh.Mat->SetTexture(name, AssetManager::GetTexture2D(pathStr));
+								submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr));
 							}
 
 							if (!material.normal_texname.empty() &&
-								(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
-									name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
+								(property.Name.find("norm") != std::string::npos || property.Name.find("Norm") != std::string::npos ||
+									property.Name.find("height") != std::string::npos || property.Name.find("Height") != std::string::npos))
 							{
 								std::string pathStr = (dir / material.normal_texname).string();
-								submesh.Mat->SetTexture(name, AssetManager::GetTexture2D(pathStr));
+								submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr));
 								normalMapApplied = true;
 							}
 							else if (!material.bump_texname.empty() &&
-								(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
-									name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
+								(property.Name.find("norm") != std::string::npos || property.Name.find("Norm") != std::string::npos ||
+									property.Name.find("height") != std::string::npos || property.Name.find("Height") != std::string::npos))
 							{
 								std::string pathStr = (dir / material.bump_texname).string();
-								submesh.Mat->SetTexture(name, AssetManager::GetTexture2D(pathStr));
+								submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr));
 								normalMapApplied = true;
 							}
 
 							if (!material.emissive_texname.empty() &&
-								(name.find("emissi") != std::string::npos || name.find("Emissi") != std::string::npos))
+								(property.Name.find("emissi") != std::string::npos || property.Name.find("Emissi") != std::string::npos))
 							{
 								std::string pathStr = (dir / material.emissive_texname).string();
-								submesh.Mat->SetTexture(name, AssetManager::GetTexture2D(pathStr));
+								submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr));
 							}
 						}
 
 						if (property.Type == MaterialPropertyType::Bool && normalMapApplied &&
-							(name.find("norm") != std::string::npos || name.find("Norm") != std::string::npos ||
-								name.find("height") != std::string::npos || name.find("Height") != std::string::npos))
+							(property.Name.find("norm") != std::string::npos || property.Name.find("Norm") != std::string::npos ||
+								property.Name.find("height") != std::string::npos || property.Name.find("Height") != std::string::npos))
 						{
-							submesh.Mat->SetData(name, 1);
+							submesh.Mat->SetData(property.Name, 1);
 						}
 					}
 				}

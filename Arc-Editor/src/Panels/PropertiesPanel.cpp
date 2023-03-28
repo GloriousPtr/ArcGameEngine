@@ -185,8 +185,9 @@ namespace ArcEngine
 		UI::BeginProperties();
 
 		const auto& materialProperties = material->GetProperties();
-		for (const auto& [name, property] : materialProperties)
+		for (const auto& property : materialProperties)
 		{
+			const std::string_view name = property.Name;
 			const char* displayName = property.DisplayName.c_str();
 
 			switch (property.Type)

@@ -45,7 +45,9 @@ namespace ArcEngine
 	{
 		MaterialPropertyType Type;
 		size_t SizeInBytes;
+		size_t StartOffsetInBytes;
 
+		std::string Name;
 		std::string DisplayName;
 		bool IsSlider;
 		bool IsColor;
@@ -58,8 +60,6 @@ namespace ArcEngine
 		}
 	};
 
-	using MaterialPropertyMap = std::unordered_map<std::string, MaterialProperty, UM_StringTransparentEquality>;
-
 	class PipelineState
 	{
 	public:
@@ -68,7 +68,7 @@ namespace ArcEngine
 		[[nodiscard]] virtual bool Bind() const = 0;
 		virtual bool Unbind() const = 0;
 
-		[[nodiscard]] virtual MaterialPropertyMap& GetMaterialProperties() = 0;
+		[[nodiscard]] virtual std::vector<MaterialProperty>& GetMaterialProperties() = 0;
 		[[nodiscard]] virtual uint32_t GetSlot(const std::string_view& name) = 0;
 
 		void SetData(const std::string& name, const void* data, uint32_t size, uint32_t offset = 0)

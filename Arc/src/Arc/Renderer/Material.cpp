@@ -45,13 +45,13 @@ namespace ArcEngine
 		glm::vec4 one(1.0);
 		size_t cbSize = 0;
 		uint32_t cbSlot = 0;
-		for (auto& [name, property] : materialProperties)
+		for (auto& property : materialProperties)
 		{
 			if (property.Type == MaterialPropertyType::Texture2D)
 			{
 				const uint32_t texIndex = static_cast<uint32_t>(m_Textures.size());
 				const uint32_t buffIndex = static_cast<uint32_t>(m_TextureBuffer.size());
-				m_Indices.emplace(name, MaterialData(property.Type, texIndex, buffIndex, property.SizeInBytes));
+				m_Indices.emplace(property.Name, MaterialData(property.Type, texIndex, buffIndex, property.SizeInBytes));
 				m_TextureBuffer.emplace_back(property.Slot, texIndex);
 				m_Textures.push_back(nullptr);
 			}
@@ -59,35 +59,35 @@ namespace ArcEngine
 			{
 				const uint32_t texIndex = static_cast<uint32_t>(m_Textures.size());
 				const uint32_t buffIndex = static_cast<uint32_t>(m_BindlessTextureBuffer.size());
-				m_Indices.emplace(name, MaterialData(property.Type, texIndex, buffIndex, property.SizeInBytes));
+				m_Indices.emplace(property.Name, MaterialData(property.Type, texIndex, buffIndex, property.SizeInBytes));
 				m_BindlessTextureBuffer.emplace_back(whiteTexId);
 				m_Textures.push_back(nullptr);
 			}
 			else
 			{
-				cbSize += property.SizeInBytes;
+				cbSize = property.StartOffsetInBytes + property.SizeInBytes;
 				cbSlot = property.Slot;
 
-				const uint32_t buffIndex = static_cast<uint32_t>(m_CBBuffer.size());
-				m_Indices.emplace(name, MaterialData(property.Type, 0, buffIndex, property.SizeInBytes));
-				m_CBBuffer.push_back({});
-				memset(&(m_CBBuffer[buffIndex]), 0, 16);
+				const uint32_t buffIndex = property.StartOffsetInBytes / sizeof(float);
+				m_Indices.emplace(property.Name, MaterialData(property.Type, 0, buffIndex, property.SizeInBytes));
+				m_CBBuffer.resize(cbSize / sizeof(float));
+				memset(&(m_CBBuffer[buffIndex]), 0, property.SizeInBytes);
 
 				if (property.Type == MaterialPropertyType::Float ||
 					property.Type == MaterialPropertyType::Float2 ||
 					property.Type == MaterialPropertyType::Float3 ||
 					property.Type == MaterialPropertyType::Float4)
 				{
-					const bool setDefaultValue =	name.find("albedo") != std::string::npos ||
-													name.find("Albedo") != std::string::npos ||
-													name.find("roughness") != std::string::npos ||
-													name.find("Roughness") != std::string::npos;
+					const bool setDefaultValue =	property.Name.find("albedo") != std::string::npos ||
+													property.Name.find("Albedo") != std::string::npos ||
+													property.Name.find("roughness") != std::string::npos ||
+													property.Name.find("Roughness") != std::string::npos;
 
 					if (setDefaultValue)
 					{
 						memcpy(&(m_CBBuffer[buffIndex]), glm::value_ptr(one), property.SizeInBytes);
 					}
-					if (name.find("AlphaCutoffThreshold") != std::string::npos)
+					if (property.Name.find("AlphaCutoffThreshold") != std::string::npos)
 					{
 						glm::vec4 epsilon(0.01f);
 						memcpy(&(m_CBBuffer[buffIndex]), glm::value_ptr(epsilon), property.SizeInBytes);
@@ -121,7 +121,7 @@ namespace ArcEngine
 			if (!m_CBBuffer.empty())
 			{
 				m_ConstantBuffer->Bind(0);
-				m_ConstantBuffer->SetData(m_CBBuffer.data(), sizeof(float) * 4 * m_CBBuffer.size(), 0);
+				m_ConstantBuffer->SetData(m_CBBuffer.data(), sizeof(float) * m_CBBuffer.size(), 0);
 			}
 		}
 	}
@@ -169,7 +169,7 @@ namespace ArcEngine
 		[[likely]]
 		if (it != m_Indices.end())
 		{
-			return glm::value_ptr(m_CBBuffer[it->second.BufferIndex]);
+			return &(m_CBBuffer[it->second.BufferIndex]);
 		}
 
 		return nullptr;
@@ -183,7 +183,7 @@ namespace ArcEngine
 		[[likely]]
 		if (it != m_Indices.end())
 		{
-			memcpy(glm::value_ptr(m_CBBuffer[it->second.BufferIndex]), data, it->second.SizeInBytes);
+			memcpy(&(m_CBBuffer[it->second.BufferIndex]), data, it->second.SizeInBytes);
 		}
 	}
 }

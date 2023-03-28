@@ -67,15 +67,13 @@ namespace ArcEngine
 		std::vector<D3D12_ROOT_PARAMETER1>& outRootParams,
 		std::array<D3D12_DESCRIPTOR_RANGE1, 20>& outDescriptors,
 		uint32_t* outDescriptorsEnd,
-		MaterialPropertyMap& outMaterialProperties,
+		std::vector<MaterialProperty>& outMaterialProperties,
 		BufferMap& bufferMap)
 	{
 		ARC_PROFILE_SCOPE()
 
 		D3D12_SHADER_DESC shaderDesc;
 		reflection->GetDesc(&shaderDesc);
-
-		uint32_t offset = 0;
 
 		outRootParams.reserve(outRootParams.size() + shaderDesc.BoundResources);
 		for (uint32_t i = 0; i < shaderDesc.BoundResources; ++i)
@@ -92,7 +90,6 @@ namespace ArcEngine
 			if (bufferMap.contains(bufferName))
 				continue;
 
-			bool supported = shaderInputBindDesc.Type != D3D_SIT_SAMPLER;
 			bool tex = shaderInputBindDesc.Type == D3D_SIT_TEXTURE;
 			bool cbuffer = shaderInputBindDesc.Type == D3D_SIT_CBUFFER;
 			bool bindlessTextures = cbuffer && bufferName == "Textures";
@@ -181,15 +178,15 @@ namespace ArcEngine
 					MaterialProperty property{};
 					property.Type = type;
 					property.SizeInBytes = variableDesc.Size;
+					property.StartOffsetInBytes = variableDesc.StartOffset;
 					property.IsSlider = variableName.ends_with("01");
+					property.Name = variableDesc.Name;
 					property.DisplayName = variableDesc.Name + (property.IsSlider ? 2 : 0);
 					property.IsColor = variableName.find("color") != std::string::npos || variableName.find("Color") != std::string::npos;
 					property.Slot = slot;
 
-					outMaterialProperties.emplace(variableName, property);
+					outMaterialProperties.push_back(property);
 					bufferMap.emplace(variableName, slot);
-
-					offset += variableDesc.Size;
 				}
 			}
 			else if(tex)
@@ -197,14 +194,14 @@ namespace ArcEngine
 				MaterialProperty property{};
 				property.Type = MaterialPropertyType::Texture2D;
 				property.SizeInBytes = sizeof(uint32_t);
+				property.StartOffsetInBytes = 0;
 				property.IsSlider = false;
+				property.Name = bufferName;
 				property.DisplayName = bufferName;
 				property.IsColor = false;
 				property.Slot = slot;
 
-				outMaterialProperties.emplace(bufferName, property);
-
-				offset += property.SizeInBytes;
+				outMaterialProperties.push_back(property);
 			}
 
 			bufferMap.emplace(bufferName, slot);
