@@ -20,7 +20,8 @@ namespace ArcEngine
 	class Renderer3D
 	{
 	public:
-		static constexpr uint32_t MAX_NUM_LIGHTS = 200;
+		static constexpr uint32_t MAX_NUM_POINT_LIGHTS = 100;
+		static constexpr uint32_t MAX_NUM_SPOT_LIGHTS = 100;
 		static constexpr uint32_t MAX_NUM_DIR_LIGHTS = 3;
 
 		static void Init();

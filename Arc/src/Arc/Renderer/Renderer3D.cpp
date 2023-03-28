@@ -33,10 +33,24 @@ namespace ArcEngine
 		glm::vec2 RotationIntensity;
 	};
 
+	struct DirectionalLightData
+	{
+		glm::vec4 Direction;
+		glm::vec4 Color;				// rgb: color, a: intensity
+	};
+
 	struct PointLightData
 	{
-		glm::vec4 Position;
-		glm::vec4 Color;
+		glm::vec4 Position;				// xyz: position, w: radius
+		glm::vec4 Color;				// rgb: color, a: intensity
+	};
+
+	struct SpotLightData
+	{
+		glm::vec4 Position;				// xyz: position, w: radius
+		glm::vec4 Color;				// rgb: color, a: intensity
+		glm::vec4 AttenuationFactors;	// xy: cut-off angles
+		glm::vec4 Direction;
 	};
 
 	struct Renderer3DData
@@ -45,7 +59,9 @@ namespace ArcEngine
 		std::vector<MeshData> Meshes;
 		Ref<ConstantBuffer> GlobalDataCB;
 		Ref<ConstantBuffer> CubemapCB;
+		Ref<StructuredBuffer> DirectionalLightsSB;
 		Ref<StructuredBuffer> PointLightsSB;
+		Ref<StructuredBuffer> SpotLightsSB;
 		Ref<Texture2D> BRDFLutTexture;
 		Ref<PipelineState> RenderPipeline;
 		Ref<PipelineState> CubemapPipeline;
@@ -71,9 +87,6 @@ namespace ArcEngine
 	Ref<VertexBuffer> Renderer3D::s_CubeVertexBuffer;
 
 	Ref<Texture2D> Renderer3D::s_BRDFLutTexture;
-	Ref<ConstantBuffer> Renderer3D::s_UbPointLights;
-	Ref<ConstantBuffer> Renderer3D::s_UbDirectionalLights;
-
 
 	Renderer3D::TonemappingType Renderer3D::Tonemapping = Renderer3D::TonemappingType::ACES;
 	float Renderer3D::Exposure = 1.0f;
@@ -87,17 +100,6 @@ namespace ArcEngine
 	glm::vec4 Renderer3D::VignetteColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.25f);	// rgb: color, a: intensity
 	glm::vec4 Renderer3D::VignetteOffset = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);	// xy: offset, z: useMask, w: enable/disable effect
 	Ref<Texture2D> Renderer3D::VignetteMask = nullptr;
-
-	inline static uint32_t s_NumDirectionalLights = 0;
-	inline static uint32_t s_NumPointLights = 0;
-
-	struct DirectionalLightData
-	{
-		glm::vec4 Position;
-		glm::vec4 Color;
-		glm::vec4 LightDir;
-		glm::mat4 DirLightViewProj;
-	};
 #endif
 
 	void Renderer3D::Init()
@@ -144,13 +146,12 @@ namespace ArcEngine
 
 		s_Data->GlobalDataCB = ConstantBuffer::Create(sizeof(GlobalData), 1, s_Data->RenderPipeline->GetSlot("GlobalData"));
 		s_Data->CubemapCB = ConstantBuffer::Create(sizeof(SkyboxData), 1, s_Data->CubemapPipeline->GetSlot("SkyboxData"));
-		s_Data->PointLightsSB = StructuredBuffer::Create(sizeof(PointLightData), MAX_NUM_LIGHTS, s_Data->RenderPipeline->GetSlot("PointLights"));
+		s_Data->DirectionalLightsSB = StructuredBuffer::Create(sizeof(DirectionalLightData), MAX_NUM_DIR_LIGHTS, s_Data->RenderPipeline->GetSlot("DirectionalLights"));
+		s_Data->PointLightsSB = StructuredBuffer::Create(sizeof(PointLightData), MAX_NUM_POINT_LIGHTS, s_Data->RenderPipeline->GetSlot("PointLights"));
+		s_Data->SpotLightsSB = StructuredBuffer::Create(sizeof(SpotLightData), MAX_NUM_SPOT_LIGHTS, s_Data->RenderPipeline->GetSlot("SpotLights"));
 
 #if 0
 		s_BRDFLutTexture = Texture2D::Create("Resources/Renderer/BRDF_LUT.jpg");
-
-		s_UbPointLights = ConstantBuffer::Create(sizeof(PointLightData), MAX_NUM_LIGHTS + 1, 1);
-		s_UbDirectionalLights = ConstantBuffer::Create(sizeof(DirectionalLightData), MAX_NUM_DIR_LIGHTS + 1, 2);
 
 		s_ShadowMapShader = pipelineLibrary.Load("assets/shaders/DepthShader.glsl", spec);
 		s_CubemapShader = pipelineLibrary.Load("assets/shaders/Cubemap.glsl", spec);
@@ -377,28 +378,67 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE()
 
 		{
+			uint32_t numDirectionalLights = 0;
 			uint32_t numPointLights = 0;
-			std::array<PointLightData, MAX_NUM_LIGHTS> data{};
+			uint32_t numSpotLights = 0;
+
+			std::array<DirectionalLightData, MAX_NUM_DIR_LIGHTS> dlData{};
+			std::array<PointLightData, MAX_NUM_POINT_LIGHTS> plData{};
+			std::array<SpotLightData, MAX_NUM_SPOT_LIGHTS> slData{};
 
 			for (Entity e : s_Data->SceneLights)
 			{
 				const LightComponent& lightComponent = e.GetComponent<LightComponent>();
-				if (lightComponent.Type == LightComponent::LightType::Directional)
-					continue;
 				glm::mat4 worldTransform = e.GetWorldTransform();
 
-				data[numPointLights] =
+				switch (lightComponent.Type)
 				{
-					glm::vec4(glm::vec3(worldTransform[3]), lightComponent.Range),
-					glm::vec4(lightComponent.Color, lightComponent.Intensity),
-				};
-
-				++numPointLights;
+					case LightComponent::LightType::Directional:
+						{
+							dlData[numDirectionalLights] =
+							{
+								.Direction = worldTransform * glm::vec4(0, 0, 1, 0),
+								.Color = glm::vec4(lightComponent.Color, lightComponent.Intensity)
+							};
+							++numDirectionalLights;
+						}
+						break;
+					case LightComponent::LightType::Point:
+						{
+							plData[numPointLights] = PointLightData
+							{
+								.Position = glm::vec4(glm::vec3(worldTransform[3]), lightComponent.Range),
+								.Color = glm::vec4(lightComponent.Color, lightComponent.Intensity),
+							};
+							++numPointLights;
+						}
+						break;
+					case LightComponent::LightType::Spot:
+						{
+							slData[numSpotLights] = SpotLightData
+							{
+								.Position = glm::vec4(glm::vec3(worldTransform[3]), lightComponent.Range),
+								.Color = glm::vec4(lightComponent.Color, lightComponent.Intensity),
+								.AttenuationFactors = glm::vec4(glm::cos(lightComponent.CutOffAngle), glm::cos(lightComponent.OuterCutOffAngle), 0.0f, 0.0f),
+								.Direction = worldTransform * glm::vec4(0, 0, 1, 0)
+							};
+							++numSpotLights;
+						}
+						break;
+					default: ;
+				}
 			}
 
+			s_Data->GlobalData.NumDirectionalLights = numDirectionalLights;
 			s_Data->GlobalData.NumPointLights = numPointLights;
+			s_Data->GlobalData.NumSpotLights = numSpotLights;
+
+			s_Data->DirectionalLightsSB->Bind();
+			s_Data->DirectionalLightsSB->SetData(dlData.data(), sizeof(DirectionalLightData) * numDirectionalLights, 0);
 			s_Data->PointLightsSB->Bind();
-			s_Data->PointLightsSB->SetData(data.data(), sizeof(PointLightData) * numPointLights, 0);
+			s_Data->PointLightsSB->SetData(plData.data(), sizeof(PointLightData) * numPointLights, 0);
+			s_Data->SpotLightsSB->Bind();
+			s_Data->SpotLightsSB->SetData(slData.data(), sizeof(SpotLightData) * numSpotLights, 0);
 		}
 #if 0
 		{
@@ -659,7 +699,9 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE("Draw Meshes")
 
 			s_Data->GlobalDataCB->Bind(0);
+			s_Data->DirectionalLightsSB->Bind();
 			s_Data->PointLightsSB->Bind();
+			s_Data->SpotLightsSB->Bind();
 
 			renderTarget->Bind();
 			for (const auto& meshData : s_Data->Meshes)

@@ -22,13 +22,29 @@ cbuffer GlobalData : register(b1, space0)
 
 SamplerState Sampler : register(s0);
 
+struct DirectionalLight
+{
+	float4 Direction;
+	float4 Color;				// rgb: color, a: intensity
+};
+
 struct PointLight
 {
 	float4 Position;			// xyz: position, w: radius
 	float4 Color;				// rgb: color, a: intensity
 };
 
-StructuredBuffer<PointLight> PointLights : register (t0, space0);
+struct SpotLight
+{
+	float4 Position;			// xyz: position, w: radius
+	float4 Color;				// rgb: color, a: intensity
+	float4 AttenuationFactors;	// xy: cut-off angles
+	float4 Direction;
+};
+
+StructuredBuffer<DirectionalLight> DirectionalLights : register (t0, space0);
+StructuredBuffer<PointLight> PointLights : register (t1, space0);
+StructuredBuffer<SpotLight> SpotLights : register (t2, space0);
 
 
 
