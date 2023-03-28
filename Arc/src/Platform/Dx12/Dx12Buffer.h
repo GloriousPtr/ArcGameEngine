@@ -53,7 +53,7 @@ namespace ArcEngine
 	class Dx12ConstantBuffer : public ConstantBuffer
 	{
 	public:
-		Dx12ConstantBuffer(uint32_t size, uint32_t count, uint32_t registerIndex);
+		Dx12ConstantBuffer(uint32_t stride, uint32_t count, uint32_t registerIndex);
 		~Dx12ConstantBuffer() override;
 
 		void SetData(const void* data, uint32_t size, uint32_t index) override;
@@ -63,8 +63,25 @@ namespace ArcEngine
 		DescriptorHandle				m_Handle[Dx12Context::FrameCount]{};
 		D3D12MA::Allocation*			m_Allocation[Dx12Context::FrameCount]{};
 		uint32_t						m_RegisterIndex = 0;
-		uint32_t						m_Size = 0;
+		uint32_t						m_Stride = 0;
 		uint32_t						m_Count = 0;
-		uint32_t						m_AlignedSize = 0;
+		uint32_t						m_AlignedStride = 0;
+	};
+
+	class Dx12StructuredBuffer : public StructuredBuffer
+	{
+	public:
+		Dx12StructuredBuffer(uint32_t stride, uint32_t count, uint32_t registerIndex);
+		~Dx12StructuredBuffer() override;
+
+		void SetData(const void* data, uint32_t size, uint32_t index) override;
+		void Bind() const override;
+
+	private:
+		DescriptorHandle				m_Handle[Dx12Context::FrameCount]{};
+		D3D12MA::Allocation* m_Allocation[Dx12Context::FrameCount]{};
+		uint32_t						m_RegisterIndex = 0;
+		uint32_t						m_Stride = 0;
+		uint32_t						m_Count = 0;
 	};
 }

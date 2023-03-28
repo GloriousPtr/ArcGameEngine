@@ -139,19 +139,16 @@ namespace ArcEngine
 	}
 
 
-	Dx12ConstantBuffer::Dx12ConstantBuffer(uint32_t size, uint32_t count, uint32_t registerIndex)
+	Dx12ConstantBuffer::Dx12ConstantBuffer(uint32_t stride, uint32_t count, uint32_t registerIndex)
 	{
 		ARC_PROFILE_SCOPE()
 
 		m_RegisterIndex = registerIndex;
-		m_Size = size;
+		m_Stride = stride;
 		m_Count = count;
-		m_AlignedSize = (size + 255) &~ 255;
+		m_AlignedStride = (stride + 255) &~ 255;
 
-		const uint32_t allocationSize = m_AlignedSize * count;
-
-		D3D12MA::ALLOCATION_DESC allocationDesc{};
-		allocationDesc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
+		const uint32_t allocationSize = m_AlignedStride * count;
 
 		const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(allocationSize);
 
@@ -186,7 +183,7 @@ namespace ArcEngine
 
 		ARC_CORE_ASSERT(m_Count > index, "Constant buffer index can't be greater than count! Overflow!")
 
-		SetBufferData(m_Allocation[Dx12Context::GetCurrentFrameIndex()], data, size == 0 ? m_Size : size, m_AlignedSize * index);
+		SetBufferData(m_Allocation[Dx12Context::GetCurrentFrameIndex()], data, size == 0 ? m_Stride : size, m_AlignedStride * index);
 	}
 
 	void Dx12ConstantBuffer::Bind(uint32_t index) const
@@ -195,7 +192,65 @@ namespace ArcEngine
 
 		ARC_CORE_ASSERT(m_Count > index, "Constant buffer index can't be greater than count! Overflow!")
 
-		const auto gpuVirtualAddress = m_Allocation[Dx12Context::GetCurrentFrameIndex()]->GetResource()->GetGPUVirtualAddress() + m_AlignedSize * index;
+		const auto gpuVirtualAddress = m_Allocation[Dx12Context::GetCurrentFrameIndex()]->GetResource()->GetGPUVirtualAddress() + m_AlignedStride * index;
 		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(m_RegisterIndex, gpuVirtualAddress);
+	}
+
+
+	Dx12StructuredBuffer::Dx12StructuredBuffer(uint32_t stride, uint32_t count, uint32_t registerIndex)
+	{
+		ARC_PROFILE_SCOPE()
+
+		m_RegisterIndex = registerIndex;
+		m_Stride = stride;
+		m_Count = count;
+
+		const uint32_t size = m_Stride * m_Count;
+		const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(size);
+
+		for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
+		{
+			Dx12Allocator::CreateBufferResource(D3D12_HEAP_TYPE_UPLOAD, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, &m_Allocation[i]);
+
+			D3D12_SHADER_RESOURCE_VIEW_DESC desc{};
+			desc.Format = DXGI_FORMAT_UNKNOWN;
+			desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+			desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			desc.Buffer.StructureByteStride = m_Stride;
+			desc.Buffer.NumElements = m_Count;
+			desc.Buffer.FirstElement = 0;
+			desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+			m_Handle[i] = Dx12Context::GetSrvHeap()->Allocate();
+			Dx12Context::GetDevice()->CreateShaderResourceView(m_Allocation[i]->GetResource(), &desc, m_Handle[i].CPU);
+		}
+	}
+
+	Dx12StructuredBuffer::~Dx12StructuredBuffer()
+	{
+		ARC_PROFILE_SCOPE()
+
+		for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
+		{
+			Dx12Context::GetSrvHeap()->Free(m_Handle[i]);
+
+			if (m_Allocation[i])
+				m_Allocation[i]->Release();
+		}
+	}
+
+	void Dx12StructuredBuffer::SetData(const void* data, uint32_t size, uint32_t index)
+	{
+		ARC_PROFILE_SCOPE()
+
+		ARC_CORE_ASSERT(m_Count > index, "Structured buffer index can't be greater than count! Overflow!")
+
+		SetBufferData(m_Allocation[Dx12Context::GetCurrentFrameIndex()], data, size == 0 ? m_Stride * m_Count : size, m_Stride * index);
+	}
+
+	void Dx12StructuredBuffer::Bind() const
+	{
+		ARC_PROFILE_SCOPE()
+
+		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(m_RegisterIndex, m_Handle[Dx12Context::GetCurrentFrameIndex()].GPU);
 	}
 }

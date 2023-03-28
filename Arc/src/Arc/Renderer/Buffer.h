@@ -138,6 +138,17 @@ namespace ArcEngine
 		virtual void Bind(uint32_t index) const = 0;
 		virtual void SetData(const void* data, uint32_t size, uint32_t index) = 0;
 
-		[[nodiscard]] static Ref<ConstantBuffer> Create(uint32_t size, uint32_t count, uint32_t registerIndex);
+		[[nodiscard]] static Ref<ConstantBuffer> Create(uint32_t stride, uint32_t count, uint32_t registerIndex);
+	};
+
+	class StructuredBuffer
+	{
+	public:
+		virtual ~StructuredBuffer() = default;
+
+		virtual void Bind() const = 0;
+		virtual void SetData(const void* data, uint32_t size, uint32_t index) = 0;
+
+		[[nodiscard]] static Ref<StructuredBuffer> Create(uint32_t stride, uint32_t count, uint32_t registerIndex);
 	};
 }

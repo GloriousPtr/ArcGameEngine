@@ -125,6 +125,17 @@ namespace ArcEngine
 						++(*outDescriptorsEnd);
 					}
 					break;
+				case D3D_SIT_STRUCTURED:
+					{
+						CD3DX12_DESCRIPTOR_RANGE1 range;
+						range.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, shaderInputBindDesc.BindCount, shaderInputBindDesc.BindPoint, shaderInputBindDesc.Space, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+						size_t index = *outDescriptorsEnd;
+						outDescriptors[index] = range;
+						rootParameter.InitAsDescriptorTable(1, &outDescriptors[index]);
+						++(*outDescriptorsEnd);
+					}
+					break;
+
 				case D3D_SIT_UAV_RWTYPED:
 					{
 						CD3DX12_DESCRIPTOR_RANGE1 range;
@@ -136,7 +147,6 @@ namespace ArcEngine
 					}
 					break;
 				case D3D_SIT_SAMPLER:
-				case D3D_SIT_STRUCTURED:
 				case D3D_SIT_TBUFFER:
 				case D3D_SIT_UAV_RWSTRUCTURED:
 				case D3D_SIT_BYTEADDRESS:
