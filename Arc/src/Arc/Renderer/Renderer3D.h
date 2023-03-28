@@ -44,7 +44,7 @@ namespace ArcEngine
 		[[nodiscard]] static Statistics GetStats();
 
 	private:
-		static void SetupCameraData(const CameraData& cameraData);
+		static void SetupGlobalData();
 		static void SetupLightsData();
 		static void Flush(const Ref<RenderGraphData>& renderGraphData);
 		static void FXAAPass(const Ref<RenderGraphData>& renderGraphData);

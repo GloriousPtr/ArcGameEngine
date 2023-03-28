@@ -126,7 +126,7 @@ namespace ArcEngine
 			s_Data->TexturePipeline = pipelineLibrary.Load("assets/shaders/Texture.hlsl", texture2dPippelineSpec);
 		}
 
-		s_Data->CameraConstantBuffer = ConstantBuffer::Create(sizeof(glm::mat4), 1, s_Data->TexturePipeline->GetSlot("Camera"));
+		s_Data->CameraConstantBuffer = ConstantBuffer::Create(sizeof(CameraData), 1, s_Data->TexturePipeline->GetSlot("GlobalData"));
 
 		{
 			const PipelineSpecification linePippelineSpec

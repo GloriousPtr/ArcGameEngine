@@ -5,6 +5,17 @@
 
 namespace ArcEngine
 {
+	struct GlobalData
+	{
+		glm::mat4 CameraView{};
+		glm::mat4 CameraProjection{};
+		glm::mat4 CameraViewProjection{};
+		glm::vec4 CameraPosition{};
+		uint32_t NumDirectionalLights = 0;
+		uint32_t NumPointLights = 0;
+		uint32_t NumSpotLights = 0;
+	};
+
 	class Renderer
 	{
 	public:
