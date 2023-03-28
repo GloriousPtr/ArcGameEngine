@@ -132,6 +132,51 @@ namespace ArcEngine
 							vertex.Normal.x = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 0];
 							vertex.Normal.y = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 1];
 							vertex.Normal.z = -attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 2];
+
+							size_t index = v / 3;
+
+							int v0_index = shape.mesh.indices[index_offset + 0].vertex_index;
+							int v1_index = shape.mesh.indices[index_offset + 1].vertex_index;
+							int v2_index = shape.mesh.indices[index_offset + 2].vertex_index;
+
+							glm::vec3 v0 = { attrib.vertices[3 * v0_index + 0], attrib.vertices[3 * v0_index + 1], -attrib.vertices[3 * v0_index + 2] };
+							glm::vec3 v1 = { attrib.vertices[3 * v1_index + 0], attrib.vertices[3 * v1_index + 1], -attrib.vertices[3 * v1_index + 2] };
+							glm::vec3 v2 = { attrib.vertices[3 * v2_index + 0], attrib.vertices[3 * v2_index + 1], -attrib.vertices[3 * v2_index + 2] };
+
+							int uv0_index = shape.mesh.indices[index_offset + 0].texcoord_index;
+							int uv1_index = shape.mesh.indices[index_offset + 1].texcoord_index;
+							int uv2_index = shape.mesh.indices[index_offset + 2].texcoord_index;
+
+							glm::vec2 uv0 = { attrib.texcoords[2 * uv0_index + 0], 1.0f - attrib.texcoords[2 * uv0_index + 1] };
+							glm::vec2 uv1 = { attrib.texcoords[2 * uv1_index + 0], 1.0f - attrib.texcoords[2 * uv1_index + 1] };
+							glm::vec2 uv2 = { attrib.texcoords[2 * uv2_index + 0], 1.0f - attrib.texcoords[2 * uv2_index + 1] };
+
+							auto deltaPos1 = v1 - v0;
+							auto deltaPos2 = v2 - v0;
+							auto deltaUV1 = uv1 - uv0;
+							auto deltaUV2 = uv2 - uv0;
+
+							float det = deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x;
+							if (det == 0.0f)
+							{
+								vertex.Tangent = { 1.0f, 0.0f, 0.0f };
+								vertex.Bitangent = { 0.0f, 1.0f, 0.0f };
+							}
+							else
+							{
+								float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+								vertex.Tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+								vertex.Bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+							}
+
+							auto t = glm::normalize(vertex.Tangent - vertex.Normal * glm::dot(vertex.Normal, vertex.Tangent));
+							auto b = glm::normalize(vertex.Bitangent - vertex.Normal * glm::dot(vertex.Normal, vertex.Bitangent));
+							float handedness = glm::dot(glm::cross(vertex.Normal, t), b);
+							if (handedness < 0.0f)
+							{
+								vertex.Tangent = -vertex.Tangent;
+								vertex.Bitangent = -vertex.Bitangent;
+							}
 						}
 
 						if (uniqueVertices.count(vertex) == 0)
