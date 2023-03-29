@@ -68,6 +68,8 @@ project "Arc-Editor"
 		'{MOVE} "%{cfg.targetdir}/D3D12Core.pdb" "%{cfg.targetdir}/D3D12"',
 		'{MOVE} "%{cfg.targetdir}/D3D12SDKLayers.dll" "%{cfg.targetdir}/D3D12"',
 		'{MOVE} "%{cfg.targetdir}/D3D12SDKLayers.pdb" "%{cfg.targetdir}/D3D12"',
+
+		'{COPYFILE} "%{BinDir.Pix}/WinPixEventRuntime.dll" "%{cfg.targetdir}"',
 	}
 
 	filter "system:windows"
@@ -82,6 +84,13 @@ project "Arc-Editor"
 			"dxguid.lib",
 			"d3d12.lib",
 			"dxgi.lib",
+
+			-- Pix
+			"%{LibDir.Pix}/WinPixEventRuntime.lib",
+		}
+		externalincludedirs
+		{
+			"%{IncludeDir.Pix}",
 		}
 
 	filter "system:linux"

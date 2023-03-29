@@ -1,6 +1,10 @@
 #pragma once
 
+#include <inttypes.h>
 #include <optick.h>
+
+#include <comutil.h>
+#include <WinPixEventRuntime/pix3.h>
 
 namespace ArcEngine::Profile
 {
@@ -240,16 +244,60 @@ namespace ArcEngine::Profile
 		static uint32_t GetMask(Type t) { return static_cast<uint32_t>(t >> 32); }
 		static uint32_t GetColor(Type t) { return static_cast<uint32_t>(t); }
 	};
+
+	static consteval UINT GeneratePixColor(const char* fileName, uint32_t lineNum)
+	{
+		constexpr UINT32 FNV_offset_basis = 2166136261u;
+		constexpr UINT32 FNV_prime = 16777619u;
+
+		// Calculate the hash value
+		UINT32 hash = FNV_offset_basis;
+		for (const char* p = fileName; *p != '\0'; ++p) {
+			hash ^= static_cast<UINT32>(*p);
+			hash *= FNV_prime;
+		}
+		hash ^= lineNum;
+		hash *= FNV_prime;
+
+		// Use the lower 24 bits of the hash value as the color
+		const UINT color = hash & 0x00FFFFFF;
+
+		// Calculate the red, green, and blue components of the color
+		const UINT b = (color & 0x3F) << 2;
+		const UINT g = ((color >> 6) & 0x3F) << 2;
+		const UINT r = ((color >> 12) & 0x3F) << 2;
+
+		// Combine the components into a single 32-bit color value with alpha set to 0xFF
+		return 0xFF000000u | (r << 16) | (g << 8) | b;
+	}
+	
+	inline static void PIXSetMarkerEx(const char* name, int32_t value)					{ PIXSetMarker(0xFFA9784D, "%s %" PRId32, name, value); }
+	inline static void PIXSetMarkerEx(const char* name, uint32_t value)					{ PIXSetMarker(0xFFA9784D, "%s %" PRIu32, name, value); }
+	inline static void PIXSetMarkerEx(const char* name, int64_t value)					{ PIXSetMarker(0xFFA9784D, "%s %" PRId64, name, value); }
+	inline static void PIXSetMarkerEx(const char* name, uint64_t value)					{ PIXSetMarker(0xFFA9784D, "%s %" PRIu64, name, value); }
+	inline static void PIXSetMarkerEx(const char* name, float value)					{ PIXSetMarker(0xFFA9784D, "%s %f", name, value); }
+	inline static void PIXSetMarkerEx(const char* name, float value[3])					{ PIXSetMarker(0xFFA9784D, "%s %f, %f, %f", name, value[0], value[1], value[2]); }
+	inline static void PIXSetMarkerEx(const char* name, const char* value)				{ PIXSetMarker(0xFFA9784D, "%s %s", name, value); }
+	inline static void PIXSetMarkerEx(const char* name, float x, float y, float z)		{ PIXSetMarker(0xFFA9784D, "%s %f, %f, %f", name, x, y, z); }
 }
+
+#define ARC_CONCAT(X,Y) ARC_CONCAT_IMPL(X,Y)
+#define ARC_CONCAT_IMPL(X,Y) X##Y
+
+#define CONSTEVAL_LINE int(ARC_CONCAT(__LINE__,U)) 
 
 #define ARC_ENABLE_CPU_PROFILING 1
 #if ARC_ENABLE_CPU_PROFILING
-	#define ARC_PROFILE_FRAME(...)						OPTICK_FRAME(__VA_ARGS__)
-	#define ARC_PROFILE_SCOPE(...)						OPTICK_EVENT(__VA_ARGS__)
-	#define ARC_PROFILE_TAG(NAME, ...)					OPTICK_TAG(NAME, __VA_ARGS__)
-	#define ARC_PROFILE_SCOPE_DYNAMIC(NAME)				OPTICK_EVENT_DYNAMIC(NAME)
+	#define FUNC_NAME									((OPTICK_CONCAT(autogen_description_, __LINE__))->flags & Optick::EventDescription::IS_CUSTOM_NAME)\
+														? OPTICK_CONCAT(autogen_description_, __LINE__)->name\
+														: __FUNCTION__
+
+	#define ARC_PROFILE_FRAME(NAME, ...)				OPTICK_FRAME(NAME, __VA_ARGS__) PIXScopedEvent(ArcEngine::Profile::GeneratePixColor(__FILE__, CONSTEVAL_LINE), "CPU Frame");
+	#define ARC_PROFILE_SCOPE(...)						OPTICK_EVENT(__VA_ARGS__) PIXScopedEvent(ArcEngine::Profile::GeneratePixColor(__FILE__, CONSTEVAL_LINE), FUNC_NAME);
+	#define ARC_PROFILE_TAG(NAME, ...)					OPTICK_TAG(NAME, __VA_ARGS__) ArcEngine::Profile::PIXSetMarkerEx(NAME, __VA_ARGS__);
+	#define ARC_PROFILE_SCOPE_DYNAMIC(NAME)				OPTICK_EVENT_DYNAMIC(NAME) PIXScopedEvent(ArcEngine::Profile::GeneratePixColor(__FILE__, CONSTEVAL_LINE), NAME);
 	#define ARC_PROFILE_THREAD(...)						OPTICK_THREAD(__VA_ARGS__)
-	#define ARC_PROFILE_CATEGORY(NAME, CATEGORY)		OPTICK_CATEGORY(NAME, (static_cast<Optick::Category::Type>(CATEGORY)))
+	#define ARC_PROFILE_CATEGORY(NAME, CATEGORY)		OPTICK_CATEGORY(NAME, (static_cast<Optick::Category::Type>(CATEGORY))) PIXScopedEvent(ArcEngine::Profile::Category::GetColor(CATEGORY), NAME);
 #else
 	#define ARC_PROFILE_FRAME(...)
 	#define ARC_PROFILE_SCOPE(...)

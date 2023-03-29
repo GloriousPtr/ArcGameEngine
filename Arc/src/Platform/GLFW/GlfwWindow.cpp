@@ -1,6 +1,7 @@
 #include "arcpch.h"
 #include "GlfwWindow.h"
 
+#include <WinPixEventRuntime/pix3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
@@ -70,6 +71,10 @@ namespace ArcEngine
 
 		Maximize();
 		HWND hwnd = glfwGetWin32Window(m_Window);
+
+		PIXLoadLatestWinPixGpuCapturerLibrary();
+		PIXLoadLatestWinPixTimingCapturerLibrary();
+
 		m_Context = GraphicsContext::Create(hwnd);
 		m_Context->Init();
 		

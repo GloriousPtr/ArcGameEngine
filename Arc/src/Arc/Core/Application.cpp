@@ -6,8 +6,6 @@
 #include "Arc/Renderer/Renderer.h"
 #include "Arc/Scripting/ScriptEngine.h"
 
-#include <optick.config.h>
-
 extern "C"
 {
 	ARC_API(dllexport) unsigned long NvOptimusEnablement = 1;

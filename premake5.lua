@@ -48,6 +48,7 @@ workspace "Arc"
 -- Library directories relavtive to root folder (solution directory)
 LibDir = {}
 LibDir["DXC"] = "%{wks.location}/Arc/vendor/dxc/dxc/lib/x64"
+LibDir["Pix"] = "%{wks.location}/Arc/vendor/WinPixRuntime/bin/x64"
 filter "configurations:Debug"
 	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Debug"
 filter "configurations:Release"
@@ -58,6 +59,7 @@ filter "configurations:Dist"
 -- Bin directories relavtive to root folder (solution directory)
 BinDir = {}
 BinDir["DXC"] = "%{wks.location}/Arc/vendor/dxc/dxc/bin/x64"
+BinDir["Pix"] = "%{wks.location}/Arc/vendor/WinPixRuntime/bin/x64"
 filter "configurations:Debug"
 	BinDir["Mono"] = "%{wks.location}/Arc/vendor/mono/bin/Debug"
 filter "configurations:Release"
@@ -87,6 +89,7 @@ IncludeDir["tinyobj"] = "%{wks.location}/Arc/vendor/tinyobj"
 IncludeDir["tinygltf"] = "%{wks.location}/Arc/vendor/tinygltf"
 IncludeDir["DXC"] = "%{wks.location}/Arc/vendor/dxc"
 IncludeDir["D3D12MA"] = "%{wks.location}/Arc/vendor/D3D12MA/D3D12MemoryAllocator/include"
+IncludeDir["Pix"] = "%{wks.location}/Arc/vendor/WinPixRuntime/Include"
 
 group "Dependencies"
 	include "Arc/vendor/GLFW"

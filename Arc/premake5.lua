@@ -86,6 +86,7 @@ project "Arc"
 		{
 			"%{IncludeDir.DXC}",
 			"%{IncludeDir.D3D12MA}",
+			"%{IncludeDir.Pix}",
 		}
 		links
 		{
@@ -99,6 +100,9 @@ project "Arc"
 			"dxguid.lib",
 			"d3d12.lib",
 			"dxgi.lib",
+
+			-- Pix
+			"%{LibDir.Pix}/WinPixEventRuntime.lib",
 		}
 
 	filter "system:linux"
