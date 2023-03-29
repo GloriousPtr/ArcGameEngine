@@ -351,8 +351,7 @@ namespace ArcEngine
 			.Position = glm::vec4(m_EditorCamera.GetPosition(), 1.0f)
 		};
 
-		m_RenderGraphData->CompositePassTarget->Bind();
-		Renderer2D::BeginScene(cameraData);
+		Renderer2D::BeginScene(cameraData, m_RenderGraphData->CompositePassTarget);
 		{
 			constexpr glm::vec4 color = glm::vec4(1.0f);
 
@@ -449,6 +448,5 @@ namespace ArcEngine
 		}
 
 		Renderer2D::EndScene();
-		m_RenderGraphData->CompositePassTarget->Unbind();
 	}
 }

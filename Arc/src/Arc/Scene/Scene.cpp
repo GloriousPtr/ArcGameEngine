@@ -1196,8 +1196,7 @@ namespace ArcEngine
 		}
 		Renderer3D::EndScene(renderGraphData);
 		
-		renderGraphData->CompositePassTarget->Bind();
-		Renderer2D::BeginScene(cameraData);
+		Renderer2D::BeginScene(cameraData, renderGraphData->CompositePassTarget);
 		{
 			ARC_PROFILE_SCOPE("Submit Particle Data")
 
@@ -1215,7 +1214,6 @@ namespace ArcEngine
 			}
 		}
 		Renderer2D::EndScene();
-		renderGraphData->CompositePassTarget->Unbind();
 	}
 
 	void Scene::CreateRigidbody(Entity entity, const TransformComponent& transform, RigidbodyComponent& component) const

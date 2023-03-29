@@ -2,7 +2,9 @@
 #include "Arc/Renderer/Renderer2D.h"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
+#include "ParticleSystem.h"
 #include "PipelineState.h"
 #include "Renderer.h"
 #include "Arc/Core/AssetManager.h"
@@ -11,7 +13,6 @@
 #include "Arc/Renderer/RenderCommand.h"
 #include "Arc/Renderer/RenderGraphData.h"
 #include "Arc/Renderer/Texture.h"
-#include "glm/gtc/type_ptr.hpp"
 
 namespace ArcEngine
 {
@@ -36,6 +37,8 @@ namespace ArcEngine
 		static constexpr uint32_t MaxVertices = MaxQuads * 4;
 		static constexpr uint32_t MaxIndices = MaxQuads * 6;
 		static constexpr uint32_t MaxTextureSlots = 32;
+
+		Ref<Framebuffer> RenderTarget;
 
 		Ref<ConstantBuffer> CameraConstantBuffer;
 		Ref<VertexArray> QuadVertexArray;
@@ -158,10 +161,11 @@ namespace ArcEngine
 		s_Data.reset();
 	}
 
-	void Renderer2D::BeginScene(const CameraData& viewProjection)
+	void Renderer2D::BeginScene(const CameraData& viewProjection, Ref<Framebuffer>& renderTarget)
 	{
 		ARC_PROFILE_SCOPE()
 
+		s_Data->RenderTarget = renderTarget;
 		if (s_Data->TexturePipeline->Bind())
 		{
 			s_Data->CameraConstantBuffer->Bind(0);
@@ -195,22 +199,28 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		if(s_Data->QuadIndexCount && s_Data->TexturePipeline->Bind())
+		if(s_Data->QuadIndexCount && s_Data->RenderTarget && s_Data->TexturePipeline->Bind())
 		{
 			ARC_PROFILE_SCOPE("Draw Quads")
 
+			s_Data->RenderTarget->Bind();
+
 			const auto dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Data->QuadVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Data->QuadVertexBufferBase));
+			s_Data->CameraConstantBuffer->Bind(0);
 			s_Data->QuadVertexBuffer->SetData(s_Data->QuadVertexBufferBase, dataSize);
 			s_Data->TexturePipeline->SetData("Textures", s_Data->TextureSlots.data(), sizeof(uint32_t) * s_Data->TextureSlotIndex);
 			RenderCommand::DrawIndexed(s_Data->QuadVertexArray, s_Data->QuadIndexCount);
 			s_Data->Stats.DrawCalls++;
 
 			RenderCommand::Execute();
+			s_Data->RenderTarget->Unbind();
 		}
 		
-		if (s_Data->LineVertexCount && s_Data->LinePipeline->Bind())
+		if (s_Data->LineVertexCount && s_Data->RenderTarget && s_Data->LinePipeline->Bind())
 		{
 			ARC_PROFILE_SCOPE("Draw Lines")
+
+			s_Data->RenderTarget->Bind();
 
 			const auto dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Data->LineVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Data->LineVertexBufferBase));
 			s_Data->LineVertexBuffer->SetData(s_Data->LineVertexBufferBase, dataSize);
@@ -218,6 +228,7 @@ namespace ArcEngine
 			s_Data->Stats.DrawCalls++;
 
 			RenderCommand::Execute();
+			s_Data->RenderTarget->Unbind();
 		}
 	}
 
@@ -234,8 +245,6 @@ namespace ArcEngine
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& tintColor, glm::vec2 tiling, glm::vec2 offset)
 	{
-		ARC_PROFILE_SCOPE()
-		
 		const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 								* glm::rotate(glm::mat4(1.0f), rotation, { 0.0f, 0.0f, 1.0f })
 								* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
@@ -274,6 +283,9 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
+		if (s_Data->QuadIndexCount >= Renderer2DData::MaxIndices)
+			NextBatch();
+
 		uint32_t textureIndex = 0;
 
 		if(texture)
@@ -289,7 +301,7 @@ namespace ArcEngine
 
 			if(textureIndex == 0)
 			{
-				if(s_Data->QuadIndexCount >= Renderer2DData::MaxIndices || s_Data->TextureSlotIndex >= Renderer2DData::MaxTextureSlots)
+				if(s_Data->TextureSlotIndex >= Renderer2DData::MaxTextureSlots)
 					NextBatch();
 				
 				textureIndex = s_Data->TextureSlotIndex;

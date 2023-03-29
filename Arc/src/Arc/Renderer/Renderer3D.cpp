@@ -672,6 +672,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
+		renderTarget->Bind();
+
 		bool shouldExecute = false;
 		if (s_Data->Skylight)
 		{
@@ -680,7 +682,6 @@ namespace ArcEngine
 			[[likely]]
 			if (s_Data->CubemapPipeline->Bind())
 			{
-				renderTarget->Bind();
 				const auto& skylightComponent = s_Data->Skylight.GetComponent<SkyLightComponent>();
 				if (skylightComponent.Texture)
 				{
@@ -688,7 +689,6 @@ namespace ArcEngine
 					skylightComponent.Texture->Bind(s_Data->CubemapPipeline->GetSlot("EnvironmentTexture"));
 					DrawCube();
 				}
-				renderTarget->Unbind();
 				shouldExecute = true;
 			}
 		}
@@ -703,7 +703,6 @@ namespace ArcEngine
 			s_Data->PointLightsSB->Bind();
 			s_Data->SpotLightsSB->Bind();
 
-			renderTarget->Bind();
 			for (const auto& meshData : s_Data->Meshes)
 			{
 				meshData.SubmeshGeometry.Mat->Bind();
@@ -712,13 +711,13 @@ namespace ArcEngine
 				s_Data->Stats.DrawCalls++;
 				s_Data->Stats.IndexCount += meshData.SubmeshGeometry.Geometry->GetIndexBuffer()->GetCount();
 			}
-			renderTarget->Unbind();
 			shouldExecute = true;
 		}
 
 		if (shouldExecute)
 			RenderCommand::Execute();
 
+		renderTarget->Unbind();
 #if 0
 		renderTarget->Bind();
 		//RenderCommand::SetBlendState(false);
