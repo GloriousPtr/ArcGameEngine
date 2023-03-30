@@ -1,7 +1,7 @@
 #pragma once
 
 class IDXGIAdapter;
-class ID3D12Device;
+struct ID3D12Device;
 
 #include <D3D12MemAlloc.h>
 
