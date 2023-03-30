@@ -7,11 +7,11 @@ namespace ArcEngine
 	uint32_t BasePanel::s_Count = 0;
 
 	BasePanel::BasePanel(const char* name, const char8_t* icon, bool defaultShow)
-		: Showing(defaultShow), m_Name(name), m_Icon(icon)
+		: Showing(defaultShow), m_Icon(icon), m_Name(name)
 	{
 		ARC_PROFILE_SCOPE()
 
-		m_ID = fmt::format(" {} {}\t\t###{}{}", StringUtils::FromChar8T(icon), name, s_Count, name);
+		m_ID = fmt::format(" {} {}\t\t###{}_{}", StringUtils::FromChar8T(icon), m_Name, m_Name, s_Count);
 		s_Count++;
 	}
 

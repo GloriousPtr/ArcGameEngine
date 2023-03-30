@@ -29,7 +29,7 @@ namespace ArcEngine
 
 	void SceneViewport::OnUpdate([[maybe_unused]] Timestep timestep)
 	{
-		ARC_PROFILE_SCOPE(m_ID.c_str())
+		ARC_PROFILE_SCOPE()
 
 		if (FramebufferSpecification spec = m_RenderGraphData->CompositePassTarget->GetSpecification();
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized fb is invalid

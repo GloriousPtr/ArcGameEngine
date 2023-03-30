@@ -29,8 +29,8 @@ namespace ArcEngine
 		void OnEnd() const;
 
 	protected:
-		std::string m_Name;
 		const char8_t* m_Icon;
+		std::string m_Name;
 		std::string m_ID;
 
 	private:
