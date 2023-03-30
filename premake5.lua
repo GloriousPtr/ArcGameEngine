@@ -25,6 +25,7 @@ workspace "Arc"
 	{
 		"%{wks.location}/Arc/vendor/glm/util/glm.natvis",
 		"%{wks.location}/Arc/vendor/imgui/misc/debuggers/imgui.natvis",
+		"%{wks.location}/Arc/vendor/imgui/misc/debuggers/imgui.natstepfilter",
 		"%{wks.location}/Arc/vendor/yaml-cpp/src/contrib/yaml-cpp.natvis",
 		"%{IncludeDir.JoltPhysics}/Jolt/Jolt.natvis",
 		"%{IncludeDir.D3D12MA}/../src/D3D12MemAlloc.natvis",
