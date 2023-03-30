@@ -60,8 +60,8 @@ namespace ArcEngine
 
 		void Bind(uint32_t slot = 0) const override;
 
-		void BindIrradianceMap(uint32_t slot) const override {}
-		void BindRadianceMap(uint32_t slot) const override {}
+		void BindIrradianceMap([[maybe_unused]] uint32_t slot) const override {}
+		void BindRadianceMap([[maybe_unused]] uint32_t slot) const override {}
 		[[nodiscard]] uint64_t GetHRDRendererID() const override { return m_HDRHandle.GPU.ptr; }
 
 	private:

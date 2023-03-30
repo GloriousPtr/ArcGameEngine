@@ -11,6 +11,11 @@ namespace ArcEngine
 	{
 		uint32_t Slot;
 		uint32_t Index;
+
+		TextureSlot(uint32_t slot, uint32_t index)
+			: Slot(slot), Index(index)
+		{
+		}
 	};
 
 	struct MaterialData
@@ -19,6 +24,12 @@ namespace ArcEngine
 		uint32_t Index;
 		uint32_t BufferIndex;
 		uint32_t SizeInBytes;
+
+
+		MaterialData(MaterialPropertyType type, uint32_t index, uint32_t bufferIndex, uint32_t sizeInBytes)
+			: Type(type), Index(index), BufferIndex(bufferIndex), SizeInBytes(sizeInBytes)
+		{
+		}
 	};
 
 	using MaterialDataMap = std::unordered_map<std::string, MaterialData, UM_StringTransparentEquality>;

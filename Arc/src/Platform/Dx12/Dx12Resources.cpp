@@ -47,7 +47,7 @@ namespace ArcEngine
 
 		m_DescriptorSize = device->GetDescriptorHandleIncrementSize(m_Type);
 		m_CpuStart = m_Heap->GetCPUDescriptorHandleForHeapStart();
-		m_GpuStart = shaderVisible ? m_Heap->GetGPUDescriptorHandleForHeapStart() : D3D12_GPU_DESCRIPTOR_HANDLE(0);
+		m_GpuStart = shaderVisible ? m_Heap->GetGPUDescriptorHandleForHeapStart() : D3D12_GPU_DESCRIPTOR_HANDLE{ 0 };
 
 		return true;
 	}

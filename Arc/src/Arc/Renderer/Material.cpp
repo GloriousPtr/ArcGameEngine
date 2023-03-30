@@ -116,12 +116,12 @@ namespace ArcEngine
 
 			if (!m_BindlessTextureBuffer.empty())
 			{
-				m_Pipeline->SetData("Textures", m_BindlessTextureBuffer.data(), sizeof(uint32_t) * m_BindlessTextureBuffer.size(), 0);
+				m_Pipeline->SetData("Textures", m_BindlessTextureBuffer.data(), static_cast<uint32_t>(sizeof(uint32_t) * m_BindlessTextureBuffer.size()), 0);
 			}
 			if (!m_CBBuffer.empty())
 			{
 				m_ConstantBuffer->Bind(0);
-				m_ConstantBuffer->SetData(m_CBBuffer.data(), sizeof(float) * m_CBBuffer.size(), 0);
+				m_ConstantBuffer->SetData(m_CBBuffer.data(), static_cast<uint32_t>(sizeof(float) * m_CBBuffer.size()), 0);
 			}
 		}
 	}

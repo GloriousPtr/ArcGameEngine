@@ -42,10 +42,17 @@ namespace ArcEngine
 
 		struct ColorFrame
 		{
-			D3D12_RESOURCE_STATES		State;
+			D3D12_RESOURCE_STATES		State = D3D12_RESOURCE_STATE_RENDER_TARGET;
 			D3D12MA::Allocation*		Allocation = nullptr;
 			DescriptorHandle			SrvHandle{};
 			DescriptorHandle			RtvHandle{};
+
+			ColorFrame() = default;
+
+			ColorFrame(D3D12_RESOURCE_STATES state, D3D12MA::Allocation* allocation, DescriptorHandle srvHandle, DescriptorHandle rtvHandle)
+				: State(state), Allocation(allocation), SrvHandle(srvHandle), RtvHandle(rtvHandle)
+			{
+			}
 
 			void Release(bool deferred)
 			{
@@ -73,10 +80,17 @@ namespace ArcEngine
 
 		struct DepthFrame
 		{
-			D3D12_RESOURCE_STATES		State;
+			D3D12_RESOURCE_STATES		State = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 			D3D12MA::Allocation*		Allocation = nullptr;
 			DescriptorHandle			SrvHandle{};
 			DescriptorHandle			DsvHandle{};
+
+			DepthFrame() = default;
+
+			DepthFrame(D3D12_RESOURCE_STATES state, D3D12MA::Allocation* allocation, DescriptorHandle srvHandle, DescriptorHandle dsvHandle)
+				: State(state), Allocation(allocation), SrvHandle(srvHandle), DsvHandle(dsvHandle)
+			{
+			}
 
 			void Release(bool deferred)
 			{
@@ -128,9 +142,6 @@ namespace ArcEngine
 
 				default: ARC_CORE_ERROR("Invalid framebuffer format: {}", (int)format); return DXGI_FORMAT_UNKNOWN;
 			}
-
-			ARC_CORE_ERROR("Invalid framebuffer format: {}", (int)format);
-			return DXGI_FORMAT_UNKNOWN;
 		}
 	};
 }

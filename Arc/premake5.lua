@@ -8,7 +8,7 @@ project "Arc"
 	rtti "off"
 	postbuildmessage "================ Post-Build: Copying dependencies ================"
 
-	--flags { "FatalWarnings" }
+	flags { "FatalWarnings" }
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -87,16 +87,16 @@ project "Arc"
 		{
 			"D3D12MA",
 
-			"%{LibDir.Mono}/mono-2.0-sgen.lib",
+			"%{LibDir.Mono}/mono-2.0-sgen.dll",
 			"opengl.dll",
 
 			-- DirectX
-			"dxguid.lib",
-			"d3d12.lib",
-			"dxgi.lib",
+			"dxguid.dll",
+			"d3d12.dll",
+			"dxgi.dll",
 
 			-- Pix
-			"%{LibDir.Pix}/WinPixEventRuntime.lib",
+			"%{LibDir.Pix}/WinPixEventRuntime.dll",
 		}
 
 	filter "system:linux"

@@ -44,8 +44,8 @@ namespace ArcEngine
 	struct MaterialProperty
 	{
 		MaterialPropertyType Type;
-		size_t SizeInBytes;
-		size_t StartOffsetInBytes;
+		uint32_t SizeInBytes;
+		uint32_t StartOffsetInBytes;
 
 		std::string Name;
 		std::string DisplayName;

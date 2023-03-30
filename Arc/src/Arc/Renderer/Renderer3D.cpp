@@ -335,7 +335,7 @@ namespace ArcEngine
 		s_Data->Meshes.clear();
 	}
 
-	void Renderer3D::FXAAPass(const Ref<RenderGraphData>& renderGraphData)
+	void Renderer3D::FXAAPass([[maybe_unused]] const Ref<RenderGraphData>& renderGraphData)
 	{
 		ARC_PROFILE_SCOPE()
 
@@ -482,7 +482,7 @@ namespace ArcEngine
 #endif
 	}
 
-	void Renderer3D::CompositePass(const Ref<RenderGraphData>& renderGraphData)
+	void Renderer3D::CompositePass([[maybe_unused]] const Ref<RenderGraphData>& renderGraphData)
 	{
 		ARC_PROFILE_SCOPE()
 
@@ -520,7 +520,7 @@ namespace ArcEngine
 #endif
 	}
 
-	void Renderer3D::BloomPass(const Ref<RenderGraphData>& renderGraphData)
+	void Renderer3D::BloomPass([[maybe_unused]] const Ref<RenderGraphData>& renderGraphData)
 	{
 		ARC_PROFILE_SCOPE()
 
@@ -600,7 +600,7 @@ namespace ArcEngine
 #endif
 	}
 
-	void Renderer3D::LightingPass(const Ref<RenderGraphData>& renderGraphData)
+	void Renderer3D::LightingPass([[maybe_unused]] const Ref<RenderGraphData>& renderGraphData)
 	{
 		ARC_PROFILE_SCOPE()
 

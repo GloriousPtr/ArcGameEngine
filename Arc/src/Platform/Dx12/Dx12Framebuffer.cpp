@@ -139,10 +139,10 @@ namespace ArcEngine
 		const auto backFrame = Dx12Context::GetCurrentFrameIndex();
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_DepthAttachment[backFrame].DsvHandle.CPU;
-		commandList->OMSetRenderTargets(m_RtvHandles[backFrame].size(), m_RtvHandles[backFrame].data(), true, dsvHandle.ptr != 0 ? &dsvHandle : nullptr);
+		commandList->OMSetRenderTargets(static_cast<UINT>(m_RtvHandles[backFrame].size()), m_RtvHandles[backFrame].data(), true, dsvHandle.ptr != 0 ? &dsvHandle : nullptr);
 
 		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, (float)m_Specification.Width, (float)m_Specification.Height, 0.0f, 1.0f };
-		const D3D12_RECT scissor = { 0, 0, m_Specification.Width, m_Specification.Height };
+		const D3D12_RECT scissor = { 0, 0, static_cast<LONG>(m_Specification.Width), static_cast<LONG>(m_Specification.Height) };
 
 		commandList->RSSetViewports(1, &viewport);
 		commandList->RSSetScissorRects(1, &scissor);
@@ -163,7 +163,7 @@ namespace ArcEngine
 		commandList->OMSetRenderTargets(1, &rtv, true, nullptr);
 
 		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, (float)width, (float)height, 0.0f, 1.0f };
-		const D3D12_RECT scissorRect = { 0, 0, width, height };
+		const D3D12_RECT scissorRect = { 0, 0, static_cast<LONG>(width), static_cast<LONG>(height) };
 		commandList->RSSetViewports(1, &viewport);
 		commandList->RSSetScissorRects(1, &scissorRect);
 
@@ -183,7 +183,7 @@ namespace ArcEngine
 		for (const auto& rtv : rtvHandles)
 			commandList->ClearRenderTargetView(rtv, glm::value_ptr(m_ClearColor), 0, nullptr);
 		if (dsvHandle.ptr != 0)
-			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, m_ClearDepth.r, m_ClearDepth.g, 0, nullptr);
+			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, m_ClearDepth.r, static_cast<UINT8>(m_ClearDepth.g), 0, nullptr);
 	}
 
 	void Dx12Framebuffer::BindColorAttachment(uint32_t index, uint32_t slot)

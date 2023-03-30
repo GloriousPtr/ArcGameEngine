@@ -133,8 +133,6 @@ namespace ArcEngine
 							vertex.Normal.y = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 1];
 							vertex.Normal.z = -attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 2];
 
-							size_t index = v / 3;
-
 							int v0_index = shape.mesh.indices[index_offset + 0].vertex_index;
 							int v1_index = shape.mesh.indices[index_offset + 1].vertex_index;
 							int v2_index = shape.mesh.indices[index_offset + 2].vertex_index;
@@ -195,7 +193,7 @@ namespace ArcEngine
 
 				Ref<VertexArray> vertexArray = VertexArray::Create();
 
-				Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(reinterpret_cast<float*>(vertices.data()), (sizeof(Vertex) * vertices.size()), sizeof(Vertex));
+				Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(reinterpret_cast<float*>(vertices.data()), static_cast<uint32_t>(sizeof(Vertex) * vertices.size()), sizeof(Vertex));
 				vertexArray->AddVertexBuffer(vertexBuffer);
 
 				Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices.data(), indices.size());

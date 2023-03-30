@@ -44,7 +44,7 @@ namespace ArcEngine::Dx12Utils
 		}
 	}
 
-	static size_t GetTexelSizeInBytes(DXGI_FORMAT format)
+	static uint32_t GetTexelSizeInBytes(DXGI_FORMAT format)
 	{
 		switch (format)
 		{
@@ -123,7 +123,7 @@ namespace ArcEngine::Dx12Utils
 		}
 	}
 
-	static void CreateTexture(D3D12MA::Allocation** imageAllocation, D3D12MA::Allocation** uploadImageAllocation, D3D12_SRV_DIMENSION dimension, TextureFormat format, uint32_t width, uint32_t height, uint16_t depth, const void* data, DescriptorHandle* srvHandle, DescriptorHandle* uavHandle)
+	[[maybe_unused]] static void CreateTexture(D3D12MA::Allocation** imageAllocation, D3D12MA::Allocation** uploadImageAllocation, D3D12_SRV_DIMENSION dimension, TextureFormat format, uint32_t width, uint32_t height, uint16_t depth, const void* data, DescriptorHandle* srvHandle, DescriptorHandle* uavHandle)
 	{
 		ARC_CORE_ASSERT(imageAllocation)
 		ARC_CORE_ASSERT(uploadImageAllocation)

@@ -153,7 +153,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE()
 
-		ImVec2 windowPadding = ImGui::GetStyle().WindowPadding;
+		//ImVec2 windowPadding = ImGui::GetStyle().WindowPadding;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		if (OnBegin(ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))

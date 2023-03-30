@@ -74,12 +74,7 @@ namespace ArcEngine
 
 		[[nodiscard]] static bool IsDepthFormat(FramebufferTextureFormat format)
 		{
-			switch (format)
-			{
-				case FramebufferTextureFormat::DEPTH24STENCIL8: return true;
-			}
-
-			return false;
+			return format == FramebufferTextureFormat::DEPTH24STENCIL8;
 		}
 
 	protected:

@@ -46,20 +46,20 @@ namespace ArcEngine
 	{
 		switch (desc.Type)
 		{
-		case D3D_SVT_TEXTURE2D:			return MaterialPropertyType::Texture2D;
-		case D3D_SVT_BOOL:				return MaterialPropertyType::Bool;
-		case D3D_SVT_INT:				return MaterialPropertyType::Int;
-		case D3D_SVT_UINT:				return MaterialPropertyType::UInt;
-		case D3D_SVT_FLOAT:
-		{
-			if (desc.Columns == 1)		return MaterialPropertyType::Float;
-			if (desc.Columns == 2)		return MaterialPropertyType::Float2;
-			if (desc.Columns == 3)		return MaterialPropertyType::Float3;
-			if (desc.Columns == 4)		return MaterialPropertyType::Float4;
-		}
-		}
+			case D3D_SVT_TEXTURE2D:			return MaterialPropertyType::Texture2D;
+			case D3D_SVT_BOOL:				return MaterialPropertyType::Bool;
+			case D3D_SVT_INT:				return MaterialPropertyType::Int;
+			case D3D_SVT_UINT:				return MaterialPropertyType::UInt;
+			case D3D_SVT_FLOAT:
+			{
+				if (desc.Columns == 1)		return MaterialPropertyType::Float;
+				if (desc.Columns == 2)		return MaterialPropertyType::Float2;
+				if (desc.Columns == 3)		return MaterialPropertyType::Float3;
+				if (desc.Columns == 4)		return MaterialPropertyType::Float4;
+			}
 
-		return MaterialPropertyType::None;
+			default:						return MaterialPropertyType::None;
+		}
 	}
 
 	static void AppendMaterials(const Microsoft::WRL::ComPtr<ID3D12ShaderReflection>& reflection,
@@ -311,6 +311,11 @@ namespace ArcEngine
 			std::string Name;
 			uint32_t Index;
 			DXGI_FORMAT Format;
+
+			Layout(const char* name, uint32_t index, DXGI_FORMAT format)
+				: Name(name), Index(index), Format(format)
+			{
+			}
 		};
 		std::vector<Layout> inputLayout;
 		std::vector<Layout> outputLayout;
@@ -393,7 +398,8 @@ namespace ArcEngine
 		for (auto& i : inputLayout)
 		{
 			constexpr auto classification = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-			psoInputLayout.emplace_back(i.Name.c_str(), i.Index, i.Format, 0, D3D12_APPEND_ALIGNED_ELEMENT, classification, 0);
+			const D3D12_INPUT_ELEMENT_DESC desc{ i.Name.c_str(), i.Index, i.Format, 0, D3D12_APPEND_ALIGNED_ELEMENT, classification, 0 };
+			psoInputLayout.push_back(desc);
 		}
 
 
