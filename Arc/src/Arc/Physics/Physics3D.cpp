@@ -95,13 +95,14 @@ namespace ArcEngine
 		}
 
 #if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
-		[[nodiscard]] const char* GetBroadPhaseLayerName(BroadPhaseLayer inLayer) const override
+		[[nodiscard]] const char* GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const override
 		{
-			switch ((BroadPhaseLayer::Type)inLayer)
+			const JPH::BroadPhaseLayer layer = mObjectToBroadPhase[(uint8_t)inLayer];
+			switch ((JPH::BroadPhaseLayer::Type)layer)
 			{
-				case (BroadPhaseLayer::Type)BroadPhaseLayers::NON_MOVING:	return "NON_MOVING";
-				case (BroadPhaseLayer::Type)BroadPhaseLayers::MOVING:		return "MOVING";
-				default:													JPH_ASSERT(false); return "INVALID";
+				case (JPH::BroadPhaseLayer::Type)BroadPhaseLayers::STATIC:		return "NON_MOVING";
+				case (JPH::BroadPhaseLayer::Type)BroadPhaseLayers::DEFAULT:		return "MOVING";
+				default:														ARC_CORE_ASSERT(false); return "INVALID";
 			}
 		}
 #endif // JPH_EXTERNAL_PROFILE || JPH_PROFILE_ENABLED

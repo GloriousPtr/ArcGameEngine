@@ -29,6 +29,15 @@ project "JoltPhysics"
 	filter "system:windows"
 		systemversion "latest"
 		cppdialect "C++20"
+		externalincludedirs
+		{
+			"%{IncludeDir.Pix}"
+		}
+		links
+		{
+			-- Pix
+			"%{LibDir.Pix}/WinPixEventRuntime.lib"
+		}
 
 	filter "system:linux"
 		pic "On"

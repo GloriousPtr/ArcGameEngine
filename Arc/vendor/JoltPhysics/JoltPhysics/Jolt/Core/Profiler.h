@@ -11,9 +11,40 @@ JPH_SUPPRESS_WARNINGS_STD_END
 #include <Jolt/Core/TickCounter.h>
 #include <Jolt/Core/UnorderedMap.h>
 
+#include <Windows.h>
+#include <WinPixEventRuntime/pix3.h>
+#include <optick.h>
+#define JPH_EXTERNAL_PROFILE
+
 #if defined(JPH_EXTERNAL_PROFILE)
 
 JPH_NAMESPACE_BEGIN
+
+consteval UINT GeneratePixColor(const char* fileName, uint32_t lineNum)
+{
+	constexpr UINT32 FNV_offset_basis = 2166136261u;
+	constexpr UINT32 FNV_prime = 16777619u;
+
+	// Calculate the hash value
+	UINT32 hash = FNV_offset_basis;
+	for (const char* p = fileName; *p != '\0'; ++p) {
+		hash ^= static_cast<UINT32>(*p);
+		hash *= FNV_prime;
+	}
+	hash ^= lineNum;
+	hash *= FNV_prime;
+
+	// Use the lower 24 bits of the hash value as the color
+	const UINT color = hash & 0x00FFFFFF;
+
+	// Calculate the red, green, and blue components of the color
+	const UINT b = (color & 0x3F) << 2;
+	const UINT g = ((color >> 6) & 0x3F) << 2;
+	const UINT r = ((color >> 12) & 0x3F) << 2;
+
+	// Combine the components into a single 32-bit color value with alpha set to 0xFF
+	return 0xFF000000u | (r << 16) | (g << 8) | b;
+}
 
 /// Create this class on the stack to start sampling timing information of a particular scope.
 ///
@@ -23,11 +54,16 @@ class alignas(16) ExternalProfileMeasurement : public NonCopyable
 {	
 public:						
 	/// Constructor
-									ExternalProfileMeasurement(const char *inName, uint32 inColor = 0);
-									~ExternalProfileMeasurement();
-
-private:
-	uint8							mUserData[64];
+	ExternalProfileMeasurement(const uint32_t overrideColor, const char* inName, const uint32 inColor = 0)
+	{
+		OPTICK_PUSH_DYNAMIC(inName)
+		PIXBeginEvent(inColor == 0 ? overrideColor : PIX_COLOR((inColor & 0xFF000000) >> 24, (inColor & 0x00FF0000) >> 16, inColor & 0x0000FF00 >> 8), inName);
+	}
+	~ExternalProfileMeasurement()
+	{
+		OPTICK_POP()
+		PIXEndEvent();
+	}
 };
 
 JPH_NAMESPACE_END
@@ -39,9 +75,11 @@ JPH_NAMESPACE_END
 JPH_SUPPRESS_WARNING_PUSH
 JPH_CLANG_SUPPRESS_WARNING("-Wc++98-compat-pedantic")
 
+#define CONSTEVAL_LINE int(OPTICK_CONCAT(__LINE__,U)) 
+
 // Dummy implementations
-#define JPH_PROFILE_THREAD_START(name)			
-#define JPH_PROFILE_THREAD_END()				
+#define JPH_PROFILE_THREAD_START(name)			OPTICK_START_THREAD(name)
+#define JPH_PROFILE_THREAD_END()				OPTICK_STOP_THREAD()
 #define JPH_PROFILE_NEXTFRAME()			
 #define JPH_PROFILE_DUMP(...)				
 								
@@ -58,10 +96,10 @@ JPH_CLANG_SUPPRESS_WARNING("-Wc++98-compat-pedantic")
 ///			do operation;
 ///		}
 ///
-#define JPH_PROFILE(...)			ExternalProfileMeasurement JPH_PROFILE_TAG(__LINE__)(__VA_ARGS__)
+#define JPH_PROFILE(...)			ExternalProfileMeasurement JPH_PROFILE_TAG(__LINE__)(JPH::GeneratePixColor(__FILE__, CONSTEVAL_LINE), __VA_ARGS__)
 
 // Scope profiling for function
-#define JPH_PROFILE_FUNCTION()		JPH_PROFILE(JPH_FUNCTION_NAME)
+#define JPH_PROFILE_FUNCTION()		OPTICK_EVENT() PIXScopedEvent(JPH::GeneratePixColor(__FILE__, CONSTEVAL_LINE), JPH_FUNCTION_NAME);
 
 JPH_SUPPRESS_WARNING_POP
 
