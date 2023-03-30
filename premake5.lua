@@ -51,6 +51,9 @@ workspace "Arc"
 			"directxtk12_desktop_2019:2023.2.7.1"
 		}
 		linkoptions { "/ignore:4006" }
+		buildoptions { "/bigobj" }
+	filter { "system:windows", "toolset:clang" }
+		buildoptions { "/showFilenames" }
 	filter "system:linux"
 		toolset "clang"
 

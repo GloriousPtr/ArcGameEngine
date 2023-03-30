@@ -77,7 +77,6 @@ project "Arc"
 
 	filter "system:windows"
 		systemversion "latest"
-		buildoptions { "/bigobj" }
 		externalincludedirs
 		{
 			"%{IncludeDir.D3D12MA}",
