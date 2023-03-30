@@ -324,10 +324,10 @@ namespace ArcEngine
 #endif // ARC_CORE_DEBUG
 
 		bool heapInitResult = true;
-		heapInitResult &= s_RtvDescHeap.Init(512, false);
-		heapInitResult &= s_DsvDescHeap.Init(512, false);
-		heapInitResult &= s_SrvDescHeap.Init(4096, true);
-		heapInitResult &= s_UavDescHeap.Init(512, false);
+		heapInitResult &= s_RtvDescHeap.Init(4096, false);
+		heapInitResult &= s_DsvDescHeap.Init(4096, false);
+		heapInitResult &= s_SrvDescHeap.Init(8092, true);
+		heapInitResult &= s_UavDescHeap.Init(2048, false);
 		ARC_CORE_ASSERT(heapInitResult)
 
 		s_RtvDescHeap.Heap()->SetName(L"RTV Descriptor Heap");
