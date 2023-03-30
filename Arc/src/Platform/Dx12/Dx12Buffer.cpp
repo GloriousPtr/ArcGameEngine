@@ -1,7 +1,8 @@
 #include "arcpch.h"
 #include "Dx12Buffer.h"
 
-#include "d3dx12.h"
+#include <d3dx12/d3dx12.h>
+
 #include "Dx12Allocator.h"
 
 namespace ArcEngine

@@ -7,7 +7,6 @@
 #include <d3d12shader.h>
 
 #include "DxHelper.h"
-#include "d3dx12.h"
 #include "Dx12Framebuffer.h"
 #include "Dx12Shader.h"
 

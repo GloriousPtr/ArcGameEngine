@@ -47,7 +47,8 @@ workspace "Arc"
 		nuget
 		{
 			"Microsoft.Direct3D.D3D12:1.608.3",
-			"Microsoft.Direct3D.DXC:1.7.2212.36"
+			"Microsoft.Direct3D.DXC:1.7.2212.36",
+			"directxtk12_desktop_2019:2023.2.7.1"
 		}
 		linkoptions { "/ignore:4006" }
 	filter "system:linux"

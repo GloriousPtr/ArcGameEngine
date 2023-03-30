@@ -5,7 +5,6 @@
 #include <d3d12.h>
 #include <comutil.h>
 #include <wrl.h>
-#include "d3dx12.h"
 
 #ifdef ARC_DEBUG
 #include <dxgidebug.h>

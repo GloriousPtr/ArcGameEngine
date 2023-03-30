@@ -1,8 +1,7 @@
 #include "arcpch.h"
 #include "Dx12Shader.h"
 
-#include "d3dx12.h"
-
+#include <d3dx12/d3dx12.h>
 #include <comutil.h>
 #include <dxcapi.h>
 #include <wrl.h>

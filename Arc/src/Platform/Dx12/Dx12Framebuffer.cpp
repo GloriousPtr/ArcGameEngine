@@ -2,7 +2,6 @@
 #include "Dx12Framebuffer.h"
 
 #include "DxHelper.h"
-#include "d3dx12.h"
 #include "Dx12Allocator.h"
 
 #include <glm/gtc/type_ptr.hpp>

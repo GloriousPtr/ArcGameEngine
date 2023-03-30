@@ -2,10 +2,10 @@
 
 #include <comutil.h>
 #include <dxgiformat.h>
+#include <d3dx12/d3dx12.h>
 
 #include "Arc/Core/Base.h"
 #include "Arc/Renderer/Texture.h"
-#include "d3dx12.h"
 #include "Dx12Allocator.h"
 #include "Dx12Resources.h"
 

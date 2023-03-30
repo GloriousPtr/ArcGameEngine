@@ -1,7 +1,6 @@
 #include "arcpch.h"
 #include "Dx12Texture.h"
 
-#include "d3dx12.h"
 #include "Dx12Allocator.h"
 
 #include <stb_image.h>
