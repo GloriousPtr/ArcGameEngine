@@ -43,12 +43,18 @@ workspace "Arc"
 		"%{IncludeDir.entt}/../natvis/signal.natvis",
 	}
 
+	filter "system:windows"
+		nuget
+		{
+			"Microsoft.Direct3D.D3D12:1.608.3",
+			"Microsoft.Direct3D.DXC:1.7.2212.36"
+		}
+		linkoptions { "/ignore:4006" }
 	filter "system:linux"
 		toolset "clang"
 
 -- Library directories relavtive to root folder (solution directory)
 LibDir = {}
-LibDir["DXC"] = "%{wks.location}/Arc/vendor/dxc/dxc/lib/x64"
 LibDir["Pix"] = "%{wks.location}/Arc/vendor/WinPixRuntime/bin/x64"
 filter "configurations:Debug"
 	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Debug"
@@ -59,7 +65,6 @@ filter "configurations:Dist"
 
 -- Bin directories relavtive to root folder (solution directory)
 BinDir = {}
-BinDir["DXC"] = "%{wks.location}/Arc/vendor/dxc/dxc/bin/x64"
 BinDir["Pix"] = "%{wks.location}/Arc/vendor/WinPixRuntime/bin/x64"
 filter "configurations:Debug"
 	BinDir["Mono"] = "%{wks.location}/Arc/vendor/mono/bin/Debug"
@@ -88,7 +93,6 @@ IncludeDir["icons"] = "%{wks.location}/Arc/vendor/icons/include"
 IncludeDir["JoltPhysics"] = "%{wks.location}/Arc/vendor/JoltPhysics/JoltPhysics"
 IncludeDir["tinyobj"] = "%{wks.location}/Arc/vendor/tinyobj"
 IncludeDir["tinygltf"] = "%{wks.location}/Arc/vendor/tinygltf"
-IncludeDir["DXC"] = "%{wks.location}/Arc/vendor/dxc"
 IncludeDir["D3D12MA"] = "%{wks.location}/Arc/vendor/D3D12MA/D3D12MemoryAllocator/include"
 IncludeDir["Pix"] = "%{wks.location}/Arc/vendor/WinPixRuntime/Include"
 

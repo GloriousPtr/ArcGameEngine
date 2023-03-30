@@ -3,8 +3,8 @@
 
 #include <comutil.h>
 #include <wrl.h>
-#include <dxc/inc/dxcapi.h>
-#include <dxc/inc/d3d12shader.h>
+#include <dxcapi.h>
+#include <d3d12shader.h>
 
 #include "DxHelper.h"
 #include "d3dx12.h"

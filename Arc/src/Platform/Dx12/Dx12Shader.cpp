@@ -4,7 +4,7 @@
 #include "d3dx12.h"
 
 #include <comutil.h>
-#include <dxc/inc/dxcapi.h>
+#include <dxcapi.h>
 #include <wrl.h>
 
 #include <ranges>

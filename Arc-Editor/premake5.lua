@@ -59,9 +59,6 @@ project "Arc-Editor"
 		'{COPYFILE} "../Arc-Editor/imgui.ini" "%{cfg.targetdir}"',
 
 		'{ECHO} "Copying DirectX 12 Shader Compiler and Agility SDK files"',
-		-- DirectXShader
-		'{COPYFILE} "%{BinDir.DXC}/dxcompiler.dll" "%{cfg.targetdir}"',
-		'{COPYFILE} "%{BinDir.DXC}/dxil.dll" "%{cfg.targetdir}"',
 		-- AgilitySDK
 		'{MKDIR} "%{cfg.targetdir}/D3D12"',
 		'{MOVE} "%{cfg.targetdir}/D3D12Core.dll" "%{cfg.targetdir}/D3D12"',
@@ -80,7 +77,6 @@ project "Arc-Editor"
 			"opengl.dll",
 
 			-- DirectX
-			"%{LibDir.DXC}/dxcompiler.lib",
 			"dxguid.lib",
 			"d3d12.lib",
 			"dxgi.lib",

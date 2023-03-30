@@ -78,13 +78,8 @@ project "Arc"
 	filter "system:windows"
 		systemversion "latest"
 		buildoptions { "/bigobj" }
-		nuget
-		{
-			"Microsoft.Direct3D.D3D12:1.608.3"
-		}
 		externalincludedirs
 		{
-			"%{IncludeDir.DXC}",
 			"%{IncludeDir.D3D12MA}",
 			"%{IncludeDir.Pix}",
 		}
@@ -96,7 +91,6 @@ project "Arc"
 			"opengl.dll",
 
 			-- DirectX
-			"%{LibDir.DXC}/dxcompiler.lib",
 			"dxguid.lib",
 			"d3d12.lib",
 			"dxgi.lib",

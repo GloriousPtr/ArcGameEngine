@@ -1,2 +1,0 @@
-DX Compiler release for December 2022
-dxc_2023_03_01 (v1.7.2212.1)
