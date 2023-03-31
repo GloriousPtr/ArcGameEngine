@@ -39,6 +39,9 @@ jobs:
       - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v1.3
 
+      - name: Set up NuGet CLI
+        uses: nuget/setup-nuget@v1
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -53,6 +56,10 @@ jobs:
           python Setup.py ${{matrix.COMPILER}}
           cd ..
       
+      - name: Restoring Nuget Packages
+        run: |
+          nuget restore
+
       - name: Run Build
         run: |
           msbuild /m /p:Configuration=${{matrix.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}} /t:rebuild /nodeReuse:false

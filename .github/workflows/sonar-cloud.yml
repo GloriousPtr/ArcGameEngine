@@ -48,8 +48,13 @@ jobs:
           echo "$HOME\.sonar\build-wrapper-win-x86" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
       - name: Set up msbuild
         uses: microsoft/setup-msbuild@v1.3
+      - name: Set up NuGet CLI
+        uses: nuget/setup-nuget@v1
       - name: Generate Project Files
         run: "./scripts/GenerateSolution.bat"
+      - name: Restoring Nuget Packages
+        run: |
+          nuget restore
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
@@ -75,6 +80,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
+          dotnet restore
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"MohitSethi99_ArcGameEngine" /o:"mohitsethi99" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /n:"ArcGameEngine" /v:"1.0" /d:sonar.cfamily.build-wrapper-output=${{ env.BUILD_WRAPPER_OUT_DIR }} /d:sonar.exclusions="Arc/vendor/**, Arc-ScriptCore/src/Math/Mathfs.cs, Arc-ScriptCore/src/Math/Extensions.cs, Arc-ScriptCore/vendor/**, Sandbox/**"
           build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} msbuild /m /p:Configuration=Dist ${{env.SOLUTION_FILE_PATH}} /t:rebuild /nodeReuse:false
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
