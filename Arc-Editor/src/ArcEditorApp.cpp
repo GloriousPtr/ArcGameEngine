@@ -8,8 +8,8 @@ namespace ArcEngine
 	class ArcEditor : public Application
 	{
 	public:
-		ArcEditor()
-			: Application("Arc Editor")
+		ArcEditor(const ApplicationSpecification& spec)
+			: Application(spec)
 		{
 			m_EditorLayer = new EditorLayer();
 			PushLayer(m_EditorLayer);
@@ -25,8 +25,21 @@ namespace ArcEngine
 		EditorLayer* m_EditorLayer = nullptr;
 	};
 
-	Application* CreateApplication()
+	Application* CreateApplication(ApplicationCommandLineArgs args)
 	{
-		return new ArcEditor();
+		// Set working directory to currently running program
+		if (args.Count > 0)
+		{
+			const std::filesystem::path enginePath(args[0]);
+			std::filesystem::current_path(enginePath.parent_path());
+		}
+
+		const ApplicationSpecification spec
+		{
+			.Name = "Arc Editor",
+			.CommandLineArgs = args
+		};
+
+		return new ArcEditor(spec);
 	}
 }

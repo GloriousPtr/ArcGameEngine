@@ -54,8 +54,17 @@ namespace ArcEngine
 		m_Panels.emplace_back(CreateScope<RendererSettingsPanel>());
 		m_Panels.emplace_back(CreateScope<StatsPanel>());
 
+		const auto& commandLineArgs = Application::Get().GetSpecification().CommandLineArgs;
+		if (commandLineArgs.Count > 1)
+		{
+			if (std::filesystem::exists(commandLineArgs[1]))
+				OpenProject(commandLineArgs[1]);
+		}
 #ifdef ARC_PLATFORM_WINDOWS
-		OpenProject();
+		else
+		{
+			OpenProject();
+		}
 #endif
 	}
 

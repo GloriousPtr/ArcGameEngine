@@ -15,10 +15,28 @@ int main(int argc, char** argv);
 
 namespace ArcEngine
 {
+	struct ApplicationCommandLineArgs
+	{
+		int Count = 0;
+		char** Args = nullptr;
+
+		const char* operator[](int index) const
+		{
+			ARC_CORE_ASSERT(index < Count)
+			return Args[index];
+		}
+	};
+
+	struct ApplicationSpecification
+	{
+		std::string Name = "Arc Application";
+		ApplicationCommandLineArgs CommandLineArgs;
+	};
+
 	class Application
 	{
 	public:
-		explicit Application(const std::string& name = "Arc App");
+		explicit Application(const ApplicationSpecification& specification);
 		virtual ~Application();
 		
 		Application(const Application& other) = delete;
@@ -32,6 +50,7 @@ namespace ArcEngine
 		void PopOverlay(Layer* overlay) const { m_LayerStack->PopOverlay(overlay); }
 
 		[[nodiscard]] Window& GetWindow() const { return *m_Window; }
+		[[nodiscard]] const ApplicationSpecification& GetSpecification() const { return m_Specification; }
 
 		void Close();
 
@@ -47,7 +66,9 @@ namespace ArcEngine
 		[[nodiscard]] bool OnWindowClose([[maybe_unused]] const WindowCloseEvent& e);
 		[[nodiscard]] bool OnWindowResize(const WindowResizeEvent& e);
 		void ExecuteMainThreadQueue();
-		
+
+	private:
+		ApplicationSpecification m_Specification;
 		Scope<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer;
 		bool m_Running = true;
@@ -64,5 +85,5 @@ namespace ArcEngine
 	};
 
 	// Should be defined in CLIENT
-	Application* CreateApplication();
+	Application* CreateApplication(ApplicationCommandLineArgs args);
 }
