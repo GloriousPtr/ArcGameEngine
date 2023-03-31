@@ -326,27 +326,8 @@ namespace ArcEngine
 		{
 			if (opened && !entityDeleted)
 			{
-				ImColor treeLineColor;
-				depth %= 4;
-				switch (depth)
-				{
-					case 0:
-						treeLineColor = ImColor(254, 112, 246);
-						break;
-					case 1:
-						treeLineColor = ImColor(142, 112, 254);
-						break;
-					case 2:
-						treeLineColor = ImColor(112, 180, 254);
-						break;
-					case 3:
-						treeLineColor = ImColor(48, 134, 198);
-						break;
-					default:
-						treeLineColor = ImColor(255, 255, 255);
-						break;
-				}
-
+				static ImColor treeLineColor[3] = { ImColor(234, 102, 186), ImColor(101, 173, 229), ImColor(239, 184, 57) };
+				depth %= sizeof(treeLineColor) / sizeof(ImColor);
 				ImDrawList* drawList = ImGui::GetWindowDrawList();
 
 				ImVec2 verticalLineEnd = verticalLineStart;
@@ -359,11 +340,11 @@ namespace ArcEngine
 					const ImRect childRect = DrawEntityNode(child, depth + 1, forceExpandTree, isPartOfPrefab);
 
 					const float midpoint = (childRect.Min.y + childRect.Max.y) / 2.0f;
-					drawList->AddLine(ImVec2(verticalLineStart.x, midpoint), ImVec2(verticalLineStart.x + HorizontalTreeLineSize, midpoint), treeLineColor, lineThickness);
+					drawList->AddLine(ImVec2(verticalLineStart.x, midpoint), ImVec2(verticalLineStart.x + HorizontalTreeLineSize, midpoint), treeLineColor[depth], lineThickness);
 					verticalLineEnd.y = midpoint;
 				}
 
-				drawList->AddLine(verticalLineStart, verticalLineEnd, treeLineColor, lineThickness);
+				drawList->AddLine(verticalLineStart, verticalLineEnd, treeLineColor[depth], lineThickness);
 			}
 
 			if (opened && childrenSize > 0)
