@@ -6,7 +6,8 @@ project "Arc-Editor"
 	warnings "extra"
 	externalwarnings "off"
 	rtti "off"
-	postbuildmessage "================ Post-Build: Copying dependencies ================"
+	buildmessage "================ Copying Resource ================"
+	postbuildmessage "================ Post-Build: Copying other dependencies ================"
 
 	flags { "FatalWarnings" }
 
@@ -50,22 +51,37 @@ project "Arc-Editor"
 		"Arc-ScriptCore",
 	}
 
+	buildcommands
+	{
+		'{ECHO} ***** Copying Resource Files *****',
+		'{COPYDIR} "../vendor" "%{binDir}"/vendor',
+		'{COPYDIR} "assets" "%{cfg.targetdir}"/assets',
+		'{COPYDIR} "Resources" "%{cfg.targetdir}"/Resources',
+		'{COPYFILE} "imgui.ini" "%{cfg.targetdir}"',
+	}
+	
+	buildoutputs
+	{
+		"%{cfg.targetdir}/assets",
+		"%{cfg.targetdir}/Resources",
+	}
+
 	postbuildcommands
 	{
-		'{COPYDIR} "../vendor" "%{binDir}"/vendor',
-		'{COPYDIR} "../Arc-Editor/assets" "%{cfg.targetdir}"/assets',
-		'{COPYDIR} "../Arc-Editor/mono" "%{cfg.targetdir}"/mono',
-		'{COPYDIR} "../Arc-Editor/Resources" "%{cfg.targetdir}"/Resources',
-		'{COPYFILE} "../Arc-Editor/imgui.ini" "%{cfg.targetdir}"',
+		-- Mono
+		'{ECHO} ***** Copying Mono *****',
+		'{COPYDIR} "mono" "%{cfg.targetdir}"/mono',
 
-		'{ECHO} "Copying DirectX 12 Shader Compiler and Agility SDK files"',
 		-- AgilitySDK
+		'{ECHO} ***** Moving DirectX 12 Shader Compiler and Agility SDK files to correct folder *****',
 		'{MKDIR} "%{cfg.targetdir}/D3D12"',
 		'{MOVE} "%{cfg.targetdir}/D3D12Core.dll" "%{cfg.targetdir}/D3D12"',
 		'{MOVE} "%{cfg.targetdir}/D3D12Core.pdb" "%{cfg.targetdir}/D3D12"',
 		'{MOVE} "%{cfg.targetdir}/D3D12SDKLayers.dll" "%{cfg.targetdir}/D3D12"',
 		'{MOVE} "%{cfg.targetdir}/D3D12SDKLayers.pdb" "%{cfg.targetdir}/D3D12"',
 
+		-- PIX
+		'{ECHO} ***** Copying WinPixEventRuntime.dll *****',
 		'{COPYFILE} "%{BinDir.Pix}/WinPixEventRuntime.dll" "%{cfg.targetdir}"',
 	}
 
