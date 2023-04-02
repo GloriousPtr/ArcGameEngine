@@ -8,6 +8,7 @@
 
 #include <ranges>
 
+#include "DxHelper.h"
 #include "Arc/Core/Filesystem.h"
 
 namespace ArcEngine
@@ -84,12 +85,7 @@ namespace ArcEngine
 		}
 
 		ComPtr<IDxcCompiler3> compiler;
-		HRESULT hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&compiler));
-		if (FAILED(hr))
-		{
-			ARC_CORE_ERROR("DxcCompiler creation failed!");
-			return nullptr;
-		}
+		ThrowIfFailed(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&compiler)), "DxcCompiler creation failed!");
 
 		// Prepare args
 		const std::wstring wideFilename = filepath.filename();
@@ -123,7 +119,7 @@ namespace ArcEngine
 		shaderBuffer.Ptr = encodedBlob->GetBufferPointer();
 		shaderBuffer.Size = encodedBlob->GetBufferSize();
 		ComPtr<IDxcResult> compileResult;
-		hr = compiler->Compile(&shaderBuffer, args.data(), static_cast<uint32_t>(args.size()), includeHandler.Get(), IID_PPV_ARGS(&compileResult));
+		HRESULT hr = compiler->Compile(&shaderBuffer, args.data(), static_cast<uint32_t>(args.size()), includeHandler.Get(), IID_PPV_ARGS(&compileResult));
 		if (SUCCEEDED(hr) && compileResult)
 			compileResult->GetStatus(&hr);
 
@@ -175,29 +171,19 @@ namespace ArcEngine
 		using namespace Microsoft::WRL;
 		
 		ComPtr<IDxcUtils> utils = nullptr;
-		HRESULT hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&utils));
-		if (FAILED(hr))
-		{
-			ARC_CORE_ERROR("DxcUtils creation failed!");
-			return;
-		}
+		ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&utils)), "DxcUtils creation failed!");
 
 		ComPtr<IDxcBlobEncoding> source;
-		hr = utils->LoadFile(filepath.c_str(), nullptr, &source);
+		const HRESULT hr = utils->LoadFile(filepath.c_str(), nullptr, &source);
 		if (FAILED(hr))
 		{
 			ARC_CORE_ERROR("Loading shader failed: {}", filepath);
 			return;
 		}
 		ComPtr<IDxcIncludeHandler> includeHandler;
-		hr = utils->CreateDefaultIncludeHandler(&includeHandler);
-		if (FAILED(hr))
-		{
-			ARC_CORE_ERROR("Loading shader failed: {}", filepath);
-			return;
-		}
+		ThrowIfFailed(utils->CreateDefaultIncludeHandler(&includeHandler), "IDxcIncludeHandler creation failed!");
 
-		ARC_CORE_ASSERT(source, source->GetBufferSize());
+		ARC_CORE_ASSERT(source, source->GetBufferSize())
 
 		const std::vector<const wchar_t*> args
 		{

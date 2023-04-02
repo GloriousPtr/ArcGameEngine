@@ -298,12 +298,7 @@ namespace ArcEngine
 		const ComPtr<IDxcBlob> pixelReflection = dxShader->m_ReflectionBlobs.at(ShaderType::Pixel);
 
 		ComPtr<IDxcUtils> utils = nullptr;
-		HRESULT hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&utils));
-		if (FAILED(hr))
-		{
-			ARC_CORE_ERROR("DxcUtils creation failed!");
-			return;
-		}
+		ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&utils)), "DxcUtils creation failed!");
 
 		_bstr_t shaderName = ToWCSTR(shader->GetName().c_str());
 		struct Layout
@@ -423,7 +418,7 @@ namespace ArcEngine
 
 		ComPtr<ID3DBlob> rootBlob;
 		ComPtr<ID3DBlob> errorBlob;
-		hr = D3D12SerializeVersionedRootSignature(&rootSigDesc, &rootBlob, &errorBlob);
+		HRESULT hr = D3D12SerializeVersionedRootSignature(&rootSigDesc, &rootBlob, &errorBlob);
 		if (FAILED(hr))
 		{
 			if (errorBlob)
@@ -564,12 +559,7 @@ namespace ArcEngine
 		const ComPtr<IDxcBlob> computeReflection = dxShader->m_ReflectionBlobs.at(ShaderType::Compute);
 
 		ComPtr<IDxcUtils> utils = nullptr;
-		HRESULT hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&utils));
-		if (FAILED(hr))
-		{
-			ARC_CORE_ERROR("DxcUtils creation failed!");
-			return;
-		}
+		ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&utils)), "DxcUtils creation failed!");
 
 		_bstr_t shaderName = ToWCSTR(shader->GetName().c_str());
 		std::vector<D3D12_ROOT_PARAMETER1> rootParams;
@@ -615,7 +605,7 @@ namespace ArcEngine
 
 		ComPtr<ID3DBlob> rootBlob;
 		ComPtr<ID3DBlob> errorBlob;
-		hr = D3D12SerializeVersionedRootSignature(&rootSigDesc, &rootBlob, &errorBlob);
+		HRESULT hr = D3D12SerializeVersionedRootSignature(&rootSigDesc, &rootBlob, &errorBlob);
 		if (FAILED(hr))
 		{
 			if (errorBlob)

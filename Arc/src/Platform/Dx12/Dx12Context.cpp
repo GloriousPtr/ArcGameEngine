@@ -95,14 +95,14 @@ namespace ArcEngine
 		}
 	};
 
-	static void DebugMessageCallback(
+	[[maybe_unused]] static void DebugMessageCallback(
 		[[maybe_unused]] D3D12_MESSAGE_CATEGORY category,
 		[[maybe_unused]] D3D12_MESSAGE_SEVERITY severity,
 		[[maybe_unused]] D3D12_MESSAGE_ID id,
 		[[maybe_unused]] LPCSTR pDescription,
 		[[maybe_unused]] void* pContext)
 	{
-		OPTICK_EVENT();
+		ARC_PROFILE_SCOPE();
 
 		switch (severity)
 		{
@@ -262,7 +262,7 @@ namespace ArcEngine
 		}
 #endif
 
-		ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&s_Factory)), "Failed to create DXGI Factory")
+		ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&s_Factory)), "Failed to create DXGI Factory");
 
 		const D3D_FEATURE_LEVEL minFeatureLevel = D3D_FEATURE_LEVEL_12_0;
 		GetHardwareAdapter(s_Factory, &s_Adapter, &s_Device, minFeatureLevel);
@@ -326,7 +326,7 @@ namespace ArcEngine
 #endif // ENABLE_DX12_DEBUG_MESSAGES
 #endif // ARC_CORE_DEBUG
 
-		bool heapInitResult = true;
+		[[maybe_unused]] bool heapInitResult = true;
 		heapInitResult &= s_RtvDescHeap.Init(4096, false);
 		heapInitResult &= s_DsvDescHeap.Init(4096, false);
 		heapInitResult &= s_SrvDescHeap.Init(8092, true);
@@ -366,9 +366,9 @@ namespace ArcEngine
 			s_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, frame.GraphicsCommandAllocator, nullptr, IID_PPV_ARGS(&(frame.GraphicsCommandList)));
 
 			std::string cmdAllocatorName = fmt::format("Graphics Command Allocator {}", tempInt);
-			NameResource(frame.GraphicsCommandAllocator, cmdAllocatorName.c_str())
+			NameResource(frame.GraphicsCommandAllocator, cmdAllocatorName.c_str());
 			std::string cmdListName = fmt::format("Graphics Command List {}", tempInt);
-			NameResource(frame.GraphicsCommandList, cmdListName.c_str())
+			NameResource(frame.GraphicsCommandList, cmdListName.c_str());
 
 			frame.GraphicsCommandList->Close();
 

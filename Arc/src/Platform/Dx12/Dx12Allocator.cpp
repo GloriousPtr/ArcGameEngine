@@ -18,7 +18,7 @@ namespace ArcEngine
 		desc.Flags = D3D12MA::ALLOCATOR_FLAG_DEFAULT_POOLS_NOT_ZEROED;
 		desc.pDevice = device;
 		desc.pAdapter = adapter;
-		ThrowIfFailed(D3D12MA::CreateAllocator(&desc, &s_Allocator), "Failed to create D3D12 Memory Allocator!")
+		ThrowIfFailed(D3D12MA::CreateAllocator(&desc, &s_Allocator), "Failed to create D3D12 Memory Allocator!");
 	}
 
 	void Dx12Allocator::Shutdown()

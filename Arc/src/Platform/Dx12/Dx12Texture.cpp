@@ -79,7 +79,7 @@ namespace ArcEngine
 		return static_cast<uint32_t>(m_Handle.GPU.ptr - m_HeapStart.ptr) / Dx12Context::GetSrvHeap()->DescriptorSize();
 	}
 
-	void Dx12Texture2D::SetData(const TextureData data, uint32_t size)
+	void Dx12Texture2D::SetData(const TextureData data, [[maybe_unused]] uint32_t size)
 	{
 		ARC_PROFILE_SCOPE()
 
@@ -188,7 +188,7 @@ namespace ArcEngine
 		return static_cast<uint32_t>(m_SrvHandle.GPU.ptr - m_HeapStart.ptr) / Dx12Context::GetSrvHeap()->DescriptorSize();
 	}
 
-	void Dx12TextureCube::SetData(const TextureData data, uint32_t size)
+	void Dx12TextureCube::SetData(const TextureData data, [[maybe_unused]] uint32_t size)
 	{
 		ARC_PROFILE_SCOPE()
 

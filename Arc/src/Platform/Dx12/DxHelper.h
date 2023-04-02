@@ -11,16 +11,17 @@
 
 namespace ArcEngine::Dx12Utils
 {
+#ifdef ARC_ENABLE_ASSERTS
+	#define ThrowIfFailed(fn, msg) ARC_CORE_ASSERT(SUCCEEDED(fn), msg)
+#else
+	#define ThrowIfFailed(fn, msg)	fn
+#endif
 
-	#define ThrowIfFailed(fn, msg)	{\
-										HRESULT hr = fn;\
-										ARC_CORE_ASSERT(SUCCEEDED(hr), msg); \
-									}
-
-	#define NameResource(pResource, cstr)	{\
-												_bstr_t wcstr(cstr);\
-												(pResource)->SetName(wcstr);\
-											}
+#ifdef ARC_DEBUG
+	#define NameResource(pResource, cstr) (pResource)->SetName(ToWCSTR(cstr))
+#else
+	#define NameResource(pResource, cstr)
+#endif
 
 	#define ToWCSTR(cstr) _bstr_t(cstr)
 	#define ToCSTR(wcstr) static_cast<const char*>(_bstr_t(wcstr))

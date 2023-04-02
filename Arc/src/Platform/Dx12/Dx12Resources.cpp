@@ -29,7 +29,7 @@ namespace ArcEngine
 		desc.Type = m_Type;
 		desc.NodeMask = 0;
 
-		HRESULT hr = device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_Heap));
+		const HRESULT hr = device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_Heap));
 		if (FAILED(hr))
 			return false;
 
@@ -40,7 +40,7 @@ namespace ArcEngine
 		for (uint32_t i = 0; i < capacity; ++i)
 			m_FreeHandles[i] = i;
 
-		for (const auto& deferedFreeIndices : m_DeferedFreeIndices)
+		for ([[maybe_unused]] const auto& deferedFreeIndices : m_DeferedFreeIndices)
 		{
 			ARC_CORE_ASSERT(deferedFreeIndices.empty())
 		}
