@@ -48,7 +48,8 @@ workspace "Arc"
 		{
 			"Microsoft.Direct3D.D3D12:1.608.3",
 			"Microsoft.Direct3D.DXC:1.7.2212.36",
-			"directxtk12_desktop_2019:2023.2.7.1"
+			"directxtk12_desktop_2019:2023.2.7.1",
+			"WinPixEventRuntime:1.0.230302001",
 		}
 		linkoptions { "/ignore:4006" }
 		buildoptions { "/bigobj" }
@@ -59,7 +60,6 @@ workspace "Arc"
 
 -- Library directories relavtive to root folder (solution directory)
 LibDir = {}
-LibDir["Pix"] = "%{wks.location}/Arc/vendor/WinPixRuntime/bin/x64"
 filter "configurations:Debug"
 	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Debug"
 filter "configurations:Release"
@@ -69,7 +69,6 @@ filter "configurations:Dist"
 
 -- Bin directories relavtive to root folder (solution directory)
 BinDir = {}
-BinDir["Pix"] = "%{wks.location}/Arc/vendor/WinPixRuntime/bin/x64"
 filter "configurations:Debug"
 	BinDir["Mono"] = "%{wks.location}/Arc/vendor/mono/bin/Debug"
 filter "configurations:Release"
@@ -98,7 +97,6 @@ IncludeDir["JoltPhysics"] = "%{wks.location}/Arc/vendor/JoltPhysics/JoltPhysics"
 IncludeDir["tinyobj"] = "%{wks.location}/Arc/vendor/tinyobj"
 IncludeDir["tinygltf"] = "%{wks.location}/Arc/vendor/tinygltf"
 IncludeDir["D3D12MA"] = "%{wks.location}/Arc/vendor/D3D12MA/D3D12MemoryAllocator/include"
-IncludeDir["Pix"] = "%{wks.location}/Arc/vendor/WinPixRuntime/Include"
 
 group "Dependencies"
 	include "Arc/vendor/GLFW"

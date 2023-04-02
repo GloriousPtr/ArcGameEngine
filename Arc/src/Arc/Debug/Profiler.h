@@ -4,7 +4,7 @@
 #include <optick.h>
 
 #include <comutil.h>
-#include <WinPixEventRuntime/pix3.h>
+#include <pix3.h>
 
 namespace ArcEngine::Profile
 {

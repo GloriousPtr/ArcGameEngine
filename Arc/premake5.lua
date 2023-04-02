@@ -80,7 +80,6 @@ project "Arc"
 		externalincludedirs
 		{
 			"%{IncludeDir.D3D12MA}",
-			"%{IncludeDir.Pix}",
 		}
 		links
 		{
@@ -93,9 +92,6 @@ project "Arc"
 			"dxguid.dll",
 			"d3d12.dll",
 			"dxgi.dll",
-
-			-- Pix
-			"%{LibDir.Pix}/WinPixEventRuntime.dll",
 		}
 
 	filter "system:linux"

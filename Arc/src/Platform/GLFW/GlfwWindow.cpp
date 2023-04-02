@@ -1,7 +1,7 @@
 #include "arcpch.h"
 #include "GlfwWindow.h"
 
-#include <WinPixEventRuntime/pix3.h>
+#include <pix3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 

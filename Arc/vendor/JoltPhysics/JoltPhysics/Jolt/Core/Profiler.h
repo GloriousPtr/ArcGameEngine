@@ -12,7 +12,7 @@ JPH_SUPPRESS_WARNINGS_STD_END
 #include <Jolt/Core/UnorderedMap.h>
 
 #include <Windows.h>
-#include <WinPixEventRuntime/pix3.h>
+#include <pix3.h>
 #include <optick.h>
 #define JPH_EXTERNAL_PROFILE
 
