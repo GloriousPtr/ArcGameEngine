@@ -7,7 +7,7 @@ namespace ArcEngine
 	public:
 		static void TempratureToColor(const uint32_t kelvin, glm::vec3& outColor)
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			const uint32_t temp = glm::clamp(kelvin, 1000u, 40000u) / 100;
 			if (temp <= 66)

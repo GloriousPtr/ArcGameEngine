@@ -11,14 +11,14 @@ namespace ArcEngine
 	Dx12Framebuffer::Dx12Framebuffer(const FramebufferSpecification& spec)
 		: m_Specification(spec)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		Invalidate();
 	}
 
 	Dx12Framebuffer::~Dx12Framebuffer()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		for (auto& depthAttachment : m_DepthAttachment)
 			depthAttachment.Release(false);
@@ -32,7 +32,7 @@ namespace ArcEngine
 
 	void Dx12Framebuffer::Invalidate()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		D3D12MA::ALLOCATION_DESC allocationDesc{};
 		allocationDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
@@ -133,7 +133,7 @@ namespace ArcEngine
 
 	void Dx12Framebuffer::Bind()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		auto* commandList = Dx12Context::GetGraphicsCommandList();
 		const auto backFrame = Dx12Context::GetCurrentFrameIndex();
@@ -150,7 +150,7 @@ namespace ArcEngine
 
 	void Dx12Framebuffer::Unbind()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		TransitionTo(D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
@@ -172,7 +172,7 @@ namespace ArcEngine
 
 	void Dx12Framebuffer::Clear()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		auto* commandList = Dx12Context::GetGraphicsCommandList();
 		const auto backFrame = Dx12Context::GetCurrentFrameIndex();
@@ -188,7 +188,7 @@ namespace ArcEngine
 
 	void Dx12Framebuffer::BindColorAttachment(uint32_t index, uint32_t slot)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const auto backFrame = Dx12Context::GetCurrentFrameIndex();
 		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(slot, m_ColorAttachments[backFrame][index].SrvHandle.GPU);
@@ -196,7 +196,7 @@ namespace ArcEngine
 
 	void Dx12Framebuffer::BindDepthAttachment(uint32_t slot)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const auto backFrame = Dx12Context::GetCurrentFrameIndex();
 		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(slot, m_DepthAttachment[backFrame].SrvHandle.GPU);
@@ -204,7 +204,7 @@ namespace ArcEngine
 
 	void Dx12Framebuffer::Resize(uint32_t width, uint32_t height)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (width == 0 || height == 0 || width > s_MaxFramebufferSize || height > s_MaxFramebufferSize)
 		{
@@ -243,7 +243,7 @@ namespace ArcEngine
 
 	void Dx12Framebuffer::TransitionTo(D3D12_RESOURCE_STATES colorAttachmentState, D3D12_RESOURCE_STATES depthAttachmentState)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const auto backFrame = Dx12Context::GetCurrentFrameIndex();
 

@@ -10,11 +10,11 @@ namespace ArcEngine
 	{
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
+			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::Dx12:	return CreateRef<Dx12Texture2D>(width, height, format);
 		}
 
-		ARC_CORE_ASSERT(false, "Unknown RendererAPI!")
+		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
 	}
 
@@ -22,11 +22,11 @@ namespace ArcEngine
 	{
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
+			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::Dx12:	return CreateRef<Dx12Texture2D>(path, format);
 		}
 
-		ARC_CORE_ASSERT(false, "Unknown RendererAPI!")
+		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
 	}
 
@@ -34,11 +34,11 @@ namespace ArcEngine
 	{
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
+			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::Dx12:	return CreateRef<Dx12TextureCube>(path, format);
 		}
 
-		ARC_CORE_ASSERT(false, "Unknown RendererAPI!")
+		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
 	}
 }

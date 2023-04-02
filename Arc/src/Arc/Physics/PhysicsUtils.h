@@ -11,14 +11,14 @@ namespace ArcEngine
 	public:
 		[[nodiscard]] static bool Inside(b2Vec2 cp1, b2Vec2 cp2, b2Vec2 p)
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			return (cp2.x - cp1.x) * (p.y - cp1.y) > (cp2.y - cp1.y) * (p.x - cp1.x);
 		}
 
 		[[nodiscard]] static b2Vec2 Intersection(b2Vec2 cp1, b2Vec2 cp2, b2Vec2 s, b2Vec2 e)
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			const b2Vec2 dc(cp1.x - cp2.x, cp1.y - cp2.y);
 			const b2Vec2 dp(s.x - e.x, s.y - e.y);
@@ -30,7 +30,7 @@ namespace ArcEngine
 
 		static bool VerticesFromCircle(b2Fixture* fixture, std::vector<b2Vec2>& vertices, float resolution = 16.0f)
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			if (fixture->GetShape()->GetType() != b2Shape::e_circle)
 				return false;
@@ -60,7 +60,7 @@ namespace ArcEngine
 		//fixtures in Box2D are convex, so that will not be a problem
 		[[nodiscard]] static bool FindIntersectionOfFixtures(b2Fixture* fA, b2Fixture* fB, std::vector<b2Vec2>& outputVertices)
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 			
 			std::vector<b2Vec2> clipPolygon;
 
@@ -131,7 +131,7 @@ namespace ArcEngine
 
 		[[nodiscard]] static b2Vec2 ComputeCentroid(std::vector<b2Vec2> vs, float& area)
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			const auto count = static_cast<int>(vs.size());
 			b2Assert(count >= 3);
@@ -175,7 +175,7 @@ namespace ArcEngine
 
 		static void HandleBuoyancy(b2Fixture* fluid, b2Fixture* fixture, b2Vec2 gravity, bool flipGravity, float density, float dragMultiplier, float flowMagnitude, float flowAngleInRadians)
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 			
 			std::vector<b2Vec2> intersectionPoints;
 			if (FindIntersectionOfFixtures(fluid, fixture, intersectionPoints))

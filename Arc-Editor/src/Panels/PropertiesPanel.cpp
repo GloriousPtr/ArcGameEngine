@@ -18,7 +18,7 @@ namespace ArcEngine
 
 	void PropertiesPanel::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (OnBegin())
 		{
@@ -51,7 +51,7 @@ namespace ArcEngine
 	template<typename T, typename UIFunction>
 	static void DrawComponent(const char8_t* name, Entity entity, UIFunction uiFunction, const bool removable = true)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if(entity.HasComponent<T>())
 		{
@@ -93,7 +93,7 @@ namespace ArcEngine
 
 			if(open)
 			{
-				ARC_PROFILE_SCOPE("UI Function")
+				ARC_PROFILE_SCOPE("UI Function");
 
 				uiFunction(component);
 				ImGui::TreePop();
@@ -144,7 +144,7 @@ namespace ArcEngine
 
 			if (open)
 			{
-				ARC_PROFILE_SCOPE("UI Function")
+				ARC_PROFILE_SCOPE("UI Function");
 
 				// Public Fields
 				UI::BeginProperties();
@@ -339,7 +339,7 @@ namespace ArcEngine
 
 	void PropertiesPanel::DrawComponents(Entity entity)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const ImVec2 framePadding = ImGui::GetStyle().FramePadding;
 		const float frameHeight = ImGui::GetFrameHeight();

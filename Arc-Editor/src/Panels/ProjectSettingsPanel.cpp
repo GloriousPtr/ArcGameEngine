@@ -14,7 +14,7 @@ namespace ArcEngine
 
 	void ProjectSettingsPanel::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (OnBegin())
 		{

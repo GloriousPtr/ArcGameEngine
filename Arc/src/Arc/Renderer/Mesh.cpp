@@ -54,14 +54,14 @@ namespace ArcEngine
 {
 	Mesh::Mesh(const char* filepath)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		Load(filepath);
 	}
 
 	void Mesh::Load(const char* filepath)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		std::filesystem::path path = filepath;
 
@@ -265,9 +265,9 @@ namespace ArcEngine
 
 	Submesh& Mesh::GetSubmesh(size_t index)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
-		ARC_CORE_ASSERT(index < m_Submeshes.size(), "Submesh index out of bounds")
+		ARC_CORE_ASSERT(index < m_Submeshes.size(), "Submesh index out of bounds");
 
 		return m_Submeshes[index];
 	}

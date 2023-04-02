@@ -19,7 +19,7 @@ namespace ArcEngine
 
 	void AssetManager::Init()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		s_WhiteTexture = Texture2D::Create(1, 1, TextureFormat::RGBA8);
 		uint32_t whiteTextureData = 0xffffffff;
@@ -32,7 +32,7 @@ namespace ArcEngine
 
 	void AssetManager::Shutdown()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		s_WhiteTexture.reset();
 		s_BlackTexture.reset();
@@ -55,7 +55,7 @@ namespace ArcEngine
 
 	Ref<Texture2D>& AssetManager::GetTexture2D(const std::string& path)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const auto& it = m_Texture2DMap.find(path);
 		if (it != m_Texture2DMap.end())
@@ -68,7 +68,7 @@ namespace ArcEngine
 
 	Ref<TextureCube>& AssetManager::GetTextureCube(const std::string& path)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const auto& it = m_TextureCubeMap.find(path);
 		if (it != m_TextureCubeMap.end())
@@ -81,7 +81,7 @@ namespace ArcEngine
 
 	Ref<Mesh>& AssetManager::GetMesh(const std::string& path)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const auto& it = m_MeshMap.find(path);
 		if (it != m_MeshMap.end())

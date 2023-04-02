@@ -15,11 +15,11 @@ namespace ArcEngine
 	{
 		switch (s_API)
 		{
-			case RendererAPI::API::None:    ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
+			case RendererAPI::API::None:    ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::Dx12:	return CreateScope<Dx12RendererAPI>();
 		}
 
-		ARC_CORE_ASSERT(false, "Unknown RendererAPI!")
+		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
 	}
 }

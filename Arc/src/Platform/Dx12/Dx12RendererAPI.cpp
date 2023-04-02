@@ -14,7 +14,7 @@ namespace ArcEngine
 {
 	void Dx12RendererAPI::Init()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_Context = reinterpret_cast<Dx12Context*>(Application::Get().GetWindow().GetGraphicsContext().get());
 	}
@@ -36,7 +36,7 @@ namespace ArcEngine
 
 	void Dx12RendererAPI::SetClearColor(const glm::vec4& color)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		Dx12Context::GetGraphicsCommandList()->ClearRenderTargetView(Dx12Context::GetRtv(), glm::value_ptr(color), 0, nullptr);
 	}
@@ -47,7 +47,7 @@ namespace ArcEngine
 
 	void Dx12RendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		vertexArray->Bind();
 		indexCount = indexCount == 0 ? vertexArray->GetIndexBuffer()->GetCount() : indexCount;
@@ -59,7 +59,7 @@ namespace ArcEngine
 
 	void Dx12RendererAPI::Draw(const Ref<VertexBuffer>& vertexBuffer, uint32_t vertexCount)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		vertexBuffer->Bind();
 		auto* commandList = Dx12Context::GetGraphicsCommandList();
@@ -69,7 +69,7 @@ namespace ArcEngine
 
 	void Dx12RendererAPI::DrawLines(const Ref<VertexBuffer>& vertexBuffer, uint32_t vertexCount)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		vertexBuffer->Bind();
 		auto* commandList = Dx12Context::GetGraphicsCommandList();

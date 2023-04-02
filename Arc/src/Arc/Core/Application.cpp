@@ -19,9 +19,9 @@ namespace ArcEngine
 	Application::Application(const ApplicationSpecification& specification)
 		: m_Specification(specification)
 	{
-		ARC_PROFILE_SCOPE()
-		
-		ARC_CORE_ASSERT(!s_Instance, "Application already exists!")
+		ARC_PROFILE_SCOPE();
+
+		ARC_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
 		
 		m_Window = Window::Create(WindowProps(m_Specification.Name));
@@ -39,7 +39,7 @@ namespace ArcEngine
 
 	Application::~Application()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		PopOverlay(m_ImGuiLayer);
 		delete m_ImGuiLayer;
@@ -55,7 +55,7 @@ namespace ArcEngine
 
 	void Application::Close()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_Running = false;
 	}
@@ -67,7 +67,7 @@ namespace ArcEngine
 	
 	void Application::OnEvent(Event& e)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 		
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(ARC_BIND_EVENT_FN(Application::OnWindowClose));
@@ -86,7 +86,7 @@ namespace ArcEngine
 	{
 		while (m_Running)
 		{
-			ARC_PROFILE_FRAME("MainThread")
+			ARC_PROFILE_FRAME("MainThread");
 
 			const auto time = std::chrono::high_resolution_clock::now();
 			const Timestep timestep = std::chrono::duration<float>(time - m_LastFrameTime).count();
@@ -98,7 +98,7 @@ namespace ArcEngine
 			{
 				RenderCommand::BeginFrame();
 				{
-					ARC_PROFILE_SCOPE("LayerStack OnUpdate")
+					ARC_PROFILE_SCOPE("LayerStack OnUpdate");
 
 					for (Layer* layer : *m_LayerStack)
 						layer->OnUpdate(timestep);	
@@ -106,7 +106,7 @@ namespace ArcEngine
 
 				m_ImGuiLayer->Begin();
 				{
-					ARC_PROFILE_SCOPE("LayerStack OnImGuiRender")
+					ARC_PROFILE_SCOPE("LayerStack OnImGuiRender");
 
 					for (Layer* layer : *m_LayerStack)
 						layer->OnImGuiRender();
@@ -128,7 +128,7 @@ namespace ArcEngine
 
 	bool Application::OnWindowClose([[maybe_unused]] const WindowCloseEvent& e)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_Running = false;
 		return true;
@@ -136,7 +136,7 @@ namespace ArcEngine
 
 	bool Application::OnWindowResize(const WindowResizeEvent& e)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 		
 		if(e.GetWidth() == 0 || e.GetHeight() == 0)
 		{

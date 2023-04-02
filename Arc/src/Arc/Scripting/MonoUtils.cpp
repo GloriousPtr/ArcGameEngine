@@ -48,7 +48,7 @@ namespace ArcEngine
 
 	bool MonoUtils::CheckMonoError(MonoError& error)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (!mono_error_ok(&error))
 		{
@@ -66,7 +66,7 @@ namespace ArcEngine
 
 	std::string MonoUtils::MonoStringToUTF8(MonoString* monoString)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (monoString == nullptr || mono_string_length(monoString) == 0)
 			return "";
@@ -83,7 +83,7 @@ namespace ArcEngine
 
 	MonoString* MonoUtils::UTF8ToMonoString(const std::string& str)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		return mono_string_new(ScriptEngine::GetDomain(), str.c_str());
 	}

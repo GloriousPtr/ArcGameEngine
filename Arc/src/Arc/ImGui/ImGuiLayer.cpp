@@ -29,7 +29,7 @@ namespace ArcEngine
 
 	void ImGuiLayer::OnAttach()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 		
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -92,7 +92,7 @@ namespace ArcEngine
 
 	void ImGuiLayer::OnDetach()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 #ifdef ARC_PLATFORM_LINUX
 #endif
@@ -118,7 +118,7 @@ namespace ArcEngine
 
 	void ImGuiLayer::Begin() const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		ImGui_ImplDX12_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -129,7 +129,7 @@ namespace ArcEngine
 
 	void ImGuiLayer::End() const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		ImGuiIO& io = ImGui::GetIO();
 		const Window& window = Application::Get().GetWindow();
@@ -140,7 +140,7 @@ namespace ArcEngine
 #endif
 
 		{
-			ARC_PROFILE_SCOPE("ImGui::End::Render")
+			ARC_PROFILE_SCOPE("ImGui::End::Render");
 			// Rendering
 			ImGui::Render();
 #ifdef ARC_PLATFORM_LINUX

@@ -16,14 +16,14 @@ namespace ArcEngine
 
 	void GCManager::Init()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		s_GCState = new GCState();
 	}
 
 	void GCManager::Shutdown()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (!s_GCState->StrongRefMap.empty())
 		{
@@ -56,7 +56,7 @@ namespace ArcEngine
 
 	void GCManager::CollectGarbage(bool blockUntilFinalized)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		mono_gc_collect(mono_gc_max_generation());
 		if (blockUntilFinalized)
@@ -67,13 +67,13 @@ namespace ArcEngine
 
 	GCHandle GCManager::CreateObjectReference(MonoObject* managedObject, bool weakReference, bool pinned, bool track)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		GCHandle handle = weakReference
 			? mono_gchandle_new_weakref(managedObject, pinned)
 			: mono_gchandle_new(managedObject, pinned);
 
-		ARC_CORE_ASSERT(handle, "Failed to get valid GC Handle!")
+		ARC_CORE_ASSERT(handle, "Failed to get valid GC Handle!");
 
 		if (track)
 		{
@@ -88,7 +88,7 @@ namespace ArcEngine
 
 	MonoObject* GCManager::GetReferencedObject(GCHandle handle)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		MonoObject* obj = mono_gchandle_get_target(handle);
 		if (obj == nullptr || mono_object_get_vtable(obj) == nullptr)
@@ -98,7 +98,7 @@ namespace ArcEngine
 
 	void GCManager::ReleaseObjectReference(GCHandle handle)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (mono_gchandle_get_target(handle) != nullptr)
 		{

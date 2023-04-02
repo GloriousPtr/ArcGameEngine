@@ -140,9 +140,9 @@ namespace ArcEngine
 	Dx12Context::Dx12Context(HWND hwnd)
 		: m_Hwnd(hwnd)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
-		ARC_CORE_ASSERT(hwnd, "Handle is null!")
+		ARC_CORE_ASSERT(hwnd, "Handle is null!");
 
 		RECT clientRect;
 		GetClientRect(m_Hwnd, &clientRect);
@@ -152,7 +152,7 @@ namespace ArcEngine
 
 	Dx12Context::~Dx12Context()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		using namespace Microsoft::WRL;
 
@@ -234,7 +234,7 @@ namespace ArcEngine
 
 	void Dx12Context::Init()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		using namespace Microsoft::WRL;
 
@@ -331,7 +331,7 @@ namespace ArcEngine
 		heapInitResult &= s_DsvDescHeap.Init(4096, false);
 		heapInitResult &= s_SrvDescHeap.Init(8092, true);
 		heapInitResult &= s_UavDescHeap.Init(2048, false);
-		ARC_CORE_ASSERT(heapInitResult)
+		ARC_CORE_ASSERT(heapInitResult);
 
 		s_RtvDescHeap.Heap()->SetName(L"RTV Descriptor Heap");
 		s_DsvDescHeap.Heap()->SetName(L"DSV Descriptor Heap");
@@ -380,7 +380,7 @@ namespace ArcEngine
 
 	void Dx12Context::SwapBuffers()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		auto& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
 
@@ -502,7 +502,7 @@ namespace ArcEngine
 
 	void Dx12Context::OnBeginFrame() const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<float>(s_Width), static_cast<float>(s_Height), 0.0f, 1.0f };
 		const D3D12_RECT scissorRect = { 0, 0, static_cast<long>(s_Width), static_cast<long>(s_Height) };
@@ -530,7 +530,7 @@ namespace ArcEngine
 
 	void Dx12Context::OnEndFrame() const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const auto& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
 
@@ -552,7 +552,7 @@ namespace ArcEngine
 
 	void Dx12Context::CreateRTV() const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		// Create RTV
 		int tempInt = 0;
@@ -571,7 +571,7 @@ namespace ArcEngine
 
 	void Dx12Context::CreateSwapchain() const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		// Create Swapchain
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
@@ -604,7 +604,7 @@ namespace ArcEngine
 
 	void Dx12Context::ProcessDeferredReleases(uint32_t frameIndex)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		std::lock_guard lock(s_DeferredReleasesMutex);
 

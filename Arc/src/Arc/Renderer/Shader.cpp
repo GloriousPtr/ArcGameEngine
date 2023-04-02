@@ -11,20 +11,20 @@ namespace ArcEngine
 	{
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
+			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::Dx12:	return CreateRef<Dx12Shader>(filepath, type);
 		}
 
-		ARC_CORE_ASSERT(false, "Unknown RendererAPI!")
+		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
 	}
 
 	Ref<PipelineState> PipelineLibrary::Load(const std::filesystem::path& shaderPath, const PipelineSpecification& spec)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const auto& name = shaderPath.filename().string();
-		ARC_CORE_ASSERT(!Exists(name), "Shader already exists!")
+		ARC_CORE_ASSERT(!Exists(name), "Shader already exists!");
 
 		const auto shader = Shader::Create(shaderPath, spec.Type);
 		if (!shader)
@@ -40,7 +40,7 @@ namespace ArcEngine
 
 	void PipelineLibrary::ReloadAll()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		std::string shaderName;
 		for (const auto& [name, pipeline] : m_Pipelines)
@@ -55,15 +55,15 @@ namespace ArcEngine
 
 	Ref<PipelineState> PipelineLibrary::Get(const std::string& name)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
-		ARC_CORE_ASSERT(Exists(name), "Pipeline not found!")
+		ARC_CORE_ASSERT(Exists(name), "Pipeline not found!");
 		return m_Pipelines[name];
 	}
 
 	bool PipelineLibrary::Exists(const std::string& name) const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		return m_Pipelines.contains(name);
 	}

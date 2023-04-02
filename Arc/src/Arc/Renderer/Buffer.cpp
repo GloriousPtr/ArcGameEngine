@@ -11,11 +11,11 @@ namespace ArcEngine
 	{
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
+			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::Dx12:	return CreateRef<Dx12VertexBuffer>(size, stride);
 		}
 
-		ARC_CORE_ASSERT(false, "Unknown RendererAPI!")
+		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
 	}
 
@@ -23,11 +23,11 @@ namespace ArcEngine
 	{
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
+			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::Dx12:	return CreateRef<Dx12VertexBuffer>(vertices, size, stride);
 		}
 
-		ARC_CORE_ASSERT(false, "Unknown RendererAPI!")
+		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
 	}
 
@@ -35,11 +35,11 @@ namespace ArcEngine
 	{
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
+			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::Dx12:	return CreateRef<Dx12IndexBuffer>(indices, static_cast<uint32_t>(count));
 		}
 
-		ARC_CORE_ASSERT(false, "Unknown RendererAPI!")
+		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
 	}
 
@@ -47,11 +47,11 @@ namespace ArcEngine
 	{
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
+			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::Dx12:	return CreateRef<Dx12ConstantBuffer>(stride, count, registerIndex);
 		}
 
-		ARC_CORE_ASSERT(false, "Unknown RendererAPI!")
+		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
 	}
 
@@ -59,11 +59,11 @@ namespace ArcEngine
 	{
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!") return nullptr;
+			case RendererAPI::API::None:	ARC_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::API::Dx12:	return CreateRef<Dx12StructuredBuffer>(stride, count, registerIndex);
 		}
 
-		ARC_CORE_ASSERT(false, "Unknown RendererAPI!")
+		ARC_CORE_ASSERT(false, "Unknown RendererAPI!");
 			return nullptr;
 	}
 }

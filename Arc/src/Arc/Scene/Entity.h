@@ -18,9 +18,9 @@ namespace ArcEngine
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args) const
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
-			ARC_CORE_ASSERT(m_Scene, "Scene is null!")
+			ARC_CORE_ASSERT(m_Scene, "Scene is null!");
 			T& component = m_Scene->m_Registry.emplace_or_replace<T>(m_EntityHandle, std::forward<Args>(args)...);
 			m_Scene->OnComponentAdded<T>(*this, component);
 			return component;
@@ -29,27 +29,27 @@ namespace ArcEngine
 		template<typename T>
 		[[nodiscard]] T& GetComponent() const
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
-			ARC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!")
+			ARC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
 			return m_Scene->m_Registry.get<T>(m_EntityHandle);
 		}
 
 		template<typename T>
 		[[nodiscard]] bool HasComponent() const
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
-			ARC_CORE_ASSERT(m_Scene, "Scene is null!")
+			ARC_CORE_ASSERT(m_Scene, "Scene is null!");
 			return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
 		}
 
 		template<typename T>
 		void RemoveComponent() const
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
-			ARC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!")
+			ARC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
 			m_Scene->m_Registry.remove<T>(m_EntityHandle);
 		}
 
@@ -60,7 +60,7 @@ namespace ArcEngine
 		
 		[[nodiscard]] Entity GetParent() const
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			if (!m_Scene)
 				return {};
@@ -71,9 +71,9 @@ namespace ArcEngine
 
 		void SetParent(Entity parent) const
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
-			ARC_CORE_ASSERT(m_Scene->m_EntityMap.contains(parent.GetUUID()), "Parent is not in the same scene as entity")
+			ARC_CORE_ASSERT(m_Scene->m_EntityMap.contains(parent.GetUUID()), "Parent is not in the same scene as entity");
 			Deparent();
 			
 			auto& rc = GetComponent<RelationshipComponent>();
@@ -83,7 +83,7 @@ namespace ArcEngine
 
 		void Deparent() const
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			auto& transform = GetRelationship();
 			const UUID uuid = GetUUID();
@@ -106,7 +106,7 @@ namespace ArcEngine
 		
 		[[nodiscard]] glm::mat4 GetWorldTransform() const
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			const auto& transform = GetTransform();
 			const auto& rc = GetRelationship();
@@ -117,7 +117,7 @@ namespace ArcEngine
 
 		[[nodiscard]] glm::mat4 GetLocalTransform() const
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			const auto& transform = GetTransform();
 			return glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);

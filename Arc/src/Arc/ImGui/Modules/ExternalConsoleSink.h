@@ -36,7 +36,7 @@ namespace ArcEngine
 
 		static void SetConsoleSink_HandleFlush(const std::function<void(std::string_view, const char*, const char*, int32_t, Log::Level)>& func)
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			OnFlush = func;
 		}
@@ -44,7 +44,7 @@ namespace ArcEngine
 	protected:
 		void sink_it_(const spdlog::details::log_msg& msg) override
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			if (OnFlush == nullptr)
 			{
@@ -62,7 +62,7 @@ namespace ArcEngine
 
 		void flush_() override
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			if (OnFlush == nullptr)
 				return;

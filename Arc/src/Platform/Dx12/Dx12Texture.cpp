@@ -23,7 +23,7 @@ namespace ArcEngine
 	Dx12Texture2D::Dx12Texture2D(const std::string& path, TextureFormat format)
 		: m_Format(format)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_Channels = ChannelCountFromFormat(m_Format);
 
@@ -32,7 +32,7 @@ namespace ArcEngine
 		int width, height, channels;
 		void* data = nullptr;
 		{
-			ARC_PROFILE_SCOPE("stbi_load Texture")
+			ARC_PROFILE_SCOPE("stbi_load Texture");
 			switch (m_Format)
 			{
 				case TextureFormat::None:		data = stbi_load(path.c_str(), &width, &height, &channels, m_Channels); break;
@@ -50,7 +50,7 @@ namespace ArcEngine
 			}
 			
 		}
-		ARC_CORE_ASSERT(data, "Failed to load image!")
+		ARC_CORE_ASSERT(data, "Failed to load image!");
 
 		m_Width = width;
 		m_Height = height;
@@ -64,7 +64,7 @@ namespace ArcEngine
 
 	Dx12Texture2D::~Dx12Texture2D()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		Dx12Context::GetSrvHeap()->Free(m_Handle);
 
@@ -81,16 +81,16 @@ namespace ArcEngine
 
 	void Dx12Texture2D::SetData(const TextureData data, [[maybe_unused]] uint32_t size)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
-		ARC_CORE_ASSERT(m_Width * m_Height == size / m_Channels)
+		ARC_CORE_ASSERT(m_Width * m_Height == size / m_Channels);
 
 		Dx12Utils::SetTextureData(m_ImageAllocation, m_UploadImageAllocation, m_Format, m_Width, m_Height, data);
 	}
 
 	void Dx12Texture2D::Bind(uint32_t slot) const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(slot, m_Handle.GPU);
 	}
@@ -101,7 +101,7 @@ namespace ArcEngine
 	Dx12TextureCube::Dx12TextureCube(const std::string& path, TextureFormat format)
 		: m_Format(format)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_HDRHandle = Dx12Context::GetSrvHeap()->Allocate();
 		m_UavHandle = Dx12Context::GetSrvHeap()->Allocate();
@@ -112,7 +112,7 @@ namespace ArcEngine
 		{
 			int width, height, channels;
 			float* data = stbi_loadf(path.c_str(), &width, &height, &channels, 4);
-			ARC_CORE_ASSERT(data, "Failed to load image!")
+			ARC_CORE_ASSERT(data, "Failed to load image!");
 			Dx12Utils::CreateTexture(&m_HDRImageAllocation, &m_HDRUploadImageAllocation, D3D12_SRV_DIMENSION_TEXTURE2D, TextureFormat::RGBA32F, width, height, 1, data, &m_HDRHandle, nullptr);
 			stbi_image_free(data);
 			m_Path = path;
@@ -166,7 +166,7 @@ namespace ArcEngine
 
 	Dx12TextureCube::~Dx12TextureCube()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		Dx12Context::GetSrvHeap()->Free(m_HDRHandle);
 		Dx12Context::GetSrvHeap()->Free(m_UavHandle);
@@ -190,16 +190,16 @@ namespace ArcEngine
 
 	void Dx12TextureCube::SetData(const TextureData data, [[maybe_unused]] uint32_t size)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
-		ARC_CORE_ASSERT(m_Width * m_Height == size / ChannelCountFromFormat(m_Format))
+		ARC_CORE_ASSERT(m_Width * m_Height == size / ChannelCountFromFormat(m_Format));
 
 		Dx12Utils::SetTextureData(m_ImageAllocation, m_UploadImageAllocation, m_Format, m_Width, m_Height, data);
 	}
 
 	void Dx12TextureCube::Bind(uint32_t slot) const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(slot, m_SrvHandle.GPU);
 	}

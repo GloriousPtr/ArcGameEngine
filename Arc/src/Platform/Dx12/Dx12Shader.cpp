@@ -15,7 +15,7 @@ namespace ArcEngine
 {
 	Dx12Shader::Dx12Shader(const std::filesystem::path& filepath, ShaderType type)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_Name = filepath.filename().string();
 		m_Type = type;
@@ -24,7 +24,7 @@ namespace ArcEngine
 
 	Dx12Shader::~Dx12Shader()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		for (auto& shader : m_ShaderBlobs | std::views::values)
 			shader->Release();
@@ -35,7 +35,7 @@ namespace ArcEngine
 
 	void Dx12Shader::Recompile(const std::filesystem::path& path)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		for (auto& shader : m_ShaderBlobs | std::views::values)
 			shader->Release();
@@ -74,7 +74,7 @@ namespace ArcEngine
 		const std::vector<const wchar_t*>& defines,
 		IDxcBlob** reflection)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		using namespace Microsoft::WRL;
 
@@ -166,7 +166,7 @@ namespace ArcEngine
 
 	void Dx12Shader::Compile(const std::filesystem::path& filepath)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		using namespace Microsoft::WRL;
 		
@@ -183,7 +183,7 @@ namespace ArcEngine
 		ComPtr<IDxcIncludeHandler> includeHandler;
 		ThrowIfFailed(utils->CreateDefaultIncludeHandler(&includeHandler), "IDxcIncludeHandler creation failed!");
 
-		ARC_CORE_ASSERT(source, source->GetBufferSize())
+		ARC_CORE_ASSERT(source, source->GetBufferSize());
 
 		const std::vector<const wchar_t*> args
 		{

@@ -73,7 +73,7 @@ namespace ArcEngine
 
 	void Renderer2D::Init()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		s_Data = CreateScope<Renderer2DData>();
 
@@ -153,7 +153,7 @@ namespace ArcEngine
 
 	void Renderer2D::Shutdown()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		delete[] s_Data->QuadVertexBufferBase;
 		delete[] s_Data->LineVertexBufferBase;
@@ -163,7 +163,7 @@ namespace ArcEngine
 
 	void Renderer2D::BeginScene(const CameraData& viewProjection, Ref<Framebuffer>& renderTarget)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		s_Data->RenderTarget = renderTarget;
 		if (s_Data->TexturePipeline->Bind())
@@ -177,14 +177,14 @@ namespace ArcEngine
 
 	void Renderer2D::EndScene()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		Flush();
 	}
 
 	void Renderer2D::StartBatch()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		s_Data->QuadIndexCount = 0;
 		s_Data->QuadVertexBufferPtr = s_Data->QuadVertexBufferBase;
@@ -197,11 +197,11 @@ namespace ArcEngine
 
 	void Renderer2D::Flush()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if(s_Data->QuadIndexCount && s_Data->RenderTarget && s_Data->TexturePipeline->Bind())
 		{
-			ARC_PROFILE_SCOPE("Draw Quads")
+			ARC_PROFILE_SCOPE("Draw Quads");
 
 			s_Data->RenderTarget->Bind();
 
@@ -218,7 +218,7 @@ namespace ArcEngine
 		
 		if (s_Data->LineVertexCount && s_Data->RenderTarget && s_Data->LinePipeline->Bind())
 		{
-			ARC_PROFILE_SCOPE("Draw Lines")
+			ARC_PROFILE_SCOPE("Draw Lines");
 
 			s_Data->RenderTarget->Bind();
 
@@ -254,7 +254,7 @@ namespace ArcEngine
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 		
 		constexpr size_t quadVertexCount = 4;
 		constexpr uint32_t textureIndex = 0; // White Texture
@@ -281,7 +281,7 @@ namespace ArcEngine
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec4& tintColor, glm::vec2 tiling, glm::vec2 offset)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (s_Data->QuadIndexCount >= Renderer2DData::MaxIndices)
 			NextBatch();
@@ -329,7 +329,7 @@ namespace ArcEngine
 
 	void Renderer2D::DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		s_Data->LineVertexBufferPtr->Position = glm::vec4(p0, 1.0f);
 		s_Data->LineVertexBufferPtr->Color = color;
@@ -344,7 +344,7 @@ namespace ArcEngine
 
 	void Renderer2D::DrawRect(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const glm::vec3 p0 = { position.x - size.x * 0.5f, position.y - size.y * 0.5f, position.z };
 		const glm::vec3 p1 = { position.x + size.x * 0.5f, position.y - size.y * 0.5f, position.z };
@@ -359,7 +359,7 @@ namespace ArcEngine
 
 	void Renderer2D::DrawRect(const glm::mat4& transform, const glm::vec4& color)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		glm::vec3 lineVertices[4];
 		for (size_t i = 0; i < 4; i++)

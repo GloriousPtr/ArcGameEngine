@@ -13,7 +13,7 @@ namespace ArcEngine
 
 	void RendererSettingsPanel::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 #if 0
 		if (OnBegin())
 		{

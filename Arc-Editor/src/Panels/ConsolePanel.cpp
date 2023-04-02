@@ -18,7 +18,7 @@ namespace ArcEngine
 	ConsolePanel::ConsolePanel(const char* name)
 		: BasePanel(name, ICON_MDI_CONSOLE, true)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		s_MessageBufferRenderFilter |= Log::Level::Trace;
 		s_MessageBufferRenderFilter |= Log::Level::Info;
@@ -38,7 +38,7 @@ namespace ArcEngine
 
 	void ConsolePanel::AddMessage(const std::string_view message, const char* filepath, const char* function, int32_t line, Log::Level level)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		static uint32_t id = 0;
 
@@ -56,7 +56,7 @@ namespace ArcEngine
 
 	const ConsolePanel::Message* ConsolePanel::GetRecentMessage() const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (m_BufferBegin == 0)
 			return nullptr;
@@ -66,7 +66,7 @@ namespace ArcEngine
 
 	void ConsolePanel::Clear()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		for (auto& message : m_MessageBuffer)
 			message = nullptr;
@@ -76,7 +76,7 @@ namespace ArcEngine
 
 	void ConsolePanel::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (OnBegin())
 		{
@@ -92,14 +92,14 @@ namespace ArcEngine
 
 	void ConsolePanel::SetFocus() const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		ImGui::SetWindowFocus(m_ID.c_str());
 	}
 
 	void ConsolePanel::ImGuiRenderHeader()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_COGS)))
 			ImGui::OpenPopup("SettingsPopup");
@@ -166,7 +166,7 @@ namespace ArcEngine
 
 	void ConsolePanel::ImGuiRenderSettings()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		UI::BeginProperties(ImGuiTableFlags_SizingStretchSame);
 		UI::Property("Scroll to bottom", m_AllowScrollingToBottom);
@@ -176,7 +176,7 @@ namespace ArcEngine
 
 	void ConsolePanel::ImGuiRenderMessages()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_RowBg
 			| ImGuiTableFlags_ContextMenuInBody
@@ -245,12 +245,12 @@ namespace ArcEngine
 	ConsolePanel::Message::Message(uint32_t id, std::string_view message, const char* filepath, const char* function, int32_t line, Log::Level level)
 		: ID(id), Buffer(message.data(), message.size()), Filepath(filepath ? filepath : ""), Function(function ? function : ""), Line(line), Level(level)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 	}
 
 	void ConsolePanel::Message::OnImGuiRender() const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();

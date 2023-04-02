@@ -172,7 +172,7 @@ namespace ArcEngine
 
 	std::pair<bool, uint32_t> AssetPanel::DirectoryTreeViewRecursive(const std::filesystem::path& path, uint32_t* count, int* selectionMask, ImGuiTreeNodeFlags flags)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		bool anyNodeClicked = false;
 		uint32_t nodeClicked = 0;
@@ -278,7 +278,7 @@ namespace ArcEngine
 	AssetPanel::AssetPanel(const char* name)
 		: BasePanel(name, ICON_MDI_FOLDER_STAR, true)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_DirectoryIcon = AssetManager::GetTexture2D("Resources/Icons/ContentBrowser/DirectoryIcon.png");
 		m_FileIcon = AssetManager::GetTexture2D("Resources/Icons/ContentBrowser/FileIcon.png");
@@ -331,7 +331,7 @@ namespace ArcEngine
 
 	void AssetPanel::OnUpdate([[maybe_unused]] Timestep ts)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_ElapsedTime += ts;
 		s_LastDomainReloadTime += ts;
@@ -350,7 +350,7 @@ namespace ArcEngine
 
 	void AssetPanel::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollWithMouse
 			| ImGuiWindowFlags_NoScrollbar;
@@ -388,7 +388,7 @@ namespace ArcEngine
 
 	void AssetPanel::RenderHeader()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_COGS)))
 			ImGui::OpenPopup("SettingsPopup");
@@ -498,7 +498,7 @@ namespace ArcEngine
 
 	void AssetPanel::RenderSideView()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		static int selectionMask = 0;
 
@@ -578,7 +578,7 @@ namespace ArcEngine
 
 	void AssetPanel::RenderBody(bool grid)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		std::filesystem::path directoryToOpen;
 		std::filesystem::path directoryToDelete;
@@ -821,7 +821,7 @@ namespace ArcEngine
 
 	void AssetPanel::UpdateDirectoryEntries(const std::filesystem::path& directory)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_CurrentDirectory = directory;
 		m_DirectoryEntries.clear();

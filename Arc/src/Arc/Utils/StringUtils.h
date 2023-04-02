@@ -29,7 +29,7 @@ namespace ArcEngine
 
 		[[nodiscard]] static std::string_view GetExtension(const std::string_view& filepath)
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			const auto lastDot = filepath.find_last_of('.');
 			return filepath.substr(lastDot + 1, filepath.size() - lastDot);
@@ -37,7 +37,7 @@ namespace ArcEngine
 
 		[[nodiscard]] static std::string_view GetName(const std::string_view& filepath)
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			auto lastSlash = filepath.find_last_of("/\\");
 			lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
@@ -48,7 +48,7 @@ namespace ArcEngine
 
 		[[nodiscard]] static std::string_view GetNameWithExtension(const std::string_view& filepath)
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			auto lastSlash = filepath.find_last_of("/\\");
 			lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;

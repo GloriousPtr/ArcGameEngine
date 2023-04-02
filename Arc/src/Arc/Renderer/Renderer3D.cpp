@@ -104,7 +104,7 @@ namespace ArcEngine
 
 	void Renderer3D::Init()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		s_Data = CreateScope<Renderer3DData>();
 
@@ -247,14 +247,14 @@ namespace ArcEngine
 
 	void Renderer3D::Shutdown()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		s_Data.reset();
 	}
 
 	void Renderer3D::BeginScene(const CameraData& cameraData, Entity cubemap, std::vector<Entity>&& lights)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		s_Data->Skylight = cubemap;
 		s_Data->SceneLights = std::move(lights);
@@ -290,21 +290,21 @@ namespace ArcEngine
 
 	void Renderer3D::EndScene(const Ref<RenderGraphData>& renderTarget)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		Flush(renderTarget);
 	}
 
 	void Renderer3D::DrawCube()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		RenderCommand::Draw(s_Data->CubeVertexBuffer, 36);
 	}
 
 	void Renderer3D::DrawQuad()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		//RenderCommand::DrawIndexed(s_QuadVertexArray);
 	}
@@ -316,14 +316,14 @@ namespace ArcEngine
 
 	void Renderer3D::SubmitMesh(const glm::mat4& transform, Submesh& submesh)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		s_Data->Meshes.emplace_back(transform, submesh);
 	}
 
 	void Renderer3D::Flush(const Ref<RenderGraphData>& renderGraphData)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		ShadowMapPass();
 		RenderPass(renderGraphData->CompositePassTarget);
@@ -337,7 +337,7 @@ namespace ArcEngine
 
 	void Renderer3D::FXAAPass([[maybe_unused]] const Ref<RenderGraphData>& renderGraphData)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 #if 0
 		if (UseFXAA)
@@ -353,21 +353,21 @@ namespace ArcEngine
 
 	void Renderer3D::ResetStats()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		memset(&s_Data->Stats, 0, sizeof(Statistics));
 	}
 
 	Renderer3D::Statistics Renderer3D::GetStats()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		return s_Data->Stats;
 	}
 
 	void Renderer3D::SetupGlobalData()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		s_Data->GlobalDataCB->Bind(0);
 		s_Data->GlobalDataCB->SetData(&(s_Data->GlobalData), sizeof(GlobalData), 0);
@@ -375,7 +375,7 @@ namespace ArcEngine
 
 	void Renderer3D::SetupLightsData()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		{
 			uint32_t numDirectionalLights = 0;
@@ -484,7 +484,7 @@ namespace ArcEngine
 
 	void Renderer3D::CompositePass([[maybe_unused]] const Ref<RenderGraphData>& renderGraphData)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 #if 0
 		renderGraphData->CompositePassTarget->Bind();
@@ -522,7 +522,7 @@ namespace ArcEngine
 
 	void Renderer3D::BloomPass([[maybe_unused]] const Ref<RenderGraphData>& renderGraphData)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 #if 0
 		if (!UseBloom)
@@ -532,7 +532,7 @@ namespace ArcEngine
 		glm::vec4 params = { BloomClamp, 2.0f, 0.0f, 0.0f };
 
 		{
-			ARC_PROFILE_SCOPE("Prefilter")
+			ARC_PROFILE_SCOPE("Prefilter");
 
 			renderGraphData->PrefilteredFramebuffer->Bind();
 			//s_BloomShader->SetData("u_Threshold", threshold);
@@ -545,7 +545,7 @@ namespace ArcEngine
 		const size_t blurSamples = renderGraphData->BlurSamples;
 		FramebufferSpecification spec = renderGraphData->PrefilteredFramebuffer->GetSpecification();
 		{
-			ARC_PROFILE_SCOPE("Downsample")
+			ARC_PROFILE_SCOPE("Downsample");
 
 			//s_GaussianBlurShader->SetData("u_Texture", 0);
 			for (size_t i = 0; i < blurSamples; i++)
@@ -566,7 +566,7 @@ namespace ArcEngine
 		}
 		
 		{
-			ARC_PROFILE_SCOPE("Upsample")
+			ARC_PROFILE_SCOPE("Upsample");
 
 			//s_BloomShader->SetData("u_Threshold", threshold);
 			params = glm::vec4(BloomClamp, 3.0f, 1.0f, 1.0f);
@@ -602,7 +602,7 @@ namespace ArcEngine
 
 	void Renderer3D::LightingPass([[maybe_unused]] const Ref<RenderGraphData>& renderGraphData)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 #if 0
 		renderGraphData->LightingPassTarget->Bind();
@@ -670,14 +670,14 @@ namespace ArcEngine
 
 	void Renderer3D::RenderPass(const Ref<Framebuffer>& renderTarget)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		renderTarget->Bind();
 
 		bool shouldExecute = false;
 		if (s_Data->Skylight)
 		{
-			ARC_PROFILE_SCOPE("Draw Skylight")
+			ARC_PROFILE_SCOPE("Draw Skylight");
 
 			[[likely]]
 			if (s_Data->CubemapPipeline->Bind())
@@ -696,7 +696,7 @@ namespace ArcEngine
 		[[likely]]
 		if (s_Data->RenderPipeline->Bind())
 		{
-			ARC_PROFILE_SCOPE("Draw Meshes")
+			ARC_PROFILE_SCOPE("Draw Meshes");
 
 			s_Data->GlobalDataCB->Bind(0);
 			s_Data->DirectionalLightsSB->Bind();
@@ -725,7 +725,7 @@ namespace ArcEngine
 		RenderCommand::Clear();
 
 		{
-			ARC_PROFILE_SCOPE("Skylight")
+			ARC_PROFILE_SCOPE("Skylight");
 
 			if (s_Skylight)
 			{
@@ -746,7 +746,7 @@ namespace ArcEngine
 		}
 		
 		{
-			ARC_PROFILE_SCOPE("Draw Meshes")
+			ARC_PROFILE_SCOPE("Draw Meshes");
 
 			MeshComponent::CullModeType currentCullMode = MeshComponent::CullModeType::Unknown;
 			for (const auto& meshData : s_Meshes)
@@ -764,7 +764,7 @@ namespace ArcEngine
 
 	void Renderer3D::ShadowMapPass()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 #if 0
 		for (const auto& lightEntity : s_SceneLights)
 		{

@@ -35,43 +35,43 @@ namespace ArcEngine
 	public:
 		[[nodiscard]] static const std::filesystem::path& GetProjectDirectory()
 		{
-			ARC_CORE_ASSERT(s_ActiveProject)
+			ARC_CORE_ASSERT(s_ActiveProject);
 			return s_ActiveProject->m_ProjectDirectory;
 		}
 
 		[[nodiscard]] static std::filesystem::path GetAssetDirectory()
 		{
-			ARC_CORE_ASSERT(s_ActiveProject)
+			ARC_CORE_ASSERT(s_ActiveProject);
 			return GetProjectDirectory() / s_ActiveProject->m_Config.AssetDirectory;
 		}
 
 		[[nodiscard]] static std::filesystem::path GetScriptModuleDirectory()
 		{
-			ARC_CORE_ASSERT(s_ActiveProject)
+			ARC_CORE_ASSERT(s_ActiveProject);
 			return GetProjectDirectory() / s_ActiveProject->m_Config.ScriptModulePath;
 		}
 
 		[[nodiscard]] static std::filesystem::path GetAssetFileSystemPath(const std::filesystem::path& path)
 		{
-			ARC_CORE_ASSERT(s_ActiveProject)
+			ARC_CORE_ASSERT(s_ActiveProject);
 			return GetAssetDirectory() / path;
 		}
 
 		[[nodiscard]] static std::filesystem::path GetAssetRelativeFileSystemPath(const std::filesystem::path& path)
 		{
-			ARC_CORE_ASSERT(s_ActiveProject)
+			ARC_CORE_ASSERT(s_ActiveProject);
 			return std::filesystem::relative(path, GetAssetDirectory());
 		}
 
 		[[nodiscard]] static std::filesystem::path GetSolutionPath()
 		{
-			ARC_CORE_ASSERT(s_ActiveProject)
+			ARC_CORE_ASSERT(s_ActiveProject);
 			return GetProjectDirectory() / (s_ActiveProject->GetConfig().Name + ".sln");
 		}
 
 		[[nodiscard]] static std::string_view GetBuildConfigString()
 		{
-			ARC_CORE_ASSERT(s_ActiveProject)
+			ARC_CORE_ASSERT(s_ActiveProject);
 			return s_BuildConfigMap.at(s_ActiveProject->GetConfig().BuildConfiguration);
 		}
 

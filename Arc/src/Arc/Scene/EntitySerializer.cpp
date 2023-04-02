@@ -169,7 +169,7 @@ namespace ArcEngine
 
 	void EntitySerializer::SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
-		ARC_CORE_ASSERT(entity.HasComponent<IDComponent>())
+		ARC_CORE_ASSERT(entity.HasComponent<IDComponent>());
 
 		out << YAML::BeginMap;
 		out << YAML::Key << "Entity" << YAML::Value << entity.GetUUID();
@@ -733,7 +733,7 @@ namespace ArcEngine
 						READ_FIELD_TYPE(FieldType::Vector4, glm::vec4);
 						READ_FIELD_TYPE(FieldType::Color, glm::vec4);
 						default:
-							ARC_CORE_ASSERT(false)
+							ARC_CORE_ASSERT(false);
 							break;
 					}
 				}
@@ -1311,7 +1311,7 @@ namespace ArcEngine
 									WRITE_FIELD_TYPE(FieldType::Vector4, glm::vec4);
 									WRITE_FIELD_TYPE(FieldType::Color, glm::vec4);
 									default:
-										ARC_CORE_ASSERT(false)
+										ARC_CORE_ASSERT(false);
 										break;
 								}
 							}

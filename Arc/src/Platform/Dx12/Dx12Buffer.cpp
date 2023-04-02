@@ -42,7 +42,7 @@ namespace ArcEngine
 
 	Dx12VertexBuffer::Dx12VertexBuffer(uint32_t size, uint32_t stride)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		CreateBuffer(&m_Allocation, size, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COMMON);
 		m_BufferView.BufferLocation = m_Allocation->GetResource()->GetGPUVirtualAddress();
@@ -54,7 +54,7 @@ namespace ArcEngine
 
 	Dx12VertexBuffer::Dx12VertexBuffer(const float* vertices, uint32_t size, uint32_t stride)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		CreateBuffer(&m_Allocation, size, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COMMON);
 		m_BufferView.BufferLocation = m_Allocation->GetResource()->GetGPUVirtualAddress();
@@ -68,7 +68,7 @@ namespace ArcEngine
 
 	Dx12VertexBuffer::~Dx12VertexBuffer()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (m_UploadAllocation)
 			m_UploadAllocation->Release();
@@ -78,14 +78,14 @@ namespace ArcEngine
 
 	void Dx12VertexBuffer::Bind() const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		Dx12Context::GetGraphicsCommandList()->IASetVertexBuffers(0, 1, &m_BufferView);
 	}
 
 	void Dx12VertexBuffer::SetData(const void* data, uint32_t size)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		ID3D12Resource* resource = m_Allocation->GetResource();
 		ID3D12Resource* uploadResource = m_UploadAllocation->GetResource();
@@ -108,7 +108,7 @@ namespace ArcEngine
 	Dx12IndexBuffer::Dx12IndexBuffer(const uint32_t* indices, uint32_t count)
 		: m_Count(count)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const uint32_t size = count * sizeof(uint32_t);
 
@@ -124,7 +124,7 @@ namespace ArcEngine
 
 	Dx12IndexBuffer::~Dx12IndexBuffer()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (m_UploadAllocation)
 			m_UploadAllocation->Release();
@@ -134,7 +134,7 @@ namespace ArcEngine
 
 	void Dx12IndexBuffer::Bind() const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		Dx12Context::GetGraphicsCommandList()->IASetIndexBuffer(&m_BufferView);
 	}
@@ -142,7 +142,7 @@ namespace ArcEngine
 
 	Dx12ConstantBuffer::Dx12ConstantBuffer(uint32_t stride, uint32_t count, uint32_t registerIndex)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_RegisterIndex = registerIndex;
 		m_Stride = stride;
@@ -167,7 +167,7 @@ namespace ArcEngine
 
 	Dx12ConstantBuffer::~Dx12ConstantBuffer()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
 		{
@@ -180,18 +180,18 @@ namespace ArcEngine
 
 	void Dx12ConstantBuffer::SetData(const void* data, uint32_t size, uint32_t index)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
-		ARC_CORE_ASSERT(m_Count > index, "Constant buffer index can't be greater than count! Overflow!")
+		ARC_CORE_ASSERT(m_Count > index, "Constant buffer index can't be greater than count! Overflow!");
 
 		SetBufferData(m_Allocation[Dx12Context::GetCurrentFrameIndex()], data, size == 0 ? m_Stride : size, m_AlignedStride * index);
 	}
 
 	void Dx12ConstantBuffer::Bind(uint32_t index) const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
-		ARC_CORE_ASSERT(m_Count > index, "Constant buffer index can't be greater than count! Overflow!")
+		ARC_CORE_ASSERT(m_Count > index, "Constant buffer index can't be greater than count! Overflow!");
 
 		const auto gpuVirtualAddress = m_Allocation[Dx12Context::GetCurrentFrameIndex()]->GetResource()->GetGPUVirtualAddress() + m_AlignedStride * index;
 		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(m_RegisterIndex, gpuVirtualAddress);
@@ -200,7 +200,7 @@ namespace ArcEngine
 
 	Dx12StructuredBuffer::Dx12StructuredBuffer(uint32_t stride, uint32_t count, uint32_t registerIndex)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_RegisterIndex = registerIndex;
 		m_Stride = stride;
@@ -228,7 +228,7 @@ namespace ArcEngine
 
 	Dx12StructuredBuffer::~Dx12StructuredBuffer()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
 		{
@@ -241,16 +241,16 @@ namespace ArcEngine
 
 	void Dx12StructuredBuffer::SetData(const void* data, uint32_t size, uint32_t index)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
-		ARC_CORE_ASSERT(m_Count > index, "Structured buffer index can't be greater than count! Overflow!")
+		ARC_CORE_ASSERT(m_Count > index, "Structured buffer index can't be greater than count! Overflow!");
 
 		SetBufferData(m_Allocation[Dx12Context::GetCurrentFrameIndex()], data, size == 0 ? m_Stride * m_Count : size, m_Stride * index);
 	}
 
 	void Dx12StructuredBuffer::Bind() const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(m_RegisterIndex, m_Handle[Dx12Context::GetCurrentFrameIndex()].GPU);
 	}

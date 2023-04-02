@@ -7,14 +7,14 @@ namespace ArcEngine
 {
 	SceneCamera::SceneCamera()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		RecalculateProjection();
 	}
 
 	void SceneCamera::SetPerspective(float verticalFov, float nearClip, float farClip)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_ProjectionType = ProjectionType::Perspective;
 		
@@ -27,7 +27,7 @@ namespace ArcEngine
 
 	void SceneCamera::SetOrthographic(float size, float nearClip, float farClip)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_ProjectionType = ProjectionType::Orthographic;
 		
@@ -40,7 +40,7 @@ namespace ArcEngine
 	
 	void SceneCamera::SetViewportSize(uint32_t width, uint32_t height)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_AspectRatio = static_cast<float>(width) / static_cast<float>(height);
 		RecalculateProjection();
@@ -48,7 +48,7 @@ namespace ArcEngine
 
 	void SceneCamera::RecalculateProjection()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if(m_ProjectionType == ProjectionType::Perspective)
 		{

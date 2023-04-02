@@ -24,14 +24,14 @@ namespace ArcEngine
 	EditorLayer::EditorLayer()
 		: Layer("Arc-Editor")
 	{
-		ARC_CORE_ASSERT(!s_Instance, "Editor Layer already exists!")
+		ARC_CORE_ASSERT(!s_Instance, "Editor Layer already exists!");
 
 		s_Instance = this;
 	}
 
 	void EditorLayer::OnAttach()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		EditorTheme::SetFont();
 		EditorTheme::SetStyle();
@@ -70,12 +70,12 @@ namespace ArcEngine
 
 	void EditorLayer::OnDetach()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 	}
 
 	void EditorLayer::OnUpdate([[maybe_unused]] Timestep ts)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		Renderer2D::ResetStats();
 		Renderer3D::ResetStats();
@@ -137,7 +137,7 @@ namespace ArcEngine
 
 	void EditorLayer::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		Application::Get().GetWindow().RegisterOverTitlebar(false);
 
@@ -578,7 +578,7 @@ namespace ArcEngine
 
 	void EditorLayer::OnEvent([[maybe_unused]] Event& e)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(ARC_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
@@ -655,7 +655,7 @@ namespace ArcEngine
 
 	bool EditorLayer::OnKeyPressed([[maybe_unused]] const KeyPressedEvent& e)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		/*
 		HotKeys:

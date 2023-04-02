@@ -15,11 +15,11 @@ namespace ArcEngine
 {
 	Material::Material(const std::filesystem::path& shaderPath)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		// Extract name from filepath
 		const std::string name = shaderPath.filename().string();
-		ARC_CORE_ASSERT(Renderer::GetPipelineLibrary().Exists(name))
+		ARC_CORE_ASSERT(Renderer::GetPipelineLibrary().Exists(name));
 
 		m_Pipeline = Renderer::GetPipelineLibrary().Get(name);
 		Invalidate();
@@ -27,12 +27,12 @@ namespace ArcEngine
 
 	Material::~Material()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 	}
 
 	void Material::Invalidate()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_TextureBuffer.clear();
 		m_CBBuffer.clear();
@@ -101,7 +101,7 @@ namespace ArcEngine
 
 	void Material::Bind() const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		[[likely]]
 		if (m_Pipeline->Bind())
@@ -128,14 +128,14 @@ namespace ArcEngine
 
 	void Material::Unbind() const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_Pipeline->Unbind();
 	}
 
 	Ref<Texture2D> Material::GetTexture(const std::string_view& name)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const auto it = m_Indices.find(name.data());
 		[[likely]]
@@ -149,7 +149,7 @@ namespace ArcEngine
 
 	void Material::SetTexture(const std::string_view& name, const Ref<Texture2D>& texture)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const auto it = m_Indices.find(name.data());
 		[[likely]]
@@ -163,7 +163,7 @@ namespace ArcEngine
 
 	void* Material::GetData_Internal(const std::string_view& name)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const auto it = m_Indices.find(name.data());
 		[[likely]]
@@ -177,7 +177,7 @@ namespace ArcEngine
 
 	void Material::SetData_Internal(const std::string_view& name, const void* data)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const auto it = m_Indices.find(name.data());
 		[[likely]]

@@ -26,21 +26,21 @@ namespace ArcEngine
 	
 	GlfwWindow::GlfwWindow(const WindowProps& props)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 		
 		Init(props);
 	}
 	
 	GlfwWindow::~GlfwWindow()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 		
 		Shutdown();
 	}
 
 	void GlfwWindow::Init(const WindowProps& props)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 		
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
@@ -50,15 +50,15 @@ namespace ArcEngine
 		
 		if(s_GLFWWindowCount == 0)
 		{
-			ARC_PROFILE_SCOPE("glfwInit")
+			ARC_PROFILE_SCOPE("glfwInit");
 			
 			[[maybe_unused]] const int success = glfwInit();
-			ARC_CORE_ASSERT(success, "Could not initialize GLFW!")
+			ARC_CORE_ASSERT(success, "Could not initialize GLFW!");
 			glfwSetErrorCallback(GLFWErrorCallback);
 		}
 
 		{
-			ARC_PROFILE_SCOPE("glfwCreateWindow")
+			ARC_PROFILE_SCOPE("glfwCreateWindow");
 
 			#ifdef ARC_PLATFORM_WINDOWS
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -83,7 +83,7 @@ namespace ArcEngine
 
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
 		{
-			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input)
+			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
 			auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 			data->Width = width;
@@ -95,7 +95,7 @@ namespace ArcEngine
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 		{
-			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input)
+			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
 			const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 			WindowCloseEvent event;
@@ -104,7 +104,7 @@ namespace ArcEngine
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, [[maybe_unused]] int scancode, [[maybe_unused]] int action, [[maybe_unused]] int mods)
 		{
-			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input)
+			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
 			const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
@@ -135,7 +135,7 @@ namespace ArcEngine
 
 		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int keycode)
 		{
-			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input)
+			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
 			const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
@@ -145,7 +145,7 @@ namespace ArcEngine
 		
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, [[maybe_unused]] int action, [[maybe_unused]] int mods)
 		{
-			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input)
+			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
 			const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
@@ -170,7 +170,7 @@ namespace ArcEngine
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
 		{
-			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input)
+			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
 			const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
@@ -180,7 +180,7 @@ namespace ArcEngine
 
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos)
 		{
-			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input)
+			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
 			const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
@@ -198,7 +198,7 @@ namespace ArcEngine
 
 	void GlfwWindow::Shutdown() const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 		
 		glfwDestroyWindow(m_Window);
 		--s_GLFWWindowCount;
@@ -209,22 +209,22 @@ namespace ArcEngine
 
 	void GlfwWindow::OnUpdate()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 		
 		{
-			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input)
+			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 			glfwPollEvents();
 		}
 
 		{
-			ARC_PROFILE_CATEGORY("Wait", Profile::Category::Wait)
+			ARC_PROFILE_CATEGORY("Wait", Profile::Category::Wait);
 			m_Context->SwapBuffers();
 		}
 	}
 
 	void GlfwWindow::SetVSync(bool enabled)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_Context->SetSyncInterval(enabled ? 1 : 0);
 		m_Data.VSync = enabled;

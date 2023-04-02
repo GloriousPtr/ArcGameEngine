@@ -18,7 +18,7 @@ namespace ArcEngine
 
 	void SceneViewport::OnInit()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		constexpr uint32_t width = 1280;
 		constexpr uint32_t height = 720;
@@ -29,7 +29,7 @@ namespace ArcEngine
 
 	void SceneViewport::OnUpdate([[maybe_unused]] Timestep timestep)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (FramebufferSpecification spec = m_RenderGraphData->CompositePassTarget->GetSpecification();
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized fb is invalid
@@ -151,7 +151,7 @@ namespace ArcEngine
 
 	void SceneViewport::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		//ImVec2 windowPadding = ImGui::GetStyle().WindowPadding;
 
@@ -192,7 +192,7 @@ namespace ArcEngine
 
 				if (m_SceneHierarchyPanel && m_GizmoType != -1)
 				{
-					ARC_PROFILE_SCOPE("Transform Gizmos")
+					ARC_PROFILE_SCOPE("Transform Gizmos");
 
 					EditorContext context = EditorLayer::GetInstance()->GetContext();
 					if (context.IsValid(EditorContextType::Entity))
@@ -304,7 +304,7 @@ namespace ArcEngine
 			EditorContext context = EditorLayer::GetInstance()->GetContext();
 			if (!m_SimulationRunning && context.IsValid(EditorContextType::Entity))
 			{
-				ARC_PROFILE_SCOPE("MiniViewport")
+				ARC_PROFILE_SCOPE("MiniViewport");
 
 				Entity selectedEntity = *context.As<Entity>();
 				if (selectedEntity && selectedEntity.HasComponent<CameraComponent>())
@@ -341,7 +341,7 @@ namespace ArcEngine
 
 	void SceneViewport::OnOverlayRender() const
 	{
-		ARC_PROFILE_CATEGORY("Debug Rendering", Profile::Category::Debug)
+		ARC_PROFILE_CATEGORY("Debug Rendering", Profile::Category::Debug);
 
 		const CameraData cameraData
 		{

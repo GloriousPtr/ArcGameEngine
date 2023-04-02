@@ -126,8 +126,8 @@ namespace ArcEngine::Dx12Utils
 
 	[[maybe_unused]] static void CreateTexture(D3D12MA::Allocation** imageAllocation, D3D12MA::Allocation** uploadImageAllocation, D3D12_SRV_DIMENSION dimension, TextureFormat format, uint32_t width, uint32_t height, uint16_t depth, const void* data, DescriptorHandle* srvHandle, DescriptorHandle* uavHandle)
 	{
-		ARC_CORE_ASSERT(imageAllocation)
-		ARC_CORE_ASSERT(uploadImageAllocation)
+		ARC_CORE_ASSERT(imageAllocation);
+		ARC_CORE_ASSERT(uploadImageAllocation);
 
 		DXGI_FORMAT dxFormat = Dx12FormatFromTextureFormat(format);
 
@@ -174,7 +174,7 @@ namespace ArcEngine::Dx12Utils
 					srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
 					break;
 				default:
-					ARC_CORE_ASSERT(false, "Unknown texture dimensions!")
+					ARC_CORE_ASSERT(false, "Unknown texture dimensions!");
 					break;
 			}
 

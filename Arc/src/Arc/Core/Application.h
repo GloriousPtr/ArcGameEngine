@@ -22,7 +22,7 @@ namespace ArcEngine
 
 		const char* operator[](int index) const
 		{
-			ARC_CORE_ASSERT(index < Count)
+			ARC_CORE_ASSERT(index < Count);
 			return Args[index];
 		}
 	};

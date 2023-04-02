@@ -13,7 +13,7 @@ namespace ArcEngine
 
 	void EditorCamera::OnUpdate([[maybe_unused]] Timestep timestep)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const float cosYaw = glm::cos(m_Yaw);
 		const float sinYaw = glm::sin(m_Yaw);
@@ -33,7 +33,7 @@ namespace ArcEngine
 
 	void EditorCamera::SetViewportSize(float width, float height)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_AspectRatio = width / height;
 		m_Projection = glm::perspective(m_Fov, m_AspectRatio, m_NearClip, m_FarClip);

@@ -11,7 +11,7 @@ namespace ArcEngine
 
 	void Renderer::Init()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		RenderCommand::Init();
 
@@ -23,7 +23,7 @@ namespace ArcEngine
 
 	void Renderer::Shutdown()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		s_PipelineLibrary.reset();
 
@@ -33,7 +33,7 @@ namespace ArcEngine
 
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		RenderCommand::SetViewport(0, 0, width, height);
 	}

@@ -31,7 +31,7 @@ namespace ArcEngine
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_RowBg
 			| ImGuiTableFlags_ContextMenuInBody
@@ -143,7 +143,7 @@ namespace ArcEngine
 
 	ImRect SceneHierarchyPanel::DrawEntityNode(Entity entity, uint32_t depth, bool forceExpandTree, bool isPartOfPrefab)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		[[unlikely]]
 		if (!entity)
@@ -360,7 +360,7 @@ namespace ArcEngine
 
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		m_Context = context;
 	}

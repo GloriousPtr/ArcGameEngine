@@ -25,7 +25,7 @@ namespace ArcEngine
 			case ShaderDataType::Bool:									return 1;
 		}
 
-		ARC_CORE_ASSERT(false, "Unknown ShaderDataType!")
+		ARC_CORE_ASSERT(false, "Unknown ShaderDataType!");
 		return 0;
 	}
 	
@@ -65,7 +65,7 @@ namespace ArcEngine
 				case ShaderDataType::Bool:									return 1;
 			}
 
-			ARC_CORE_ASSERT(false, "Unknown ShaderDataType!")
+			ARC_CORE_ASSERT(false, "Unknown ShaderDataType!");
 			return 0;
 		}
 	};

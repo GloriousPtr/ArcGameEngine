@@ -9,7 +9,7 @@ namespace ArcEngine
 	bool Math::DecomposeTransform(const glm::mat4& transform, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale)
 	{
 		// From glm::decompose in matrix_decompose.inl
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		using namespace glm;
 		using T = float;

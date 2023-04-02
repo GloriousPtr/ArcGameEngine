@@ -13,7 +13,7 @@ namespace ArcEngine
 
 	void StatsPanel::OnImGuiRender()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 		
 		float avg = 0.0;
 

@@ -17,7 +17,7 @@ namespace ArcEngine
 {
 	static bool Physics3DObjectCanCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const EntityLayer layer1 = BIT(inObject1);
 		const EntityLayer layer2 = BIT(inObject2);
@@ -59,7 +59,7 @@ namespace ArcEngine
 	public:
 		BPLayerInterfaceImpl()
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			mObjectToBroadPhase[Physics3DLayer::STATIC] = BroadPhaseLayers::STATIC;
 			mObjectToBroadPhase[Physics3DLayer::DEFAULT] = BroadPhaseLayers::DEFAULT;
@@ -81,16 +81,16 @@ namespace ArcEngine
 
 		[[nodiscard]] JPH::uint GetNumBroadPhaseLayers() const override
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
 			return BroadPhaseLayers::NUM_LAYERS;
 		}
 
 		[[nodiscard]] JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override
 		{
-			ARC_PROFILE_SCOPE()
+			ARC_PROFILE_SCOPE();
 
-			ARC_CORE_ASSERT(inLayer < Physics3DLayer::NUM_LAYERS)
+			ARC_CORE_ASSERT(inLayer < Physics3DLayer::NUM_LAYERS);
 			return mObjectToBroadPhase[inLayer];
 		}
 
@@ -113,7 +113,7 @@ namespace ArcEngine
 
 	static bool Physics3DBroadPhaseCanCollide(JPH::ObjectLayer inLayer1, JPH::BroadPhaseLayer inLayer2)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (inLayer1 == Physics3DLayer::STATIC)
 			return inLayer2 != BroadPhaseLayers::STATIC;
@@ -129,7 +129,7 @@ namespace ArcEngine
 
 	void Physics3D::Init()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		JPH::RegisterDefaultAllocator();
 
@@ -151,7 +151,7 @@ namespace ArcEngine
 
 	void Physics3D::Shutdown()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		delete s_PhysicsSystem;
 		delete s_BPLayerInterface;
@@ -168,18 +168,18 @@ namespace ArcEngine
 
 	void Physics3D::Step(float physicsTs)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
-		ARC_CORE_ASSERT(s_PhysicsSystem, "Physics system not initialized")
+		ARC_CORE_ASSERT(s_PhysicsSystem, "Physics system not initialized");
 
 		s_PhysicsSystem->Update(physicsTs, 1, 1, s_TempAllocator, s_JobSystem);
 	}
 
 	JPH::PhysicsSystem& Physics3D::GetPhysicsSystem()
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
-		ARC_CORE_ASSERT(s_PhysicsSystem, "Physics system not initialized")
+		ARC_CORE_ASSERT(s_PhysicsSystem, "Physics system not initialized");
 
 		return *s_PhysicsSystem;
 	}

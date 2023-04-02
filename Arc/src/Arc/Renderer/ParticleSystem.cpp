@@ -34,7 +34,7 @@ namespace ArcEngine
 
 	void ParticleSystem::OnUpdate(Timestep ts, const glm::vec3& position)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		const float simTs = ts * m_Properties.SimulationSpeed;
 
@@ -119,7 +119,7 @@ namespace ArcEngine
 
 	void ParticleSystem::OnRender() const
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		for (const auto& particle : m_Particles)
 		{
@@ -139,7 +139,7 @@ namespace ArcEngine
 
 	void ParticleSystem::Emit(const glm::vec3& position, uint32_t count)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		if (m_ActiveParticleCount >= m_Properties.MaxParticles)
 			return;

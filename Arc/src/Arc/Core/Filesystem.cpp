@@ -49,7 +49,7 @@ namespace ArcEngine
 
 	std::string Filesystem::ReadFileText(const std::filesystem::path& filepath)
 	{
-		ARC_PROFILE_SCOPE()
+		ARC_PROFILE_SCOPE();
 
 		std::ifstream in(filepath.c_str(), std::ios::in | std::ios::binary);
 		if (in)

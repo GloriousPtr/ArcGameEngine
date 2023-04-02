@@ -13,15 +13,14 @@ namespace ArcEngine
 			shaderVisible = false;
 		}
 
-		ARC_CORE_ASSERT(capacity && capacity < D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_2)
-		ARC_CORE_ASSERT(!(m_Type == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER &&
-						capacity > D3D12_MAX_SHADER_VISIBLE_SAMPLER_HEAP_SIZE))
+		ARC_CORE_ASSERT(capacity && capacity < D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_2);
+		ARC_CORE_ASSERT(!(m_Type == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER && capacity > D3D12_MAX_SHADER_VISIBLE_SAMPLER_HEAP_SIZE));
 
 		if (m_Size)
 			Release();
 
 		auto* device = Dx12Context::GetDevice();
-		ARC_CORE_ASSERT(device)
+		ARC_CORE_ASSERT(device);
 
 		D3D12_DESCRIPTOR_HEAP_DESC desc {};
 		desc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
@@ -42,7 +41,7 @@ namespace ArcEngine
 
 		for ([[maybe_unused]] const auto& deferedFreeIndices : m_DeferedFreeIndices)
 		{
-			ARC_CORE_ASSERT(deferedFreeIndices.empty())
+			ARC_CORE_ASSERT(deferedFreeIndices.empty());
 		}
 
 		m_DescriptorSize = device->GetDescriptorHandleIncrementSize(m_Type);
@@ -54,7 +53,7 @@ namespace ArcEngine
 
 	void DescriptorHeap::Release()
 	{
-		ARC_CORE_ASSERT(!m_Size)
+		ARC_CORE_ASSERT(!m_Size);
 		Dx12Context::DeferredRelease(m_Heap);
 		m_Heap = nullptr;
 	}
@@ -62,7 +61,7 @@ namespace ArcEngine
 	void DescriptorHeap::ProcessDeferredFree(uint32_t frameIndex)
 	{
 		std::lock_guard lock(m_Mutex);
-		ARC_CORE_ASSERT(frameIndex < Dx12Context::FrameCount)
+		ARC_CORE_ASSERT(frameIndex < Dx12Context::FrameCount);
 
 		auto& indices = m_DeferedFreeIndices[frameIndex];
 		for (const auto index : indices)
@@ -77,8 +76,8 @@ namespace ArcEngine
 	{
 		std::lock_guard lock(m_Mutex);
 
-		ARC_CORE_ASSERT(m_Heap)
-		ARC_CORE_ASSERT(m_Size < m_Capacity)
+		ARC_CORE_ASSERT(m_Heap);
+		ARC_CORE_ASSERT(m_Size < m_Capacity);
 
 		const uint32_t index = m_FreeHandles[m_Size];
 		const uint32_t offset = index * m_DescriptorSize;
@@ -99,14 +98,14 @@ namespace ArcEngine
 
 		std::lock_guard lock(m_Mutex);
 
-		ARC_CORE_ASSERT(m_Heap && m_Size)
-		ARC_CORE_ASSERT(handle.CPU.ptr >= m_CpuStart.ptr)
-		ARC_CORE_ASSERT(handle.GPU.ptr >= m_GpuStart.ptr)
-		ARC_CORE_ASSERT((handle.CPU.ptr - m_CpuStart.ptr) % m_DescriptorSize == 0)
-		ARC_CORE_ASSERT(m_Heap && m_Size)
+		ARC_CORE_ASSERT(m_Heap && m_Size);
+		ARC_CORE_ASSERT(handle.CPU.ptr >= m_CpuStart.ptr);
+		ARC_CORE_ASSERT(handle.GPU.ptr >= m_GpuStart.ptr);
+		ARC_CORE_ASSERT((handle.CPU.ptr - m_CpuStart.ptr) % m_DescriptorSize == 0);
+		ARC_CORE_ASSERT(m_Heap && m_Size);
 
 		const uint32_t index = static_cast<uint32_t>(handle.CPU.ptr - m_CpuStart.ptr) / m_DescriptorSize;
-		ARC_CORE_ASSERT(index < m_Capacity)
+		ARC_CORE_ASSERT(index < m_Capacity);
 
 		const uint32_t frameIndex = Dx12Context::GetCurrentFrameIndex();
 		m_DeferedFreeIndices[frameIndex].push_back(index);

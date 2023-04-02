@@ -29,7 +29,7 @@ namespace ArcEngine
 	void Dx12Allocator::CreateTextureResource(D3D12_HEAP_TYPE heapType, const D3D12_RESOURCE_DESC* resourceDesc,
 		D3D12_RESOURCE_STATES initialState, D3D12MA::Allocation** outAllocation)
 	{
-		ARC_CORE_ASSERT(outAllocation, "D3D12MA::Allocation** cannot be null!")
+		ARC_CORE_ASSERT(outAllocation, "D3D12MA::Allocation** cannot be null!");
 
 		D3D12MA::ALLOCATION_DESC defaultAllocation{};
 		defaultAllocation.HeapType = heapType;
@@ -40,7 +40,7 @@ namespace ArcEngine
 	void Dx12Allocator::CreateBufferResource(D3D12_HEAP_TYPE heapType, const D3D12_RESOURCE_DESC* resourceDesc,
 		D3D12_RESOURCE_STATES initialState, D3D12MA::Allocation** outAllocation)
 	{
-		ARC_CORE_ASSERT(outAllocation, "D3D12MA::Allocation** cannot be null!")
+		ARC_CORE_ASSERT(outAllocation, "D3D12MA::Allocation** cannot be null!");
 
 		D3D12MA::ALLOCATION_DESC defaultAllocation{};
 		defaultAllocation.HeapType = heapType;
@@ -51,7 +51,7 @@ namespace ArcEngine
 	void Dx12Allocator::CreateRtvResource(D3D12_HEAP_TYPE heapType, const D3D12_RESOURCE_DESC* resourceDesc,
 		D3D12_RESOURCE_STATES initialState, const D3D12_CLEAR_VALUE* clearValue, D3D12MA::Allocation** outAllocation)
 	{
-		ARC_CORE_ASSERT(outAllocation, "D3D12MA::Allocation** cannot be null!")
+		ARC_CORE_ASSERT(outAllocation, "D3D12MA::Allocation** cannot be null!");
 
 		D3D12MA::ALLOCATION_DESC defaultAllocation{};
 		defaultAllocation.HeapType = heapType;
