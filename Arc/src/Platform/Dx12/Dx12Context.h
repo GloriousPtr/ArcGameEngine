@@ -4,9 +4,9 @@
 
 struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct IUnknown;
-struct ID3D12Device8;
+struct ID3D12Device11;
 struct ID3D12CommandAllocator;
-struct ID3D12GraphicsCommandList6;
+struct ID3D12GraphicsCommandList9;
 struct ID3D12CommandQueue;
 struct ID3D12DescriptorHeap;
 
@@ -31,10 +31,10 @@ namespace ArcEngine
 		void OnEndFrame() const;
 
 		static void WaitForGpu();
-		static ID3D12Device8* GetDevice();
+		static ID3D12Device11* GetDevice();
 		static ID3D12CommandQueue* GetCommandQueue();
 		static ID3D12CommandAllocator* GetGraphicsCommandAllocator();
-		static ID3D12GraphicsCommandList6* GetGraphicsCommandList();
+		static ID3D12GraphicsCommandList9* GetGraphicsCommandList();
 		static D3D12_CPU_DESCRIPTOR_HANDLE GetRtv();
 		static int GetSwapChainFormat();
 		static uint32_t GetCurrentFrameIndex();

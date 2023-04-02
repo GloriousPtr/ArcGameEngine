@@ -75,7 +75,7 @@ namespace ArcEngine
 		DescriptorHandle RtvHandle{};
 
 		ID3D12CommandAllocator* GraphicsCommandAllocator = nullptr;
-		ID3D12GraphicsCommandList6* GraphicsCommandList = nullptr;
+		ID3D12GraphicsCommandList9* GraphicsCommandList = nullptr;
 
 		std::vector<IUnknown*> DeferredReleases{};
 		bool DeferedReleasesFlag = false;
@@ -118,7 +118,7 @@ namespace ArcEngine
 
 	inline static IDXGIFactory7* s_Factory;
 	inline static IDXGIAdapter4* s_Adapter;
-	inline static ID3D12Device8* s_Device;
+	inline static ID3D12Device11* s_Device;
 	inline static ID3D12CommandQueue* s_CommandQueue;
 	inline static IDXGISwapChain4* s_Swapchain;
 	inline static Dx12Frame s_Frames[Dx12Context::FrameCount];
@@ -199,9 +199,6 @@ namespace ArcEngine
 		if (FAILED(s_Device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
 			infoQueue = nullptr;
 #endif // ENABLE_DX12_DEBUG_MESSAGES
-
-		ComPtr<ID3D12DebugDevice2> debugDevice;
-		s_Device->QueryInterface(IID_PPV_ARGS(&debugDevice));
 #endif // ILLUMINO_DEBUG
 
 		s_Device->Release();
@@ -225,10 +222,9 @@ namespace ArcEngine
 			infoQueue->Release();
 		}
 		
-		if (debugDevice)
-		{
-			debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_SUMMARY | D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL);
-		}
+		ComPtr<IDXGIDebug1> dxgiDebug = nullptr;
+		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
+			dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
 #endif
 	}
 
@@ -428,7 +424,7 @@ namespace ArcEngine
 							m_PresentFlags & ~DXGI_PRESENT_ALLOW_TEARING;
 	}
 
-	ID3D12Device8* Dx12Context::GetDevice()
+	ID3D12Device11* Dx12Context::GetDevice()
 	{
 		return s_Device;
 	}
@@ -443,7 +439,7 @@ namespace ArcEngine
 		return s_Frames[Dx12Frame::CurrentBackBuffer].GraphicsCommandAllocator;
 	}
 
-	ID3D12GraphicsCommandList6* Dx12Context::GetGraphicsCommandList()
+	ID3D12GraphicsCommandList9* Dx12Context::GetGraphicsCommandList()
 	{
 		return s_Frames[Dx12Frame::CurrentBackBuffer].GraphicsCommandList;
 	}
