@@ -92,6 +92,7 @@ namespace ArcEngine
 		}
 
 		// Prepare args
+		const std::wstring wideFilename = filepath.filename();
 		std::wstring pdbParentPath = filepath.parent_path().c_str();
 		pdbParentPath += L"/Debug/";
 		std::wstring pdbName = std::wstring(filepath.filename().stem());
@@ -101,7 +102,7 @@ namespace ArcEngine
 		const std::filesystem::path pdbPath = pdbParentPath + pdbName;
 		std::vector args
 		{
-			filepath.filename().c_str(),
+			wideFilename.c_str(),
 			L"-E", s_EntryPointMap.at(shaderModel),
 			L"-T", s_TargetMap.at(shaderModel),
 			L"-Fd", pdbPath.c_str()
