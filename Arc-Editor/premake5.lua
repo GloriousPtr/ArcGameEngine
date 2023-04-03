@@ -6,8 +6,8 @@ project "Arc-Editor"
 	warnings "extra"
 	externalwarnings "off"
 	rtti "off"
-	buildmessage "================ Copying Resource ================"
-	postbuildmessage "================ Post-Build: Copying other dependencies ================"
+	buildmessage ""
+	postbuildmessage ""
 
 	flags { "FatalWarnings" }
 
@@ -53,7 +53,7 @@ project "Arc-Editor"
 
 	buildcommands
 	{
-		'{ECHO} ***** Copying Resource Files *****',
+		'{ECHO} ====== Copying Resource Files ======',
 		'{COPYDIR} "../vendor" "%{binDir}"/vendor',
 		'{COPYDIR} "assets" "%{cfg.targetdir}"/assets',
 		'{COPYDIR} "Resources" "%{cfg.targetdir}"/Resources',
@@ -69,7 +69,7 @@ project "Arc-Editor"
 	postbuildcommands
 	{
 		-- Mono
-		'{ECHO} ***** Copying Mono *****',
+		'{ECHO} ====== Copying Mono ======',
 		'{COPYDIR} "mono" "%{cfg.targetdir}"/mono',
 	}
 

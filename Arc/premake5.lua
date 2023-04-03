@@ -6,7 +6,7 @@ project "Arc"
 	warnings "extra"
 	externalwarnings "off"
 	rtti "off"
-	postbuildmessage "================ Post-Build: Copying dependencies ================"
+	postbuildmessage ""
 
 	flags { "FatalWarnings" }
 
@@ -112,6 +112,7 @@ project "Arc"
 		symbols "on"
 		postbuildcommands
 		{
+			'{ECHO} ====== Copying Mono ======',
 			'{COPYFILE} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
 		}
 
@@ -121,6 +122,7 @@ project "Arc"
 		optimize "speed"
 		postbuildcommands
 		{
+			'{ECHO} ====== Copying Mono ======',
 			'{COPYFILE} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
 		}
 
@@ -131,5 +133,6 @@ project "Arc"
 		symbols "off"
 		postbuildcommands
 		{
+			'{ECHO} ====== Copying Mono ======',
 			'{COPYFILE} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
 		}
