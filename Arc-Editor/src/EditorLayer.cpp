@@ -451,6 +451,12 @@ namespace ArcEngine
 							ImGui::PopFont();
 							ImGui::PopStyleColor();
 						}
+
+						ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - frameHeight * 1.5f);
+						uint64_t texId = AssetManager::GetTexture2D("Resources/Textures/Bug.png")->GetRendererID();
+						ImVec4 tint = ScriptEngine::IsDebuggerAttached() ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+						ImGui::Image(reinterpret_cast<ImTextureID>(texId), { frameHeight, frameHeight }, ARC_UI_UV_0, ARC_UI_UV_1, tint);
+
 						ImGui::EndMenuBar();
 					}
 
