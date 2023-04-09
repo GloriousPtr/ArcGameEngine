@@ -1,0 +1,21 @@
+{
+    "recommendations":
+    [
+        "ms-vscode.cpptools",
+        "ms-vscode.cpptools-themes",
+
+        "ms-dotnettools.csharp",
+        "Fudge.auto-using",
+        "adrianwilczynski.namespace",
+
+        "TimGJones.hlsltools",
+        "VisualStudioExptTeam.vscodeintellicode",
+        "tintoy.msbuild-project-tools",
+
+		"aaron-bond.better-comments",
+		"EditorConfig.EditorConfig",
+		"tejasvi.rainbow-brackets-2",
+		"ms-vscode.vs-keybindings",
+		"vscode-icons-team.vscode-icons",
+    ]
+}
