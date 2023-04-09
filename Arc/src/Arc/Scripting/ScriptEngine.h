@@ -219,6 +219,7 @@ namespace ArcEngine
 		[[nodiscard]] static MonoDomain* GetDomain();
 		[[nodiscard]] static MonoImage* GetCoreAssemblyImage();
 		[[nodiscard]] static MonoImage* GetAppAssemblyImage();
+		[[nodiscard]] static bool IsDebuggerAttached();
 
 		[[nodiscard]] static bool HasClass(const std::string& className);
 		static ScriptInstance* CreateInstance(Entity entity, const std::string& name);

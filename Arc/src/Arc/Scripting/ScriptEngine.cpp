@@ -276,6 +276,11 @@ namespace ArcEngine
 		return s_Data->AppImage;
 	}
 
+	bool ScriptEngine::IsDebuggerAttached()
+	{
+		return mono_is_debugger_attached();
+	}
+
 	ScriptInstance* ScriptEngine::CreateInstance(Entity entity, const std::string& name)
 	{
 		ARC_PROFILE_SCOPE();
