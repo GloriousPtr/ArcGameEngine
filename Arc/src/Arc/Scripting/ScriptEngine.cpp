@@ -91,8 +91,7 @@ namespace ArcEngine
 		{
 			static char* options[] =
 			{
-				const_cast<char*>(
-					"--debugger-agent=transport=dt_socket,address=127.0.0.1:2550,server=y,suspend=n,loglevel=3,logfile=MonoDebugger.log"),
+				const_cast<char*>("--debugger-agent=transport=dt_socket,address=127.0.0.1:2550,server=y,suspend=n,loglevel=3,logfile=MonoDebugger.log"),
 				const_cast<char*>("--soft-breakpoints")
 			};
 			mono_jit_parse_options(2, options);
@@ -107,7 +106,6 @@ namespace ArcEngine
 		
 		mono_thread_set_main(mono_thread_current());
 
-		GCManager::Init();
 		ScriptEngineRegistry::RegisterInternalCalls();
 
 		ReloadAppDomain();
@@ -121,12 +119,15 @@ namespace ArcEngine
 		s_Data->EntityFields.clear();
 		s_Data->EntityRuntimeInstances.clear();
 
+		GCManager::CollectGarbage();
+		GCManager::Shutdown();
+
 		mono_domain_set(s_Data->RootDomain, false);
 		if (s_Data->AppDomain)
 			mono_domain_unload(s_Data->AppDomain);
 
-		GCManager::CollectGarbage();
-		GCManager::Shutdown();
+		if (mono_debug_enabled())
+			mono_debug_cleanup();
 
 		mono_jit_cleanup(s_Data->RootDomain);
 
@@ -183,6 +184,19 @@ namespace ArcEngine
 
 		if (!Project::GetActive())
 			return;
+
+		static bool firstTime = true;
+		if (!firstTime)
+		{
+			GCManager::CollectGarbage();
+			GCManager::Shutdown();
+		}
+		else
+		{
+			firstTime = false;
+		}
+
+		GCManager::Init();
 
 		const auto begin = std::chrono::high_resolution_clock::now();
 
