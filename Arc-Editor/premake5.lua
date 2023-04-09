@@ -19,6 +19,9 @@ project "Arc-Editor"
 	{
 		"src/**.h",
 		"src/**.cpp",
+
+		"%{wks.location}/Arc/vendor/**.natvis",
+		"%{wks.location}/Arc/vendor/**.natstepfilter",
 	}
 
 	includedirs
@@ -84,6 +87,13 @@ project "Arc-Editor"
 			"dxguid.lib",
 			"d3d12.lib",
 			"dxgi.lib",
+		}
+		nuget
+		{
+			"Microsoft.Direct3D.D3D12:1.608.3",
+			"Microsoft.Direct3D.DXC:1.7.2212.36",
+			"directxtk12_desktop_2019:2023.2.7.1",
+			"WinPixEventRuntime:1.0.230302001",
 		}
 
 	filter "system:linux"

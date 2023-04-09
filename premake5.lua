@@ -21,36 +21,7 @@ workspace "Arc"
 		"MultiProcessorCompile"
 	}
 
-	files
-	{
-		"%{wks.location}/Arc/vendor/glm/util/glm.natvis",
-		"%{wks.location}/Arc/vendor/imgui/misc/debuggers/imgui.natvis",
-		"%{wks.location}/Arc/vendor/imgui/misc/debuggers/imgui.natstepfilter",
-		"%{wks.location}/Arc/vendor/yaml-cpp/src/contrib/yaml-cpp.natvis",
-		"%{IncludeDir.JoltPhysics}/Jolt/Jolt.natvis",
-		"%{IncludeDir.D3D12MA}/../src/D3D12MemAlloc.natvis",
-		"%{IncludeDir.entt}/../natvis/config.natvis",
-		"%{IncludeDir.entt}/../natvis/container.natvis",
-		"%{IncludeDir.entt}/../natvis/core.natvis",
-		"%{IncludeDir.entt}/../natvis/entity.natvis",
-		"%{IncludeDir.entt}/../natvis/graph.natvis",
-		"%{IncludeDir.entt}/../natvis/locator.natvis",
-		"%{IncludeDir.entt}/../natvis/meta.natvis",
-		"%{IncludeDir.entt}/../natvis/platform.natvis",
-		"%{IncludeDir.entt}/../natvis/poly.natvis",
-		"%{IncludeDir.entt}/../natvis/process.natvis",
-		"%{IncludeDir.entt}/../natvis/resource.natvis",
-		"%{IncludeDir.entt}/../natvis/signal.natvis",
-	}
-
 	filter "system:windows"
-		nuget
-		{
-			"Microsoft.Direct3D.D3D12:1.608.3",
-			"Microsoft.Direct3D.DXC:1.7.2212.36",
-			"directxtk12_desktop_2019:2023.2.7.1",
-			"WinPixEventRuntime:1.0.230302001",
-		}
 		linkoptions { "/ignore:4006" }
 		buildoptions { "/bigobj" }
 	filter { "system:windows", "toolset:clang" }

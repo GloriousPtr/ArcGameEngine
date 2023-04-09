@@ -27,6 +27,12 @@ project "JoltPhysics"
 	}
 
 	filter "system:windows"
+		nuget
+		{
+			"WinPixEventRuntime:1.0.230302001",
+		}
+
+	filter "system:windows"
 		systemversion "latest"
 		cppdialect "C++20"
 
