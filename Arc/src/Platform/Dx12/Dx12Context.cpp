@@ -273,7 +273,7 @@ namespace ArcEngine
 
 			ARC_CORE_INFO("DirectX Info:");
 			ARC_CORE_INFO("  Vendor: {}", GetVendorName(adapterDesc.VendorId));
-			ARC_CORE_INFO("  Renderer: {}", ToCSTR(adapterDesc.Description));
+			ARC_CORE_INFO(L"  Renderer: {}", adapterDesc.Description);
 		}
 
 #ifdef ARC_DEBUG
@@ -361,9 +361,9 @@ namespace ArcEngine
 			s_Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&(frame.GraphicsCommandAllocator)));
 			s_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, frame.GraphicsCommandAllocator, nullptr, IID_PPV_ARGS(&(frame.GraphicsCommandList)));
 
-			std::string cmdAllocatorName = fmt::format("Graphics Command Allocator {}", tempInt);
+			std::string cmdAllocatorName = std::format("Graphics Command Allocator {}", tempInt);
 			NameResource(frame.GraphicsCommandAllocator, cmdAllocatorName.c_str());
-			std::string cmdListName = fmt::format("Graphics Command List {}", tempInt);
+			std::string cmdListName = std::format("Graphics Command List {}", tempInt);
 			NameResource(frame.GraphicsCommandList, cmdListName.c_str());
 
 			frame.GraphicsCommandList->Close();
@@ -558,7 +558,7 @@ namespace ArcEngine
 			frame.RtvHandle = s_RtvDescHeap.Allocate();
 			s_Device->CreateRenderTargetView(frame.RtvBuffer, nullptr, frame.RtvHandle.CPU);
 
-			std::string rtvFrameName = fmt::format("RTV Frame {}", tempInt);
+			std::string rtvFrameName = std::format("RTV Frame {}", tempInt);
 			NameResource(frame.RtvBuffer, rtvFrameName.c_str());
 
 			++tempInt;

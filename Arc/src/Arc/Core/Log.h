@@ -33,15 +33,9 @@ namespace ArcEngine
 	};
 }
 
-#ifdef SPDLOG_USE_STD_FORMAT
-#define FMT std
-#else
-#define FMT fmt
-#endif
-
 template<>
 struct 
-FMT::formatter<ArcEngine::UUID>
+std::formatter<ArcEngine::UUID>
 {
 	constexpr auto parse(const format_parse_context& ctx) const -> decltype(ctx.begin())
 	{
@@ -51,13 +45,13 @@ FMT::formatter<ArcEngine::UUID>
 	template <typename FormatContext>
 	auto format(const ArcEngine::UUID& input, FormatContext& ctx) -> decltype(ctx.out())
 	{
-		return FMT::format_to(ctx.out(), "{}", static_cast<uint64_t>(input));
+		return std::format_to(ctx.out(), "{}", static_cast<uint64_t>(input));
 	}
 };
 
 template<>
 struct 
-FMT::formatter<std::filesystem::path>
+std::formatter<std::filesystem::path>
 {
 	constexpr auto parse(format_parse_context& ctx) const -> decltype(ctx.begin())
 	{
@@ -67,11 +61,9 @@ FMT::formatter<std::filesystem::path>
 	template <typename FormatContext>
 	auto format(const std::filesystem::path& input, FormatContext& ctx) -> decltype(ctx.out())
 	{
-		return FMT::format_to(ctx.out(), "{}", input.string());
+		return std::format_to(ctx.out(), "{}", input.string());
 	}
 };
-
-#undef FMT
 
 #define ARC_CORE_TRACE(...)		::ArcEngine::Log::GetCoreLogger()->trace(__VA_ARGS__)
 #define ARC_CORE_INFO(...)		::ArcEngine::Log::GetCoreLogger()->info(__VA_ARGS__)

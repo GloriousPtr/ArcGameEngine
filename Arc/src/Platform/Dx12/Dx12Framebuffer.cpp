@@ -90,7 +90,7 @@ namespace ArcEngine
 
 					depthAttachment = { state, allocation, srvHandle, dsvHandle };
 
-					std::string resourceName = fmt::format("Depth Resource ({}): {}", i, m_Specification.Name);
+					std::string resourceName = std::format("Depth Resource ({}): {}", i, m_Specification.Name);
 					NameResource(allocation, resourceName.c_str());
 					++i;
 				}
@@ -123,7 +123,7 @@ namespace ArcEngine
 					colorAttachment.emplace_back(state, allocation, srvHandle, rtvHandle);
 					m_RtvHandles[i].emplace_back(rtvHandle.CPU);
 
-					std::string resourceName = fmt::format("Color Resource ({}): {}", i, m_Specification.Name);
+					std::string resourceName = std::format("Color Resource ({}): {}", i, m_Specification.Name);
 					NameResource(allocation, resourceName.c_str());
 					++i;
 				}

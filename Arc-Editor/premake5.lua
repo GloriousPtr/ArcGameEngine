@@ -24,6 +24,12 @@ project "Arc-Editor"
 		"%{wks.location}/Arc/vendor/**.natstepfilter",
 	}
 
+	defines
+	{
+		"SPDLOG_USE_STD_FORMAT",
+		"SPDLOG_WCHAR_TO_UTF8_SUPPORT"
+	}
+
 	includedirs
 	{
 		"src",

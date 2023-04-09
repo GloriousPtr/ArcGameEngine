@@ -51,7 +51,7 @@ namespace ArcEngine
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
 		++s_Counter;
-		std::string buffer = fmt::format("##{}", s_Counter);
+		std::string buffer = std::format("##{}", s_Counter);
 		std::memcpy(&s_IDBuffer, buffer.data(), 16);
 	}
 	
@@ -67,7 +67,7 @@ namespace ArcEngine
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
 		++s_Counter;
-		std::string buffer = fmt::format("##{}", s_Counter);
+		std::string buffer = std::format("##{}", s_Counter);
 		std::memcpy(&s_IDBuffer, buffer.data(), 16);
 
 		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_PadOuterX;
@@ -82,7 +82,7 @@ namespace ArcEngine
 		s_IDBuffer[1] = '#';
 		memset(s_IDBuffer + 2, 0, 14);
 		++s_Counter;
-		std::string buffer = fmt::format("##{}", s_Counter);
+		std::string buffer = std::format("##{}", s_Counter);
 		std::memcpy(&s_IDBuffer, buffer.data(), 16);
 
 		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_PadOuterX;
@@ -314,7 +314,7 @@ namespace ArcEngine
 			for (T& p : v)
 			{
 				ImGui::PushID(i);
-				std::string name = fmt::format("Point {}", i);
+				std::string name = std::format("Point {}", i);
 				function(name.c_str(), p);
 				ImGui::TableNextColumn();
 

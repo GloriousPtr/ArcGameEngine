@@ -34,7 +34,9 @@ project "Arc"
 
 	defines
 	{
-		"GLFW_INCLUDE_NONE"
+		"GLFW_INCLUDE_NONE",
+		"SPDLOG_USE_STD_FORMAT",
+		"SPDLOG_WCHAR_TO_UTF8_SUPPORT"
 	}
 
 	includedirs
