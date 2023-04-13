@@ -8,6 +8,6 @@ namespace ArcEngine
 	{
 	public:
 		[[nodiscard]] static bool GenerateProjectFiles();
-		[[nodiscard]] static bool BuildProject(const std::function<void()>& onComplete = nullptr);
+		static void BuildProject(bool async, const std::function<void(bool)>& onComplete = nullptr);
 	};
 }

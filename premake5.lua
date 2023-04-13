@@ -31,21 +31,10 @@ workspace "Arc"
 
 -- Library directories relavtive to root folder (solution directory)
 LibDir = {}
-filter "configurations:Debug"
-	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Debug"
-filter "configurations:Release"
-	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Release"
-filter "configurations:Dist"
-	LibDir["Mono"] = "%{wks.location}/Arc/vendor/mono/lib/Release"
+LibDir["dotnet"] = "%{wks.location}/Arc/vendor/dotnet"
 
 -- Bin directories relavtive to root folder (solution directory)
 BinDir = {}
-filter "configurations:Debug"
-	BinDir["Mono"] = "%{wks.location}/Arc/vendor/mono/bin/Debug"
-filter "configurations:Release"
-	BinDir["Mono"] = "%{wks.location}/Arc/vendor/mono/bin/Release"
-filter "configurations:Dist"
-	BinDir["Mono"] = "%{wks.location}/Arc/vendor/mono/bin/Release"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}";
 
@@ -61,7 +50,7 @@ IncludeDir["yaml_cpp"] = "%{wks.location}/Arc/vendor/yaml-cpp/include"
 IncludeDir["ImGuizmo"] = "%{wks.location}/Arc/vendor/ImGuizmo"
 IncludeDir["optick"] = "%{wks.location}/Arc/vendor/optick/src"
 IncludeDir["box2d"] = "%{wks.location}/Arc/vendor/box2d/include"
-IncludeDir["mono"] = "%{wks.location}/Arc/vendor/mono/include"
+IncludeDir["dotnet"] = "%{wks.location}/Arc/vendor/dotnet"
 IncludeDir["miniaudio"] = "%{wks.location}/Arc/vendor/miniaudio"
 IncludeDir["icons"] = "%{wks.location}/Arc/vendor/icons/include"
 IncludeDir["JoltPhysics"] = "%{wks.location}/Arc/vendor/JoltPhysics/JoltPhysics"

@@ -57,6 +57,10 @@ project "Arc-Editor"
 		"optick",
 		"box2d",
 		"JoltPhysics",
+	}
+
+	dependson
+	{
 		"Arc-ScriptCore",
 	}
 
@@ -77,16 +81,17 @@ project "Arc-Editor"
 
 	postbuildcommands
 	{
-		-- Mono
-		'{ECHO} ====== Copying Mono ======',
-		'{COPYDIR} "mono" "%{cfg.targetdir}"/mono',
+		-- Nethost
+		'{ECHO} ====== Copying Nethost ======',
+		'{COPYFILE} %{LibDir.dotnet}/nethost.dll "%{cfg.targetdir}"',
 	}
 
 	filter "system:windows"
 		systemversion "latest"
 		links
 		{
-			"%{LibDir.Mono}/mono-2.0-sgen.lib",
+			"%{LibDir.dotnet}/nethost.lib",
+
 			"opengl.dll",
 
 			-- DirectX
@@ -108,7 +113,6 @@ project "Arc-Editor"
 		linkoptions { "`pkg-config --libs gtk+-3.0`" }
 		links
 		{
-			"monosgen-2.0:shared",
 			"GL:shared",
 			"dl:shared"
 		}
@@ -117,26 +121,14 @@ project "Arc-Editor"
 		defines "ARC_DEBUG"
 		runtime "Debug"
 		symbols "on"
-		postbuildcommands
-		{
-			'{COPYFILE} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
-		}
 
 	filter "configurations:Release"
 		defines "ARC_RELEASE"
 		runtime "Release"
 		optimize "speed"
-		postbuildcommands
-		{
-			'{COPYFILE} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
-		}
 
 	filter "configurations:Dist"
 		defines "ARC_DIST"
 		runtime "Release"
         optimize "speed"
 		symbols "off"
-		postbuildcommands
-		{
-			'{COPYFILE} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
-		}

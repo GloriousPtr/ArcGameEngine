@@ -36,7 +36,7 @@ namespace ArcEngine
 		premakeCommand += premakeExePath.string();
 		premakeCommand += "\"";
 
-		premakeCommand += " --dotnet=mono";
+		premakeCommand += " --dotnet=msnet";
 
 		premakeCommand += " --file=";
 
@@ -57,11 +57,13 @@ namespace ArcEngine
 		return true;
 	}
 
-	bool ProjectBuilder::BuildProject(const std::function<void()>& onComplete)
+	void ProjectBuilder::BuildProject(bool async, const std::function<void(bool)>& onComplete)
 	{
 		if (!Project::GetActive())
 		{
 			ARC_CORE_ERROR("No active project found!");
+			if (onComplete)
+				onComplete(false);
 			return false;
 		}
 
@@ -124,9 +126,7 @@ namespace ArcEngine
 		}
 
 		if (onComplete)
-			onComplete();
-
-		return !failed;
+			onComplete(!failed);
 	}
 }
 

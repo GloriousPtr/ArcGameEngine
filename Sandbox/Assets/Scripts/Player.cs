@@ -1,4 +1,5 @@
 using ArcEngine;
+using System;
 
 namespace Sandbox
 {
@@ -6,24 +7,19 @@ namespace Sandbox
 	{
 		[Range(3.0f, 1000.0f)]
 		[SerializeField]
-		private float Speed = 5.0f;
-		[SerializeField]
-		private Vector2 Force = new Vector2(0.0f, 1.0f);
+		private float Speed = 500.0f;
 
 		private TransformComponent m_TransformComponent;
 		private Rigidbody2DComponent m_Rigidbody2D;
 
-		public void OnCreate()
+		internal void OnCreate()
 		{
 			m_TransformComponent = GetComponent<TransformComponent>();
 			m_Rigidbody2D = GetComponent<Rigidbody2DComponent>();
 		}
 
-		public void OnUpdate(float timestep)
+		private void OnUpdate(float timestep)
 		{
-			/*if (Input.IsKeyPressed(KeyCodes.Space))
-				m_Rigidbody2D.ApplyLinearImpulse(Force);
-			*/
 			float speed = Speed * timestep;
 			Vector2 dir = new Vector2(0.0f);
 
@@ -35,8 +31,8 @@ namespace Sandbox
 				dir.x = 1.0f;
 			else if (Input.IsKeyPressed(KeyCodes.A))
 				dir.x = -1.0f;
-
-			Vector2 velocity = dir * speed;
+			
+			Vector2 velocity = dir * speed * 0.5f;
 			m_Rigidbody2D.velocity = velocity;
 		}
 	}

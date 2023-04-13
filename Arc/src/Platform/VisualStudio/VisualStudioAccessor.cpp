@@ -227,6 +227,8 @@ namespace ArcEngine
 			startInfo.wShowWindow = SW_HIDE;
 			uint32_t createFlags = NORMAL_PRIORITY_CLASS | DETACHED_PROCESS;
 			CreateProcess(nullptr, wCmdArgs, nullptr, nullptr, FALSE, createFlags, nullptr, nullptr, &startInfo, &processInfo);
+			WaitForSingleObject(processInfo.hProcess, INFINITE);
+
 			CloseHandle(processInfo.hThread);
 			CloseHandle(processInfo.hProcess);
 		}
@@ -327,6 +329,53 @@ namespace ArcEngine
 		if (open)
 			OpenFile(filepath);
 		return success;
+	}
+
+	void VisualStudioAccessor::AttachDebugger()
+	{
+		if (!Project::GetActive())
+		{
+			ARC_CORE_ERROR("No active project found!");
+			return;
+		}
+
+		s_OpenProjectFuture = std::async(std::launch::async, []()
+		{
+			const auto solutionPath = Project::GetSolutionPath();
+			if (!IsDteValid())
+			{
+				FindAndSetRunningInstance(solutionPath.string());
+
+				if (!IsDteValid())
+					RunAndOpenSolutionAndFile(solutionPath);
+				else
+					ShowDteWindow(s_VsInstance);
+			}
+			else
+			{
+				if (!ShowDteWindow(s_VsInstance))
+					RunAndOpenSolutionAndFile(solutionPath);
+			}
+
+			if (IsDteValid())
+			{
+				CComBSTR cmd = "ArcVSExtension.AttachToDebuggerCommand";
+				CComBSTR args = "";
+				HRESULT hr = s_VsInstance->ExecuteCommand(cmd, args);
+				if (FAILED(hr))
+					ARC_CORE_ERROR("Failed to attach visual studio debugger! Make sure ArcVSExtension is installed.");
+			}
+		});
+	}
+
+	void VisualStudioAccessor::DetachDebugger()
+	{
+		if (IsDteValid())
+		{
+			CComBSTR cmd = "Debug.StopDebugging";
+			CComBSTR args = "";
+			s_VsInstance->ExecuteCommand(cmd, args);
+		}
 	}
 }
 

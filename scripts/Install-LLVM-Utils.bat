@@ -33,3 +33,4 @@ git clone -q --depth=1 --branch=main https://github.com/MohitSethi99/llvm-utils.
 CALL ".cache/llvm-utils\VS2017\install.bat" 1
 
 echo LLVM should now work with Visual Studio
+pause

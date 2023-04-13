@@ -9,7 +9,7 @@ namespace Sandbox
 		[SerializeField] private float Speed = 20.0f;
 
 		[Header("Test")]
-		public bool Bool = false;
+		public bool Bool = true;
 		public byte Byte = 255;
 		public sbyte SByte = 127;
 		public short Short = -25600;
@@ -18,11 +18,15 @@ namespace Sandbox
 		public uint UInt = 5;
 		public long Long = -5000000000000000000L;
 		public ulong ULong = 5000000000000000000UL;
-		public string String = "Arc Engine";
+		[Range(0.0f, 300.0f)]
+		public float Float = 69.69f;
+		public double Double = 6969.69;
+		public string String = "Arc En";
 		public char Char = 'E';
 		public Vector2 Vec2 = new Vector2(2.0f, 3.0f);
 		public Vector3 Vec3 = new Vector3(2.0f, 3.0f, 4.0f);
-		public Vector4 Vec4 = new Vector4(2.0f, 3.0f, 4.0f, 1.0f);
+		[SerializeField]
+		private Vector4 Vec4 = new Vector4(2.0f, 3.0f, 4.0f, 1.0f);
 		public Color EnemyColor = new Color(1.0f, 0.0f, 1.0f, 1.0f);
 
 		private TransformComponent m_TransformComponent;
@@ -31,27 +35,25 @@ namespace Sandbox
 		{
 			m_TransformComponent = GetComponent<TransformComponent>();
 
-			/*
 			OnSensorEnter2D += (CollisionData data) =>
 			{
-				Log.Info("Sensor Enter 2D: {0}, other: {1}", GetComponent<TagComponent>().tag, data.otherEntity.GetComponent<TagComponent>().tag);
+				Log.Info(string.Format("Sensor Enter 2D: {0}, other: {1}", GetTag(), data.entity.GetTag()));
 			};
 
 			OnSensorExit2D += (CollisionData data) =>
 			{
-				Log.Info("Sensor Exit 2D: {0}, other: {1}", GetComponent<TagComponent>().tag, data.otherEntity.GetComponent<TagComponent>().tag);
+				Log.Info(string.Format("Sensor Exit 2D: {0}, other: {1}", GetTag(), data.entity.GetTag()));
 			};
 
 			OnCollisionEnter2D += (CollisionData data) =>
 			{
-				Log.Info("Collision Enter 2D: {0}, other: {1}", GetComponent<TagComponent>().tag, data.otherEntity.GetComponent<TagComponent>().tag);
+				Log.Info(string.Format("Collision Enter 2D: {0}, other: {1}", GetTag(), data.entity.GetTag()));
 			};
 
 			OnCollisionExit2D += (CollisionData data) =>
 			{
-				Log.Info("Collision Exit 2D: {0}, other: {1}", GetComponent<TagComponent>().tag, data.otherEntity.GetComponent<TagComponent>().tag);
+				Log.Info(string.Format("Collision Exit 2D: {0}, other: {1}", GetTag(), data.entity.GetTag()));
 			};
-			*/
 		}
 
 		public void OnUpdate(float timestep)
@@ -64,10 +66,6 @@ namespace Sandbox
 				transform.Rotation.z -= Speed * timestep;
 
 			m_TransformComponent.transform = transform;
-		}
-
-		public void OnDestroy()
-		{
 		}
 	}
 }

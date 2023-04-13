@@ -147,28 +147,31 @@ namespace ArcEngine
 				ARC_PROFILE_SCOPE("UI Function");
 
 				// Public Fields
-				UI::BeginProperties();
-				const auto& fields = ScriptEngine::GetFields(className.c_str());
-				auto& fieldMap = ScriptEngine::GetFieldMap(className.c_str());
-				for (const auto& name : fields)
+				if (ScriptEngine::HasClass(className))
 				{
-					auto& field = fieldMap.at(name);
-					if (field.Hidden)
-						continue;
-
-					if (!field.Header.empty())
+					UI::BeginProperties();
+					const auto& fields = ScriptEngine::GetFields(className.c_str());
+					auto& fieldMap = ScriptEngine::GetFieldMap(className.c_str());
+					for (const auto& name : fields)
 					{
-						UI::EndProperties();
-						ImGui::Spacing();
-						ImGui::Spacing();
-						ImGui::TextUnformatted(field.Header.c_str());
-						ImGui::Spacing();
-						UI::BeginProperties();
-					}
+						auto& field = fieldMap.at(name);
+						if (field.Hidden)
+							continue;
 
-					UI::DrawField(entity, className, name);
+						if (!field.Header.empty())
+						{
+							UI::EndProperties();
+							ImGui::Spacing();
+							ImGui::Spacing();
+							ImGui::TextUnformatted(field.Header.c_str());
+							ImGui::Spacing();
+							UI::BeginProperties();
+						}
+
+						UI::DrawField(entity, className, name);
+					}
+					UI::EndProperties();
 				}
-				UI::EndProperties();
 
 				ImGui::TreePop();
 			}

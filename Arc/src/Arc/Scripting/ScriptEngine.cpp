@@ -1,24 +1,17 @@
 #include "arcpch.h"
 #include "ScriptEngine.h"
 
-#include <mono/jit/jit.h>
-#include <mono/metadata/assembly.h>
-#include <mono/metadata/object.h>
-#include <mono/metadata/attrdefs.h>
-#include <mono/metadata/threads.h>
-#include <mono/metadata/mono-debug.h>
-
-#ifdef ARC_DEBUG
-#include <mono/metadata/debug-helpers.h>
-#endif // ARC_DEBUG
+#include <nethost.h>
+#include <coreclr_delegates.h>
+#include <hostfxr.h>
 
 #include "Arc/Project/Project.h"
 #include "Arc/Scene/Entity.h"
 #include "Arc/Scene/Scene.h"
-#include "MonoUtils.h"
-#include "GCManager.h"
 #include "ProjectBuilder.h"
 #include "ScriptEngineRegistry.h"
+
+#include "Platform/VisualStudio/VisualStudioAccessor.h"
 
 namespace ArcEngine
 {
@@ -44,25 +37,32 @@ namespace ArcEngine
 		{ "ArcEngine.Color",	FieldType::Color },
 	};
 
+	template<typename Output, typename... Args>
+	using ManagedMethod = Output(*)(Args...);
+
+	template<typename Output, typename... Args>
+	auto GetManagedMethod(const char_t* methodName) -> ManagedMethod<Output, Args...>;
+
+	struct Vec2
+	{
+		float min = 0.0f;
+		float max = 0.0f;
+	};
+
 	struct ScriptEngineData
 	{
-		MonoDomain* RootDomain = nullptr;
-		MonoDomain* AppDomain = nullptr;
+		hostfxr_initialize_for_runtime_config_fn DotnetRuntimeConfig;
+		hostfxr_handle DotnetRuntimeContext;
+		hostfxr_get_runtime_delegate_fn RuntimeDelegate;
+		load_assembly_and_get_function_pointer_fn DotnetLoadAssemblyAndFunc;
+		hostfxr_close_fn DotnetClose;
 
-		MonoAssembly* CoreAssembly = nullptr;
-		MonoAssembly* AppAssembly = nullptr;
-		MonoImage* CoreImage = nullptr;
-		MonoImage* AppImage = nullptr;
+		DotnetAssembly CoreAssembly = nullptr;
+		DotnetAssembly ClientAssembly = nullptr;
 
-		MonoClass* EntityClass = nullptr;
-		MonoClass* SerializeFieldAttribute = nullptr;
-		MonoClass* HideInPropertiesAttribute = nullptr;
-		MonoClass* ShowInPropertiesAttribute = nullptr;
-		MonoClass* HeaderAttribute = nullptr;
-		MonoClass* TooltipAttribute = nullptr;
-		MonoClass* RangeAttribute = nullptr;
-
-		bool EnableDebugging = true;
+		std::string CoreAssemblyPath;
+		std::string ClientAssemblyPath;
+		Scope<ScriptClass> EntityClass;
 
 		std::unordered_map<std::string, Ref<ScriptClass>, UM_StringTransparentEquality> EntityClasses;
 		std::unordered_map<UUID, std::unordered_map<std::string, std::unordered_map<std::string, ScriptFieldInstance, UM_StringTransparentEquality>, UM_StringTransparentEquality>> EntityFields;
@@ -71,43 +71,170 @@ namespace ArcEngine
 		EntityInstanceMap EntityRuntimeInstances;
 	};
 
+
+
+#define STR(x) ARC_CONCAT(L, x)
+#define RegisterManagedMethod(Name, ...) ManagedMethod<__VA_ARGS__> Name = GetManagedMethod<__VA_ARGS__>(ARC_CONCAT(L, #Name))
+
+	struct ReflectionMethods
+	{
+		RegisterManagedMethod(LoadAssembly, DotnetAssembly, const char*);
+		RegisterManagedMethod(CreateEntityReference, GCHandle, DotnetAssembly, const char*, UUID);
+		RegisterManagedMethod(CreateObjectReference, GCHandle, DotnetAssembly, const char*);
+		RegisterManagedMethod(ReleaseObjectReference, void, GCHandle);
+		RegisterManagedMethod(GetClassNames, char**, DotnetAssembly, DotnetAssembly, const char*);
+		RegisterManagedMethod(GetMethod, DotnetMethod, GCHandle, const char*, int);
+		RegisterManagedMethod(InvokeMethod, void, DotnetMethod, void**, int);
+		RegisterManagedMethod(IsDebuggerAttached, int);
+		RegisterManagedMethod(GetTypeFromName, DotnetType, DotnetAssembly, const char*);
+		RegisterManagedMethod(GetNameFromType, char*, DotnetType);
+		RegisterManagedMethod(Free, void, void*);
+		RegisterManagedMethod(FreeArray, void, void*);
+		RegisterManagedMethod(UnloadAssemblies, void);
+
+		RegisterManagedMethod(GetFieldNames, char**, DotnetAssembly, const char*);
+		RegisterManagedMethod(GetFieldTypeName, char*, DotnetAssembly, const char*, const char*);
+		RegisterManagedMethod(GetFieldDisplayName, char*, DotnetAssembly, const char*, const char*);
+		RegisterManagedMethod(GetFieldTooltip, char*, DotnetAssembly, const char*, const char*);
+		RegisterManagedMethod(IsFieldPublic, int, DotnetAssembly, const char*, const char*);
+		RegisterManagedMethod(FieldHasAttribute, int, DotnetAssembly, const char*, const char*, const char*);
+		RegisterManagedMethod(GetFieldRange, Vec2, DotnetAssembly, const char*, const char*);
+		RegisterManagedMethod(GetFieldValue, void, GCHandle, const char*, void*);
+		RegisterManagedMethod(GetFieldValueString, char*, GCHandle, const char*);
+		RegisterManagedMethod(SetFieldValue, void, GCHandle, const char*, const void*);
+	};
+
 	static Scope<ScriptEngineData> s_Data;
+	static Scope<ReflectionMethods> s_Reflection;
 
 	Scene* ScriptEngine::s_CurrentScene = nullptr;
+
+	inline static std::unordered_map<DotnetType, std::function<bool(const Entity&, DotnetType)>> s_HasComponentFuncs;
+	inline static std::unordered_map<DotnetType, std::function<void(const Entity&, DotnetType)>> s_AddComponentFuncs;
+	inline static std::unordered_map<DotnetType, std::function<GCHandle(const Entity&, DotnetType)>> s_GetComponentFuncs;
+	inline static std::unordered_map<DotnetType, std::string> s_ClassTypes;
+
+
+	template<typename Output, typename... Args>
+	auto GetManagedMethod(const char_t* methodName) -> ManagedMethod<Output, Args...>
+	{
+		typedef Output(CORECLR_DELEGATE_CALLTYPE* ManagedMethod)(Args...);
+		ManagedMethod method = nullptr;
+		static const std::filesystem::path asmPath = s_Data->CoreAssemblyPath;
+		s_Data->DotnetLoadAssemblyAndFunc(asmPath.c_str(), STR("ArcEngine.AssemblyHelper, Arc-ScriptCore"), methodName, UNMANAGEDCALLERSONLY_METHOD, nullptr, (void**)&method);
+		return method;
+	}
+
+
+
+
+	template<typename... Component>
+	void RegisterComponent()
+	{
+		([]()
+		{
+			char* nameCstr = nullptr;
+			static std::string componentPrefix = "ArcEngine.";
+		#if defined(__clang__) || defined(__llvm__) || defined(__GNUC__) || defined(__GNUG__)
+			constexpr size_t n = std::string_view("ArcEngine::").size();
+		#elif defined(_MSC_VER)
+			constexpr size_t n = std::string_view("struct ArcEngine::").size();
+		#endif
+			const std::string componentName = static_cast<std::string>(entt::type_id<Component>().name().substr(n));
+			std::string name = componentPrefix + componentName;
+			nameCstr = name.data();
+			if (!nameCstr)
+			{
+				ARC_CORE_ASSERT(false, "Could not register component");
+				return;
+			}
+
+			DotnetAssembly assembly = s_Data->CoreAssembly;
+			DotnetType type = s_Reflection->GetTypeFromName(assembly, nameCstr);
+			if (type)
+			{
+				ARC_CORE_DEBUG("Registering {}", name);
+				s_HasComponentFuncs[type] = [](const Entity& entity, [[maybe_unused]] DotnetType) { return entity.HasComponent<Component>(); };
+				s_AddComponentFuncs[type] = [](const Entity& entity, [[maybe_unused]] DotnetType) { entity.AddComponent<Component>(); };
+			}
+		}(), ...);
+	}
+
+	template<typename... Component>
+	void RegisterComponent(ComponentGroup<Component...>)
+	{
+		RegisterComponent<Component...>();
+	}
+
+	void RegisterScriptComponent(DotnetAssembly assembly, const std::string& className)
+	{
+		DotnetType type = s_Reflection->GetTypeFromName(assembly, className.c_str());
+		if (type)
+		{
+			ARC_CORE_DEBUG("Registering {}", className);
+			s_ClassTypes[type] = className;
+			s_HasComponentFuncs[type] = [](const Entity& entity, DotnetType type) { return ScriptEngine::HasInstance(entity, s_ClassTypes.at(type)); };
+			s_AddComponentFuncs[type] = [](const Entity& entity, DotnetType type) { ScriptEngine::CreateInstance(entity, s_ClassTypes.at(type)); };
+			s_GetComponentFuncs[type] = [](const Entity& entity, DotnetType type) { return ScriptEngine::GetInstance(entity, s_ClassTypes.at(type))->GetHandle(); };
+		}
+	}
+
 
 	void ScriptEngine::Init()
 	{
 		ARC_PROFILE_SCOPE();
 
-#if defined(ARC_PLATFORM_WINDOWS)
-		mono_set_assemblies_path("mono/Win64/lib");
-#elif defined(ARC_PLATFORM_LINUX)
-		mono_set_assemblies_path("mono/Linux/lib");
-#endif
-
+		
 		s_Data = CreateScope<ScriptEngineData>();
+		s_Data->CoreAssemblyPath = std::filesystem::absolute("Resources/Scripts/Arc-ScriptCore.dll").string();
+		
 
-		if (s_Data->EnableDebugging)
+		HMODULE handleNethost{ LoadLibraryW(STR("nethost.dll")) };
+		ARC_CORE_ASSERT(handleNethost, "Failed loading nethost.dll");
+
+		auto get_hostfxr_path_handle{ reinterpret_cast<decltype (&get_hostfxr_path)>(GetProcAddress(handleNethost, "get_hostfxr_path")) };
+		ARC_CORE_ASSERT(get_hostfxr_path_handle, "Failed getting address of get_hostfxr_path");
+
+		char_t buffer[MAX_PATH];
+		size_t bufferSize{ std::size(buffer) };
+
+		[[maybe_unused]] int result{ get_hostfxr_path_handle(buffer, &bufferSize, nullptr) };
+		ARC_CORE_ASSERT(result == 0, "get_hostfxr_path failed, provided buffer is too small");
+
+		HMODULE handleHostFxr{ LoadLibraryW(buffer) };
+		ARC_CORE_ASSERT(handleHostFxr, "Failed loading module");
+
+		s_Data->DotnetRuntimeConfig = reinterpret_cast<hostfxr_initialize_for_runtime_config_fn>(GetProcAddress(handleHostFxr, "hostfxr_initialize_for_runtime_config"));
+		ARC_CORE_ASSERT(s_Data->DotnetRuntimeConfig, "Failed getting address of hostfxr_initialize_for_runtime_config_fn");
+
+		s_Data->RuntimeDelegate = reinterpret_cast<hostfxr_get_runtime_delegate_fn>(GetProcAddress(handleHostFxr, "hostfxr_get_runtime_delegate"));
+		ARC_CORE_ASSERT(s_Data->RuntimeDelegate, "Failed getting address of hostfxr_get_runtime_delegate");
+
+		s_Data->DotnetClose = reinterpret_cast<hostfxr_close_fn>(GetProcAddress(handleHostFxr, "hostfxr_close"));
+		ARC_CORE_ASSERT(s_Data->DotnetClose, "Failed getting address of hostfxr_close");
+
+		const std::filesystem::path configPath = "Resources/Scripts/Arc-ScriptCore.runtimeconfig.json";
+
+		result = s_Data->DotnetRuntimeConfig(configPath.c_str(), nullptr, &s_Data->DotnetRuntimeContext);
+		if (result != 0 || s_Data->DotnetRuntimeContext == nullptr)
 		{
-			static char* options[] =
-			{
-				const_cast<char*>("--debugger-agent=transport=dt_socket,address=127.0.0.1:2550,server=y,suspend=n,loglevel=3,logfile=MonoDebugger.log"),
-				const_cast<char*>("--soft-breakpoints")
-			};
-			mono_jit_parse_options(2, options);
-			mono_debug_init(MONO_DEBUG_FORMAT_MONO);
+			s_Data->DotnetClose(s_Data->DotnetRuntimeContext);
+			ARC_CORE_ASSERT(false, "Runtime initialization failed ");
 		}
 
-		s_Data->RootDomain = mono_jit_init("ArcJITRuntime");
-		mono_domain_set(s_Data->RootDomain, false);
+		result = s_Data->RuntimeDelegate(s_Data->DotnetRuntimeContext, hdt_load_assembly_and_get_function_pointer, (void**)&s_Data->DotnetLoadAssemblyAndFunc);
+		if (result != 0 || s_Data->DotnetRuntimeContext == nullptr || s_Data->DotnetLoadAssemblyAndFunc == nullptr)
+		{
+			s_Data->DotnetClose(s_Data->DotnetRuntimeContext);
+			ARC_CORE_ASSERT(false, "Failed loading the runtime");
+		}
 
-		if (s_Data->EnableDebugging)
-			mono_debug_domain_create(s_Data->RootDomain);
-		
-		mono_thread_set_main(mono_thread_current());
+		s_Reflection = CreateScope<ReflectionMethods>();
 
-		ScriptEngineRegistry::RegisterInternalCalls();
+		s_Data->DotnetClose(s_Data->DotnetRuntimeContext);
+		s_Data->DotnetRuntimeContext = nullptr;
 
+		LoadAssemblyHelper();
 		ReloadAppDomain();
 	}
 
@@ -119,43 +246,17 @@ namespace ArcEngine
 		s_Data->EntityFields.clear();
 		s_Data->EntityRuntimeInstances.clear();
 
-		GCManager::CollectGarbage();
-		GCManager::Shutdown();
-
-		mono_domain_set(s_Data->RootDomain, false);
-		if (s_Data->AppDomain)
-			mono_domain_unload(s_Data->AppDomain);
-
-		if (mono_debug_enabled())
-			mono_debug_cleanup();
-
-		mono_jit_cleanup(s_Data->RootDomain);
-
-		s_Data->AppDomain = nullptr;
-		s_Data->RootDomain = nullptr;
+		if (s_Reflection->UnloadAssemblies)
+			s_Reflection->UnloadAssemblies();
 	}
 
-	void ScriptEngine::LoadCoreAssembly()
+	void ScriptEngine::LoadAssemblyHelper()
 	{
 		ARC_PROFILE_SCOPE();
-
-		if (!Project::GetActive())
-			return;
-
-		const std::filesystem::path path = "Resources/Scripts/Arc-ScriptCore.dll";
-		s_Data->CoreAssembly = MonoUtils::LoadMonoAssembly(path, s_Data->EnableDebugging);
-		s_Data->CoreImage = mono_assembly_get_image(s_Data->CoreAssembly);
-
-		s_Data->EntityClass = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "Entity");
-		s_Data->SerializeFieldAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "SerializeFieldAttribute");
-		s_Data->HideInPropertiesAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "HideInPropertiesAttribute");
-		s_Data->ShowInPropertiesAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "ShowInPropertiesAttribute");
-		s_Data->HeaderAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "HeaderAttribute");
-		s_Data->TooltipAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "TooltipAttribute");
-		s_Data->RangeAttribute = mono_class_from_name(s_Data->CoreImage, "ArcEngine", "RangeAttribute");
+		
 	}
 
-	void ScriptEngine::LoadClientAssembly()
+	void ScriptEngine::LoadCoreAndClientAssembly()
 	{
 		ARC_PROFILE_SCOPE();
 		
@@ -163,122 +264,127 @@ namespace ArcEngine
 		if (!project)
 			return;
 
-		const std::string clientAssemblyName = project->GetConfig().Name + ".dll";
-		const auto path = Project::GetScriptModuleDirectory() / clientAssemblyName;
-		if (std::filesystem::exists(path))
-		{
-			s_Data->AppAssembly = MonoUtils::LoadMonoAssembly(path, s_Data->EnableDebugging);
-			s_Data->AppImage = mono_assembly_get_image(s_Data->AppAssembly);
+		s_Data->ClientAssemblyPath = std::filesystem::absolute(Project::GetScriptModuleDirectory() / (Project::GetActive()->GetConfig().Name + ".dll")).string();
 
-			s_Data->EntityClasses.clear();
-			LoadAssemblyClasses(s_Data->AppAssembly);
+		s_Data->EntityClasses.clear();
 
-			ScriptEngineRegistry::ClearTypes();
-			ScriptEngineRegistry::RegisterTypes();
-		}
+		ScriptEngineRegistry::Init();
+		s_ClassTypes.clear();
+		s_HasComponentFuncs.clear();
+		s_GetComponentFuncs.clear();
+		s_AddComponentFuncs.clear();
+
+		s_Data->CoreAssembly = s_Reflection->LoadAssembly(s_Data->CoreAssemblyPath.c_str());
+		s_Data->EntityClass = CreateScope<ScriptClass>(s_Data->CoreAssembly, "ArcEngine.Entity");
+
+		s_Data->ClientAssembly = s_Reflection->LoadAssembly(s_Data->ClientAssemblyPath.c_str());
+		LoadAssemblyClasses(s_Data->ClientAssembly);
+
+		RegisterComponent<TagComponent>();
+		RegisterComponent(AllComponents{});
+		const auto& scripts = ScriptEngine::GetClasses();
+		RegisterScriptComponent(s_Data->CoreAssembly, "ArcEngine.Entity");
+		for (const auto& [className, _] : scripts)
+			RegisterScriptComponent(s_Data->ClientAssembly, className);
 	}
 
-	void ScriptEngine::ReloadAppDomain()
+	void ScriptEngine::ReloadAppDomain(bool asyncBuild)
 	{
 		ARC_PROFILE_SCOPE();
 
 		if (!Project::GetActive())
 			return;
 
-		static bool firstTime = true;
-		if (!firstTime)
-		{
-			GCManager::CollectGarbage();
-			GCManager::Shutdown();
-		}
-		else
-		{
-			firstTime = false;
-		}
-
-		GCManager::Init();
-
-		const auto begin = std::chrono::high_resolution_clock::now();
+		auto begin = std::chrono::high_resolution_clock::now();
 
 		if (!ProjectBuilder::GenerateProjectFiles())
 			return;
 
-		const bool buildSuccess = ProjectBuilder::BuildProject();
-
-		const auto end = std::chrono::high_resolution_clock::now();
-		const auto timeTaken = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-
-		if (!buildSuccess)
+		ProjectBuilder::BuildProject(asyncBuild, [begin](bool success)
 		{
-			ARC_CORE_ERROR("Build Failed; Compile time: {0}ms", timeTaken);
-			return;
-		}
+			auto end = std::chrono::high_resolution_clock::now();
+			auto timeTaken = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
 
-		ARC_CORE_INFO("Build Suceeded; Compile time: {0}ms", timeTaken);
+			if (success)
+			{
+				ARC_CORE_INFO("Build Suceeded; Compile time: {0}ms", timeTaken);
 
-		if (s_Data->AppDomain)
-		{
-			mono_domain_set(s_Data->RootDomain, false);
-			mono_domain_unload(s_Data->AppDomain);
-			s_Data->AppDomain = nullptr;
-		}
+				if (s_Reflection->UnloadAssemblies)
+					s_Reflection->UnloadAssemblies();
 
-		s_Data->AppDomain = mono_domain_create_appdomain(const_cast<char*>("ScriptRuntime"), nullptr);
-		ARC_CORE_ASSERT(s_Data->AppDomain);
-		mono_domain_set(s_Data->AppDomain, true);
-
-		LoadCoreAssembly();
-		LoadClientAssembly();
-
-		GCManager::CollectGarbage();
+				LoadCoreAndClientAssembly();
+			}
+			else
+			{
+				ARC_CORE_ERROR("Build Failed; Compile time: {0}ms", timeTaken);
+			}
+		});
 	}
 
-	void ScriptEngine::LoadAssemblyClasses(MonoAssembly* assembly)
+	void ScriptEngine::LoadAssemblyClasses(DotnetAssembly assembly)
 	{
 		ARC_PROFILE_SCOPE();
 
-		MonoImage* image = mono_assembly_get_image(assembly);
-		const MonoTableInfo* typeDefinitionTable = mono_image_get_table_info(image, MONO_TABLE_TYPEDEF);
-		const int32_t numTypes = mono_table_info_get_rows(typeDefinitionTable);
-
-		for (int32_t i = 0; i < numTypes; ++i)
+		char** classes = s_Reflection->GetClassNames(assembly, s_Data->CoreAssembly, "ArcEngine.Entity");
+		if (classes)
 		{
-			uint32_t cols[MONO_TYPEDEF_SIZE];
-			mono_metadata_decode_row(typeDefinitionTable, i, cols, MONO_TYPEDEF_SIZE);
-
-			const char* nameSpace = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAMESPACE]);
-			const char* name = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAME]);
-			std::string fullname = std::format("{}.{}", nameSpace, name);
-
-			MonoClass* monoClass = mono_class_from_name(image, nameSpace, name);
-			if (!monoClass)
-				continue;
-
-			if (MonoClass* parentClass = mono_class_get_parent(monoClass))
+			int i = 0;
+			while (classes[i])
 			{
-				const char* parentName = mono_class_get_name(parentClass);
-				const char* parentNamespace = mono_class_get_namespace(parentClass);
-
-				const bool isEntity = monoClass && strcmp(parentName, "Entity") == 0 && strcmp(parentNamespace, "ArcEngine") == 0;
-				if (isEntity)
-					s_Data->EntityClasses[fullname] = CreateRef<ScriptClass>(nameSpace, name);
+				s_Data->EntityClasses[classes[i]] = CreateRef<ScriptClass>(assembly, classes[i], true);
+				++i;
 			}
+			s_Reflection->FreeArray(classes);
 		}
 	}
 
-	MonoImage* ScriptEngine::GetCoreAssemblyImage()
+	bool ScriptEngine::HasComponent(Entity entity, DotnetType type)
 	{
-		return s_Data->CoreImage;
+		ARC_PROFILE_SCOPE();
+
+		ARC_CORE_ASSERT(s_HasComponentFuncs.contains(type));
+		return s_HasComponentFuncs.at(type)(entity, type);
 	}
 
-	MonoImage* ScriptEngine::GetAppAssemblyImage()
+	void ScriptEngine::AddComponent(Entity entity, DotnetType type)
 	{
-		return s_Data->AppImage;
+		ARC_PROFILE_SCOPE();
+
+		ARC_CORE_ASSERT(s_HasComponentFuncs.contains(type));
+		s_AddComponentFuncs.at(type)(entity, type);
+	}
+
+	GCHandle ScriptEngine::GetComponent(Entity entity, DotnetType type)
+	{
+		ARC_PROFILE_SCOPE();
+
+		ARC_CORE_ASSERT(s_HasComponentFuncs.contains(type));
+		ARC_CORE_ASSERT(s_GetComponentFuncs.contains(type));
+		ARC_CORE_ASSERT(HasInstance(entity, s_ClassTypes.at(type)));
+
+		return s_GetComponentFuncs.at(type)(entity, type);
+	}
+
+	void ScriptEngine::AttachDebugger()
+	{
+		if (!IsDebuggerAttached())
+			VisualStudioAccessor::AttachDebugger();
+	}
+
+	void ScriptEngine::DetachDebugger()
+	{
+		if (IsDebuggerAttached())
+			VisualStudioAccessor::DetachDebugger();
 	}
 
 	bool ScriptEngine::IsDebuggerAttached()
 	{
-		return mono_is_debugger_attached();
+		ARC_PROFILE_SCOPE();
+
+		if (!s_Reflection->IsDebuggerAttached)
+			return false;
+
+		return s_Reflection->IsDebuggerAttached() == 0 ? false : true;
 	}
 
 	ScriptInstance* ScriptEngine::CreateInstance(Entity entity, const std::string& name)
@@ -321,11 +427,6 @@ namespace ArcEngine
 		s_Data->EntityRuntimeInstances[entity.GetUUID()].erase(name);
 	}
 
-	MonoDomain* ScriptEngine::GetDomain()
-	{
-		return s_Data->AppDomain;
-	}
-
 	const std::vector<std::string>& ScriptEngine::GetFields(const char* className)
 	{
 		return s_Data->EntityClasses.at(className)->GetFields();
@@ -349,8 +450,8 @@ namespace ArcEngine
 	////////////////////////////////////////////////////////////////////////
 	// Script Class ////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////
-	ScriptClass::ScriptClass(MonoClass* monoClass, bool loadFields)
-		: m_MonoClass(monoClass)
+	ScriptClass::ScriptClass(DotnetAssembly assembly, const std::string_view classname, bool loadFields)
+		: m_Assembly(assembly), m_Classname(classname)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -358,111 +459,32 @@ namespace ArcEngine
 			LoadFields();
 	}
 
-	ScriptClass::ScriptClass(const std::string& classNamespace, const std::string& className)
-		: m_ClassNamespace(classNamespace), m_ClassName(className)
+	DotnetMethod ScriptClass::GetMethod(GCHandle object, const char* methodName, int parameterCount) const
 	{
 		ARC_PROFILE_SCOPE();
 
-		m_MonoClass = mono_class_from_name(s_Data->AppImage, classNamespace.c_str(), className.c_str());
-		LoadFields();
+		return s_Reflection->GetMethod(object, methodName, parameterCount);
 	}
 
-	GCHandle ScriptClass::Instantiate() const
+	void ScriptClass::GetFieldValue(GCHandle instance, const std::string_view fieldName, void* value) const
 	{
-		ARC_PROFILE_SCOPE();
-
-		if (MonoObject* object = mono_object_new(s_Data->AppDomain, m_MonoClass))
-		{
-			mono_runtime_object_init(object);
-			return GCManager::CreateObjectReference(object, false);
-		}
-
-		return 0;
+		s_Reflection->GetFieldValue(instance, fieldName.data(), value);
 	}
 
-	MonoMethod* ScriptClass::GetMethod(const char* methodName, uint32_t parameterCount) const
+	void ScriptClass::SetFieldValue(GCHandle instance, const std::string_view fieldName, const void* value) const
 	{
-		ARC_PROFILE_SCOPE();
-
-		return mono_class_get_method_from_name(m_MonoClass, methodName, static_cast<int>(parameterCount));
+		s_Reflection->SetFieldValue(instance, fieldName.data(), value);
 	}
 
-	GCHandle ScriptClass::InvokeMethod(GCHandle gcHandle, MonoMethod* method, void** params) const
+	std::string ScriptClass::GetFieldValueString(GCHandle instance, const std::string_view fieldName) const
 	{
 		ARC_PROFILE_SCOPE();
+		auto string = s_Reflection->GetFieldValueString(instance, fieldName.data());
+		std::string str = string ? string : "";
+		if (string)
+			s_Reflection->Free(string);
 
-		MonoObject* reference = GCManager::GetReferencedObject(gcHandle);
-		MonoObject* exception;
-		if (!reference)
-		{
-			ARC_APP_CRITICAL("System.NullReferenceException: Object reference not set to an instance of an object.");
-			return gcHandle;
-		}
-
-		mono_runtime_invoke(method, reference, params, &exception);
-		if (exception)
-		{
-			MonoString* monoString = mono_object_to_string(exception, nullptr);
-			const std::string ex = MonoUtils::MonoStringToUTF8(monoString);
-			ARC_APP_CRITICAL(ex);
-		}
-		return gcHandle;
-	}
-
-	enum class Accessibility : uint8_t
-	{
-		None = 0,
-		Private = (1 << 0),
-		Internal = (1 << 1),
-		Protected = (1 << 2),
-		Public = (1 << 3)
-	};
-
-	// Gets the accessibility level of the given field
-	static uint8_t GetFieldAccessibility(MonoClassField* field)
-	{
-		ARC_PROFILE_SCOPE();
-
-		auto accessibility = static_cast<uint8_t>(Accessibility::None);
-		const uint32_t accessFlag = mono_field_get_flags(field) & MONO_FIELD_ATTR_FIELD_ACCESS_MASK;
-
-		switch (accessFlag)
-		{
-			case MONO_FIELD_ATTR_PRIVATE:
-			{
-				accessibility = static_cast<uint8_t>(Accessibility::Private);
-				break;
-			}
-			case MONO_FIELD_ATTR_FAM_AND_ASSEM:
-			{
-				accessibility |= static_cast<uint8_t>(Accessibility::Protected);
-				accessibility |= static_cast<uint8_t>(Accessibility::Internal);
-				break;
-			}
-			case MONO_FIELD_ATTR_ASSEMBLY:
-			{
-				accessibility = static_cast<uint8_t>(Accessibility::Internal);
-				break;
-			}
-			case MONO_FIELD_ATTR_FAMILY:
-			{
-				accessibility = static_cast<uint8_t>(Accessibility::Protected);
-				break;
-			}
-			case MONO_FIELD_ATTR_FAM_OR_ASSEM:
-			{
-				accessibility |= static_cast<uint8_t>(Accessibility::Private);
-				accessibility |= static_cast<uint8_t>(Accessibility::Protected);
-				break;
-			}
-			case MONO_FIELD_ATTR_PUBLIC:
-			{
-				accessibility = static_cast<uint8_t>(Accessibility::Public);
-				break;
-			}
-		}
-
-		return accessibility;
+		return str;
 	}
 
 	void ScriptClass::LoadFields()
@@ -472,114 +494,94 @@ namespace ArcEngine
 		m_Fields.clear();
 		m_FieldsMap.clear();
 
-		MonoObject* tempObject = mono_object_new(s_Data->AppDomain, m_MonoClass);
-		const GCHandle tempObjectHandle = GCManager::CreateObjectReference(tempObject, false);
-		mono_runtime_object_init(tempObject);
+		const char* className = m_Classname.c_str();
 
-		MonoClassField* monoField;
-		void* ptr = nullptr;
-		while ((monoField = mono_class_get_fields(m_MonoClass, &ptr)) != nullptr)
+		char** fields = s_Reflection->GetFieldNames(m_Assembly, m_Classname.c_str());
+		if (fields)
 		{
-			const char* fieldName = mono_field_get_name(monoField);
-
-			MonoType* fieldType = mono_field_get_type(monoField);
-
-			FieldType type = FieldType::Unknown;
+			GCHandle obj = s_Reflection->CreateObjectReference(m_Assembly, m_Classname.c_str());
+			int i = 0;
+			while (fields[i] != nullptr)
 			{
-				char* typeName = mono_type_get_name(fieldType);
+				std::string fieldName = fields[i];
+
+				FieldType type = FieldType::Unknown;
+
+				auto typeName = s_Reflection->GetFieldTypeName(m_Assembly, className, fieldName.c_str());
+				if (!typeName)
+				{
+					ARC_CORE_WARN("Unsupported Field Type Name: TypeName is null");
+					++i;
+					continue;
+				}
+
 				const auto& fieldIt = s_ScriptFieldTypeMap.find(typeName);
 				if (fieldIt != s_ScriptFieldTypeMap.end())
 					type = fieldIt->second;
+				s_Reflection->Free(typeName);
 
 				if (type == FieldType::Unknown)
 				{
 					ARC_CORE_WARN("Unsupported Field Type Name: {}", typeName);
+					++i;
 					continue;
 				}
-				mono_free(typeName);
-			}
 
-			const uint8_t accessibilityFlag = GetFieldAccessibility(monoField);
-			bool serializable = accessibilityFlag & static_cast<uint8_t>(Accessibility::Public);
-			bool hidden = !serializable;
-			std::string header;
-			std::string tooltip;
-			float min = 0;
-			float max = 0;
-
-			if (MonoCustomAttrInfo* attr = mono_custom_attrs_from_field(m_MonoClass, monoField))
-			{
-				if (!serializable)
-					serializable = mono_custom_attrs_has_attr(attr, s_Data->SerializeFieldAttribute);
-
-				hidden = !serializable;
-
-				if (mono_custom_attrs_has_attr(attr, s_Data->HideInPropertiesAttribute))
+				bool isPublic = s_Reflection->IsFieldPublic(m_Assembly, className, fieldName.c_str());
+				bool serializable = isPublic || s_Reflection->FieldHasAttribute(m_Assembly, className, fieldName.c_str(), "ArcEngine.SerializeFieldAttribute");
+				bool hidden = !serializable;
+				if (s_Reflection->FieldHasAttribute(m_Assembly, className, fieldName.c_str(), "ArcEngine.HideInPropertiesAttribute"))
 					hidden = true;
-				else if (mono_custom_attrs_has_attr(attr, s_Data->ShowInPropertiesAttribute))
+				else if (s_Reflection->FieldHasAttribute(m_Assembly, className, fieldName.c_str(), "ArcEngine.ShowInPropertiesAttribute"))
 					hidden = false;
 
-				if (mono_custom_attrs_has_attr(attr, s_Data->HeaderAttribute))
+				auto header = s_Reflection->GetFieldDisplayName(m_Assembly, className, fieldName.c_str());
+				auto tooltip = s_Reflection->GetFieldTooltip(m_Assembly, className, fieldName.c_str());
+				Vec2 rangeMinMax = s_Reflection->GetFieldRange(m_Assembly, className, fieldName.c_str());
+
+				auto& scriptField = m_FieldsMap[fieldName];
+				scriptField.Name = fieldName;
+				if (scriptField.Name.size() > 1 && scriptField.Name[0] == '_')
+					scriptField.DisplayName = &scriptField.Name[1];
+				else if (scriptField.Name.size() > 2 && scriptField.Name[1] == '_')
+					scriptField.DisplayName = &scriptField.Name[2];
+				else
+					scriptField.DisplayName = scriptField.Name;
+				scriptField.Type = type;
+				scriptField.Serializable = serializable;
+				scriptField.Hidden = hidden;
+				scriptField.Header = header ? header : "";
+				scriptField.Tooltip = tooltip ? tooltip : "";
+				scriptField.Min = rangeMinMax.min;
+				scriptField.Max = rangeMinMax.max;
+
+				if (type == FieldType::String)
 				{
-					MonoObject* attributeObject = mono_custom_attrs_get_attr(attr, s_Data->HeaderAttribute);
-					MonoClassField* messageField = mono_class_get_field_from_name(s_Data->HeaderAttribute, "Message");
-					MonoObject* monoStr = mono_field_get_value_object(ScriptEngine::GetDomain(), messageField, attributeObject);
-					header = MonoUtils::MonoStringToUTF8(reinterpret_cast<MonoString*>(monoStr));
+					auto string = s_Reflection->GetFieldValueString(obj, fieldName.c_str());
+					std::string str = string ? string : "";
+					if (string)
+						s_Reflection->Free(string);
+					memcpy(scriptField.DefaultValue, str.data(), sizeof(scriptField.DefaultValue));
+				}
+				else
+				{
+					s_Reflection->GetFieldValue(obj, fieldName.c_str(), scriptField.DefaultValue);
 				}
 
-				if (mono_custom_attrs_has_attr(attr, s_Data->TooltipAttribute))
-				{
-					MonoObject* attributeObject = mono_custom_attrs_get_attr(attr, s_Data->TooltipAttribute);
-					MonoClassField* messageField = mono_class_get_field_from_name(s_Data->TooltipAttribute, "Message");
-					MonoObject* monoStr = mono_field_get_value_object(ScriptEngine::GetDomain(), messageField, attributeObject);
-					tooltip = MonoUtils::MonoStringToUTF8(reinterpret_cast<MonoString*>(monoStr));
-				}
+				m_Fields.emplace_back(fieldName);
 
-				if (mono_custom_attrs_has_attr(attr, s_Data->RangeAttribute))
-				{
-					MonoObject* attributeObject = mono_custom_attrs_get_attr(attr, s_Data->RangeAttribute);
-					MonoClassField* minField = mono_class_get_field_from_name(s_Data->RangeAttribute, "Min");
-					MonoClassField* maxField = mono_class_get_field_from_name(s_Data->RangeAttribute, "Max");
-					mono_field_get_value(attributeObject, minField, &min);
-					mono_field_get_value(attributeObject, maxField, &max);
-				}
+				if (header)
+					s_Reflection->Free(header);
+				if (tooltip)
+					s_Reflection->Free(tooltip);
+
+				++i;
 			}
-
-			auto& scriptField = m_FieldsMap[fieldName];
-			scriptField.Name = fieldName;
-			if (scriptField.Name.size() > 1 && scriptField.Name[0] == '_')
-				scriptField.DisplayName = &scriptField.Name[1];
-			else if (scriptField.Name.size() > 2 && scriptField.Name[1] == '_')
-				scriptField.DisplayName = &scriptField.Name[2];
-			else
-				scriptField.DisplayName = scriptField.Name;
-			scriptField.Type = type;
-			scriptField.Field = monoField;
-			scriptField.Serializable = serializable;
-			scriptField.Hidden = hidden;
-			scriptField.Header = header;
-			scriptField.Tooltip = tooltip;
-			scriptField.Min = min;
-			scriptField.Max = max;
-
-			if (type == FieldType::String)
-			{
-				auto* monoStr = reinterpret_cast<MonoString*>(mono_field_get_value_object(s_Data->AppDomain, monoField, tempObject));
-				std::string str = MonoUtils::MonoStringToUTF8(monoStr);
-				memcpy(scriptField.DefaultValue, str.data(), sizeof(scriptField.DefaultValue));
-			}
-			else
-			{
-				mono_field_get_value(tempObject, monoField, scriptField.DefaultValue);
-			}
-
-			m_Fields.emplace_back(fieldName);
+			s_Reflection->ReleaseObjectReference(obj);
+			s_Reflection->FreeArray(fields);
 		}
-
-		GCManager::ReleaseObjectReference(tempObjectHandle);
 	}
-
-	////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////
 	// Script Instance /////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////
 
@@ -588,15 +590,9 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		m_Handle = scriptClass->Instantiate();
+		m_Handle = s_Reflection->CreateEntityReference(scriptClass->m_Assembly, scriptClass->m_Classname.c_str(), entityID);
 
-		m_EntityClass = CreateRef<ScriptClass>(s_Data->EntityClass);
-		m_Constructor = m_EntityClass->GetMethod(".ctor", 1);
-		void* params = &entityID;
-		m_EntityClass->InvokeMethod(m_Handle, m_Constructor, &params);
-		
-		const std::string fullClassName = std::format("{}.{}", scriptClass->m_ClassNamespace, scriptClass->m_ClassName);
-		auto& fieldsMap = s_Data->EntityFields[entityID][fullClassName];
+		auto& fieldsMap = s_Data->EntityFields[entityID][scriptClass->m_Classname];
 		for (const auto& [fieldName, _] : scriptClass->m_FieldsMap)
 		{
 			const auto& fieldIt = fieldsMap.find(fieldName);
@@ -607,21 +603,21 @@ namespace ArcEngine
 			}
 		}
 
-		m_OnCreateMethod = scriptClass->GetMethod("OnCreate", 0);
-		m_OnUpdateMethod = scriptClass->GetMethod("OnUpdate", 1);
-		m_OnDestroyMethod = scriptClass->GetMethod("OnDestroy", 0);
+		m_OnCreateMethod = scriptClass->GetMethod(m_Handle, "OnCreate", 0);
+		m_OnUpdateMethod = scriptClass->GetMethod(m_Handle, "OnUpdate", 1);
+		m_OnDestroyMethod = scriptClass->GetMethod(m_Handle, "OnDestroy", 0);
 
-		m_OnCollisionEnter2DMethod = m_EntityClass->GetMethod("HandleOnCollisionEnter2D", 1);
-		m_OnCollisionExit2DMethod = m_EntityClass->GetMethod("HandleOnCollisionExit2D", 1);
-		m_OnSensorEnter2DMethod = m_EntityClass->GetMethod("HandleOnSensorEnter2D", 1);
-		m_OnSensorExit2DMethod = m_EntityClass->GetMethod("HandleOnSensorExit2D", 1);
+		m_OnCollisionEnter2DMethod = s_Data->EntityClass->GetMethod(m_Handle, "HandleOnCollisionEnter2D", 1);
+		m_OnCollisionExit2DMethod = s_Data->EntityClass->GetMethod(m_Handle, "HandleOnCollisionExit2D", 1);
+		m_OnSensorEnter2DMethod = s_Data->EntityClass->GetMethod(m_Handle, "HandleOnSensorEnter2D", 1);
+		m_OnSensorExit2DMethod = s_Data->EntityClass->GetMethod(m_Handle, "HandleOnSensorExit2D", 1);
 	}
 
 	ScriptInstance::~ScriptInstance()
 	{
 		ARC_PROFILE_SCOPE();
 
-		GCManager::ReleaseObjectReference(m_Handle);
+		s_Reflection->ReleaseObjectReference(m_Handle);
 	}
 
 	void ScriptInstance::InvokeOnCreate() const
@@ -629,7 +625,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		if (m_OnCreateMethod)
-			m_ScriptClass->InvokeMethod(m_Handle, m_OnCreateMethod);
+			s_Reflection->InvokeMethod(m_OnCreateMethod, nullptr, 0);
 	}
 
 	void ScriptInstance::InvokeOnUpdate(float ts) const
@@ -639,7 +635,7 @@ namespace ArcEngine
 		if (m_OnUpdateMethod)
 		{
 			void* params = &ts;
-			m_ScriptClass->InvokeMethod(m_Handle, m_OnUpdateMethod, &params);
+			s_Reflection->InvokeMethod(m_OnUpdateMethod, &params, 1);
 		}
 	}
 
@@ -648,39 +644,39 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		if (m_OnDestroyMethod)
-			m_ScriptClass->InvokeMethod(m_Handle, m_OnDestroyMethod);
+			s_Reflection->InvokeMethod(m_OnDestroyMethod, nullptr, 0);
 	}
 
 	void ScriptInstance::InvokeOnCollisionEnter2D(Collision2DData& other) const
 	{
 		ARC_PROFILE_SCOPE();
 
-		void* params = &other;
-		m_EntityClass->InvokeMethod(m_Handle, m_OnCollisionEnter2DMethod, &params);
+		void* param = &other;
+		s_Reflection->InvokeMethod(m_OnCollisionEnter2DMethod, &param, 1);
 	}
 
 	void ScriptInstance::InvokeOnCollisionExit2D(Collision2DData& other) const
 	{
 		ARC_PROFILE_SCOPE();
-
-		void* params = &other;
-		m_EntityClass->InvokeMethod(m_Handle, m_OnCollisionExit2DMethod, &params);
+		
+		void* param = &other;
+		s_Reflection->InvokeMethod(m_OnCollisionExit2DMethod, &param, 1);
 	}
 
 	void ScriptInstance::InvokeOnSensorEnter2D(Collision2DData& other) const
 	{
 		ARC_PROFILE_SCOPE();
 
-		void* params = &other;
-		m_EntityClass->InvokeMethod(m_Handle, m_OnSensorEnter2DMethod, &params);
+		void* param = &other;
+		s_Reflection->InvokeMethod(m_OnSensorEnter2DMethod, &param, 1);
 	}
 
 	void ScriptInstance::InvokeOnSensorExit2D(Collision2DData& other) const
 	{
 		ARC_PROFILE_SCOPE();
-
-		void* params = &other;
-		m_EntityClass->InvokeMethod(m_Handle, m_OnSensorExit2DMethod, &params);
+		
+		void* param = &other;
+		s_Reflection->InvokeMethod(m_OnSensorExit2DMethod, &param, 1);
 	}
 
     GCHandle ScriptInstance::GetHandle() const
@@ -692,33 +688,20 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		MonoClassField* classField = m_ScriptClass->m_FieldsMap.at(name).Field;
-		mono_field_get_value(GCManager::GetReferencedObject(m_Handle), classField, value);
+		m_ScriptClass->GetFieldValue(m_Handle, name, value);
 	}
 
 	void ScriptInstance::SetFieldValueInternal(const std::string& name, const void* value) const
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto& field = m_ScriptClass->m_FieldsMap.at(name);
-		MonoClassField* classField = field.Field;
-		if (field.Type == FieldType::String)
-		{
-			MonoString* monoStr = mono_string_new(s_Data->AppDomain, static_cast<const char*>(value));
-			mono_field_set_value(GCManager::GetReferencedObject(m_Handle), classField, monoStr);
-		}
-		else
-		{
-			mono_field_set_value(GCManager::GetReferencedObject(m_Handle), classField, const_cast<void*>(value));
-		}
+		m_ScriptClass->SetFieldValue(m_Handle, name, value);
 	}
 
 	std::string ScriptInstance::GetFieldValueStringInternal(const std::string& name) const
 	{
 		ARC_PROFILE_SCOPE();
 
-		MonoClassField* classField = m_ScriptClass->m_FieldsMap.at(name).Field;
-		auto* monoStr = reinterpret_cast<MonoString*>(mono_field_get_value_object(s_Data->AppDomain, classField, GCManager::GetReferencedObject(m_Handle)));
-		return MonoUtils::MonoStringToUTF8(monoStr);
+		return m_ScriptClass->GetFieldValueString(m_Handle, name);
 	}
 }

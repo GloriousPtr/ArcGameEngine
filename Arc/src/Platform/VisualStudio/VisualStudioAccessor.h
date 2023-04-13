@@ -10,6 +10,8 @@ namespace ArcEngine
 		static void RunVisualStudio();
 		static void OpenFile(const std::string& filepath, uint32_t goToLine = 0, bool selectLine = false);
 		static bool AddFile(const std::string& filepath, bool open = true);
+		static void AttachDebugger();
+		static void DetachDebugger();
 	};
 }
 

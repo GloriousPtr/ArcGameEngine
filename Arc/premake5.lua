@@ -57,7 +57,7 @@ project "Arc"
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.optick}",
 		"%{IncludeDir.box2d}",
-		"%{IncludeDir.mono}",
+		"%{IncludeDir.dotnet}",
 		"%{IncludeDir.miniaudio}",
 		"%{IncludeDir.icons}",
 		"%{IncludeDir.JoltPhysics}",
@@ -74,7 +74,18 @@ project "Arc"
 		"optick",
 		"box2d",
 		"JoltPhysics",
+	}
+
+	dependson
+	{
 		"Arc-ScriptCore",
+	}
+
+	postbuildcommands
+	{
+		-- Nethost
+		'{ECHO} ====== Copying Nethost ======',
+		'{COPYFILE} %{LibDir.dotnet}/nethost.dll "%{cfg.targetdir}"',
 	}
 
 	filter "files:vendor/ImGuizmo/**.cpp"
@@ -90,13 +101,14 @@ project "Arc"
 		{
 			"D3D12MA",
 
-			"%{LibDir.Mono}/mono-2.0-sgen.dll",
+			"%{LibDir.dotnet}/nethost.lib",
+
 			"opengl.dll",
 
 			-- DirectX
-			"dxguid.dll",
-			"d3d12.dll",
-			"dxgi.dll",
+			"dxguid.lib",
+			"d3d12.lib",
+			"dxgi.lib",
 		}
 		nuget
 		{
@@ -113,7 +125,6 @@ project "Arc"
 		linkoptions { "`pkg-config --libs gtk+-3.0`" }
 		links
 		{
-			"monosgen-2.0:shared",
 			"GL:shared",
 			"dl:shared",
 		}
@@ -122,29 +133,14 @@ project "Arc"
 		defines "ARC_DEBUG"
 		runtime "Debug"
 		symbols "on"
-		postbuildcommands
-		{
-			'{ECHO} ====== Copying Mono ======',
-			'{COPYFILE} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
-		}
 
 	filter "configurations:Release"
 		defines "ARC_RELEASE"
 		runtime "Release"
 		optimize "speed"
-		postbuildcommands
-		{
-			'{ECHO} ====== Copying Mono ======',
-			'{COPYFILE} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
-		}
 
 	filter "configurations:Dist"
 		defines "ARC_DIST"
 		runtime "Release"
 		optimize "speed"
 		symbols "off"
-		postbuildcommands
-		{
-			'{ECHO} ====== Copying Mono ======',
-			'{COPYFILE} "%{BinDir.Mono}/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
-		}

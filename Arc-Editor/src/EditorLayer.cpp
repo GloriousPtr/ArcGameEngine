@@ -455,7 +455,13 @@ namespace ArcEngine
 						ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - frameHeight * 1.5f);
 						uint64_t texId = AssetManager::GetTexture2D("Resources/Textures/Bug.png")->GetRendererID();
 						ImVec4 tint = ScriptEngine::IsDebuggerAttached() ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
-						ImGui::Image(reinterpret_cast<ImTextureID>(texId), { frameHeight, frameHeight }, ARC_UI_UV_0, ARC_UI_UV_1, tint);
+						if (ImGui::ImageButton(reinterpret_cast<ImTextureID>(texId), { frameHeight, frameHeight }, ARC_UI_UV_0, ARC_UI_UV_1, 1, { 0, 0, 0, 0 }, tint))
+						{
+							if (ScriptEngine::IsDebuggerAttached())
+								ScriptEngine::DetachDebugger();
+							else
+								ScriptEngine::AttachDebugger();
+						}
 
 						ImGui::EndMenuBar();
 					}
@@ -829,7 +835,7 @@ namespace ArcEngine
 	{
 		if (Project::Load(path))
 		{
-			ScriptEngine::ReloadAppDomain();
+			ScriptEngine::ReloadAppDomain(false);
 
 			if (!Project::GetActive()->GetConfig().StartScene.empty())
 			{

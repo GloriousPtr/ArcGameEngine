@@ -2,7 +2,7 @@ local ArcRootDir = '../'
 include (ArcRootDir .. "/vendor/premake/premake_customization/solution_items.lua")
 
 workspace "Sandbox"
-    architecture "x86_64"
+	architecture "x64"
     startproject "Sandbox"
 
     configurations
@@ -20,8 +20,8 @@ workspace "Sandbox"
 project "Sandbox"
     kind "SharedLib"
     language "C#"
-    dotnetframework "4.8"
-    csversion "7.2"
+    dotnetframework "net7.0"
+    csversion "11.0"
 
     targetdir ("Binaries")
 	objdir ("Intermediates")
@@ -33,20 +33,32 @@ project "Sandbox"
 
     links
     {
-        ArcRootDir .. "/Arc-Editor/Resources/Scripts/Arc-ScriptCore.dll"
+        _WORKING_DIR .. "/Resources/Scripts/Arc-ScriptCore.dll"
     }
 
     filter "configurations:Debug"
-        optimize "Off"
-        symbols "Default"
+        optimize "off"
+        symbols "default"
         defines { "DEBUG" }
 
     filter "configurations:Release"
-        optimize "On"
-        symbols "Default"
+        optimize "on"
+        symbols "default"
         defines { "RELEASE" }
         
     filter "configurations:Dist"
-        optimize "Full"
-        symbols "Off"
+        optimize "full"
+        symbols "off"
         defines { "DIST" }
+
+require "vstudio"
+
+function platformsElement(cfg)
+	_p(2,'<Platforms>x64</Platforms>\n    <EnableDynamicLoading>true</EnableDynamicLoading>\n    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>\n    <Configurations>Debug;Release;Dist</Configurations>')
+end
+
+premake.override(premake.vstudio.cs2005.elements, "projectProperties", function (oldfn, cfg)
+	return table.join(oldfn(cfg), {
+	platformsElement,
+	})
+end)

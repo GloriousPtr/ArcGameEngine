@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 
 namespace ArcEngine
@@ -36,7 +37,7 @@ namespace ArcEngine
 		public string tag
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get => InternalCalls.TagComponent_GetTag(entityID);
+			get => Marshal.PtrToStringAnsi(InternalCalls.TagComponent_GetTag(entityID));
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set => InternalCalls.TagComponent_SetTag(entityID, value);
 		}

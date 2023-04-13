@@ -13,21 +13,9 @@ namespace ArcEngine
 	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public class Entity : IComponent, IEqualityComparer<Entity>
 	{
-		internal ulong ID { get; private set; }
+		public ulong ID { get; internal set; }
 
 		#region CollisionCallbacks
-
-		/// <summary>
-		/// Holds data for collision events
-		/// </summary>
-		[StructLayout(LayoutKind.Sequential)]
-		public struct CollisionData
-		{
-			private ulong entityID;
-			public Vector2 relativeVelocity;
-
-			public Entity entity => new Entity(entityID);
-		}
 
 		protected event Action<CollisionData> OnCollisionEnter2D;
 		protected event Action<CollisionData> OnCollisionExit2D;
@@ -45,7 +33,7 @@ namespace ArcEngine
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private Entity(ulong id)
+		internal Entity(ulong id)
 		{
 			ID = id;
 		}
@@ -62,7 +50,7 @@ namespace ArcEngine
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool HasComponent<T>() where T : class, IComponent
 		{
-			return InternalCalls.Entity_HasComponent(ID, typeof(T));
+			return InternalCalls.Entity_HasComponent(ID, typeof(T).TypeHandle.Value);
 		}
 
 		/// <summary>
@@ -79,7 +67,7 @@ namespace ArcEngine
 				return GetComponent<T>();
 			}
 
-			InternalCalls.Entity_AddComponent(ID, typeof(T));
+			InternalCalls.Entity_AddComponent(ID, typeof(T).TypeHandle.Value);
 			T component = new T();
 			component.SetEntity(ID);
 			return component;
@@ -96,27 +84,37 @@ namespace ArcEngine
 			if (!HasComponent<T>())
 				return null;
 			
-			if (typeof(T).BaseType == typeof(Entity))
-				return (T)InternalCalls.Entity_GetComponent(ID, typeof(T));
+			if (typeof(T).IsSubclassOf(typeof(Entity)))
+			{
+				IntPtr objectPtr = InternalCalls.Entity_GetComponent(ID, typeof(T).TypeHandle.Value);
+				if (objectPtr == IntPtr.Zero)
+					return null;
+
+				object target = GCHandle.FromIntPtr(objectPtr).Target;
+				if (target == null)
+					return null;
+
+				return (T)target;
+			}
 
 			T component = new T();
 			component.SetEntity(ID);
 			return component;
 		}
 
-		public string GetTag() => GetComponent<TagComponent>().tag;
+		public string GetTag() => Marshal.PtrToStringAnsi(InternalCalls.TagComponent_GetTag(ID));
 
 		#endregion
 
 		#region CollisionHandlingMethods
 
-		private void HandleOnCollisionEnter2D(CollisionData data) => OnCollisionEnter2D?.Invoke(data);
+		internal void HandleOnCollisionEnter2D(CollisionData data) => OnCollisionEnter2D?.Invoke(data);
 
-		private void HandleOnCollisionExit2D(CollisionData data) => OnCollisionExit2D?.Invoke(data);
+		internal void HandleOnCollisionExit2D(CollisionData data) => OnCollisionExit2D?.Invoke(data);
 
-		private void HandleOnSensorEnter2D(CollisionData data) => OnSensorEnter2D?.Invoke(data);
+		internal void HandleOnSensorEnter2D(CollisionData data) => OnSensorEnter2D?.Invoke(data);
 
-		private void HandleOnSensorExit2D(CollisionData data) => OnSensorExit2D?.Invoke(data);
+		internal void HandleOnSensorExit2D(CollisionData data) => OnSensorExit2D?.Invoke(data);
 
 		#endregion
 

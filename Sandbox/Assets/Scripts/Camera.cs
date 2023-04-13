@@ -10,12 +10,12 @@ namespace Sandbox
 
 		private TransformComponent m_TransformComponent;
 
-		public void OnCreate()
+		internal void OnCreate()
 		{
 			m_TransformComponent = GetComponent<TransformComponent>();
 		}
 
-		public void OnUpdate(float timestep)
+		private void OnUpdate(float timestep)
 		{
 			float speed = Speed * timestep;
 			Vector2 dir = new Vector2(0.0f);

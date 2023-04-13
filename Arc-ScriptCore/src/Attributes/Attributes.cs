@@ -36,16 +36,16 @@ namespace ArcEngine
 	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public class HeaderAttribute : Attribute
 	{
-		internal string Message;
+		internal string Title;
 
 		/// <summary>
 		/// Show header before the field
 		/// </summary>
 		/// <param name="message">Header string.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public HeaderAttribute(string message)
+		public HeaderAttribute(string title)
 		{
-			Message = message;
+			Title = title;
 		}
 	}
 
@@ -74,8 +74,7 @@ namespace ArcEngine
 	[UsedImplicitly(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.WithMembers)]
 	public class RangeAttribute : Attribute
 	{
-		internal float Min;
-		internal float Max;
+		internal Vector2 Range;
 
 		/// <summary>
 		/// Change the input field to a slider.
@@ -84,11 +83,7 @@ namespace ArcEngine
 		/// <param name="min">Min value (inclusive)</param>
 		/// <param name="max">Max value (inclusive)</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public RangeAttribute(float min, float max)
-		{
-			Min = min;
-			Max = max;
-		}
+		public RangeAttribute(float min, float max) => Range = new Vector2(min, max);
 
 		/// <summary>
 		/// Change the input field to a slider.
@@ -97,10 +92,6 @@ namespace ArcEngine
 		/// <param name="min">Min value (inclusive)</param>
 		/// <param name="max">Max value (inclusive)</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public RangeAttribute(int min, int max)
-		{
-			Min = min;
-			Max = max;
-		}
+		public RangeAttribute(int min, int max) => Range = new Vector2(min, max);
 	}
 }

@@ -3,21 +3,16 @@
 #include "Arc/Core/UUID.h"
 #include "Arc/Utils/StringUtils.h"
 
-typedef struct _MonoDomain MonoDomain;
-typedef struct _MonoAssembly MonoAssembly;
-typedef struct _MonoImage MonoImage;
-typedef struct _MonoClass MonoClass;
-typedef struct _MonoMethod MonoMethod;
-typedef struct _MonoProperty MonoProperty;
-typedef struct _MonoClassField MonoClassField;
-typedef struct _MonoType MonoType;
-
 namespace ArcEngine
 {
 	class Entity;
 	class Scene;
 
-	using GCHandle = uint32_t;
+	using DotnetAssembly	= void*;
+	using DotnetMethod		= void*;
+	using DotnetType		= void*;
+	using DotnetField		= void*;
+	using GCHandle			= void*;
 
 	enum class FieldType
 	{
@@ -47,7 +42,6 @@ namespace ArcEngine
 		std::string Name;
 		std::string DisplayName;
 		FieldType Type = FieldType::Unknown;
-		MonoClassField* Field = nullptr;
 
 		// For attributes
 		bool Serializable = true;
@@ -112,15 +106,15 @@ namespace ArcEngine
 	{
 	public:
 		ScriptClass() = delete;
-		explicit ScriptClass(MonoClass* monoClass, bool loadFields = false);
-		ScriptClass(const std::string& classNamespace, const std::string& className);
+		explicit ScriptClass(DotnetAssembly assembly, const std::string_view classname, bool loadFields = false);
 		
 		ScriptClass(const ScriptClass& other) = delete;
 		ScriptClass(ScriptClass&& other) = delete;
 
-		[[nodiscard]] GCHandle Instantiate() const;
-		[[nodiscard]] MonoMethod* GetMethod(const char* methodName, uint32_t parameterCount) const;
-		GCHandle InvokeMethod(GCHandle gcHandle, MonoMethod* method, void** params = nullptr) const;
+		[[nodiscard]] DotnetMethod GetMethod(GCHandle object, const char* methodName, int parameterCount) const;
+		void GetFieldValue(GCHandle instance, const std::string_view fieldName, void* value) const;
+		void SetFieldValue(GCHandle instance, const std::string_view fieldName, const void* value) const;
+		[[nodiscard]] std::string GetFieldValueString(GCHandle instance, const std::string_view fieldName) const;
 
 		[[nodiscard]] const std::vector<std::string>& GetFields() const { return m_Fields; }
 		[[nodiscard]] const std::unordered_map<std::string, ScriptField, UM_StringTransparentEquality>& GetFieldsMap() const { return m_FieldsMap; }
@@ -132,10 +126,8 @@ namespace ArcEngine
 		friend class ScriptEngine;
 		friend class ScriptInstance;
 
-		std::string m_ClassNamespace;
-		std::string m_ClassName;
-
-		MonoClass* m_MonoClass = nullptr;
+		DotnetAssembly m_Assembly;
+		std::string m_Classname{};
 		std::vector<std::string> m_Fields;
 		std::unordered_map<std::string, ScriptField, UM_StringTransparentEquality> m_FieldsMap;
 	};
@@ -191,19 +183,17 @@ namespace ArcEngine
 		[[nodiscard]] std::string GetFieldValueStringInternal(const std::string& name) const;
 
 	private:
-		Ref<ScriptClass> m_EntityClass;
 		Ref<ScriptClass> m_ScriptClass;
 
 		GCHandle m_Handle = 0;
-		MonoMethod* m_Constructor = nullptr;
-		MonoMethod* m_OnCreateMethod = nullptr;
-		MonoMethod* m_OnUpdateMethod = nullptr;
-		MonoMethod* m_OnDestroyMethod = nullptr;
-
-		MonoMethod* m_OnCollisionEnter2DMethod = nullptr;
-		MonoMethod* m_OnCollisionExit2DMethod = nullptr;
-		MonoMethod* m_OnSensorEnter2DMethod = nullptr;
-		MonoMethod* m_OnSensorExit2DMethod = nullptr;
+		DotnetMethod m_OnCreateMethod = nullptr;
+		DotnetMethod m_OnUpdateMethod = nullptr;
+		DotnetMethod m_OnDestroyMethod = nullptr;
+		
+		DotnetMethod m_OnCollisionEnter2DMethod = nullptr;
+		DotnetMethod m_OnCollisionExit2DMethod = nullptr;
+		DotnetMethod m_OnSensorEnter2DMethod = nullptr;
+		DotnetMethod m_OnSensorExit2DMethod = nullptr;
 	};
 
 	class ScriptEngine
@@ -211,14 +201,17 @@ namespace ArcEngine
 	public:
 		static void Init();
 		static void Shutdown();
-		static void LoadCoreAssembly();
-		static void LoadClientAssembly();
-		static void ReloadAppDomain();
-		static void LoadAssemblyClasses(MonoAssembly* assembly);
+		static void LoadAssemblyHelper();
+		static void LoadCoreAndClientAssembly();
+		static void ReloadAppDomain(bool asyncBuild = true);
+		static void LoadAssemblyClasses(DotnetAssembly assembly);
 
-		[[nodiscard]] static MonoDomain* GetDomain();
-		[[nodiscard]] static MonoImage* GetCoreAssemblyImage();
-		[[nodiscard]] static MonoImage* GetAppAssemblyImage();
+		static void AddComponent(Entity entity, DotnetType type);
+		[[nodiscard]] static bool HasComponent(Entity entity, DotnetType type);
+		[[nodiscard]] static GCHandle GetComponent(Entity entity, DotnetType type);
+
+		static void AttachDebugger();
+		static void DetachDebugger();
 		[[nodiscard]] static bool IsDebuggerAttached();
 
 		[[nodiscard]] static bool HasClass(const std::string& className);

@@ -9,6 +9,8 @@
 
 namespace ArcEngine
 {
+	inline static std::future<void> s_BuildProjectFuture;
+
 	bool ProjectBuilder::GenerateProjectFiles()
 	{
 		if (!Project::GetActive())
@@ -35,7 +37,7 @@ namespace ArcEngine
 		premakeCommand += premakeExePath.string();
 		premakeCommand += "\"";
 
-		premakeCommand += " --dotnet=mono";
+		premakeCommand += " --dotnet=msnet";
 
 		premakeCommand += " --file=";
 
@@ -68,94 +70,100 @@ namespace ArcEngine
 		return !failed;
 	}
 
-	bool ProjectBuilder::BuildProject(const std::function<void()>& onComplete)
+	void ProjectBuilder::BuildProject(bool async, const std::function<void(bool)>& onComplete)
 	{
 		if (!Project::GetActive())
 		{
 			ARC_CORE_ERROR("No active project found!");
-			return false;
+			if (onComplete)
+				onComplete(false);
+			return;
 		}
 
 		const std::filesystem::path solutionPath = Project::GetSolutionPath();
 		const std::string buildConfig = static_cast<std::string>(Project::GetBuildConfigString());
 
-		constexpr const char* buildFlags = ""
-			" -nologo"																	// no microsoft branding in console
-			" -noconlog"																// no console logs
-			//" -t:rebuild"																// rebuild the project
-			" -m"																		// multi-process build
-			" -flp1:Verbosity=minimal;logfile=AssemblyBuildErrors.log;errorsonly"		// dump errors in AssemblyBuildErrors.log file
-			" -flp2:Verbosity=minimal;logfile=AssemblyBuildWarnings.log;warningsonly";	// dump warnings in AssemblyBuildWarnings.log file
-
-		std::string buildCommand = "dotnet.exe msbuild ";
-
-		buildCommand += "\"";
-		buildCommand += solutionPath.string();
-		buildCommand += "\"";
-
-		buildCommand += " /property:Configuration=";
-		buildCommand += buildConfig;
-
-		buildCommand += buildFlags;
-
-		const _bstr_t wCmdArgs(buildCommand.c_str());
-
-		STARTUPINFO startInfo = {};
-		PROCESS_INFORMATION processInfo = { nullptr, nullptr, 0, 0 };
-		constexpr uint32_t createFlags = HIGH_PRIORITY_CLASS;
-		const HRESULT result = CreateProcess(nullptr, wCmdArgs, nullptr, nullptr, FALSE, createFlags, nullptr, nullptr, &startInfo, &processInfo);
-		WaitForSingleObject(processInfo.hProcess, INFINITE);
-
-		bool failed = FAILED(result);
-		if (failed)
-			ARC_CORE_ERROR("Failed to build solution: {}", GetLastError());
-
-		CloseHandle(processInfo.hThread);
-		CloseHandle(processInfo.hProcess);
-
-		if (onComplete)
-			onComplete();
-
-		// Errors
+		s_BuildProjectFuture = std::async(async ? std::launch::async : std::launch::deferred, [solutionPath, buildConfig, onComplete]()
 		{
-			FILE* errors = nullptr;
-			fopen_s(&errors, "AssemblyBuildErrors.log", "r");
+			constexpr const char* buildFlags = ""
+				" -nologo"																	// no microsoft branding in console
+				" -noconlog"																// no console logs
+				//" -t:rebuild"																// rebuild the project
+				" -m"																		// multi-process build
+				" -flp1:Verbosity=minimal;logfile=AssemblyBuildErrors.log;errorsonly"		// dump errors in AssemblyBuildErrors.log file
+				" -flp2:Verbosity=minimal;logfile=AssemblyBuildWarnings.log;warningsonly";	// dump warnings in AssemblyBuildWarnings.log file
 
-			if (errors != nullptr)
+			std::string buildCommand = "dotnet.exe build ";
+
+			buildCommand += "\"";
+			buildCommand += solutionPath.string();
+			buildCommand += "\"";
+
+			buildCommand += " /property:Configuration=";
+			buildCommand += buildConfig;
+
+			buildCommand += buildFlags;
+
+			const _bstr_t wCmdArgs(buildCommand.c_str());
+
+			STARTUPINFO startInfo = {};
+			PROCESS_INFORMATION processInfo = { nullptr, nullptr, 0, 0 };
+			constexpr uint32_t createFlags = HIGH_PRIORITY_CLASS;
+			const HRESULT result = CreateProcess(nullptr, wCmdArgs, nullptr, nullptr, FALSE, createFlags, nullptr, nullptr, &startInfo, &processInfo);
+			WaitForSingleObject(processInfo.hProcess, INFINITE);
+
+			bool success = SUCCEEDED(result);
+			if (!success)
+				ARC_CORE_ERROR("Failed to build solution: {}", GetLastError());
+
+			CloseHandle(processInfo.hThread);
+			CloseHandle(processInfo.hProcess);
+
+			// Errors
 			{
-				char buffer[4096];
-				while (fgets(buffer, sizeof(buffer), errors))
+				FILE* errors = nullptr;
+				fopen_s(&errors, "AssemblyBuildErrors.log", "r");
+
+				if (errors != nullptr)
 				{
-					const size_t newLine = std::string_view(buffer).size() - 1;
-					buffer[newLine] = '\0';
-					ARC_APP_ERROR(buffer);
-					failed = true;
+					char buffer[4096];
+					while (fgets(buffer, sizeof(buffer), errors))
+					{
+						const size_t newLine = std::string_view(buffer).size() - 1;
+						buffer[newLine] = '\0';
+						ARC_CORE_ERROR(buffer);
+						success = false;
+					}
+
+					fclose(errors);
 				}
-
-				fclose(errors);
 			}
-		}
 
-		// Warnings
-		{
-			FILE* warns;
-			fopen_s(&warns, "AssemblyBuildWarnings.log", "r");
-
-			if (warns != nullptr)
+			// Warnings
 			{
-				char buffer[1024];
-				while (fgets(buffer, sizeof(buffer), warns))
+				FILE* warns;
+				fopen_s(&warns, "AssemblyBuildWarnings.log", "r");
+
+				if (warns != nullptr)
 				{
-					const size_t newLine = std::string_view(buffer).size() - 1;
-					buffer[newLine] = '\0';
-					ARC_APP_WARN(buffer);
+					char buffer[1024];
+					while (fgets(buffer, sizeof(buffer), warns))
+					{
+						const size_t newLine = std::string_view(buffer).size() - 1;
+						buffer[newLine] = '\0';
+						ARC_APP_WARN(buffer);
+					}
+
+					fclose(warns);
 				}
-
-				fclose(warns);
 			}
-		}
 
-		return !failed;
+			if (onComplete)
+				onComplete(success);
+		});
+
+		if (!async)
+			s_BuildProjectFuture.get();
 	}
 }
 
