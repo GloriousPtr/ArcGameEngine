@@ -7,6 +7,8 @@
 
 #include "Arc/ImGui/Modules/ExternalConsoleSink.h"
 
+#include <glm/glm.hpp>
+
 namespace ArcEngine
 {
 	std::shared_ptr<spdlog::logger> Log::s_CoreLogger;

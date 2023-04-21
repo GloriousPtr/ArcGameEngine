@@ -1,10 +1,8 @@
 #pragma once
 
-#include <filesystem>
-
-#include "UUID.h"
-
 #include <spdlog/spdlog.h>
+
+#include "LogFormatter.h"
 
 namespace ArcEngine
 {
@@ -32,38 +30,6 @@ namespace ArcEngine
 		static std::shared_ptr<spdlog::logger> s_ClientLogger;
 	};
 }
-
-template<>
-struct 
-std::formatter<ArcEngine::UUID>
-{
-	constexpr auto parse(const format_parse_context& ctx) const -> decltype(ctx.begin())
-	{
-		return ctx.end();
-	}
-
-	template <typename FormatContext>
-	auto format(const ArcEngine::UUID& input, FormatContext& ctx) -> decltype(ctx.out())
-	{
-		return std::format_to(ctx.out(), "{}", static_cast<uint64_t>(input));
-	}
-};
-
-template<>
-struct 
-std::formatter<std::filesystem::path>
-{
-	constexpr auto parse(format_parse_context& ctx) const -> decltype(ctx.begin())
-	{
-		return ctx.end();
-	}
-
-	template <typename FormatContext>
-	auto format(const std::filesystem::path& input, FormatContext& ctx) -> decltype(ctx.out())
-	{
-		return std::format_to(ctx.out(), "{}", input.string());
-	}
-};
 
 #define ARC_CORE_TRACE(...)		::ArcEngine::Log::GetCoreLogger()->trace(__VA_ARGS__)
 #define ARC_CORE_INFO(...)		::ArcEngine::Log::GetCoreLogger()->info(__VA_ARGS__)
