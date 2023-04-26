@@ -27,7 +27,7 @@ namespace ArcEngine
 				out << YAML::Key << "StartScene" << YAML::Value << config.StartScene.string();
 				out << YAML::Key << "AssetDirectory" << YAML::Value << config.AssetDirectory.string();
 				out << YAML::Key << "ScriptModulePath" << YAML::Value << config.ScriptModulePath.string();
-				out << YAML::Key << "BuildConfiguration" << YAML::Value << static_cast<int>(config.BuildConfiguration);
+				out << YAML::Key << "BuildConfiguration" << YAML::Value << magic_enum::enum_name(config.BuildConfiguration).data();
 				out << YAML::EndMap; // Project
 			}
 			out << YAML::EndMap; // Root
@@ -62,8 +62,13 @@ namespace ArcEngine
 		config.StartScene = projectNode["StartScene"].as<std::string>();
 		config.AssetDirectory = projectNode["AssetDirectory"].as<std::string>();
 		config.ScriptModulePath = projectNode["ScriptModulePath"].as<std::string>();
-		if (projectNode["BuildConfiguration"])
-			config.BuildConfiguration = static_cast<ProjectConfig::BuildConfig>(projectNode["BuildConfiguration"].as<int>());
+		if (const auto& node = projectNode["BuildConfiguration"])
+		{
+			if (node.as<int>(-1) != -1)
+				config.BuildConfiguration = static_cast<ProjectConfig::BuildConfig>(node.as<int>());
+			else
+				config.BuildConfiguration = magic_enum::enum_cast<ProjectConfig::BuildConfig>(node.as<std::string>()).value_or(ProjectConfig::BuildConfig::Debug);
+		}
 
 		return true;
 	}

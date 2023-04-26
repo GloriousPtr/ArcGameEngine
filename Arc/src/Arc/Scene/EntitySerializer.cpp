@@ -149,7 +149,17 @@ namespace ArcEngine
 	inline T TrySetEnum(T& value, const YAML::Node& node)
 	{
 		if (node)
-			value = static_cast<T>(node.as<int>(static_cast<int>(value)));
+		{
+			UUID tmp;
+			if (node.as<UUID>(tmp) != tmp)
+			{
+				value = static_cast<T>(node.as<int>(static_cast<int>(value)));
+			}
+			else
+			{
+				value = magic_enum::enum_cast<T>(node.as<std::string>(magic_enum::enum_name(value).data())).value_or((T)0);
+			}
+		}
 		return value;
 	}
 
@@ -228,7 +238,7 @@ namespace ArcEngine
 
 			out << YAML::Key << "Camera" << YAML::Value;
 			out << YAML::BeginMap;
-			out << YAML::Key << "ProjectionType" << YAML::Value << static_cast<int>(camera.GetProjectionType());
+			out << YAML::Key << "ProjectionType" << YAML::Value << magic_enum::enum_name(camera.GetProjectionType()).data();
 			out << YAML::Key << "PerspectiveFOV" << YAML::Value << camera.GetPerspectiveVerticalFOV();
 			out << YAML::Key << "PerspectiveNear" << YAML::Value << camera.GetPerspectiveNearClip();
 			out << YAML::Key << "PerspectiveFar" << YAML::Value << camera.GetPerspectiveFarClip();
@@ -288,7 +298,7 @@ namespace ArcEngine
 			out << YAML::BeginMap;
 
 			const auto& lightComponent = entity.GetComponent<LightComponent>();
-			out << YAML::Key << "Type" << YAML::Value << static_cast<int>(lightComponent.Type);
+			out << YAML::Key << "Type" << YAML::Value << magic_enum::enum_name(lightComponent.Type).data();
 			out << YAML::Key << "UseColorTemperatureMode" << YAML::Value << lightComponent.UseColorTemperatureMode;
 			out << YAML::Key << "Temperature" << YAML::Value << lightComponent.Temperature;
 			out << YAML::Key << "Color" << YAML::Value << lightComponent.Color;
@@ -296,7 +306,7 @@ namespace ArcEngine
 			out << YAML::Key << "Range" << YAML::Value << lightComponent.Range;
 			out << YAML::Key << "CutOffAngle" << YAML::Value << lightComponent.CutOffAngle;
 			out << YAML::Key << "OuterCutOffAngle" << YAML::Value << lightComponent.OuterCutOffAngle;
-			out << YAML::Key << "ShadowQuality" << YAML::Value << static_cast<int>(lightComponent.ShadowQuality);
+			out << YAML::Key << "ShadowQuality" << YAML::Value << magic_enum::enum_name(lightComponent.ShadowQuality).data();
 
 			out << YAML::EndMap;
 		}
@@ -379,7 +389,7 @@ namespace ArcEngine
 			out << YAML::BeginMap;
 
 			const auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
-			out << YAML::Key << "Type" << YAML::Value << static_cast<int>(rb2d.Type);
+			out << YAML::Key << "Type" << YAML::Value << magic_enum::enum_name(rb2d.Type).data();
 			out << YAML::Key << "AutoMass" << YAML::Value << rb2d.AutoMass;
 			out << YAML::Key << "Mass" << YAML::Value << rb2d.Mass;
 			out << YAML::Key << "LinearDrag" << YAML::Value << rb2d.LinearDrag;
@@ -573,7 +583,7 @@ namespace ArcEngine
 			out << YAML::BeginMap;
 
 			const auto& rb = entity.GetComponent<RigidbodyComponent>();
-			out << YAML::Key << "Type" << YAML::Value << static_cast<int>(rb.Type);
+			out << YAML::Key << "Type" << YAML::Value << magic_enum::enum_name(rb.Type).data();
 			out << YAML::Key << "AutoMass" << YAML::Value << rb.AutoMass;
 			out << YAML::Key << "Mass" << YAML::Value << rb.Mass;
 			out << YAML::Key << "LinearDrag" << YAML::Value << rb.LinearDrag;
@@ -762,7 +772,7 @@ namespace ArcEngine
 			out << YAML::Key << "PlayOnAwake" << YAML::Value << audioSourceComponent.Config.PlayOnAwake;
 			out << YAML::Key << "Looping" << YAML::Value << audioSourceComponent.Config.Looping;
 			out << YAML::Key << "Spatialization" << YAML::Value << audioSourceComponent.Config.Spatialization;
-			out << YAML::Key << "AttenuationModel" << YAML::Value << static_cast<int>(audioSourceComponent.Config.AttenuationModel);
+			out << YAML::Key << "AttenuationModel" << YAML::Value << magic_enum::enum_name(audioSourceComponent.Config.AttenuationModel).data();
 			out << YAML::Key << "RollOff" << YAML::Value << audioSourceComponent.Config.RollOff;
 			out << YAML::Key << "MinGain" << YAML::Value << audioSourceComponent.Config.MinGain;
 			out << YAML::Key << "MaxGain" << YAML::Value << audioSourceComponent.Config.MaxGain;

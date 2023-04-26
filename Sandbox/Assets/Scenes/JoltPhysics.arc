@@ -16,7 +16,7 @@ Entities:
         {}
     CameraComponent:
       Camera:
-        ProjectionType: 0
+        ProjectionType: Perspective
         PerspectiveFOV: 0.785398185
         PerspectiveNear: 0.00999999978
         PerspectiveFar: 1000
@@ -40,7 +40,7 @@ Entities:
       Children:
         {}
     RigidbodyComponent:
-      Type: 2
+      Type: Dynamic
       AutoMass: true
       Mass: 1
       LinearDrag: 0
@@ -60,7 +60,6 @@ Entities:
     MeshComponent:
       Filepath: Resources/Models/Primitives/Cube.obj
       SubmeshIndex: 0
-      CullMode: 1
   - Entity: 1304237688638990982
     TagComponent:
       Tag: Light
@@ -76,7 +75,7 @@ Entities:
       Children:
         {}
     LightComponent:
-      Type: 0
+      Type: Directional
       UseColorTemperatureMode: false
       Temperature: 6570
       Color: [1, 1, 1]
@@ -84,7 +83,7 @@ Entities:
       Range: 1
       CutOffAngle: 12.5
       OuterCutOffAngle: 17.5
-      ShadowQuality: 2
+      ShadowQuality: UltraSoft
   - Entity: 13079083868139151945
     TagComponent:
       Tag: Ground
@@ -100,7 +99,7 @@ Entities:
       Children:
         {}
     RigidbodyComponent:
-      Type: 0
+      Type: Static
       AutoMass: true
       Mass: 1
       LinearDrag: 0
@@ -120,7 +119,6 @@ Entities:
     MeshComponent:
       Filepath: Resources/Models/Primitives/Cube.obj
       SubmeshIndex: 0
-      CullMode: 1
   - Entity: 4444126669705181132
     TagComponent:
       Tag: Cubemap
@@ -156,4 +154,3 @@ Entities:
     MeshComponent:
       Filepath: Resources/Models/Primitives/Sphere.obj
       SubmeshIndex: 0
-      CullMode: 1

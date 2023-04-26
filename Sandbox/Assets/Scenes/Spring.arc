@@ -16,10 +16,12 @@ Entities:
         {}
     SpriteRendererComponent:
       Color: [0.876595736, 0.249923021, 0.249923021, 1]
+      SortingOrder: 0
+      Tiling: [1, 1]
+      Offset: [0, 0]
       TexturePath: ""
-      TilingFactor: 1
     Rigidbody2DComponent:
-      Type: 0
+      Type: Static
       AutoMass: true
       Mass: 1
       LinearDrag: 0
@@ -53,7 +55,7 @@ Entities:
         {}
     CameraComponent:
       Camera:
-        ProjectionType: 1
+        ProjectionType: Orthographic
         PerspectiveFOV: 0.785398185
         PerspectiveNear: 0.00999999978
         PerspectiveFar: 1000
@@ -78,10 +80,12 @@ Entities:
         {}
     SpriteRendererComponent:
       Color: [0.19568257, 0.859574437, 0.153626055, 1]
+      SortingOrder: 0
+      Tiling: [1, 1]
+      Offset: [0, 0]
       TexturePath: ""
-      TilingFactor: 1
     Rigidbody2DComponent:
-      Type: 2
+      Type: Dynamic
       AutoMass: true
       Mass: 1
       LinearDrag: 0
@@ -127,10 +131,12 @@ Entities:
         {}
     SpriteRendererComponent:
       Color: [0.19568257, 0.859574437, 0.153626055, 1]
+      SortingOrder: 0
+      Tiling: [1, 1]
+      Offset: [0, 0]
       TexturePath: ""
-      TilingFactor: 1
     Rigidbody2DComponent:
-      Type: 2
+      Type: Dynamic
       AutoMass: true
       Mass: 1
       LinearDrag: 0
@@ -174,10 +180,12 @@ Entities:
         {}
     SpriteRendererComponent:
       Color: [0.876595736, 0.249923021, 0.249923021, 1]
+      SortingOrder: 0
+      Tiling: [1, 1]
+      Offset: [0, 0]
       TexturePath: ""
-      TilingFactor: 1
     Rigidbody2DComponent:
-      Type: 2
+      Type: Dynamic
       AutoMass: true
       Mass: 1
       LinearDrag: 0
@@ -223,10 +231,12 @@ Entities:
         {}
     SpriteRendererComponent:
       Color: [0.876595736, 0.249923021, 0.249923021, 1]
+      SortingOrder: 0
+      Tiling: [1, 1]
+      Offset: [0, 0]
       TexturePath: ""
-      TilingFactor: 1
     Rigidbody2DComponent:
-      Type: 0
+      Type: Static
       AutoMass: true
       Mass: 1
       LinearDrag: 0
@@ -260,10 +270,12 @@ Entities:
         {}
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
+      SortingOrder: 0
+      Tiling: [1, 1]
+      Offset: [0, 0]
       TexturePath: Textures/circle.png
-      TilingFactor: 1
     Rigidbody2DComponent:
-      Type: 1
+      Type: Kinematic
       AutoMass: false
       Mass: 5
       LinearDrag: 0

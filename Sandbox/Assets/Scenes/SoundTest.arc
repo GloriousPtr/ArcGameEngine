@@ -17,10 +17,11 @@ Entities:
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
       SortingOrder: 0
-      TilingFactor: 1
+      Tiling: [1, 1]
+      Offset: [0, 0]
       TexturePath: ""
     Rigidbody2DComponent:
-      Type: 0
+      Type: Static
       AutoMass: false
       Mass: 1
       LinearDrag: 0
@@ -45,7 +46,7 @@ Entities:
       PlayOnAwake: true
       Looping: true
       Spatialization: true
-      AttenuationModel: 1
+      AttenuationModel: Inverse
       RollOff: 1
       MinGain: 0
       MaxGain: 1
@@ -71,7 +72,7 @@ Entities:
         {}
     CameraComponent:
       Camera:
-        ProjectionType: 1
+        ProjectionType: Orthographic
         PerspectiveFOV: 0.785398185
         PerspectiveNear: 0.00999999978
         PerspectiveFar: 1000

@@ -15,7 +15,7 @@ Entities:
       Children:
         {}
     LightComponent:
-      Type: 1
+      Type: Point
       UseColorTemperatureMode: false
       Temperature: 6570
       Color: [0.160919666, 1, 0]
@@ -23,7 +23,7 @@ Entities:
       Range: 10
       CutOffAngle: 12.5
       OuterCutOffAngle: 17.5
-      ShadowQuality: 2
+      ShadowQuality: UltraSoft
   - Entity: 13464390929186834787
     TagComponent:
       Tag: PointLights
@@ -54,7 +54,7 @@ Entities:
       Children:
         {}
     LightComponent:
-      Type: 1
+      Type: Point
       UseColorTemperatureMode: false
       Temperature: 6570
       Color: [0, 0.275862217, 1]
@@ -62,500 +62,7 @@ Entities:
       Range: 5
       CutOffAngle: 12.5
       OuterCutOffAngle: 17.5
-      ShadowQuality: 2
-  - Entity: 34557238050364489
-    TagComponent:
-      Tag: DirLight
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [1.00530958, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 6631891353277229707
-      ChildrenCount: 0
-      Children:
-        {}
-    LightComponent:
-      Type: 0
-      UseColorTemperatureMode: true
-      Temperature: 3438
-      Color: [1, 0.74372685, 0.530086339]
-      Intensity: 20
-      Range: 1
-      CutOffAngle: 12.5
-      OuterCutOffAngle: 17.5
-      ShadowQuality: 2
-  - Entity: 6631891353277229707
-    TagComponent:
-      Tag: Sky Light
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 0
-      ChildrenCount: 2
-      Children:
-        0: 34557238050364489
-        1: 13464390929186834787
-    SkyLightComponent:
-      TexturePath: Textures/Cubemap.hdr
-      Intensity: 0.699999988
-      Rotation: 0
-  - Entity: 3496615779418459996
-    TagComponent:
-      Tag: sponza_sponza_vase_round
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 24
-      CullMode: 1
-  - Entity: 12896254358261950236
-    TagComponent:
-      Tag: sponza_sponza_vase_hanging
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 23
-      CullMode: 1
-  - Entity: 2171958093859330569
-    TagComponent:
-      Tag: sponza_sponza_vase
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 22
-      CullMode: 1
-  - Entity: 12340539741192413070
-    TagComponent:
-      Tag: sponza_sponza_roof
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 21
-      CullMode: 1
-  - Entity: 9497956432310012474
-    TagComponent:
-      Tag: sponza_sponza_leaf
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 20
-      CullMode: 1
-  - Entity: 6225032001798920303
-    TagComponent:
-      Tag: sponza_sponza_floor
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 19
-      CullMode: 1
-  - Entity: 11413275653437956207
-    TagComponent:
-      Tag: sponza_sponza_flagpole
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 18
-      CullMode: 1
-  - Entity: 13656944375313487358
-    TagComponent:
-      Tag: sponza_sponza_fabric_g
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 17
-      CullMode: 1
-  - Entity: 2508669298851889244
-    TagComponent:
-      Tag: sponza_sponza_fabric_f
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 16
-      CullMode: 1
-  - Entity: 5247346448757476093
-    TagComponent:
-      Tag: sponza_sponza_fabric_e
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 15
-      CullMode: 1
-  - Entity: 13285847275102555933
-    TagComponent:
-      Tag: sponza_sponza_fabric_d
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 14
-      CullMode: 1
-  - Entity: 7065221905690173654
-    TagComponent:
-      Tag: sponza_sponza_fabric_c
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 13
-      CullMode: 1
-  - Entity: 16964542492198351252
-    TagComponent:
-      Tag: sponza_sponza_fabric_a
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 12
-      CullMode: 1
-  - Entity: 14269506995403230443
-    TagComponent:
-      Tag: sponza_sponza_details
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 11
-      CullMode: 1
-  - Entity: 13138774069436837992
-    TagComponent:
-      Tag: sponza_sponza_column_c
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 10
-      CullMode: 1
-  - Entity: 16536703140984935075
-    TagComponent:
-      Tag: sponza_sponza_column_b
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 9
-      CullMode: 1
-  - Entity: 4105027073037869382
-    TagComponent:
-      Tag: sponza_sponza_column_a
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 8
-      CullMode: 1
-  - Entity: 575903852694178809
-    TagComponent:
-      Tag: sponza_sponza_chain
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 7
-      CullMode: 1
-  - Entity: 5036459482807748356
-    TagComponent:
-      Tag: sponza_sponza_ceiling
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 6
-      CullMode: 1
-  - Entity: 14653948611369502714
-    TagComponent:
-      Tag: sponza_sponza_bricks
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 5
-      CullMode: 1
-  - Entity: 5794960747746557335
-    TagComponent:
-      Tag: sponza_sponza_arch
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 4
-      CullMode: 1
-  - Entity: 15751752526908026905
-    TagComponent:
-      Tag: sponza_sponza_VasePlant
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 3
-      CullMode: 1
-  - Entity: 861998861965754813
-    TagComponent:
-      Tag: sponza_sponza_Material__47
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 2
-      CullMode: 1
-  - Entity: 9838241152144991898
-    TagComponent:
-      Tag: sponza_sponza_Material__298
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 1
-      CullMode: 1
-  - Entity: 16484834023453057403
-    TagComponent:
-      Tag: sponza_sponza_Material__25
-      Layer: 0
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      Parent: 1900647786115943484
-      ChildrenCount: 0
-      Children:
-        {}
-    MeshComponent:
-      Filepath: Models/sponza/sponza.obj
-      SubmeshIndex: 0
-      CullMode: 1
+      ShadowQuality: UltraSoft
   - Entity: 1900647786115943484
     TagComponent:
       Tag: sponza
@@ -594,3 +101,446 @@ Entities:
         22: 2171958093859330569
         23: 12896254358261950236
         24: 3496615779418459996
+  - Entity: 6631891353277229707
+    TagComponent:
+      Tag: Sky Light
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 0
+      ChildrenCount: 1
+      Children:
+        0: 13464390929186834787
+    SkyLightComponent:
+      TexturePath: Textures/Cubemap.hdr
+      Intensity: 0.699999988
+      Rotation: 0
+  - Entity: 3496615779418459996
+    TagComponent:
+      Tag: sponza_sponza_vase_round
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 24
+  - Entity: 12896254358261950236
+    TagComponent:
+      Tag: sponza_sponza_vase_hanging
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 23
+  - Entity: 2171958093859330569
+    TagComponent:
+      Tag: sponza_sponza_vase
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 22
+  - Entity: 12340539741192413070
+    TagComponent:
+      Tag: sponza_sponza_roof
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 21
+  - Entity: 9497956432310012474
+    TagComponent:
+      Tag: sponza_sponza_leaf
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 20
+  - Entity: 6225032001798920303
+    TagComponent:
+      Tag: sponza_sponza_floor
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 19
+  - Entity: 11413275653437956207
+    TagComponent:
+      Tag: sponza_sponza_flagpole
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 18
+  - Entity: 13656944375313487358
+    TagComponent:
+      Tag: sponza_sponza_fabric_g
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 17
+  - Entity: 2508669298851889244
+    TagComponent:
+      Tag: sponza_sponza_fabric_f
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 16
+  - Entity: 5247346448757476093
+    TagComponent:
+      Tag: sponza_sponza_fabric_e
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 15
+  - Entity: 13285847275102555933
+    TagComponent:
+      Tag: sponza_sponza_fabric_d
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 14
+  - Entity: 7065221905690173654
+    TagComponent:
+      Tag: sponza_sponza_fabric_c
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 13
+  - Entity: 16964542492198351252
+    TagComponent:
+      Tag: sponza_sponza_fabric_a
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 12
+  - Entity: 14269506995403230443
+    TagComponent:
+      Tag: sponza_sponza_details
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 11
+  - Entity: 13138774069436837992
+    TagComponent:
+      Tag: sponza_sponza_column_c
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 10
+  - Entity: 16536703140984935075
+    TagComponent:
+      Tag: sponza_sponza_column_b
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 9
+  - Entity: 4105027073037869382
+    TagComponent:
+      Tag: sponza_sponza_column_a
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 8
+  - Entity: 575903852694178809
+    TagComponent:
+      Tag: sponza_sponza_chain
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 7
+  - Entity: 5036459482807748356
+    TagComponent:
+      Tag: sponza_sponza_ceiling
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 6
+  - Entity: 14653948611369502714
+    TagComponent:
+      Tag: sponza_sponza_bricks
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 5
+  - Entity: 5794960747746557335
+    TagComponent:
+      Tag: sponza_sponza_arch
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 4
+  - Entity: 15751752526908026905
+    TagComponent:
+      Tag: sponza_sponza_VasePlant
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 3
+  - Entity: 861998861965754813
+    TagComponent:
+      Tag: sponza_sponza_Material__47
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 2
+  - Entity: 9838241152144991898
+    TagComponent:
+      Tag: sponza_sponza_Material__298
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 1
+  - Entity: 16484834023453057403
+    TagComponent:
+      Tag: sponza_sponza_Material__25
+      Layer: 0
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      Parent: 1900647786115943484
+      ChildrenCount: 0
+      Children:
+        {}
+    MeshComponent:
+      Filepath: Models/sponza/sponza.obj
+      SubmeshIndex: 0
