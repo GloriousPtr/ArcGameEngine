@@ -101,14 +101,14 @@ project "Arc"
 		{
 			"D3D12MA",
 
-			"%{LibDir.dotnet}/nethost.lib",
+			"%{LibDir.dotnet}/nethost.dll",
 
 			"opengl.dll",
 
 			-- DirectX
-			"dxguid.lib",
-			"d3d12.lib",
-			"dxgi.lib",
+			"dxguid.dll",
+			"d3d12.dll",
+			"dxgi.dll",
 		}
 		nuget
 		{
