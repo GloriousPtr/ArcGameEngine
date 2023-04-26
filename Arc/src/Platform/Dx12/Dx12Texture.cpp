@@ -60,6 +60,8 @@ namespace ArcEngine
 		Dx12Utils::CreateTexture(&m_ImageAllocation, &m_UploadImageAllocation, D3D12_SRV_DIMENSION_TEXTURE2D, m_Format, m_Width, m_Height, 1, data, &m_Handle, nullptr);
 
 		stbi_image_free(data);
+
+		m_Path = path;
 	}
 
 	Dx12Texture2D::~Dx12Texture2D()
