@@ -29,6 +29,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
+#include <magic_enum.hpp>
+
 #include "Arc/Core/Base.h"
 
 #include "Arc/Core/Log.h"

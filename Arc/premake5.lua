@@ -63,6 +63,7 @@ project "Arc"
 		"%{IncludeDir.JoltPhysics}",
 		"%{IncludeDir.tinyobj}",
 		"%{IncludeDir.tinygltf}",
+		"%{IncludeDir.magic_enum}",
 	}
 
 	links

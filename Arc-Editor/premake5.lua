@@ -45,6 +45,7 @@ project "Arc-Editor"
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.optick}",
 		"%{IncludeDir.icons}",
+		"%{IncludeDir.magic_enum}",
 	}
 	
 	links

@@ -57,6 +57,7 @@ IncludeDir["JoltPhysics"] = "%{wks.location}/Arc/vendor/JoltPhysics/JoltPhysics"
 IncludeDir["tinyobj"] = "%{wks.location}/Arc/vendor/tinyobj"
 IncludeDir["tinygltf"] = "%{wks.location}/Arc/vendor/tinygltf"
 IncludeDir["D3D12MA"] = "%{wks.location}/Arc/vendor/D3D12MA/D3D12MemoryAllocator/include"
+IncludeDir["magic_enum"] = "%{wks.location}/Arc/vendor/magic_enum"
 
 group "Dependencies"
 	include "Arc/vendor/GLFW"

@@ -51,3 +51,4 @@
 #include "Arc/Utils/StringUtils.h"
 
 #include <glm/glm.hpp>
+#include <magic_enum.hpp>
