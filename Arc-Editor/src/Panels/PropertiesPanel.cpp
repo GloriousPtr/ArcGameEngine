@@ -477,10 +477,9 @@ namespace ArcEngine
 
 			UI::Property("Primary", component.Primary);
 
-			const char* projectionTypeStrings[] = { "Perspective", "Orthographic" };
-			int projectionType = static_cast<int>(camera.GetProjectionType());
-			if (UI::Property("Projection", projectionType, projectionTypeStrings, 2))
-				camera.SetProjectionType(static_cast<SceneCamera::ProjectionType>(projectionType));
+			auto projectionType = camera.GetProjectionType();
+			if (UI::PropertyEnum("Projection", projectionType))
+				camera.SetProjectionType(projectionType);
 
 			if(camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 			{
@@ -587,10 +586,7 @@ namespace ArcEngine
 		DrawComponent<LightComponent>(ICON_MDI_LIGHTBULB " Light", entity, [](LightComponent& component)
 		{
 			UI::BeginProperties();
-			const char* lightTypeStrings[] = { "Directional", "Point", "Spot" };
-			int lightType = static_cast<int>(component.Type);
-			if (UI::Property("Light Type", lightType, lightTypeStrings, 3))
-				component.Type = static_cast<LightComponent::LightType>(lightType);
+			UI::PropertyEnum("Light Type", component.Type);
 
 			if (UI::Property("Use color temperature mode", component.UseColorTemperatureMode) && component.UseColorTemperatureMode)
 			{
@@ -637,11 +633,7 @@ namespace ArcEngine
 			}
 			else
 			{
-				const char* shadowQualityTypeStrings[] = { "Hard", "Soft", "Ultra Soft" };
-				int shadowQualityType = static_cast<int>(component.ShadowQuality);
-
-				if (UI::Property("Shadow Quality Type", shadowQualityType, shadowQualityTypeStrings, 3))
-					component.ShadowQuality = static_cast<LightComponent::ShadowQualityType>(shadowQualityType);
+				UI::PropertyEnum("Shadow Quality Type", component.ShadowQuality);
 
 				uint64_t textureID = component.ShadowMapFramebuffer->GetDepthAttachmentRendererID();
 				if (textureID == 0)
@@ -712,10 +704,7 @@ namespace ArcEngine
 		{
 			UI::BeginProperties();
 
-			const char* bodyTypeStrings[] = { "Static", "Kinematic", "Dynamic" };
-			int bodyType = static_cast<int>(component.Type);
-			if (UI::Property("Body Type", bodyType, bodyTypeStrings, 3))
-				component.Type = static_cast<Rigidbody2DComponent::BodyType>(bodyType);
+			UI::PropertyEnum("Body Type", component.Type);
 
 			if (component.Type == Rigidbody2DComponent::BodyType::Dynamic)
 			{
@@ -956,10 +945,7 @@ namespace ArcEngine
 		{
 			UI::BeginProperties();
 
-			const char* bodyTypeStrings[] = { "Static", "Kinematic", "Dynamic" };
-			int bodyType = static_cast<int>(component.Type);
-			if (UI::Property("Body Type", bodyType, bodyTypeStrings, 3))
-				component.Type = static_cast<RigidbodyComponent::BodyType>(bodyType);
+			UI::PropertyEnum("Body Type", component.Type);
 
 			if (component.Type == RigidbodyComponent::BodyType::Dynamic)
 			{
@@ -1143,10 +1129,7 @@ namespace ArcEngine
 			if (config.Spatialization)
 			{
 				ImGui::Indent();
-				const char* attenuationTypeStrings[] = { "None", "Inverse", "Linear", "Exponential" };
-				int attenuationType = static_cast<int>(config.AttenuationModel);
-				if (UI::Property("Attenuation Model", attenuationType, attenuationTypeStrings, 4))
-					config.AttenuationModel = static_cast<AttenuationModelType>(attenuationType);
+				UI::PropertyEnum("Attenuation Model", config.AttenuationModel);
 				UI::Property("Roll Off", config.RollOff);
 				UI::Property("Min Gain", config.MinGain);
 				UI::Property("Max Gain", config.MaxGain);

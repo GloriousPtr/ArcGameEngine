@@ -121,41 +121,6 @@ namespace ArcEngine
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	/// Dropdown /////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool UI::Property(const char* label, int& value, const char** dropdownStrings, int count, const char* tooltip)
-	{
-		BeginPropertyGrid(label, tooltip);
-
-		bool modified = false;
-		const char* current = dropdownStrings[value];
-
-		if(ImGui::BeginCombo(s_IDBuffer, current))
-		{
-			for (int i = 0; i < count; i++)
-			{
-				bool isSelected = current == dropdownStrings[i];
-				if(ImGui::Selectable(dropdownStrings[i], isSelected))
-				{
-					current = dropdownStrings[i];
-					value = i;
-					modified = true;
-				}
-
-				if(isSelected)
-					ImGui::SetItemDefaultFocus();
-			}
-			ImGui::EndCombo();
-		}
-
-		UI::EndPropertyGrid();
-
-		return modified;
-	}
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// 2D/3D Textures ///////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	bool UI::Property(const char* label, Ref<TextureCube>& texture, uint64_t overrideTextureID, const char* tooltip)

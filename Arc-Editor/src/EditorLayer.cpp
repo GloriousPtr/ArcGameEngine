@@ -342,26 +342,27 @@ namespace ArcEngine
 						ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, windowPadding);
 						if (ImGui::BeginMenuBar())
 						{
-							const char* buildConfigStrings[3] = { "Debug", "Release", "Dist" };
-							const char* current = buildConfigStrings[static_cast<int>(Project::GetActive()->GetConfig().BuildConfiguration)];
+							const auto current = Project::GetActive()->GetConfig().BuildConfiguration;
+							const auto currentString = magic_enum::enum_name(current);
 							ImGui::SetNextItemWidth(100.0f);
-							if (ImGui::BeginCombo("##BuildConfiguration", current))
+							if (ImGui::BeginCombo("##BuildConfiguration", currentString.data()))
 							{
-								for (int i = 0; i < 3; i++)
+								magic_enum::enum_for_each<ProjectConfig::BuildConfig>([current, this](auto val)
 								{
-									bool isSelected = current == buildConfigStrings[i];
-									if (ImGui::Selectable(buildConfigStrings[i], isSelected))
+									constexpr ProjectConfig::BuildConfig config = val;
+									constexpr auto configString = magic_enum::enum_name(config);
+									bool isSelected = current == config;
+									if (ImGui::Selectable(configString.data(), isSelected))
 									{
-										current = buildConfigStrings[i];
-										Project::GetActive()->GetConfig().BuildConfiguration = static_cast<ProjectConfig::BuildConfig>(i);
+										Project::GetActive()->GetConfig().BuildConfiguration = config;
 										SaveProject(Project::GetProjectDirectory() / (Project::GetActive()->GetConfig().Name + ".arcproj"));
-
 										ScriptEngine::ReloadAppDomain();
 									}
 
 									if (isSelected)
 										ImGui::SetItemDefaultFocus();
-								}
+								});
+
 								ImGui::EndCombo();
 							}
 						}

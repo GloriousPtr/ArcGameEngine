@@ -105,8 +105,38 @@ namespace ArcEngine
 		// Bool
 		static bool Property(const char* label, bool& flag, const char* tooltip = nullptr);
 
-		// Dropdown
-		static bool Property(const char* label, int& value, const char** dropdownStrings, int count, const char* tooltip = nullptr);
+		template<typename T>
+		static bool PropertyEnum(const char* label, T& value, const char* tooltip = nullptr)
+		{
+			BeginPropertyGrid(label, tooltip);
+
+			bool modified = false;
+
+			const auto currentString = magic_enum::enum_name(value);
+			if (ImGui::BeginCombo(s_IDBuffer, currentString.data()))
+			{
+				magic_enum::enum_for_each<T>([&value, &modified](auto val)
+				{
+					constexpr T config = val;
+					constexpr auto configString = magic_enum::enum_name(config);
+					bool isSelected = value == config;
+					if (ImGui::Selectable(configString.data(), isSelected))
+					{
+						value = config;
+						modified = true;
+					}
+
+					if (isSelected)
+						ImGui::SetItemDefaultFocus();
+				});
+
+				ImGui::EndCombo();
+			}
+
+			UI::EndPropertyGrid();
+
+			return modified;
+		}
 
 		// 2D/3D Textures
 		static bool Property(const char* label, Ref<TextureCube>& texture, uint64_t overrideTextureID = 0, const char* tooltip = nullptr);
