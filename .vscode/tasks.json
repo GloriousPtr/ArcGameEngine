@@ -1,145 +1,169 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        // Debug
-        {
-            "label": "Build Debug",
-            "type": "shell",
-            "windows" :{
-                "command": "${workspaceRoot}/scripts/GenerateSolution.bat \n msbuild ${workspaceRoot}/Arc.sln /property:Configuration=Debug /property:GenerateFullPaths=true /t:build /m /nologo /verbosity:minimal",
-            },
-            "linux": {
-                "command": "./scripts/GenerateMake.sh && make config=debug -j$(nproc)",
-            },
-            "options": {
-                "cwd": ""
-            },
-            "problemMatcher": [
-                "$gcc",
-                "$msCompile"
-            ],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": true
-            }
-        },
-        {
-            "label": "Clean Debug",
-            "type": "shell",
-            "windows" :{
-                "command": "msbuild -target:Clean /property:Configuration=Debug /m /nologo /verbosity:minimal",
-            },
-            "linux": {
-                "command": "make clean",
-            },
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": true
-            }
-        },
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Premake5 Build",
+			"type": "shell",
+			"options": {
+				"cwd": "${workspaceRoot}/scripts"
+			},
+			"windows" :{
+				"command": "python Setup.py"
+			},
+			"linux" :{
+				"command": ". GenerateMake.sh",
+			},
+			"problemMatcher": "$msCompile",
+			"group": "build",
+			"presentation": {
+				"focus": true,
+				"panel": "new",
+				"clear": true,
+				"showReuseMessage": false
+			},
+		},
 
-        // Release
-        {
-            "label": "Build Release",
-            "type": "shell",
-            "windows" :{
-                "command": "${workspaceRoot}/scripts/GenerateSolution.bat \n msbuild ${workspaceRoot}/Arc.sln /property:Configuration=Release /property:GenerateFullPaths=true /t:build /m /nologo /verbosity:minimal",
-            },
-            "linux": {
-                "command": "./scripts/GenerateMake.sh && make config=release -j$(nproc)",
-            },
-            "options": {
-                "cwd": ""
-            },
-            "problemMatcher": [
-                "$gcc",
-                "$msCompile"
-            ],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": true
-            }
-        },
-        {
-            "label": "Clean Release",
-            "type": "shell",
-            "windows" :{
-                "command": "msbuild -target:Clean /property:Configuration=Release /m /nologo /verbosity:minimal",
-            },
-            "linux": {
-                "command": "make clean",
-            },
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": true
-            }
-        },
+		// Debug
+		{
+			"label": "Build Debug",
+			"type": "shell",
+			"windows" :{
+				"problemMatcher":"$msCompile",
+				"command": "msbuild",
+				"args": [
+					"${workspaceRoot}/Arc.sln",
+					"/property:Configuration=Debug",
+					"/property:GenerateFullPaths=true",
+					"/t:build",
+					"/m",
+					"/nologo",
+					"/verbosity:minimal",
+					"/consoleloggerparameters:Summary"
+				]
+			},
+			"linux": {
+				"problemMatcher": "$gcc",
+				"command": "make",
+				"args": [
+					"config=debug",
+					"-j$(nproc)"
+				]
+			},
+			"group": "build",
+			"dependsOn": ["Premake5 Build"],
+		},
+		{
+			"label": "Clean Debug",
+			"type": "shell",
+			"windows" :{
+				"command": "msbuild",
+				"args": [
+					"-target:Clean",
+					"/property:Configuration=Debug",
+					"/m",
+					"/nologo",
+					"/verbosity:normal"
+				],
+			},
+			"linux": {
+				"command": "make clean",
+			},
+			"group": "build",
+			"presentation": {
+				"focus": true,
+				"panel": "new",
+				"clear": true
+			}
+		},
 
-        // Dist
-        {
-            "label": "Build Dist",
-            "type": "shell",
-            "windows" :{
-                "command": "${workspaceRoot}/scripts/GenerateSolution.bat \n msbuild ${workspaceRoot}/Arc.sln /property:Configuration=Dist /property:GenerateFullPaths=true /t:build /m /nologo /verbosity:minimal",
-            },
-            "linux": {
-                "command": "./scripts/GenerateMake.sh && make config=dist -j$(nproc)",
-            },
-            "options": {
-                "cwd": ""
-            },
-            "problemMatcher": [
-                "$gcc",
-                "$msCompile"
-            ],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": true
-            }
-        },
-        {
-            "label": "Clean Dist",
-            "type": "shell",
-            "windows" :{
-                "command": "msbuild -target:Clean /property:Configuration=Dist /m /nologo /verbosity:minimal",
-            },
-            "linux": {
-                "command": "make clean",
-            },
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": true
-            }
-        }
-    ]
+		// Release
+		{
+			"label": "Build Release",
+			"type": "shell",
+			"windows" :{
+				"problemMatcher":"$msCompile",
+				"command": "msbuild",
+				"args": [
+					"${workspaceRoot}/Arc.sln",
+					"/property:Configuration=Release",
+					"/property:GenerateFullPaths=true",
+					"/t:build",
+					"/m",
+					"/nologo",
+					"/verbosity:minimal"
+				]
+			},
+			"linux": {
+				"problemMatcher": "$gcc",
+				"command": "make",
+				"args": [
+					"config=release",
+					"-j$(nproc)"
+				]
+			},
+			"group": "build",
+			"dependsOn": ["Premake5 Build"]
+		},
+		{
+			"label": "Clean Release",
+			"type": "shell",
+			"windows" :{
+				"command": "msbuild -target:Clean /property:Configuration=Release /m /nologo /verbosity:minimal",
+			},
+			"linux": {
+				"command": "make clean",
+			},
+			"group": "build",
+			"presentation": {
+				"focus": true,
+				"panel": "new",
+				"clear": true
+			}
+		},
+
+		// Dist
+		{
+			"label": "Build Dist",
+			"type": "shell",
+			"windows" :{
+				"problemMatcher":"$msCompile",
+				"command": "msbuild",
+				"args": [
+					"${workspaceRoot}/Arc.sln",
+					"/property:Configuration=Dist",
+					"/property:GenerateFullPaths=true",
+					"/t:build",
+					"/m",
+					"/nologo",
+					"/verbosity:minimal"
+				]
+			},
+			"linux": {
+				"problemMatcher": "$gcc",
+				"command": "make",
+				"args": [
+					"config=dist",
+					"-j$(nproc)"
+				]
+			},
+			"group": "build",
+			"dependsOn": ["Premake5 Build"]
+		},
+		{
+			"label": "Clean Dist",
+			"type": "shell",
+			"windows" :{
+				"command": "msbuild -target:Clean /property:Configuration=Dist /m /nologo /verbosity:minimal",
+			},
+			"linux": {
+				"command": "make clean",
+			},
+			"group": "build",
+			"presentation": {
+				"focus": true,
+				"panel": "new",
+				"clear": true
+			}
+		}
+	]
 }

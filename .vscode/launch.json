@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
 		{
-			"name": "Attach",
+			"name": "Dotnet Attach",
 			"type": "coreclr",
 			"request": "attach",
 			"processName":"Arc-Editor.exe"
@@ -26,7 +26,7 @@
                 "type": "cppvsdbg",
                 "request": "launch",
                 "program": "${workspaceRoot}/bin/Debug-Windows-x86_64/Arc-Editor/Arc-Editor.exe",
-                "console": "newExternalWindow",
+				"console": "integratedTerminal",
             },
             
             "linux": {
@@ -52,7 +52,7 @@
                 "type": "cppvsdbg",
                 "request": "launch",
                 "program": "${workspaceRoot}/bin/Release-Windows-x86_64/Arc-Editor/Arc-Editor.exe",
-                "console": "newExternalWindow",
+                "console": "integratedTerminal",
             },
             
             "linux": {
@@ -78,7 +78,7 @@
                 "type": "cppvsdbg",
                 "request": "launch",
                 "program": "${workspaceRoot}/bin/Dist-Windows-x86_64/Arc-Editor/Arc-Editor.exe",
-                "console": "newExternalWindow",
+                "console": "integratedTerminal",
             },
             
             "linux": {
