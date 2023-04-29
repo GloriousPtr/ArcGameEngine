@@ -264,10 +264,8 @@ namespace ArcEngine
 		}
 
 	public:
-		JPH::ValidateResult OnContactValidate([[maybe_unused]] const JPH::Body& inBody1, [[maybe_unused]] const JPH::Body& inBody2, [[maybe_unused]] const JPH::CollideShapeResult& inCollisionResult) override
+		virtual JPH::ValidateResult	OnContactValidate([[maybe_unused]] const JPH::Body& inBody1, [[maybe_unused]] const JPH::Body& inBody2, [[maybe_unused]] JPH::RVec3Arg inBaseOffset, [[maybe_unused]] const JPH::CollideShapeResult& inCollisionResult)
 		{
-			ARC_PROFILE_SCOPE();
-
 			return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
 		}
 

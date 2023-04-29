@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -11,7 +12,7 @@ class Color;
 using ColorArg = Color;
 
 /// Class that holds an RGBA color with 8-bits per component
-class [[nodiscard]] Color
+class [[nodiscard]] JPH_EXPORT Color
 {
 public:
 	/// Constructors

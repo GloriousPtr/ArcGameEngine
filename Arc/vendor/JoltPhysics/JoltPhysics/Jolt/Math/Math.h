@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -158,7 +159,7 @@ inline uint CountBits(uint32 inValue)
 #elif defined(JPH_COMPILER_MSVC)
 	#if defined(JPH_USE_SSE4_2)
 		return _mm_popcnt_u32(inValue);
-	#elif defined(JPH_USE_NEON)
+	#elif defined(JPH_USE_NEON) && (_MSC_VER >= 1930) // _CountOneBits not available on MSVC2019
 		return _CountOneBits(inValue);
 	#else
 		inValue = inValue - ((inValue >> 1) & 0x55555555);
@@ -175,6 +176,24 @@ inline uint CountBits(uint32 inValue)
 inline uint32 GetNextPowerOf2(uint32 inValue)
 {
 	return inValue <= 1? uint32(1) : uint32(1) << (32 - CountLeadingZeros(inValue - 1));
+}
+
+// Simple implementation of C++20 std::bit_cast (unfortunately not constexpr)
+template <class To, class From>
+JPH_INLINE To BitCast(const From &inValue)
+{
+	static_assert(std::is_trivially_constructible_v<To>);
+	static_assert(sizeof(From) == sizeof(To));
+
+	union FromTo
+	{
+		To			mTo;
+		From		mFrom;
+	};
+
+	FromTo convert;
+	convert.mFrom = inValue;
+	return convert.mTo;
 }
 
 JPH_NAMESPACE_END

@@ -20,11 +20,5 @@ namespace ArcEngine
 		static void Step(float physicsTs);
 
 		[[nodiscard]] static JPH::PhysicsSystem& GetPhysicsSystem();
-
-	private:
-		static JPH::PhysicsSystem* s_PhysicsSystem;
-		static JPH::TempAllocator* s_TempAllocator;
-		static JPH::JobSystemThreadPool* s_JobSystem;
-		static BPLayerInterfaceImpl* s_BPLayerInterface;
 	};
 }

@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -9,10 +10,10 @@
 JPH_NAMESPACE_BEGIN
 
 /// Distance constraint settings, used to create a distance constraint
-class DistanceConstraintSettings final : public TwoBodyConstraintSettings
+class JPH_EXPORT DistanceConstraintSettings final : public TwoBodyConstraintSettings
 {
 public:
-	JPH_DECLARE_SERIALIZABLE_VIRTUAL(DistanceConstraintSettings)
+	JPH_DECLARE_SERIALIZABLE_VIRTUAL(JPH_EXPORT, DistanceConstraintSettings)
 
 	// See: ConstraintSettings::SaveBinaryState
 	virtual void				SaveBinaryState(StreamOut &inStream) const override;
@@ -26,10 +27,10 @@ public:
 	/// Body 1 constraint reference frame (space determined by mSpace).
 	/// Constraint will keep mPoint1 (a point on body 1) and mPoint2 (a point on body 2) at the same distance.
 	/// Note that this constraint can be used as a cheap PointConstraint by setting mPoint1 = mPoint2 (but this removes only 1 degree of freedom instead of 3).
-	Vec3						mPoint1 = Vec3::sZero();
+	RVec3						mPoint1 = RVec3::sZero();
 
 	/// Body 2 constraint reference frame (space determined by mSpace)
-	Vec3						mPoint2 = Vec3::sZero();
+	RVec3						mPoint2 = RVec3::sZero();
 
 	/// Ability to override the distance range at which the two points are kept apart. If the value is negative, it will be replaced by the distance between mPoint1 and mPoint2 (works only if mSpace is world space).
 	float						mMinDistance = -1.0f;
@@ -48,7 +49,7 @@ protected:
 };
 
 /// This constraint is a stiff spring that holds 2 points at a fixed distance from each other
-class DistanceConstraint final : public TwoBodyConstraint
+class JPH_EXPORT DistanceConstraint final : public TwoBodyConstraint
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -58,6 +59,7 @@ public:
 
 	// Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override									{ return EConstraintSubType::Distance; }
+	virtual void				NotifyShapeChanged(const BodyID &inBodyID, Vec3Arg inDeltaCOM) override;
 	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
 	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
 	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;
@@ -110,8 +112,8 @@ private:
 	// RUN TIME PROPERTIES FOLLOW
 
 	// World space positions and normal
-	Vec3						mWorldSpacePosition1;
-	Vec3						mWorldSpacePosition2;
+	RVec3						mWorldSpacePosition1;
+	RVec3						mWorldSpacePosition2;
 	Vec3						mWorldSpaceNormal;
 
 	// Depending on if the distance < min or distance > max we can apply forces to prevent further violations

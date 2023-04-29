@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -16,7 +17,7 @@ JPH_NAMESPACE_BEGIN
 /// Internal tree structure in broadphase, is essentially a quad AABB tree.
 /// Tree is lockless (except for UpdatePrepare/Finalize() function), modifying objects in the tree will widen the aabbs of parent nodes to make the node fit.
 /// During the UpdatePrepare/Finalize() call the tree is rebuilt to achieve a tight fit again.
-class QuadTree : public NonCopyable
+class JPH_EXPORT QuadTree : public NonCopyable
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -245,7 +246,7 @@ public:
 	void						CastAABox(const AABoxCast &inBox, CastShapeBodyCollector &ioCollector, const ObjectLayerFilter &inObjectLayerFilter, const TrackingVector &inTracking) const;
 
 	/// Find all colliding pairs between dynamic bodies, calls ioPairCollector for every pair found
-	void						FindCollidingPairs(const BodyVector &inBodies, const BodyID *inActiveBodies, int inNumActiveBodies, float inSpeculativeContactDistance, BodyPairCollector &ioPairCollector, ObjectLayerPairFilter inObjectLayerPairFilter) const;
+	void						FindCollidingPairs(const BodyVector &inBodies, const BodyID *inActiveBodies, int inNumActiveBodies, float inSpeculativeContactDistance, BodyPairCollector &ioPairCollector, const ObjectLayerPairFilter &inObjectLayerPairFilter) const;
 
 #ifdef JPH_TRACK_BROADPHASE_STATS
 	/// Trace the stats of this tree to the TTY

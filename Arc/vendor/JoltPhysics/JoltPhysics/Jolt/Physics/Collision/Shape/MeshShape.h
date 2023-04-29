@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -18,10 +19,10 @@ class ConvexShape;
 class CollideShapeSettings;
 
 /// Class that constructs a MeshShape
-class MeshShapeSettings final : public ShapeSettings
+class JPH_EXPORT MeshShapeSettings final : public ShapeSettings
 {
 public:
-	JPH_DECLARE_SERIALIZABLE_VIRTUAL(MeshShapeSettings)
+	JPH_DECLARE_SERIALIZABLE_VIRTUAL(JPH_EXPORT, MeshShapeSettings)
 
 	/// Default constructor for deserialization
 									MeshShapeSettings() = default;
@@ -48,8 +49,10 @@ public:
 	uint							mMaxTrianglesPerLeaf = 8;
 };
 
-/// A mesh shape, consisting of triangles. Cannot be used as a dynamic object.
-class MeshShape final : public Shape
+/// A mesh shape, consisting of triangles. Mesh shapes are mostly used for static geometry.
+/// They can be used by dynamic or kinematic objects but only if they don't collide with other mesh or heightfield shapes as those collisions are currently not supported.
+/// Note that if you make a mesh shape a dynamic or kinematic object, you need to provide a mass yourself as mesh shapes don't need to form a closed hull so don't have a well defined volume from which the mass can be calculated.
+class JPH_EXPORT MeshShape final : public Shape
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -91,7 +94,7 @@ public:
 
 #ifdef JPH_DEBUG_RENDERER
 	// See Shape::Draw
-	virtual void					Draw(DebugRenderer *inRenderer, Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, ColorArg inColor, bool inUseMaterialColors, bool inDrawWireframe) const override;
+	virtual void					Draw(DebugRenderer *inRenderer, RMat44Arg inCenterOfMassTransform, Vec3Arg inScale, ColorArg inColor, bool inUseMaterialColors, bool inDrawWireframe) const override;
 #endif // JPH_DEBUG_RENDERER
 
 	// See Shape::CastRay
@@ -110,7 +113,7 @@ public:
 	virtual int						GetTrianglesNext(GetTrianglesContext &ioContext, int inMaxTrianglesRequested, Float3 *outTriangleVertices, const PhysicsMaterial **outMaterials = nullptr) const override;
 
 	// See Shape::GetSubmergedVolume
-	virtual void					GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy) const override { JPH_ASSERT(false, "Not supported"); }
+	virtual void					GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override { JPH_ASSERT(false, "Not supported"); }
 
 	// See Shape
 	virtual void					SaveBinaryState(StreamOut &inStream) const override;

@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -8,7 +9,7 @@
 JPH_NAMESPACE_BEGIN
 
 /// A class that groups triangles in batches of N (according to closeness)
-class TriangleGrouper
+class JPH_EXPORT TriangleGrouper
 {
 public:
 	/// Virtual destructor

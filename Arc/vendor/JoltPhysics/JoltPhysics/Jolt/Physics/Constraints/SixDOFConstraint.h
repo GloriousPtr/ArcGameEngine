@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -14,10 +15,10 @@
 JPH_NAMESPACE_BEGIN
 
 /// 6 Degree Of Freedom Constraint setup structure. Allows control over each of the 6 degrees of freedom.
-class SixDOFConstraintSettings final : public TwoBodyConstraintSettings
+class JPH_EXPORT SixDOFConstraintSettings final : public TwoBodyConstraintSettings
 {
 public:
-	JPH_DECLARE_SERIALIZABLE_VIRTUAL(SixDOFConstraintSettings)
+	JPH_DECLARE_SERIALIZABLE_VIRTUAL(JPH_EXPORT, SixDOFConstraintSettings)
 
 	/// Constraint is split up into translation/rotation around X, Y and Z axis.
 	enum EAxis
@@ -43,12 +44,12 @@ public:
 	EConstraintSpace			mSpace = EConstraintSpace::WorldSpace;
 
 	/// Body 1 constraint reference frame (space determined by mSpace)
-	Vec3						mPosition1 = Vec3::sZero();
+	RVec3						mPosition1 = RVec3::sZero();
 	Vec3						mAxisX1 = Vec3::sAxisX();
 	Vec3						mAxisY1 = Vec3::sAxisY();
 
 	/// Body 2 constraint reference frame (space determined by mSpace)
-	Vec3						mPosition2 = Vec3::sZero();
+	RVec3						mPosition2 = RVec3::sZero();
 	Vec3						mAxisX2 = Vec3::sAxisX();
 	Vec3						mAxisY2 = Vec3::sAxisY();
 	
@@ -87,7 +88,7 @@ protected:
 };
 
 /// 6 Degree Of Freedom Constraint. Allows control over each of the 6 degrees of freedom.
-class SixDOFConstraint final : public TwoBodyConstraint
+class JPH_EXPORT SixDOFConstraint final : public TwoBodyConstraint
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -100,6 +101,7 @@ public:
 
 	/// Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override									{ return EConstraintSubType::SixDOF; }
+	virtual void				NotifyShapeChanged(const BodyID &inBodyID, Vec3Arg inDeltaCOM) override;
 	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
 	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
 	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;

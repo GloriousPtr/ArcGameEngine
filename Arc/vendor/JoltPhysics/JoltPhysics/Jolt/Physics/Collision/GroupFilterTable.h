@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -31,9 +32,9 @@ JPH_NAMESPACE_BEGIN
 /// . is a bit we don't need to store because the table is symmetric, we take care that group 2 > group 1 always by swapping the elements if needed
 ///
 /// The total number of bits we need to store is (N * (N - 1)) / 2
-class GroupFilterTable final : public GroupFilter
+class JPH_EXPORT GroupFilterTable final : public GroupFilter
 {
-	JPH_DECLARE_SERIALIZABLE_VIRTUAL(GroupFilterTable)
+	JPH_DECLARE_SERIALIZABLE_VIRTUAL(JPH_EXPORT, GroupFilterTable)
 
 private:
 	using GroupID = CollisionGroup::GroupID;

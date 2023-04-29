@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -25,10 +26,10 @@ enum class EPathRotationConstraintType
 };
 
 /// Path constraint settings, used to constrain the degrees of freedom between two bodies to a path
-class PathConstraintSettings final : public TwoBodyConstraintSettings
+class JPH_EXPORT PathConstraintSettings final : public TwoBodyConstraintSettings
 {
 public:
-	JPH_DECLARE_SERIALIZABLE_VIRTUAL(PathConstraintSettings)
+	JPH_DECLARE_SERIALIZABLE_VIRTUAL(JPH_EXPORT, PathConstraintSettings)
 
 	// See: ConstraintSettings::SaveBinaryState
 	virtual void					SaveBinaryState(StreamOut &inStream) const override;
@@ -63,7 +64,7 @@ protected:
 };
 
 /// Path constraint, used to constrain the degrees of freedom between two bodies to a path
-class PathConstraint final : public TwoBodyConstraint
+class JPH_EXPORT PathConstraint final : public TwoBodyConstraint
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -73,6 +74,7 @@ public:
 
 	// Generic interface of a constraint
 	virtual EConstraintSubType		GetSubType() const override								{ return EConstraintSubType::Path; }
+	virtual void					NotifyShapeChanged(const BodyID &inBodyID, Vec3Arg inDeltaCOM) override;
 	virtual void					SetupVelocityConstraint(float inDeltaTime) override;
 	virtual void					WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
 	virtual bool					SolveVelocityConstraint(float inDeltaTime) override;

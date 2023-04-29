@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -16,10 +17,10 @@ JPH_NAMESPACE_BEGIN
 ///
 /// This image describes the limit settings:
 /// @image html Docs/SwingTwistConstraint.png
-class SwingTwistConstraintSettings final : public TwoBodyConstraintSettings
+class JPH_EXPORT SwingTwistConstraintSettings final : public TwoBodyConstraintSettings
 {
 public:
-	JPH_DECLARE_SERIALIZABLE_VIRTUAL(SwingTwistConstraintSettings)
+	JPH_DECLARE_SERIALIZABLE_VIRTUAL(JPH_EXPORT, SwingTwistConstraintSettings)
 
 	// See: ConstraintSettings::SaveBinaryState
 	virtual void				SaveBinaryState(StreamOut &inStream) const override;
@@ -31,12 +32,12 @@ public:
 	EConstraintSpace			mSpace = EConstraintSpace::WorldSpace;
 
 	///@name Body 1 constraint reference frame (space determined by mSpace)
-	Vec3						mPosition1 = Vec3::sZero();
+	RVec3						mPosition1 = RVec3::sZero();
 	Vec3						mTwistAxis1 = Vec3::sAxisX();
 	Vec3						mPlaneAxis1 = Vec3::sAxisY();
 
 	///@name Body 2 constraint reference frame (space determined by mSpace)
-	Vec3						mPosition2 = Vec3::sZero();
+	RVec3						mPosition2 = RVec3::sZero();
 	Vec3						mTwistAxis2 = Vec3::sAxisX();
 	Vec3						mPlaneAxis2 = Vec3::sAxisY();
 	
@@ -63,7 +64,7 @@ protected:
 /// A swing twist constraint is a specialized constraint for humanoid ragdolls that allows limited rotation only
 ///
 /// @see SwingTwistConstraintSettings for a description of the limits
-class SwingTwistConstraint final : public TwoBodyConstraint
+class JPH_EXPORT SwingTwistConstraint final : public TwoBodyConstraint
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -73,6 +74,7 @@ public:
 
 	///@name Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override									{ return EConstraintSubType::SwingTwist; }
+	virtual void				NotifyShapeChanged(const BodyID &inBodyID, Vec3Arg inDeltaCOM) override;
 	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
 	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
 	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;

@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -10,7 +11,7 @@
 JPH_NAMESPACE_BEGIN
 
 /// A convex hull builder that tries to create 2D hulls as accurately as possible. Used for offline processing. 
-class ConvexHullBuilder2D : public NonCopyable
+class JPH_EXPORT ConvexHullBuilder2D : public NonCopyable
 {
 public:
 	using Positions = Array<Vec3>; 
@@ -42,7 +43,7 @@ public:
 private:
 #ifdef JPH_CONVEX_BUILDER_2D_DEBUG
 	/// Factor to scale convex hull when debug drawing the construction process
-	static constexpr float cDrawScale = 10.0f;
+	static constexpr Real cDrawScale = 10;
 #endif
 
 	class Edge;
@@ -96,7 +97,7 @@ private:
 	int					mNumEdges = 0;								///< Number of edges in hull
 
 #ifdef JPH_CONVEX_BUILDER_2D_DEBUG
-	Vec3				mOffset;									///< Offset to use for state drawing
+	RVec3				mOffset;									///< Offset to use for state drawing
 	Vec3				mDelta;										///< Delta offset between next states
 #endif
 };

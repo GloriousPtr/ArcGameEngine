@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -19,7 +20,7 @@ template <class T> using Queue = std::queue<T, std::deque<T, STLAllocator<T>>>;
 
 /// ObjectStreamOut contains all logic for writing an object to disk. It is the base 
 /// class for the text and binary output streams (ObjectStreamTextOut and ObjectStreamBinaryOut).
-class ObjectStreamOut : public IObjectStreamOut
+class JPH_EXPORT ObjectStreamOut : public IObjectStreamOut
 {
 private:
 	struct ObjectInfo;

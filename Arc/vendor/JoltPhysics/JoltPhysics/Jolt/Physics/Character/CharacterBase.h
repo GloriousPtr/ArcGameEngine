@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -16,7 +17,7 @@ class PhysicsSystem;
 class StateRecorder;
 
 /// Base class for configuration of a character
-class CharacterBaseSettings : public RefTarget<CharacterBaseSettings>
+class JPH_EXPORT CharacterBaseSettings : public RefTarget<CharacterBaseSettings>
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -41,7 +42,7 @@ public:
 };
 
 /// Base class for character class
-class CharacterBase : public RefTarget<CharacterBase>, public NonCopyable
+class JPH_EXPORT CharacterBase : public RefTarget<CharacterBase>, public NonCopyable
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -88,7 +89,7 @@ public:
 	bool								IsSupported() const										{ return mGroundState == EGroundState::OnGround || mGroundState == EGroundState::OnSteepGround; }
 
 	/// Get the contact point with the ground
-	Vec3 								GetGroundPosition() const								{ return mGroundPosition; }
+	RVec3 								GetGroundPosition() const								{ return mGroundPosition; }
 
 	/// Get the contact normal with the ground
 	Vec3	 							GetGroundNormal() const									{ return mGroundNormal; }
@@ -135,7 +136,7 @@ protected:
 	EGroundState						mGroundState = EGroundState::InAir;
 	BodyID								mGroundBodyID;
 	SubShapeID							mGroundBodySubShapeID;
-	Vec3								mGroundPosition = Vec3::sZero();
+	RVec3								mGroundPosition = RVec3::sZero();
 	Vec3								mGroundNormal = Vec3::sZero();
 	Vec3								mGroundVelocity = Vec3::sZero();
 	RefConst<PhysicsMaterial>			mGroundMaterial = PhysicsMaterial::sDefault;

@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -12,10 +13,10 @@
 JPH_NAMESPACE_BEGIN
 
 /// Slider constraint settings, used to create a slider constraint
-class SliderConstraintSettings final : public TwoBodyConstraintSettings
+class JPH_EXPORT SliderConstraintSettings final : public TwoBodyConstraintSettings
 {
 public:
-	JPH_DECLARE_SERIALIZABLE_VIRTUAL(SliderConstraintSettings)
+	JPH_DECLARE_SERIALIZABLE_VIRTUAL(JPH_EXPORT, SliderConstraintSettings)
 
 	// See: ConstraintSettings::SaveBinaryState
 	virtual void				SaveBinaryState(StreamOut &inStream) const override;
@@ -35,12 +36,12 @@ public:
 
 	/// Body 1 constraint reference frame (space determined by mSpace).
 	/// Slider axis is the axis along which movement is possible (direction), normal axis is a perpendicular vector to define the frame.
-	Vec3						mPoint1 = Vec3::sZero();
+	RVec3						mPoint1 = RVec3::sZero();
 	Vec3						mSliderAxis1 = Vec3::sAxisX();
 	Vec3						mNormalAxis1 = Vec3::sAxisY();
 	
 	/// Body 2 constraint reference frame (space determined by mSpace)
-	Vec3						mPoint2 = Vec3::sZero();
+	RVec3						mPoint2 = RVec3::sZero();
 	Vec3						mSliderAxis2 = Vec3::sAxisX();
 	Vec3						mNormalAxis2 = Vec3::sAxisY();
 
@@ -65,7 +66,7 @@ protected:
 };
 
 /// A slider constraint allows movement in only 1 axis (and no rotation). Also known as a prismatic constraint.
-class SliderConstraint final : public TwoBodyConstraint
+class JPH_EXPORT SliderConstraint final : public TwoBodyConstraint
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -75,6 +76,7 @@ public:
 
 	// Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override								{ return EConstraintSubType::Slider; }
+	virtual void				NotifyShapeChanged(const BodyID &inBodyID, Vec3Arg inDeltaCOM) override;
 	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
 	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
 	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;

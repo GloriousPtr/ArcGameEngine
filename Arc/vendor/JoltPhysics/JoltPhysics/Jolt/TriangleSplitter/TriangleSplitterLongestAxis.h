@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -8,7 +9,7 @@
 JPH_NAMESPACE_BEGIN
 
 /// Splitter using center of bounding box with longest axis
-class TriangleSplitterLongestAxis : public TriangleSplitter
+class JPH_EXPORT TriangleSplitterLongestAxis : public TriangleSplitter
 {
 public:
 	/// Constructor

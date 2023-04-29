@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -10,10 +11,10 @@
 JPH_NAMESPACE_BEGIN
 
 /// Fixed constraint settings, used to create a fixed constraint
-class FixedConstraintSettings final : public TwoBodyConstraintSettings
+class JPH_EXPORT FixedConstraintSettings final : public TwoBodyConstraintSettings
 {
 public:
-	JPH_DECLARE_SERIALIZABLE_VIRTUAL(FixedConstraintSettings)
+	JPH_DECLARE_SERIALIZABLE_VIRTUAL(JPH_EXPORT, FixedConstraintSettings)
 
 	// See: ConstraintSettings::SaveBinaryState
 	virtual void				SaveBinaryState(StreamOut &inStream) const override;
@@ -28,12 +29,12 @@ public:
 	bool						mAutoDetectPoint = false;
 
 	/// Body 1 constraint reference frame (space determined by mSpace)
-	Vec3						mPoint1 = Vec3::sZero();
+	RVec3						mPoint1 = RVec3::sZero();
 	Vec3						mAxisX1 = Vec3::sAxisX();
 	Vec3						mAxisY1 = Vec3::sAxisY();
 
 	/// Body 2 constraint reference frame (space determined by mSpace)
-	Vec3						mPoint2 = Vec3::sZero();
+	RVec3						mPoint2 = RVec3::sZero();
 	Vec3						mAxisX2 = Vec3::sAxisX();
 	Vec3						mAxisY2 = Vec3::sAxisY();
 
@@ -44,7 +45,7 @@ protected:
 
 /// A fixed constraint welds two bodies together removing all degrees of freedom between them.
 /// This variant uses euler angles for the rotation constraint.
-class FixedConstraint final : public TwoBodyConstraint
+class JPH_EXPORT FixedConstraint final : public TwoBodyConstraint
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -54,6 +55,7 @@ public:
 
 	// Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override									{ return EConstraintSubType::Fixed; }
+	virtual void				NotifyShapeChanged(const BodyID &inBodyID, Vec3Arg inDeltaCOM) override;
 	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
 	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
 	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;

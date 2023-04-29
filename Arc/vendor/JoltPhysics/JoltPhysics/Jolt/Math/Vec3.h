@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -24,6 +25,9 @@ public:
 #else
 	using Type = Vec4::Type;
 #endif
+
+	// Argument type
+	using ArgType = Vec3Arg;
 
 	/// Constructor
 								Vec3() = default; ///< Intentionally not initialized for performance reasons
@@ -99,7 +103,7 @@ public:
 	static JPH_INLINE Vec3		sUnitSpherical(float inTheta, float inPhi);
 
 	/// A set of vectors uniformly spanning the surface of a unit sphere, usable for debug purposes
-	static const std::vector<Vec3> sUnitSphere;
+	JPH_EXPORT static const std::vector<Vec3> sUnitSphere;
 
 	/// Get random unit vector
 	template <class Random>

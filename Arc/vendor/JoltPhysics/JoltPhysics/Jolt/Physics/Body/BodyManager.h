@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -25,7 +26,7 @@ using BodyVector = Array<Body *>;
 using BodyIDVector = Array<BodyID>;
 
 /// Class that contains all bodies
-class BodyManager : public NonCopyable
+class JPH_EXPORT BodyManager : public NonCopyable
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -85,6 +86,9 @@ public:
 	/// Deactivate a list of bodies.
 	/// This function should only be called when an exclusive lock for the bodies are held.
 	void							DeactivateBodies(const BodyID *inBodyIDs, int inNumber);
+
+	/// Update the motion quality for a body
+	void							SetMotionQuality(Body &ioBody, EMotionQuality inMotionQuality);
 
 	/// Get copy of the list of active bodies under protection of a lock.
 	void							GetActiveBodies(BodyIDVector &outBodyIDs) const;
@@ -205,17 +209,17 @@ public:
 	public:
 		inline GrantActiveBodiesAccess(bool inAllowActivation, bool inAllowDeactivation)
 		{
-			JPH_ASSERT(!sOverrideAllowActivation);
-			sOverrideAllowActivation = inAllowActivation;
+			JPH_ASSERT(!sGetOverrideAllowActivation());
+			sSetOverrideAllowActivation(inAllowActivation);
 
-			JPH_ASSERT(!sOverrideAllowDeactivation);
-			sOverrideAllowDeactivation = inAllowDeactivation;
+			JPH_ASSERT(!sGetOverrideAllowDeactivation());
+			sSetOverrideAllowDeactivation(inAllowDeactivation);
 		}
 
 		inline ~GrantActiveBodiesAccess()
 		{
-			sOverrideAllowActivation = false;
-			sOverrideAllowDeactivation = false;
+			sSetOverrideAllowActivation(false);
+			sSetOverrideAllowDeactivation(false);
 		}
 	};
 #endif
@@ -296,10 +300,14 @@ private:
 	const BroadPhaseLayerInterface *mBroadPhaseLayerInterface = nullptr;
 
 #ifdef JPH_ENABLE_ASSERTS
+	static bool						sGetOverrideAllowActivation();
+	static void						sSetOverrideAllowActivation(bool inValue);
+
+	static bool						sGetOverrideAllowDeactivation();
+	static void						sSetOverrideAllowDeactivation(bool inValue);
+
 	/// Debug system that tries to limit changes to active bodies during the PhysicsSystem::Update()
 	bool							mActiveBodiesLocked = false;
-	static thread_local bool		sOverrideAllowActivation;
-	static thread_local bool		sOverrideAllowDeactivation;
 #endif
 };
 

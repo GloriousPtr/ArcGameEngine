@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -10,10 +11,10 @@
 JPH_NAMESPACE_BEGIN
 
 /// Cone constraint settings, used to create a cone constraint
-class ConeConstraintSettings final : public TwoBodyConstraintSettings
+class JPH_EXPORT ConeConstraintSettings final : public TwoBodyConstraintSettings
 {
 public:
-	JPH_DECLARE_SERIALIZABLE_VIRTUAL(ConeConstraintSettings)
+	JPH_DECLARE_SERIALIZABLE_VIRTUAL(JPH_EXPORT, ConeConstraintSettings)
 
 	// See: ConstraintSettings::SaveBinaryState
 	virtual void				SaveBinaryState(StreamOut &inStream) const override;
@@ -25,11 +26,11 @@ public:
 	EConstraintSpace			mSpace = EConstraintSpace::WorldSpace;
 
 	/// Body 1 constraint reference frame (space determined by mSpace)
-	Vec3						mPoint1 = Vec3::sZero();
+	RVec3						mPoint1 = RVec3::sZero();
 	Vec3						mTwistAxis1 = Vec3::sAxisX();
 
 	/// Body 2 constraint reference frame (space determined by mSpace)
-	Vec3						mPoint2 = Vec3::sZero();
+	RVec3						mPoint2 = RVec3::sZero();
 	Vec3						mTwistAxis2 = Vec3::sAxisX();
 
 	/// Half of maximum angle between twist axis of body 1 and 2
@@ -65,7 +66,7 @@ protected:
 /// Where J is the Jacobian.
 ///
 /// Note that this is the exact same equation as used in AngleConstraintPart if we use t2 x t1 as the world space axis
-class ConeConstraint final : public TwoBodyConstraint
+class JPH_EXPORT ConeConstraint final : public TwoBodyConstraint
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -75,6 +76,7 @@ public:
 
 	// Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override					{ return EConstraintSubType::Cone; }
+	virtual void				NotifyShapeChanged(const BodyID &inBodyID, Vec3Arg inDeltaCOM) override;
 	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
 	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
 	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;

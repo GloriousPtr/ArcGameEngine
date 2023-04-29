@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -12,10 +13,10 @@
 JPH_NAMESPACE_BEGIN
 
 /// Hinge constraint settings, used to create a hinge constraint
-class HingeConstraintSettings final : public TwoBodyConstraintSettings
+class JPH_EXPORT HingeConstraintSettings final : public TwoBodyConstraintSettings
 {
 public:
-	JPH_DECLARE_SERIALIZABLE_VIRTUAL(HingeConstraintSettings)
+	JPH_DECLARE_SERIALIZABLE_VIRTUAL(JPH_EXPORT, HingeConstraintSettings)
 
 	// See: ConstraintSettings::SaveBinaryState
 	virtual void				SaveBinaryState(StreamOut &inStream) const override;
@@ -28,12 +29,12 @@ public:
 
 	/// Body 1 constraint reference frame (space determined by mSpace).
 	/// Hinge axis is the axis where rotation is allowed, normal axis defines the 0 angle of the hinge.
-	Vec3						mPoint1 = Vec3::sZero();
+	RVec3						mPoint1 = RVec3::sZero();
 	Vec3						mHingeAxis1 = Vec3::sAxisY();
 	Vec3						mNormalAxis1 = Vec3::sAxisX();
 	
 	/// Body 2 constraint reference frame (space determined by mSpace)
-	Vec3						mPoint2 = Vec3::sZero();
+	RVec3						mPoint2 = RVec3::sZero();
 	Vec3						mHingeAxis2 = Vec3::sAxisY();
 	Vec3						mNormalAxis2 = Vec3::sAxisX();
 	
@@ -54,7 +55,7 @@ protected:
 };
 
 /// A hinge constraint constrains 2 bodies on a single point and allows only a single axis of rotation
-class HingeConstraint final : public TwoBodyConstraint
+class JPH_EXPORT HingeConstraint final : public TwoBodyConstraint
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -64,6 +65,7 @@ public:
 
 	// Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override								{ return EConstraintSubType::Hinge; }
+	virtual void				NotifyShapeChanged(const BodyID &inBodyID, Vec3Arg inDeltaCOM) override;
 	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
 	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
 	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;

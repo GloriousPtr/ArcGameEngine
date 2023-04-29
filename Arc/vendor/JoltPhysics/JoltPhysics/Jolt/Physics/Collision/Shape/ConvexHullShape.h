@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -13,10 +14,10 @@
 JPH_NAMESPACE_BEGIN
 
 /// Class that constructs a ConvexHullShape
-class ConvexHullShapeSettings final : public ConvexShapeSettings
+class JPH_EXPORT ConvexHullShapeSettings final : public ConvexShapeSettings
 {
 public:
-	JPH_DECLARE_SERIALIZABLE_VIRTUAL(ConvexHullShapeSettings)
+	JPH_DECLARE_SERIALIZABLE_VIRTUAL(JPH_EXPORT, ConvexHullShapeSettings)
 
 	/// Default constructor for deserialization
 							ConvexHullShapeSettings() = default;
@@ -36,7 +37,7 @@ public:
 };
 
 /// A convex hull
-class ConvexHullShape final : public ConvexShape
+class JPH_EXPORT ConvexHullShape final : public ConvexShape
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -71,14 +72,14 @@ public:
 	virtual const Support *	GetSupportFunction(ESupportMode inMode, SupportBuffer &inBuffer, Vec3Arg inScale) const override;
 
 	// See Shape::GetSubmergedVolume
-	virtual void			GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy) const override;
+	virtual void			GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override;
 
 #ifdef JPH_DEBUG_RENDERER
 	// See Shape::Draw
-	virtual void			Draw(DebugRenderer *inRenderer, Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, ColorArg inColor, bool inUseMaterialColors, bool inDrawWireframe) const override;
+	virtual void			Draw(DebugRenderer *inRenderer, RMat44Arg inCenterOfMassTransform, Vec3Arg inScale, ColorArg inColor, bool inUseMaterialColors, bool inDrawWireframe) const override;
 
 	/// Debugging helper draw function that draws how all points are moved when a shape is shrunk by the convex radius
-	void					DrawShrunkShape(DebugRenderer *inRenderer, Mat44Arg inCenterOfMassTransform, Vec3Arg inScale) const;
+	void					DrawShrunkShape(DebugRenderer *inRenderer, RMat44Arg inCenterOfMassTransform, Vec3Arg inScale) const;
 #endif // JPH_DEBUG_RENDERER
 
 	// See Shape::CastRay
@@ -114,6 +115,27 @@ public:
 
 	/// Get a vertex of this convex hull relative to the center of mass
 	inline Vec3				GetPoint(uint inIndex) const										{ return mPoints[inIndex].mPosition; }
+
+	/// Get the number of faces in this convex hull
+	inline uint				GetNumFaces() const													{ return (uint)mFaces.size(); }
+
+	/// Get the number of vertices in a face
+	inline uint				GetNumVerticesInFace(uint inFaceIndex) const						{ return mFaces[inFaceIndex].mNumVertices; }
+
+	/// Get the vertices indices of a face
+	/// @param inFaceIndex Index of the face.
+	/// @param inMaxVertices Maximum number of vertices to return.
+	/// @param outVertices Array of vertices indices, must be at least inMaxVertices in size, the vertices are returned in counter clockwise order and the positions can be obtained using GetPoint(index).
+	/// @return Number of vertices in face, if this is bigger than inMaxVertices, not all vertices were retrieved.
+	inline uint				GetFaceVertices(uint inFaceIndex, uint inMaxVertices, uint *outVertices) const
+	{
+		const Face &face = mFaces[inFaceIndex];
+		const uint8 *first_vertex = mVertexIdx.data() + face.mFirstVertex;
+		uint num_vertices = min<uint>(face.mNumVertices, inMaxVertices);
+		for (uint i = 0; i < num_vertices; ++i)
+			outVertices[i] = first_vertex[i];
+		return face.mNumVertices;
+	}
 
 	// Register shape functions with the registry
 	static void				sRegister();

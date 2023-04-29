@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -111,7 +112,7 @@ class ProfileSample;
 class ProfileThread;
 
 /// Singleton class for managing profiling information
-class Profiler : public NonCopyable
+class JPH_EXPORT Profiler : public NonCopyable
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -194,7 +195,7 @@ private:
 };							
 
 // Class that contains the information of a single scoped measurement
-class alignas(16) ProfileSample : public NonCopyable
+class alignas(16) JPH_EXPORT ProfileSample : public NonCopyable
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -223,11 +224,20 @@ public:
 	ProfileSample				mSamples[cMaxSamples];												///< Buffer of samples
 	uint						mCurrentSample = 0;													///< Next position to write a sample to
 
+#ifdef JPH_SHARED_LIBRARY
+	JPH_EXPORT static void		sSetInstance(ProfileThread *inInstance);
+	JPH_EXPORT static ProfileThread *sGetInstance();
+#else
+	static inline void			sSetInstance(ProfileThread *inInstance)								{ sInstance = inInstance; }
+	static inline ProfileThread *sGetInstance()														{ return sInstance; }
+
+private:
 	static thread_local ProfileThread *sInstance;
+#endif
 };
 
 /// Create this class on the stack to start sampling timing information of a particular scope
-class ProfileMeasurement : public NonCopyable
+class JPH_EXPORT ProfileMeasurement : public NonCopyable
 {	
 public:						
 	/// Constructor

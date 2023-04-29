@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -16,10 +17,10 @@ class DebugRenderer;
 #endif // JPH_DEBUG_RENDERER
 
 /// The path for a path constraint. It allows attaching two bodies to each other while giving the second body the freedom to move along a path relative to the first.
-class PathConstraintPath : public SerializableObject, public RefTarget<PathConstraintPath>
+class JPH_EXPORT PathConstraintPath : public SerializableObject, public RefTarget<PathConstraintPath>
 {
 public:
-	JPH_DECLARE_SERIALIZABLE_ABSTRACT(PathConstraintPath)
+	JPH_DECLARE_SERIALIZABLE_ABSTRACT(JPH_EXPORT, PathConstraintPath)
 
 	using PathResult = Result<Ref<PathConstraintPath>>;
 
@@ -48,7 +49,7 @@ public:
 
 #ifdef JPH_DEBUG_RENDERER
 	/// Draw the path relative to inBaseTransform. Used for debug purposes.
-	void				DrawPath(DebugRenderer *inRenderer, Mat44Arg inBaseTransform) const;
+	void				DrawPath(DebugRenderer *inRenderer, RMat44Arg inBaseTransform) const;
 #endif // JPH_DEBUG_RENDERER
 
 	/// Saves the contents of the path in binary form to inStream.

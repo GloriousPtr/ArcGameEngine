@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -9,10 +10,10 @@
 JPH_NAMESPACE_BEGIN
 
 /// Point constraint settings, used to create a point constraint
-class PointConstraintSettings final : public TwoBodyConstraintSettings
+class JPH_EXPORT PointConstraintSettings final : public TwoBodyConstraintSettings
 {
 public:
-	JPH_DECLARE_SERIALIZABLE_VIRTUAL(PointConstraintSettings)
+	JPH_DECLARE_SERIALIZABLE_VIRTUAL(JPH_EXPORT, PointConstraintSettings)
 
 	// See: ConstraintSettings::SaveBinaryState
 	virtual void				SaveBinaryState(StreamOut &inStream) const override;
@@ -24,11 +25,11 @@ public:
 	EConstraintSpace			mSpace = EConstraintSpace::WorldSpace;
 
 	/// Body 1 constraint position (space determined by mSpace).
-	Vec3						mPoint1 = Vec3::sZero();
+	RVec3						mPoint1 = RVec3::sZero();
 
 	/// Body 2 constraint position (space determined by mSpace).
 	/// Note: Normally you would set mPoint1 = mPoint2 if the bodies are already placed how you want to constrain them (if mSpace = world space).
-	Vec3						mPoint2 = Vec3::sZero();
+	RVec3						mPoint2 = RVec3::sZero();
 
 protected:
 	// See: ConstraintSettings::RestoreBinaryState
@@ -36,7 +37,7 @@ protected:
 };
 
 /// A point constraint constrains 2 bodies on a single point (removing 3 degrees of freedom)
-class PointConstraint final : public TwoBodyConstraint
+class JPH_EXPORT PointConstraint final : public TwoBodyConstraint
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -46,6 +47,7 @@ public:
 
 	// Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override									{ return EConstraintSubType::Point; }
+	virtual void				NotifyShapeChanged(const BodyID &inBodyID, Vec3Arg inDeltaCOM) override;
 	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
 	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
 	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;
@@ -58,10 +60,10 @@ public:
 	virtual Ref<ConstraintSettings> GetConstraintSettings() const override;
 
 	/// Update the attachment point for body 1
-	void						SetPoint1(EConstraintSpace inSpace, Vec3Arg inPoint1);
+	void						SetPoint1(EConstraintSpace inSpace, RVec3Arg inPoint1);
 
 	/// Update the attachment point for body 2
-	void						SetPoint2(EConstraintSpace inSpace, Vec3Arg inPoint2);
+	void						SetPoint2(EConstraintSpace inSpace, RVec3Arg inPoint2);
 
 	/// Get the attachment point for body 1 relative to body 1 COM
 	inline Vec3					GetLocalSpacePoint1() const									{ return mLocalSpacePosition1; }

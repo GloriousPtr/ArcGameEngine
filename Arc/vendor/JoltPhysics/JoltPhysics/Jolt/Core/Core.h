@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -37,13 +38,14 @@
 // Determine compiler
 #if defined(__clang__)
 	#define JPH_COMPILER_CLANG
-#elif defined(__MINGW64__) || defined (__MINGW32__)
-	#define JPH_COMPILER_GCC
-	#define JPH_COMPILER_MINGW
 #elif defined(__GNUC__)
 	#define JPH_COMPILER_GCC
 #elif defined(_MSC_VER)
 	#define JPH_COMPILER_MSVC
+#endif
+
+#if defined(__MINGW64__) || defined (__MINGW32__)
+	#define JPH_COMPILER_MINGW
 #endif
 
 // Detect CPU architecture
@@ -57,6 +59,7 @@
 	#endif
 	#define JPH_USE_SSE
 	#define JPH_VECTOR_ALIGNMENT 16
+	#define JPH_DVECTOR_ALIGNMENT 32
 
 	// Detect enabled instruction sets
 	#if defined(__AVX512F__) && defined(__AVX512VL__) && defined(__AVX512DQ__) && !defined(JPH_USE_AVX512)
@@ -103,19 +106,47 @@
 		#define JPH_CPU_ADDRESS_BITS 64
 		#define JPH_USE_NEON
 		#define JPH_VECTOR_ALIGNMENT 16
+		#define JPH_DVECTOR_ALIGNMENT 32
 	#else
 		#define JPH_CPU_ADDRESS_BITS 32
 		#define JPH_VECTOR_ALIGNMENT 8 // 32-bit ARM does not support aligning on the stack on 16 byte boundaries
+		#define JPH_DVECTOR_ALIGNMENT 8
 	#endif
 #elif defined(JPH_PLATFORM_WASM)
 	// WebAssembly CPU architecture
 	#define JPH_CPU_WASM
 	#define JPH_CPU_ADDRESS_BITS 32
 	#define JPH_VECTOR_ALIGNMENT 16
+	#define JPH_DVECTOR_ALIGNMENT 32
 	#define JPH_DISABLE_CUSTOM_ALLOCATOR
 #else
 	#error Unsupported CPU architecture
 #endif
+
+// If this define is set, Jolt is compiled as a shared library
+#ifdef JPH_SHARED_LIBRARY
+	#ifdef JPH_BUILD_SHARED_LIBRARY
+		// While building the shared library, we must export these symbols
+		#ifdef JPH_PLATFORM_WINDOWS
+			#define JPH_EXPORT __declspec(dllexport)
+		#else
+			#define JPH_EXPORT __attribute__ ((visibility ("default")))
+		#endif
+	#else
+		// When linking against Jolt, we must import these symbols
+		#ifdef JPH_PLATFORM_WINDOWS
+			#define JPH_EXPORT __declspec(dllimport)
+		#else
+			#define JPH_EXPORT __attribute__ ((visibility ("default")))
+		#endif
+	#endif
+#else
+	// If the define is not set, we use static linking and symbols don't need to be imported or exported
+	#define JPH_EXPORT
+#endif
+
+// Macro used by the RTTI macros to not export a function
+#define JPH_NO_EXPORT
 
 // Pragmas to store / restore the warning state and to disable individual warnings
 #ifdef JPH_COMPILER_CLANG
@@ -123,8 +154,14 @@
 #define JPH_SUPPRESS_WARNING_PUSH		JPH_PRAGMA(clang diagnostic push)
 #define JPH_SUPPRESS_WARNING_POP		JPH_PRAGMA(clang diagnostic pop)
 #define JPH_CLANG_SUPPRESS_WARNING(w)	JPH_PRAGMA(clang diagnostic ignored w)
+#if __clang_major__ >= 13
+	#define JPH_CLANG_13_PLUS_SUPPRESS_WARNING(w) JPH_CLANG_SUPPRESS_WARNING(w)
+#else
+	#define JPH_CLANG_13_PLUS_SUPPRESS_WARNING(w)
+#endif
 #else
 #define JPH_CLANG_SUPPRESS_WARNING(w)
+#define JPH_CLANG_13_PLUS_SUPPRESS_WARNING(w)
 #endif
 #ifdef JPH_COMPILER_GCC
 #define JPH_PRAGMA(x)					_Pragma(#x)
@@ -139,8 +176,14 @@
 #define JPH_SUPPRESS_WARNING_PUSH		JPH_PRAGMA(warning (push))
 #define JPH_SUPPRESS_WARNING_POP		JPH_PRAGMA(warning (pop))
 #define JPH_MSVC_SUPPRESS_WARNING(w)	JPH_PRAGMA(warning (disable : w))
+#if _MSC_VER >= 1920 && _MSC_VER < 1930
+	#define JPH_MSVC2019_SUPPRESS_WARNING(w) JPH_MSVC_SUPPRESS_WARNING(w)
+#else
+	#define JPH_MSVC2019_SUPPRESS_WARNING(w)
+#endif
 #else
 #define JPH_MSVC_SUPPRESS_WARNING(w)
+#define JPH_MSVC2019_SUPPRESS_WARNING(w)
 #endif
 
 // Disable common warnings triggered by Jolt when compiling with -Wall
@@ -165,6 +208,7 @@
 	JPH_CLANG_SUPPRESS_WARNING("-Wdocumentation-unknown-command")								\
 	JPH_CLANG_SUPPRESS_WARNING("-Wctad-maybe-unsupported")										\
 	JPH_CLANG_SUPPRESS_WARNING("-Wdeprecated-copy")												\
+	JPH_CLANG_13_PLUS_SUPPRESS_WARNING("-Wdeprecated-copy-with-dtor")							\
 	JPH_IF_NOT_ANDROID(JPH_CLANG_SUPPRESS_WARNING("-Wimplicit-int-float-conversion"))			\
 																								\
 	JPH_GCC_SUPPRESS_WARNING("-Wcomment")														\
@@ -191,7 +235,9 @@
 	JPH_MSVC_SUPPRESS_WARNING(4582) /* 'X': constructor is not implicitly called */				\
 	JPH_MSVC_SUPPRESS_WARNING(5219) /* implicit conversion from 'X' to 'Y', possible loss of data  */ \
 	JPH_MSVC_SUPPRESS_WARNING(4826) /* Conversion from 'X *' to 'JPH::uint64' is sign-extended. This may cause unexpected runtime behavior. (32-bit) */ \
-	JPH_MSVC_SUPPRESS_WARNING(5264) /* 'X': 'const' variable is not used */
+	JPH_MSVC_SUPPRESS_WARNING(5264) /* 'X': 'const' variable is not used */						\
+	JPH_MSVC_SUPPRESS_WARNING(4251) /* class 'X' needs to have DLL-interface to be used by clients of class 'Y' */ \
+	JPH_MSVC2019_SUPPRESS_WARNING(5246) /* the initialization of a subobject should be wrapped in braces */
 
 // OS-specific includes
 #if defined(JPH_PLATFORM_WINDOWS)
@@ -237,9 +283,7 @@
 	JPH_MSVC_SUPPRESS_WARNING(4820)																\
 	JPH_MSVC_SUPPRESS_WARNING(4514)																\
 	JPH_MSVC_SUPPRESS_WARNING(5262)																\
-	JPH_MSVC_SUPPRESS_WARNING(5264)																\
-																								\
-	JPH_GCC_SUPPRESS_WARNING("-Wstringop-overflow=")
+	JPH_MSVC_SUPPRESS_WARNING(5264)
 
 #define JPH_SUPPRESS_WARNINGS_STD_END															\
 	JPH_SUPPRESS_WARNING_POP
@@ -252,6 +296,7 @@ JPH_SUPPRESS_WARNINGS_STD_BEGIN
 #include <sstream>
 #include <functional>
 #include <algorithm>
+#include <cstdint>
 JPH_SUPPRESS_WARNINGS_STD_END
 #include <limits.h>
 #include <float.h>
@@ -351,17 +396,46 @@ static_assert(sizeof(void *) == (JPH_CPU_ADDRESS_BITS == 64? 8 : 4), "Invalid si
 	#define JPH_IF_FLOATING_POINT_EXCEPTIONS_ENABLED(...)
 #endif
 
+// Helper macros to detect if we're running in single or double precision mode
+#ifdef JPH_DOUBLE_PRECISION
+	#define JPH_IF_SINGLE_PRECISION(...)
+	#define JPH_IF_SINGLE_PRECISION_ELSE(s, d) d
+	#define JPH_IF_DOUBLE_PRECISION(...) __VA_ARGS__
+#else
+	#define JPH_IF_SINGLE_PRECISION(...) __VA_ARGS__
+	#define JPH_IF_SINGLE_PRECISION_ELSE(s, d) s
+	#define JPH_IF_DOUBLE_PRECISION(...)
+#endif
+
+// Helper macro to detect if the debug renderer is active
+#ifdef JPH_DEBUG_RENDERER
+	#define JPH_IF_DEBUG_RENDERER(...) __VA_ARGS__
+	#define JPH_IF_NOT_DEBUG_RENDERER(...)
+#else
+	#define JPH_IF_DEBUG_RENDERER(...)
+	#define JPH_IF_NOT_DEBUG_RENDERER(...) __VA_ARGS__
+#endif
+
 // Macro to indicate that a parameter / variable is unused
 #define JPH_UNUSED(x)			(void)x
 
 // Macro to enable floating point precise mode and to disable fused multiply add instructions
-#if defined(JPH_COMPILER_CLANG) || defined(JPH_COMPILER_GCC) || defined(JPH_CROSS_PLATFORM_DETERMINISTIC)
-	// In clang it appears you cannot turn off -ffast-math and -ffp-contract=fast for a code block
-	// There is #pragma clang fp contract (off) but that doesn't seem to work under clang 9 & 10 when -ffast-math is specified on the commandline (you override it to turn it on, but not off)
-	// There is #pragma float_control(precise, on) but that doesn't work under clang 9.
-	// So for now we compile clang without -ffast-math so the macros are empty
+#if defined(JPH_COMPILER_GCC) || defined(JPH_CROSS_PLATFORM_DETERMINISTIC)
+	// We compile without -ffast-math and -ffp-contract=fast, so we don't need to disable anything
 	#define JPH_PRECISE_MATH_ON
 	#define JPH_PRECISE_MATH_OFF
+#elif defined(JPH_COMPILER_CLANG)
+	// We compile without -ffast-math because it cannot be turned off for a single compilation unit
+	// On clang 14 and later we can turn off float contraction through a pragma, so if FMA is on we can disable it through this macro
+	#if __clang_major__ >= 14 && defined(JPH_USE_FMADD)
+		#define JPH_PRECISE_MATH_ON					\
+			_Pragma("clang fp contract(off)")
+		#define JPH_PRECISE_MATH_OFF				\
+			_Pragma("clang fp contract(on)")
+	#else
+		#define JPH_PRECISE_MATH_ON
+		#define JPH_PRECISE_MATH_OFF
+	#endif
 #elif defined(JPH_COMPILER_MSVC)
 	// Unfortunately there is no way to push the state of fp_contract, so we have to assume it was turned on before JPH_PRECISE_MATH_ON
 	#define JPH_PRECISE_MATH_ON						\

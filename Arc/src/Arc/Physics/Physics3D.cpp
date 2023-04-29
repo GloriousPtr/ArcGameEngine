@@ -15,16 +15,6 @@
 
 namespace ArcEngine
 {
-	static bool Physics3DObjectCanCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2)
-	{
-		ARC_PROFILE_SCOPE();
-
-		const EntityLayer layer1 = BIT(inObject1);
-		const EntityLayer layer2 = BIT(inObject2);
-		return	(layer1 & Scene::LayerCollisionMask.at(layer2).Flags) == layer1 &&
-				(layer2 & Scene::LayerCollisionMask.at(layer1).Flags) == layer2;
-	};
-
 	struct Physics3DLayer
 	{
 		static constexpr uint8_t STATIC = 0;
@@ -111,21 +101,47 @@ namespace ArcEngine
 		JPH::BroadPhaseLayer mObjectToBroadPhase[Physics3DLayer::NUM_LAYERS];
 	};
 
-	static bool Physics3DBroadPhaseCanCollide(JPH::ObjectLayer inLayer1, JPH::BroadPhaseLayer inLayer2)
+	class ObjectVsBroadPhaseLayerFilterImpl final : public JPH::ObjectVsBroadPhaseLayerFilter
 	{
-		ARC_PROFILE_SCOPE();
+	public:
+		virtual ~ObjectVsBroadPhaseLayerFilterImpl() = default;
 
-		if (inLayer1 == Physics3DLayer::STATIC)
-			return inLayer2 != BroadPhaseLayers::STATIC;
+		[[nodiscard]] bool ShouldCollide(JPH::ObjectLayer inLayer1, JPH::BroadPhaseLayer inLayer2) const override
+		{
+			ARC_PROFILE_SCOPE();
 
-		return true;
-	}
+			if (inLayer1 == Physics3DLayer::STATIC)
+				return inLayer2 != BroadPhaseLayers::STATIC;
 
-	JPH::PhysicsSystem* Physics3D::s_PhysicsSystem;
-	JPH::TempAllocator* Physics3D::s_TempAllocator;
-	JPH::JobSystemThreadPool* Physics3D::s_JobSystem;
+			return true;
+		}
+	};
 
-	BPLayerInterfaceImpl* Physics3D::s_BPLayerInterface;
+	class ObjectLayerPairFilterImpl : public JPH::ObjectLayerPairFilter
+	{
+	public:
+		virtual ~ObjectLayerPairFilterImpl() = default;
+
+		[[nodiscard]] bool ShouldCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2) const
+		{
+			ARC_PROFILE_SCOPE();
+
+			const EntityLayer layer1 = BIT(inObject1);
+			const EntityLayer layer2 = BIT(inObject2);
+			return	(layer1 & Scene::LayerCollisionMask.at(layer2).Flags) == layer1 &&
+				(layer2 & Scene::LayerCollisionMask.at(layer1).Flags) == layer2;
+		};
+	};
+
+
+
+	static JPH::PhysicsSystem* s_PhysicsSystem;
+	static JPH::TempAllocator* s_TempAllocator;
+	static JPH::JobSystemThreadPool* s_JobSystem;
+
+	BPLayerInterfaceImpl* s_BPLayerInterface;
+	ObjectVsBroadPhaseLayerFilterImpl* s_ObjectVsBroadPhaseLayerFilter;
+	ObjectLayerPairFilterImpl* s_ObjectLayerPairFilter;
 
 	void Physics3D::Init()
 	{
@@ -145,8 +161,11 @@ namespace ArcEngine
 		constexpr JPH::uint cMaxContactConstraints = 10240;
 
 		s_BPLayerInterface = new BPLayerInterfaceImpl();
+		s_ObjectVsBroadPhaseLayerFilter = new ObjectVsBroadPhaseLayerFilterImpl();
+		s_ObjectLayerPairFilter = new ObjectLayerPairFilterImpl();
 		s_PhysicsSystem = new JPH::PhysicsSystem();
-		s_PhysicsSystem->Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, *s_BPLayerInterface, Physics3DBroadPhaseCanCollide, Physics3DObjectCanCollide);
+
+		s_PhysicsSystem->Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, *s_BPLayerInterface, *s_ObjectVsBroadPhaseLayerFilter, *s_ObjectLayerPairFilter);
 	}
 
 	void Physics3D::Shutdown()
@@ -154,12 +173,16 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		delete s_PhysicsSystem;
+		delete s_ObjectLayerPairFilter;
+		delete s_ObjectVsBroadPhaseLayerFilter;
 		delete s_BPLayerInterface;
 		delete s_JobSystem;
 		delete s_TempAllocator;
 		delete JPH::Factory::sInstance;
 
 		s_PhysicsSystem = nullptr;
+		s_ObjectLayerPairFilter = nullptr;
+		s_ObjectVsBroadPhaseLayerFilter = nullptr;
 		s_BPLayerInterface = nullptr;
 		s_JobSystem = nullptr;
 		s_TempAllocator = nullptr;

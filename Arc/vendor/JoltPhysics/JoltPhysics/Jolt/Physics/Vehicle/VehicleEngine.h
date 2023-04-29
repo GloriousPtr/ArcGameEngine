@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -16,10 +17,10 @@ JPH_NAMESPACE_BEGIN
 #endif // JPH_DEBUG_RENDERER
 
 /// Generic properties for a vehicle engine
-class VehicleEngineSettings
+class JPH_EXPORT VehicleEngineSettings
 {
 public:
-	JPH_DECLARE_SERIALIZABLE_NON_VIRTUAL(VehicleEngineSettings)
+	JPH_DECLARE_SERIALIZABLE_NON_VIRTUAL(JPH_EXPORT, VehicleEngineSettings)
 
 	/// Constructor
 							VehicleEngineSettings();
@@ -39,7 +40,7 @@ public:
 };
 
 /// Runtime data for engine
-class VehicleEngine : public VehicleEngineSettings
+class JPH_EXPORT VehicleEngine : public VehicleEngineSettings
 {
 public:
 	/// Multiply an angular velocity (rad/s) with this value to get rounds per minute (RPM)
@@ -72,7 +73,7 @@ public:
 
 #ifdef JPH_DEBUG_RENDERER
 	/// Debug draw a RPM meter
-	void					DrawRPM(DebugRenderer *inRenderer, Vec3Arg inPosition, Vec3Arg inForward, Vec3Arg inUp, float inSize, float inShiftDownRPM, float inShiftUpRPM) const;
+	void					DrawRPM(DebugRenderer *inRenderer, RVec3Arg inPosition, Vec3Arg inForward, Vec3Arg inUp, float inSize, float inShiftDownRPM, float inShiftUpRPM) const;
 #endif // JPH_DEBUG_RENDERER
 
 	/// Saving state for replay

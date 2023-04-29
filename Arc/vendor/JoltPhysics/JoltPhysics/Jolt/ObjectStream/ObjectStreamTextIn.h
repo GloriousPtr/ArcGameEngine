@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -8,7 +9,7 @@
 JPH_NAMESPACE_BEGIN
 
 /// Implementation of ObjectStream text input stream.
-class ObjectStreamTextIn : public ObjectStreamIn
+class JPH_EXPORT ObjectStreamTextIn : public ObjectStreamIn
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -28,13 +29,17 @@ public:
 	virtual bool				ReadPrimitiveData(uint32 &outPrimitive) override;
 	virtual bool				ReadPrimitiveData(uint64 &outPrimitive) override;
 	virtual bool				ReadPrimitiveData(float &outPrimitive) override;
+	virtual bool				ReadPrimitiveData(double &outPrimitive) override;
 	virtual bool				ReadPrimitiveData(bool &outPrimitive) override;
 	virtual bool				ReadPrimitiveData(String &outPrimitive) override;
 	virtual bool				ReadPrimitiveData(Float3 &outPrimitive) override;
+	virtual bool				ReadPrimitiveData(Double3 &outPrimitive) override;
 	virtual bool				ReadPrimitiveData(Vec3 &outPrimitive) override;
+	virtual bool				ReadPrimitiveData(DVec3 &outPrimitive) override;
 	virtual bool				ReadPrimitiveData(Vec4 &outPrimitive) override;
 	virtual bool				ReadPrimitiveData(Quat &outPrimitive) override;
 	virtual bool				ReadPrimitiveData(Mat44 &outPrimitive) override;
+	virtual bool				ReadPrimitiveData(DMat44 &outPrimitive) override;
 
 private:
 	bool						ReadChar(char &outChar);

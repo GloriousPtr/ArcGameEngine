@@ -1,3 +1,4 @@
+// Jolt Physics Library (https://github.com/jrouwe/JoltPhysics)
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
@@ -31,7 +32,7 @@ struct AABBTreeBuilderStats
 };
 
 /// Helper class to build an AABB tree
-class AABBTreeBuilder
+class JPH_EXPORT AABBTreeBuilder
 {
 public:
 	/// A node in the tree, contains the AABox for the tree and any child nodes or triangles
