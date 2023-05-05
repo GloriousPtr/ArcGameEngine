@@ -42,6 +42,19 @@ namespace ArcEngine
 	inline static std::future<void> s_OpenProjectFuture;
 	inline static std::future<void> s_OpenFileFuture;
 
+	enum class VisualStudioVersion
+	{
+		Preview2022, Enterprise2022, Professional2022, Community2022,
+	};
+
+	inline static std::unordered_map<VisualStudioVersion, const char*> s_VisualStudioInstallLocation
+	{
+		{ VisualStudioVersion::Preview2022,			"C:/Program Files/Microsoft Visual Studio/2022/Preview/Common7/IDE/devenv.exe"		},
+		{ VisualStudioVersion::Enterprise2022,		"C:/Program Files/Microsoft Visual Studio/2022/Enterprise/Common7/IDE/devenv.exe"	},
+		{ VisualStudioVersion::Professional2022,	"C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/devenv.exe" },
+		{ VisualStudioVersion::Community2022,		"C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/devenv.exe"	},
+	};
+
 	static bool FindAndSetRunningInstance(const std::string& solutionPath)
 	{
 		IRunningObjectTable* runningObjectTable = nullptr;
@@ -163,26 +176,21 @@ namespace ArcEngine
 
 	static void RunAndOpenSolutionAndFile(const std::filesystem::path& solutionPath, const char* filepath = nullptr, uint32_t goToLine = 0)
 	{
-		constexpr const char* vs2022Enterprise = "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/Common7/IDE/devenv.exe";
-		constexpr const char* vs2022Professional = "C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/devenv.exe";
-		constexpr const char* vs2022Community = "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/devenv.exe";
-
 		std::string cmdArgs;
-		if (std::filesystem::exists(vs2022Enterprise))
+		
+		constexpr auto versions = magic_enum::enum_values<VisualStudioVersion>();
+		for (const auto version : versions)
 		{
-			cmdArgs = vs2022Enterprise;
+			if (std::filesystem::exists(s_VisualStudioInstallLocation[version]))
+			{
+				cmdArgs = s_VisualStudioInstallLocation[version];
+				break;
+			}
 		}
-		else if (std::filesystem::exists(vs2022Professional))
+
+		if (cmdArgs.empty())
 		{
-			cmdArgs = vs2022Professional;
-		}
-		else if (std::filesystem::exists(vs2022Community))
-		{
-			cmdArgs = vs2022Community;
-		}
-		else
-		{
-			ARC_CORE_ERROR("Failed to run Visual Studio 2022! Make sure VS2022 Enterprise, Professional or Community is installed");
+			ARC_CORE_ERROR("Failed to run Visual Studio 2022! Make sure VS2022 Preview, Enterprise, Professional or Community is installed");
 			return;
 		}
 		cmdArgs += " ";
