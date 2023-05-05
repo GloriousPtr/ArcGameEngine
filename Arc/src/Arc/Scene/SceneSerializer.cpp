@@ -5,10 +5,6 @@
 #include "Arc/Scene/Scene.h"
 #include "EntitySerializer.h"
 
-#include <fstream>
-
-#include <yaml-cpp/yaml.h>
-
 namespace ArcEngine
 {
 	SceneSerializer::SceneSerializer(const Ref<Scene>& scene)

@@ -4,8 +4,6 @@
 #include "DxHelper.h"
 #include "Dx12Allocator.h"
 
-#include <glm/gtc/type_ptr.hpp>
-
 namespace ArcEngine
 {
 	Dx12Framebuffer::Dx12Framebuffer(const FramebufferSpecification& spec)

@@ -1,8 +1,6 @@
 #include "arcpch.h"
 #include "AssetManager.h"
 
-#include <stb_image.h>
-
 #include "Arc/Core/Application.h"
 #include "Arc/Renderer/Mesh.h"
 #include "Arc/Renderer/Texture.h"

@@ -1,8 +1,6 @@
 #include "arcpch.h"
 #include "Dx12PipelineState.h"
 
-#include <comutil.h>
-#include <wrl.h>
 #include <dxcapi.h>
 #include <d3d12shader.h>
 

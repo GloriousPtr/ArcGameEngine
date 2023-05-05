@@ -20,15 +20,8 @@
 #	pragma warning(pop)
 #endif
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#include <wrl.h>
-#include <atlbase.h>
-
 //#import "libid:80cc9f66-e7d8-4ddd-85b6-d9e6cd0e93e2" named_guids raw_interfaces_only auto_rename
 //#import "libid:1A31287A-4D7D-413E-8E32-3B374931BD89" named_guids raw_interfaces_only auto_rename
-
-#include <future>
 
 #include "Arc/Project/Project.h"
 #include "Arc/Scripting/ProjectBuilder.h"

@@ -1,7 +1,7 @@
 #include "arcpch.h"
 #include "AudioSource.h"
 
-#include "miniaudio.h"
+#include <miniaudio.h>
 
 #include "AudioEngine.h"
 

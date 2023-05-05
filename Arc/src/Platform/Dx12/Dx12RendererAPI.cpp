@@ -2,7 +2,6 @@
 #include "Dx12RendererAPI.h"
 
 #include <d3d12.h>
-#include <glm/gtc/type_ptr.inl>
 
 #include "Arc/Core/Application.h"
 #include "Arc/Core/Window.h"

@@ -1,9 +1,6 @@
 #include "arcpch.h"
 #include "Material.h"
 
-#include <ranges>
-#include <glm/gtc/type_ptr.hpp>
-
 #include "Buffer.h"
 #include "Renderer.h"
 #include "Shader.h"

@@ -1,8 +1,6 @@
 #include "arcpch.h"
 #include "Filesystem.h"
 
-#include <fstream>
-
 namespace ArcEngine
 {
 	bool Filesystem::IsPartOfDirectoryTree(const std::filesystem::path& filePath, const std::filesystem::path& rootPath)

@@ -1,9 +1,6 @@
 #include "arcpch.h"
 #include "Renderer3D.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include "Renderer.h"
 #include "RenderGraphData.h"
 #include "Framebuffer.h"

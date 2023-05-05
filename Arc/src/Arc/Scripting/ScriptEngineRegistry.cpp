@@ -1,7 +1,6 @@
 #include "arcpch.h"
 #include "ScriptEngineRegistry.h"
 
-#include <glm/gtc/type_ptr.hpp>
 #include <box2d/b2_body.h>
 
 #include "Arc/Core/Input.h"

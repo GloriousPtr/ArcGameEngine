@@ -1,9 +1,6 @@
 #include "arcpch.h"
 #include "EntitySerializer.h"
 
-#include <yaml-cpp/yaml.h>
-#include <fstream>
-
 #include "Arc/Audio/AudioListener.h"
 #include "Arc/Audio/AudioSource.h"
 #include "Arc/Core/AssetManager.h"

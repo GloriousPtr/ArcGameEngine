@@ -3,8 +3,6 @@
 
 #include <dxgi1_6.h>
 #include <d3d12.h>
-#include <comutil.h>
-#include <wrl.h>
 
 #ifdef ARC_DEBUG
 #include <dxgidebug.h>

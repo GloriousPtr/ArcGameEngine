@@ -11,8 +11,6 @@
 #include "Arc/Scene/Entity.h"
 #include "Arc/Scripting/ScriptEngine.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtx/compatibility.hpp>
 #include <box2d/box2d.h>
 
 // Jolt includes

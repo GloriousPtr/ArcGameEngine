@@ -1,8 +1,6 @@
 #include "arcpch.h"
 #include "Arc/Scene/SceneCamera.h"
 
-#include <glm/gtc/matrix_transform.hpp>
-
 namespace ArcEngine
 {
 	SceneCamera::SceneCamera()

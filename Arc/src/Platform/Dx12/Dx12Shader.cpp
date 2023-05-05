@@ -2,11 +2,7 @@
 #include "Dx12Shader.h"
 
 #include <d3dx12/d3dx12.h>
-#include <comutil.h>
 #include <dxcapi.h>
-#include <wrl.h>
-
-#include <ranges>
 
 #include "DxHelper.h"
 #include "Arc/Core/Filesystem.h"

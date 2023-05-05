@@ -3,8 +3,6 @@
 
 #include "Dx12Allocator.h"
 
-#include <stb_image.h>
-
 #include "DxHelper.h"
 #include "Arc/Renderer/PipelineState.h"
 #include "Arc/Renderer/Renderer.h"

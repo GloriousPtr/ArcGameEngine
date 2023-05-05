@@ -2,8 +2,6 @@
 
 #ifdef ARC_PLATFORM_WINDOWS
 
-#include <comutil.h>
-
 #include "Arc/Project/Project.h"
 #include "Arc/Scripting/ProjectBuilder.h"
 
