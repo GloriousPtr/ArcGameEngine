@@ -22,9 +22,3 @@
 [submodule "Arc/vendor/D3D12MA/D3D12MemoryAllocator"]
 	path = Arc/vendor/D3D12MA/D3D12MemoryAllocator
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator.git
-[submodule "Arc/vendor/EASTL/EASTL"]
-	path = Arc/vendor/EASTL/EASTL
-	url = https://github.com/electronicarts/EASTL.git
-[submodule "Arc/vendor/EABase/EABase"]
-	path = Arc/vendor/EABase/EABase
-	url = https://github.com/electronicarts/EABase.git

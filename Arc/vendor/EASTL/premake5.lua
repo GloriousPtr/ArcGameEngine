@@ -9,17 +9,17 @@ project "EASTL"
 
 	files
 	{
-		"EASTL/include/**.h",
-		"EASTL/include/**.cpp",
-		"EASTL/source/**.h",
-		"EASTL/source/**.cpp"
+		"include/**.h",
+		"include/**.cpp",
+		"source/**.h",
+		"source/**.cpp"
 	}
 
 	includedirs 
 	{
-		"EASTL/include",
-		"EASTL/source",
-		"../EABase/EABase/include/Common",
+		"include",
+		"source",
+		"../EABase/include/Common",
 	}
 
 	filter "system:windows"
