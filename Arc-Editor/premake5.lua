@@ -46,6 +46,8 @@ project "Arc-Editor"
 		"%{IncludeDir.optick}",
 		"%{IncludeDir.icons}",
 		"%{IncludeDir.magic_enum}",
+		"%{IncludeDir.EABase}",
+		"%{IncludeDir.EASTL}",
 	}
 	
 	links
@@ -58,6 +60,7 @@ project "Arc-Editor"
 		"optick",
 		"box2d",
 		"JoltPhysics",
+		"EASTL",
 	}
 
 	dependson

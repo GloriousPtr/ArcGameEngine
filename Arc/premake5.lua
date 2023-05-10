@@ -64,6 +64,8 @@ project "Arc"
 		"%{IncludeDir.tinyobj}",
 		"%{IncludeDir.tinygltf}",
 		"%{IncludeDir.magic_enum}",
+		"%{IncludeDir.EABase}",
+		"%{IncludeDir.EASTL}",
 	}
 
 	links
@@ -75,6 +77,7 @@ project "Arc"
 		"optick",
 		"box2d",
 		"JoltPhysics",
+		"EASTL",
 	}
 
 	dependson

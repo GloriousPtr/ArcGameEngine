@@ -58,6 +58,8 @@ IncludeDir["tinyobj"] = "%{wks.location}/Arc/vendor/tinyobj"
 IncludeDir["tinygltf"] = "%{wks.location}/Arc/vendor/tinygltf"
 IncludeDir["D3D12MA"] = "%{wks.location}/Arc/vendor/D3D12MA/D3D12MemoryAllocator/include"
 IncludeDir["magic_enum"] = "%{wks.location}/Arc/vendor/magic_enum"
+IncludeDir["EASTL"] = "%{wks.location}/Arc/vendor/EASTL/EASTL/include"
+IncludeDir["EABase"] = "%{wks.location}/Arc/vendor/EABase/EABase/include/Common"
 
 group "Dependencies"
 	include "Arc/vendor/GLFW"
@@ -68,6 +70,7 @@ group "Dependencies"
 	include "Arc/vendor/box2d"
 	include "Arc/vendor/JoltPhysics"
 	include "Arc/vendor/D3D12MA"
+	include "Arc/vendor/EASTL"
 
 group ""
 
