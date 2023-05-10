@@ -1189,14 +1189,14 @@ namespace ArcEngine
 			}
 			else
 			{
-				m_Scene = CreateRef<Scene>();
+				m_Scene = CreateScope<Scene>();
 				prefab = EntitySerializer::DeserializeEntityAsPrefab(filepath, *m_Scene);
 			}
 		}
 		else
 		{
 			if (m_Scene)
-				m_Scene = nullptr;
+				m_Scene.reset();
 
 			ImGui::TextUnformatted(name.data());
 		}

@@ -94,15 +94,18 @@ namespace ArcEngine
 					ImGui::PopID();
 				}
 
-				ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
-				const auto view = m_Context->m_Registry.view<IDComponent>();
-				for (auto e = view.rbegin(); e != view.rend(); ++e)
+				if (m_Context)
 				{
-					const Entity entity = { *e, m_Context.get() };
-					if (entity && !entity.GetParent())
-						DrawEntityNode(entity);
+					ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+					const auto view = m_Context->m_Registry.view<IDComponent>();
+					for (auto e = view.rbegin(); e != view.rend(); ++e)
+					{
+						const Entity entity = { *e, m_Context };
+						if (entity && !entity.GetParent())
+							DrawEntityNode(entity);
+					}
+					ImGui::PopStyleVar();
 				}
-				ImGui::PopStyleVar();
 
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 				if (ImGui::BeginPopupContextWindow("SceneHierarchyContextWindow", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
@@ -126,7 +129,7 @@ namespace ArcEngine
 				m_DraggedEntityTarget = {};
 			}
 
-			if (m_DeletedEntity)
+			if (m_DeletedEntity && m_Context)
 			{
 				const EditorContext& context = EditorLayer::GetInstance()->GetContext();
 				if (context.IsValid(EditorContextType::Entity) && *context.As<Entity>() == m_DeletedEntity)
@@ -146,7 +149,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		[[unlikely]]
-		if (!entity)
+		if (!entity || !m_Context)
 			return { 0, 0, 0, 0 };
 
 		ImGui::TableNextRow();
@@ -358,7 +361,7 @@ namespace ArcEngine
 		return nodeRect;
 	}
 
-	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
+	void SceneHierarchyPanel::SetContext(Scene* context)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -367,6 +370,9 @@ namespace ArcEngine
 
 	void SceneHierarchyPanel::DragDropTarget() const
 	{
+		if (!m_Context)
+			return;
+
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
@@ -423,6 +429,9 @@ namespace ArcEngine
 
 	void SceneHierarchyPanel::DrawContextMenu() const
 	{
+		if (!m_Context)
+			return;
+
 		const bool hasContext = m_SelectedEntity;
 
 		if (!hasContext)

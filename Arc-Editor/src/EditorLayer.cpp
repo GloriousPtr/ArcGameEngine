@@ -40,7 +40,7 @@ namespace ArcEngine
 		m_ActiveScene = CreateRef<Scene>();
 		m_EditorScene = m_ActiveScene;
 
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene.get());
 
 		m_Viewports.emplace_back(CreateScope<SceneViewport>());
 		m_Viewports[0]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
@@ -881,7 +881,7 @@ namespace ArcEngine
 		m_ActiveScene = CreateRef<Scene>();
 		m_EditorScene = m_ActiveScene;
 
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene.get());
 		if (!m_Viewports.empty())
 			m_Viewports[0]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
 		m_ScenePath = "";
@@ -903,7 +903,7 @@ namespace ArcEngine
 		m_EditorScene = m_ActiveScene;
 		ScriptEngine::SetScene(m_ActiveScene.get());
 
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene.get());
 		if (!m_Viewports.empty())
 			m_Viewports[0]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
 
@@ -949,7 +949,7 @@ namespace ArcEngine
 		m_ActiveScene->OnRuntimeStart();
 		m_SceneState = SceneState::Play;
 
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene.get());
 		if (m_Viewports.empty())
 			m_Viewports.emplace_back(CreateScope<SceneViewport>());
 		m_Viewports[0]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
@@ -968,7 +968,7 @@ namespace ArcEngine
 		m_ActiveScene = m_EditorScene;
 		ScriptEngine::SetScene(m_ActiveScene.get());
 
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene.get());
 		if (!m_Viewports.empty())
 		{
 			m_Viewports[0]->SetSimulation(false);

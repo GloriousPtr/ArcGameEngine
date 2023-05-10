@@ -22,7 +22,7 @@ namespace ArcEngine
 		void OnUpdate([[maybe_unused]] Timestep ts) override;
 		void OnImGuiRender() override;
 
-		void SetContext(const Ref<Scene>& context);
+		void SetContext(Scene* context);
 
 	private:
 		ImRect DrawEntityNode(Entity entity, uint32_t depth = 0, bool forceExpandTree = false, bool isPartOfPrefab = false);
@@ -32,7 +32,7 @@ namespace ArcEngine
 		friend class SceneViewport;
 
 	private:
-		Ref<Scene> m_Context = nullptr;
+		Scene* m_Context = nullptr;
 		Entity m_SelectedEntity;
 		Entity m_RenamingEntity;
 		Entity m_DeletedEntity;

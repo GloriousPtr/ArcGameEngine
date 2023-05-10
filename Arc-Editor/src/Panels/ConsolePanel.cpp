@@ -28,7 +28,7 @@ namespace ArcEngine
 		s_MessageBufferRenderFilter |= Log::Level::Critical;
 
 		ExternalConsoleSink::SetConsoleSink_HandleFlush([this](std::string_view message, const char* filepath, const char* function, int32_t line, Log::Level level){ AddMessage(message, filepath, function, line, level); });
-		m_MessageBuffer = std::vector<Ref<ConsolePanel::Message>>(m_Capacity);
+		m_MessageBuffer = std::vector<Scope<ConsolePanel::Message>>(m_Capacity);
 	}
 
 	ConsolePanel::~ConsolePanel()
@@ -42,7 +42,7 @@ namespace ArcEngine
 
 		static uint32_t id = 0;
 
-		*(m_MessageBuffer.begin() + m_BufferBegin) = CreateRef<Message>(id, message, filepath, function, line, level);
+		*(m_MessageBuffer.begin() + m_BufferBegin) = CreateScope<Message>(id, message, filepath, function, line, level);
 		if (++m_BufferBegin == m_Capacity)
 			m_BufferBegin = 0;
 		if (m_BufferSize < m_Capacity)

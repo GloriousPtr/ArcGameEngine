@@ -55,7 +55,7 @@ namespace ArcEngine
 		uint32_t s_MessageBufferRenderFilter = Log::Level::Trace;
 		bool m_AllowScrollingToBottom = true;
 		bool m_RequestScrollToBottom = false;
-		std::vector<Ref<Message>> m_MessageBuffer;
+		std::vector<Scope<Message>> m_MessageBuffer;
 		ImGuiTextFilter m_Filter;
 	};
 }
