@@ -5,9 +5,6 @@
 #include "Arc/Core/UUID.h"
 #include "Arc/Core/Timestep.h"
 
-class b2World;
-class b2Fixture;
-
 namespace ArcEngine
 {
 	class Entity;
@@ -17,13 +14,10 @@ namespace ArcEngine
 
 	struct TransformComponent;
 
-	class Physics3DContactListener;
-	class Physics3DBodyActivationListener;
 	struct RigidbodyComponent;
 	struct BoxColliderComponent;
 	struct SphereColliderComponent;
 
-	class Physics2DContactListener;
 	struct Rigidbody2DComponent;
 	struct BoxCollider2DComponent;
 	struct CircleCollider2DComponent;
@@ -94,11 +88,6 @@ namespace ArcEngine
 		entt::registry m_Registry;
 		std::unordered_map<UUID, entt::entity> m_EntityMap;
 		bool m_IsRunning = false;
-
-		b2World* m_PhysicsWorld2D = nullptr;
-		Physics2DContactListener* m_ContactListener2D = nullptr;
-		Physics3DContactListener* m_ContactListener3D = nullptr;
-		Physics3DBodyActivationListener* m_BodyActivationListener3D = nullptr;
 
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 

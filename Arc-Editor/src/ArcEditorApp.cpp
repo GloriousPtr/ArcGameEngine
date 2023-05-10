@@ -11,18 +11,18 @@ namespace ArcEngine
 		ArcEditor(const ApplicationSpecification& spec)
 			: Application(spec)
 		{
-			m_EditorLayer = new EditorLayer();
-			PushLayer(m_EditorLayer);
+			m_EditorLayer = CreateScope<EditorLayer>();
+			PushLayer(m_EditorLayer.get());
 		}
 
 		~ArcEditor() override
 		{
-			PopLayer(m_EditorLayer);
-			delete m_EditorLayer;
+			ARC_CORE_ASSERT(m_EditorLayer, "Editor Layer doesn't exist!");
+			PopLayer(m_EditorLayer.get());
 		}
 
 	private:
-		EditorLayer* m_EditorLayer = nullptr;
+		Scope<EditorLayer> m_EditorLayer;
 	};
 
 	Application* CreateApplication(ApplicationCommandLineArgs args)

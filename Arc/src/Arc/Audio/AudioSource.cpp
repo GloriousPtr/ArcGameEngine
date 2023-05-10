@@ -24,7 +24,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		ma_sound_uninit(m_Sound.get());
-		m_Sound = nullptr;
+		m_Sound.reset();
 	}
 
 	void AudioSource::Play() const

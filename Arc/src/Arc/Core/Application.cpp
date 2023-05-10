@@ -14,7 +14,7 @@ extern "C"
 
 namespace ArcEngine
 {
-	Application* Application::s_Instance = nullptr;
+	static Application* s_Instance = nullptr;
 
 	Application::Application(const ApplicationSpecification& specification)
 		: m_Specification(specification)
@@ -32,18 +32,18 @@ namespace ArcEngine
 		AudioEngine::Init();
 		ScriptEngine::Init();
 
-		m_LayerStack = new LayerStack();
-		m_ImGuiLayer = new ImGuiLayer();
-		PushOverlay(m_ImGuiLayer);
+		m_LayerStack = CreateScope<LayerStack>();
+		m_ImGuiLayer = CreateScope<ImGuiLayer>();
+		PushOverlay(m_ImGuiLayer.get());
 	}
 
 	Application::~Application()
 	{
 		ARC_PROFILE_SCOPE();
 
-		PopOverlay(m_ImGuiLayer);
-		delete m_ImGuiLayer;
-		delete m_LayerStack;
+		PopOverlay(m_ImGuiLayer.get());
+		m_ImGuiLayer.reset();
+		m_LayerStack.reset();
 
 		ScriptEngine::Shutdown();
 		AudioEngine::Shutdown();
@@ -62,7 +62,14 @@ namespace ArcEngine
 
 	size_t Application::GetAllocatedMemorySize()
 	{
-		return  Allocation::GetSize();
+		return Allocation::GetSize();
+	}
+
+	Application& Application::Get()
+	{
+		ARC_CORE_ASSERT(s_Instance, "Application instance doesn't exist!");
+
+		return *s_Instance;
 	}
 	
 	void Application::OnEvent(Event& e)

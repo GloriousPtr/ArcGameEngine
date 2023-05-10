@@ -248,6 +248,9 @@ namespace ArcEngine
 
 		if (s_Reflection->UnloadAssemblies)
 			s_Reflection->UnloadAssemblies();
+
+		s_Reflection.reset();
+		s_Data.reset();
 	}
 
 	void ScriptEngine::LoadAssemblyHelper()

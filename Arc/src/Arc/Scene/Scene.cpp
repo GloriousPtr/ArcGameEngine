@@ -262,7 +262,9 @@ namespace ArcEngine
 		}
 
 	public:
-		virtual JPH::ValidateResult	OnContactValidate([[maybe_unused]] const JPH::Body& inBody1, [[maybe_unused]] const JPH::Body& inBody2, [[maybe_unused]] JPH::RVec3Arg inBaseOffset, [[maybe_unused]] const JPH::CollideShapeResult& inCollisionResult)
+		virtual ~Physics3DContactListener() = default;
+
+		JPH::ValidateResult	OnContactValidate([[maybe_unused]] const JPH::Body& inBody1, [[maybe_unused]] const JPH::Body& inBody2, [[maybe_unused]] JPH::RVec3Arg inBaseOffset, [[maybe_unused]] const JPH::CollideShapeResult& inCollisionResult) override
 		{
 			return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
 		}
@@ -292,6 +294,8 @@ namespace ArcEngine
 	class Physics3DBodyActivationListener : public JPH::BodyActivationListener
 	{
 	public:
+		virtual ~Physics3DBodyActivationListener() = default;
+
 		void OnBodyActivated([[maybe_unused]] const JPH::BodyID& inBodyID, [[maybe_unused]] JPH::uint64 inBodyUserData) override
 		{
 			ARC_PROFILE_SCOPE();
@@ -308,6 +312,11 @@ namespace ArcEngine
 	};
 
 	#pragma endregion
+
+	Scope<b2World> m_PhysicsWorld2D;
+	Scope<Physics2DContactListener> m_ContactListener2D;
+	Scope<Physics3DContactListener> m_ContactListener3D;
+	Scope<Physics3DBodyActivationListener> m_BodyActivationListener3D;
 
 	template<typename... Component>
 	static void CopyComponent(entt::registry& dst, entt::registry& src, std::unordered_map<UUID, entt::entity> enttMap)
@@ -473,11 +482,11 @@ namespace ArcEngine
 			#pragma region Physics3D
 			{
 				Physics3D::Init();
-				m_BodyActivationListener3D = new Physics3DBodyActivationListener();
-				m_ContactListener3D = new Physics3DContactListener();
+				m_BodyActivationListener3D = CreateScope<Physics3DBodyActivationListener>();
+				m_ContactListener3D = CreateScope<Physics3DContactListener>();
 				JPH::PhysicsSystem& physicsSystem = Physics3D::GetPhysicsSystem();
-				physicsSystem.SetBodyActivationListener(m_BodyActivationListener3D);
-				physicsSystem.SetContactListener(m_ContactListener3D);
+				physicsSystem.SetBodyActivationListener(m_BodyActivationListener3D.get());
+				physicsSystem.SetContactListener(m_ContactListener3D.get());
 
 				auto group = m_Registry.group<RigidbodyComponent>(entt::get<TransformComponent>);
 				for (auto &&[e, rb, tc] : group.each())
@@ -493,9 +502,9 @@ namespace ArcEngine
 
 			#pragma region Physics2D
 			{
-				m_PhysicsWorld2D = new b2World({ Gravity.x, Gravity.y });
-				m_ContactListener2D = new Physics2DContactListener(this);
-				m_PhysicsWorld2D->SetContactListener(m_ContactListener2D);
+				m_PhysicsWorld2D = CreateScope<b2World>(b2Vec2(Gravity.x, Gravity.y));
+				m_ContactListener2D = CreateScope<Physics2DContactListener>(this);
+				m_PhysicsWorld2D->SetContactListener(m_ContactListener2D.get());
 
 				{
 					auto group = m_Registry.group<Rigidbody2DComponent>(entt::get<TransformComponent>);
@@ -781,20 +790,16 @@ namespace ArcEngine
 					}
 				}
 
-				delete m_BodyActivationListener3D;
-				delete m_ContactListener3D;
-				m_BodyActivationListener3D = nullptr;
-				m_ContactListener3D = nullptr;
+				m_BodyActivationListener3D.reset();
+				m_ContactListener3D.reset();
 				Physics3D::Shutdown();
 			}
 			#pragma endregion
 
 			#pragma region Physics2D
 			{
-				delete m_ContactListener2D;
-				delete m_PhysicsWorld2D;
-				m_ContactListener2D = nullptr;
-				m_PhysicsWorld2D = nullptr;
+				m_ContactListener2D.reset();
+				m_PhysicsWorld2D.reset();
 			}
 			#pragma endregion
 		}

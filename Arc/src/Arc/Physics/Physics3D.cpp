@@ -120,7 +120,10 @@ namespace ArcEngine
 	class ObjectLayerPairFilterImpl : public JPH::ObjectLayerPairFilter
 	{
 	public:
-		virtual ~ObjectLayerPairFilterImpl() = default;
+		virtual ~ObjectLayerPairFilterImpl()
+		{
+			[[maybe_unused]] int a = 6;
+		}
 
 		[[nodiscard]] bool ShouldCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2) const
 		{
@@ -133,15 +136,18 @@ namespace ArcEngine
 		};
 	};
 
+	struct JoltData
+	{
+		Scope<JPH::Factory> Factory;
+		Scope<JPH::PhysicsSystem> PhysicsSystem;
+		Scope<JPH::TempAllocator> TempAllocator;
+		Scope<JPH::JobSystemThreadPool> JobSystem;
+		Scope<BPLayerInterfaceImpl> BPLayerInterface;
+		Scope<ObjectVsBroadPhaseLayerFilterImpl> ObjectVsBroadPhaseLayerFilter;
+		Scope<ObjectLayerPairFilterImpl> ObjectLayerPairFilter;
+	};
 
-
-	static JPH::PhysicsSystem* s_PhysicsSystem;
-	static JPH::TempAllocator* s_TempAllocator;
-	static JPH::JobSystemThreadPool* s_JobSystem;
-
-	BPLayerInterfaceImpl* s_BPLayerInterface;
-	ObjectVsBroadPhaseLayerFilterImpl* s_ObjectVsBroadPhaseLayerFilter;
-	ObjectLayerPairFilterImpl* s_ObjectLayerPairFilter;
+	static Scope<JoltData> s_Data;
 
 	void Physics3D::Init()
 	{
@@ -149,61 +155,50 @@ namespace ArcEngine
 
 		JPH::RegisterDefaultAllocator();
 
-		JPH::Factory::sInstance = new JPH::Factory();
+		s_Data = CreateScope<JoltData>();
+
+		s_Data->Factory = CreateScope<JPH::Factory>();
+		JPH::Factory::sInstance = s_Data->Factory.get();
 
 		JPH::RegisterTypes();
 
-		s_TempAllocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
-		s_JobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, static_cast<int>(JPH::thread::hardware_concurrency()) - 1);
+		s_Data->TempAllocator = CreateScope<JPH::TempAllocatorImpl>(10 * 1024 * 1024);
+		s_Data->JobSystem = CreateScope<JPH::JobSystemThreadPool>(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, static_cast<int>(JPH::thread::hardware_concurrency()) - 1);
 		constexpr JPH::uint cMaxBodies = 65536;
 		constexpr JPH::uint cNumBodyMutexes = 0;
 		constexpr JPH::uint cMaxBodyPairs = 65536;
 		constexpr JPH::uint cMaxContactConstraints = 10240;
 
-		s_BPLayerInterface = new BPLayerInterfaceImpl();
-		s_ObjectVsBroadPhaseLayerFilter = new ObjectVsBroadPhaseLayerFilterImpl();
-		s_ObjectLayerPairFilter = new ObjectLayerPairFilterImpl();
-		s_PhysicsSystem = new JPH::PhysicsSystem();
+		s_Data->BPLayerInterface = CreateScope<BPLayerInterfaceImpl>();
+		s_Data->ObjectVsBroadPhaseLayerFilter = CreateScope<ObjectVsBroadPhaseLayerFilterImpl>();
+		s_Data->ObjectLayerPairFilter = CreateScope<ObjectLayerPairFilterImpl>();
+		s_Data->PhysicsSystem = CreateScope<JPH::PhysicsSystem>();
 
-		s_PhysicsSystem->Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, *s_BPLayerInterface, *s_ObjectVsBroadPhaseLayerFilter, *s_ObjectLayerPairFilter);
+		s_Data->PhysicsSystem->Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, *s_Data->BPLayerInterface, *s_Data->ObjectVsBroadPhaseLayerFilter, *s_Data->ObjectLayerPairFilter);
 	}
 
 	void Physics3D::Shutdown()
 	{
 		ARC_PROFILE_SCOPE();
 
-		delete s_PhysicsSystem;
-		delete s_ObjectLayerPairFilter;
-		delete s_ObjectVsBroadPhaseLayerFilter;
-		delete s_BPLayerInterface;
-		delete s_JobSystem;
-		delete s_TempAllocator;
-		delete JPH::Factory::sInstance;
-
-		s_PhysicsSystem = nullptr;
-		s_ObjectLayerPairFilter = nullptr;
-		s_ObjectVsBroadPhaseLayerFilter = nullptr;
-		s_BPLayerInterface = nullptr;
-		s_JobSystem = nullptr;
-		s_TempAllocator = nullptr;
-		JPH::Factory::sInstance = nullptr;
+		s_Data.reset();
 	}
 
 	void Physics3D::Step(float physicsTs)
 	{
 		ARC_PROFILE_SCOPE();
 
-		ARC_CORE_ASSERT(s_PhysicsSystem, "Physics system not initialized");
+		ARC_CORE_ASSERT(s_Data->PhysicsSystem && s_Data->TempAllocator && s_Data->JobSystem, "Physics system not initialized");
 
-		s_PhysicsSystem->Update(physicsTs, 1, 1, s_TempAllocator, s_JobSystem);
+		s_Data->PhysicsSystem->Update(physicsTs, 1, 1, s_Data->TempAllocator.get(), s_Data->JobSystem.get());
 	}
 
 	JPH::PhysicsSystem& Physics3D::GetPhysicsSystem()
 	{
 		ARC_PROFILE_SCOPE();
 
-		ARC_CORE_ASSERT(s_PhysicsSystem, "Physics system not initialized");
+		ARC_CORE_ASSERT(s_Data->PhysicsSystem, "Physics system not initialized");
 
-		return *s_PhysicsSystem;
+		return *s_Data->PhysicsSystem;
 	}
 }

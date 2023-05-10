@@ -54,10 +54,10 @@ namespace ArcEngine
 
 		void Close();
 
-		[[nodiscard]] ImGuiLayer* GetImGuiLayer() const { return m_ImGuiLayer; }
+		[[nodiscard]] ImGuiLayer* GetImGuiLayer() const { return m_ImGuiLayer.get(); }
 
 		[[nodiscard]] static size_t GetAllocatedMemorySize();
-		[[nodiscard]] static Application& Get() { return *s_Instance; }
+		[[nodiscard]] static Application& Get();
 		
 		void SubmitToMainThread(const std::function<void()>& function);
 
@@ -70,17 +70,16 @@ namespace ArcEngine
 	private:
 		ApplicationSpecification m_Specification;
 		Scope<Window> m_Window;
-		ImGuiLayer* m_ImGuiLayer;
+		Scope<ImGuiLayer> m_ImGuiLayer;
 		bool m_Running = true;
 		bool m_Minimized = false;
-		LayerStack* m_LayerStack;
+		Scope<LayerStack> m_LayerStack;
 		std::chrono::steady_clock::time_point m_LastFrameTime;
 
 		std::vector<std::function<void()>> m_MainThreadQueue;
 		std::mutex m_MainThreadQueueMutex;
 
 	private:
-		static Application* s_Instance;
 		friend int ::main(int argc, char** argv);
 	};
 

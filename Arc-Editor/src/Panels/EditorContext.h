@@ -11,21 +11,21 @@ namespace ArcEngine
 
 	struct EditorContext
 	{
-		void Set(EditorContextType type, const char* data, size_t size)
+		void Set(EditorContextType type, const void* data, size_t size)
 		{
-			delete[] m_Data;
+			m_Data.clear();
 
 			if (data && size != 0)
 			{
 				m_Type = type;
 				m_Size = size;
-				m_Data = new char[m_Size];
-				memcpy(m_Data, data, m_Size);
+				m_Data.resize(m_Size);
+				memcpy(m_Data.data(), data, m_Size);
 			}
 			else
 			{
 				m_Type = EditorContextType::None;
-				m_Data = nullptr;
+				m_Data.clear();
 			}
 		}
 
@@ -37,17 +37,17 @@ namespace ArcEngine
 		EditorContext() = default;
 		~EditorContext()
 		{
-			delete[] m_Data;
+			m_Data.clear();
 		}
 
 		EditorContext(const EditorContext& other)
 		{
-			Set(other.m_Type, other.m_Data, other.m_Size);
+			Set(other.m_Type, other.m_Data.data(), other.m_Size);
 		}
 
 		EditorContext& operator=(const EditorContext& other)
 		{
-			Set(other.m_Type, other.m_Data, other.m_Size);
+			Set(other.m_Type, other.m_Data.data(), other.m_Size);
 			return *this;
 		}
 
@@ -57,15 +57,15 @@ namespace ArcEngine
 		[[nodiscard]] EditorContextType GetType() const { return m_Type; }
 
 		template<typename T>
-		[[nodiscard]] const T* As() const { return reinterpret_cast<T*>(m_Data); }
+		[[nodiscard]] const T* As() const { ARC_CORE_ASSERT(!m_Data.empty(), "EditorContext Data is null"); return reinterpret_cast<const T*>(m_Data.data()); }
 
-		[[nodiscard]] bool IsValid(EditorContextType type) const { return type == m_Type && m_Data != nullptr; }
-		operator bool() const { return m_Type != EditorContextType::None && m_Data != nullptr; }
-		bool operator==(const EditorContext& other) const { return m_Type == other.m_Type && m_Data == other.m_Data; }
+		[[nodiscard]] bool IsValid(EditorContextType type) const { return type == m_Type && !m_Data.empty(); }
+		operator bool() const { return m_Type != EditorContextType::None && !m_Data.empty(); }
+		bool operator==(const EditorContext& other) const { return m_Type == other.m_Type && m_Data.data() == other.m_Data.data(); }
 
 	private:
 		EditorContextType m_Type = EditorContextType::None;
-		char* m_Data = nullptr;
+		std::vector<uint8_t> m_Data;
 		size_t m_Size = 0;
 	};
 }
