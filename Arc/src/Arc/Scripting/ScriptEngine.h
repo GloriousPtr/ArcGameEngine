@@ -117,7 +117,7 @@ namespace ArcEngine
 		[[nodiscard]] std::string GetFieldValueString(GCHandle instance, const std::string_view fieldName) const;
 
 		[[nodiscard]] const std::vector<std::string>& GetFields() const { return m_Fields; }
-		[[nodiscard]] const std::unordered_map<std::string, ScriptField, UM_StringTransparentEquality>& GetFieldsMap() const { return m_FieldsMap; }
+		[[nodiscard]] const str_umap<ScriptField>& GetFieldsMap() const { return m_FieldsMap; }
 
 	private:
 		void LoadFields();
@@ -129,7 +129,7 @@ namespace ArcEngine
 		DotnetAssembly m_Assembly;
 		std::string m_Classname{};
 		std::vector<std::string> m_Fields;
-		std::unordered_map<std::string, ScriptField, UM_StringTransparentEquality> m_FieldsMap;
+		str_umap<ScriptField> m_FieldsMap;
 	};
 
 	struct Collision2DData
@@ -220,10 +220,10 @@ namespace ArcEngine
 		[[nodiscard]] static ScriptInstance* GetInstance(Entity entity, const std::string& name);
 		static void RemoveInstance(Entity entity, const std::string& name);
 		
-		[[nodiscard]] static std::unordered_map<std::string, Ref<ScriptClass>, UM_StringTransparentEquality>& GetClasses();
+		[[nodiscard]] static str_umap<Ref<ScriptClass>>& GetClasses();
 		[[nodiscard]] static const std::vector<std::string>& GetFields (const char* className);
-		[[nodiscard]] static const std::unordered_map<std::string, ScriptField, UM_StringTransparentEquality>& GetFieldMap(const char* className);
-		[[nodiscard]] static std::unordered_map<std::string, ScriptFieldInstance, UM_StringTransparentEquality>& GetFieldInstanceMap(Entity entity, const char* className);
+		[[nodiscard]] static const str_umap<ScriptField>& GetFieldMap(const char* className);
+		[[nodiscard]] static str_umap<ScriptFieldInstance>& GetFieldInstanceMap(Entity entity, const char* className);
 
 		static void SetScene(Scene* scene) { s_CurrentScene = scene; }
 		[[nodiscard]] static Scene* GetScene() { return s_CurrentScene; }

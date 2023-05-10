@@ -15,7 +15,7 @@
 
 namespace ArcEngine
 {
-	static const std::unordered_map<std::string, FieldType, UM_StringTransparentEquality> s_ScriptFieldTypeMap =
+	static const str_umap<FieldType> s_ScriptFieldTypeMap =
 	{
 		{ "System.Single",		FieldType::Float },
 		{ "System.Double",		FieldType::Double },
@@ -64,10 +64,10 @@ namespace ArcEngine
 		std::string ClientAssemblyPath;
 		Scope<ScriptClass> EntityClass;
 
-		std::unordered_map<std::string, Ref<ScriptClass>, UM_StringTransparentEquality> EntityClasses;
-		std::unordered_map<UUID, std::unordered_map<std::string, std::unordered_map<std::string, ScriptFieldInstance, UM_StringTransparentEquality>, UM_StringTransparentEquality>> EntityFields;
+		str_umap<Ref<ScriptClass>> EntityClasses;
+		std::unordered_map<UUID, str_umap<str_umap<ScriptFieldInstance>>> EntityFields;
 
-		using EntityInstanceMap = std::unordered_map<UUID, std::unordered_map<std::string, ScriptInstance*, UM_StringTransparentEquality>>;
+		using EntityInstanceMap = std::unordered_map<UUID, str_umap<ScriptInstance*>>;
 		EntityInstanceMap EntityRuntimeInstances;
 	};
 
@@ -432,17 +432,17 @@ namespace ArcEngine
 		return s_Data->EntityClasses.at(className)->GetFields();
 	}
 
-	const std::unordered_map<std::string, ScriptField, UM_StringTransparentEquality>& ScriptEngine::GetFieldMap(const char* className)
+	const str_umap<ScriptField>& ScriptEngine::GetFieldMap(const char* className)
 	{
 		return s_Data->EntityClasses.at(className)->GetFieldsMap();
 	}
 
-	std::unordered_map<std::string, ScriptFieldInstance, UM_StringTransparentEquality>& ScriptEngine::GetFieldInstanceMap(Entity entity, const char* className)
+	str_umap<ScriptFieldInstance>& ScriptEngine::GetFieldInstanceMap(Entity entity, const char* className)
 	{
 		return s_Data->EntityFields[entity.GetUUID()][className];
 	}
 
-	std::unordered_map<std::string, Ref<ScriptClass>, UM_StringTransparentEquality>& ScriptEngine::GetClasses()
+	str_umap<Ref<ScriptClass>>& ScriptEngine::GetClasses()
 	{
 		return s_Data->EntityClasses;
 	}

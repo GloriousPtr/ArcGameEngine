@@ -40,8 +40,8 @@ namespace ArcEngine
 		[[nodiscard]] bool Exists(const std::string& name) const;
 	private:
 
-		std::unordered_map<std::string, Ref<PipelineState>, UM_StringTransparentEquality> m_Pipelines;
-		std::unordered_map<std::string, Ref<Shader>, UM_StringTransparentEquality> m_Shaders;
-		std::unordered_map<std::string, std::string, UM_StringTransparentEquality> m_ShaderPaths;
+		str_umap<Ref<PipelineState>> m_Pipelines;
+		str_umap<Ref<Shader>> m_Shaders;
+		str_umap<std::string> m_ShaderPaths;
 	};
 }

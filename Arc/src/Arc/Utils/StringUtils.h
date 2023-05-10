@@ -4,29 +4,31 @@
 
 namespace ArcEngine
 {
+	struct StringHash
+	{
+		using is_transparent = void;
+		[[nodiscard]] size_t operator()(const char* txt) const
+		{
+			return std::hash<std::string_view>{}(txt);
+		}
+
+		[[nodiscard]] size_t operator()(std::string_view txt) const
+		{
+			return std::hash<std::string_view>{}(txt);
+		}
+
+		[[nodiscard]] size_t operator()(const std::string& txt) const
+		{
+			return std::hash<std::string>{}(txt);
+		}
+	};
+
+	template<typename T>
+	using str_umap = std::unordered_map<std::string, T, StringHash, std::equal_to<>>;
+
 	class StringUtils
 	{
 	public:
-		struct StringHash
-		{
-			using is_transparent = void;
-			[[nodiscard]] size_t operator()(const char* txt) const
-			{
-				return std::hash<std::string_view>{}(txt);
-			}
-
-			[[nodiscard]] size_t operator()(std::string_view txt) const
-			{
-				return std::hash<std::string_view>{}(txt);
-			}
-
-			[[nodiscard]] size_t operator()(const std::string& txt) const
-			{
-				return std::hash<std::string>{}(txt);
-			}
-		};
-#define UM_StringTransparentEquality StringUtils::StringHash, std::equal_to<>
-
 		[[nodiscard]] static std::string_view GetExtension(const std::string_view& filepath)
 		{
 			ARC_PROFILE_SCOPE();

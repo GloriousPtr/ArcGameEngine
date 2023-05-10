@@ -32,8 +32,6 @@ namespace ArcEngine
 		}
 	};
 
-	using MaterialDataMap = std::unordered_map<std::string, MaterialData, UM_StringTransparentEquality>;
-
 	class Material
 	{
 	public:
@@ -71,7 +69,7 @@ namespace ArcEngine
 
 	private:
 		Ref<PipelineState>				m_Pipeline = nullptr;
-		MaterialDataMap					m_Indices;
+		str_umap<MaterialData>			m_Indices;
 		std::vector<TextureSlot>		m_TextureBuffer;
 		std::vector<uint32_t>			m_BindlessTextureBuffer;
 		std::vector<float>				m_CBBuffer;

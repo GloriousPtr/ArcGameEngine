@@ -48,7 +48,7 @@ namespace ArcEngine
 		{ FileType::Audio,		"Audio" },
 	};
 
-	static const std::unordered_map<std::string, FileType, UM_StringTransparentEquality> s_FileTypes =
+	static const str_umap<FileType> s_FileTypes =
 	{
 		{ ".arc",		FileType::Scene },
 		{ ".prefab",	FileType::Prefab },

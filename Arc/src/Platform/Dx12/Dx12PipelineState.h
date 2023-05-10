@@ -6,8 +6,6 @@
 
 namespace ArcEngine
 {
-	using BufferMap = std::unordered_map<std::string, uint32_t, UM_StringTransparentEquality>;
-
 	class Dx12PipelineState : public PipelineState
 	{
 	public:
@@ -29,7 +27,7 @@ namespace ArcEngine
 		ID3D12RootSignature*				m_RootSignature = nullptr;
 		ID3D12PipelineState*				m_PipelineState = nullptr;
 		std::vector<MaterialProperty>		m_MaterialProperties;
-		BufferMap							m_BufferMap;
+		str_umap<uint32_t>					m_BufferMap;
 		PipelineSpecification				m_Specification;
 	};
 }

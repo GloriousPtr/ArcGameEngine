@@ -10,9 +10,9 @@ namespace ArcEngine
 {
 	inline static Ref<Texture2D> s_WhiteTexture;
 	inline static Ref<Texture2D> s_BlackTexture;
-	inline static std::unordered_map<std::string, Ref<Texture2D>, UM_StringTransparentEquality> m_Texture2DMap;
-	inline static std::unordered_map<std::string, Ref<TextureCube>, UM_StringTransparentEquality> m_TextureCubeMap;
-	inline static std::unordered_map<std::string, Ref<Mesh>, UM_StringTransparentEquality> m_MeshMap;
+	inline static str_umap<Ref<Texture2D>> m_Texture2DMap;
+	inline static str_umap<Ref<TextureCube>> m_TextureCubeMap;
+	inline static str_umap<Ref<Mesh>> m_MeshMap;
 	inline static std::vector<std::future<void>> m_Futures;
 
 	void AssetManager::Init()

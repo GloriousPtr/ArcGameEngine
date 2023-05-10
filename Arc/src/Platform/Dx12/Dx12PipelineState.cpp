@@ -65,7 +65,7 @@ namespace ArcEngine
 		std::array<D3D12_DESCRIPTOR_RANGE1, 20>& outDescriptors,
 		uint32_t* outDescriptorsEnd,
 		std::vector<MaterialProperty>& outMaterialProperties,
-		BufferMap& bufferMap)
+		str_umap<uint32_t>& bufferMap)
 	{
 		ARC_PROFILE_SCOPE();
 
