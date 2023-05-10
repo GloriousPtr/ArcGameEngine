@@ -112,7 +112,7 @@ namespace ArcEngine
 			const auto& rc = GetRelationship();
 			const Entity parent = m_Scene->GetEntity(rc.Parent);
 			const glm::mat4 parentTransform = parent ? parent.GetWorldTransform() : glm::mat4(1.0f);
-			return parentTransform * glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);
+			return std::move(parentTransform * glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale));
 		}
 
 		[[nodiscard]] glm::mat4 GetLocalTransform() const
@@ -120,7 +120,7 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE();
 
 			const auto& transform = GetTransform();
-			return glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale);
+			return std::move(glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale));
 		}
 
 		[[nodiscard]] Scene* GetScene() const { return m_Scene; }

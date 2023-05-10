@@ -16,10 +16,13 @@ namespace ArcEngine
 	struct MeshData
 	{
 		glm::mat4 Transform;
-		Submesh& SubmeshGeometry;
+		Ref<Material> Mat;
+		Ref<VertexArray> Geometry;
 
-		MeshData(const glm::mat4& transform, Submesh& submesh)
-			: Transform(transform), SubmeshGeometry(submesh)
+		MeshData() = default;
+
+		MeshData(glm::mat4&& transform, Ref<Material>& material, Ref<VertexArray>& geometry)
+			: Transform(std::move(transform)), Mat(material), Geometry(geometry)
 		{
 		}
 	};
@@ -53,7 +56,7 @@ namespace ArcEngine
 	struct Renderer3DData
 	{
 		Renderer3D::Statistics Stats;
-		std::vector<MeshData> Meshes;
+		std::array<MeshData, 1'000'000> Meshes;
 		Ref<ConstantBuffer> GlobalDataCB;
 		Ref<ConstantBuffer> CubemapCB;
 		Ref<StructuredBuffer> DirectionalLightsSB;
@@ -68,6 +71,7 @@ namespace ArcEngine
 		Entity Skylight;
 		std::vector<Entity> SceneLights;
 		GlobalData GlobalData;
+		size_t MeshInsertIndex;
 	};
 
 	inline static Scope<Renderer3DData> s_Data;
@@ -306,16 +310,15 @@ namespace ArcEngine
 		//RenderCommand::DrawIndexed(s_QuadVertexArray);
 	}
 
-	void Renderer3D::ReserveMeshes(const size_t count)
-	{
-		s_Data->Meshes.reserve(count);
-	}
-
-	void Renderer3D::SubmitMesh(const glm::mat4& transform, Submesh& submesh)
+	void Renderer3D::SubmitMesh(glm::mat4&& transform, Ref<Material>& material, Ref<VertexArray>& geometry)
 	{
 		ARC_PROFILE_SCOPE();
 
-		s_Data->Meshes.emplace_back(transform, submesh);
+		if (s_Data->MeshInsertIndex >= s_Data->Meshes.size())
+			return;
+
+		s_Data->Meshes[s_Data->MeshInsertIndex] = std::move(MeshData(std::move(transform), material, geometry));
+		++s_Data->MeshInsertIndex;
 	}
 
 	void Renderer3D::Flush(const Ref<RenderGraphData>& renderGraphData)
@@ -329,7 +332,7 @@ namespace ArcEngine
 		FXAAPass(renderGraphData);
 		CompositePass(renderGraphData);
 
-		s_Data->Meshes.clear();
+		s_Data->MeshInsertIndex = 0;
 	}
 
 	void Renderer3D::FXAAPass([[maybe_unused]] const Ref<RenderGraphData>& renderGraphData)
@@ -700,13 +703,14 @@ namespace ArcEngine
 			s_Data->PointLightsSB->Bind();
 			s_Data->SpotLightsSB->Bind();
 
-			for (const auto& meshData : s_Data->Meshes)
+			const std::span<MeshData> meshes(s_Data->Meshes.data(), s_Data->MeshInsertIndex);
+			for (const auto& meshData : meshes)
 			{
-				meshData.SubmeshGeometry.Mat->Bind();
+				meshData.Mat->Bind();
 				s_Data->RenderPipeline->SetData("Transform", glm::value_ptr(meshData.Transform), sizeof(glm::mat4), 0);
-				RenderCommand::DrawIndexed(meshData.SubmeshGeometry.Geometry);
+				RenderCommand::DrawIndexed(meshData.Geometry);
 				s_Data->Stats.DrawCalls++;
-				s_Data->Stats.IndexCount += meshData.SubmeshGeometry.Geometry->GetIndexBuffer()->GetCount();
+				s_Data->Stats.IndexCount += meshData.Geometry->GetIndexBuffer()->GetCount();
 			}
 			shouldExecute = true;
 		}
@@ -746,14 +750,15 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE("Draw Meshes");
 
 			MeshComponent::CullModeType currentCullMode = MeshComponent::CullModeType::Unknown;
-			for (const auto& meshData : s_Meshes)
+			const std::span<MeshData> meshes(s_Data->Meshes.data(), s_Data->MeshInsertIndex);
+			for (const auto& meshData : meshes)
 			{
-				meshData.SubmeshGeometry.Mat->Bind();
+				meshData.Mat->Bind();
 				//s_Shader->SetData("u_Model", meshData.Transform);
 				
-				RenderCommand::DrawIndexed(meshData.SubmeshGeometry.Geometry);
+				RenderCommand::DrawIndexed(meshData.Geometry);
 				s_Stats.DrawCalls++;
-				s_Stats.IndexCount += meshData.SubmeshGeometry.Geometry->GetIndexBuffer()->GetCount();
+				s_Stats.IndexCount += meshData.Geometry->GetIndexBuffer()->GetCount();
 			}
 		}
 #endif
@@ -788,11 +793,12 @@ namespace ArcEngine
 
 			//s_ShadowMapShader->SetData("u_ViewProjection", dirLightViewProj);
 
-			for (auto it = s_Meshes.rbegin(); it != s_Meshes.rend(); ++it)
+			const std::span<MeshData> meshes(s_Data->Meshes.data(), s_Data->MeshInsertIndex);
+			for (auto it = meshes.rbegin(); it != meshes.rend(); ++it)
 			{
 				const MeshData& meshData = *it;
 				//s_ShadowMapShader->SetData("u_Model", meshData.Transform);
-				RenderCommand::DrawIndexed(meshData.SubmeshGeometry.Geometry);
+				RenderCommand::DrawIndexed(meshData.Geometry);
 			}
 		}
 #endif

@@ -11,11 +11,12 @@ namespace ArcEngine
 	class Shader;
 	class PipelineState;
 	class ConstantBuffer;
-	struct Submesh;
 	struct RenderGraphData;
-	class Entity;
 	struct CameraData;
+	class Entity;
+	class Material;
 	class VertexBuffer;
+	class VertexArray;
 
 	class Renderer3D
 	{
@@ -32,8 +33,7 @@ namespace ArcEngine
 
 		static void DrawCube();
 		static void DrawQuad();
-		static void ReserveMeshes(size_t count);
-		static void SubmitMesh(const glm::mat4& transform, Submesh& submesh);
+		static void SubmitMesh(glm::mat4&& transform, Ref<Material>& material, Ref<VertexArray>& geometry);
 
 		struct Statistics
 		{

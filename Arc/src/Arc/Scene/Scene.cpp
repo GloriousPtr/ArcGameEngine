@@ -1185,13 +1185,13 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE("Submit Mesh Data");
 
 			const auto view = m_Registry.view<MeshComponent>();
-			Renderer3D::ReserveMeshes(view.size());
 			for (auto &&[entity, meshComponent] : view.each())
 			{
 				if (meshComponent.MeshGeometry && meshComponent.MeshGeometry->GetSubmeshCount() != 0)
 				{
 					ARC_CORE_ASSERT(meshComponent.MeshGeometry->GetSubmeshCount() > meshComponent.SubmeshIndex, "Trying to access submesh index that does not exist!");
-					Renderer3D::SubmitMesh(Entity(entity, this).GetWorldTransform(), meshComponent.MeshGeometry->GetSubmesh(meshComponent.SubmeshIndex));
+					auto& submesh = meshComponent.MeshGeometry->GetSubmesh(meshComponent.SubmeshIndex);
+					Renderer3D::SubmitMesh(Entity(entity, this).GetWorldTransform(), submesh.Mat, submesh.Geometry);
 				}
 			}
 		}
