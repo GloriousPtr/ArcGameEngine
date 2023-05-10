@@ -1,6 +1,8 @@
 #pragma once
 
-#include <memory>
+#include <EASTL/memory.h>
+#include <EASTL/unique_ptr.h>
+#include <EASTL/shared_ptr.h>
 
 #include "Arc/Core/PlatformDetection.h"
 
@@ -54,19 +56,19 @@
 namespace ArcEngine
 {
 	template<typename T>
-	using Scope = std::unique_ptr<T>;
+	using Scope = eastl::unique_ptr<T>;
 	template<typename T, typename ... Args>
 	constexpr Scope<T> CreateScope(Args&& ... args)
 	{
-		return std::make_unique<T>(std::forward<Args>(args)...);
+		return eastl::make_unique<T>(eastl::forward<Args>(args)...);
 	}
 
 	template<typename T>
-	using Ref = std::shared_ptr<T>;
+	using Ref = eastl::shared_ptr<T>;
 	template<typename T, typename ... Args>
 	constexpr Ref<T> CreateRef(Args&& ... args)
 	{
-		return std::make_shared<T>(std::forward<Args>(args)...);
+		return eastl::make_shared<T>(eastl::forward<Args>(args)...);
 	}
 }
 

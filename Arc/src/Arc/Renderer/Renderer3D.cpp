@@ -22,7 +22,7 @@ namespace ArcEngine
 		MeshData() = default;
 
 		MeshData(glm::mat4&& transform, Ref<Material>& material, Ref<VertexArray>& geometry)
-			: Transform(std::move(transform)), Mat(material), Geometry(geometry)
+			: Transform(eastl::move(transform)), Mat(material), Geometry(geometry)
 		{
 		}
 	};
@@ -56,7 +56,7 @@ namespace ArcEngine
 	struct Renderer3DData
 	{
 		Renderer3D::Statistics Stats;
-		std::array<MeshData, 1'000'000> Meshes;
+		eastl::array<MeshData, 1'000'000> Meshes;
 		Ref<ConstantBuffer> GlobalDataCB;
 		Ref<ConstantBuffer> CubemapCB;
 		Ref<StructuredBuffer> DirectionalLightsSB;
@@ -69,7 +69,7 @@ namespace ArcEngine
 		Ref<VertexBuffer> CubeVertexBuffer;
 
 		Entity Skylight;
-		std::vector<Entity> SceneLights;
+		eastl::vector<Entity> SceneLights;
 		GlobalData GlobalData;
 		size_t MeshInsertIndex;
 	};
@@ -253,12 +253,12 @@ namespace ArcEngine
 		s_Data.reset();
 	}
 
-	void Renderer3D::BeginScene(const CameraData& cameraData, Entity cubemap, std::vector<Entity>&& lights)
+	void Renderer3D::BeginScene(const CameraData& cameraData, Entity cubemap, eastl::vector<Entity>&& lights)
 	{
 		ARC_PROFILE_SCOPE();
 
 		s_Data->Skylight = cubemap;
-		s_Data->SceneLights = std::move(lights);
+		s_Data->SceneLights = eastl::move(lights);
 		s_Data->GlobalData =
 		{
 			.CameraView = cameraData.View,
@@ -317,7 +317,7 @@ namespace ArcEngine
 		if (s_Data->MeshInsertIndex >= s_Data->Meshes.size())
 			return;
 
-		s_Data->Meshes[s_Data->MeshInsertIndex] = std::move(MeshData(std::move(transform), material, geometry));
+		s_Data->Meshes[s_Data->MeshInsertIndex] = eastl::move(MeshData(eastl::move(transform), material, geometry));
 		++s_Data->MeshInsertIndex;
 	}
 
@@ -382,9 +382,9 @@ namespace ArcEngine
 			uint32_t numPointLights = 0;
 			uint32_t numSpotLights = 0;
 
-			std::array<DirectionalLightData, MAX_NUM_DIR_LIGHTS> dlData{};
-			std::array<PointLightData, MAX_NUM_POINT_LIGHTS> plData{};
-			std::array<SpotLightData, MAX_NUM_SPOT_LIGHTS> slData{};
+			eastl::array<DirectionalLightData, MAX_NUM_DIR_LIGHTS> dlData{};
+			eastl::array<PointLightData, MAX_NUM_POINT_LIGHTS> plData{};
+			eastl::array<SpotLightData, MAX_NUM_SPOT_LIGHTS> slData{};
 
 			for (Entity e : s_Data->SceneLights)
 			{

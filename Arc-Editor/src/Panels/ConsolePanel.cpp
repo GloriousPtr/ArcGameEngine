@@ -27,8 +27,8 @@ namespace ArcEngine
 		s_MessageBufferRenderFilter |= Log::Level::Error;
 		s_MessageBufferRenderFilter |= Log::Level::Critical;
 
-		ExternalConsoleSink::SetConsoleSink_HandleFlush([this](std::string_view message, const char* filepath, const char* function, int32_t line, Log::Level level){ AddMessage(message, filepath, function, line, level); });
-		m_MessageBuffer = std::vector<Scope<ConsolePanel::Message>>(m_Capacity);
+		ExternalConsoleSink::SetConsoleSink_HandleFlush([this](eastl::string_view message, const char* filepath, const char* function, int32_t line, Log::Level level){ AddMessage(message, filepath, function, line, level); });
+		m_MessageBuffer = eastl::vector<Scope<ConsolePanel::Message>>(m_Capacity);
 	}
 
 	ConsolePanel::~ConsolePanel()
@@ -36,7 +36,7 @@ namespace ArcEngine
 		ExternalConsoleSink::SetConsoleSink_HandleFlush(nullptr);
 	}
 
-	void ConsolePanel::AddMessage(const std::string_view message, const char* filepath, const char* function, int32_t line, Log::Level level)
+	void ConsolePanel::AddMessage(const eastl::string_view message, const char* filepath, const char* function, int32_t line, Log::Level level)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -242,7 +242,7 @@ namespace ArcEngine
 		ImGui::PopStyleVar();
 	}
 
-	ConsolePanel::Message::Message(uint32_t id, std::string_view message, const char* filepath, const char* function, int32_t line, Log::Level level)
+	ConsolePanel::Message::Message(uint32_t id, eastl::string_view message, const char* filepath, const char* function, int32_t line, Log::Level level)
 		: ID(id), Buffer(message.data(), message.size()), Filepath(filepath ? filepath : ""), Function(function ? function : ""), Line(line), Level(level)
 	{
 		ARC_PROFILE_SCOPE();
@@ -272,7 +272,7 @@ namespace ArcEngine
 
 #ifdef ARC_PLATFORM_VISUAL_STUDIO
 		if (Line != 0 && !Filepath.empty() && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-			VisualStudioAccessor::OpenFile(Filepath, Line);
+			VisualStudioAccessor::OpenFile(Filepath.c_str(), Line);
 #endif //ARC_PLATFORM_VISUAL_STUDIO
 
 		if(ImGui::BeginPopupContextItem("Popup"))

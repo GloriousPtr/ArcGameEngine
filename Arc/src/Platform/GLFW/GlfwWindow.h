@@ -45,7 +45,7 @@ namespace ArcEngine
 
 		struct WindowData
 		{
-			std::string Title;
+			eastl::string Title;
 			unsigned int Width = 0;
 			unsigned int Height = 0;
 			bool VSync = true;

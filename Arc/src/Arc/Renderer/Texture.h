@@ -32,7 +32,7 @@ namespace ArcEngine
 		[[nodiscard]] virtual TextureFormat GetTextureFormat() const = 0;
 		[[nodiscard]] virtual uint64_t GetRendererID() const = 0;
 		[[nodiscard]] virtual uint32_t GetIndex() const = 0;
-		[[nodiscard]] virtual const std::string& GetPath() const = 0;
+		[[nodiscard]] virtual const eastl::string& GetPath() const = 0;
 
 		virtual void SetData(const TextureData data, [[maybe_unused]] uint32_t size) = 0;
 		
@@ -64,13 +64,13 @@ namespace ArcEngine
 	{
 	public:
 		[[nodiscard]] static Ref<Texture2D> Create(uint32_t width, uint32_t height, TextureFormat format);
-		[[nodiscard]] static Ref<Texture2D> Create(const std::string& path, TextureFormat format);
+		[[nodiscard]] static Ref<Texture2D> Create(const eastl::string& path, TextureFormat format);
 	};
 
 	class TextureCube : public Texture
 	{
 	public:
-		[[nodiscard]] static Ref<TextureCube> Create(const std::string& path, TextureFormat format);
+		[[nodiscard]] static Ref<TextureCube> Create(const eastl::string& path, TextureFormat format);
 
 		virtual void BindIrradianceMap(uint32_t slot) const = 0;
 		virtual void BindRadianceMap(uint32_t slot) const = 0;

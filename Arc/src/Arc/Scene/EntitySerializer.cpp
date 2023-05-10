@@ -15,6 +15,25 @@
 namespace YAML
 {
 	template<>
+	struct convert<eastl::string>
+	{
+		static Node encode(const eastl::string& rhs)
+		{
+			Node node;
+			node.push_back(rhs.c_str());
+			return node;
+		}
+
+		static bool decode(const Node& node, eastl::string& rhs)
+		{
+			std::string s;
+			bool success = convert<std::string>::decode(node, s);
+			rhs = s.c_str();
+			return success;
+		}
+	};
+
+	template<>
 	struct convert<glm::vec2>
 	{
 		static Node encode(const glm::vec2& rhs)
@@ -187,7 +206,7 @@ namespace ArcEngine
 			out << YAML::BeginMap;
 
 			const auto& tc = entity.GetComponent<TagComponent>();
-			out << YAML::Key << "Tag" << YAML::Value << tc.Tag;
+			out << YAML::Key << "Tag" << YAML::Value << tc.Tag.c_str();
 			out << YAML::Key << "Layer" << YAML::Value << tc.Layer;
 			out << YAML::Key << "Enabled" << YAML::Value << tc.Enabled;
 
@@ -261,7 +280,7 @@ namespace ArcEngine
 			out << YAML::Key << "Tiling" << YAML::Value << spriteRendererComponent.Tiling;
 			out << YAML::Key << "Offset" << YAML::Value << spriteRendererComponent.Offset;
 
-			std::string texturePath = spriteRendererComponent.Texture ? spriteRendererComponent.Texture->GetPath() : "";
+			std::string texturePath = spriteRendererComponent.Texture ? spriteRendererComponent.Texture->GetPath().c_str() : "";
 			if (Project::IsPartOfProject(texturePath))
 				texturePath = Project::GetAssetRelativeFileSystemPath(texturePath).string();
 			std::replace(texturePath.begin(), texturePath.end(), '\\', '/');
@@ -277,7 +296,7 @@ namespace ArcEngine
 
 			const auto& skyLightComponent = entity.GetComponent<SkyLightComponent>();
 
-			std::string texturePath = skyLightComponent.Texture ? skyLightComponent.Texture->GetPath() : "";
+			std::string texturePath = skyLightComponent.Texture ? skyLightComponent.Texture->GetPath().c_str() : "";
 			if (Project::IsPartOfProject(texturePath))
 				texturePath = Project::GetAssetRelativeFileSystemPath(texturePath).string();
 			std::replace(texturePath.begin(), texturePath.end(), '\\', '/');
@@ -371,7 +390,7 @@ namespace ArcEngine
 			out << YAML::Key << "RotationBySpeed.MaxSpeed" << YAML::Value << particleProps.RotationBySpeed.MaxSpeed;
 			out << YAML::Key << "RotationBySpeed.Enabled" << YAML::Value << particleProps.RotationBySpeed.Enabled;
 
-			std::string texturePath = particleProps.Texture ? particleProps.Texture->GetPath() : "";
+			std::string texturePath = particleProps.Texture ? particleProps.Texture->GetPath().c_str() : "";
 			if (Project::IsPartOfProject(texturePath))
 				texturePath = Project::GetAssetRelativeFileSystemPath(texturePath).string();
 			std::replace(texturePath.begin(), texturePath.end(), '\\', '/');
@@ -706,7 +725,7 @@ namespace ArcEngine
 				out << YAML::Key << i << YAML::BeginMap;
 				++i;
 
-				out << YAML::Key << "Name" << YAML::Value << className;
+				out << YAML::Key << "Name" << YAML::Value << className.c_str();
 				out << YAML::Key << "Fields" << YAML::BeginMap;
 
 				const auto& fields = ScriptEngine::GetFieldMap(className.c_str());
@@ -720,7 +739,7 @@ namespace ArcEngine
 					if (!field.Serializable)
 						continue;
 
-					out << YAML::Key << fieldName << YAML::Value;
+					out << YAML::Key << fieldName.c_str() << YAML::Value;
 
 					switch (field.Type)
 					{
@@ -806,13 +825,13 @@ namespace ArcEngine
 
 		auto uuid = entity["Entity"].as<uint64_t>();
 
-		std::string name;
+		eastl::string name;
 		bool enabled = true;
 		EntityLayer layer = 0;
 		auto tagComponent = entity["TagComponent"];
 		if (tagComponent)
 		{
-			name = tagComponent["Tag"].as<std::string>();
+			name = tagComponent["Tag"].as<eastl::string>();
 			TrySet(layer, tagComponent["Layer"]);
 			TrySet(enabled, tagComponent["Enabled"]);
 		}
@@ -913,7 +932,7 @@ namespace ArcEngine
 				std::filesystem::path path = Project::GetAssetFileSystemPath(texturePath);
 				if (!std::filesystem::exists(path))
 					path = texturePath;
-				src.Texture = AssetManager::GetTexture2D(path.string());
+				src.Texture = AssetManager::GetTexture2D(path.string().c_str());
 			}
 		}
 
@@ -930,7 +949,7 @@ namespace ArcEngine
 				std::filesystem::path path = Project::GetAssetFileSystemPath(texturePath);
 				if (!std::filesystem::exists(path))
 					path = texturePath;
-				src.Texture = AssetManager::GetTextureCube(path.string());
+				src.Texture = AssetManager::GetTextureCube(path.string().c_str());
 			}
 		}
 
@@ -1018,7 +1037,7 @@ namespace ArcEngine
 				std::filesystem::path path = Project::GetAssetFileSystemPath(texturePath);
 				if (!std::filesystem::exists(path))
 					path = texturePath;
-				props.Texture = AssetManager::GetTexture2D(path.string());
+				props.Texture = AssetManager::GetTexture2D(path.string().c_str());
 			}
 		}
 
@@ -1254,7 +1273,7 @@ namespace ArcEngine
 				std::filesystem::path path = Project::GetAssetFileSystemPath(filepath);
 				if (!std::filesystem::exists(path))
 					path = filepath;
-				src.MeshGeometry = AssetManager::GetMesh(path.string());
+				src.MeshGeometry = AssetManager::GetMesh(path.string().c_str());
 			}
 		}
 
@@ -1273,7 +1292,7 @@ namespace ArcEngine
 				{
 					auto scriptNode = scripts[i];
 					
-					std::string scriptName;
+					eastl::string scriptName;
 					TrySet(scriptName, scriptNode["Name"]);
 					if (!ScriptEngine::HasClass(scriptName))
 					{
@@ -1370,9 +1389,9 @@ namespace ArcEngine
 		return deserializedEntity.GetUUID();
 	}
 
-	static void GetAllChildren(Entity parent, std::vector<Entity>& outEntities)
+	static void GetAllChildren(Entity parent, eastl::vector<Entity>& outEntities)
 	{
-		std::vector<UUID> children = parent.GetComponent<RelationshipComponent>().Children;
+		const eastl::vector<UUID>& children = parent.GetComponent<RelationshipComponent>().Children;
 		for (const auto& child : children)
 		{
 			Entity entity = parent.GetScene()->GetEntity(child);
@@ -1394,7 +1413,7 @@ namespace ArcEngine
 		out << YAML::Key << "Prefab" << YAML::Value << entity.AddComponent<PrefabComponent>().ID;
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 
-		std::vector<Entity> entities;
+		eastl::vector<Entity> entities;
 		entities.push_back(entity);
 		GetAllChildren(entity, entities);
 
@@ -1436,7 +1455,7 @@ namespace ArcEngine
 
 		if (entities)
 		{
-			std::unordered_map<UUID, UUID> oldNewIdMap;
+			eastl::hash_map<UUID, UUID> oldNewIdMap;
 			for (const auto& entity : entities)
 			{
 				UUID oldUUID = 0;

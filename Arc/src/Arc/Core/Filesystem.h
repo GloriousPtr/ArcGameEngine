@@ -10,7 +10,7 @@ namespace ArcEngine
 		[[nodiscard]] static bool IsPartOfDirectoryTree(const std::filesystem::path& filePath, const std::filesystem::path& rootPath);
 		[[nodiscard]] static Buffer ReadFileBinary(const std::filesystem::path& filepath);
 		[[nodiscard]] static bool WriteFileBinary(const std::filesystem::path& filepath, Buffer& buffer);
-		[[nodiscard]] static std::string ReadFileText(const std::filesystem::path& filepath);
-		static void WriteFileText(const std::filesystem::path& filepath, const std::string& buffer);
+		[[nodiscard]] static eastl::string ReadFileText(const std::filesystem::path& filepath);
+		static void WriteFileText(const std::filesystem::path& filepath, const eastl::string& buffer);
 	};
 }

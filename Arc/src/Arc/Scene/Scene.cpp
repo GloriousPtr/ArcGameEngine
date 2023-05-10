@@ -29,7 +29,7 @@
 
 namespace ArcEngine
 {
-	std::map<EntityLayer, EntityLayerData> Scene::LayerCollisionMask =
+	eastl::map<EntityLayer, EntityLayerData> Scene::LayerCollisionMask =
 	{
 		{ BIT(0), { "Static",		static_cast<uint16_t>(0xFFFF), 0 } },
 		{ BIT(1), { "Default",		static_cast<uint16_t>(0xFFFF), 1 } },
@@ -319,7 +319,7 @@ namespace ArcEngine
 	Scope<Physics3DBodyActivationListener> m_BodyActivationListener3D;
 
 	template<typename... Component>
-	static void CopyComponent(entt::registry& dst, entt::registry& src, std::unordered_map<UUID, entt::entity> enttMap)
+	static void CopyComponent(entt::registry& dst, entt::registry& src, eastl::hash_map<UUID, entt::entity> enttMap)
 	{
 		([&]()
 		{
@@ -335,7 +335,7 @@ namespace ArcEngine
 	}
 
 	template<typename... Component>
-	static void CopyComponent(ComponentGroup<Component...>, entt::registry& dst, entt::registry& src, std::unordered_map<UUID, entt::entity> enttMap)
+	static void CopyComponent(ComponentGroup<Component...>, entt::registry& dst, entt::registry& src, eastl::hash_map<UUID, entt::entity> enttMap)
 	{
 		CopyComponent<Component...>(dst, src, enttMap);
 	}
@@ -395,14 +395,14 @@ namespace ArcEngine
 		return newScene;
 	}
 
-	Entity Scene::CreateEntity(const std::string& name)
+	Entity Scene::CreateEntity(const eastl::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 
 		return CreateEntityWithUUID(UUID(), name);
 	}
 
-	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
+	Entity Scene::CreateEntityWithUUID(UUID uuid, const eastl::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -441,7 +441,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		std::string name = entity.GetComponent<TagComponent>().Tag;
+		eastl::string name = entity.GetComponent<TagComponent>().Tag;
 		Entity duplicate = CreateEntity(name);
 		CopyComponent(AllComponents{}, m_Registry, entity, duplicate);
 		return duplicate;
@@ -451,7 +451,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		return m_EntityMap.contains(uuid);
+		return m_EntityMap.find(uuid) != m_EntityMap.end();
 	}
 
 	Entity Scene::GetEntity(UUID uuid)
@@ -1161,7 +1161,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_CATEGORY("Rendering", Profile::Category::Rendering);
 
-		std::vector<Entity> lights;
+		eastl::vector<Entity> lights;
 		{
 			ARC_PROFILE_SCOPE("Prepare Light Data");
 
@@ -1179,7 +1179,7 @@ namespace ArcEngine
 				skylight = Entity(*view.begin(), this);
 		}
 		
-		Renderer3D::BeginScene(cameraData, skylight, std::move(lights));
+		Renderer3D::BeginScene(cameraData, skylight, eastl::move(lights));
 		// Meshes
 		{
 			ARC_PROFILE_SCOPE("Submit Mesh Data");

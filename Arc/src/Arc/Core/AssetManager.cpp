@@ -10,10 +10,10 @@ namespace ArcEngine
 {
 	inline static Ref<Texture2D> s_WhiteTexture;
 	inline static Ref<Texture2D> s_BlackTexture;
-	inline static str_umap<Ref<Texture2D>> m_Texture2DMap;
-	inline static str_umap<Ref<TextureCube>> m_TextureCubeMap;
-	inline static str_umap<Ref<Mesh>> m_MeshMap;
-	inline static std::vector<std::future<void>> m_Futures;
+	inline static eastl::hash_map<eastl::string, Ref<Texture2D>> m_Texture2DMap;
+	inline static eastl::hash_map<eastl::string, Ref<TextureCube>> m_TextureCubeMap;
+	inline static eastl::hash_map<eastl::string, Ref<Mesh>> m_MeshMap;
+	inline static eastl::vector<std::future<void>> m_Futures;
 
 	void AssetManager::Init()
 	{
@@ -51,42 +51,42 @@ namespace ArcEngine
 		return s_BlackTexture;
 	}
 
-	Ref<Texture2D>& AssetManager::GetTexture2D(const std::string& path)
+	Ref<Texture2D>& AssetManager::GetTexture2D(const eastl::string& path)
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto& it = m_Texture2DMap.find(path);
+		const auto it = m_Texture2DMap.find_as(path);
 		if (it != m_Texture2DMap.end())
 			return it->second;
 
 		Ref<Texture2D> texture = Texture2D::Create(path, TextureFormat::RGBA8);
 		m_Texture2DMap.emplace(path, texture);
-		return m_Texture2DMap[path];
+		return m_Texture2DMap.at(path);
 	}
 
-	Ref<TextureCube>& AssetManager::GetTextureCube(const std::string& path)
+	Ref<TextureCube>& AssetManager::GetTextureCube(const eastl::string& path)
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto& it = m_TextureCubeMap.find(path);
+		const auto it = m_TextureCubeMap.find_as(path);
 		if (it != m_TextureCubeMap.end())
 			return it->second;
 
 		Ref<TextureCube> texture = TextureCube::Create(path, TextureFormat::RGBA16F);
 		m_TextureCubeMap.emplace(path, texture);
-		return m_TextureCubeMap[path];
+		return m_TextureCubeMap.at(path);
 	}
 
-	Ref<Mesh>& AssetManager::GetMesh(const std::string& path)
+	Ref<Mesh>& AssetManager::GetMesh(const eastl::string& path)
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto& it = m_MeshMap.find(path);
+		const auto it = m_MeshMap.find_as(path);
 		if (it != m_MeshMap.end())
 			return it->second;
 
 		Ref<Mesh> mesh = CreateRef<Mesh>(path.c_str());
 		m_MeshMap.emplace(path, mesh);
-		return m_MeshMap[path];
+		return m_MeshMap.at(path);
 	}
 }

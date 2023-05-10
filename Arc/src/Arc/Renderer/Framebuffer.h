@@ -37,7 +37,7 @@ namespace ArcEngine
 		FramebufferAttachmentSpecification(std::initializer_list<FramebufferTextureSpecification> attachments)
 			: Attachments(attachments) {}
 
-		std::vector<FramebufferTextureSpecification> Attachments;
+		eastl::vector<FramebufferTextureSpecification> Attachments;
 	};
 
 	struct FramebufferSpecification
@@ -48,7 +48,7 @@ namespace ArcEngine
 
 		bool SwapChainTarget = false;
 
-		std::string Name = "Unknown Framebuffer";
+		eastl::string Name = "Unknown Framebuffer";
 	};
 	
 	class Framebuffer

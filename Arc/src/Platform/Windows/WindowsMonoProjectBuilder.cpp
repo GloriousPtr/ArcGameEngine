@@ -79,7 +79,7 @@ namespace ArcEngine
 		}
 
 		const std::filesystem::path solutionPath = Project::GetSolutionPath();
-		const std::string buildConfig = static_cast<std::string>(Project::GetBuildConfigString());
+		const std::string buildConfig = Project::GetBuildConfigString().data();
 
 		s_BuildProjectFuture = std::async(async ? std::launch::async : std::launch::deferred, [solutionPath, buildConfig, onComplete]()
 		{

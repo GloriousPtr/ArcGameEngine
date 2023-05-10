@@ -2,6 +2,25 @@
 
 // For use by Arc applications
 
+#include <glm/glm.hpp>
+#include <magic_enum.hpp>
+
+#include <EASTL/memory.h>
+#include <EASTL/utility.h>
+#include <EASTL/algorithm.h>
+#include <EASTL/functional.h>
+#include <EASTL/string.h>
+#include <EASTL/array.h>
+#include <EASTL/fixed_vector.h>
+#include <EASTL/vector.h>
+#include <EASTL/hash_map.h>
+#include <EASTL/map.h>
+#include <EASTL/unordered_map.h>
+#include <EASTL/set.h>
+#include <EASTL/unordered_set.h>
+#include <EASTL/stack.h>
+#include <EASTL/queue.h>
+
 #include "Arc/Core/Base.h"
 
 #include "Arc/Core/Application.h"
@@ -49,6 +68,3 @@
 #include "Arc/Utils/ColorUtils.h"
 #include "Arc/Utils/PlatformUtils.h"
 #include "Arc/Utils/StringUtils.h"
-
-#include <glm/glm.hpp>
-#include <magic_enum.hpp>

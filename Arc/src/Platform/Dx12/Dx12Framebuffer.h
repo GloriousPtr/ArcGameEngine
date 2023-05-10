@@ -116,14 +116,14 @@ namespace ArcEngine
 			}
 		};
 
-		std::array<std::vector<ColorFrame>, Dx12Context::FrameCount>						m_ColorAttachments{};
-		std::array<std::vector<D3D12_CPU_DESCRIPTOR_HANDLE>, Dx12Context::FrameCount>		m_RtvHandles;
-		std::array<DepthFrame, Dx12Context::FrameCount>										m_DepthAttachment{};
-		glm::vec4																			m_ClearColor = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
-		glm::vec2																			m_ClearDepth = glm::vec2(1.0f, 0.0f);
+		eastl::array<eastl::vector<ColorFrame>, Dx12Context::FrameCount>						m_ColorAttachments{};
+		eastl::array<eastl::vector<D3D12_CPU_DESCRIPTOR_HANDLE>, Dx12Context::FrameCount>		m_RtvHandles;
+		eastl::array<DepthFrame, Dx12Context::FrameCount>										m_DepthAttachment{};
+		glm::vec4																				m_ClearColor = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+		glm::vec2																				m_ClearDepth = glm::vec2(1.0f, 0.0f);
 
-		std::array<std::vector<ColorFrame>, Dx12Context::FrameCount>						m_ReleasedColorAttachments{};
-		std::array<DepthFrame, Dx12Context::FrameCount>										m_ReleasedDepthAttachment{};
+		eastl::array<eastl::vector<ColorFrame>, Dx12Context::FrameCount>						m_ReleasedColorAttachments{};
+		eastl::array<DepthFrame, Dx12Context::FrameCount>										m_ReleasedDepthAttachment{};
 
 	public:
 

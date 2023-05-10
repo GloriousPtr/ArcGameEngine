@@ -41,7 +41,11 @@ namespace ArcEngine
 					if (disabled)
 						ImGui::BeginDisabled();
 
-					ImGui::InputText("##LayerName", &layerData.Name);
+					constexpr size_t bufferSize = 256;
+					char buffer[bufferSize];
+					memcpy_s(buffer, bufferSize, layerData.Name.c_str(), layerData.Name.size() + 1);
+					if (ImGui::InputText("##LayerName", buffer, bufferSize))
+						layerData.Name = buffer;
 
 					if (disabled)
 					{

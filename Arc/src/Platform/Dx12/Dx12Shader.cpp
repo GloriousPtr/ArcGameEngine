@@ -13,7 +13,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		m_Name = filepath.filename().string();
+		auto nameStr = filepath.filename().string();
+		m_Name = nameStr.c_str();
 		m_Type = type;
 		Compile(filepath);
 	}
@@ -22,10 +23,10 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		for (auto& shader : m_ShaderBlobs | std::views::values)
+		for (auto& [_, shader] : m_ShaderBlobs)
 			shader->Release();
 
-		for (auto& reflection : m_ReflectionBlobs | std::views::values)
+		for (auto& [_, reflection] : m_ReflectionBlobs)
 			reflection->Release();
 	}
 
@@ -33,28 +34,28 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		for (auto& shader : m_ShaderBlobs | std::views::values)
+		for (auto& [_, shader] : m_ShaderBlobs)
 			shader->Release();
 
-		for (auto& reflection : m_ReflectionBlobs | std::views::values)
+		for (auto& [_, reflection] : m_ReflectionBlobs)
 			reflection->Release();
 
 		Compile(path);
 	}
 
-	const std::string& Dx12Shader::GetName() const
+	const eastl::string& Dx12Shader::GetName() const
 	{
 		return m_Name;
 	}
 
-	inline static std::map<ShaderType, const wchar_t*> s_TargetMap
+	inline static eastl::hash_map<ShaderType, const wchar_t*> s_TargetMap
 	{
 		{ ShaderType::Vertex,		L"vs_6_6" },
 		{ ShaderType::Pixel,		L"ps_6_6" },
 		{ ShaderType::Compute,		L"cs_6_6" },
 	};
 
-	inline static std::map<ShaderType, const wchar_t*> s_EntryPointMap
+	inline static eastl::hash_map<ShaderType, const wchar_t*> s_EntryPointMap
 	{
 		{ ShaderType::Vertex,		L"VS_Main" },
 		{ ShaderType::Pixel,		L"PS_Main" },
@@ -66,15 +67,15 @@ namespace ArcEngine
 		const Microsoft::WRL::ComPtr<IDxcBlobEncoding>& encodedBlob,
 		const Microsoft::WRL::ComPtr<IDxcIncludeHandler>& includeHandler,
 		ShaderType shaderModel,
-		const std::vector<const wchar_t*>& arguments,
-		const std::vector<const wchar_t*>& defines,
+		const eastl::vector<const wchar_t*>& arguments,
+		const eastl::vector<const wchar_t*>& defines,
 		IDxcBlob** reflection)
 	{
 		ARC_PROFILE_SCOPE();
 
 		using namespace Microsoft::WRL;
 
-		if (!s_TargetMap.contains(shaderModel) || !s_EntryPointMap.contains(shaderModel))
+		if (s_TargetMap.find(shaderModel) == s_TargetMap.end() || s_EntryPointMap.find(shaderModel) == s_EntryPointMap.end())
 		{
 			ARC_CORE_ERROR("Shader model not found for: {}", filepath);
 			return nullptr;
@@ -92,7 +93,7 @@ namespace ArcEngine
 		pdbName += s_TargetMap.at(shaderModel);
 		pdbName += L".pdb";
 		const std::filesystem::path pdbPath = pdbParentPath + pdbName;
-		std::vector args
+		eastl::vector args
 		{
 			wideFilename.c_str(),
 			L"-E", s_EntryPointMap.at(shaderModel),
@@ -181,7 +182,7 @@ namespace ArcEngine
 
 		ARC_CORE_ASSERT(source, source->GetBufferSize());
 
-		const std::vector<const wchar_t*> args
+		const eastl::vector<const wchar_t*> args
 		{
 #ifdef ARC_DEBUG
 			DXC_ARG_DEBUG,
@@ -198,7 +199,7 @@ namespace ArcEngine
 			L"-I", L"assets/shaders",
 		};
 
-		const std::vector<const wchar_t*> defs;
+		const eastl::vector<const wchar_t*> defs;
 
 		// Compile shaders
 		if (m_Type == ShaderType::Pixel || m_Type == ShaderType::Vertex)

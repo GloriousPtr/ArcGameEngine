@@ -34,7 +34,7 @@ namespace ArcEngine
 	};
 }
 
-namespace std
+namespace eastl
 {
 	template<> struct hash<ArcEngine::Vertex>
 	{
@@ -101,9 +101,9 @@ namespace ArcEngine
 			// Loop over shapes
 			for (const auto& shape : shapes)
 			{
-				std::vector<Vertex> vertices;
-				std::vector<uint32_t> indices;
-				std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+				eastl::vector<Vertex> vertices;
+				eastl::vector<uint32_t> indices;
+				eastl::hash_map<Vertex, uint32_t> uniqueVertices{};
 
 				// Loop over faces(polygon)
 				int materialId = -1;
@@ -199,7 +199,7 @@ namespace ArcEngine
 				Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices.data(), indices.size());
 				vertexArray->SetIndexBuffer(indexBuffer);
 
-				const Submesh& submesh = m_Submeshes.emplace_back(shape.name, CreateRef<Material>(), vertexArray);
+				const Submesh& submesh = m_Submeshes.emplace_back(shape.name.c_str(), CreateRef<Material>(), vertexArray);
 
 				if (materialId >= 0)
 				{
@@ -216,41 +216,41 @@ namespace ArcEngine
 							property.Type == MaterialPropertyType::Texture2DBindless)
 						{
 							if (!material.diffuse_texname.empty() &&
-								(property.Name.find("albedo") != std::string::npos || property.Name.find("Albedo") != std::string::npos ||
-									property.Name.find("diff") != std::string::npos || property.Name.find("Diff") != std::string::npos))
+								(property.Name.find("albedo") != eastl::string::npos || property.Name.find("Albedo") != eastl::string::npos ||
+									property.Name.find("diff") != eastl::string::npos || property.Name.find("Diff") != eastl::string::npos))
 							{
-								std::string pathStr = (dir / material.diffuse_texname).string();
+								eastl::string pathStr = (dir / material.diffuse_texname).string().c_str();
 								submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr));
 							}
 
 							if (!material.normal_texname.empty() &&
-								(property.Name.find("norm") != std::string::npos || property.Name.find("Norm") != std::string::npos ||
-									property.Name.find("height") != std::string::npos || property.Name.find("Height") != std::string::npos))
+								(property.Name.find("norm") != eastl::string::npos || property.Name.find("Norm") != eastl::string::npos ||
+									property.Name.find("height") != eastl::string::npos || property.Name.find("Height") != eastl::string::npos))
 							{
 								std::string pathStr = (dir / material.normal_texname).string();
-								submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr));
+								submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr.c_str()));
 								normalMapApplied = true;
 							}
 							else if (!material.bump_texname.empty() &&
-								(property.Name.find("norm") != std::string::npos || property.Name.find("Norm") != std::string::npos ||
-									property.Name.find("height") != std::string::npos || property.Name.find("Height") != std::string::npos))
+								(property.Name.find("norm") != eastl::string::npos || property.Name.find("Norm") != eastl::string::npos ||
+									property.Name.find("height") != eastl::string::npos || property.Name.find("Height") != eastl::string::npos))
 							{
 								std::string pathStr = (dir / material.bump_texname).string();
-								submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr));
+								submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr.c_str()));
 								normalMapApplied = true;
 							}
 
 							if (!material.emissive_texname.empty() &&
-								(property.Name.find("emissi") != std::string::npos || property.Name.find("Emissi") != std::string::npos))
+								(property.Name.find("emissi") != eastl::string::npos || property.Name.find("Emissi") != eastl::string::npos))
 							{
 								std::string pathStr = (dir / material.emissive_texname).string();
-								submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr));
+								submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr.c_str()));
 							}
 						}
 
 						if (property.Type == MaterialPropertyType::Bool && normalMapApplied &&
-							(property.Name.find("norm") != std::string::npos || property.Name.find("Norm") != std::string::npos ||
-								property.Name.find("height") != std::string::npos || property.Name.find("Height") != std::string::npos))
+							(property.Name.find("norm") != eastl::string::npos || property.Name.find("Norm") != eastl::string::npos ||
+								property.Name.find("height") != eastl::string::npos || property.Name.find("Height") != eastl::string::npos))
 						{
 							submesh.Mat->SetData(property.Name, 1);
 						}

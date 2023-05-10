@@ -8,7 +8,7 @@ namespace ArcEngine
 	class Layer
 	{
 	public:
-		explicit Layer(const std::string& name = "Layer");
+		explicit Layer(const eastl::string& name = "Layer");
 		virtual ~Layer() = default;
 
 		virtual void OnAttach() { /* Called when layer is attached */ }
@@ -17,8 +17,8 @@ namespace ArcEngine
 		virtual void OnImGuiRender() { /* Layer OnRender */ }
 		virtual void OnEvent([[maybe_unused]] Event& e) { /* Called when an event is fired */ }
 
-		[[nodiscard]] const std::string& GetName() const { return m_DebugName; }
+		[[nodiscard]] const eastl::string& GetName() const { return m_DebugName; }
 	protected:
-		std::string m_DebugName;
+		eastl::string m_DebugName;
 	};
 }

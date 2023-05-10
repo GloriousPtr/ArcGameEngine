@@ -11,7 +11,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		m_ID = std::format(" {} {}\t\t###{}_{}", StringUtils::FromChar8T(icon), m_Name, m_Name, s_Count);
+		m_ID = std::format(" {} {}\t\t###{}_{}", StringUtils::FromChar8T(icon), m_Name, m_Name, s_Count).c_str();
 		s_Count++;
 	}
 

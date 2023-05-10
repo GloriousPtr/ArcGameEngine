@@ -403,7 +403,7 @@ namespace ArcEngine
 			{
 				glm::mat4 transform = Entity(entity, m_Scene.get()).GetWorldTransform();
 				transform *= glm::translate(glm::mat4(1.0f), glm::vec3(bc.Offset, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f * bc.Size, 1.0f));
-				Renderer2D::DrawRect(std::move(transform), color);
+				Renderer2D::DrawRect(eastl::move(transform), color);
 			}
 
 			const auto polygonColliderView = m_Scene->GetAllEntitiesWith<TransformComponent, PolygonCollider2DComponent>();
@@ -440,10 +440,10 @@ namespace ArcEngine
 				glm::mat4 transformLeft = glm::translate(transform, glm::vec3(-bc.Size.x, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 				glm::mat4 transformRight = glm::translate(transformLeft, glm::vec3(0.0f, 0.0f, 2.0f * bc.Size.x));
 
-				Renderer2D::DrawRect(std::move(transformFront), color);
-				Renderer2D::DrawRect(std::move(transformBack), color);
-				Renderer2D::DrawRect(std::move(transformLeft), color);
-				Renderer2D::DrawRect(std::move(transformRight), color);
+				Renderer2D::DrawRect(eastl::move(transformFront), color);
+				Renderer2D::DrawRect(eastl::move(transformBack), color);
+				Renderer2D::DrawRect(eastl::move(transformLeft), color);
+				Renderer2D::DrawRect(eastl::move(transformRight), color);
 			}
 		}
 

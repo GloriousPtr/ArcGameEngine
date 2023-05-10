@@ -75,7 +75,7 @@ namespace ArcEngine
 		ID3D12CommandAllocator* GraphicsCommandAllocator = nullptr;
 		ID3D12GraphicsCommandList9* GraphicsCommandList = nullptr;
 
-		std::vector<IUnknown*> DeferredReleases{};
+		eastl::vector<IUnknown*> DeferredReleases{};
 		bool DeferedReleasesFlag = false;
 		bool DeferedReleasesFlagHandles = false;
 
@@ -359,9 +359,9 @@ namespace ArcEngine
 			s_Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&(frame.GraphicsCommandAllocator)));
 			s_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, frame.GraphicsCommandAllocator, nullptr, IID_PPV_ARGS(&(frame.GraphicsCommandList)));
 
-			std::string cmdAllocatorName = std::format("Graphics Command Allocator {}", tempInt);
+			auto cmdAllocatorName = std::format("Graphics Command Allocator {}", tempInt);
 			NameResource(frame.GraphicsCommandAllocator, cmdAllocatorName.c_str());
-			std::string cmdListName = std::format("Graphics Command List {}", tempInt);
+			auto cmdListName = std::format("Graphics Command List {}", tempInt);
 			NameResource(frame.GraphicsCommandList, cmdListName.c_str());
 
 			frame.GraphicsCommandList->Close();
@@ -381,7 +381,7 @@ namespace ArcEngine
 		backFrame.CloseGraphicsCommands();
 
 		constexpr uint32_t numCommandList = 1;
-		const std::array<ID3D12CommandList*, numCommandList> commandLists
+		const eastl::array<ID3D12CommandList*, numCommandList> commandLists
 		{
 			backFrame.GraphicsCommandList
 		};
@@ -556,7 +556,7 @@ namespace ArcEngine
 			frame.RtvHandle = s_RtvDescHeap.Allocate();
 			s_Device->CreateRenderTargetView(frame.RtvBuffer, nullptr, frame.RtvHandle.CPU);
 
-			std::string rtvFrameName = std::format("RTV Frame {}", tempInt);
+			auto rtvFrameName = std::format("RTV Frame {}", tempInt);
 			NameResource(frame.RtvBuffer, rtvFrameName.c_str());
 
 			++tempInt;

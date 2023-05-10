@@ -26,7 +26,7 @@ namespace ArcEngine
 	using EntityLayer = uint16_t;
 	struct EntityLayerData
 	{
-		std::string Name = "Layer";
+		eastl::string Name = "Layer";
 		EntityLayer Flags = 0xFFFF;
 		uint8_t Index = 1;
 	};
@@ -40,13 +40,13 @@ namespace ArcEngine
 
 		static constexpr EntityLayer StaticLayer  = BIT(0);
 		static constexpr EntityLayer DefaultLayer = BIT(1);
-		static std::map<EntityLayer, EntityLayerData> LayerCollisionMask;
+		static eastl::map<EntityLayer, EntityLayerData> LayerCollisionMask;
 
 	public:
 		[[nodiscard]] static Ref<Scene> CopyTo(const Ref<Scene>& other);
 
-		Entity CreateEntity(const std::string& name = std::string());
-		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
+		Entity CreateEntity(const eastl::string& name = eastl::string());
+		Entity CreateEntityWithUUID(UUID uuid, const eastl::string& name = eastl::string());
 		void DestroyEntity(Entity entity);
 		Entity Duplicate(Entity entity);
 		[[nodiscard]] bool HasEntity(UUID uuid) const;
@@ -86,7 +86,7 @@ namespace ArcEngine
 		friend class SceneHierarchyPanel;
 
 		entt::registry m_Registry;
-		std::unordered_map<UUID, entt::entity> m_EntityMap;
+		eastl::hash_map<UUID, entt::entity> m_EntityMap;
 		bool m_IsRunning = false;
 
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;

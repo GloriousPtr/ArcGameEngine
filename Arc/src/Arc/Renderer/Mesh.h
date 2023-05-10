@@ -11,11 +11,11 @@ namespace ArcEngine
 
 	struct Submesh
 	{
-		std::string Name;
+		eastl::string Name;
 		Ref<Material> Mat;
 		Ref<VertexArray> Geometry;
 
-		Submesh(const std::string& name, const Ref<Material>& material, const Ref<VertexArray>& geometry)
+		Submesh(const eastl::string& name, const Ref<Material>& material, const Ref<VertexArray>& geometry)
 			: Name(name), Mat(material), Geometry(geometry)
 		{
 		}
@@ -36,8 +36,8 @@ namespace ArcEngine
 		[[nodiscard]] const char* GetFilepath() const { return m_Filepath.c_str(); }
 
 	private:
-		std::string m_Name;
-		std::string m_Filepath;
-		std::vector<Submesh> m_Submeshes;
+		eastl::string m_Name;
+		eastl::string m_Filepath;
+		eastl::vector<Submesh> m_Submeshes;
 	};
 }

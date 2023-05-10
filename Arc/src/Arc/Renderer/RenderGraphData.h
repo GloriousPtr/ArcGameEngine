@@ -97,7 +97,7 @@ namespace ArcEngine
 				blurSpec.Attachments = { FramebufferTextureFormat::R11G11B10F };
 				blurSpec.Width = width;
 				blurSpec.Height = height;
-				blurSpec.Name = std::format("Blur Spec Pass Framebuffer {}", i);
+				blurSpec.Name = std::format("Blur Spec Pass Framebuffer {}", i).c_str();
 				TempBlurFramebuffers[i] = Framebuffer::Create(bloomSpec);
 				DownsampledFramebuffers[i] = Framebuffer::Create(blurSpec);
 				UpsampledFramebuffers[i] = Framebuffer::Create(blurSpec);

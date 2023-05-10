@@ -13,7 +13,7 @@ namespace ArcEngine
 			Dist
 		};
 		
-		std::string Name = "Untitled";
+		eastl::string Name = "Untitled";
 
 		std::filesystem::path StartScene;
 
@@ -25,7 +25,7 @@ namespace ArcEngine
 
 	class Project
 	{
-		inline static const std::unordered_map<ProjectConfig::BuildConfig, const char*> s_BuildConfigMap =
+		inline static const eastl::hash_map<ProjectConfig::BuildConfig, const char*> s_BuildConfigMap =
 		{
 			{ ProjectConfig::BuildConfig::Debug,	"Debug"		},
 			{ ProjectConfig::BuildConfig::Release,	"Release"	},
@@ -66,10 +66,10 @@ namespace ArcEngine
 		[[nodiscard]] static std::filesystem::path GetSolutionPath()
 		{
 			ARC_CORE_ASSERT(s_ActiveProject);
-			return GetProjectDirectory() / (s_ActiveProject->GetConfig().Name + ".sln");
+			return GetProjectDirectory() / (s_ActiveProject->GetConfig().Name + ".sln").c_str();
 		}
 
-		[[nodiscard]] static std::string_view GetBuildConfigString()
+		[[nodiscard]] static eastl::string_view GetBuildConfigString()
 		{
 			ARC_CORE_ASSERT(s_ActiveProject);
 			return s_BuildConfigMap.at(s_ActiveProject->GetConfig().BuildConfiguration);

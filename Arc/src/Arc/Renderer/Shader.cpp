@@ -23,8 +23,9 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto& name = shaderPath.filename().string();
-		ARC_CORE_ASSERT(!Exists(name), "Shader already exists!");
+		std::string nameStr = shaderPath.filename().string();
+		eastl::string name = nameStr.c_str();
+		ARC_CORE_ASSERT(!Exists(name.c_str()), "Shader already exists!");
 
 		const auto shader = Shader::Create(shaderPath, spec.Type);
 		if (!shader)
@@ -33,7 +34,9 @@ namespace ArcEngine
 		auto pipeline = PipelineState::Create(shader, spec);
 		m_Pipelines[name] = pipeline;
 		m_Shaders[name] = shader;
-		m_ShaderPaths[shader->GetName()] = shaderPath.string();
+
+		auto path = shaderPath.string();
+		m_ShaderPaths[shader->GetName()] = path.c_str();
 
 		return pipeline;
 	}
@@ -42,7 +45,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		std::string shaderName;
+		eastl::string shaderName;
 		for (const auto& [name, pipeline] : m_Pipelines)
 		{
 			const auto& it = m_ShaderPaths.find(name);
@@ -53,7 +56,7 @@ namespace ArcEngine
 		}
 	}
 
-	Ref<PipelineState> PipelineLibrary::Get(const std::string& name)
+	Ref<PipelineState> PipelineLibrary::Get(const eastl::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -61,10 +64,10 @@ namespace ArcEngine
 		return m_Pipelines[name];
 	}
 
-	bool PipelineLibrary::Exists(const std::string& name) const
+	bool PipelineLibrary::Exists(const eastl::string& name) const
 	{
 		ARC_PROFILE_SCOPE();
 
-		return m_Pipelines.contains(name);
+		return m_Pipelines.find(name) != m_Pipelines.end();
 	}
 }

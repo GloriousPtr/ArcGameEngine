@@ -282,7 +282,9 @@ namespace ArcEngine
 				ImGui::SetKeyboardFocusHere();
 			}
 
-			ImGui::InputText("##Tag", &tag);
+			std::string tagBuffer = tag.c_str();
+			if (ImGui::InputText("##Tag", &tagBuffer))
+				tag = tagBuffer.c_str();
 
 			if (ImGui::IsItemDeactivated())
 			{
@@ -378,7 +380,7 @@ namespace ArcEngine
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 			{
 				const char* path = static_cast<char*>(payload->Data);
-				const std::string name(StringUtils::GetName(path));
+				const eastl::string name(StringUtils::GetName(path));
 				const auto ext = StringUtils::GetExtension(path);
 
 				if (ext == "prefab")

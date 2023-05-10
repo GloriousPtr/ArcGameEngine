@@ -45,7 +45,7 @@ namespace ArcEngine
 		return true;
 	}
 
-	std::string Filesystem::ReadFileText(const std::filesystem::path& filepath)
+	eastl::string Filesystem::ReadFileText(const std::filesystem::path& filepath)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -56,7 +56,7 @@ namespace ArcEngine
 			const int64_t size = in.tellg();
 			if (std::cmp_not_equal(size, -1))
 			{
-				std::string ret;
+				eastl::string ret;
 				ret.resize(size);
 				in.seekg(0, std::ios::beg);
 				in.read(ret.data(), size);
@@ -75,7 +75,7 @@ namespace ArcEngine
 		return "";
 	}
 
-	void Filesystem::WriteFileText(const std::filesystem::path& filepath, const std::string& buffer)
+	void Filesystem::WriteFileText(const std::filesystem::path& filepath, const eastl::string& buffer)
 	{
 		std::ofstream stream(filepath, std::ios::out);
 		stream << buffer.c_str();

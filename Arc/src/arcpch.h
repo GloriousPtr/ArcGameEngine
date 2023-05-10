@@ -12,20 +12,24 @@
 #include <fstream>
 #include <sstream>
 
+#include <EASTL/memory.h>
+#include <EASTL/utility.h>
+#include <EASTL/algorithm.h>
+#include <EASTL/functional.h>
+#include <EASTL/string.h>
+#include <EASTL/array.h>
+#include <EASTL/fixed_vector.h>
+#include <EASTL/vector.h>
+#include <EASTL/hash_map.h>
+#include <EASTL/map.h>
+#include <EASTL/unordered_map.h>
+#include <EASTL/set.h>
+#include <EASTL/unordered_set.h>
+#include <EASTL/stack.h>
+#include <EASTL/queue.h>
+
 #include <future>
-#include <memory>
-#include <utility>
-#include <algorithm>
-#include <functional>
 #include <string>
-#include <array>
-#include <vector>
-#include <map>
-#include <unordered_map>
-#include <set>
-#include <unordered_set>
-#include <stack>
-#include <queue>
 #include <ranges>
 
 #include <glm/glm.hpp>
@@ -54,4 +58,6 @@
 namespace ArcEngine::Allocation
 {
 	size_t GetSize();
+	void* New(size_t size);
+	void Free(void* ptr, size_t size);
 }

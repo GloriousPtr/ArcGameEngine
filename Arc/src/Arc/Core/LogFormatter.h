@@ -24,6 +24,36 @@ namespace std
 	};
 
 	template<>
+	struct formatter<eastl::string>
+	{
+		constexpr auto parse(const format_parse_context& ctx) const -> decltype(ctx.begin())
+		{
+			return ctx.end();
+		}
+
+		template <typename FormatContext>
+		auto format(const eastl::string& input, FormatContext& ctx) -> decltype(ctx.out())
+		{
+			return format_to(ctx.out(), "{}", input.c_str());
+		}
+	};
+
+	template<>
+	struct formatter<eastl::string_view>
+	{
+		constexpr auto parse(const format_parse_context& ctx) const -> decltype(ctx.begin())
+		{
+			return ctx.end();
+		}
+
+		template <typename FormatContext>
+		auto format(const eastl::string_view& input, FormatContext& ctx) -> decltype(ctx.out())
+		{
+			return format_to(ctx.out(), "{}", input.data());
+		}
+	};
+
+	template<>
 	struct formatter<filesystem::path>
 	{
 		constexpr auto parse(format_parse_context& ctx) const -> decltype(ctx.begin())

@@ -61,11 +61,11 @@ namespace ArcEngine
 	}
 
 	static void AppendMaterials(const Microsoft::WRL::ComPtr<ID3D12ShaderReflection>& reflection,
-		std::vector<D3D12_ROOT_PARAMETER1>& outRootParams,
-		std::array<D3D12_DESCRIPTOR_RANGE1, 20>& outDescriptors,
+		eastl::vector<D3D12_ROOT_PARAMETER1>& outRootParams,
+		eastl::array<D3D12_DESCRIPTOR_RANGE1, 20>& outDescriptors,
 		uint32_t* outDescriptorsEnd,
-		std::vector<MaterialProperty>& outMaterialProperties,
-		str_umap<uint32_t>& bufferMap)
+		eastl::vector<MaterialProperty>& outMaterialProperties,
+		eastl::hash_map<eastl::string, uint32_t>& bufferMap)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -82,9 +82,9 @@ namespace ArcEngine
 			D3D12_SHADER_BUFFER_DESC constantBufferDesc{};
 			cb->GetDesc(&constantBufferDesc);
 
-			std::string bufferName = shaderInputBindDesc.Name;
+			eastl::string bufferName { shaderInputBindDesc.Name };
 
-			if (bufferMap.contains(bufferName))
+			if (bufferMap.find(bufferName) != bufferMap.end())
 				continue;
 
 			bool tex = shaderInputBindDesc.Type == D3D_SIT_TEXTURE;
@@ -189,11 +189,11 @@ namespace ArcEngine
 					property.IsSlider = variableName.ends_with("01");
 					property.Name = variableDesc.Name;
 					property.DisplayName = variableDesc.Name + (property.IsSlider ? 2 : 0);
-					property.IsColor = variableName.find("color") != std::string::npos || variableName.find("Color") != std::string::npos;
+					property.IsColor = variableName.find("color") != eastl::string::npos || variableName.find("Color") != eastl::string::npos;
 					property.Slot = slot;
 
 					outMaterialProperties.push_back(property);
-					bufferMap.emplace(variableName, slot);
+					bufferMap.emplace(variableName.c_str(), slot);
 				}
 			}
 			else if(tex)
@@ -275,11 +275,11 @@ namespace ArcEngine
 		return true;
 	}
 
-	void Dx12PipelineState::SetDataImpl(const std::string& name, const void* data, uint32_t size, uint32_t offset)
+	void Dx12PipelineState::SetDataImpl(const eastl::string_view name, const void* data, uint32_t size, uint32_t offset)
 	{
 		ARC_PROFILE_SCOPE();
 
-		const int32_t slot = m_BufferMap.at(name);
+		const int32_t slot = m_BufferMap.at(name.data());
 		Dx12Context::GetGraphicsCommandList()->SetGraphicsRoot32BitConstants(slot, size / 4, data, offset);
 	}
 
@@ -301,7 +301,7 @@ namespace ArcEngine
 		_bstr_t shaderName = ToWCSTR(shader->GetName().c_str());
 		struct Layout
 		{
-			std::string Name;
+			eastl::string Name;
 			uint32_t Index;
 			DXGI_FORMAT Format;
 
@@ -310,10 +310,10 @@ namespace ArcEngine
 			{
 			}
 		};
-		std::vector<Layout> inputLayout;
-		std::vector<Layout> outputLayout;
-		std::vector<D3D12_ROOT_PARAMETER1> rootParams;
-		std::array<D3D12_DESCRIPTOR_RANGE1, 20> rootDescriptors;
+		eastl::vector<Layout> inputLayout;
+		eastl::vector<Layout> outputLayout;
+		eastl::vector<D3D12_ROOT_PARAMETER1> rootParams;
+		eastl::array<D3D12_DESCRIPTOR_RANGE1, 20> rootDescriptors;
 		uint32_t rootDescriptorsEnd = 0;
 
 		if (vertexReflection)
@@ -386,7 +386,7 @@ namespace ArcEngine
 			AppendMaterials(reflect, rootParams, rootDescriptors, &rootDescriptorsEnd, m_MaterialProperties, m_BufferMap);
 		}
 
-		std::vector<D3D12_INPUT_ELEMENT_DESC> psoInputLayout;
+		eastl::vector<D3D12_INPUT_ELEMENT_DESC> psoInputLayout;
 		psoInputLayout.reserve(inputLayout.size());
 		for (auto& i : inputLayout)
 		{
@@ -560,8 +560,8 @@ namespace ArcEngine
 		ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&utils)), "DxcUtils creation failed!");
 
 		_bstr_t shaderName = ToWCSTR(shader->GetName().c_str());
-		std::vector<D3D12_ROOT_PARAMETER1> rootParams;
-		std::array<D3D12_DESCRIPTOR_RANGE1, 20> rootDescriptors;
+		eastl::vector<D3D12_ROOT_PARAMETER1> rootParams;
+		eastl::array<D3D12_DESCRIPTOR_RANGE1, 20> rootDescriptors;
 		uint32_t rootDescriptorsEnd = 0;
 
 		if (computeReflection)

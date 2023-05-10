@@ -31,7 +31,7 @@ namespace ArcEngine
 	
 	struct BufferElement
 	{
-		std::string Name;
+		eastl::string Name;
 		ShaderDataType Type;
 		uint32_t Size;
 		size_t Offset;
@@ -42,7 +42,7 @@ namespace ArcEngine
 		{
 		}
 
-		BufferElement(ShaderDataType type, const std::string& name, bool normalized = false)
+		BufferElement(ShaderDataType type, const eastl::string& name, bool normalized = false)
 			: Name(name), Type(type), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized)
 		{
 		}
@@ -82,12 +82,12 @@ namespace ArcEngine
 		}
 
 		[[nodiscard]] uint32_t GetStride() const { return m_Stride; }
-		[[nodiscard]] const std::vector<BufferElement>& GetElements() const { return m_Elements; }
+		[[nodiscard]] const eastl::vector<BufferElement>& GetElements() const { return m_Elements; }
 
-		[[nodiscard]] std::vector<BufferElement>::iterator begin() { return m_Elements.begin(); }
-		[[nodiscard]] std::vector<BufferElement>::iterator end() { return m_Elements.end(); }
-		[[nodiscard]] std::vector<BufferElement>::const_iterator begin() const { return m_Elements.begin(); }
-		[[nodiscard]] std::vector<BufferElement>::const_iterator end() const { return m_Elements.end(); }
+		[[nodiscard]] eastl::vector<BufferElement>::iterator begin() { return m_Elements.begin(); }
+		[[nodiscard]] eastl::vector<BufferElement>::iterator end() { return m_Elements.end(); }
+		[[nodiscard]] eastl::vector<BufferElement>::const_iterator begin() const { return m_Elements.begin(); }
+		[[nodiscard]] eastl::vector<BufferElement>::const_iterator end() const { return m_Elements.end(); }
 	private:
 		void CalculateOffsetAndStride()
 		{
@@ -101,7 +101,7 @@ namespace ArcEngine
 			}
 		}
 	private:
-		std::vector<BufferElement> m_Elements;
+		eastl::vector<BufferElement> m_Elements;
 		uint32_t m_Stride = 0;
 	};
 	

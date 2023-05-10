@@ -59,8 +59,8 @@ namespace ArcEngine
 
 		std::filesystem::path m_AssetsDirectory;
 		std::filesystem::path m_CurrentDirectory;
-		std::stack<std::filesystem::path> m_BackStack;
-		std::vector<File> m_DirectoryEntries;
+		eastl::stack<std::filesystem::path> m_BackStack;
+		eastl::vector<File> m_DirectoryEntries;
 		uint32_t m_CurrentlyVisibleItemsTreeView = 0;
 		float m_ThumbnailSize = 128.0f;
 		ImGuiTextFilter m_Filter;

@@ -16,11 +16,11 @@ namespace ArcEngine
 		void Bind() const override;
 		void AddVertexBuffer(Ref<VertexBuffer>& vertexBuffer) override;
 		void SetIndexBuffer(Ref<IndexBuffer>& indexBuffer) override;
-		[[nodiscard]] const std::vector<Ref<VertexBuffer>>& GetVertexBuffer() const override { return m_VertexBuffers; }
+		[[nodiscard]] const eastl::vector<Ref<VertexBuffer>>& GetVertexBuffer() const override { return m_VertexBuffers; }
 		[[nodiscard]] const Ref<IndexBuffer>& GetIndexBuffer() const override { return m_IndexBuffer; }
 
 	private:
-		std::vector<Ref<VertexBuffer>> m_VertexBuffers;
+		eastl::vector<Ref<VertexBuffer>> m_VertexBuffers;
 		Ref<IndexBuffer> m_IndexBuffer;
 	};
 }

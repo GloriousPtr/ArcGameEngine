@@ -279,7 +279,7 @@ namespace ArcEngine
 						ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 						if (auto project = Project::GetActive())
 						{
-							const std::string& projectName = project->GetConfig().Name;
+							const eastl::string& projectName = project->GetConfig().Name;
 							ImVec2 textSize = ImGui::CalcTextSize(projectName.c_str());
 							ImGui::SetCursorPos(ImVec2(region.x - 4.0f * buttonSize.x - textSize.x - 100.0f + ImGui::GetStyle().WindowPadding.x, ImGui::GetCursorPosY() - 2.0f));
 							ImGui::Button(projectName.c_str(), { textSize.x + 100.0f, buttonSize.y });
@@ -355,7 +355,7 @@ namespace ArcEngine
 									if (ImGui::Selectable(configString.data(), isSelected))
 									{
 										Project::GetActive()->GetConfig().BuildConfiguration = config;
-										SaveProject(Project::GetProjectDirectory() / (Project::GetActive()->GetConfig().Name + ".arcproj"));
+										SaveProject(Project::GetProjectDirectory() / (Project::GetActive()->GetConfig().Name + ".arcproj").c_str());
 										ScriptEngine::ReloadAppDomain();
 									}
 
@@ -546,7 +546,7 @@ namespace ArcEngine
 					ImGui::PopStyleColor();
 
 				if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_FOLDER)))
-					m_TempProjectPath = FileDialogs::OpenFolder();
+					m_TempProjectPath = FileDialogs::OpenFolder().c_str();
 
 				ImGui::Separator();
 
@@ -558,7 +558,7 @@ namespace ArcEngine
 				if (ImGui::Button("OK", ImVec2(120, 0)))
 				{
 					const auto& project = Project::New();
-					project->GetConfig().Name = m_TempProjectName;
+					project->GetConfig().Name = m_TempProjectName.c_str();
 					std::filesystem::path projectDirPath = std::filesystem::path(m_TempProjectPath) / m_TempProjectName;
 					if (!std::filesystem::exists(projectDirPath))
 						std::filesystem::create_directories(projectDirPath);
@@ -918,7 +918,8 @@ namespace ArcEngine
 		if (!m_ScenePath.empty())
 		{
 			const SceneSerializer serializer(m_ActiveScene);
-			serializer.Serialize(m_ScenePath.string());
+			std::string scenePath = m_ScenePath.string();
+			serializer.Serialize(scenePath.c_str());
 		}
 		else
 		{
@@ -932,7 +933,7 @@ namespace ArcEngine
 		if (!filepath.empty())
 		{
 			const SceneSerializer serializer(m_ActiveScene);
-			serializer.Serialize(filepath);
+			serializer.Serialize(filepath.c_str());
 			m_ScenePath = filepath;
 		}
 	}

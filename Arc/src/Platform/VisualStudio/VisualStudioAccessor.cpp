@@ -40,7 +40,7 @@ namespace ArcEngine
 		Preview2022, Enterprise2022, Professional2022, Community2022,
 	};
 
-	inline static std::unordered_map<VisualStudioVersion, const char*> s_VisualStudioInstallLocation
+	inline static eastl::hash_map<VisualStudioVersion, const char*> s_VisualStudioInstallLocation
 	{
 		{ VisualStudioVersion::Preview2022,			"C:/Program Files/Microsoft Visual Studio/2022/Preview/Common7/IDE/devenv.exe"		},
 		{ VisualStudioVersion::Enterprise2022,		"C:/Program Files/Microsoft Visual Studio/2022/Enterprise/Common7/IDE/devenv.exe"	},
@@ -91,7 +91,7 @@ namespace ArcEngine
 				wBuffer = buffer;
 				cBuffer = wBuffer;
 				std::filesystem::path path = cBuffer;
-				if (path == solutionPath)
+				if (path == solutionPath.c_str())
 				{
 					s_VsInstance = vsInstance;
 					return true;

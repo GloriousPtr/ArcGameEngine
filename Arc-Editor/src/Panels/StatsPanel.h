@@ -19,6 +19,6 @@ namespace ArcEngine
 
 	private:
 		float m_FpsValues[50];
-		std::vector<float> m_FrameTimes;
+		eastl::vector<float> m_FrameTimes;
 	};
 }

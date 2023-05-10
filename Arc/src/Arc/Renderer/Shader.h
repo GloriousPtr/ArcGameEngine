@@ -24,7 +24,7 @@ namespace ArcEngine
 
 		virtual void Recompile(const std::filesystem::path& path) = 0;
 
-		[[nodiscard]] virtual const std::string& GetName() const = 0;
+		[[nodiscard]] virtual const eastl::string& GetName() const = 0;
 
 		[[nodiscard]] static Ref<Shader> Create(const std::filesystem::path& filepath, ShaderType type);
 	};
@@ -35,13 +35,13 @@ namespace ArcEngine
 		Ref<PipelineState> Load(const std::filesystem::path& shaderPath, const PipelineSpecification& spec);
 		void ReloadAll();
 
-		[[nodiscard]] Ref<PipelineState> Get(const std::string& name);
+		[[nodiscard]] Ref<PipelineState> Get(const eastl::string& name);
 
-		[[nodiscard]] bool Exists(const std::string& name) const;
+		[[nodiscard]] bool Exists(const eastl::string& name) const;
 	private:
 
-		str_umap<Ref<PipelineState>> m_Pipelines;
-		str_umap<Ref<Shader>> m_Shaders;
-		str_umap<std::string> m_ShaderPaths;
+		eastl::hash_map<eastl::string, Ref<PipelineState>> m_Pipelines;
+		eastl::hash_map<eastl::string, Ref<Shader>> m_Shaders;
+		eastl::hash_map<eastl::string, eastl::string> m_ShaderPaths;
 	};
 }

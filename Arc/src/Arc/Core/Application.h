@@ -29,7 +29,7 @@ namespace ArcEngine
 
 	struct ApplicationSpecification
 	{
-		std::string Name = "Arc Application";
+		eastl::string Name = "Arc Application";
 		ApplicationCommandLineArgs CommandLineArgs;
 	};
 
@@ -76,7 +76,7 @@ namespace ArcEngine
 		Scope<LayerStack> m_LayerStack;
 		std::chrono::steady_clock::time_point m_LastFrameTime;
 
-		std::vector<std::function<void()>> m_MainThreadQueue;
+		eastl::vector<std::function<void()>> m_MainThreadQueue;
 		std::mutex m_MainThreadQueueMutex;
 
 	private:

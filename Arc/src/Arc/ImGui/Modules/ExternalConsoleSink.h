@@ -14,27 +14,27 @@ namespace ArcEngine
 	public:
 		struct Message
 		{
-			std::string Buffer;
+			eastl::string Buffer;
 			const char* CallerPath;
 			const char* CallerFunction;
 			int32_t CallerLine;
 			Log::Level Level;
 
-			Message(std::string_view message, const char* callerPath, const char* callerFunction, int32_t callerLine, Log::Level level)
+			Message(eastl::string_view message, const char* callerPath, const char* callerFunction, int32_t callerLine, Log::Level level)
 				: Buffer(message.data(), message.size()), CallerPath(callerPath), CallerFunction(callerFunction), CallerLine(callerLine), Level(level)
 			{
 			}
 		};
 
 		explicit ExternalConsoleSink(bool forceFlush = false, uint8_t bufferCapacity = 10)
-			: m_MessageBufferCapacity(forceFlush ? 1 : bufferCapacity), m_MessageBuffer(std::vector<Ref<Message>>(forceFlush ? 1 : bufferCapacity))
+			: m_MessageBufferCapacity(forceFlush ? 1 : bufferCapacity), m_MessageBuffer(eastl::vector<Ref<Message>>(forceFlush ? 1 : bufferCapacity))
 		{
 		}
 		ExternalConsoleSink(const ExternalConsoleSink&) = delete;
 		ExternalConsoleSink& operator=(const ExternalConsoleSink&) = delete;
 		~ExternalConsoleSink() override = default;
 
-		static void SetConsoleSink_HandleFlush(const std::function<void(std::string_view, const char*, const char*, int32_t, Log::Level)>& func)
+		static void SetConsoleSink_HandleFlush(const std::function<void(eastl::string_view, const char*, const char*, int32_t, Log::Level)>& func)
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -54,7 +54,7 @@ namespace ArcEngine
 
 			spdlog::memory_buf_t formatted;
 			base_sink<std::mutex>::formatter_->format(msg, formatted);
-			*(m_MessageBuffer.begin() + m_MessagesBuffered) = CreateRef<Message>(std::string_view(formatted.data(), formatted.size()), msg.source.filename, msg.source.funcname, msg.source.line, GetMessageLevel(msg.level));
+			*(m_MessageBuffer.begin() + m_MessagesBuffered) = CreateRef<Message>(eastl::string_view(formatted.data(), formatted.size()), msg.source.filename, msg.source.funcname, msg.source.line, GetMessageLevel(msg.level));
 
 			if (++m_MessagesBuffered == m_MessageBufferCapacity)
 				flush_();
@@ -91,8 +91,8 @@ namespace ArcEngine
 	private:
 		uint8_t m_MessagesBuffered = 0;
 		uint8_t m_MessageBufferCapacity;
-		std::vector<Ref<Message>> m_MessageBuffer;
+		eastl::vector<Ref<Message>> m_MessageBuffer;
 
-		static std::function<void(std::string_view, const char*, const char*, int32_t, Log::Level)> OnFlush;
+		static std::function<void(eastl::string_view, const char*, const char*, int32_t, Log::Level)> OnFlush;
 	};
 }

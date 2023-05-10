@@ -28,7 +28,7 @@ namespace ArcEngine
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene(const CameraData& cameraData, Entity cubemap, std::vector<Entity>&& lights);
+		static void BeginScene(const CameraData& cameraData, Entity cubemap, eastl::vector<Entity>&& lights);
 		static void EndScene(const Ref<RenderGraphData>& renderTarget);
 
 		static void DrawCube();
@@ -70,7 +70,7 @@ namespace ArcEngine
 		static Ref<ConstantBuffer> s_UbDirectionalLights;
 
 		static Entity s_Skylight;
-		static std::vector<Entity> s_SceneLights;
+		static eastl::vector<Entity> s_SceneLights;
 
 	public:
 

@@ -53,7 +53,7 @@ namespace ArcEngine
 		LineVertex* LineVertexBufferBase = nullptr;
 		LineVertex* LineVertexBufferPtr = nullptr;
 
-		std::array<uint32_t, MaxTextureSlots> TextureSlots;
+		eastl::array<uint32_t, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 1; // 0 = white texture
 
 		static constexpr glm::vec4 QuadVertexPositions[4] =	  { { -0.5f, -0.5f, 0.0f, 1.0f },
@@ -246,7 +246,7 @@ namespace ArcEngine
 								* glm::rotate(glm::mat4(1.0f), rotation, { 0.0f, 0.0f, 1.0f })
 								* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-		DrawQuad(std::move(transform), texture, tintColor, tiling, offset);
+		DrawQuad(eastl::move(transform), texture, tintColor, tiling, offset);
 	}
 
 	void Renderer2D::DrawQuad(glm::mat4&& transform, const glm::vec4& color)

@@ -121,7 +121,7 @@ namespace ArcEngine
 		void Emit(const glm::vec3& position, uint32_t count = 1);
 
 	private:
-		std::vector<Particle> m_Particles;
+		eastl::vector<Particle> m_Particles;
 		uint32_t m_PoolIndex = 0;
 		ParticleProperties m_Properties;
 

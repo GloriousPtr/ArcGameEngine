@@ -112,14 +112,14 @@ namespace ArcEngine
 			| ImGuiTreeNodeFlags_Framed
 			| ImGuiTreeNodeFlags_FramePadding;
 
-		std::string toRemove;
+		eastl::string* toRemove = nullptr;
 		
 		const float frameHeight = ImGui::GetFrameHeight();
 		const float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 
 		for (auto it = component.Classes.begin(); it != component.Classes.end(); ++it)
 		{
-			const std::string& className = *it;
+			const eastl::string& className = *it;
 
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
 			const bool open = ImGui::TreeNodeEx(&it, treeFlags, "%s", className.c_str());
@@ -134,7 +134,7 @@ namespace ArcEngine
 				if (ImGui::BeginPopup("ScriptSettings"))
 				{
 					if (ImGui::MenuItem("Remove"))
-						toRemove = *it;
+						toRemove = it;
 
 					ImGui::EndPopup();
 				}
@@ -177,10 +177,8 @@ namespace ArcEngine
 			}
 		}
 
-		if (!toRemove.empty())
-		{
-			std::erase_if(component.Classes, [&toRemove](auto n) { return n == toRemove; });
-		}
+		if (toRemove)
+			component.Classes.erase(toRemove);
 	}
 
 	static void DrawMaterialProperties(const Ref<Material>& material)
@@ -190,7 +188,7 @@ namespace ArcEngine
 		const auto& materialProperties = material->GetProperties();
 		for (const auto& property : materialProperties)
 		{
-			const std::string_view name = property.Name;
+			const eastl::string_view name = property.Name;
 			const char* displayName = property.DisplayName.c_str();
 
 			switch (property.Type)
@@ -268,7 +266,7 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	static void DrawParticleOverLifetimeModule(std::string_view moduleName, OverLifetimeModule<T>& propertyModule, bool color = false, bool rotation = false)
+	static void DrawParticleOverLifetimeModule(eastl::string_view moduleName, OverLifetimeModule<T>& propertyModule, bool color = false, bool rotation = false)
 	{
 		static constexpr ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen
 			| ImGuiTreeNodeFlags_SpanAvailWidth
@@ -304,7 +302,7 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	static void DrawParticleBySpeedModule(std::string_view moduleName, BySpeedModule<T>& propertyModule, bool color = false, bool rotation = false)
+	static void DrawParticleBySpeedModule(eastl::string_view moduleName, BySpeedModule<T>& propertyModule, bool color = false, bool rotation = false)
 	{
 		static constexpr ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen
 			| ImGuiTreeNodeFlags_SpanAvailWidth
@@ -358,7 +356,11 @@ namespace ArcEngine
 			if (entity.HasComponent<TagComponent>())
 			{
 				ImGui::SetNextItemWidth(tagWidth);
-				ImGui::InputText("##Tag", &tag.Tag);
+				constexpr size_t bufferSize = 256;
+				char buffer[bufferSize];
+				memcpy_s(buffer, bufferSize, tag.Tag.c_str(), tag.Tag.size() + 1);
+				if (ImGui::InputText("##Tag", buffer, bufferSize))
+					tag.Tag = buffer;
 			}
 
 			ImGui::SameLine();

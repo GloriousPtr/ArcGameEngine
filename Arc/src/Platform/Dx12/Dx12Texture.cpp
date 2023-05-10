@@ -18,7 +18,7 @@ namespace ArcEngine
 		Dx12Utils::CreateTexture(&m_ImageAllocation, &m_UploadImageAllocation, D3D12_SRV_DIMENSION_TEXTURE2D, m_Format, m_Width, m_Height, 1, nullptr, &m_Handle, nullptr);
 	}
 
-	Dx12Texture2D::Dx12Texture2D(const std::string& path, TextureFormat format)
+	Dx12Texture2D::Dx12Texture2D(const eastl::string& path, TextureFormat format)
 		: m_Format(format)
 	{
 		ARC_PROFILE_SCOPE();
@@ -98,7 +98,7 @@ namespace ArcEngine
 
 
 
-	Dx12TextureCube::Dx12TextureCube(const std::string& path, TextureFormat format)
+	Dx12TextureCube::Dx12TextureCube(const eastl::string& path, TextureFormat format)
 		: m_Format(format)
 	{
 		ARC_PROFILE_SCOPE();

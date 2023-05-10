@@ -18,7 +18,7 @@ namespace ArcEngine
 		bool EnableDepth = false;
 		DepthFuncType DepthFunc = DepthFuncType::Less;
 		FramebufferTextureFormat DepthFormat = FramebufferTextureFormat::Depth;
-		std::vector<FramebufferTextureFormat> OutputFormats{};
+		eastl::vector<FramebufferTextureFormat> OutputFormats{};
 	};
 
 	struct PipelineSpecification
@@ -47,8 +47,8 @@ namespace ArcEngine
 		uint32_t SizeInBytes;
 		uint32_t StartOffsetInBytes;
 
-		std::string Name;
-		std::string DisplayName;
+		eastl::string Name;
+		eastl::string DisplayName;
 		bool IsSlider;
 		bool IsColor;
 
@@ -68,16 +68,16 @@ namespace ArcEngine
 		[[nodiscard]] virtual bool Bind() const = 0;
 		virtual bool Unbind() const = 0;
 
-		[[nodiscard]] virtual std::vector<MaterialProperty>& GetMaterialProperties() = 0;
-		[[nodiscard]] virtual uint32_t GetSlot(const std::string_view& name) = 0;
+		[[nodiscard]] virtual eastl::vector<MaterialProperty>& GetMaterialProperties() = 0;
+		[[nodiscard]] virtual uint32_t GetSlot(const eastl::string_view& name) = 0;
 
-		void SetData(const std::string& name, const void* data, uint32_t size, uint32_t offset = 0)
+		void SetData(const eastl::string_view name, const void* data, uint32_t size, uint32_t offset = 0)
 		{
 			SetDataImpl(name, data, size, offset);
 		}
 
 	private:
-		virtual void SetDataImpl(const std::string& name, const void* data, uint32_t size, uint32_t offset) = 0;
+		virtual void SetDataImpl(const eastl::string_view name, const void* data, uint32_t size, uint32_t offset) = 0;
 
 	public:
 		static Ref<PipelineState> Create(const Ref<Shader>& shader, const PipelineSpecification& spec);

@@ -7,6 +7,7 @@
 #include <Platform/VisualStudio/VisualStudioAccessor.h>
 #endif //ARC_PLATFORM_VISUAL_STUDIO
 
+#include <EASTL/hash_map.h>
 #include <icons/IconsMaterialDesignIcons.h>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
@@ -32,7 +33,7 @@
 
 namespace ArcEngine
 {
-	static const std::unordered_map<FileType, const char*> s_FileTypesToString =
+	static const eastl::hash_map<FileType, const char*> s_FileTypesToString =
 	{
 		{ FileType::Unknown,	"Unknown" },
 
@@ -48,7 +49,7 @@ namespace ArcEngine
 		{ FileType::Audio,		"Audio" },
 	};
 
-	static const str_umap<FileType> s_FileTypes =
+	static const eastl::hash_map<eastl::string, FileType> s_FileTypes =
 	{
 		{ ".arc",		FileType::Scene },
 		{ ".prefab",	FileType::Prefab },
@@ -73,7 +74,7 @@ namespace ArcEngine
 		{ ".wav",		FileType::Audio },
 	};
 
-	static const std::unordered_map<FileType, ImVec4> s_TypeColors =
+	static const eastl::hash_map<FileType, ImVec4> s_TypeColors =
 	{
 		{ FileType::Scene,			{ 0.75f, 0.35f, 0.20f, 1.00f } },
 		{ FileType::Prefab,			{ 0.10f, 0.50f, 0.80f, 1.00f } },
@@ -87,7 +88,7 @@ namespace ArcEngine
 		{ FileType::Audio,			{ 0.20f, 0.80f, 0.50f, 1.00f } },
 	};
 
-	static const std::unordered_map<FileType, const char8_t*> s_FileTypesToIcon =
+	static const eastl::hash_map<FileType, const char8_t*> s_FileTypesToIcon =
 	{
 		{ FileType::Unknown,	ICON_MDI_FILE },
 
@@ -112,7 +113,7 @@ namespace ArcEngine
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity"))
 			{
 				const Entity entity = *static_cast<Entity*>(payload->Data);
-				const std::filesystem::path path = dropPath / std::string(entity.GetComponent<TagComponent>().Tag + ".prefab");
+				const std::filesystem::path path = dropPath / (entity.GetComponent<TagComponent>().Tag + ".prefab").c_str();
 				EntitySerializer::SerializeEntityAsPrefab(path.string().c_str(), entity);
 				return true;
 			}
@@ -139,7 +140,7 @@ namespace ArcEngine
 		const std::string filepathString = path.string();
 		const char* filepath = filepathString.c_str();
 		const std::string ext = path.extension().string();
-		const auto& fileTypeIt = s_FileTypes.find(ext);
+		const auto& fileTypeIt = s_FileTypes.find_as(ext.c_str());
 		if (fileTypeIt != s_FileTypes.end())
 		{
 			const FileType fileType = fileTypeIt->second;
@@ -221,13 +222,14 @@ namespace ArcEngine
 				DragDropTarget(entryPath);
 			DragDropFrom(entryPath);
 
-			auto name = StringUtils::GetNameWithExtension(filepath);
+			auto name = StringUtils::GetNameWithExtension(filepath.c_str());
 
 			const char8_t* folderIcon = ICON_MDI_FILE;
 			if (entryIsFile)
 			{
 				auto fileType = FileType::Unknown;
-				const auto& fileTypeIt = s_FileTypes.find(entryPath.extension().string());
+				auto entryPathStr = entryPath.extension().string();
+				const auto& fileTypeIt = s_FileTypes.find_as(entryPathStr.c_str());
 				if (fileTypeIt != s_FileTypes.end())
 					fileType = fileTypeIt->second;
 
@@ -298,8 +300,8 @@ namespace ArcEngine
 				std::filesystem::path filepath = path;
 				const std::string ext = filepath.extension().string();
 				FileType fileType = FileType::Unknown;
-				if (s_FileTypes.contains(ext))
-					fileType = s_FileTypes.at(ext);
+				if (s_FileTypes.find_as(ext.c_str()) != s_FileTypes.end())
+					fileType = s_FileTypes.at(ext.c_str());
 
 				if (fileType == FileType::Script)
 				{
@@ -649,7 +651,7 @@ namespace ArcEngine
 						else if (!textureCreated)
 						{
 							textureCreated = true;
-							file.Thumbnail = AssetManager::GetTexture2D(file.Filepath);
+							file.Thumbnail = AssetManager::GetTexture2D(file.Filepath.c_str());
 							textureId = file.Thumbnail->GetRendererID();
 						}
 						else
@@ -834,7 +836,7 @@ namespace ArcEngine
 			const std::string extension = relativePath.extension().string();
 
 			auto fileType = FileType::Unknown;
-			const auto& fileTypeIt = s_FileTypes.find(extension);
+			const auto& fileTypeIt = s_FileTypes.find_as(extension.c_str());
 			if (fileTypeIt != s_FileTypes.end())
 				fileType = fileTypeIt->second;
 

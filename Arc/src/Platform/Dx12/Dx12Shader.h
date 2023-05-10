@@ -18,7 +18,7 @@ namespace ArcEngine
 
 		void Recompile(const std::filesystem::path& path) override;
 
-		[[nodiscard]] const std::string& GetName() const override;
+		[[nodiscard]] const eastl::string& GetName() const override;
 
 	private:
 		void Compile(const std::filesystem::path& filepath);
@@ -26,9 +26,9 @@ namespace ArcEngine
 	private:
 		friend class Dx12PipelineState;
 
-		std::string										m_Name;
-		ShaderType										m_Type;
-		std::unordered_map<ShaderType, IDxcBlob*>		m_ShaderBlobs;
-		std::unordered_map<ShaderType, IDxcBlob*>		m_ReflectionBlobs;
+		eastl::string								m_Name;
+		ShaderType									m_Type;
+		eastl::hash_map<ShaderType, IDxcBlob*>		m_ShaderBlobs;
+		eastl::hash_map<ShaderType, IDxcBlob*>		m_ReflectionBlobs;
 	};
 }

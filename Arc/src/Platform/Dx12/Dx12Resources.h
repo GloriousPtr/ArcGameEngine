@@ -44,7 +44,7 @@ namespace ArcEngine
 		D3D12_CPU_DESCRIPTOR_HANDLE			m_CpuStart{};
 		D3D12_GPU_DESCRIPTOR_HANDLE			m_GpuStart{};
 		Scope<uint32_t[]>					m_FreeHandles{};
-		std::vector<uint32_t>				m_DeferedFreeIndices[Dx12Context::FrameCount]{};
+		eastl::vector<uint32_t>				m_DeferedFreeIndices[Dx12Context::FrameCount]{};
 		std::mutex							m_Mutex{};
 		uint32_t							m_Capacity = 0;
 		uint32_t							m_Size = 0;

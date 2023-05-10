@@ -38,7 +38,7 @@ namespace ArcEngine
 			const std::filesystem::path premakeFilepath = GetProjectDirectory() / "premake5.lua";
 			if (!std::filesystem::exists(premakeFilepath))
 			{
-				std::string buffer = Filesystem::ReadFileText("Resources/Templates/PremakeProjectTemplate.txt");
+				eastl::string buffer = Filesystem::ReadFileText("Resources/Templates/PremakeProjectTemplate.txt");
 				StringUtils::ReplaceString(buffer, "{PROJECT_NAME}", s_ActiveProject->GetConfig().Name);
 				Filesystem::WriteFileText(premakeFilepath, buffer);
 			}

@@ -15,19 +15,19 @@ namespace ArcEngine
 		[[nodiscard]] bool Bind() const override;
 		bool Unbind() const override;
 
-		[[nodiscard]] std::vector<MaterialProperty>& GetMaterialProperties() override { return m_MaterialProperties; }
-		[[nodiscard]] uint32_t GetSlot(const std::string_view& name) override { return m_BufferMap.at(name.data()); }
+		[[nodiscard]] eastl::vector<MaterialProperty>& GetMaterialProperties() override { return m_MaterialProperties; }
+		[[nodiscard]] uint32_t GetSlot(const eastl::string_view& name) override { return m_BufferMap.at(name.data()); }
 
 	private:
-		void SetDataImpl(const std::string& name, const void* value, uint32_t size, uint32_t offset) override;
+		void SetDataImpl(const eastl::string_view name, const void* value, uint32_t size, uint32_t offset) override;
 		void MakeGraphicsPipeline(const Ref<Shader>& shader);
 		void MakeComputePipeline(const Ref<Shader>& shader);
 
 	private:
-		ID3D12RootSignature*				m_RootSignature = nullptr;
-		ID3D12PipelineState*				m_PipelineState = nullptr;
-		std::vector<MaterialProperty>		m_MaterialProperties;
-		str_umap<uint32_t>					m_BufferMap;
-		PipelineSpecification				m_Specification;
+		ID3D12RootSignature*							m_RootSignature = nullptr;
+		ID3D12PipelineState*							m_PipelineState = nullptr;
+		eastl::vector<MaterialProperty>					m_MaterialProperties;
+		eastl::hash_map<eastl::string, uint32_t>		m_BufferMap;
+		PipelineSpecification							m_Specification;
 	};
 }

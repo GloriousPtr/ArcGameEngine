@@ -54,7 +54,7 @@ namespace ArcEngine
 		}
 
 		[[nodiscard]] UUID GetUUID() const { return GetComponent<IDComponent>().ID; }
-		[[nodiscard]] std::string_view GetTag() const { return GetComponent<TagComponent>().Tag; }
+		[[nodiscard]] eastl::string_view GetTag() const { return GetComponent<TagComponent>().Tag; }
 		[[nodiscard]] TransformComponent& GetTransform() const { return GetComponent<TransformComponent>(); }
 		[[nodiscard]] RelationshipComponent& GetRelationship() const { return GetComponent<RelationshipComponent>(); }
 		
@@ -73,7 +73,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE();
 
-			ARC_CORE_ASSERT(m_Scene->m_EntityMap.contains(parent.GetUUID()), "Parent is not in the same scene as entity");
+			ARC_CORE_ASSERT(m_Scene->m_EntityMap.find(parent.GetUUID()) != m_Scene->m_EntityMap.end(), "Parent is not in the same scene as entity");
 			Deparent();
 			
 			auto& rc = GetComponent<RelationshipComponent>();
@@ -112,7 +112,7 @@ namespace ArcEngine
 			const auto& rc = GetRelationship();
 			const Entity parent = m_Scene->GetEntity(rc.Parent);
 			const glm::mat4 parentTransform = parent ? parent.GetWorldTransform() : glm::mat4(1.0f);
-			return std::move(parentTransform * glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale));
+			return eastl::move(parentTransform * glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale));
 		}
 
 		[[nodiscard]] glm::mat4 GetLocalTransform() const
@@ -120,7 +120,7 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE();
 
 			const auto& transform = GetTransform();
-			return std::move(glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale));
+			return eastl::move(glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale));
 		}
 
 		[[nodiscard]] Scene* GetScene() const { return m_Scene; }

@@ -15,7 +15,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		// Extract name from filepath
-		const std::string name = shaderPath.filename().string();
+		const eastl::string name = shaderPath.filename().string().c_str();
 		ARC_CORE_ASSERT(Renderer::GetPipelineLibrary().Exists(name));
 
 		m_Pipeline = Renderer::GetPipelineLibrary().Get(name);
@@ -75,16 +75,16 @@ namespace ArcEngine
 					property.Type == MaterialPropertyType::Float3 ||
 					property.Type == MaterialPropertyType::Float4)
 				{
-					const bool setDefaultValue =	property.Name.find("albedo") != std::string::npos ||
-													property.Name.find("Albedo") != std::string::npos ||
-													property.Name.find("roughness") != std::string::npos ||
-													property.Name.find("Roughness") != std::string::npos;
+					const bool setDefaultValue =	property.Name.find("albedo") != eastl::string::npos ||
+													property.Name.find("Albedo") != eastl::string::npos ||
+													property.Name.find("roughness") != eastl::string::npos ||
+													property.Name.find("Roughness") != eastl::string::npos;
 
 					if (setDefaultValue)
 					{
 						memcpy(&(m_CBBuffer[buffIndex]), glm::value_ptr(one), property.SizeInBytes);
 					}
-					if (property.Name.find("AlphaCutoffThreshold") != std::string::npos)
+					if (property.Name.find("AlphaCutoffThreshold") != eastl::string::npos)
 					{
 						glm::vec4 epsilon(0.01f);
 						memcpy(&(m_CBBuffer[buffIndex]), glm::value_ptr(epsilon), property.SizeInBytes);
@@ -130,11 +130,11 @@ namespace ArcEngine
 		m_Pipeline->Unbind();
 	}
 
-	Ref<Texture2D> Material::GetTexture(const std::string_view& name)
+	Ref<Texture2D> Material::GetTexture(const eastl::string_view& name)
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto it = m_Indices.find(name.data());
+		const auto it = m_Indices.find_as(name.data());
 		[[likely]]
 		if (it != m_Indices.end())
 		{
@@ -144,11 +144,11 @@ namespace ArcEngine
 		return nullptr;
 	}
 
-	void Material::SetTexture(const std::string_view& name, const Ref<Texture2D>& texture)
+	void Material::SetTexture(const eastl::string_view& name, const Ref<Texture2D>& texture)
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto it = m_Indices.find(name.data());
+		const auto it = m_Indices.find_as(name.data());
 		[[likely]]
 		if (it != m_Indices.end())
 		{
@@ -158,11 +158,11 @@ namespace ArcEngine
 		}
 	}
 
-	void* Material::GetData_Internal(const std::string_view& name)
+	void* Material::GetData_Internal(const eastl::string_view& name)
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto it = m_Indices.find(name.data());
+		const auto it = m_Indices.find_as(name.data());
 		[[likely]]
 		if (it != m_Indices.end())
 		{
@@ -172,11 +172,11 @@ namespace ArcEngine
 		return nullptr;
 	}
 
-	void Material::SetData_Internal(const std::string_view& name, const void* data)
+	void Material::SetData_Internal(const eastl::string_view& name, const void* data)
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto it = m_Indices.find(name.data());
+		const auto it = m_Indices.find_as(name.data());
 		[[likely]]
 		if (it != m_Indices.end())
 		{

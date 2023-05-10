@@ -30,8 +30,8 @@ namespace ArcEngine
 
 	protected:
 		const char8_t* m_Icon;
-		std::string m_Name;
-		std::string m_ID;
+		eastl::string m_Name;
+		eastl::string m_ID;
 
 	private:
 		static uint32_t s_Count;

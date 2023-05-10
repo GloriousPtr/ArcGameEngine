@@ -45,35 +45,35 @@ namespace ArcEngine
 		void Bind() const;
 		void Unbind() const;
 
-		[[nodiscard]] Ref<Texture2D> GetTexture(const std::string_view& name);
-		[[nodiscard]] std::vector<MaterialProperty>& GetProperties() const { return m_Pipeline->GetMaterialProperties(); }
+		[[nodiscard]] Ref<Texture2D> GetTexture(const eastl::string_view& name);
+		[[nodiscard]] eastl::vector<MaterialProperty>& GetProperties() const { return m_Pipeline->GetMaterialProperties(); }
 
-		void SetTexture(const std::string_view& name, const Ref<Texture2D>& texture);
+		void SetTexture(const eastl::string_view& name, const Ref<Texture2D>& texture);
 
 		template<typename T>
-		[[nodiscard]] T GetData(const std::string_view& name)
+		[[nodiscard]] T GetData(const eastl::string_view& name)
 		{
 			void* value = GetData_Internal(name);
 			return (value ? *static_cast<T*>(value) : T());
 		}
 
 		template<typename T>
-		void SetData(const std::string_view& name, const T& data)
+		void SetData(const eastl::string_view& name, const T& data)
 		{
 			SetData_Internal(name, &data);
 		}
 
 	private:
-		[[nodiscard]] void* GetData_Internal(const std::string_view& name);
-		void SetData_Internal(const std::string_view& name, const void* data);
+		[[nodiscard]] void* GetData_Internal(const eastl::string_view& name);
+		void SetData_Internal(const eastl::string_view& name, const void* data);
 
 	private:
-		Ref<PipelineState>				m_Pipeline = nullptr;
-		str_umap<MaterialData>			m_Indices;
-		std::vector<TextureSlot>		m_TextureBuffer;
-		std::vector<uint32_t>			m_BindlessTextureBuffer;
-		std::vector<float>				m_CBBuffer;
-		std::vector<Ref<Texture2D>>		m_Textures;
-		Ref<ConstantBuffer>				m_ConstantBuffer;
+		Ref<PipelineState>								m_Pipeline = nullptr;
+		eastl::hash_map<eastl::string, MaterialData>	m_Indices;
+		eastl::vector<TextureSlot>						m_TextureBuffer;
+		eastl::vector<uint32_t>							m_BindlessTextureBuffer;
+		eastl::vector<float>							m_CBBuffer;
+		eastl::vector<Ref<Texture2D>>					m_Textures;
+		Ref<ConstantBuffer>								m_ConstantBuffer;
 	};
 }

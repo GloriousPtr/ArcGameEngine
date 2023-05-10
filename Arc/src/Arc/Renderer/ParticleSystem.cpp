@@ -127,7 +127,7 @@ namespace ArcEngine
 				continue;
 
 			glm::mat4 transform = glm::translate(glm::mat4(1.0f), particle.Position) * glm::mat4(glm::quat(particle.Rotation)) * glm::scale(glm::mat4(1.0f), particle.Size);
-			Renderer2D::DrawQuad(std::move(transform), m_Properties.Texture, particle.Color);
+			Renderer2D::DrawQuad(eastl::move(transform), m_Properties.Texture, particle.Color);
 		}
 	}
 
