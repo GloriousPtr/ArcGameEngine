@@ -21,10 +21,10 @@ workspace "Arc"
 		"MultiProcessorCompile"
 	}
 
-	filter "system:windows"
+	filter { "action:vs2022" }
 		linkoptions { "/ignore:4006" }
 		buildoptions { "/bigobj" }
-	filter { "system:windows", "toolset:clang" }
+	filter { "action:vs2022", "toolset:clang" }
 		buildoptions { "/showFilenames" }
 	filter "system:linux"
 		toolset "clang"
