@@ -64,4 +64,3 @@ namespace ArcEngine
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 }
-

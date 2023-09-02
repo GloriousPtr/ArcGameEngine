@@ -1,4 +1,4 @@
-﻿// by Freya Holmér (https://github.com/FreyaHolmer/Mathfs)
+// by Freya Holmér (https://github.com/FreyaHolmer/Mathfs)
 
 using static ArcEngine.Mathfs;
 using JetBrains.Annotations;

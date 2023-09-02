@@ -70,4 +70,3 @@ namespace ArcEngine
 		EVENT_CLASS_TYPE(KeyTyped)
 	};
 }
-

@@ -1,4 +1,4 @@
-﻿/*
+/*
 	MIT License
 
 	Copyright (c) Freya Holmér

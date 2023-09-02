@@ -2535,6 +2535,3 @@ inline HRESULT D3DX12ParsePipelineStream(const D3D12_PIPELINE_STATE_STREAM_DESC&
 #endif // defined( __cplusplus )
 
 #endif //__D3DX12_H__
-
-
-

@@ -1,4 +1,4 @@
-﻿// The original Mathfs.cs source https://github.com/FreyaHolmer/Mathfs
+// The original Mathfs.cs source https://github.com/FreyaHolmer/Mathfs
 /*
 	MIT License
 

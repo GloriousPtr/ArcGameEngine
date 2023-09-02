@@ -33,4 +33,3 @@ namespace ArcEngine
 		unsigned int m_LayerInsertIndex = 0;
 	};
 }
-

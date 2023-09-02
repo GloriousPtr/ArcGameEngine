@@ -46,4 +46,3 @@ namespace ArcEngine
 		static void NextBatch();
 	};
 }
-

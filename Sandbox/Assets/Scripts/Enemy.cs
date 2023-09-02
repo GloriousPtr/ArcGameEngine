@@ -1,4 +1,4 @@
-﻿using ArcEngine;
+using ArcEngine;
 
 namespace Sandbox
 {

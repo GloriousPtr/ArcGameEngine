@@ -98,4 +98,3 @@ namespace ArcEngine
 		EVENT_CLASS_TYPE(MouseButtonReleased)
 	};
 }
-

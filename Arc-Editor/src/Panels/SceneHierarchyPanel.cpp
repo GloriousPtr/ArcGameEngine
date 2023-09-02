@@ -1,4 +1,4 @@
-﻿#include "SceneHierarchyPanel.h"
+#include "SceneHierarchyPanel.h"
 
 #include <Arc/Scene/EntitySerializer.h>
 
