@@ -19,7 +19,6 @@
             "args": [],
             "stopAtEntry": false,
             "environment": [],
-            "preLaunchTask": "Build Debug",
 
             "windows": {
                 "name": "Windows Launch",
@@ -45,7 +44,6 @@
             "args": [],
             "stopAtEntry": false,
             "environment": [],
-            "preLaunchTask": "Build Release",
 
             "windows": {
                 "name": "Windows Launch",
@@ -71,7 +69,6 @@
             "args": [],
             "stopAtEntry": false,
             "environment": [],
-            "preLaunchTask": "Build Dist",
 
             "windows": {
                 "name": "Windows Launch",
