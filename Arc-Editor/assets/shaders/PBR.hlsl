@@ -27,9 +27,11 @@ VertexOut VS_Main(VertexIn v)
 	output.Position = mul(CameraViewProjection, worldPosition);
 	output.UV = v.UV;
 	output.WorldPosition = worldPosition.xyz;
-	output.WorldNormal = normalize(mul(Model, float4(v.Normal, 1.0)).xyz);
-	float3 T = normalize(mul(Model, float4(v.Tangent, 1.0)).xyz);
-	float3 B = normalize(mul(Model, float4(v.Bitangent, 1.0)).xyz);
+
+	float3x3 normalMatrix = (float3x3)Model;
+	float3 T = normalize(mul(normalMatrix, v.Tangent));
+	float3 B = normalize(mul(normalMatrix, v.Bitangent));
+	output.WorldNormal = normalize(mul(normalMatrix, v.Normal));
 	output.TBN = float3x3(T, B, output.WorldNormal);
 
 	return output;
@@ -58,8 +60,7 @@ float4 PS_Main(VertexOut input) : SV_TARGET
 
 	albedo *= AlbedoColor;
 
-	float3 normal = normalize(mul(input.TBN, normalTexture.Sample(Sampler, input.UV).rgb * 2.0f - 1.0f));
-	//float3 normal = normalize(input.WorldNormal);
+	float3 normal = NormalTexture ? normalize(mul(input.TBN, normalTexture.Sample(Sampler, input.UV).rgb * 2.0f - 1.0f)) : input.WorldNormal;
 
 	float3 view = normalize(CameraPosition.xyz - input.WorldPosition);
 	float NdotV = max(dot(normal, view), 0.0);
@@ -73,6 +74,7 @@ float4 PS_Main(VertexOut input) : SV_TARGET
 
 	float3 Lo = float3(0.0, 0.0, 0.0);
 
+	// Directional Lights
 	for (uint dirLightIndex = 0; dirLightIndex < NumDirectionalLights; ++dirLightIndex)
 	{
 		DirectionalLight light = DirectionalLights.Load(dirLightIndex);
