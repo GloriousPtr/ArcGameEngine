@@ -1,9 +1,5 @@
 #pragma once
 
-struct aiScene;
-struct aiNode;
-struct aiMesh;
-
 namespace ArcEngine
 {
 	class VertexArray;

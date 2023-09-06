@@ -2,10 +2,6 @@
 
 #include "Arc/Scene/Components.h"
 
-struct aiMesh;
-struct aiScene;
-struct aiNode;
-
 namespace ArcEngine
 {
 	class Shader;
