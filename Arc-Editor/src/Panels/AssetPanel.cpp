@@ -475,17 +475,25 @@ namespace ArcEngine
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.0f, 0.0f, 0.0f, 0.0f });
-		std::filesystem::path current = m_AssetsDirectory.parent_path();
+
+		std::filesystem::path projectDir = m_AssetsDirectory.parent_path();
+		static std::filesystem::path absProjectDir = std::filesystem::absolute(m_AssetsDirectory.parent_path());
+		static std::string absProjectDirString = absProjectDir.string();
+		static size_t absProjectDirLength = absProjectDirString.length();
+
+		std::string currentDir = m_CurrentDirectory.string();
+		const char* p = &currentDir[absProjectDirLength + 1];
+		const std::filesystem::path currentDirectory = p;
+
 		std::filesystem::path directoryToOpen;
-		const std::filesystem::path currentDirectory = std::filesystem::relative(m_CurrentDirectory, current);
 		for (auto& path : currentDirectory)
 		{
-			current /= path;
+			projectDir /= path;
 			ImGui::SameLine();
 			if (ImGui::Button(path.filename().string().c_str()))
-				directoryToOpen = current;
+				directoryToOpen = projectDir;
 
-			if (m_CurrentDirectory != current)
+			if (m_CurrentDirectory != projectDir)
 			{
 				ImGui::SameLine();
 				ImGui::TextUnformatted("/");
