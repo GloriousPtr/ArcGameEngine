@@ -11,7 +11,6 @@ project "Arc-Editor"
 
 	flags { "FatalWarnings" }
 
-	binDir = "%{wks.location}/bin/" .. outputdir
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
@@ -71,7 +70,7 @@ project "Arc-Editor"
 	buildcommands
 	{
 		'{ECHO} ====== Copying Resource Files ======',
-		'{COPYDIR} "../vendor" "%{binDir}"/vendor',
+		'{COPYDIR} "../vendor" "%{cfg.targetdir}"/vendor',
 		'{COPYDIR} "assets" "%{cfg.targetdir}"/assets',
 		'{COPYDIR} "Resources" "%{cfg.targetdir}"/Resources',
 		'{COPYFILE} "imgui.ini" "%{cfg.targetdir}"',

@@ -80,6 +80,7 @@ namespace ArcEngine
 		std::mutex m_MainThreadQueueMutex;
 
 	private:
+		friend int ::WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR argv, int argc);
 		friend int ::main(int argc, char** argv);
 	};
 

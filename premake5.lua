@@ -29,6 +29,9 @@ workspace "Arc"
 	filter "system:linux"
 		toolset "clang"
 
+	filter { "system:windows", "configurations:Dist" }
+		linkoptions { "/SUBSYSTEM:WINDOWS" }
+
 -- Library directories relavtive to root folder (solution directory)
 LibDir = {}
 LibDir["dotnet"] = "%{wks.location}/Arc/vendor/dotnet"

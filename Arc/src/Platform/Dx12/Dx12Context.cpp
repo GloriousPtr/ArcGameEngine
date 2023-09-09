@@ -20,7 +20,7 @@ extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\
 
 namespace ArcEngine
 {
-	static const char* GetVendorName(UINT vendorId)
+	[[maybe_unused]] static const char* GetVendorName(UINT vendorId)
 	{
 		if (vendorId == 0x1002)
 			return "Advanced Micro Devices, Inc. (AMD)";
