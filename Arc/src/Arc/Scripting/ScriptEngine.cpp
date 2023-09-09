@@ -299,27 +299,29 @@ namespace ArcEngine
 			return;
 
 		auto begin = std::chrono::high_resolution_clock::now();
-
-		if (!ProjectBuilder::GenerateProjectFiles())
-			return;
-
-		ProjectBuilder::BuildProject(asyncBuild, [begin](bool success)
+		ProjectBuilder::GenerateProjectFiles([asyncBuild, begin](bool generated)
 		{
-			auto end = std::chrono::high_resolution_clock::now();
-			auto timeTaken = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-
-			if (success)
+			if (generated)
 			{
-				ARC_CORE_INFO("Build Suceeded; Compile time: {0}ms", timeTaken);
+				ProjectBuilder::BuildProject(asyncBuild, [begin](bool success)
+				{
+					auto end = std::chrono::high_resolution_clock::now();
+					auto timeTaken = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
 
-				if (s_Reflection->UnloadAssemblies)
-					s_Reflection->UnloadAssemblies();
+					if (success)
+					{
+						ARC_CORE_INFO("Build Suceeded; Compile time: {0}ms", timeTaken);
 
-				LoadCoreAndClientAssembly();
-			}
-			else
-			{
-				ARC_CORE_ERROR("Build Failed; Compile time: {0}ms", timeTaken);
+						if (s_Reflection->UnloadAssemblies)
+							s_Reflection->UnloadAssemblies();
+
+						LoadCoreAndClientAssembly();
+					}
+					else
+					{
+						ARC_CORE_ERROR("Build Failed; Compile time: {0}ms", timeTaken);
+					}
+				});
 			}
 		});
 	}

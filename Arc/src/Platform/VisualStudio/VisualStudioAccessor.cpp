@@ -324,12 +324,11 @@ namespace ArcEngine
 		});
 	}
 
-	bool VisualStudioAccessor::AddFile(const std::string& filepath, bool open)
+	void VisualStudioAccessor::AddFile(const std::string& filepath, bool open)
 	{
-		const bool success = ProjectBuilder::GenerateProjectFiles();
+		ProjectBuilder::GenerateProjectFiles(nullptr);
 		if (open)
 			OpenFile(filepath);
-		return success;
 	}
 
 	void VisualStudioAccessor::AttachDebugger()
