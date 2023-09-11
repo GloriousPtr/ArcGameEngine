@@ -31,7 +31,7 @@ jobs:
     env:
       SOLUTION_FILE_PATH: "Arc.sln"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           submodules: true
@@ -73,7 +73,7 @@ jobs:
           - release
           - dist
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           submodules: true
