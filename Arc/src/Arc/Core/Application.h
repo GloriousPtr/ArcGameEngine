@@ -74,7 +74,7 @@ namespace ArcEngine
 		bool m_Running = true;
 		bool m_Minimized = false;
 		Scope<LayerStack> m_LayerStack;
-		std::chrono::steady_clock::time_point m_LastFrameTime;
+		Timestep m_Timestep = 0;
 
 		eastl::vector<std::function<void()>> m_MainThreadQueue;
 		std::mutex m_MainThreadQueueMutex;

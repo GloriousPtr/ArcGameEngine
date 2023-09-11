@@ -91,13 +91,10 @@ namespace ArcEngine
 
 	void Application::Run()
 	{
+		auto lastFrameTime = std::chrono::high_resolution_clock::now();
 		while (m_Running)
 		{
 			ARC_PROFILE_FRAME("MainThread");
-
-			const auto time = std::chrono::high_resolution_clock::now();
-			const Timestep timestep = std::chrono::duration<float>(time - m_LastFrameTime).count();
-			m_LastFrameTime = time;
 
 			ExecuteMainThreadQueue();
 
@@ -108,7 +105,7 @@ namespace ArcEngine
 					ARC_PROFILE_SCOPE("LayerStack OnUpdate");
 
 					for (Layer* layer : *m_LayerStack)
-						layer->OnUpdate(timestep);	
+						layer->OnUpdate(m_Timestep);	
 				}
 
 				m_ImGuiLayer->Begin();
@@ -123,6 +120,10 @@ namespace ArcEngine
 			}
 			
 			m_Window->OnUpdate();
+
+			const auto time = std::chrono::high_resolution_clock::now();
+			m_Timestep = std::chrono::duration<float>(time - lastFrameTime).count();
+			lastFrameTime = time;
 		}
 	}
 
