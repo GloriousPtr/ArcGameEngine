@@ -9,7 +9,6 @@
 
 #include <EASTL/hash_map.h>
 #include <icons/IconsMaterialDesignIcons.h>
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
 #include "../EditorLayer.h"

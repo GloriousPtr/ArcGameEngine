@@ -3,6 +3,7 @@
 #include "BasePanel.h"
 #include "EditorContext.h"
 
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui.h>
 
 namespace ArcEngine

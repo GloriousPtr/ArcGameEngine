@@ -6,7 +6,6 @@
 #include <Platform/VisualStudio/VisualStudioAccessor.h>
 #endif //ARC_PLATFORM_VISUAL_STUDIO
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 #include <icons/IconsMaterialDesignIcons.h>
 

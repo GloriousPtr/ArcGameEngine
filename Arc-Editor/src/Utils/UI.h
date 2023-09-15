@@ -3,6 +3,8 @@
 #include <ArcEngine.h>
 
 #include <glm/gtc/type_ptr.hpp>
+
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui.h>
 
 struct ImRect;
