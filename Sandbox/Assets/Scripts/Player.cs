@@ -20,7 +20,6 @@ namespace Sandbox
 
 		private void OnUpdate(float timestep)
 		{
-			float speed = Speed * timestep;
 			Vector2 dir = new Vector2(0.0f);
 
 			if (Input.IsKeyPressed(KeyCodes.W))
@@ -32,7 +31,7 @@ namespace Sandbox
 			else if (Input.IsKeyPressed(KeyCodes.A))
 				dir.x = -1.0f;
 			
-			Vector2 velocity = dir * speed * 0.5f;
+			Vector2 velocity = dir * Speed;
 			m_Rigidbody2D.velocity = velocity;
 		}
 	}
