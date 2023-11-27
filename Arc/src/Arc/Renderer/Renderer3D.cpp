@@ -74,7 +74,7 @@ namespace ArcEngine
 		size_t MeshInsertIndex;
 	};
 
-	inline static Scope<Renderer3DData> s_Data;
+	static Scope<Renderer3DData> s_Renderer3DData;
 
 #if 0
 	Ref<PipelineState> Renderer3D::s_LightingShader;
@@ -107,7 +107,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		s_Data = CreateScope<Renderer3DData>();
+		s_Renderer3DData = CreateScope<Renderer3DData>();
 
 		auto& pipelineLibrary = Renderer::GetPipelineLibrary();
 
@@ -126,7 +126,7 @@ namespace ArcEngine
 					.OutputFormats = {FramebufferTextureFormat::R11G11B10F}
 				}
 			};
-			s_Data->RenderPipeline = pipelineLibrary.Load("assets/shaders/PBR.hlsl", spec);
+			s_Renderer3DData->RenderPipeline = pipelineLibrary.Load("assets/shaders/PBR.hlsl", spec);
 		}
 
 		{
@@ -142,14 +142,14 @@ namespace ArcEngine
 					.OutputFormats = {FramebufferTextureFormat::R11G11B10F}
 				}
 			};
-			s_Data->CubemapPipeline = pipelineLibrary.Load("assets/shaders/Cubemap.hlsl", spec);
+			s_Renderer3DData->CubemapPipeline = pipelineLibrary.Load("assets/shaders/Cubemap.hlsl", spec);
 		}
 
-		s_Data->GlobalDataCB = ConstantBuffer::Create(sizeof(GlobalData), 1, s_Data->RenderPipeline->GetSlot("GlobalData"));
-		s_Data->CubemapCB = ConstantBuffer::Create(sizeof(SkyboxData), 1, s_Data->CubemapPipeline->GetSlot("SkyboxData"));
-		s_Data->DirectionalLightsSB = StructuredBuffer::Create(sizeof(DirectionalLightData), MAX_NUM_DIR_LIGHTS, s_Data->RenderPipeline->GetSlot("DirectionalLights"));
-		s_Data->PointLightsSB = StructuredBuffer::Create(sizeof(PointLightData), MAX_NUM_POINT_LIGHTS, s_Data->RenderPipeline->GetSlot("PointLights"));
-		s_Data->SpotLightsSB = StructuredBuffer::Create(sizeof(SpotLightData), MAX_NUM_SPOT_LIGHTS, s_Data->RenderPipeline->GetSlot("SpotLights"));
+		s_Renderer3DData->GlobalDataCB = ConstantBuffer::Create(sizeof(GlobalData), 1, s_Renderer3DData->RenderPipeline->GetSlot("GlobalData"));
+		s_Renderer3DData->CubemapCB = ConstantBuffer::Create(sizeof(SkyboxData), 1, s_Renderer3DData->CubemapPipeline->GetSlot("SkyboxData"));
+		s_Renderer3DData->DirectionalLightsSB = StructuredBuffer::Create(sizeof(DirectionalLightData), MAX_NUM_DIR_LIGHTS, s_Renderer3DData->RenderPipeline->GetSlot("DirectionalLights"));
+		s_Renderer3DData->PointLightsSB = StructuredBuffer::Create(sizeof(PointLightData), MAX_NUM_POINT_LIGHTS, s_Renderer3DData->RenderPipeline->GetSlot("PointLights"));
+		s_Renderer3DData->SpotLightsSB = StructuredBuffer::Create(sizeof(SpotLightData), MAX_NUM_SPOT_LIGHTS, s_Renderer3DData->RenderPipeline->GetSlot("SpotLights"));
 
 #if 0
 		s_BRDFLutTexture = Texture2D::Create("Resources/Renderer/BRDF_LUT.jpg");
@@ -217,7 +217,7 @@ namespace ArcEngine
 				 0.5f,  0.5f,  0.5f,
 			};
 
-			s_Data->CubeVertexBuffer = VertexBuffer::Create(vertices, 108 * sizeof(float), 3 * sizeof(float));
+			s_Renderer3DData->CubeVertexBuffer = VertexBuffer::Create(vertices, 108 * sizeof(float), 3 * sizeof(float));
 		}
 #if 0
 		// Quad
@@ -250,16 +250,16 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		s_Data.reset();
+		s_Renderer3DData.reset();
 	}
 
 	void Renderer3D::BeginScene(const CameraData& cameraData, Entity cubemap, eastl::vector<Entity>&& lights)
 	{
 		ARC_PROFILE_SCOPE();
 
-		s_Data->Skylight = cubemap;
-		s_Data->SceneLights = eastl::move(lights);
-		s_Data->GlobalData =
+		s_Renderer3DData->Skylight = cubemap;
+		s_Renderer3DData->SceneLights = eastl::move(lights);
+		s_Renderer3DData->GlobalData =
 		{
 			.CameraView = cameraData.View,
 			.CameraProjection = cameraData.Projection,
@@ -270,13 +270,13 @@ namespace ArcEngine
 			.NumSpotLights = 0
 		};
 
-		if (s_Data->RenderPipeline->Bind())
+		if (s_Renderer3DData->RenderPipeline->Bind())
 		{
 			SetupLightsData();
 			SetupGlobalData();
 		}
 
-		if (cubemap && s_Data->CubemapPipeline->Bind())
+		if (cubemap && s_Renderer3DData->CubemapPipeline->Bind())
 		{
 			auto& sky = cubemap.GetComponent<SkyLightComponent>();
 			const SkyboxData data
@@ -284,8 +284,8 @@ namespace ArcEngine
 				.SkyboxViewProjection = cameraData.Projection * glm::mat4(glm::mat3(cameraData.View)),
 				.RotationIntensity = { sky.Rotation, sky.Intensity }
 			};
-			s_Data->CubemapCB->Bind(0);
-			s_Data->CubemapCB->SetData(&data, sizeof(SkyboxData), 0);
+			s_Renderer3DData->CubemapCB->Bind(0);
+			s_Renderer3DData->CubemapCB->SetData(&data, sizeof(SkyboxData), 0);
 		}
 	}
 
@@ -300,7 +300,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		RenderCommand::Draw(s_Data->CubeVertexBuffer, 36);
+		RenderCommand::Draw(s_Renderer3DData->CubeVertexBuffer, 36);
 	}
 
 	void Renderer3D::DrawQuad()
@@ -314,11 +314,11 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (s_Data->MeshInsertIndex >= s_Data->Meshes.size())
+		if (s_Renderer3DData->MeshInsertIndex >= s_Renderer3DData->Meshes.size())
 			return;
 
-		s_Data->Meshes[s_Data->MeshInsertIndex] = eastl::move(MeshData(eastl::move(transform), material, geometry));
-		++s_Data->MeshInsertIndex;
+		s_Renderer3DData->Meshes[s_Renderer3DData->MeshInsertIndex] = eastl::move(MeshData(eastl::move(transform), material, geometry));
+		++s_Renderer3DData->MeshInsertIndex;
 	}
 
 	void Renderer3D::Flush(const Ref<RenderGraphData>& renderGraphData)
@@ -332,7 +332,7 @@ namespace ArcEngine
 		FXAAPass(renderGraphData);
 		CompositePass(renderGraphData);
 
-		s_Data->MeshInsertIndex = 0;
+		s_Renderer3DData->MeshInsertIndex = 0;
 	}
 
 	void Renderer3D::FXAAPass([[maybe_unused]] const Ref<RenderGraphData>& renderGraphData)
@@ -355,22 +355,22 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		memset(&s_Data->Stats, 0, sizeof(Statistics));
+		memset(&s_Renderer3DData->Stats, 0, sizeof(Statistics));
 	}
 
 	Renderer3D::Statistics Renderer3D::GetStats()
 	{
 		ARC_PROFILE_SCOPE();
 
-		return s_Data->Stats;
+		return s_Renderer3DData->Stats;
 	}
 
 	void Renderer3D::SetupGlobalData()
 	{
 		ARC_PROFILE_SCOPE();
 
-		s_Data->GlobalDataCB->Bind(0);
-		s_Data->GlobalDataCB->SetData(&(s_Data->GlobalData), sizeof(GlobalData), 0);
+		s_Renderer3DData->GlobalDataCB->Bind(0);
+		s_Renderer3DData->GlobalDataCB->SetData(&(s_Renderer3DData->GlobalData), sizeof(GlobalData), 0);
 	}
 
 	void Renderer3D::SetupLightsData()
@@ -386,7 +386,7 @@ namespace ArcEngine
 			eastl::array<PointLightData, MAX_NUM_POINT_LIGHTS> plData{};
 			eastl::array<SpotLightData, MAX_NUM_SPOT_LIGHTS> slData{};
 
-			for (Entity e : s_Data->SceneLights)
+			for (Entity e : s_Renderer3DData->SceneLights)
 			{
 				const LightComponent& lightComponent = e.GetComponent<LightComponent>();
 				glm::mat4 worldTransform = e.GetWorldTransform();
@@ -429,16 +429,16 @@ namespace ArcEngine
 				}
 			}
 
-			s_Data->GlobalData.NumDirectionalLights = numDirectionalLights;
-			s_Data->GlobalData.NumPointLights = numPointLights;
-			s_Data->GlobalData.NumSpotLights = numSpotLights;
+			s_Renderer3DData->GlobalData.NumDirectionalLights = numDirectionalLights;
+			s_Renderer3DData->GlobalData.NumPointLights = numPointLights;
+			s_Renderer3DData->GlobalData.NumSpotLights = numSpotLights;
 
-			s_Data->DirectionalLightsSB->Bind();
-			s_Data->DirectionalLightsSB->SetData(dlData.data(), sizeof(DirectionalLightData) * numDirectionalLights, 0);
-			s_Data->PointLightsSB->Bind();
-			s_Data->PointLightsSB->SetData(plData.data(), sizeof(PointLightData) * numPointLights, 0);
-			s_Data->SpotLightsSB->Bind();
-			s_Data->SpotLightsSB->SetData(slData.data(), sizeof(SpotLightData) * numSpotLights, 0);
+			s_Renderer3DData->DirectionalLightsSB->Bind();
+			s_Renderer3DData->DirectionalLightsSB->SetData(dlData.data(), sizeof(DirectionalLightData) * numDirectionalLights, 0);
+			s_Renderer3DData->PointLightsSB->Bind();
+			s_Renderer3DData->PointLightsSB->SetData(plData.data(), sizeof(PointLightData) * numPointLights, 0);
+			s_Renderer3DData->SpotLightsSB->Bind();
+			s_Renderer3DData->SpotLightsSB->SetData(slData.data(), sizeof(SpotLightData) * numSpotLights, 0);
 		}
 #if 0
 		{
@@ -675,18 +675,18 @@ namespace ArcEngine
 		renderTarget->Bind();
 
 		bool shouldExecute = false;
-		if (s_Data->Skylight)
+		if (s_Renderer3DData->Skylight)
 		{
 			ARC_PROFILE_SCOPE("Draw Skylight");
 
 			[[likely]]
-			if (s_Data->CubemapPipeline->Bind())
+			if (s_Renderer3DData->CubemapPipeline->Bind())
 			{
-				const auto& skylightComponent = s_Data->Skylight.GetComponent<SkyLightComponent>();
+				const auto& skylightComponent = s_Renderer3DData->Skylight.GetComponent<SkyLightComponent>();
 				if (skylightComponent.Texture)
 				{
-					s_Data->CubemapCB->Bind(0);
-					skylightComponent.Texture->Bind(s_Data->CubemapPipeline->GetSlot("EnvironmentTexture"));
+					s_Renderer3DData->CubemapCB->Bind(0);
+					skylightComponent.Texture->Bind(s_Renderer3DData->CubemapPipeline->GetSlot("EnvironmentTexture"));
 					DrawCube();
 				}
 				shouldExecute = true;
@@ -694,23 +694,23 @@ namespace ArcEngine
 		}
 
 		[[likely]]
-		if (s_Data->RenderPipeline->Bind())
+		if (s_Renderer3DData->RenderPipeline->Bind())
 		{
 			ARC_PROFILE_SCOPE("Draw Meshes");
 
-			s_Data->GlobalDataCB->Bind(0);
-			s_Data->DirectionalLightsSB->Bind();
-			s_Data->PointLightsSB->Bind();
-			s_Data->SpotLightsSB->Bind();
+			s_Renderer3DData->GlobalDataCB->Bind(0);
+			s_Renderer3DData->DirectionalLightsSB->Bind();
+			s_Renderer3DData->PointLightsSB->Bind();
+			s_Renderer3DData->SpotLightsSB->Bind();
 
-			const std::span<MeshData> meshes(s_Data->Meshes.data(), s_Data->MeshInsertIndex);
+			const std::span<MeshData> meshes(s_Renderer3DData->Meshes.data(), s_Renderer3DData->MeshInsertIndex);
 			for (const auto& meshData : meshes)
 			{
 				meshData.Mat->Bind();
-				s_Data->RenderPipeline->SetData("Transform", glm::value_ptr(meshData.Transform), sizeof(glm::mat4), 0);
+				s_Renderer3DData->RenderPipeline->SetData("Transform", glm::value_ptr(meshData.Transform), sizeof(glm::mat4), 0);
 				RenderCommand::DrawIndexed(meshData.Geometry);
-				s_Data->Stats.DrawCalls++;
-				s_Data->Stats.IndexCount += meshData.Geometry->GetIndexBuffer()->GetCount();
+				s_Renderer3DData->Stats.DrawCalls++;
+				s_Renderer3DData->Stats.IndexCount += meshData.Geometry->GetIndexBuffer()->GetCount();
 			}
 			shouldExecute = true;
 		}
@@ -750,7 +750,7 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE("Draw Meshes");
 
 			MeshComponent::CullModeType currentCullMode = MeshComponent::CullModeType::Unknown;
-			const std::span<MeshData> meshes(s_Data->Meshes.data(), s_Data->MeshInsertIndex);
+			const std::span<MeshData> meshes(s_Renderer3DData->Meshes.data(), s_Renderer3DData->MeshInsertIndex);
 			for (const auto& meshData : meshes)
 			{
 				meshData.Mat->Bind();
@@ -793,7 +793,7 @@ namespace ArcEngine
 
 			//s_ShadowMapShader->SetData("u_ViewProjection", dirLightViewProj);
 
-			const std::span<MeshData> meshes(s_Data->Meshes.data(), s_Data->MeshInsertIndex);
+			const std::span<MeshData> meshes(s_Renderer3DData->Meshes.data(), s_Renderer3DData->MeshInsertIndex);
 			for (auto it = meshes.rbegin(); it != meshes.rend(); ++it)
 			{
 				const MeshData& meshData = *it;

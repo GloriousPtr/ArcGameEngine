@@ -104,7 +104,7 @@ namespace ArcEngine
 		RegisterManagedMethod(SetFieldValue, void, GCHandle, const char*, const void*);
 	};
 
-	static Scope<ScriptEngineData> s_Data;
+	static Scope<ScriptEngineData> s_ScriptEngineData;
 	static Scope<ReflectionMethods> s_Reflection;
 
 	Scene* ScriptEngine::s_CurrentScene = nullptr;
@@ -120,8 +120,8 @@ namespace ArcEngine
 	{
 		typedef Output(CORECLR_DELEGATE_CALLTYPE* ManagedMethod)(Args...);
 		ManagedMethod method = nullptr;
-		static const std::filesystem::path asmPath = s_Data->CoreAssemblyPath;
-		s_Data->DotnetLoadAssemblyAndFunc(asmPath.c_str(), STR("ArcEngine.AssemblyHelper, Arc-ScriptCore"), methodName, UNMANAGEDCALLERSONLY_METHOD, nullptr, (void**)&method);
+		static const std::filesystem::path asmPath = s_ScriptEngineData->CoreAssemblyPath;
+		s_ScriptEngineData->DotnetLoadAssemblyAndFunc(asmPath.c_str(), STR("ArcEngine.AssemblyHelper, Arc-ScriptCore"), methodName, UNMANAGEDCALLERSONLY_METHOD, nullptr, (void**)&method);
 		return method;
 	}
 
@@ -149,7 +149,7 @@ namespace ArcEngine
 				return;
 			}
 
-			DotnetAssembly assembly = s_Data->CoreAssembly;
+			DotnetAssembly assembly = s_ScriptEngineData->CoreAssembly;
 			DotnetType type = s_Reflection->GetTypeFromName(assembly, nameCstr);
 			if (type)
 			{
@@ -185,8 +185,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		
-		s_Data = CreateScope<ScriptEngineData>();
-		s_Data->CoreAssemblyPath = std::filesystem::absolute("Resources/Scripts/Arc-ScriptCore.dll").string();
+		s_ScriptEngineData = CreateScope<ScriptEngineData>();
+		s_ScriptEngineData->CoreAssemblyPath = std::filesystem::absolute("Resources/Scripts/Arc-ScriptCore.dll").string();
 		
 
 		HMODULE handleNethost{ LoadLibraryW(STR("nethost.dll")) };
@@ -204,35 +204,35 @@ namespace ArcEngine
 		HMODULE handleHostFxr{ LoadLibraryW(buffer) };
 		ARC_CORE_ASSERT(handleHostFxr, "Failed loading module");
 
-		s_Data->DotnetRuntimeConfig = reinterpret_cast<hostfxr_initialize_for_runtime_config_fn>(GetProcAddress(handleHostFxr, "hostfxr_initialize_for_runtime_config"));
-		ARC_CORE_ASSERT(s_Data->DotnetRuntimeConfig, "Failed getting address of hostfxr_initialize_for_runtime_config_fn");
+		s_ScriptEngineData->DotnetRuntimeConfig = reinterpret_cast<hostfxr_initialize_for_runtime_config_fn>(GetProcAddress(handleHostFxr, "hostfxr_initialize_for_runtime_config"));
+		ARC_CORE_ASSERT(s_ScriptEngineData->DotnetRuntimeConfig, "Failed getting address of hostfxr_initialize_for_runtime_config_fn");
 
-		s_Data->RuntimeDelegate = reinterpret_cast<hostfxr_get_runtime_delegate_fn>(GetProcAddress(handleHostFxr, "hostfxr_get_runtime_delegate"));
-		ARC_CORE_ASSERT(s_Data->RuntimeDelegate, "Failed getting address of hostfxr_get_runtime_delegate");
+		s_ScriptEngineData->RuntimeDelegate = reinterpret_cast<hostfxr_get_runtime_delegate_fn>(GetProcAddress(handleHostFxr, "hostfxr_get_runtime_delegate"));
+		ARC_CORE_ASSERT(s_ScriptEngineData->RuntimeDelegate, "Failed getting address of hostfxr_get_runtime_delegate");
 
-		s_Data->DotnetClose = reinterpret_cast<hostfxr_close_fn>(GetProcAddress(handleHostFxr, "hostfxr_close"));
-		ARC_CORE_ASSERT(s_Data->DotnetClose, "Failed getting address of hostfxr_close");
+		s_ScriptEngineData->DotnetClose = reinterpret_cast<hostfxr_close_fn>(GetProcAddress(handleHostFxr, "hostfxr_close"));
+		ARC_CORE_ASSERT(s_ScriptEngineData->DotnetClose, "Failed getting address of hostfxr_close");
 
 		const std::filesystem::path configPath = "Resources/Scripts/Arc-ScriptCore.runtimeconfig.json";
 
-		result = s_Data->DotnetRuntimeConfig(configPath.c_str(), nullptr, &s_Data->DotnetRuntimeContext);
-		if (result != 0 || s_Data->DotnetRuntimeContext == nullptr)
+		result = s_ScriptEngineData->DotnetRuntimeConfig(configPath.c_str(), nullptr, &s_ScriptEngineData->DotnetRuntimeContext);
+		if (result != 0 || s_ScriptEngineData->DotnetRuntimeContext == nullptr)
 		{
-			s_Data->DotnetClose(s_Data->DotnetRuntimeContext);
+			s_ScriptEngineData->DotnetClose(s_ScriptEngineData->DotnetRuntimeContext);
 			ARC_CORE_ASSERT(false, "Runtime initialization failed ");
 		}
 
-		result = s_Data->RuntimeDelegate(s_Data->DotnetRuntimeContext, hdt_load_assembly_and_get_function_pointer, (void**)&s_Data->DotnetLoadAssemblyAndFunc);
-		if (result != 0 || s_Data->DotnetRuntimeContext == nullptr || s_Data->DotnetLoadAssemblyAndFunc == nullptr)
+		result = s_ScriptEngineData->RuntimeDelegate(s_ScriptEngineData->DotnetRuntimeContext, hdt_load_assembly_and_get_function_pointer, (void**)&s_ScriptEngineData->DotnetLoadAssemblyAndFunc);
+		if (result != 0 || s_ScriptEngineData->DotnetRuntimeContext == nullptr || s_ScriptEngineData->DotnetLoadAssemblyAndFunc == nullptr)
 		{
-			s_Data->DotnetClose(s_Data->DotnetRuntimeContext);
+			s_ScriptEngineData->DotnetClose(s_ScriptEngineData->DotnetRuntimeContext);
 			ARC_CORE_ASSERT(false, "Failed loading the runtime");
 		}
 
 		s_Reflection = CreateScope<ReflectionMethods>();
 
-		s_Data->DotnetClose(s_Data->DotnetRuntimeContext);
-		s_Data->DotnetRuntimeContext = nullptr;
+		s_ScriptEngineData->DotnetClose(s_ScriptEngineData->DotnetRuntimeContext);
+		s_ScriptEngineData->DotnetRuntimeContext = nullptr;
 
 		LoadAssemblyHelper();
 		ReloadAppDomain();
@@ -242,15 +242,15 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		s_Data->EntityClasses.clear();
-		s_Data->EntityFields.clear();
-		s_Data->EntityRuntimeInstances.clear();
+		s_ScriptEngineData->EntityClasses.clear();
+		s_ScriptEngineData->EntityFields.clear();
+		s_ScriptEngineData->EntityRuntimeInstances.clear();
 
 		if (s_Reflection->UnloadAssemblies)
 			s_Reflection->UnloadAssemblies();
 
 		s_Reflection.reset();
-		s_Data.reset();
+		s_ScriptEngineData.reset();
 	}
 
 	void ScriptEngine::LoadAssemblyHelper()
@@ -267,9 +267,9 @@ namespace ArcEngine
 		if (!project)
 			return;
 
-		s_Data->ClientAssemblyPath = std::filesystem::absolute(Project::GetScriptModuleDirectory() / (Project::GetActive()->GetConfig().Name + ".dll").c_str()).string();
+		s_ScriptEngineData->ClientAssemblyPath = std::filesystem::absolute(Project::GetScriptModuleDirectory() / (Project::GetActive()->GetConfig().Name + ".dll").c_str()).string();
 
-		s_Data->EntityClasses.clear();
+		s_ScriptEngineData->EntityClasses.clear();
 
 		ScriptEngineRegistry::Init();
 		s_ClassTypes.clear();
@@ -277,18 +277,18 @@ namespace ArcEngine
 		s_GetComponentFuncs.clear();
 		s_AddComponentFuncs.clear();
 
-		s_Data->CoreAssembly = s_Reflection->LoadAssembly(s_Data->CoreAssemblyPath.c_str());
-		s_Data->EntityClass = CreateScope<ScriptClass>(s_Data->CoreAssembly, "ArcEngine.Entity");
+		s_ScriptEngineData->CoreAssembly = s_Reflection->LoadAssembly(s_ScriptEngineData->CoreAssemblyPath.c_str());
+		s_ScriptEngineData->EntityClass = CreateScope<ScriptClass>(s_ScriptEngineData->CoreAssembly, "ArcEngine.Entity");
 
-		s_Data->ClientAssembly = s_Reflection->LoadAssembly(s_Data->ClientAssemblyPath.c_str());
-		LoadAssemblyClasses(s_Data->ClientAssembly);
+		s_ScriptEngineData->ClientAssembly = s_Reflection->LoadAssembly(s_ScriptEngineData->ClientAssemblyPath.c_str());
+		LoadAssemblyClasses(s_ScriptEngineData->ClientAssembly);
 
 		RegisterComponent<TagComponent>();
 		RegisterComponent(AllComponents{});
 		const auto& scripts = ScriptEngine::GetClasses();
-		RegisterScriptComponent(s_Data->CoreAssembly, "ArcEngine.Entity");
+		RegisterScriptComponent(s_ScriptEngineData->CoreAssembly, "ArcEngine.Entity");
 		for (const auto& [className, _] : scripts)
-			RegisterScriptComponent(s_Data->ClientAssembly, className);
+			RegisterScriptComponent(s_ScriptEngineData->ClientAssembly, className);
 	}
 
 	void ScriptEngine::ReloadAppDomain(bool asyncBuild)
@@ -330,13 +330,13 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		char** classes = s_Reflection->GetClassNames(assembly, s_Data->CoreAssembly, "ArcEngine.Entity");
+		char** classes = s_Reflection->GetClassNames(assembly, s_ScriptEngineData->CoreAssembly, "ArcEngine.Entity");
 		if (classes)
 		{
 			int i = 0;
 			while (classes[i])
 			{
-				s_Data->EntityClasses[classes[i]] = CreateRef<ScriptClass>(assembly, classes[i], true);
+				s_ScriptEngineData->EntityClasses[classes[i]] = CreateRef<ScriptClass>(assembly, classes[i], true);
 				++i;
 			}
 			s_Reflection->FreeArray(classes);
@@ -396,10 +396,10 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto& scriptClass = s_Data->EntityClasses.at(name);
+		const auto& scriptClass = s_ScriptEngineData->EntityClasses.at(name);
 		const UUID entityID = entity.GetUUID();
 		auto* instance = new ScriptInstance(scriptClass, entityID);
-		s_Data->EntityRuntimeInstances[entityID][name] = instance;
+		s_ScriptEngineData->EntityRuntimeInstances[entityID][name] = instance;
 		return instance;
 	}
 
@@ -407,49 +407,49 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		return s_Data->EntityRuntimeInstances[entity.GetUUID()].find(name) != s_Data->EntityRuntimeInstances[entity.GetUUID()].end();
+		return s_ScriptEngineData->EntityRuntimeInstances[entity.GetUUID()].find(name) != s_ScriptEngineData->EntityRuntimeInstances[entity.GetUUID()].end();
 	}
 
 	ScriptInstance* ScriptEngine::GetInstance(Entity entity, const eastl::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 
-		return s_Data->EntityRuntimeInstances.at(entity.GetUUID()).at(name);
+		return s_ScriptEngineData->EntityRuntimeInstances.at(entity.GetUUID()).at(name);
 	}
 
 	bool ScriptEngine::HasClass(const eastl::string& className)
 	{
 		ARC_PROFILE_SCOPE();
 
-		return s_Data->EntityClasses.find(className) != s_Data->EntityClasses.end();
+		return s_ScriptEngineData->EntityClasses.find(className) != s_ScriptEngineData->EntityClasses.end();
 	}
 
 	void ScriptEngine::RemoveInstance(Entity entity, const eastl::string& name)
 	{
 		ARC_PROFILE_SCOPE();
 
-		delete s_Data->EntityRuntimeInstances.at(entity.GetUUID()).at(name);
-		s_Data->EntityRuntimeInstances[entity.GetUUID()].erase(name);
+		delete s_ScriptEngineData->EntityRuntimeInstances.at(entity.GetUUID()).at(name);
+		s_ScriptEngineData->EntityRuntimeInstances[entity.GetUUID()].erase(name);
 	}
 
 	const eastl::vector<eastl::string>& ScriptEngine::GetFields(const char* className)
 	{
-		return s_Data->EntityClasses.at(className)->GetFields();
+		return s_ScriptEngineData->EntityClasses.at(className)->GetFields();
 	}
 
 	const eastl::hash_map<eastl::string, ScriptField>& ScriptEngine::GetFieldMap(const char* className)
 	{
-		return s_Data->EntityClasses.at(className)->GetFieldsMap();
+		return s_ScriptEngineData->EntityClasses.at(className)->GetFieldsMap();
 	}
 
 	eastl::hash_map<eastl::string, ScriptFieldInstance>& ScriptEngine::GetFieldInstanceMap(Entity entity, const char* className)
 	{
-		return s_Data->EntityFields[entity.GetUUID()][className];
+		return s_ScriptEngineData->EntityFields[entity.GetUUID()][className];
 	}
 
 	eastl::hash_map<eastl::string, Ref<ScriptClass>>& ScriptEngine::GetClasses()
 	{
-		return s_Data->EntityClasses;
+		return s_ScriptEngineData->EntityClasses;
 	}
 
 	////////////////////////////////////////////////////////////////////////
@@ -597,7 +597,7 @@ namespace ArcEngine
 
 		m_Handle = s_Reflection->CreateEntityReference(scriptClass->m_Assembly, scriptClass->m_Classname.c_str(), entityID);
 
-		auto& fieldsMap = s_Data->EntityFields[entityID][scriptClass->m_Classname];
+		auto& fieldsMap = s_ScriptEngineData->EntityFields[entityID][scriptClass->m_Classname];
 		for (const auto& [fieldName, _] : scriptClass->m_FieldsMap)
 		{
 			const auto& fieldIt = fieldsMap.find(fieldName);
@@ -612,10 +612,10 @@ namespace ArcEngine
 		m_OnUpdateMethod = scriptClass->GetMethod(m_Handle, "OnUpdate", 1);
 		m_OnDestroyMethod = scriptClass->GetMethod(m_Handle, "OnDestroy", 0);
 
-		m_OnCollisionEnter2DMethod = s_Data->EntityClass->GetMethod(m_Handle, "HandleOnCollisionEnter2D", 1);
-		m_OnCollisionExit2DMethod = s_Data->EntityClass->GetMethod(m_Handle, "HandleOnCollisionExit2D", 1);
-		m_OnSensorEnter2DMethod = s_Data->EntityClass->GetMethod(m_Handle, "HandleOnSensorEnter2D", 1);
-		m_OnSensorExit2DMethod = s_Data->EntityClass->GetMethod(m_Handle, "HandleOnSensorExit2D", 1);
+		m_OnCollisionEnter2DMethod = s_ScriptEngineData->EntityClass->GetMethod(m_Handle, "HandleOnCollisionEnter2D", 1);
+		m_OnCollisionExit2DMethod = s_ScriptEngineData->EntityClass->GetMethod(m_Handle, "HandleOnCollisionExit2D", 1);
+		m_OnSensorEnter2DMethod = s_ScriptEngineData->EntityClass->GetMethod(m_Handle, "HandleOnSensorEnter2D", 1);
+		m_OnSensorExit2DMethod = s_ScriptEngineData->EntityClass->GetMethod(m_Handle, "HandleOnSensorExit2D", 1);
 	}
 
 	ScriptInstance::~ScriptInstance()
