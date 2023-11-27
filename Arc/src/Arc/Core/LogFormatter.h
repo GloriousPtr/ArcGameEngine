@@ -11,13 +11,12 @@ namespace std
 	template<>
 	struct formatter<ArcEngine::UUID>
 	{
-		constexpr auto parse(const format_parse_context& ctx) const -> decltype(ctx.begin())
+		constexpr auto parse(format_parse_context& ctx) -> format_parse_context::iterator
 		{
 			return ctx.end();
 		}
 
-		template <typename FormatContext>
-		auto format(const ArcEngine::UUID& input, FormatContext& ctx) -> decltype(ctx.out())
+		auto format(const ArcEngine::UUID& input, format_context& ctx) const -> format_context::iterator
 		{
 			return format_to(ctx.out(), "{}", static_cast<uint64_t>(input));
 		}
@@ -26,13 +25,12 @@ namespace std
 	template<>
 	struct formatter<eastl::string>
 	{
-		constexpr auto parse(const format_parse_context& ctx) const -> decltype(ctx.begin())
+		constexpr auto parse(format_parse_context& ctx) -> format_parse_context::iterator
 		{
 			return ctx.end();
 		}
 
-		template <typename FormatContext>
-		auto format(const eastl::string& input, FormatContext& ctx) -> decltype(ctx.out())
+		auto format(const eastl::string& input, format_context& ctx) const->format_context::iterator
 		{
 			return format_to(ctx.out(), "{}", input.c_str());
 		}
@@ -41,13 +39,12 @@ namespace std
 	template<>
 	struct formatter<eastl::string_view>
 	{
-		constexpr auto parse(const format_parse_context& ctx) const -> decltype(ctx.begin())
+		constexpr auto parse(format_parse_context& ctx) -> format_parse_context::iterator
 		{
 			return ctx.end();
 		}
 
-		template <typename FormatContext>
-		auto format(const eastl::string_view& input, FormatContext& ctx) -> decltype(ctx.out())
+		auto format(const eastl::string_view& input, format_context& ctx) const -> format_context::iterator
 		{
 			return format_to(ctx.out(), "{}", input.data());
 		}
@@ -56,13 +53,12 @@ namespace std
 	template<>
 	struct formatter<filesystem::path>
 	{
-		constexpr auto parse(format_parse_context& ctx) const -> decltype(ctx.begin())
+		constexpr auto parse(format_parse_context& ctx) -> format_parse_context::iterator
 		{
 			return ctx.end();
 		}
 
-		template <typename FormatContext>
-		auto format(const filesystem::path& input, FormatContext& ctx) -> decltype(ctx.out())
+		auto format(const filesystem::path& input, format_context& ctx) const -> format_context::iterator
 		{
 			return format_to(ctx.out(), "{}", input.string());
 		}
@@ -71,13 +67,12 @@ namespace std
 	template<>
 	struct formatter<glm::vec2>
 	{
-		constexpr auto parse(const format_parse_context& ctx) const -> decltype(ctx.begin())
+		constexpr auto parse(format_parse_context& ctx) -> format_parse_context::iterator
 		{
 			return ctx.end();
 		}
 
-		template <typename FormatContext>
-		auto format(const glm::vec2& input, FormatContext& ctx) -> decltype(ctx.out())
+		auto format(const glm::vec2& input, format_context& ctx) const->format_context::iterator
 		{
 			return format_to(ctx.out(), "[{}, {}]", input.x, input.y);
 		}
@@ -86,13 +81,12 @@ namespace std
 	template<>
 	struct formatter<glm::vec3>
 	{
-		constexpr auto parse(const format_parse_context& ctx) const -> decltype(ctx.begin())
+		constexpr auto parse(format_parse_context& ctx) -> format_parse_context::iterator
 		{
 			return ctx.end();
 		}
 
-		template <typename FormatContext>
-		auto format(const glm::vec3& input, FormatContext& ctx) -> decltype(ctx.out())
+		auto format(const glm::vec3& input, format_context& ctx) const -> format_context::iterator
 		{
 			return format_to(ctx.out(), "[{}, {}, {}]", input.x, input.y, input.z);
 		}
@@ -101,13 +95,12 @@ namespace std
 	template<>
 	struct formatter<glm::vec4>
 	{
-		constexpr auto parse(const format_parse_context& ctx) const -> decltype(ctx.begin())
+		constexpr auto parse(format_parse_context& ctx) -> format_parse_context::iterator
 		{
 			return ctx.end();
 		}
 
-		template <typename FormatContext>
-		auto format(const glm::vec4& input, FormatContext& ctx) -> decltype(ctx.out())
+		auto format(const glm::vec4& input, format_context& ctx) const -> format_context::iterator
 		{
 			return format_to(ctx.out(), "[{}, {}, {}, {}]", input.x, input.y, input.z, input.w);
 		}
