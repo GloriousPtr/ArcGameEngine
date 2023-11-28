@@ -2,7 +2,7 @@
 
 namespace ArcEngine
 {
-	enum class FramebufferTextureFormat
+	enum class FramebufferTextureFormat : uint8_t
 	{
 		None = 0,
 

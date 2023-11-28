@@ -710,17 +710,35 @@ namespace ArcEngine
 
 			if (component.Type == Rigidbody2DComponent::BodyType::Dynamic)
 			{
-				UI::Property("Auto Mass", component.AutoMass);
+				bool tmpBool = component.AutoMass;
+				if (UI::Property("Auto Mass", tmpBool))
+					component.AutoMass = tmpBool;
+
 				if (!component.AutoMass)
 					UI::Property("Mass", component.Mass, 0.01f, 10000.0f);
 				UI::Property("Linear Drag", component.LinearDrag);
 				UI::Property("Angular Drag", component.AngularDrag);
 				UI::Property("Gravity Scale", component.GravityScale);
-				UI::Property("Allow Sleep", component.AllowSleep);
-				UI::Property("Awake", component.Awake);
-				UI::Property("Continuous", component.Continuous);
-				UI::Property("Interpolation", component.Interpolation);
-				UI::Property("Freeze Rotation", component.FreezeRotation);
+
+				tmpBool = component.AllowSleep;
+				if (UI::Property("Allow Sleep", tmpBool))
+					component.AllowSleep = tmpBool;
+
+				tmpBool = component.Awake;
+				if (UI::Property("Awake", tmpBool))
+					component.Awake = tmpBool;
+
+				tmpBool = component.Continuous;
+				if (UI::Property("Continuous", tmpBool))
+					component.Continuous = tmpBool;
+
+				tmpBool = component.Interpolation;
+				if (UI::Property("Interpolation", tmpBool))
+					component.Interpolation = tmpBool;
+
+				tmpBool = component.FreezeRotation;
+				if (UI::Property("Freeze Rotation", tmpBool))
+					component.FreezeRotation = tmpBool;
 
 				component.LinearDrag = glm::max(component.LinearDrag, 0.0f);
 				component.AngularDrag = glm::max(component.AngularDrag, 0.0f);
@@ -951,22 +969,40 @@ namespace ArcEngine
 
 			if (component.Type == RigidbodyComponent::BodyType::Dynamic)
 			{
-				UI::Property("Auto Mass", component.AutoMass);
+				bool tmpBool = component.AutoMass;
+				if (UI::Property("Auto Mass", tmpBool))
+					component.AutoMass = tmpBool;
+
 				if (!component.AutoMass)
 					UI::Property("Mass", component.Mass, 0.01f, 10000.0f);
 				UI::Property("Linear Drag", component.LinearDrag);
 				UI::Property("Angular Drag", component.AngularDrag);
 				UI::Property("Gravity Scale", component.GravityScale);
-				UI::Property("Allow Sleep", component.AllowSleep);
-				UI::Property("Awake", component.Awake);
-				UI::Property("Continuous", component.Continuous);
-				UI::Property("Interpolation", component.Interpolation);
+
+				tmpBool = component.AllowSleep;
+				if (UI::Property("Allow Sleep", tmpBool))
+					component.AllowSleep = tmpBool;
+
+				tmpBool = component.Awake;
+				if (UI::Property("Awake", tmpBool))
+					component.Awake = tmpBool;
+
+				tmpBool = component.Continuous;
+				if (UI::Property("Continuous", tmpBool))
+					component.Continuous = tmpBool;
+
+				tmpBool = component.Interpolation;
+				if (UI::Property("Interpolation", tmpBool))
+					component.Interpolation = tmpBool;
 
 				component.LinearDrag = glm::max(component.LinearDrag, 0.0f);
 				component.AngularDrag = glm::max(component.AngularDrag, 0.0f);
 			}
 
-			UI::Property("Is Sensor", component.IsSensor);
+			bool sensor = component.IsSensor;
+			if (UI::Property("Is Sensor", sensor))
+				component.IsSensor = sensor;
+
 			UI::EndProperties();
 		});
 

@@ -70,7 +70,6 @@ namespace ArcEngine
 	struct ParticleProperties
 	{
 		float Duration = 3.0f;
-		bool Looping = true;
 		float StartDelay = 0.0f;
 		float StartLifetime = 3.0f;
 		glm::vec3 StartVelocity = glm::vec3(0.0f, 2.0f, 0.0f);
@@ -79,7 +78,6 @@ namespace ArcEngine
 		glm::vec3 StartRotation = glm::vec3(0.0f);
 		float GravityModifier = 0.0f;
 		float SimulationSpeed = 1.0f;
-		bool PlayOnAwake = true;
 		uint32_t MaxParticles = 1000;
 
 		uint32_t RateOverTime = 10;
@@ -99,6 +97,9 @@ namespace ArcEngine
 		OverLifetimeModule<glm::vec3> RotationOverLifetime;
 		BySpeedModule<glm::vec3> RotationBySpeed;
 
+		bool Looping = true;
+		bool PlayOnAwake = true;
+		
 		Ref<Texture2D> Texture = nullptr;
 	};
 
@@ -122,7 +123,6 @@ namespace ArcEngine
 
 	private:
 		eastl::vector<Particle> m_Particles;
-		uint32_t m_PoolIndex = 0;
 		ParticleProperties m_Properties;
 
 		float m_SystemTime = 0.0f;
@@ -130,6 +130,7 @@ namespace ArcEngine
 		float m_SpawnTime = 0.0f;
 		glm::vec3 m_LastSpawnedPosition = glm::vec3(0.0f);
 
+		uint32_t m_PoolIndex = 0;
 		uint32_t m_ActiveParticleCount = 0;
 		bool m_Playing = false;
 

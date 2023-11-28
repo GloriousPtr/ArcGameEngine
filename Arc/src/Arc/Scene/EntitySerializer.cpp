@@ -1045,16 +1045,22 @@ namespace ArcEngine
 		{
 			auto& src = deserializedEntity.AddComponent<Rigidbody2DComponent>();
 			TrySetEnum(src.Type, rb2dCpmponent["Type"]);
-			TrySet(src.AutoMass, rb2dCpmponent["AutoMass"]);
 			TrySet(src.Mass, rb2dCpmponent["Mass"]);
 			TrySet(src.LinearDrag, rb2dCpmponent["LinearDrag"]);
 			TrySet(src.AngularDrag, rb2dCpmponent["AngularDrag"]);
 			TrySet(src.GravityScale, rb2dCpmponent["GravityScale"]);
-			TrySet(src.AllowSleep, rb2dCpmponent["AllowSleep"]);
-			TrySet(src.Awake, rb2dCpmponent["Awake"]);
-			TrySet(src.Continuous, rb2dCpmponent["Continuous"]);
-			TrySet(src.Interpolation, rb2dCpmponent["Interpolation"]);
-			TrySet(src.FreezeRotation, rb2dCpmponent["FreezeRotation"]);
+			uint8_t tmpBool = src.AutoMass;
+			src.AutoMass = TrySet(tmpBool, rb2dCpmponent["AutoMass"]);
+			tmpBool = src.AllowSleep;
+			src.AllowSleep = TrySet(tmpBool, rb2dCpmponent["AllowSleep"]);
+			tmpBool = src.Awake;
+			src.Awake = TrySet(tmpBool, rb2dCpmponent["Awake"]);
+			tmpBool = src.Continuous;
+			src.Continuous = TrySet(tmpBool, rb2dCpmponent["Continuous"]);
+			tmpBool = src.Interpolation;
+			src.Interpolation = TrySet(tmpBool, rb2dCpmponent["Interpolation"]);
+			tmpBool = src.FreezeRotation;
+			src.FreezeRotation = TrySet(tmpBool, rb2dCpmponent["FreezeRotation"]);
 		}
 
 		if (const auto& bc2dCpmponent = entity["BoxCollider2DComponent"])
@@ -1195,16 +1201,22 @@ namespace ArcEngine
 		{
 			auto& src = deserializedEntity.AddComponent<RigidbodyComponent>();
 			TrySetEnum(src.Type, rbComponent["Type"]);
-			TrySet(src.AutoMass, rbComponent["AutoMass"]);
 			TrySet(src.Mass, rbComponent["Mass"]);
 			TrySet(src.LinearDrag, rbComponent["LinearDrag"]);
 			TrySet(src.AngularDrag, rbComponent["AngularDrag"]);
 			TrySet(src.GravityScale, rbComponent["GravityScale"]);
-			TrySet(src.AllowSleep, rbComponent["AllowSleep"]);
-			TrySet(src.Awake, rbComponent["Awake"]);
-			TrySet(src.Continuous, rbComponent["Continuous"]);
-			TrySet(src.Interpolation, rbComponent["Interpolation"]);
-			TrySet(src.IsSensor, rbComponent["IsSensor"]);
+			uint8_t tmpBool = src.AutoMass;
+			src.AutoMass = TrySet(tmpBool, rbComponent["AutoMass"]);
+			tmpBool = src.AllowSleep;
+			src.AllowSleep = TrySet(tmpBool, rbComponent["AllowSleep"]);
+			tmpBool = src.Awake;
+			src.Awake = TrySet(tmpBool, rbComponent["Awake"]);
+			tmpBool = src.Continuous;
+			src.Continuous = TrySet(tmpBool, rbComponent["Continuous"]);
+			tmpBool = src.Interpolation;
+			src.Interpolation = TrySet(tmpBool, rbComponent["Interpolation"]);
+			tmpBool = src.IsSensor;
+			src.IsSensor = TrySet(tmpBool, rbComponent["IsSensor"]);
 		}
 
 		if (const auto& bcComponent = entity["BoxColliderComponent"])

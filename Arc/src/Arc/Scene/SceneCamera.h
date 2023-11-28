@@ -7,7 +7,7 @@ namespace ArcEngine
 	class SceneCamera : public Camera
 	{
 	public:
-		enum class ProjectionType { Perspective = 0, Orthographic = 1 };
+		enum class ProjectionType : uint8_t { Perspective = 0, Orthographic = 1 };
 	public:
 		SceneCamera();
 		~SceneCamera() override = default;
@@ -36,8 +36,6 @@ namespace ArcEngine
 	private:
 		void RecalculateProjection();
 	private:
-		ProjectionType m_ProjectionType = ProjectionType::Perspective;
-
 		float m_PerspectiveFOV = glm::radians(45.0f);
 		float m_PerspectiveNear = 0.01f, m_PerspectiveFar = 1000.0f;
 		
@@ -45,5 +43,7 @@ namespace ArcEngine
 		float m_OrthographicNear = -1.0f, m_OrthographicFar = 1.0f;
 
 		float m_AspectRatio = 0.0f;
+
+		ProjectionType m_ProjectionType = ProjectionType::Perspective;
 	};
 }

@@ -120,7 +120,6 @@ namespace ArcEngine
 					.CullMode = CullModeType::Back,
 					.Primitive = PrimitiveType::Triangle,
 					.FillMode = FillModeType::Solid,
-					.EnableDepth = true,
 					.DepthFunc = DepthFuncType::Less,
 					.DepthFormat = FramebufferTextureFormat::Depth,
 					.OutputFormats = {FramebufferTextureFormat::R11G11B10F}
@@ -138,7 +137,7 @@ namespace ArcEngine
 					.CullMode = CullModeType::Front,
 					.Primitive = PrimitiveType::Triangle,
 					.FillMode = FillModeType::Solid,
-					.EnableDepth = false,
+					.DepthFormat = FramebufferTextureFormat::None,
 					.OutputFormats = {FramebufferTextureFormat::R11G11B10F}
 				}
 			};

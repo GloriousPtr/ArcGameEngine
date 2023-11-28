@@ -2,7 +2,7 @@
 
 namespace ArcEngine
 {
-	enum class ShaderDataType
+	enum class ShaderDataType : uint8_t
 	{
 		None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Bool
 	};
@@ -32,18 +32,18 @@ namespace ArcEngine
 	struct BufferElement
 	{
 		eastl::string Name;
-		ShaderDataType Type;
-		uint32_t Size;
 		size_t Offset;
+		uint32_t Size;
+		ShaderDataType Type;
 		bool Normalized;
 
 		BufferElement()
-			: Type(ShaderDataType::None), Size(0), Offset(0), Normalized(false)
+			: Offset(0), Size(0), Type(ShaderDataType::None), Normalized(false)
 		{
 		}
 
 		BufferElement(ShaderDataType type, const eastl::string& name, bool normalized = false)
-			: Name(name), Type(type), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized)
+			: Name(name), Offset(0), Size(ShaderDataTypeSize(type)), Type(type), Normalized(normalized)
 		{
 		}
 

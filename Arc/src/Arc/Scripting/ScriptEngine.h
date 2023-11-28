@@ -41,7 +41,9 @@ namespace ArcEngine
 	{
 		eastl::string Name;
 		eastl::string DisplayName;
+
 		FieldType Type = FieldType::Unknown;
+		char DefaultValue[16] = {};
 
 		// For attributes
 		bool Serializable = true;
@@ -50,8 +52,6 @@ namespace ArcEngine
 		eastl::string Tooltip;
 		float Min = 0.0f;
 		float Max = 0.0f;
-
-		char DefaultValue[16] = {};
 
 		ScriptField()
 		{

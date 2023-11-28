@@ -10,7 +10,7 @@ namespace ArcEngine
 	public:
 		virtual ~RendererAPI() = default;
 
-		enum class API
+		enum class API : uint8_t
 		{
 			None = 0, Dx12
 		};

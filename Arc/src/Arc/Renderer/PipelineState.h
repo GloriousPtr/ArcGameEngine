@@ -5,17 +5,16 @@
 
 namespace ArcEngine
 {
-	enum class CullModeType {	None = 0, Back, Front };
-	enum class PrimitiveType { Triangle, Line, Point };
-	enum class FillModeType { Solid, Wireframe };
-	enum class DepthFuncType { None = 0, Never, Less, Equal, LessEqual, Greater, NotEqual, GreaterEqual, Always };
+	enum class CullModeType : uint8_t { None = 0, Back, Front };
+	enum class PrimitiveType : uint8_t { Triangle, Line, Point };
+	enum class FillModeType : uint8_t { Solid, Wireframe };
+	enum class DepthFuncType : uint8_t { None = 0, Never, Less, Equal, LessEqual, Greater, NotEqual, GreaterEqual, Always };
 
 	struct GraphicsPipelineSpecification
 	{
 		CullModeType CullMode = CullModeType::Back;
 		PrimitiveType Primitive = PrimitiveType::Triangle;
 		FillModeType FillMode = FillModeType::Solid;
-		bool EnableDepth = false;
 		DepthFuncType DepthFunc = DepthFuncType::Less;
 		FramebufferTextureFormat DepthFormat = FramebufferTextureFormat::Depth;
 		eastl::vector<FramebufferTextureFormat> OutputFormats{};
@@ -27,7 +26,7 @@ namespace ArcEngine
 		GraphicsPipelineSpecification GraphicsPipelineSpecs{};
 	};
 
-	enum class MaterialPropertyType
+	enum class MaterialPropertyType : uint8_t
 	{
 		None = 0,
 		Texture2D,
@@ -43,16 +42,16 @@ namespace ArcEngine
 
 	struct MaterialProperty
 	{
-		MaterialPropertyType Type;
+		eastl::string Name;
+		eastl::string DisplayName;
 		uint32_t SizeInBytes;
 		uint32_t StartOffsetInBytes;
 
-		eastl::string Name;
-		eastl::string DisplayName;
+		int32_t Slot = -1;
 		bool IsSlider;
 		bool IsColor;
 
-		int32_t Slot = -1;
+		MaterialPropertyType Type;
 
 		[[nodiscard]] bool IsValid() const
 		{

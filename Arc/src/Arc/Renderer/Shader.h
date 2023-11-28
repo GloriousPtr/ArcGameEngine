@@ -7,7 +7,7 @@ namespace ArcEngine
 	struct PipelineSpecification;
 	class PipelineState;
 
-	enum class ShaderType
+	enum class ShaderType : uint8_t
 	{
 		None = 0,
 		Vertex,

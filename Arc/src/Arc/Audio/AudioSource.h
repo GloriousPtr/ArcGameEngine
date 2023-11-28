@@ -4,7 +4,7 @@ struct ma_sound;
 
 namespace ArcEngine
 {
-	enum class AttenuationModelType
+	enum class AttenuationModelType : uint8_t
 	{
 		None = 0,
 		Inverse,

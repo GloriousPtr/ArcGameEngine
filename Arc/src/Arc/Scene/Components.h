@@ -61,9 +61,9 @@ namespace ArcEngine
 	{
 		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
 		Ref<Texture2D> Texture = nullptr;
-		int32_t SortingOrder = 0;
 		glm::vec2 Tiling = glm::vec2(1.0f);
 		glm::vec2 Offset = glm::vec2(0.0f);
+		int32_t SortingOrder = 0;
 	};
 
 	struct CameraComponent
@@ -96,11 +96,11 @@ namespace ArcEngine
 
 	struct LightComponent
 	{
-		enum class LightType { Directional = 0, Point, Spot };
-		enum class ShadowQualityType { Hard = 0, Soft, UltraSoft };
+		enum class LightType : uint8_t { Directional = 0, Point, Spot };
+		enum class ShadowQualityType : uint8_t { Hard = 0, Soft, UltraSoft };
 
-		LightType Type = LightType::Point;
-		bool UseColorTemperatureMode = false;
+		Ref<Framebuffer> ShadowMapFramebuffer;
+
 		uint32_t Temperature = 6570;
 		glm::vec3 Color = glm::vec3(1.0f);
 		float Intensity = 20.0f;
@@ -109,9 +109,9 @@ namespace ArcEngine
 		float CutOffAngle = glm::radians(12.5f);
 		float OuterCutOffAngle = glm::radians(17.5f);
 		
+		LightType Type = LightType::Point;
 		ShadowQualityType ShadowQuality = ShadowQualityType::UltraSoft;
-
-		Ref<Framebuffer> ShadowMapFramebuffer;
+		bool UseColorTemperatureMode = false;
 
 		LightComponent()
 		{
@@ -137,29 +137,30 @@ namespace ArcEngine
 	struct Rigidbody2DComponent
 	{
 		enum class BodyType { Static = 0, Kinematic, Dynamic };
-
-		BodyType Type = BodyType::Dynamic;
-		bool AutoMass = true;
-		float Mass = 1.0f;
-		float LinearDrag = 0.0f;
-		float AngularDrag = 0.05f;
-		float GravityScale = 1.0f;
-		bool AllowSleep = true;
-		bool Awake = true;
-		bool Continuous = false;
-		bool Interpolation = true;
-		bool FreezeRotation = false;
-
+		
 		void* RuntimeBody = nullptr;
 
 		// For interpolation/extrapolation
 		glm::vec3 PreviousTranslationRotation = glm::vec3(0.0f);
 		glm::vec3 TranslationRotation = glm::vec3(0.0f);
+
+		BodyType Type = BodyType::Dynamic;
+		float Mass = 1.0f;
+		float LinearDrag = 0.0f;
+		float AngularDrag = 0.05f;
+		float GravityScale = 1.0f;
+		uint32_t AutoMass : 1 = 1;
+		uint32_t AllowSleep : 1 = 1;
+		uint32_t Awake : 1 = 1;
+		uint32_t Continuous : 1 = 0;
+		uint32_t Interpolation : 1 = 1;
+		uint32_t FreezeRotation : 1 = 0;
 	};
 
 	struct BoxCollider2DComponent
 	{
-		bool IsSensor = false;
+		void* RuntimeFixture = nullptr;
+
 		glm::vec2 Size = { 0.5f, 0.5f };
 		glm::vec2 Offset = { 0.0f, 0.0f };
 
@@ -168,12 +169,13 @@ namespace ArcEngine
 		float Friction = 0.2f;
 		float Restitution = 0.0f;
 
-		void* RuntimeFixture = nullptr;
+		bool IsSensor = false;
 	};
 
 	struct CircleCollider2DComponent
 	{
-		bool IsSensor = false;
+		void* RuntimeFixture = nullptr;
+
 		float Radius = 0.5f;
 		glm::vec2 Offset = { 0.0f, 0.0f };
 
@@ -182,12 +184,13 @@ namespace ArcEngine
 		float Friction = 0.2f;
 		float Restitution = 0.0f;
 
-		void* RuntimeFixture = nullptr;
+		bool IsSensor = false;
 	};
 
 	struct PolygonCollider2DComponent
 	{
-		bool IsSensor = false;
+		void* RuntimeFixture = nullptr;
+
 		glm::vec2 Offset = { 0.0f, 0.0f };
 		eastl::vector<glm::vec2> Points = { { 0.0f, 0.0f }, { 1.0, 0.0f }, { 0.0f, 1.0f } };
 
@@ -196,7 +199,7 @@ namespace ArcEngine
 		float Friction = 0.2f;
 		float Restitution = 0.0f;
 
-		void* RuntimeFixture = nullptr;
+		bool IsSensor = false;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -205,28 +208,29 @@ namespace ArcEngine
 
 	struct DistanceJoint2DComponent
 	{
-		bool EnableCollision = false;
+		void* RuntimeJoint = nullptr;
+
 		UUID ConnectedRigidbody = 0;
 		glm::vec2 Anchor = glm::vec2(0.0f);
 		glm::vec2 ConnectedAnchor = glm::vec2(0.0f);
 
-		bool AutoDistance = true;
 		float Distance = 0.0f;
 		float MinDistance = 0.0f;
 		float MaxDistanceBy = 2.0f;
 		float BreakForce = FLT_MAX;
 
-		void* RuntimeJoint = nullptr;
+		bool AutoDistance = true;
+		bool EnableCollision = false;
 	};
 
 	struct SpringJoint2DComponent
 	{
-		bool EnableCollision = false;
+		void* RuntimeJoint = nullptr;
+
 		UUID ConnectedRigidbody = 0;
 		glm::vec2 Anchor = glm::vec2(0.0f);
 		glm::vec2 ConnectedAnchor = glm::vec2(0.0f);
 
-		bool AutoDistance = true;
 		float Distance = 0.0f;
 		float MinDistance = 0.0f;
 		float MaxDistanceBy = 2.0f;
@@ -234,99 +238,83 @@ namespace ArcEngine
 		float DampingRatio = 0.5f;
 		float BreakForce = FLT_MAX;
 
-		void* RuntimeJoint = nullptr;
+		bool AutoDistance = true;
+		bool EnableCollision = false;
 	};
 
 	struct HingeJoint2DComponent
 	{
-		bool EnableCollision = false;
+		void* RuntimeJoint = nullptr;
+
 		UUID ConnectedRigidbody = 0;
 		glm::vec2 Anchor = glm::vec2(0.0f);
 
-		bool UseLimits = false;
 		float LowerAngle = glm::radians(0.0f);
 		float UpperAngle = glm::radians(359.0f);
-		
-		bool UseMotor = false;
 		float MotorSpeed = 5.0f;
 		float MaxMotorTorque = 10000.0f;
-
 		float BreakForce = FLT_MAX;
 		float BreakTorque = FLT_MAX;
-
-		void* RuntimeJoint = nullptr;
+		
+		bool UseLimits = false;
+		bool UseMotor = false;
+		bool EnableCollision = false;
 	};
 
 	struct SliderJoint2DComponent
 	{
-		bool EnableCollision = false;
+		void* RuntimeJoint = nullptr;
+
 		UUID ConnectedRigidbody = 0;
 		glm::vec2 Anchor = glm::vec2(0.0f);
-		float Angle = 0.0f;
 
-		bool UseLimits = false;
+		float Angle = 0.0f;
 		float LowerTranslation = 0.0f;
 		float UpperTranslation = 0.0f;
-
-		bool UseMotor = false;
 		float MotorSpeed = 5.0f;
 		float MaxMotorForce = 20.0f;
-
 		float BreakForce = FLT_MAX;
 		float BreakTorque = FLT_MAX;
 
-		void* RuntimeJoint = nullptr;
+		bool UseLimits = false;
+		bool UseMotor = false;
+		bool EnableCollision = false;
 	};
 
 	struct WheelJoint2DComponent
 	{
-		bool EnableCollision = false;
+		void* RuntimeJoint = nullptr;
+		
 		UUID ConnectedRigidbody = 0;
 		glm::vec2 Anchor = glm::vec2(0.0f);
 
 		float Frequency = 4.0f;
 		float DampingRatio = 0.7f;
-
-		bool UseLimits = true;
 		float LowerTranslation = -0.25f;
 		float UpperTranslation = 0.25f;
-
-		bool UseMotor = true;
 		float MotorSpeed = 10.0f;
 		float MaxMotorTorque = 20.0f;
-
 		float BreakForce = FLT_MAX;
 		float BreakTorque = FLT_MAX;
 
-		void* RuntimeJoint = nullptr;
+		bool UseLimits = true;
+		bool UseMotor = true;
+		bool EnableCollision = false;
 	};
 
 	struct BuoyancyEffector2DComponent
 	{
 		float Density = 2.0f;
 		float DragMultiplier = 1.0f;
-		bool FlipGravity = false;
-
 		float FlowMagnitude = 0.0f;
 		float FlowAngle = glm::radians(0.0f);
+
+		bool FlipGravity = false;
 	};
 
 	struct RigidbodyComponent
 	{
-		enum class BodyType { Static = 0, Kinematic, Dynamic };
-
-		BodyType Type = BodyType::Dynamic;
-		bool AutoMass = true;
-		float Mass = 1.0f;
-		float LinearDrag = 0.0f;
-		float AngularDrag = 0.05f;
-		float GravityScale = 1.0f;
-		bool AllowSleep = true;
-		bool Awake = true;
-		bool Continuous = false;
-		bool Interpolation = true;
-
-		bool IsSensor = false;
+		enum class BodyType : uint8_t { Static = 0, Kinematic, Dynamic };
 
 		void* RuntimeBody = nullptr;
 
@@ -335,6 +323,18 @@ namespace ArcEngine
 		glm::quat PreviousRotation = glm::vec3(0.0f);
 		glm::vec3 Translation = glm::vec3(0.0f);
 		glm::quat Rotation = glm::vec3(0.0f);
+
+		float Mass = 1.0f;
+		float LinearDrag = 0.0f;
+		float AngularDrag = 0.05f;
+		float GravityScale = 1.0f;
+		uint32_t AutoMass : 1 = 1;
+		uint32_t AllowSleep : 1 = 1;
+		uint32_t Awake : 1 = 1;
+		uint32_t Continuous : 1 = 0;
+		uint32_t Interpolation : 1 = 1;
+		uint32_t IsSensor : 1 = 0;
+		BodyType Type = BodyType::Dynamic;
 	};
 
 	struct BoxColliderComponent
@@ -342,7 +342,6 @@ namespace ArcEngine
 		glm::vec3 Size = { 0.5f, 0.5f, 0.5f };
 		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
 		float Density = 1.0f;
-
 		float Friction = 0.5f;
 		float Restitution = 0.0f;
 	};
@@ -352,7 +351,6 @@ namespace ArcEngine
 		float Radius = 0.5f;
 		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
 		float Density = 1.0f;
-
 		float Friction = 0.5f;
 		float Restitution = 0.0f;
 	};
@@ -363,7 +361,6 @@ namespace ArcEngine
 		float Radius = 0.5f;
 		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
 		float Density = 1.0f;
-
 		float Friction = 0.5f;
 		float Restitution = 0.0f;
 	};
@@ -375,7 +372,6 @@ namespace ArcEngine
 		float BottomRadius = 0.5f;
 		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
 		float Density = 1.0f;
-
 		float Friction = 0.5f;
 		float Restitution = 0.0f;
 	};
@@ -386,7 +382,6 @@ namespace ArcEngine
 		float Radius = 0.5f;
 		glm::vec3 Offset = { 0.0f, 0.0f, 0.0f };
 		float Density = 1.0f;
-
 		float Friction = 0.5f;
 		float Restitution = 0.0f;
 	};

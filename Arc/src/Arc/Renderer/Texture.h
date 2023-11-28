@@ -4,7 +4,7 @@ namespace ArcEngine
 {
 	using TextureData = void*;
 
-	enum class TextureFormat
+	enum class TextureFormat : uint8_t
 	{
 		None = 0,
 

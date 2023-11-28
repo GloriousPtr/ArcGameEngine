@@ -87,10 +87,11 @@ namespace ArcEngine
 
 		entt::registry m_Registry;
 		eastl::hash_map<UUID, entt::entity> m_EntityMap;
-		bool m_IsRunning = false;
 
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 
 		float m_PhysicsFrameAccumulator = 0.0f;
+
+		bool m_IsRunning = false;
 	};
 }

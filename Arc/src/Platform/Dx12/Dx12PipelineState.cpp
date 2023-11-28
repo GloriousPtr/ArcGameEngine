@@ -183,14 +183,14 @@ namespace ArcEngine
 						type = MaterialPropertyType::Texture2DBindless;
 
 					MaterialProperty property{};
-					property.Type = type;
-					property.SizeInBytes = variableDesc.Size;
-					property.StartOffsetInBytes = variableDesc.StartOffset;
-					property.IsSlider = variableName.ends_with("01");
 					property.Name = variableDesc.Name;
 					property.DisplayName = variableDesc.Name + (property.IsSlider ? 2 : 0);
-					property.IsColor = variableName.find("color") != eastl::string::npos || variableName.find("Color") != eastl::string::npos;
+					property.SizeInBytes = variableDesc.Size;
+					property.StartOffsetInBytes = variableDesc.StartOffset;
 					property.Slot = slot;
+					property.IsSlider = variableName.ends_with("01");
+					property.IsColor = variableName.find("color") != eastl::string::npos || variableName.find("Color") != eastl::string::npos;
+					property.Type = type;
 
 					outMaterialProperties.push_back(property);
 					bufferMap.emplace(variableName.c_str(), slot);
@@ -199,14 +199,14 @@ namespace ArcEngine
 			else if(tex)
 			{
 				MaterialProperty property{};
-				property.Type = MaterialPropertyType::Texture2D;
-				property.SizeInBytes = sizeof(uint32_t);
-				property.StartOffsetInBytes = 0;
-				property.IsSlider = false;
 				property.Name = bufferName;
 				property.DisplayName = bufferName;
-				property.IsColor = false;
+				property.SizeInBytes = sizeof(uint32_t);
+				property.StartOffsetInBytes = 0;
 				property.Slot = slot;
+				property.IsSlider = false;
+				property.IsColor = false;
+				property.Type = MaterialPropertyType::Texture2D;
 
 				outMaterialProperties.push_back(property);
 			}
@@ -498,7 +498,7 @@ namespace ArcEngine
 			case PrimitiveType::Point:		psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT; break;
 		}
 
-		if (graphicsSpec.EnableDepth && Framebuffer::IsDepthFormat(graphicsSpec.DepthFormat))
+		if (Framebuffer::IsDepthFormat(graphicsSpec.DepthFormat))
 		{
 			psoDesc.DSVFormat = Dx12Framebuffer::GetDxgiFormat(graphicsSpec.DepthFormat);
 			psoDesc.DepthStencilState.DepthEnable = true;

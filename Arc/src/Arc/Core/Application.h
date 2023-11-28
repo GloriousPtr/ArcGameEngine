@@ -73,8 +73,8 @@ namespace ArcEngine
 		Scope<ImGuiLayer> m_ImGuiLayer;
 		bool m_Running = true;
 		bool m_Minimized = false;
+		Timestep m_Timestep = 0.0f;
 		Scope<LayerStack> m_LayerStack;
-		Timestep m_Timestep = 0;
 
 		eastl::vector<std::function<void()>> m_MainThreadQueue;
 		std::mutex m_MainThreadQueueMutex;
