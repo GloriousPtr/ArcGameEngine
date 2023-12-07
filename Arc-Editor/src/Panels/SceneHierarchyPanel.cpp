@@ -69,7 +69,11 @@ namespace ArcEngine
 			}
 
 			const ImVec2 cursorPos = ImGui::GetCursorPos();
-			const ImVec2 region = ImGui::GetContentRegionAvail();
+			ImVec2 region = ImGui::GetContentRegionAvail();
+			if (region.x == 0.0f)
+				region.x = 1.0f;
+			if (region.y == 0.0f)
+				region.y = 1.0f;
 			ImGui::InvisibleButton("##DragDropTargetBehindTable", region);
 			DragDropTarget();
 

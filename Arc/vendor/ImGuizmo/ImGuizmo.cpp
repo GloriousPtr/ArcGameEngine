@@ -729,6 +729,9 @@ namespace IMGUIZMO_NAMESPACE
       bool mBelowPlaneLimit[3];
       float mAxisFactor[3];
 
+      float mAxisLimit=0.0025f;
+      float mPlaneLimit=0.02f;
+
       // bounds stretching
       vec_t mBoundsPivot;
       vec_t mBoundsAnchor;
@@ -988,6 +991,11 @@ namespace IMGUIZMO_NAMESPACE
       return (gContext.mbUsing && (gContext.mActualID == -1 || gContext.mActualID == gContext.mEditingID)) || gContext.mbUsingBounds;
    }
 
+   bool IsUsingAny()
+   {
+      return gContext.mbUsing || gContext.mbUsingBounds;
+   }
+
    bool IsOver()
    {
       return (Intersects(gContext.mOperation, TRANSLATE) && GetMoveType(gContext.mOperation, NULL) != MT_NONE) ||
@@ -1173,8 +1181,8 @@ namespace IMGUIZMO_NAMESPACE
          float axisLengthInClipSpace = GetSegmentLengthClipSpace(makeVect(0.f, 0.f, 0.f), dirAxis * gContext.mScreenFactor, localCoordinates);
 
          float paraSurf = GetParallelogram(makeVect(0.f, 0.f, 0.f), dirPlaneX * gContext.mScreenFactor, dirPlaneY * gContext.mScreenFactor);
-         belowPlaneLimit = (paraSurf > 0.0025f);
-         belowAxisLimit = (axisLengthInClipSpace > 0.02f);
+         belowPlaneLimit = (paraSurf > gContext.mAxisLimit);
+         belowAxisLimit = (axisLengthInClipSpace > gContext.mPlaneLimit);
 
          // and store values
          gContext.mAxisFactor[axisIndex] = mulAxis;
@@ -2484,6 +2492,16 @@ namespace IMGUIZMO_NAMESPACE
      gContext.mAllowAxisFlip = value;
    }
 
+   void SetAxisLimit(float value)
+   {
+     gContext.mAxisLimit=value;
+   }
+
+   void SetPlaneLimit(float value)
+   {
+     gContext.mPlaneLimit = value;
+   }
+
    bool Manipulate(const float* view, const float* projection, OPERATION operation, MODE mode, float* matrix, float* deltaMatrix, const float* snap, const float* localBounds, const float* boundsSnap)
    {
       // Scale is always local or matrix will be skewed when applying world scale or oriented matrix
@@ -2498,7 +2516,7 @@ namespace IMGUIZMO_NAMESPACE
       // behind camera
       vec_t camSpacePosition;
       camSpacePosition.TransformPoint(makeVect(0.f, 0.f, 0.f), gContext.mMVP);
-      if (!gContext.mIsOrthographic && camSpacePosition.z < 0.001f)
+      if (!gContext.mIsOrthographic && camSpacePosition.z < 0.001f && !gContext.mbUsing)
       {
          return false;
       }
@@ -2937,7 +2955,7 @@ namespace IMGUIZMO_NAMESPACE
                interpolationUp = referenceUp;
             }
             interpolationFrames = 40;
-            
+
          }
          isClicking = false;
          isDraging = false;
