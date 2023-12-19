@@ -94,7 +94,8 @@ namespace ArcEngine
 		auto lastFrameTime = std::chrono::high_resolution_clock::now();
 		while (m_Running)
 		{
-			ARC_PROFILE_FRAME("MainThread");
+			ARC_PROFILE_FRAME("CPUFrame");
+			ARC_PROFILE_THREAD("MainThread");
 
 			ExecuteMainThreadQueue();
 

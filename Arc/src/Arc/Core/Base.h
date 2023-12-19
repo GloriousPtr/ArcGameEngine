@@ -23,8 +23,8 @@
 #define ARC_EXPAND_MACRO(x) x
 #define ARC_STRINGIFY_MACRO(x) #x
 
-#define ARC_CONCAT(X,Y) ARC_CONCAT_IMPL(X,Y)
 #define ARC_CONCAT_IMPL(X,Y) X##Y
+#define ARC_CONCAT(X,Y) ARC_CONCAT_IMPL(X,Y)
 
 #define CONSTEVAL_LINE int(ARC_CONCAT(__LINE__,U))
 

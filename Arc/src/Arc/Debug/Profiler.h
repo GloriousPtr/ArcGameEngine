@@ -6,6 +6,8 @@
 #include <comutil.h>
 #include <pix3.h>
 
+#include "Arc/Core/Base.h"
+
 namespace ArcEngine::Profile
 {
 	struct Color
@@ -285,13 +287,13 @@ namespace ArcEngine::Profile
 #if ARC_ENABLE_CPU_PROFILING
 	#define FUNC_NAME									((OPTICK_CONCAT(autogen_description_, __LINE__))->flags & Optick::EventDescription::IS_CUSTOM_NAME)\
 														? OPTICK_CONCAT(autogen_description_, __LINE__)->name\
-														: __FUNCTION__
+														: ARC_FUNC_SIG
 
-	#define ARC_PROFILE_FRAME(NAME, ...)				OPTICK_FRAME(NAME, __VA_ARGS__) PIXScopedEvent(ArcEngine::Profile::GeneratePixColor(__FILE__, CONSTEVAL_LINE), "CPU Frame")
+	#define ARC_PROFILE_FRAME(NAME, ...)				OPTICK_FRAME(NAME, __VA_ARGS__) PIXScopedEvent(ArcEngine::Profile::GeneratePixColor(__FILE__, CONSTEVAL_LINE), NAME)
 	#define ARC_PROFILE_SCOPE(...)						OPTICK_EVENT(__VA_ARGS__) PIXScopedEvent(ArcEngine::Profile::GeneratePixColor(__FILE__, CONSTEVAL_LINE), FUNC_NAME)
 	#define ARC_PROFILE_TAG(NAME, ...)					OPTICK_TAG(NAME, __VA_ARGS__) ArcEngine::Profile::PIXSetMarkerEx(NAME, __VA_ARGS__)
 	#define ARC_PROFILE_SCOPE_DYNAMIC(NAME)				OPTICK_EVENT_DYNAMIC(NAME) PIXScopedEvent(ArcEngine::Profile::GeneratePixColor(__FILE__, CONSTEVAL_LINE), NAME)
-	#define ARC_PROFILE_THREAD(...)						OPTICK_THREAD(__VA_ARGS__)
+	#define ARC_PROFILE_THREAD(NAME)					OPTICK_THREAD(NAME) SetThreadDescription(GetCurrentThread(), OPTICK_CONCAT(L, NAME))
 	#define ARC_PROFILE_CATEGORY(NAME, CATEGORY)		OPTICK_CATEGORY(NAME, (static_cast<Optick::Category::Type>(CATEGORY))) PIXScopedEvent(ArcEngine::Profile::Category::GetColor(CATEGORY), NAME)
 #else
 	#define ARC_PROFILE_FRAME(...)
