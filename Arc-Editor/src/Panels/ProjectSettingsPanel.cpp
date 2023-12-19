@@ -1,6 +1,6 @@
 #include "ProjectSettingsPanel.h"
 
-#include <icons/IconsMaterialDesignIcons.h>
+#include <Icons.h>
 
 #include "../Utils/UI.h"
 #include <imgui/misc/cpp/imgui_stdlib.h>
@@ -8,7 +8,7 @@
 namespace ArcEngine
 {
 	ProjectSettingsPanel::ProjectSettingsPanel()
-		: BasePanel("Project Settings", ICON_MDI_SETTINGS)
+		: BasePanel("Project Settings", ARC_ICON_SETTINGS)
 	{
 	}
 
@@ -25,10 +25,10 @@ namespace ArcEngine
 				if (layerCollisionMask.size() < 16)
 				{
 					const float cursorPosY = ImGui::GetCursorPosY();
-					if (UI::IconButton("  " ICON_MDI_PLUS, "Add  "))
+					if (UI::IconButton("  " ARC_ICON_PLUS, "Add  "))
 						layerCollisionMask[BIT(layerCollisionMask.size())] = { "Layer", 0xFFFF, static_cast<uint8_t>(layerCollisionMask.size()) };
 
-					ImGui::SetCursorPosY(cursorPosY + UI::GetIconButtonSize("  " ICON_MDI_PLUS, "Add  ").y + ImGui::GetStyle().FramePadding.y);
+					ImGui::SetCursorPosY(cursorPosY + UI::GetIconButtonSize("  " ARC_ICON_PLUS, "Add  ").y + ImGui::GetStyle().FramePadding.y);
 				}
 
 				int i = 0;
@@ -53,7 +53,7 @@ namespace ArcEngine
 						if (i == 0)
 						{
 							ImGui::SameLine();
-							ImGui::TextUnformatted(ICON_MDI_INFORMATION);
+							ImGui::TextUnformatted(ARC_ICON_INFO);
 							if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 							{
 								ImGui::BeginTooltip();
@@ -65,7 +65,7 @@ namespace ArcEngine
 					else
 					{
 						ImGui::SameLine();
-						if (ImGui::Button(ICON_MDI_CLOSE))
+						if (ImGui::Button(ARC_ICON_CLOSE))
 							deletedLayer = layer;
 					}
 					ImGui::PopID();

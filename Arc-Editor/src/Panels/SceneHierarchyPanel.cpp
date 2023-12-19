@@ -2,7 +2,7 @@
 
 #include <Arc/Scene/EntitySerializer.h>
 
-#include <icons/IconsMaterialDesignIcons.h>
+#include <Icons.h>
 #include <imgui/imgui_internal.h>
 #include <imgui/misc/cpp/imgui_stdlib.h>
 #include <string>
@@ -14,7 +14,7 @@
 namespace ArcEngine
 {
 	SceneHierarchyPanel::SceneHierarchyPanel(const char* name)
-		: BasePanel(name, ICON_MDI_VIEW_LIST, true)
+		: BasePanel(name, ARC_ICON_HIERARCHY, true)
 	{
 	}
 
@@ -46,11 +46,11 @@ namespace ArcEngine
 			const ImVec2 padding = ImGui::GetStyle().FramePadding;
 
 			const float filterCursorPosX = ImGui::GetCursorPosX();
-			m_Filter.Draw("###HierarchyFilter", ImGui::GetContentRegionAvail().x - (UI::GetIconButtonSize("  " ICON_MDI_PLUS, "Add  ").x + 2.0f * padding.x));
+			m_Filter.Draw("###HierarchyFilter", ImGui::GetContentRegionAvail().x - (UI::GetIconButtonSize("  " ARC_ICON_PLUS, "Add  ").x + 2.0f * padding.x));
 			
 			ImGui::SameLine();
 
-			if (UI::IconButton("  " ICON_MDI_PLUS, "Add  "))
+			if (UI::IconButton("  " ARC_ICON_PLUS, "Add  "))
 				ImGui::OpenPopup("SceneHierarchyContextWindow");
 
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
@@ -65,7 +65,7 @@ namespace ArcEngine
 			{
 				ImGui::SameLine();
 				ImGui::SetCursorPosX(filterCursorPosX + ImGui::GetFontSize() * 0.5f);
-				ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
+				ImGui::TextUnformatted(ARC_ICON_SEARCH " Search...");
 			}
 
 			const ImVec2 cursorPos = ImGui::GetCursorPos();
@@ -83,7 +83,7 @@ namespace ArcEngine
 			{
 				ImGui::TableSetupColumn("  Label", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_NoClip);
 				ImGui::TableSetupColumn("  Type", ImGuiTableColumnFlags_WidthFixed, lineHeight * 3.0f);
-				ImGui::TableSetupColumn("  " ICON_MDI_EYE_OUTLINE, ImGuiTableColumnFlags_WidthFixed, lineHeight * 2.0f);
+				ImGui::TableSetupColumn("  " ARC_ICON_EYE, ImGuiTableColumnFlags_WidthFixed, lineHeight * 2.0f);
 
 				ImGui::TableSetupScrollFreeze(0, 1);
 				
@@ -202,7 +202,7 @@ namespace ArcEngine
 		if (prefabColorApplied)
 			ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::HeaderSelectedColor);
 
-		const bool opened = ImGui::TreeNodeEx(reinterpret_cast<void*>(static_cast<uint64_t>(entity.GetUUID())), flags, "%s %s", ICON_MDI_CUBE_OUTLINE, tag.c_str());
+		const bool opened = ImGui::TreeNodeEx(reinterpret_cast<void*>(static_cast<uint64_t>(entity.GetUUID())), flags, "%s %s", ARC_ICON_ENTITY, tag.c_str());
 
 		if (highlight)
 			ImGui::PopStyleColor(2);
@@ -313,7 +313,7 @@ namespace ArcEngine
 		ImGui::TableNextColumn();
 		// Visibility Toggle
 		{
-			ImGui::Text("  %s", reinterpret_cast<const char*>(tagComponent.Enabled ? ICON_MDI_EYE_OUTLINE : ICON_MDI_EYE_OFF_OUTLINE));
+			ImGui::Text("  %s", tagComponent.Enabled ? ARC_ICON_EYE : ARC_ICON_EYE_OFF);
 			
 			if (!ImGui::IsItemHovered())
 				tagComponent.handled = false;

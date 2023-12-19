@@ -8,7 +8,7 @@
 #endif //ARC_PLATFORM_VISUAL_STUDIO
 
 #include <EASTL/hash_map.h>
-#include <icons/IconsMaterialDesignIcons.h>
+#include <Icons.h>
 #include <imgui/imgui_internal.h>
 
 #include "../EditorLayer.h"
@@ -89,18 +89,18 @@ namespace ArcEngine
 
 	static const eastl::hash_map<FileType, const char*> s_FileTypesToIcon =
 	{
-		{ FileType::Unknown,	ICON_MDI_FILE },
+		{ FileType::Unknown,	ARC_ICON_FILE },
 
-		{ FileType::Scene,		ICON_MDI_FILE },
-		{ FileType::Prefab,		ICON_MDI_FILE },
-		{ FileType::Script,		ICON_MDI_LANGUAGE_CSHARP },
-		{ FileType::Shader,		ICON_MDI_IMAGE_FILTER_BLACK_WHITE },
+		{ FileType::Scene,		ARC_ICON_SCENE },
+		{ FileType::Prefab,		ARC_ICON_PREFAB },
+		{ FileType::Script,		ARC_ICON_LANGUAGE_CSHARP },
+		{ FileType::Shader,		ARC_ICON_SHADER },
 
-		{ FileType::Texture,	ICON_MDI_FILE_IMAGE },
-		{ FileType::Cubemap,	ICON_MDI_IMAGE_FILTER_HDR },
-		{ FileType::Model,		ICON_MDI_VECTOR_POLYGON },
+		{ FileType::Texture,	ARC_ICON_TEXTURE },
+		{ FileType::Cubemap,	ARC_ICON_CUBEMAP },
+		{ FileType::Model,		ARC_ICON_POLYGON },
 
-		{ FileType::Audio,		ICON_MDI_MICROPHONE },
+		{ FileType::Audio,		ARC_ICON_AUDIO },
 	};
 
 	inline static float s_LastDomainReloadTime = 0.0f;
@@ -223,7 +223,7 @@ namespace ArcEngine
 
 			auto name = StringUtils::GetNameWithExtension(filepath.c_str());
 
-			const char* folderIcon = ICON_MDI_FILE;
+			const char* folderIcon = ARC_ICON_FILE;
 			if (entryIsFile)
 			{
 				auto fileType = FileType::Unknown;
@@ -238,7 +238,7 @@ namespace ArcEngine
 			}
 			else
 			{
-				folderIcon = open ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
+				folderIcon = open ? ARC_ICON_FOLDER_OPEN : ARC_ICON_FOLDER;
 			}
 
 			ImGui::SameLine();
@@ -277,7 +277,7 @@ namespace ArcEngine
 	}
 
 	AssetPanel::AssetPanel(const char* name)
-		: BasePanel(name, ICON_MDI_FOLDER_STAR, true)
+		: BasePanel(name, ARC_ICON_FOLDER_STAR, true)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -391,7 +391,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (ImGui::Button(ICON_MDI_COGS))
+		if (ImGui::Button(ARC_ICON_COGS))
 			ImGui::OpenPopup("SettingsPopup");
 		if (ImGui::BeginPopup("SettingsPopup"))
 		{
@@ -408,7 +408,7 @@ namespace ArcEngine
 		{
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(cursorPosX + ImGui::GetFontSize() * 0.5f);
-			static const char* searchString = ICON_MDI_MAGNIFY " Search...";
+			static const char* searchString = ARC_ICON_SEARCH " Search...";
 			static const char* searchStringEnd = searchString + strlen(searchString);
 			ImGui::TextUnformatted(searchString, searchStringEnd);
 		}
@@ -428,7 +428,7 @@ namespace ArcEngine
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-			if (ImGui::Button(ICON_MDI_ARROW_LEFT_CIRCLE_OUTLINE))
+			if (ImGui::Button(ARC_ICON_ARROW_LEFT_CIRCLE))
 			{
 				m_BackStack.push(m_CurrentDirectory);
 				UpdateDirectoryEntries(m_CurrentDirectory.parent_path());
@@ -455,7 +455,7 @@ namespace ArcEngine
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-			if (ImGui::Button(ICON_MDI_ARROW_RIGHT_CIRCLE_OUTLINE))
+			if (ImGui::Button(ARC_ICON_ARROW_RIGHT_CIRCLE))
 			{
 				const auto& top = m_BackStack.top();
 				UpdateDirectoryEntries(top);
@@ -471,7 +471,7 @@ namespace ArcEngine
 
 		ImGui::SameLine();
 
-		ImGui::TextUnformatted(ICON_MDI_FOLDER);
+		ImGui::TextUnformatted(ARC_ICON_FOLDER);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
@@ -550,7 +550,7 @@ namespace ArcEngine
 				UpdateDirectoryEntries(m_AssetsDirectory);
 				selectionMask = 0;
 			}
-			const char* folderIcon = opened ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
+			const char* folderIcon = opened ? ARC_ICON_FOLDER_OPEN : ARC_ICON_FOLDER;
 			ImGui::SameLine();
 			ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::AssetIconColor);
 			ImGui::TextUnformatted(folderIcon);

@@ -1,6 +1,6 @@
 #include "UI.h"
 
-#include <icons/IconsMaterialDesignIcons.h>
+#include <Icons.h>
 
 #include <imgui/imgui_internal.h>
 #include <imgui/misc/cpp/imgui_stdlib.h>
@@ -282,7 +282,7 @@ namespace ArcEngine
 				function(name.c_str(), p);
 				ImGui::TableNextColumn();
 
-				if (ImGui::Button(ICON_MDI_CLOSE))
+				if (ImGui::Button(ARC_ICON_CLOSE))
 					removeAt = i;
 
 				ImGui::PopID();

@@ -1,13 +1,13 @@
 #include "RendererSettingsPanel.h"
 
-#include <icons/IconsMaterialDesignIcons.h>
+#include <Icons.h>
 
 #include "../Utils/UI.h"
 
 namespace ArcEngine
 {
 	RendererSettingsPanel::RendererSettingsPanel(const char* name)
-		: BasePanel(name, ICON_MDI_GPU)
+		: BasePanel(name, ARC_ICON_GPU)
 	{
 	}
 

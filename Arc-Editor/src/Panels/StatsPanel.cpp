@@ -1,13 +1,13 @@
 #include "StatsPanel.h"
 
-#include <icons/IconsMaterialDesignIcons.h>
+#include <Icons.h>
 
 #include "../Utils/UI.h"
 
 namespace ArcEngine
 {
 	StatsPanel::StatsPanel(const char* name)
-		: BasePanel(name, ICON_MDI_INFORMATION_VARIANT, true), m_FpsValues{}
+		: BasePanel(name, ARC_ICON_INFO_2, true), m_FpsValues{}
 	{
 	}
 

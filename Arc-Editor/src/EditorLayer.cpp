@@ -1,10 +1,10 @@
 #include "EditorLayer.h"
 
+#include <Icons.h>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <imgui/misc/cpp/imgui_stdlib.h>
-#include <icons/IconsMaterialDesignIcons.h>
 
 #include <Arc/Scene/SceneSerializer.h>
 #include <Arc/Scripting/ScriptEngine.h>
@@ -299,11 +299,11 @@ namespace ArcEngine
 						bool isNormalCursor = ImGui::GetMouseCursor() == ImGuiMouseCursor_Arrow;
 
 						// Minimize Button
-						if (ImGui::Button(ICON_MDI_MINUS, buttonSize) && isNormalCursor)
+						if (ImGui::Button(ARC_ICON_WINDOW_MINIMIZE, buttonSize) && isNormalCursor)
 							Application::Get().GetWindow().Minimize();
 
 						// Maximize Button
-						if (ImGui::Button(ICON_MDI_WINDOW_MAXIMIZE, buttonSize) && isNormalCursor)
+						if (ImGui::Button(ARC_ICON_WINDOW_MAXIMIZE, buttonSize) && isNormalCursor)
 						{
 							Window& window = Application::Get().GetWindow();
 							if (window.IsMaximized())
@@ -315,7 +315,7 @@ namespace ArcEngine
 						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.909f, 0.066f, 0.137f, 1.0f });
 						ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0.920f, 0.066f, 0.120f, 1.0f });
 						// Close Button
-						if (ImGui::Button(ICON_MDI_WINDOW_CLOSE, buttonSize) && isNormalCursor)
+						if (ImGui::Button(ARC_ICON_WINDOW_CLOSE, buttonSize) && isNormalCursor)
 							Application::Get().Close();
 						ImGui::PopStyleColor(2);
 
@@ -383,7 +383,7 @@ namespace ArcEngine
 						ImGui::SetCursorPosX(buttonStartPositionX);
 						//Play Button
 						bool highlight = m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
-						const char* icon = m_SceneState == SceneState::Edit ? ICON_MDI_PLAY : ICON_MDI_STOP;
+						const char* icon = m_SceneState == SceneState::Edit ? ARC_ICON_PLAY : ARC_ICON_STOP;
 						if (UI::ToggleButton(icon, highlight, buttonSize))
 						{
 							if (m_SceneState == SceneState::Edit)
@@ -395,7 +395,7 @@ namespace ArcEngine
 						//Pause Button
 						highlight = m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
 						ImGui::PushItemFlag(ImGuiItemFlags_Disabled, m_SceneState == SceneState::Edit);
-						if (UI::ToggleButton(ICON_MDI_PAUSE, highlight, buttonSize))
+						if (UI::ToggleButton(ARC_ICON_PAUSE, highlight, buttonSize))
 						{
 							if (m_SceneState == SceneState::Play)
 								OnScenePause();
@@ -407,7 +407,7 @@ namespace ArcEngine
 						if (m_SceneState == SceneState::Step)
 							OnScenePause();
 						ImGui::PushItemFlag(ImGuiItemFlags_Disabled, m_SceneState != SceneState::Pause);
-						if (ImGui::Button(ICON_MDI_STEP_FORWARD, buttonSize) && m_SceneState == SceneState::Pause)
+						if (ImGui::Button(ARC_ICON_STEP_FORWARD, buttonSize) && m_SceneState == SceneState::Pause)
 						{
 							OnSceneUnpause();
 							m_SceneState = SceneState::Step;
@@ -545,7 +545,7 @@ namespace ArcEngine
 				if (!isValidPath)
 					ImGui::PopStyleColor();
 
-				if (ImGui::Button(ICON_MDI_FOLDER))
+				if (ImGui::Button(ARC_ICON_FOLDER))
 					m_TempProjectPath = FileDialogs::OpenFolder().c_str();
 
 				ImGui::Separator();

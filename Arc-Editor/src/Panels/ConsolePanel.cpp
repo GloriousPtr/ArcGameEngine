@@ -6,8 +6,8 @@
 #include <Platform/VisualStudio/VisualStudioAccessor.h>
 #endif //ARC_PLATFORM_VISUAL_STUDIO
 
+#include <Icons.h>
 #include <imgui/imgui_internal.h>
-#include <icons/IconsMaterialDesignIcons.h>
 
 #include "../Utils/UI.h"
 #include "../Utils/EditorTheme.h"
@@ -15,7 +15,7 @@
 namespace ArcEngine
 {
 	ConsolePanel::ConsolePanel(const char* name)
-		: BasePanel(name, ICON_MDI_CONSOLE, true)
+		: BasePanel(name, ARC_ICON_CONSOLE, true)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -100,7 +100,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (ImGui::Button(ICON_MDI_COGS))
+		if (ImGui::Button(ARC_ICON_COGS))
 			ImGui::OpenPopup("SettingsPopup");
 
 		if (ImGui::BeginPopup("SettingsPopup"))
@@ -147,7 +147,7 @@ namespace ArcEngine
 
 		ImGui::SameLine();
 
-		if (ImGui::Button(ICON_MDI_NOTIFICATION_CLEAR_ALL))
+		if (ImGui::Button(ARC_ICON_CLEAR_ALL))
 			Clear();
 
 		ImGui::PopStyleColor();
@@ -159,7 +159,7 @@ namespace ArcEngine
 		{
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(cursorPosX + ImGui::GetFontSize() * 0.5f);
-			ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
+			ImGui::TextUnformatted(ARC_ICON_SEARCH " Search...");
 		}
 	}
 
@@ -321,14 +321,14 @@ namespace ArcEngine
     {
         switch(level)
         {
-			case Log::Level::Trace:				return ICON_MDI_MESSAGE_TEXT;
-			case Log::Level::Info:				return ICON_MDI_INFORMATION;
-			case Log::Level::Debug:				return ICON_MDI_BUG;
-			case Log::Level::Warn:				return ICON_MDI_ALERT;
-			case Log::Level::Error:				return ICON_MDI_CLOSE_OCTAGON;
-			case Log::Level::Critical:			return ICON_MDI_ALERT_OCTAGRAM;
+			case Log::Level::Trace:				return ARC_ICON_TRACE;
+			case Log::Level::Info:				return ARC_ICON_INFO;
+			case Log::Level::Debug:				return ARC_ICON_DEBUG;
+			case Log::Level::Warn:				return ARC_ICON_WARN;
+			case Log::Level::Error:				return ARC_ICON_ERROR;
+			case Log::Level::Critical:			return ARC_ICON_CRITICAL;
         }
 
-		return "Unknown name";
+		return "?";
     }
 }
