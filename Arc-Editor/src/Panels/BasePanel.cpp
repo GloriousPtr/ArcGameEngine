@@ -6,12 +6,12 @@ namespace ArcEngine
 {
 	uint32_t BasePanel::s_Count = 0;
 
-	BasePanel::BasePanel(const char* name, const char8_t* icon, bool defaultShow)
+	BasePanel::BasePanel(const char* name, const char* icon, bool defaultShow)
 		: Showing(defaultShow), m_Icon(icon), m_Name(name)
 	{
 		ARC_PROFILE_SCOPE();
 
-		m_ID = std::format(" {} {}\t\t###{}_{}", StringUtils::FromChar8T(icon), m_Name, m_Name, s_Count).c_str();
+		m_ID = std::format(" {} {}\t\t###{}_{}", icon, m_Name, m_Name, s_Count).c_str();
 		s_Count++;
 	}
 

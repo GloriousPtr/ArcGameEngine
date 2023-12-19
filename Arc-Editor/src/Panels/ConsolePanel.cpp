@@ -100,7 +100,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_COGS)))
+		if (ImGui::Button(ICON_MDI_COGS))
 			ImGui::OpenPopup("SettingsPopup");
 
 		if (ImGui::BeginPopup("SettingsPopup"))
@@ -113,7 +113,7 @@ namespace ArcEngine
 
 		const float spacing = ImGui::GetStyle().ItemSpacing.x;
         ImGui::GetStyle().ItemSpacing.x = 2;
-        const float levelButtonWidth = (ImGui::CalcTextSize(StringUtils::FromChar8T(Message::GetLevelIcon(Log::Level::Trace))) + ImGui::GetStyle().FramePadding * 2.0f).x;
+        const float levelButtonWidth = (ImGui::CalcTextSize(Message::GetLevelIcon(Log::Level::Trace)) + ImGui::GetStyle().FramePadding * 2.0f).x;
         const float levelButtonWidths = (levelButtonWidth + ImGui::GetStyle().ItemSpacing.x) * 7;
 
 		const float cursorPosX = ImGui::GetCursorPosX();
@@ -133,7 +133,7 @@ namespace ArcEngine
 			else
 				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5, 0.5f, 0.5f));
 
-			if(ImGui::Button(StringUtils::FromChar8T(Message::GetLevelIcon(level))))
+			if(ImGui::Button(Message::GetLevelIcon(level)))
 			{
 				s_MessageBufferRenderFilter ^= level;
 			}
@@ -147,7 +147,7 @@ namespace ArcEngine
 
 		ImGui::SameLine();
 
-		if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_NOTIFICATION_CLEAR_ALL)))
+		if (ImGui::Button(ICON_MDI_NOTIFICATION_CLEAR_ALL))
 			Clear();
 
 		ImGui::PopStyleColor();
@@ -159,7 +159,7 @@ namespace ArcEngine
 		{
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(cursorPosX + ImGui::GetFontSize() * 0.5f);
-			ImGui::TextUnformatted(StringUtils::FromChar8T(ICON_MDI_MAGNIFY " Search..."));
+			ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
 		}
 	}
 
@@ -264,8 +264,7 @@ namespace ArcEngine
 		glm::vec4 c = GetRenderColor(Level);
 		ImGui::PushStyleColor(ImGuiCol_Text, { c.r, c.g, c.b, c.a });
 		ImGui::PushFont(EditorTheme::BoldFont);
-		const auto levelIcon = GetLevelIcon(Level);
-		ImGui::TreeNodeEx(&ID, flags, "%s  %s", StringUtils::FromChar8T(levelIcon), Buffer.c_str());
+		ImGui::TreeNodeEx(&ID, flags, "%s  %s", GetLevelIcon(Level), Buffer.c_str());
 		ImGui::PopFont();
 		ImGui::PopStyleColor();
 
@@ -318,7 +317,7 @@ namespace ArcEngine
 		return { 1.00f, 1.00f, 1.00f, 1.00f };
 	}
 
-	const char8_t* ConsolePanel::Message::GetLevelIcon(Log::Level level)
+	const char* ConsolePanel::Message::GetLevelIcon(Log::Level level)
     {
         switch(level)
         {
@@ -330,6 +329,6 @@ namespace ArcEngine
 			case Log::Level::Critical:			return ICON_MDI_ALERT_OCTAGRAM;
         }
 
-		return u8"Unknown name";
+		return "Unknown name";
     }
 }

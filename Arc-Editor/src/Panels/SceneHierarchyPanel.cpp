@@ -65,7 +65,7 @@ namespace ArcEngine
 			{
 				ImGui::SameLine();
 				ImGui::SetCursorPosX(filterCursorPosX + ImGui::GetFontSize() * 0.5f);
-				ImGui::TextUnformatted(StringUtils::FromChar8T(ICON_MDI_MAGNIFY " Search..."));
+				ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
 			}
 
 			const ImVec2 cursorPos = ImGui::GetCursorPos();
@@ -83,7 +83,7 @@ namespace ArcEngine
 			{
 				ImGui::TableSetupColumn("  Label", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_NoClip);
 				ImGui::TableSetupColumn("  Type", ImGuiTableColumnFlags_WidthFixed, lineHeight * 3.0f);
-				ImGui::TableSetupColumn(StringUtils::FromChar8T("  " ICON_MDI_EYE_OUTLINE), ImGuiTableColumnFlags_WidthFixed, lineHeight * 2.0f);
+				ImGui::TableSetupColumn("  " ICON_MDI_EYE_OUTLINE, ImGuiTableColumnFlags_WidthFixed, lineHeight * 2.0f);
 
 				ImGui::TableSetupScrollFreeze(0, 1);
 				
@@ -202,7 +202,7 @@ namespace ArcEngine
 		if (prefabColorApplied)
 			ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::HeaderSelectedColor);
 
-		const bool opened = ImGui::TreeNodeEx(reinterpret_cast<void*>(static_cast<uint64_t>(entity.GetUUID())), flags, "%s %s", StringUtils::FromChar8T(ICON_MDI_CUBE_OUTLINE), tag.c_str());
+		const bool opened = ImGui::TreeNodeEx(reinterpret_cast<void*>(static_cast<uint64_t>(entity.GetUUID())), flags, "%s %s", ICON_MDI_CUBE_OUTLINE, tag.c_str());
 
 		if (highlight)
 			ImGui::PopStyleColor(2);

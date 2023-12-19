@@ -24,7 +24,7 @@ namespace ArcEngine
 
 			static const char* GetLevelName(Log::Level level);
 			static glm::vec4 GetRenderColor(Log::Level level);
-			static const char8_t* GetLevelIcon(Log::Level level);
+			static const char* GetLevelIcon(Log::Level level);
 		};
 
 	public:

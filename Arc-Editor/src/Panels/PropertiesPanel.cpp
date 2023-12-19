@@ -49,7 +49,7 @@ namespace ArcEngine
 	}
 
 	template<typename T, typename UIFunction>
-	static void DrawComponent(const char8_t* name, Entity entity, UIFunction uiFunction, const bool removable = true)
+	static void DrawComponent(const char* name, Entity entity, UIFunction uiFunction, const bool removable = true)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -77,7 +77,7 @@ namespace ArcEngine
 
 				const float frameHeight = ImGui::GetFrameHeight();
 				ImGui::SameLine(ImGui::GetContentRegionMax().x - frameHeight * 1.2f);
-				if(ImGui::Button(StringUtils::FromChar8T(ICON_MDI_SETTINGS), ImVec2{ frameHeight * 1.2f, frameHeight }))
+				if(ImGui::Button(ICON_MDI_SETTINGS, ImVec2{ frameHeight * 1.2f, frameHeight }))
 					ImGui::OpenPopup("ComponentSettings");
 
 				if(ImGui::BeginPopup("ComponentSettings"))
@@ -128,7 +128,7 @@ namespace ArcEngine
 				ImGui::PushID(&it);
 
 				ImGui::SameLine(ImGui::GetContentRegionMax().x - frameHeight * 1.2f);
-				if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_SETTINGS), ImVec2{ frameHeight * 1.2f, frameHeight }))
+				if (ImGui::Button(ICON_MDI_SETTINGS, ImVec2{ frameHeight * 1.2f, frameHeight }))
 					ImGui::OpenPopup("ScriptSettings");
 
 				if (ImGui::BeginPopup("ScriptSettings"))
@@ -379,7 +379,7 @@ namespace ArcEngine
 					{
 						ImGui::SameLine();
 						ImGui::SetCursorPosX(filterCursorPosX + ImGui::GetFontSize() * 0.5f);
-						ImGui::TextUnformatted(StringUtils::FromChar8T(ICON_MDI_MAGNIFY " Search..."));
+						ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
 					}
 
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
@@ -423,8 +423,8 @@ namespace ArcEngine
 			// Lock Button
 			{
 				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + framePadding.x);
-				const char8_t* icon = m_Locked ? ICON_MDI_LOCK : ICON_MDI_LOCK_OPEN_OUTLINE;
-				if (UI::ToggleButton(StringUtils::FromChar8T(icon), m_Locked, lockButtonSize))
+				const char* icon = m_Locked ? ICON_MDI_LOCK : ICON_MDI_LOCK_OPEN_OUTLINE;
+				if (UI::ToggleButton(icon, m_Locked, lockButtonSize))
 					m_Locked = !m_Locked;
 			}
 
@@ -439,7 +439,7 @@ namespace ArcEngine
 
 			if (ImGui::BeginCombo("##LayerName", current))
 			{
-				for (auto [layer, layerData] : Scene::LayerCollisionMask)
+				for (const auto& [layer, layerData] : Scene::LayerCollisionMask)
 				{
 					const bool isSelected = current == layerData.Name;
 					if (ImGui::Selectable(Scene::LayerCollisionMask.at(layer).Name.c_str(), isSelected))
@@ -652,10 +652,10 @@ namespace ArcEngine
 
 			ImGui::Text("Active Particles Count: %u", component.System->GetActiveParticleCount());
 			ImGui::BeginDisabled(props.Looping);
-			if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_PLAY)))
+			if (ImGui::Button(ICON_MDI_PLAY))
 				component.System->Play();
 			ImGui::SameLine();
-			if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_STOP)))
+			if (ImGui::Button(ICON_MDI_STOP))
 				component.System->Stop();
 			ImGui::EndDisabled();
 
@@ -1099,7 +1099,7 @@ namespace ArcEngine
 					{
 						ImGui::SameLine();
 						ImGui::SetCursorPosX(filterCursorPosX + ImGui::GetFontSize() * 0.5f);
-						ImGui::TextUnformatted(StringUtils::FromChar8T(ICON_MDI_MAGNIFY " Search..."));
+						ImGui::TextUnformatted(ICON_MDI_MAGNIFY " Search...");
 					}
 				}
 
@@ -1151,13 +1151,13 @@ namespace ArcEngine
 			UI::EndProperties();
 
 			ImGui::Spacing();
-			if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_PLAY "Play "))&& component.Source)
+			if (ImGui::Button(ICON_MDI_PLAY "Play ") && component.Source)
 				component.Source->Play();
 			ImGui::SameLine();
-			if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_PAUSE "Pause ")) && component.Source)
+			if (ImGui::Button(ICON_MDI_PAUSE "Pause ") && component.Source)
 				component.Source->Pause();
 			ImGui::SameLine();
-			if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_STOP "Stop ")) && component.Source)
+			if (ImGui::Button(ICON_MDI_STOP "Stop ") && component.Source)
 				component.Source->Stop();
 			ImGui::Spacing();
 
@@ -1241,9 +1241,8 @@ namespace ArcEngine
 	}
 
 	template<typename Component>
-	void PropertiesPanel::DrawAddComponent(Entity entity, const char8_t* name, const char* category) const
+	void PropertiesPanel::DrawAddComponent(Entity entity, const char* name, const char* category) const
 	{
-		const char* displayName = StringUtils::FromChar8T(name);
 		if (!entity.HasComponent<Component>())
 		{
 			if (!m_Filter.IsActive())
@@ -1252,7 +1251,7 @@ namespace ArcEngine
 				{
 					if (ImGui::BeginMenu(category))
 					{
-						if (ImGui::MenuItem(displayName))
+						if (ImGui::MenuItem(name))
 						{
 							entity.AddComponent<Component>();
 							ImGui::CloseCurrentPopup();
@@ -1263,7 +1262,7 @@ namespace ArcEngine
 				}
 				else
 				{
-					if (ImGui::MenuItem(displayName))
+					if (ImGui::MenuItem(name))
 					{
 						entity.AddComponent<Component>();
 						ImGui::CloseCurrentPopup();
@@ -1272,9 +1271,9 @@ namespace ArcEngine
 			}
 			else
 			{
-				if (m_Filter.IsActive() && m_Filter.PassFilter(displayName))
+				if (m_Filter.IsActive() && m_Filter.PassFilter(name))
 				{
-					if (ImGui::MenuItem(displayName))
+					if (ImGui::MenuItem(name))
 					{
 						entity.AddComponent<Component>();
 						ImGui::CloseCurrentPopup();

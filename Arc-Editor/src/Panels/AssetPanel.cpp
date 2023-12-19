@@ -87,7 +87,7 @@ namespace ArcEngine
 		{ FileType::Audio,			{ 0.20f, 0.80f, 0.50f, 1.00f } },
 	};
 
-	static const eastl::hash_map<FileType, const char8_t*> s_FileTypesToIcon =
+	static const eastl::hash_map<FileType, const char*> s_FileTypesToIcon =
 	{
 		{ FileType::Unknown,	ICON_MDI_FILE },
 
@@ -223,7 +223,7 @@ namespace ArcEngine
 
 			auto name = StringUtils::GetNameWithExtension(filepath.c_str());
 
-			const char8_t* folderIcon = ICON_MDI_FILE;
+			const char* folderIcon = ICON_MDI_FILE;
 			if (entryIsFile)
 			{
 				auto fileType = FileType::Unknown;
@@ -243,10 +243,10 @@ namespace ArcEngine
 
 			ImGui::SameLine();
 			ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::AssetIconColor);
-			ImGui::TextUnformatted(StringUtils::FromChar8T(folderIcon));
+			ImGui::TextUnformatted(folderIcon);
 			ImGui::PopStyleColor();
 			ImGui::SameLine();
-			ImGui::TextUnformatted(name.data());
+			ImGui::TextUnformatted(name.data(), name.data() + name.size());
 			m_CurrentlyVisibleItemsTreeView++;
 
 			(*count)--;
@@ -391,7 +391,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_COGS)))
+		if (ImGui::Button(ICON_MDI_COGS))
 			ImGui::OpenPopup("SettingsPopup");
 		if (ImGui::BeginPopup("SettingsPopup"))
 		{
@@ -408,7 +408,9 @@ namespace ArcEngine
 		{
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(cursorPosX + ImGui::GetFontSize() * 0.5f);
-			ImGui::TextUnformatted(StringUtils::FromChar8T(ICON_MDI_MAGNIFY " Search..."));
+			static const char* searchString = ICON_MDI_MAGNIFY " Search...";
+			static const char* searchStringEnd = searchString + strlen(searchString);
+			ImGui::TextUnformatted(searchString, searchStringEnd);
 		}
 
 		ImGui::Spacing();
@@ -426,7 +428,7 @@ namespace ArcEngine
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-			if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_ARROW_LEFT_CIRCLE_OUTLINE)))
+			if (ImGui::Button(ICON_MDI_ARROW_LEFT_CIRCLE_OUTLINE))
 			{
 				m_BackStack.push(m_CurrentDirectory);
 				UpdateDirectoryEntries(m_CurrentDirectory.parent_path());
@@ -453,7 +455,7 @@ namespace ArcEngine
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-			if (ImGui::Button(StringUtils::FromChar8T(ICON_MDI_ARROW_RIGHT_CIRCLE_OUTLINE)))
+			if (ImGui::Button(ICON_MDI_ARROW_RIGHT_CIRCLE_OUTLINE))
 			{
 				const auto& top = m_BackStack.top();
 				UpdateDirectoryEntries(top);
@@ -469,7 +471,7 @@ namespace ArcEngine
 
 		ImGui::SameLine();
 
-		ImGui::TextUnformatted(StringUtils::FromChar8T(ICON_MDI_FOLDER));
+		ImGui::TextUnformatted(ICON_MDI_FOLDER);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
@@ -548,10 +550,10 @@ namespace ArcEngine
 				UpdateDirectoryEntries(m_AssetsDirectory);
 				selectionMask = 0;
 			}
-			const char8_t* folderIcon = opened ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
+			const char* folderIcon = opened ? ICON_MDI_FOLDER_OPEN : ICON_MDI_FOLDER;
 			ImGui::SameLine();
 			ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::AssetIconColor);
-			ImGui::TextUnformatted(StringUtils::FromChar8T(folderIcon));
+			ImGui::TextUnformatted(folderIcon);
 			ImGui::PopStyleColor();
 			ImGui::SameLine();
 			ImGui::TextUnformatted("Assets");
@@ -645,6 +647,7 @@ namespace ArcEngine
 
 				const bool isDir = file.IsDirectory;
 				const char* filename = file.Name.c_str();
+				const char* filenameEnd = filename + file.Name.size();
 
 				uint64_t textureId = m_DirectoryIcon->GetRendererID();
 				if (!isDir)
@@ -759,7 +762,7 @@ namespace ArcEngine
 					const ImVec2 rectSize = ImGui::GetItemRectSize();
 					const ImRect clipRect = ImRect({ rectMin.x + padding * 1.0f, rectMin.y + padding * 2.0f },
 						{ rectMin.x + rectSize.x, rectMin.y + scaledThumbnailSizeX - EditorTheme::SmallFont->FontSize - padding * 4.0f });
-					UI::ClippedText(clipRect.Min, clipRect.Max, filename, nullptr, nullptr, { 0, 0 }, nullptr, clipRect.GetSize().x);
+					UI::ClippedText(clipRect.Min, clipRect.Max, filename, filenameEnd, nullptr, { 0, 0 }, nullptr, clipRect.GetSize().x);
 
 					if (!isDir)
 					{
@@ -791,7 +794,7 @@ namespace ArcEngine
 					ImGui::SetCursorPosX(ImGui::GetCursorPosX() - lineHeight);
 					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), { lineHeight, lineHeight }, ARC_UI_UV_0, ARC_UI_UV_1);
 					ImGui::SameLine();
-					ImGui::TextUnformatted(filename);
+					ImGui::TextUnformatted(filename, filenameEnd);
 
 					if (opened)
 						ImGui::TreePop();

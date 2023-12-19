@@ -23,11 +23,12 @@ workspace "Arc"
 
 	filter { "action:vs2022" }
 		linkoptions { "/ignore:4006" }
-		buildoptions { "/bigobj" }
+		buildoptions { "/bigobj", "/Zc:char8_t-" }
 	filter { "action:vs2022", "toolset:clang" }
-		buildoptions { "/showFilenames" }
+		buildoptions { "/showFilenames", "/Zc:char8_t-" }
 	filter "system:linux"
 		toolset "clang"
+		buildoptions { "-fno-char8_t" }
 
 	filter { "system:windows", "configurations:Dist" }
 		linkoptions { "/SUBSYSTEM:WINDOWS" }
