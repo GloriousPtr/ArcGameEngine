@@ -20,8 +20,8 @@ project "Arc"
 	{
 		"src/**.h",
 		"src/**.cpp",
-		"vendor/stb_image/**.h",
-		"vendor/stb_image/**.cpp",
+		"vendor/stb/**.h",
+		"vendor/stb/**.cpp",
 		"vendor/glm/glm/**.hpp",
 		"vendor/glm/glm/**.inl",
 
@@ -36,7 +36,7 @@ project "Arc"
 	{
 		"GLFW_INCLUDE_NONE",
 		"SPDLOG_USE_STD_FORMAT",
-		"SPDLOG_WCHAR_TO_UTF8_SUPPORT"
+		"SPDLOG_WCHAR_TO_UTF8_SUPPORT",
 	}
 
 	includedirs
@@ -51,7 +51,7 @@ project "Arc"
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.stb_image}",
+		"%{IncludeDir.stb}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGuizmo}",
