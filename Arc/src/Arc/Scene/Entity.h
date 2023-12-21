@@ -53,6 +53,14 @@ namespace ArcEngine
 			m_Scene->m_Registry.remove<T>(m_EntityHandle);
 		}
 
+		template<typename... Components>
+		[[nodiscard]] auto GetAllComponents() const
+		{
+			ARC_PROFILE_SCOPE();
+
+			return m_Scene->m_Registry.get<Components...>(m_EntityHandle);
+		}
+
 		[[nodiscard]] UUID GetUUID() const { return GetComponent<IDComponent>().ID; }
 		[[nodiscard]] eastl::string_view GetTag() const { return GetComponent<TagComponent>().Tag; }
 		[[nodiscard]] TransformComponent& GetTransform() const { return GetComponent<TransformComponent>(); }

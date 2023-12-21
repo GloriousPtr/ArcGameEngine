@@ -101,12 +101,14 @@ namespace ArcEngine
 				if (m_Context)
 				{
 					ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
-					const auto view = m_Context->m_Registry.view<IDComponent>();
-					for (auto e = view.rbegin(); e != view.rend(); ++e)
+					const auto view = m_Context->GetAllEntitiesWith<RelationshipComponent, IDComponent, TagComponent>();
+					for (auto &&[e, rc, id, tc] : view.each())
 					{
-						const Entity entity = { *e, m_Context };
-						if (entity && !entity.GetParent())
-							DrawEntityNode(entity);
+						if (!rc.Parent)
+						{
+							const Entity entity = { e, m_Context };
+							DrawEntityNode(id.ID, tc, rc, entity);
+						}
 					}
 					ImGui::PopStyleVar();
 				}
@@ -148,29 +150,26 @@ namespace ArcEngine
 		ImGui::PopStyleVar();
 	}
 
-	ImRect SceneHierarchyPanel::DrawEntityNode(Entity entity, uint32_t depth, bool forceExpandTree, bool isPartOfPrefab)
+	ImRect SceneHierarchyPanel::DrawEntityNode(UUID id, TagComponent& tc, const RelationshipComponent& rc, Entity entity, uint32_t depth, bool forceExpandTree, bool isPartOfPrefab)
 	{
 		ARC_PROFILE_SCOPE();
 
-		[[unlikely]]
 		if (!entity || !m_Context)
 			return { 0, 0, 0, 0 };
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
 
-		auto& tagComponent = entity.GetComponent<TagComponent>();
-		auto& tag = tagComponent.Tag;
-
-		const auto& rc = entity.GetRelationship();
-		const size_t childrenSize = rc.Children.size();
-
-		if (m_Filter.IsActive() && !m_Filter.PassFilter(tag.c_str()))
+		const eastl::string_view tag = tc.Tag;
+		if (m_Filter.IsActive() && !m_Filter.PassFilter(tag.begin(), tag.end()))
 		{
-			for (const auto& child : rc.Children)
+			for (const auto& childId : rc.Children)
 			{
-				const UUID childId = entity.GetRelationship().Children[child];
-				DrawEntityNode(m_Context->GetEntity(childId));
+				if (const Entity child = m_Context->GetEntity(childId))
+				{
+					auto &&[t, r] = child.GetAllComponents<TagComponent, RelationshipComponent>();
+					DrawEntityNode(childId, t, r, child);
+				}
 			}
 			return { 0, 0, 0, 0 };
 		}
@@ -179,6 +178,7 @@ namespace ArcEngine
 		ImGuiTreeNodeFlags flags = (selected ? ImGuiTreeNodeFlags_Selected : 0)
 			| ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_AllowOverlap;
 
+		const size_t childrenSize = rc.Children.size();
 		if (childrenSize == 0)
 		{
 			flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
@@ -200,7 +200,7 @@ namespace ArcEngine
 		if (prefabColorApplied)
 			ImGui::PushStyleColor(ImGuiCol_Text, EditorTheme::HeaderSelectedColor);
 
-		const bool opened = ImGui::TreeNodeEx(reinterpret_cast<void*>(static_cast<uint64_t>(entity.GetUUID())), flags, "%s %s", ARC_ICON_ENTITY, tag.c_str());
+		const bool opened = ImGui::TreeNodeEx(reinterpret_cast<void*>(static_cast<uint64_t>(id)), flags, "%s %s", ARC_ICON_ENTITY, tag.begin());
 
 		if (selected)
 			ImGui::PopStyleColor(2);
@@ -246,6 +246,8 @@ namespace ArcEngine
 
 		// Drag Drop
 		{
+			ARC_PROFILE_SCOPE("DragDrop");
+
 			if (ImGui::BeginDragDropTarget())
 			{
 				if (const ImGuiPayload* entityPayload = ImGui::AcceptDragDropPayload("Entity"))
@@ -270,7 +272,7 @@ namespace ArcEngine
 			if (ImGui::BeginDragDropSource())
 			{
 				ImGui::SetDragDropPayload("Entity", &entity, sizeof(entity));
-				ImGui::TextUnformatted(tag.c_str());
+				ImGui::TextUnformatted(tag.begin(), tag.end());
 				ImGui::EndDragDropSource();
 			}
 		}
@@ -284,9 +286,9 @@ namespace ArcEngine
 				ImGui::SetKeyboardFocusHere();
 			}
 
-			std::string tagBuffer = tag.c_str();
+			std::string tagBuffer(tag.begin(), tag.end());
 			if (ImGui::InputText("##Tag", &tagBuffer))
-				tag = tagBuffer.c_str();
+				tc.Tag = tagBuffer.c_str();
 
 			if (ImGui::IsItemDeactivated())
 			{
@@ -300,15 +302,15 @@ namespace ArcEngine
 		ImGui::TableNextColumn();
 		// Visibility Toggle
 		{
-			ImGui::Text("  %s", tagComponent.Enabled ? ARC_ICON_EYE : ARC_ICON_EYE_OFF);
+			ImGui::Text(" %s", tc.Enabled ? ARC_ICON_EYE : ARC_ICON_EYE_OFF);
 			
 			if (!ImGui::IsItemHovered())
-				tagComponent.handled = false;
+				tc.handled = false;
 
-			if (ImGui::IsItemHovered() && ((!tagComponent.handled && ImGui::IsMouseDragging(0)) || ImGui::IsItemClicked()))
+			if (ImGui::IsItemHovered() && ((!tc.handled && ImGui::IsMouseDragging(0)) || ImGui::IsItemClicked()))
 			{
-				tagComponent.handled = true;
-				tagComponent.Enabled = !tagComponent.Enabled;
+				tc.handled = true;
+				tc.Enabled = !tc.Enabled;
 			}
 		}
 
@@ -327,15 +329,17 @@ namespace ArcEngine
 				ImVec2 verticalLineEnd = verticalLineStart;
 				constexpr float lineThickness = 1.5f;
 
-				for (const auto& childId : rc.Children)
+				for (const UUID childId : rc.Children)
 				{
-					Entity child = m_Context->GetEntity(childId);
-					const float HorizontalTreeLineSize = child.GetRelationship().Children.empty() ? 18.0f : 9.0f; //chosen arbitrarily
-					const ImRect childRect = DrawEntityNode(child, depth + 1, forceExpandTree, isPartOfPrefab);
-
-					const float midpoint = (childRect.Min.y + childRect.Max.y) / 2.0f;
-					drawList->AddLine(ImVec2(verticalLineStart.x, midpoint), ImVec2(verticalLineStart.x + HorizontalTreeLineSize, midpoint), treeLineColor[depth], lineThickness);
-					verticalLineEnd.y = midpoint;
+					if (const Entity child = m_Context->GetEntity(childId))
+					{
+						auto&& [t, r] = child.GetAllComponents<TagComponent, RelationshipComponent>();
+						const float HorizontalTreeLineSize = r.Children.empty() ? 18.0f : 9.0f; //chosen arbitrarily
+						const ImRect childRect = DrawEntityNode(childId, t, r, child, depth + 1, forceExpandTree, isPartOfPrefab);
+						const float midpoint = (childRect.Min.y + childRect.Max.y) / 2.0f;
+						drawList->AddLine(ImVec2(verticalLineStart.x, midpoint), ImVec2(verticalLineStart.x + HorizontalTreeLineSize, midpoint), treeLineColor[depth], lineThickness);
+						verticalLineEnd.y = midpoint;
+					}
 				}
 
 				drawList->AddLine(verticalLineStart, verticalLineEnd, treeLineColor[depth], lineThickness);

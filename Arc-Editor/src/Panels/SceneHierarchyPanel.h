@@ -26,7 +26,7 @@ namespace ArcEngine
 		void SetContext(Scene* context);
 
 	private:
-		ImRect DrawEntityNode(Entity entity, uint32_t depth = 0, bool forceExpandTree = false, bool isPartOfPrefab = false);
+		ImRect DrawEntityNode(UUID id, TagComponent& tc, const RelationshipComponent& rc, Entity entity, uint32_t depth = 0, bool forceExpandTree = false, bool isPartOfPrefab = false);
 		void DrawContextMenu() const;
 		void DragDropTarget() const;
 
