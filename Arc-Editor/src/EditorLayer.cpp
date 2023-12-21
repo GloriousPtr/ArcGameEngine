@@ -172,7 +172,7 @@ namespace ArcEngine
 
 							if (ImGui::MenuItem("New Scene", "Ctrl+N"))
 								NewScene();
-							if (ImGui::MenuItem("Save Scene", "Ctrl+S"))
+							if (ImGui::MenuItemEx("Save Scene", ARC_ICON_FILE, "Ctrl+S"))
 								SaveScene();
 							if (ImGui::MenuItem("Save Scene As...", "Ctrl+Shift+S"))
 								SaveSceneAs();
@@ -191,7 +191,7 @@ namespace ArcEngine
 
 								ImGui::EndMenu();
 							}
-							if (ImGui::MenuItem("Exit"))
+							if (ImGui::MenuItem("Exit", "Alt+F4"))
 								Application::Get().Close();
 
 							ImGui::PopStyleVar();
@@ -204,18 +204,18 @@ namespace ArcEngine
 
 							if (ImGui::BeginMenu("Add"))
 							{
-								if (ImGui::MenuItem("Viewport"))
+								if (ImGui::MenuItemEx("Viewport", ARC_ICON_VIEWPORT))
 								{
 									size_t index = m_Viewports.size();
 									m_Viewports.emplace_back(CreateScope<SceneViewport>());
 									m_Viewports[index]->SetContext(m_ActiveScene, m_SceneHierarchyPanel);
 								}
-								if (ImGui::MenuItem("Properties"))
+								if (ImGui::MenuItemEx("Properties", ARC_ICON_INFO))
 								{
 									m_Properties.emplace_back(CreateScope<PropertiesPanel>());
 								}
 								ImGui::BeginDisabled(!Project::GetActive().get());
-								if (ImGui::MenuItem("Assets"))
+								if (ImGui::MenuItemEx("Assets", ARC_ICON_FOLDER_STAR))
 								{
 									m_AssetPanels.emplace_back(CreateScope<AssetPanel>());
 								}
@@ -224,11 +224,16 @@ namespace ArcEngine
 								ImGui::EndMenu();
 							}
 							ImGui::Separator();
-							ImGui::MenuItem("Hierarchy", nullptr, &m_ShowSceneHierarchyPanel);
-							ImGui::MenuItem(m_ConsolePanel.GetName(), nullptr, &m_ConsolePanel.Showing);
+							if (ImGui::MenuItemEx("Hierarchy", ARC_ICON_HIERARCHY, nullptr, m_ShowSceneHierarchyPanel))
+								m_ShowSceneHierarchyPanel = !m_ShowSceneHierarchyPanel;
+							if (ImGui::MenuItemEx(m_ConsolePanel.GetName(), m_ConsolePanel.GetIcon(), nullptr, m_ConsolePanel.Showing))
+								m_ConsolePanel.Showing = !m_ConsolePanel.Showing;
 
 							for (const auto& panel : m_Panels)
-								ImGui::MenuItem(panel->GetName(), nullptr, &panel->Showing);
+							{
+								if (ImGui::MenuItemEx(panel->GetName(), panel->GetIcon(), nullptr, panel->Showing))
+									panel->Showing = !panel->Showing;
+							}
 
 							ImGui::Separator();
 							ImGui::MenuItem("ImGui Demo Window", nullptr, &m_ShowDemoWindow);
@@ -241,7 +246,7 @@ namespace ArcEngine
 						{
 							ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 
-							if (ImGui::MenuItem("Reload Shaders"))
+							if (ImGui::MenuItemEx("Reload Shaders", ARC_ICON_RELOAD))
 							{
 								Renderer::GetPipelineLibrary().ReloadAll();
 								Renderer3D::Init();
@@ -255,7 +260,7 @@ namespace ArcEngine
 						{
 							ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 
-							if (ImGui::MenuItem("Reload Assemblies"))
+							if (ImGui::MenuItemEx("Reload Assemblies", ARC_ICON_RELOAD))
 								ScriptEngine::ReloadAppDomain();
 
 							ImGui::PopStyleVar();

@@ -227,11 +227,11 @@ namespace ArcEngine
 			if (m_SelectedEntity != entity)
 				EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, reinterpret_cast<const char*>(&entity), sizeof(entity));
 
-			if (ImGui::MenuItem("Rename", "F2"))
+			if (ImGui::MenuItemEx("Rename", ARC_ICON_RENAME, "F2"))
 				m_RenamingEntity = entity;
-			if (ImGui::MenuItem("Duplicate", "Ctrl+D"))
+			if (ImGui::MenuItemEx("Duplicate", ARC_ICON_DUPLICATE, "Ctrl+D"))
 				m_Context->Duplicate(entity);
-			if (ImGui::MenuItem("Delete", "Del"))
+			if (ImGui::MenuItemEx("Delete", ARC_ICON_DELETE, "Del"))
 				entityDeleted = true;
 
 			ImGui::Separator();
@@ -444,13 +444,13 @@ namespace ArcEngine
 			EditorLayer::GetInstance()->ResetContext();
 
 		Entity toSelect = {};
-		if (ImGui::MenuItem("Empty Entity"))
+		if (ImGui::MenuItemEx("Empty Entity", ARC_ICON_ENTITY))
 		{
 			toSelect = m_Context->CreateEntity("EmptyEntity");
 		}
 		if (ImGui::BeginMenu("2D"))
 		{
-			if (ImGui::MenuItem("Sprite"))
+			if (ImGui::MenuItemEx("Sprite", ARC_ICON_SPRITE_RENDERER))
 			{
 				toSelect = m_Context->CreateEntity("Sprite");
 				toSelect.AddComponent<SpriteRendererComponent>();
@@ -461,7 +461,7 @@ namespace ArcEngine
 		}
 		if (ImGui::BeginMenu("3D"))
 		{
-			if (ImGui::MenuItem("Mesh"))
+			if (ImGui::MenuItemEx("Mesh", ARC_ICON_MESH))
 			{
 				toSelect = m_Context->CreateEntity("Mesh");
 				toSelect.AddComponent<MeshComponent>();
@@ -506,7 +506,7 @@ namespace ArcEngine
 		}
 		if (ImGui::BeginMenu("Light"))
 		{
-			if (ImGui::MenuItem("Sky Light"))
+			if (ImGui::MenuItemEx("Sky Light", ARC_ICON_SKYLIGHT))
 			{
 				toSelect = m_Context->CreateEntity("SkyLight");
 				toSelect.AddComponent<SkyLightComponent>();
@@ -518,7 +518,7 @@ namespace ArcEngine
 				toSelect.AddComponent<LightComponent>().Type = LightComponent::LightType::Directional;
 				ImGui::CloseCurrentPopup();
 			}
-			if (ImGui::MenuItem("Point Light"))
+			if (ImGui::MenuItemEx("Point Light", ARC_ICON_LIGHT))
 			{
 				toSelect = m_Context->CreateEntity("PointLight");
 				toSelect.AddComponent<LightComponent>().Type = LightComponent::LightType::Point;
@@ -535,13 +535,13 @@ namespace ArcEngine
 		}
 		if (ImGui::BeginMenu("Audio"))
 		{
-			if (ImGui::MenuItem("Audio Source"))
+			if (ImGui::MenuItemEx("Audio Source", ARC_ICON_AUDIO_SOURCE))
 			{
 				toSelect = m_Context->CreateEntity("AudioSource");
 				toSelect.AddComponent<AudioSourceComponent>();
 				ImGui::CloseCurrentPopup();
 			}
-			if (ImGui::MenuItem("Audio Listener"))
+			if (ImGui::MenuItemEx("Audio Listener", ARC_ICON_AUDIO_LISTENER))
 			{
 				toSelect = m_Context->CreateEntity("AudioListener");
 				toSelect.AddComponent<AudioListenerComponent>();
@@ -550,13 +550,13 @@ namespace ArcEngine
 
 			ImGui::EndMenu();
 		}
-		if (ImGui::MenuItem("Particle System"))
+		if (ImGui::MenuItemEx("Particle System", ARC_ICON_PARTICLE_SYSTEM))
 		{
 			toSelect = m_Context->CreateEntity("ParticleSystem");
 			toSelect.AddComponent<ParticleSystemComponent>();
 			ImGui::CloseCurrentPopup();
 		}
-		if (ImGui::MenuItem("Camera"))
+		if (ImGui::MenuItemEx("Camera", ARC_ICON_CAMERA))
 		{
 			toSelect = m_Context->CreateEntity("Camera");
 			toSelect.AddComponent<CameraComponent>();
