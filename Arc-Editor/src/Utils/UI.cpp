@@ -4,6 +4,7 @@
 
 #include <imgui/imgui_internal.h>
 #include <imgui/misc/cpp/imgui_stdlib.h>
+#include <stb/stb_sprintf.h>
 
 namespace ArcEngine
 {
@@ -24,20 +25,20 @@ namespace ArcEngine
 		--s_UIContextID;
 	}
 	
-	void UI::BeginPropertyGrid(const char* label, const char* tooltip, bool rightAlignNextColumn)
+	void UI::BeginPropertyGrid(eastl::string_view label, eastl::string_view tooltip, bool rightAlignNextColumn)
 	{
 		PushID();
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
 
-		ImGui::PushID(label);
+		ImGui::PushID(label.begin());
 		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
-		ImGui::TextUnformatted(label);
-		if (tooltip && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
+		ImGui::TextUnformatted(label.begin(), label.end());
+		if (!tooltip.empty() && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 		{
 			ImGui::BeginTooltip();
-			ImGui::TextUnformatted(tooltip);
+			ImGui::TextUnformatted(tooltip.begin(), tooltip.end());
 			ImGui::EndTooltip();
 		}
 
@@ -46,12 +47,8 @@ namespace ArcEngine
 		if (rightAlignNextColumn)
 			ImGui::SetNextItemWidth(-FLT_MIN);
 
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
 		++s_Counter;
-		std::string buffer = std::format("##{}", s_Counter);
-		std::memcpy(&s_IDBuffer, buffer.data(), 16);
+		stbsp_snprintf(s_IDBuffer, sizeof(s_IDBuffer), "##%i", s_Counter);
 	}
 	
 	void UI::EndPropertyGrid()
@@ -62,12 +59,8 @@ namespace ArcEngine
 
 	void UI::BeginProperties(ImGuiTableFlags flags)
 	{
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
 		++s_Counter;
-		std::string buffer = std::format("##{}", s_Counter);
-		std::memcpy(&s_IDBuffer, buffer.data(), 16);
+		stbsp_snprintf(s_IDBuffer, sizeof(s_IDBuffer), "##%i", s_Counter);
 
 		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_PadOuterX;
 		ImGui::BeginTable(s_IDBuffer, 2, tableFlags | flags);
@@ -77,12 +70,8 @@ namespace ArcEngine
 
 	void UI::BeginProperties3(ImGuiTableFlags flags)
 	{
-		s_IDBuffer[0] = '#';
-		s_IDBuffer[1] = '#';
-		memset(s_IDBuffer + 2, 0, 14);
 		++s_Counter;
-		std::string buffer = std::format("##{}", s_Counter);
-		std::memcpy(&s_IDBuffer, buffer.data(), 16);
+		stbsp_snprintf(s_IDBuffer, sizeof(s_IDBuffer), "##%i", s_Counter);
 
 		constexpr ImGuiTableFlags tableFlags = ImGuiTableFlags_PadOuterX;
 		ImGui::BeginTable(s_IDBuffer, 3, tableFlags | flags);
@@ -99,7 +88,7 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// Strings //////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, std::string& value, const char* tooltip)
+	bool UI::Property(eastl::string_view label, std::string& value, eastl::string_view tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
 		const bool modified = ImGui::InputText(s_IDBuffer, &value);
@@ -110,7 +99,7 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// Bool /////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, bool& flag, const char* tooltip)
+	bool UI::Property(eastl::string_view label, bool& flag, eastl::string_view tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
 		bool modified = ImGui::Checkbox(s_IDBuffer, &flag);
@@ -122,7 +111,7 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// 2D/3D Textures ///////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::Property(const char* label, Ref<TextureCube>& texture, uint64_t overrideTextureID, const char* tooltip)
+	bool UI::Property(eastl::string_view label, Ref<TextureCube>& texture, uint64_t overrideTextureID, eastl::string_view tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
 
@@ -182,7 +171,7 @@ namespace ArcEngine
 		return changed;
 	}
 
-	bool UI::Property(const char* label, Ref<Texture2D>& texture, uint64_t overrideTextureID, const char* tooltip)
+	bool UI::Property(eastl::string_view label, Ref<Texture2D>& texture, uint64_t overrideTextureID, eastl::string_view tooltip)
 	{
 		BeginPropertyGrid(label, tooltip);
 
@@ -244,10 +233,10 @@ namespace ArcEngine
 
 
 	template<typename T, typename Fn>
-	bool UI::ListProperty(const char* label, eastl::vector<T>& v, const T& defaultValue, size_t minElements, const char* tooltip, Fn function)
+	bool UI::ListProperty(eastl::string_view label, eastl::vector<T>& v, const T& defaultValue, size_t minElements, eastl::string_view tooltip, Fn function)
 	{
 		bool modified = false;
-		if (ImGui::TreeNode(label))
+		if (ImGui::TreeNode(label.begin()))
 		{
 			BeginProperties3();
 
@@ -304,57 +293,57 @@ namespace ArcEngine
 		return modified;
 	}
 
-	bool UI::Property(const char* label, eastl::vector<glm::vec2>& v, const glm::vec2& defaultValue, size_t minElements, const char* tooltip)
+	bool UI::Property(eastl::string_view label, eastl::vector<glm::vec2>& v, const glm::vec2& defaultValue, size_t minElements, eastl::string_view tooltip)
 	{
-		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec2& value) { PropertyVector(name, value); });
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](eastl::string_view name, glm::vec2& value) { PropertyVector(name, value); });
 	}
 
-	bool UI::Property(const char* label, eastl::vector<glm::vec3>& v, const glm::vec3& defaultValue, size_t minElements, const char* tooltip)
+	bool UI::Property(eastl::string_view label, eastl::vector<glm::vec3>& v, const glm::vec3& defaultValue, size_t minElements, eastl::string_view tooltip)
 	{
-		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec3& value) { PropertyVector(name, value); });
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](eastl::string_view name, glm::vec3& value) { PropertyVector(name, value); });
 	}
 
-	bool UI::Property(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, const char* tooltip)
+	bool UI::Property(eastl::string_view label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, eastl::string_view tooltip)
 	{
-		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::PropertyVector(name, value); });
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](eastl::string_view name, glm::vec4& value) { UI::PropertyVector(name, value); });
 	}
 
-	bool UI::PropertyColor(const char* label, eastl::vector<glm::vec3>& v, const glm::vec3& defaultValue, size_t minElements, const char* tooltip)
+	bool UI::PropertyColor(eastl::string_view label, eastl::vector<glm::vec3>& v, const glm::vec3& defaultValue, size_t minElements, eastl::string_view tooltip)
 	{
-		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec3& value) { UI::PropertyVector(name, value, true); });
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](eastl::string_view name, glm::vec3& value) { UI::PropertyVector(name, value, true); });
 	}
 
-	bool UI::PropertyColor(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, const char* tooltip)
+	bool UI::PropertyColor(eastl::string_view label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, eastl::string_view tooltip)
 	{
-		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::PropertyVector(name, value, true); });
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](eastl::string_view name, glm::vec4& value) { UI::PropertyVector(name, value, true); });
 	}
 
-	bool UI::PropertyColor4as3(const char* label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, const char* tooltip)
+	bool UI::PropertyColor4as3(eastl::string_view label, eastl::vector<glm::vec4>& v, const glm::vec4& defaultValue, size_t minElements, eastl::string_view tooltip)
 	{
-		return ListProperty(label, v, defaultValue, minElements, tooltip, [](const char* name, glm::vec4& value) { UI::PropertyVector(name, value, true, false); });
+		return ListProperty(label, v, defaultValue, minElements, tooltip, [](eastl::string_view name, glm::vec4& value) { UI::PropertyVector(name, value, true, false); });
 	}
 
 	template<typename T>
-	static void DrawScriptFieldScalar(Entity entity, const eastl::string& className, const eastl::string& fieldName)
+	static void DrawScriptFieldScalar(Entity entity, eastl::string_view className, eastl::string_view fieldName)
 	{
-		const auto& fieldMap = ScriptEngine::GetFieldMap(className.c_str());
-		const ScriptField& field = fieldMap.at(fieldName);
-		const char* tooltip = field.Tooltip.empty() ? nullptr : field.Tooltip.c_str();
+		const auto& fieldMap = ScriptEngine::GetFieldMap(className);
+		const ScriptField& field = fieldMap.at(fieldName.begin());
+		eastl::string_view tooltip = field.Tooltip.empty() ? nullptr : field.Tooltip.c_str();
 		T min = static_cast<T>(field.Min);
 		T max = static_cast<T>(field.Max);
 
 		const ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
 		if (!scriptInstance)
 		{
-			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
-			const auto& fieldInstanceIt = fieldInstanceMap.find(fieldName);
+			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className);
+			const auto& fieldInstanceIt = fieldInstanceMap.find_as(fieldName);
 			if (fieldInstanceIt != fieldInstanceMap.end())
 			{
 				ScriptFieldInstance& fieldInstance = fieldInstanceIt->second;
 
 				if (fieldInstance.Type != field.Type)
 				{
-					fieldInstanceMap.erase(fieldName);
+					fieldInstanceMap.erase(fieldName.begin());
 					return;
 				}
 
@@ -367,8 +356,8 @@ namespace ArcEngine
 				T value = field.GetDefaultValue<T>();
 				if (UI::Property(field.DisplayName.c_str(), value, min, max, tooltip))
 				{
-					fieldInstanceMap[fieldName].Type = field.Type;
-					fieldInstanceMap[fieldName].SetValue(value);
+					fieldInstanceMap[fieldName.begin()].Type = field.Type;
+					fieldInstanceMap[fieldName.begin()].SetValue(value);
 				}
 			}
 		}
@@ -381,24 +370,24 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	static void DrawScriptField(Entity entity, const eastl::string& className, const eastl::string& fieldName)
+	static void DrawScriptField(Entity entity, eastl::string_view className, eastl::string_view fieldName)
 	{
-		const auto& fieldMap = ScriptEngine::GetFieldMap(className.c_str());
-		const ScriptField& field = fieldMap.at(fieldName);
-		const char* tooltip = field.Tooltip.empty() ? nullptr : field.Tooltip.c_str();
+		const auto& fieldMap = ScriptEngine::GetFieldMap(className);
+		const ScriptField& field = fieldMap.at(fieldName.begin());
+		eastl::string_view tooltip = field.Tooltip.empty() ? nullptr : field.Tooltip.c_str();
 
 		const ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
 		if (!scriptInstance)
 		{
-			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
-			const auto& fieldInstanceIt = fieldInstanceMap.find(fieldName);
+			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className);
+			const auto& fieldInstanceIt = fieldInstanceMap.find_as(fieldName);
 			if (fieldInstanceIt != fieldInstanceMap.end())
 			{
 				ScriptFieldInstance& fieldInstance = fieldInstanceIt->second;
 
 				if (fieldInstance.Type != field.Type)
 				{
-					fieldInstanceMap.erase(fieldName);
+					fieldInstanceMap.erase(fieldName.begin());
 					return;
 				}
 
@@ -411,8 +400,8 @@ namespace ArcEngine
 				T value = field.GetDefaultValue<T>();
 				if (UI::Property(field.DisplayName.c_str(), value, tooltip))
 				{
-					fieldInstanceMap[fieldName].Type = field.Type;
-					fieldInstanceMap[fieldName].SetValue(value);
+					fieldInstanceMap[fieldName.begin()].Type = field.Type;
+					fieldInstanceMap[fieldName.begin()].SetValue(value);
 				}
 			}
 		}
@@ -425,24 +414,24 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	static void DrawScriptFieldVector(Entity entity, const eastl::string& className, const eastl::string& fieldName, bool color = false)
+	static void DrawScriptFieldVector(Entity entity, eastl::string_view className, eastl::string_view fieldName, bool color = false)
 	{
-		const auto& fieldMap = ScriptEngine::GetFieldMap(className.c_str());
-		const ScriptField& field = fieldMap.at(fieldName);
-		const char* tooltip = field.Tooltip.empty() ? nullptr : field.Tooltip.c_str();
+		const auto& fieldMap = ScriptEngine::GetFieldMap(className);
+		const ScriptField& field = fieldMap.at(fieldName.begin());
+		eastl::string_view tooltip = field.Tooltip.empty() ? nullptr : field.Tooltip.c_str();
 
 		const ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
 		if (!scriptInstance)
 		{
-			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
-			const auto& fieldInstanceIt = fieldInstanceMap.find(fieldName);
+			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className);
+			const auto& fieldInstanceIt = fieldInstanceMap.find_as(fieldName);
 			if (fieldInstanceIt != fieldInstanceMap.end())
 			{
 				ScriptFieldInstance& fieldInstance = fieldInstanceIt->second;
 
 				if (fieldInstance.Type != field.Type)
 				{
-					fieldInstanceMap.erase(fieldName);
+					fieldInstanceMap.erase(fieldName.begin());
 					return;
 				}
 
@@ -455,8 +444,8 @@ namespace ArcEngine
 				T value = field.GetDefaultValue<T>();
 				if (UI::PropertyVector(field.DisplayName.c_str(), value, color, true, tooltip))
 				{
-					fieldInstanceMap[fieldName].Type = field.Type;
-					fieldInstanceMap[fieldName].SetValue(value);
+					fieldInstanceMap[fieldName.begin()].Type = field.Type;
+					fieldInstanceMap[fieldName.begin()].SetValue(value);
 				}
 			}
 		}
@@ -468,24 +457,24 @@ namespace ArcEngine
 		}
 	}
 
-	static void DrawScriptFieldString(Entity entity, const eastl::string& className, const eastl::string& fieldName)
+	static void DrawScriptFieldString(Entity entity, eastl::string_view className, eastl::string_view fieldName)
 	{
-		const auto& fieldMap = ScriptEngine::GetFieldMap(className.c_str());
-		const ScriptField& field = fieldMap.at(fieldName);
-		const char* tooltip = field.Tooltip.empty() ? nullptr : field.Tooltip.c_str();
+		const auto& fieldMap = ScriptEngine::GetFieldMap(className);
+		const ScriptField& field = fieldMap.at(fieldName.begin());
+		eastl::string_view tooltip = field.Tooltip.empty() ? nullptr : field.Tooltip.c_str();
 
 		const ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
 		if (!scriptInstance)
 		{
-			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className.c_str());
-			const auto& fieldInstanceIt = fieldInstanceMap.find(fieldName);
+			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className);
+			const auto& fieldInstanceIt = fieldInstanceMap.find_as(fieldName);
 			if (fieldInstanceIt != fieldInstanceMap.end())
 			{
 				ScriptFieldInstance& fieldInstance = fieldInstanceIt->second;
 
 				if (fieldInstance.Type != field.Type)
 				{
-					fieldInstanceMap.erase(fieldName);
+					fieldInstanceMap.erase(fieldName.begin());
 					return;
 				}
 
@@ -498,8 +487,8 @@ namespace ArcEngine
 				std::string value = field.DefaultValue;
 				if (UI::Property(field.DisplayName.c_str(), value, tooltip))
 				{
-					fieldInstanceMap[fieldName].Type = field.Type;
-					fieldInstanceMap[fieldName].SetValueString(value.c_str());
+					fieldInstanceMap[fieldName.begin()].Type = field.Type;
+					fieldInstanceMap[fieldName.begin()].SetValueString(value.c_str());
 				}
 			}
 		}
@@ -511,9 +500,9 @@ namespace ArcEngine
 		}
 	}
 
-	void UI::DrawField(Entity entity, const eastl::string& className, const eastl::string& fieldName)
+	void UI::DrawField(Entity entity, eastl::string_view className, eastl::string_view fieldName)
 	{
-		const ScriptField& field = ScriptEngine::GetFieldMap(className.c_str()).at(fieldName);
+		const ScriptField& field = ScriptEngine::GetFieldMap(className).at(fieldName.begin());
 		if (field.Type == FieldType::Unknown)
 			return;
 
@@ -613,7 +602,7 @@ namespace ArcEngine
 	/// Vec3 with reset button ///////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
 
-	void UI::DrawVec3Control(const char* label, glm::vec3& values, const char* tooltip, float resetValue)
+	void UI::DrawVec3Control(eastl::string_view label, glm::vec3& values, eastl::string_view tooltip, float resetValue)
 	{
 		BeginPropertyGrid(label, tooltip, false);
 
@@ -697,7 +686,7 @@ namespace ArcEngine
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	/// Buttons //////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	bool UI::IconButton(const char* icon, const char* label, ImVec4 iconColor)
+	bool UI::IconButton(const char* icon, eastl::string_view label, ImVec4 iconColor)
 	{
 		PushID();
 
@@ -705,7 +694,7 @@ namespace ArcEngine
 		ImVec2 padding = ImGui::GetStyle().FramePadding;
 
 		float width = ImGui::CalcTextSize(icon).x;
-		width += ImGui::CalcTextSize(label).x;
+		width += ImGui::CalcTextSize(label.begin(), label.end()).x;
 		width += padding.x * 2.0f;
 
 		const float cursorPosX = ImGui::GetCursorPosX();
@@ -715,26 +704,26 @@ namespace ArcEngine
 		ImGui::SetCursorPosX(cursorPosX);
 		ImGui::TextColored(iconColor, "%s", icon);
 		ImGui::SameLine();
-		ImGui::TextUnformatted(label);
+		ImGui::TextUnformatted(label.begin(), label.end());
 		ImGui::PopStyleVar();
 		PopID();
 
 		return clicked;
 	}
 
-	glm::vec2 UI::GetIconButtonSize(const char* icon, const char* label)
+	glm::vec2 UI::GetIconButtonSize(const char* icon, eastl::string_view label)
 	{
 		float lineHeight = ImGui::GetTextLineHeight();
 		ImVec2 padding = ImGui::GetStyle().FramePadding;
 
 		float width = ImGui::CalcTextSize(icon).x;
-		width += ImGui::CalcTextSize(label).x;
+		width += ImGui::CalcTextSize(label.begin(), label.end()).x;
 		width += padding.x * 2.0f;
 
 		return { width, lineHeight + padding.y * 2.0f };
 	}
 
-	bool UI::ToggleButton(const char* label, bool state, ImVec2 size, float alpha, float pressedAlpha, ImGuiButtonFlags buttonFlags)
+	bool UI::ToggleButton(eastl::string_view label, bool state, ImVec2 size, float alpha, float pressedAlpha, ImGuiButtonFlags buttonFlags)
 	{
 		if (state)
 		{
@@ -757,7 +746,7 @@ namespace ArcEngine
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, color);
 		}
 
-		bool clicked = ImGui::ButtonEx(label, size, buttonFlags);
+		bool clicked = ImGui::ButtonEx(label.data(), size, buttonFlags);
 
 		ImGui::PopStyleColor(3);
 
@@ -798,33 +787,5 @@ namespace ArcEngine
 		// Render
 		ImVec4 fine_clip_rect(clip_min->x, clip_min->y, clip_max->x, clip_max->y);
 		draw_list->AddText(nullptr, 0.0f, pos, ImGui::GetColorU32(ImGuiCol_Text), text, text_display_end, wrap_width, &fine_clip_rect);
-	}
-
-	/// Draws vertical text. The position is the bottom left of the text rect.
-	void UI::AddTextVertical(ImDrawList* DrawList, const char* text, ImVec2 pos, ImU32 text_color)
-	{
-		pos.x = IM_ROUND(pos.x);
-		pos.y = IM_ROUND(pos.y);
-		const ImFont* font = GImGui->Font;
-		char c;
-		while ((c = *text++) != 0)
-		{
-			const ImFontGlyph* glyph = font->FindGlyph(c);
-			if (!glyph) continue;
-
-			DrawList->PrimReserve(6, 4);
-			DrawList->PrimQuadUV(
-				pos + ImVec2(glyph->Y0, -glyph->X0),
-				pos + ImVec2(glyph->Y0, -glyph->X1),
-				pos + ImVec2(glyph->Y1, -glyph->X1),
-				pos + ImVec2(glyph->Y1, -glyph->X0),
-
-				ImVec2(glyph->U0, glyph->V0),
-				ImVec2(glyph->U1, glyph->V0),
-				ImVec2(glyph->U1, glyph->V1),
-				ImVec2(glyph->U0, glyph->V1),
-				text_color);
-			pos.y -= glyph->AdvanceX;
-		}
 	}
 }

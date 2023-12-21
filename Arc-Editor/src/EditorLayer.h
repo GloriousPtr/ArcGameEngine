@@ -28,7 +28,7 @@ namespace ArcEngine
 		void ResetContext() { m_SelectedContext.Reset(); }
 		[[nodiscard]] const EditorContext& GetContext() const { return m_SelectedContext; }
 		
-		void OpenScene(const char* filepath);
+		void OpenScene(eastl::string_view filepath);
 
 		static EditorLayer* GetInstance() { return s_Instance; }
 
@@ -39,7 +39,7 @@ namespace ArcEngine
 		[[nodiscard]] bool OnMouseButtonPressed([[maybe_unused]] const MouseButtonPressedEvent& e) const;
 		[[nodiscard]] bool OnMouseButtonReleased([[maybe_unused]] const MouseButtonReleasedEvent& e) const;
 
-		void OpenProject(const std::filesystem::path& path);
+		void OpenProject(eastl::string_view path);
 		void OpenProject();
 		void SaveProject(const std::filesystem::path& path) const;
 

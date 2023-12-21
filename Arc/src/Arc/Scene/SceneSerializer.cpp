@@ -12,7 +12,7 @@ namespace ArcEngine
 	{
 	}
 
-	void SceneSerializer::Serialize(const eastl::string& filepath) const
+	void SceneSerializer::Serialize(eastl::string_view filepath) const
 	{
 		YAML::Emitter out;
 		out << YAML::BeginMap;
@@ -30,18 +30,18 @@ namespace ArcEngine
 		out << YAML::EndSeq;
 		out << YAML::EndMap;
 
-		std::ofstream fout(filepath.c_str());
+		std::ofstream fout(filepath.begin());
 		fout << out.c_str();
 	}
 
-	void SceneSerializer::SerializeRuntime(const eastl::string&) const
+	void SceneSerializer::SerializeRuntime(eastl::string_view) const
 	{
 		// Not implemented
 	}
 
-	bool SceneSerializer::Deserialize(const eastl::string& filepath) const
+	bool SceneSerializer::Deserialize(eastl::string_view filepath) const
 	{
-		std::ifstream stream(filepath.c_str());
+		std::ifstream stream(filepath.begin());
 		std::stringstream strStream;
 		strStream << stream.rdbuf();
 
@@ -61,7 +61,7 @@ namespace ArcEngine
 		return true;
 	}
 
-	bool SceneSerializer::DeserializeRuntime(const eastl::string&) const
+	bool SceneSerializer::DeserializeRuntime(eastl::string_view) const
 	{
 		// Not implemented
 		return false;

@@ -392,59 +392,59 @@ namespace ArcEngine
 		return s_Reflection->IsDebuggerAttached() == 0 ? false : true;
 	}
 
-	ScriptInstance* ScriptEngine::CreateInstance(Entity entity, const eastl::string& name)
+	ScriptInstance* ScriptEngine::CreateInstance(Entity entity, eastl::string_view name)
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto& scriptClass = s_ScriptEngineData->EntityClasses.at(name);
+		const auto& scriptClass = s_ScriptEngineData->EntityClasses.at(name.begin());
 		const UUID entityID = entity.GetUUID();
 		auto* instance = new ScriptInstance(scriptClass, entityID);
-		s_ScriptEngineData->EntityRuntimeInstances[entityID][name] = instance;
+		s_ScriptEngineData->EntityRuntimeInstances[entityID][name.begin()] = instance;
 		return instance;
 	}
 
-	bool ScriptEngine::HasInstance(Entity entity, const eastl::string& name)
+	bool ScriptEngine::HasInstance(Entity entity, eastl::string_view name)
 	{
 		ARC_PROFILE_SCOPE();
 
-		return s_ScriptEngineData->EntityRuntimeInstances[entity.GetUUID()].find(name) != s_ScriptEngineData->EntityRuntimeInstances[entity.GetUUID()].end();
+		return s_ScriptEngineData->EntityRuntimeInstances[entity.GetUUID()].find_as(name) != s_ScriptEngineData->EntityRuntimeInstances[entity.GetUUID()].end();
 	}
 
-	ScriptInstance* ScriptEngine::GetInstance(Entity entity, const eastl::string& name)
+	ScriptInstance* ScriptEngine::GetInstance(Entity entity, eastl::string_view name)
 	{
 		ARC_PROFILE_SCOPE();
 
-		return s_ScriptEngineData->EntityRuntimeInstances.at(entity.GetUUID()).at(name);
+		return s_ScriptEngineData->EntityRuntimeInstances.at(entity.GetUUID()).at(name.begin());
 	}
 
-	bool ScriptEngine::HasClass(const eastl::string& className)
+	bool ScriptEngine::HasClass(eastl::string_view className)
 	{
 		ARC_PROFILE_SCOPE();
 
-		return s_ScriptEngineData->EntityClasses.find(className) != s_ScriptEngineData->EntityClasses.end();
+		return s_ScriptEngineData->EntityClasses.find_as(className) != s_ScriptEngineData->EntityClasses.end();
 	}
 
-	void ScriptEngine::RemoveInstance(Entity entity, const eastl::string& name)
+	void ScriptEngine::RemoveInstance(Entity entity, eastl::string_view name)
 	{
 		ARC_PROFILE_SCOPE();
 
-		delete s_ScriptEngineData->EntityRuntimeInstances.at(entity.GetUUID()).at(name);
-		s_ScriptEngineData->EntityRuntimeInstances[entity.GetUUID()].erase(name);
+		delete s_ScriptEngineData->EntityRuntimeInstances.at(entity.GetUUID()).at(name.begin());
+		s_ScriptEngineData->EntityRuntimeInstances[entity.GetUUID()].erase(name.begin());
 	}
 
-	const eastl::vector<eastl::string>& ScriptEngine::GetFields(const char* className)
+	const eastl::vector<eastl::string>& ScriptEngine::GetFields(eastl::string_view className)
 	{
-		return s_ScriptEngineData->EntityClasses.at(className)->GetFields();
+		return s_ScriptEngineData->EntityClasses.at(className.begin())->GetFields();
 	}
 
-	const eastl::hash_map<eastl::string, ScriptField>& ScriptEngine::GetFieldMap(const char* className)
+	const eastl::hash_map<eastl::string, ScriptField>& ScriptEngine::GetFieldMap(eastl::string_view className)
 	{
-		return s_ScriptEngineData->EntityClasses.at(className)->GetFieldsMap();
+		return s_ScriptEngineData->EntityClasses.at(className.begin())->GetFieldsMap();
 	}
 
-	eastl::hash_map<eastl::string, ScriptFieldInstance>& ScriptEngine::GetFieldInstanceMap(Entity entity, const char* className)
+	eastl::hash_map<eastl::string, ScriptFieldInstance>& ScriptEngine::GetFieldInstanceMap(Entity entity, eastl::string_view className)
 	{
-		return s_ScriptEngineData->EntityFields[entity.GetUUID()][className];
+		return s_ScriptEngineData->EntityFields[entity.GetUUID()][className.begin()];
 	}
 
 	eastl::hash_map<eastl::string, Ref<ScriptClass>>& ScriptEngine::GetClasses()
@@ -464,27 +464,27 @@ namespace ArcEngine
 			LoadFields();
 	}
 
-	DotnetMethod ScriptClass::GetMethod(GCHandle object, const char* methodName, int parameterCount) const
+	DotnetMethod ScriptClass::GetMethod(GCHandle object, eastl::string_view methodName, int parameterCount) const
 	{
 		ARC_PROFILE_SCOPE();
 
-		return s_Reflection->GetMethod(object, methodName, parameterCount);
+		return s_Reflection->GetMethod(object, methodName.begin(), parameterCount);
 	}
 
 	void ScriptClass::GetFieldValue(GCHandle instance, const eastl::string_view fieldName, void* value) const
 	{
-		s_Reflection->GetFieldValue(instance, fieldName.data(), value);
+		s_Reflection->GetFieldValue(instance, fieldName.begin(), value);
 	}
 
 	void ScriptClass::SetFieldValue(GCHandle instance, const eastl::string_view fieldName, const void* value) const
 	{
-		s_Reflection->SetFieldValue(instance, fieldName.data(), value);
+		s_Reflection->SetFieldValue(instance, fieldName.begin(), value);
 	}
 
 	std::string ScriptClass::GetFieldValueString(GCHandle instance, const eastl::string_view fieldName) const
 	{
 		ARC_PROFILE_SCOPE();
-		auto string = s_Reflection->GetFieldValueString(instance, fieldName.data());
+		auto string = s_Reflection->GetFieldValueString(instance, fieldName.begin());
 		std::string str = string ? string : "";
 		if (string)
 			s_Reflection->Free(string);
@@ -689,21 +689,21 @@ namespace ArcEngine
 		return m_Handle;
     }
 
-    void ScriptInstance::GetFieldValueInternal(const eastl::string& name, void* value) const
+    void ScriptInstance::GetFieldValueInternal(eastl::string_view name, void* value) const
 	{
 		ARC_PROFILE_SCOPE();
 
 		m_ScriptClass->GetFieldValue(m_Handle, name, value);
 	}
 
-	void ScriptInstance::SetFieldValueInternal(const eastl::string& name, const void* value) const
+	void ScriptInstance::SetFieldValueInternal(eastl::string_view name, const void* value) const
 	{
 		ARC_PROFILE_SCOPE();
 
 		m_ScriptClass->SetFieldValue(m_Handle, name, value);
 	}
 
-	std::string ScriptInstance::GetFieldValueStringInternal(const eastl::string& name) const
+	std::string ScriptInstance::GetFieldValueStringInternal(eastl::string_view name) const
 	{
 		ARC_PROFILE_SCOPE();
 

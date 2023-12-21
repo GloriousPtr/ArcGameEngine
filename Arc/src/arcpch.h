@@ -12,6 +12,7 @@
 #include <fstream>
 #include <sstream>
 
+#include <EASTL/span.h>
 #include <EASTL/memory.h>
 #include <EASTL/utility.h>
 #include <EASTL/algorithm.h>

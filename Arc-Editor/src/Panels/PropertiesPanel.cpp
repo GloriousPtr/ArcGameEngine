@@ -49,7 +49,7 @@ namespace ArcEngine
 	}
 
 	template<typename T, typename UIFunction>
-	static void DrawComponent(const char* name, Entity entity, UIFunction uiFunction, const bool removable = true)
+	static void DrawComponent(eastl::string_view name, Entity entity, UIFunction uiFunction, const bool removable = true)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -68,7 +68,7 @@ namespace ArcEngine
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
 
 			const size_t id = entt::type_id<T>().hash();
-			const bool open = ImGui::TreeNodeEx(reinterpret_cast<void*>(id), treeFlags, "%s", reinterpret_cast<const char*>(name));
+			const bool open = ImGui::TreeNodeEx(reinterpret_cast<void*>(id), treeFlags, "%s", name.begin());
 
 			bool removeComponent = false;
 			if(removable)
@@ -122,10 +122,10 @@ namespace ArcEngine
 			const eastl::string& className = *it;
 
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
-			const bool open = ImGui::TreeNodeEx(&it, treeFlags, "%s", className.c_str());
+			const bool open = ImGui::TreeNodeEx(it, treeFlags, "%s %s", ARC_ICON_LANGUAGE_CSHARP, className.c_str());
 
 			{
-				ImGui::PushID(&it);
+				ImGui::PushID(it);
 
 				ImGui::SameLine(ImGui::GetContentRegionMax().x - frameHeight * 1.2f);
 				if (ImGui::Button(ARC_ICON_SETTINGS, ImVec2{ frameHeight * 1.2f, frameHeight }))
@@ -133,7 +133,7 @@ namespace ArcEngine
 
 				if (ImGui::BeginPopup("ScriptSettings"))
 				{
-					if (ImGui::MenuItem("Remove"))
+					if (ImGui::MenuItemEx("Remove", ARC_ICON_DELETE))
 						toRemove = it;
 
 					ImGui::EndPopup();
@@ -150,8 +150,8 @@ namespace ArcEngine
 				if (ScriptEngine::HasClass(className))
 				{
 					UI::BeginProperties();
-					const auto& fields = ScriptEngine::GetFields(className.c_str());
-					auto& fieldMap = ScriptEngine::GetFieldMap(className.c_str());
+					const auto& fields = ScriptEngine::GetFields(className);
+					auto& fieldMap = ScriptEngine::GetFieldMap(className);
 					for (const auto& name : fields)
 					{
 						auto& field = fieldMap.at(name);
@@ -163,7 +163,7 @@ namespace ArcEngine
 							UI::EndProperties();
 							ImGui::Spacing();
 							ImGui::Spacing();
-							ImGui::TextUnformatted(field.Header.c_str());
+							ImGui::TextUnformatted(field.Header.begin(), field.Header.end());
 							ImGui::Spacing();
 							UI::BeginProperties();
 						}
@@ -188,8 +188,8 @@ namespace ArcEngine
 		const auto& materialProperties = material->GetProperties();
 		for (const auto& property : materialProperties)
 		{
-			const eastl::string_view name = property.Name;
-			const char* displayName = property.DisplayName.c_str();
+			eastl::string_view name = property.Name;
+			eastl::string_view displayName = property.DisplayName;
 
 			switch (property.Type)
 			{
@@ -274,7 +274,7 @@ namespace ArcEngine
 			| ImGuiTreeNodeFlags_Framed
 			| ImGuiTreeNodeFlags_FramePadding;
 
-		if (ImGui::TreeNodeEx(moduleName.data(), treeFlags, "%s", moduleName.data()))
+		if (ImGui::TreeNodeEx(moduleName.begin(), treeFlags, "%s", moduleName.begin()))
 		{
 			UI::BeginProperties();
 			UI::Property("Enabled", propertyModule.Enabled);
@@ -533,7 +533,7 @@ namespace ArcEngine
 		{
 			if (ImGui::Button(component.MeshGeometry ? component.MeshGeometry->GetFilepath() : "null", { ImGui::GetContentRegionAvail().x, ImGui::GetFrameHeight() }))
 			{
-				const std::string filepath = FileDialogs::OpenFile("Mesh (*.assbin)\0*.assbin\0(*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
+				const eastl::string filepath = FileDialogs::OpenFile("Mesh (*.assbin)\0*.assbin\0(*.obj)\0*.obj\0(*.fbx)\0*.fbx\0");
 				if (!filepath.empty())
 				{
 					component.MeshGeometry = CreateRef<Mesh>(filepath.c_str());
@@ -1108,7 +1108,7 @@ namespace ArcEngine
 					const bool notFound = std::ranges::find(component.Classes, name) == component.Classes.end();
 					if (notFound && (!m_Filter.IsActive() || (m_Filter.IsActive() && m_Filter.PassFilter(name.c_str()))))
 					{
-						if (ImGui::MenuItem(name.c_str()))
+						if (ImGui::MenuItemEx(name.c_str(), ARC_ICON_LANGUAGE_CSHARP))
 						{
 							component.Classes.emplace_back(name);
 						}
@@ -1125,16 +1125,16 @@ namespace ArcEngine
 		{
 			auto& config = component.Config;
 
-			const char* filepath = component.Source ? component.Source->GetPath() : "Drop an audio file";
+			eastl::string_view filepath = component.Source ? component.Source->GetPath() : "Drop an audio file";
 			const float x = ImGui::GetContentRegionAvail().x;
 			const float y = ImGui::GetFrameHeight();
-			ImGui::Button(filepath, { x, y });
+			ImGui::Button(filepath.begin(), {x, y});
 			if (ImGui::BeginDragDropTarget())
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
 					const char* path = static_cast<char*>(payload->Data);
-					const auto ext = StringUtils::GetExtension(path);
+					eastl::string_view ext = StringUtils::GetExtension(path);
 					if (ext == "mp3" || ext == "wav")
 						component.Source = CreateRef<AudioSource>(path);
 				}
@@ -1212,10 +1212,10 @@ namespace ArcEngine
 		ImGui::EndChild();
 	}
 
-	void PropertiesPanel::DrawFileProperties(const char* filepath)
+	void PropertiesPanel::DrawFileProperties(eastl::string_view filepath)
 	{
-		const auto name = StringUtils::GetNameWithExtension(filepath);
-		const auto ext = StringUtils::GetExtension(name);
+		const eastl::string_view name = StringUtils::GetNameWithExtension(filepath);
+		const eastl::string_view ext = StringUtils::GetExtension(name);
 
 		if (ext == "prefab")
 		{
@@ -1227,7 +1227,7 @@ namespace ArcEngine
 			else
 			{
 				m_Scene = CreateScope<Scene>();
-				prefab = EntitySerializer::DeserializeEntityAsPrefab(filepath, *m_Scene);
+				prefab = EntitySerializer::DeserializeEntityAsPrefab(filepath.begin(), *m_Scene);
 			}
 		}
 		else
@@ -1235,22 +1235,22 @@ namespace ArcEngine
 			if (m_Scene)
 				m_Scene.reset();
 
-			ImGui::TextUnformatted(name.data());
+			ImGui::TextUnformatted(name.begin(), name.end());
 		}
 	}
 
 	template<typename Component>
-	void PropertiesPanel::DrawAddComponent(Entity entity, const char* name, const char* category) const
+	void PropertiesPanel::DrawAddComponent(Entity entity, eastl::string_view name, eastl::string_view category) const
 	{
 		if (!entity.HasComponent<Component>())
 		{
 			if (!m_Filter.IsActive())
 			{
-				if (category)
+				if (!category.empty())
 				{
-					if (ImGui::BeginMenu(category))
+					if (ImGui::BeginMenu(category.begin()))
 					{
-						if (ImGui::MenuItem(name))
+						if (ImGui::MenuItem(name.begin()))
 						{
 							entity.AddComponent<Component>();
 							ImGui::CloseCurrentPopup();
@@ -1261,7 +1261,7 @@ namespace ArcEngine
 				}
 				else
 				{
-					if (ImGui::MenuItem(name))
+					if (ImGui::MenuItem(name.begin()))
 					{
 						entity.AddComponent<Component>();
 						ImGui::CloseCurrentPopup();
@@ -1270,9 +1270,9 @@ namespace ArcEngine
 			}
 			else
 			{
-				if (m_Filter.IsActive() && m_Filter.PassFilter(name))
+				if (m_Filter.IsActive() && m_Filter.PassFilter(name.begin(), name.end()))
 				{
-					if (ImGui::MenuItem(name))
+					if (ImGui::MenuItem(name.begin()))
 					{
 						entity.AddComponent<Component>();
 						ImGui::CloseCurrentPopup();

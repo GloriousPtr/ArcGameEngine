@@ -105,33 +105,22 @@ namespace ArcEngine
 
 	inline static float s_LastDomainReloadTime = 0.0f;
 	
-	static bool DragDropTarget(const std::filesystem::path& dropPath)
+	static void DragDropTarget(const eastl::string_view filepath)
 	{
-		if (ImGui::BeginDragDropTarget())
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity"))
 		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity"))
-			{
-				const Entity entity = *static_cast<Entity*>(payload->Data);
-				const std::filesystem::path path = dropPath / (entity.GetComponent<TagComponent>().Tag + ".prefab").c_str();
-				EntitySerializer::SerializeEntityAsPrefab(path.string().c_str(), entity);
-				return true;
-			}
-
-			ImGui::EndDragDropTarget();
+			const Entity entity = *static_cast<Entity*>(payload->Data);
+			eastl::string path(filepath);
+			path += "/" + entity.GetComponent<TagComponent>().Tag + ".prefab";
+			EntitySerializer::SerializeEntityAsPrefab(path.c_str(), entity);
 		}
-
-		return false;
 	}
 
-	static void DragDropFrom(const std::filesystem::path& filepath)
+	static void DragDropFrom(const eastl::string_view filepath, const eastl::string_view tooltip)
 	{
-		if (ImGui::BeginDragDropSource())
-		{
-			const std::string pathStr = filepath.string();
-			ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", pathStr.c_str(), pathStr.length() + 1);
-			ImGui::TextUnformatted(filepath.filename().string().c_str());
-			ImGui::EndDragDropSource();
-		}
+		ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", filepath.begin(), filepath.size() + 1);
+		ImGui::TextUnformatted(tooltip.begin(), tooltip.end());
+		ImGui::EndDragDropSource();
 	}
 
 	static void OpenFile(const std::filesystem::path& path)
@@ -202,7 +191,7 @@ namespace ArcEngine
 				ImGui::PushStyleColor(ImGuiCol_HeaderHovered, EditorTheme::HeaderHoveredColor);
 			}
 
-			uint64_t id = *count;
+			const uint64_t id = *count;
 			bool open = ImGui::TreeNodeEx(reinterpret_cast<void*>(id), nodeFlags, "");
 			ImGui::PopStyleColor(selected ? 2 : 1);
 
@@ -216,12 +205,18 @@ namespace ArcEngine
 			}
 
 			const std::string filepath = entryPath.string();
+			eastl::string_view name = StringUtils::GetNameWithExtension(filepath.c_str());
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (!entryIsFile)
+					DragDropTarget(filepath.c_str());
 
-			if (!entryIsFile)
-				DragDropTarget(entryPath);
-			DragDropFrom(entryPath);
-
-			auto name = StringUtils::GetNameWithExtension(filepath.c_str());
+				ImGui::EndDragDropTarget();
+			}
+			if (ImGui::BeginDragDropSource())
+			{
+				DragDropFrom(filepath.c_str(), name);
+			}
 
 			const char* folderIcon = ARC_ICON_FILE;
 			if (entryIsFile)
@@ -246,7 +241,7 @@ namespace ArcEngine
 			ImGui::TextUnformatted(folderIcon);
 			ImGui::PopStyleColor();
 			ImGui::SameLine();
-			ImGui::TextUnformatted(name.data(), name.data() + name.size());
+			ImGui::TextUnformatted(name.begin(), name.end());
 			m_CurrentlyVisibleItemsTreeView++;
 
 			(*count)--;
@@ -471,7 +466,8 @@ namespace ArcEngine
 
 		ImGui::SameLine();
 
-		ImGui::TextUnformatted(ARC_ICON_FOLDER);
+		constexpr const char* folderIcon = ARC_ICON_FOLDER;
+		ImGui::TextUnformatted(folderIcon);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
@@ -497,7 +493,8 @@ namespace ArcEngine
 			if (m_CurrentDirectory != projectDir)
 			{
 				ImGui::SameLine();
-				ImGui::TextUnformatted("/");
+				constexpr const char* delimeter = "/";
+				ImGui::TextUnformatted(delimeter, delimeter + 1);
 			}
 		}
 		ImGui::PopStyleColor(2);
@@ -542,7 +539,7 @@ namespace ArcEngine
 				ImGui::PushStyleColor(ImGuiCol_HeaderHovered, EditorTheme::HeaderHoveredColor);
 			}
 
-			const bool opened = ImGui::TreeNodeEx(m_AssetsDirectory.string().c_str(), nodeFlags, "");
+			const bool opened = ImGui::TreeNodeEx("AssetsDir", nodeFlags, "");
 			ImGui::PopStyleColor(selected ? 2 : 1);
 
 			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
@@ -556,7 +553,8 @@ namespace ArcEngine
 			ImGui::TextUnformatted(folderIcon);
 			ImGui::PopStyleColor();
 			ImGui::SameLine();
-			ImGui::TextUnformatted("Assets");
+			constexpr char rootDirName[] = "Assets";
+			ImGui::TextUnformatted(rootDirName, rootDirName + sizeof(rootDirName) - 1);
 
 			if (opened)
 			{
@@ -646,7 +644,7 @@ namespace ArcEngine
 				ImGui::PushID(i);
 
 				const bool isDir = file.IsDirectory;
-				const char* filename = file.Name.c_str();
+				const char* filename = file.Name.data();
 				const char* filenameEnd = filename + file.Name.size();
 
 				uint64_t textureId = m_DirectoryIcon->GetRendererID();
@@ -683,7 +681,6 @@ namespace ArcEngine
 				ImGui::TableNextColumn();
 
 				const auto& path = file.DirectoryEntry.path();
-				std::string strPath = path.string();
 
 				if (grid)
 				{
@@ -697,22 +694,22 @@ namespace ArcEngine
 					}
 
 					// Background button
-					static std::string id = "###";
+					static eastl::string id = "###";
 					id[2] = static_cast<char>(i);
-					bool const clicked = UI::ToggleButton(id.c_str(), highlight, backgroundThumbnailSize, 0.0f, 1.0f);
+					bool const clicked = UI::ToggleButton(id, highlight, backgroundThumbnailSize, 0.0f, 1.0f);
 					if (m_ElapsedTime > 0.25f && clicked)
 					{
-						EditorLayer::GetInstance()->SetContext(EditorContextType::File, strPath.c_str(), sizeof(char) * (strPath.length() + 1));
+						EditorLayer::GetInstance()->SetContext(EditorContextType::File, file.Filepath.c_str(), sizeof(char) * (file.Filepath.length() + 1));
 					}
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 					if (ImGui::BeginPopupContextItem())
 					{
-						if (ImGui::MenuItem("Delete"))
+						if (ImGui::MenuItemEx("Delete", ARC_ICON_DELETE))
 						{
 							directoryToDelete = path;
 							ImGui::CloseCurrentPopup();
 						}
-						if (ImGui::MenuItem("Rename"))
+						if (ImGui::MenuItemEx("Rename", ARC_ICON_RENAME))
 						{
 							ImGui::CloseCurrentPopup();
 						}
@@ -724,10 +721,17 @@ namespace ArcEngine
 					}
 					ImGui::PopStyleVar();
 
-					if (isDir)
-						DragDropTarget(file.Filepath.c_str());
+					if (ImGui::BeginDragDropTarget())
+					{
+						if (isDir)
+							DragDropTarget(file.Filepath);
 
-					DragDropFrom(file.Filepath);
+						ImGui::EndDragDropTarget();
+					}
+					if (ImGui::BeginDragDropSource())
+					{
+						DragDropFrom(file.Filepath, file.Name);
+					}
 
 					if (ImGui::IsItemHovered())
 						anyItemHovered = true;
@@ -769,7 +773,7 @@ namespace ArcEngine
 						ImGui::SetCursorPos({ cursorPos.x + padding * 2.0f, cursorPos.y + backgroundThumbnailSize.y - EditorTheme::SmallFont->FontSize - padding * 2.0f });
 						ImGui::BeginDisabled();
 						ImGui::PushFont(EditorTheme::SmallFont);
-						ImGui::TextUnformatted(file.FileTypeString.data());
+						ImGui::TextUnformatted(file.FileTypeString._Unchecked_begin(), file.FileTypeString._Unchecked_end());
 						ImGui::PopFont();
 						ImGui::EndDisabled();
 					}
@@ -788,7 +792,10 @@ namespace ArcEngine
 					if (isDir && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 						directoryToOpen = path;
 
-					DragDropFrom(file.Filepath.c_str());
+					if (ImGui::BeginDragDropSource())
+					{
+						DragDropFrom(file.Filepath, file.Name);
+					}
 
 					ImGui::SameLine();
 					ImGui::SetCursorPosX(ImGui::GetCursorPosX() - lineHeight);
@@ -843,6 +850,7 @@ namespace ArcEngine
 			const auto& path = directoryEntry.path();
 			const auto relativePath = std::filesystem::relative(path, m_AssetsDirectory);
 			const std::string filename = relativePath.filename().string();
+			const std::string filepath = path.string();
 			const std::string extension = relativePath.extension().string();
 
 			auto fileType = FileType::Unknown;
@@ -860,7 +868,7 @@ namespace ArcEngine
 			if (fileTypeColorIt != s_TypeColors.end())
 				fileTypeColor = fileTypeColorIt->second;
 
-			m_DirectoryEntries.push_back({ filename, path.string(), extension, directoryEntry, nullptr, directoryEntry.is_directory(),
+			m_DirectoryEntries.push_back({ filename.c_str(), filepath.c_str(), extension.c_str(), directoryEntry, nullptr, directoryEntry.is_directory(),
 				fileType, fileTypeString, fileTypeColor });
 		}
 
@@ -873,7 +881,7 @@ namespace ArcEngine
 		{
 			if (ImGui::BeginMenu("Create"))
 			{
-				if (ImGui::MenuItem("Folder"))
+				if (ImGui::MenuItemEx("Folder", ARC_ICON_FOLDER_PLUS))
 				{
 					int i = 0;
 					bool created = false;
@@ -888,7 +896,7 @@ namespace ArcEngine
 					EditorLayer::GetInstance()->SetContext(EditorContextType::File, newFolderPath.c_str(), sizeof(char) * (newFolderPath.length() + 1));
 					ImGui::CloseCurrentPopup();
 				}
-				if (ImGui::MenuItem("C# Script"))
+				if (ImGui::MenuItemEx("Script", ARC_ICON_LANGUAGE_CSHARP))
 				{
 					Filesystem::WriteFileText(context / "Script.cs", "using ArcEngine;");
 					ImGui::CloseCurrentPopup();
@@ -896,25 +904,28 @@ namespace ArcEngine
 				ImGui::EndMenu();
 			}
 		}
-		if (ImGui::MenuItem("Show in Explorer"))
+		if (ImGui::MenuItemEx("Show in Explorer", ARC_ICON_ARROW_TOP_RIGHT))
 		{
-			FileDialogs::OpenFolderAndSelectItem(context.string().c_str());
+			std::string path = context.string();
+			FileDialogs::OpenFolderAndSelectItem(path.c_str());
 			ImGui::CloseCurrentPopup();
 		}
-		if (ImGui::MenuItem("Open"))
+		if (ImGui::MenuItemEx("Open", ARC_ICON_OPEN_IN_APP))
 		{
-			FileDialogs::OpenFileWithProgram(context.string().c_str());
+			std::string path = context.string();
+			FileDialogs::OpenFileWithProgram(path.c_str());
 			ImGui::CloseCurrentPopup();
 		}
 		if (ImGui::MenuItem("Copy Path"))
 		{
-			ImGui::SetClipboardText(context.string().c_str());
+			std::string path = context.string();
+			ImGui::SetClipboardText(path.c_str());
 			ImGui::CloseCurrentPopup();
 		}
 
 		if (isDir)
 		{
-			if (ImGui::MenuItem("Refresh"))
+			if (ImGui::MenuItemEx("Refresh", ARC_ICON_REFRESH))
 			{
 				Refresh();
 				ImGui::CloseCurrentPopup();

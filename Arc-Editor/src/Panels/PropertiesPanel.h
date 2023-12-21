@@ -34,10 +34,10 @@ namespace ArcEngine
 
 	private:
 		void DrawComponents(Entity entity);
-		void DrawFileProperties(const char* filepath);
+		void DrawFileProperties(eastl::string_view filepath);
 
 		template<typename Component>
-		void DrawAddComponent(Entity entity, const char* name, const char* category = nullptr) const;
+		void DrawAddComponent(Entity entity, eastl::string_view name, eastl::string_view category = nullptr) const;
 
 	private:
 		EditorContext m_Context = {};

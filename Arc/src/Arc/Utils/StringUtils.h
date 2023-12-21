@@ -7,7 +7,7 @@ namespace ArcEngine
 	class StringUtils
 	{
 	public:
-		[[nodiscard]] static eastl::string_view GetExtension(const eastl::string_view& filepath)
+		[[nodiscard]] static eastl::string_view GetExtension(eastl::string_view filepath)
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -15,7 +15,7 @@ namespace ArcEngine
 			return filepath.substr(lastDot + 1, filepath.size() - lastDot);
 		}
 
-		[[nodiscard]] static eastl::string_view GetName(const eastl::string_view& filepath)
+		[[nodiscard]] static eastl::string_view GetName(eastl::string_view filepath)
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -26,7 +26,7 @@ namespace ArcEngine
 			return filepath.substr(lastSlash, count);
 		}
 
-		[[nodiscard]] static eastl::string_view GetNameWithExtension(const eastl::string_view& filepath)
+		[[nodiscard]] static eastl::string_view GetNameWithExtension(eastl::string_view filepath)
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -35,7 +35,7 @@ namespace ArcEngine
 			return filepath.substr(lastSlash, filepath.size());
 		}
 
-		static void ReplaceString(eastl::string& subject, const eastl::string_view& search, const eastl::string_view& replace)
+		static void ReplaceString(eastl::string& subject, eastl::string_view search, eastl::string_view replace)
 		{
 			size_t pos = 0;
 			const size_t replaceLength = replace.length();

@@ -5,11 +5,13 @@
 #include <glm/glm.hpp>
 #include <magic_enum.hpp>
 
+#include <EASTL/span.h>
 #include <EASTL/memory.h>
 #include <EASTL/utility.h>
 #include <EASTL/algorithm.h>
 #include <EASTL/functional.h>
 #include <EASTL/string.h>
+#include <EASTL/string_view.h>
 #include <EASTL/array.h>
 #include <EASTL/fixed_vector.h>
 #include <EASTL/vector.h>

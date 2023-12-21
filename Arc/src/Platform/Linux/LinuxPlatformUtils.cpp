@@ -8,7 +8,7 @@
 
 namespace ArcEngine
 {
-	std::string FileDialogs::OpenFolder()
+	eastl::string FileDialogs::OpenFolder()
 	{
 		GtkWidget* dialog;
 		int res;
@@ -16,7 +16,7 @@ namespace ArcEngine
 		dialog = gtk_file_chooser_dialog_new("Open", nullptr, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, nullptr);
 
 		res = gtk_dialog_run(GTK_DIALOG(dialog));
-		std::string ret;
+		eastl::string ret;
 		if (res == GTK_RESPONSE_ACCEPT)
 		{
 			char* filename;
@@ -30,7 +30,7 @@ namespace ArcEngine
 		return ret;
 	}
 
-	std::string FileDialogs::OpenFile([[maybe_unused]] const char* filter)
+	eastl::string FileDialogs::OpenFile([[maybe_unused]] const char* filter)
 	{
 		GtkWidget* dialog;
 		int res;
@@ -43,7 +43,7 @@ namespace ArcEngine
 		dialog = gtk_file_chooser_dialog_new("Open File", nullptr, GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, nullptr);
 
 		res = gtk_dialog_run(GTK_DIALOG(dialog));
-		std::string ret;
+		eastl::string ret;
 		if (res == GTK_RESPONSE_ACCEPT)
 		{
 			char* filename;
@@ -57,7 +57,7 @@ namespace ArcEngine
 		return ret;
 	}
 
-	std::string FileDialogs::SaveFile([[maybe_unused]] const char* filter)
+	eastl::string FileDialogs::SaveFile([[maybe_unused]] const char* filter)
 	{
 		GtkWidget* dialog;
 		GtkFileChooser* chooser;
@@ -69,7 +69,7 @@ namespace ArcEngine
 		gtk_file_chooser_set_do_overwrite_confirmation(chooser, TRUE);
 		gtk_file_chooser_set_current_name(chooser, "Untitled document");
 		res = gtk_dialog_run(GTK_DIALOG(dialog));
-		std::string ret;
+		eastl::string ret;
 		if (res == GTK_RESPONSE_ACCEPT)
 		{
 			char* filename = gtk_file_chooser_get_filename(chooser);

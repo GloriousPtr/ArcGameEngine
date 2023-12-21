@@ -2,7 +2,6 @@
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui.h>
-#include <stack>
 
 #include "BasePanel.h"
 
@@ -46,9 +45,9 @@ namespace ArcEngine
 	private:
 		struct File
 		{
-			std::string Name;
-			std::string Filepath;
-			std::string Extension;
+			eastl::string Name;
+			eastl::string Filepath;
+			eastl::string Extension;
 			std::filesystem::directory_entry DirectoryEntry;
 			Ref<Texture2D> Thumbnail = nullptr;
 			bool IsDirectory = false;

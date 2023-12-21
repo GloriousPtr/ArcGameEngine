@@ -285,7 +285,7 @@ namespace ArcEngine
 						if (auto project = Project::GetActive())
 						{
 							const eastl::string& projectName = project->GetConfig().Name;
-							ImVec2 textSize = ImGui::CalcTextSize(projectName.c_str());
+							ImVec2 textSize = ImGui::CalcTextSize(projectName.begin(), projectName.end());
 							ImGui::SetCursorPos(ImVec2(region.x - 4.0f * buttonSize.x - textSize.x - 100.0f + ImGui::GetStyle().WindowPadding.x, ImGui::GetCursorPosY() - 2.0f));
 							ImGui::Button(projectName.c_str(), { textSize.x + 100.0f, buttonSize.y });
 						}
@@ -388,7 +388,7 @@ namespace ArcEngine
 						ImGui::SetCursorPosX(buttonStartPositionX);
 						//Play Button
 						bool highlight = m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
-						const char* icon = m_SceneState == SceneState::Edit ? ARC_ICON_PLAY : ARC_ICON_STOP;
+						const eastl::string_view icon = m_SceneState == SceneState::Edit ? ARC_ICON_PLAY : ARC_ICON_STOP;
 						if (UI::ToggleButton(icon, highlight, buttonSize))
 						{
 							if (m_SceneState == SceneState::Edit)
@@ -453,7 +453,7 @@ namespace ArcEngine
 							glm::vec4 color = ConsolePanel::Message::GetRenderColor(message->Level);
 							ImGui::PushStyleColor(ImGuiCol_Text, { color.r, color.g, color.b, color.a });
 							ImGui::PushFont(EditorTheme::BoldFont);
-							ImGui::TextUnformatted(message->Buffer.c_str());
+							ImGui::TextUnformatted(message->Buffer.begin(), message->Buffer.end());
 							ImGui::PopFont();
 							ImGui::PopStyleColor();
 						}
@@ -551,7 +551,10 @@ namespace ArcEngine
 					ImGui::PopStyleColor();
 
 				if (ImGui::Button(ARC_ICON_FOLDER))
-					m_TempProjectPath = FileDialogs::OpenFolder().c_str();
+				{
+					eastl::string projectPath = FileDialogs::OpenFolder();
+					m_TempProjectPath = projectPath.c_str();
+				}
 
 				ImGui::Separator();
 
@@ -569,8 +572,9 @@ namespace ArcEngine
 						std::filesystem::create_directories(projectDirPath);
 
 					std::filesystem::path projectPath = projectDirPath / (m_TempProjectName + ".arcproj");
+					std::string projectPathStr = projectPath.string();
 					SaveProject(projectPath);
-					OpenProject(projectPath);
+					OpenProject(projectPathStr.c_str());
 					ImGui::CloseCurrentPopup();
 				}
 				ImGui::EndDisabled();
@@ -837,16 +841,24 @@ namespace ArcEngine
 		return false;
 	}
 
-	void EditorLayer::OpenProject(const std::filesystem::path& path)
+	void EditorLayer::OpenProject(eastl::string_view path)
 	{
-		if (Project::Load(path))
+		std::filesystem::path filepath = path.begin();
+		if (!std::filesystem::exists(filepath))
+		{
+			ARC_CORE_ERROR("Project file not found: {}", filepath);
+			return;
+		}
+
+		if (Project::Load(filepath))
 		{
 			ScriptEngine::ReloadAppDomain(false);
 
 			if (!Project::GetActive()->GetConfig().StartScene.empty())
 			{
 				const auto startScenePath = Project::GetAssetFileSystemPath(Project::GetActive()->GetConfig().StartScene);
-				OpenScene(startScenePath.string().c_str());
+				std::string scenePathStr = startScenePath.string();
+				OpenScene(scenePathStr.c_str());
 			}
 
 			if (m_AssetPanels.empty())
@@ -863,7 +875,7 @@ namespace ArcEngine
 
 	void EditorLayer::OpenProject()
 	{
-		const std::string filepath = FileDialogs::OpenFile("Arc Scene (*.arcproj)\0*.arcproj\0");
+		eastl::string filepath = FileDialogs::OpenFile("Arc Scene (*.arcproj)\0*.arcproj\0");
 		if (!filepath.empty())
 			OpenProject(filepath);
 	}
@@ -894,7 +906,7 @@ namespace ArcEngine
 		ScriptEngine::SetScene(m_ActiveScene.get());
 	}
 
-	void EditorLayer::OpenScene(const char* filepath)
+	void EditorLayer::OpenScene(eastl::string_view filepath)
 	{
 		ResetContext();
 		if (m_SceneState != SceneState::Edit)
@@ -915,7 +927,7 @@ namespace ArcEngine
 		const SceneSerializer serializer(m_ActiveScene);
 		if (!serializer.Deserialize(filepath))
 			ARC_CORE_ERROR("Could not deserialize scene!");
-		m_ScenePath = filepath;
+		m_ScenePath = filepath.begin();
 	}
 	
 	void EditorLayer::SaveScene()
@@ -934,12 +946,12 @@ namespace ArcEngine
 
 	void EditorLayer::SaveSceneAs()
 	{
-		const std::string filepath = FileDialogs::SaveFile("Arc Scene (*.arc)\0*.arc\0");
+		const eastl::string filepath = FileDialogs::SaveFile("Arc Scene (*.arc)\0*.arc\0");
 		if (!filepath.empty())
 		{
 			const SceneSerializer serializer(m_ActiveScene);
-			serializer.Serialize(filepath.c_str());
-			m_ScenePath = filepath;
+			serializer.Serialize(filepath);
+			m_ScenePath = filepath.c_str();
 		}
 	}
 

@@ -111,7 +111,7 @@ namespace ArcEngine
 		ScriptClass(const ScriptClass& other) = delete;
 		ScriptClass(ScriptClass&& other) = delete;
 
-		[[nodiscard]] DotnetMethod GetMethod(GCHandle object, const char* methodName, int parameterCount) const;
+		[[nodiscard]] DotnetMethod GetMethod(GCHandle object, eastl::string_view methodName, int parameterCount) const;
 		void GetFieldValue(GCHandle instance, const eastl::string_view fieldName, void* value) const;
 		void SetFieldValue(GCHandle instance, const eastl::string_view fieldName, const void* value) const;
 		[[nodiscard]] std::string GetFieldValueString(GCHandle instance, const eastl::string_view fieldName) const;
@@ -157,7 +157,7 @@ namespace ArcEngine
 		void InvokeOnSensorExit2D(Collision2DData& other) const;
 
 		template<typename T>
-		[[nodiscard]] T GetFieldValue(const eastl::string& fieldName) const
+		[[nodiscard]] T GetFieldValue(eastl::string_view fieldName) const
 		{
 			T value;
 			GetFieldValueInternal(fieldName, &value);
@@ -165,12 +165,12 @@ namespace ArcEngine
 		}
 
 		template<typename T>
-		void SetFieldValue(const eastl::string& fieldName, const T& value) const
+		void SetFieldValue(eastl::string_view fieldName, const T& value) const
 		{
 			SetFieldValueInternal(fieldName, &value);
 		}
 
-		[[nodiscard]] std::string GetFieldValueString(const eastl::string& fieldName) const
+		[[nodiscard]] std::string GetFieldValueString(eastl::string_view fieldName) const
 		{
 			return GetFieldValueStringInternal(fieldName);
 		}
@@ -178,9 +178,9 @@ namespace ArcEngine
 		[[nodiscard]] GCHandle GetHandle() const;
 
 	private:
-		void GetFieldValueInternal(const eastl::string& name, void* value) const;
-		void SetFieldValueInternal(const eastl::string& name, const void* value) const;
-		[[nodiscard]] std::string GetFieldValueStringInternal(const eastl::string& name) const;
+		void GetFieldValueInternal(eastl::string_view name, void* value) const;
+		void SetFieldValueInternal(eastl::string_view name, const void* value) const;
+		[[nodiscard]] std::string GetFieldValueStringInternal(eastl::string_view name) const;
 
 	private:
 		Ref<ScriptClass> m_ScriptClass;
@@ -214,16 +214,16 @@ namespace ArcEngine
 		static void DetachDebugger();
 		[[nodiscard]] static bool IsDebuggerAttached();
 
-		[[nodiscard]] static bool HasClass(const eastl::string& className);
-		static ScriptInstance* CreateInstance(Entity entity, const eastl::string& name);
-		[[nodiscard]] static bool HasInstance(Entity entity, const eastl::string& name);
-		[[nodiscard]] static ScriptInstance* GetInstance(Entity entity, const eastl::string& name);
-		static void RemoveInstance(Entity entity, const eastl::string& name);
+		[[nodiscard]] static bool HasClass(eastl::string_view className);
+		static ScriptInstance* CreateInstance(Entity entity, eastl::string_view name);
+		[[nodiscard]] static bool HasInstance(Entity entity, eastl::string_view name);
+		[[nodiscard]] static ScriptInstance* GetInstance(Entity entity, eastl::string_view name);
+		static void RemoveInstance(Entity entity, eastl::string_view name);
 		
 		[[nodiscard]] static eastl::hash_map<eastl::string, Ref<ScriptClass>>& GetClasses();
-		[[nodiscard]] static const eastl::vector<eastl::string>& GetFields (const char* className);
-		[[nodiscard]] static const eastl::hash_map<eastl::string, ScriptField>& GetFieldMap(const char* className);
-		[[nodiscard]] static eastl::hash_map<eastl::string, ScriptFieldInstance>& GetFieldInstanceMap(Entity entity, const char* className);
+		[[nodiscard]] static const eastl::vector<eastl::string>& GetFields(eastl::string_view className);
+		[[nodiscard]] static const eastl::hash_map<eastl::string, ScriptField>& GetFieldMap(eastl::string_view className);
+		[[nodiscard]] static eastl::hash_map<eastl::string, ScriptFieldInstance>& GetFieldInstanceMap(Entity entity, eastl::string_view className);
 
 		static void SetScene(Scene* scene) { s_CurrentScene = scene; }
 		[[nodiscard]] static Scene* GetScene() { return s_CurrentScene; }
