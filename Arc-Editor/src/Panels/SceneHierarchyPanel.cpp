@@ -81,9 +81,9 @@ namespace ArcEngine
 
 			if (ImGui::BeginTable("HierarchyTable", 3, tableFlags))
 			{
-				ImGui::TableSetupColumn("  Label", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_NoClip);
-				ImGui::TableSetupColumn("  Type", ImGuiTableColumnFlags_WidthFixed, lineHeight * 3.0f);
-				ImGui::TableSetupColumn("  " ARC_ICON_EYE, ImGuiTableColumnFlags_WidthFixed, lineHeight * 2.0f);
+				ImGui::TableSetupColumn(" Label", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_NoClip);
+				ImGui::TableSetupColumn(" Type", ImGuiTableColumnFlags_WidthFixed, lineHeight * 3.0f);
+				ImGui::TableSetupColumn(" " ARC_ICON_EYE, ImGuiTableColumnFlags_WidthFixed, lineHeight * 2.0f);
 
 				ImGui::TableSetupScrollFreeze(0, 1);
 				
@@ -175,18 +175,16 @@ namespace ArcEngine
 			return { 0, 0, 0, 0 };
 		}
 
-		ImGuiTreeNodeFlags flags = (m_SelectedEntity == entity ? ImGuiTreeNodeFlags_Selected : 0);
-		flags |= ImGuiTreeNodeFlags_OpenOnArrow;
-		flags |= ImGuiTreeNodeFlags_SpanFullWidth;
-		flags |= ImGuiTreeNodeFlags_FramePadding;
+		const bool selected = m_SelectedEntity == entity;
+		ImGuiTreeNodeFlags flags = (selected ? ImGuiTreeNodeFlags_Selected : 0)
+			| ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_AllowOverlap;
 
 		if (childrenSize == 0)
 		{
 			flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 		}
 
-		const bool highlight = m_SelectedEntity == entity;
-		if (highlight)
+		if (selected)
 		{
 			ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, ImGui::GetColorU32(EditorTheme::HeaderSelectedColor));
 			ImGui::PushStyleColor(ImGuiCol_Header, EditorTheme::HeaderSelectedColor);
@@ -204,7 +202,7 @@ namespace ArcEngine
 
 		const bool opened = ImGui::TreeNodeEx(reinterpret_cast<void*>(static_cast<uint64_t>(entity.GetUUID())), flags, "%s %s", ARC_ICON_ENTITY, tag.c_str());
 
-		if (highlight)
+		if (selected)
 			ImGui::PopStyleColor(2);
 
 		// Select
@@ -298,18 +296,7 @@ namespace ArcEngine
 		}
 
 		ImGui::TableNextColumn();
-
-		ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0, 0, 0, 0 });
-
-		const float buttonSizeX = ImGui::GetContentRegionAvail().x;
-		const float frameHeight = ImGui::GetFrameHeight();
-		ImGui::Button(isPartOfPrefab ? "Prefab" : "Entity", { buttonSizeX, frameHeight });
-		// Select
-		if (ImGui::IsItemDeactivated() && ImGui::IsItemHovered() && !ImGui::IsItemToggledOpen())
-			EditorLayer::GetInstance()->SetContext(EditorContextType::Entity, reinterpret_cast<const char*>(&entity), sizeof(entity));
-
+		ImGui::TextUnformatted(isPartOfPrefab ? "Prefab" : "Entity");
 		ImGui::TableNextColumn();
 		// Visibility Toggle
 		{
@@ -324,8 +311,6 @@ namespace ArcEngine
 				tagComponent.Enabled = !tagComponent.Enabled;
 			}
 		}
-
-		ImGui::PopStyleColor(3);
 
 		if (prefabColorApplied)
 			ImGui::PopStyleColor();
