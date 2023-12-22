@@ -29,8 +29,8 @@ namespace ArcEngine
 				colors[ImGuiCol_WindowBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
 				colors[ImGuiCol_ChildBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
 				colors[ImGuiCol_PopupBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-				colors[ImGuiCol_Border] = ImVec4(0.118f, 0.118f, 0.118f, 1.000f);
-				colors[ImGuiCol_BorderShadow] = ImVec4(0.275f, 0.275f, 0.275f, 1.00f);
+				colors[ImGuiCol_Border] = ImVec4(0.275f, 0.275f, 0.275f, 0.500f);
+				colors[ImGuiCol_BorderShadow] = ImVec4(0.275f, 0.275f, 0.275f, 0.500f);
 				colors[ImGuiCol_FrameBg] = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
 				colors[ImGuiCol_FrameBgHovered] = ImVec4(0.28f, 0.28f, 0.28f, 1.00f);
 				colors[ImGuiCol_FrameBgActive] = ImVec4(0.26f, 0.26f, 0.26f, 1.00f);
