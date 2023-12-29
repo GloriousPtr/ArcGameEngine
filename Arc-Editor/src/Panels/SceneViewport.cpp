@@ -422,7 +422,7 @@ namespace ArcEngine
 				for (size_t i = 0; i < pointsSize; ++i)
 				{
 					auto p0 = transform * glm::vec4(pc.Offset + pc.Points[i], 0.0f, 1.0f);
-					auto p1 = transform * glm::vec4(pc.Offset + pc.Points[i % pointsSize], 0.0f, 1.0f);
+					auto p1 = transform * glm::vec4(pc.Offset + pc.Points[(i + 1) % pointsSize], 0.0f, 1.0f);
 					Renderer2D::DrawLine(p0, p1, color);
 				}
 			}
