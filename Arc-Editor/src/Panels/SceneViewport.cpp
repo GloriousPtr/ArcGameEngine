@@ -361,20 +361,15 @@ namespace ArcEngine
 				Entity entity = { entityHandle, m_Scene.get() };
 				const auto inv = glm::inverse(cam.Camera.GetProjection() * glm::inverse(entity.GetWorldTransform()));
 				glm::vec3 frustumCorners[8];
-				int i = 0;
-				for (int x = 0; x < 2; ++x)
+				size_t i = 0;
+				for (float x = 0.0f; x < 2.0f; x += 1.0f)
 				{
-					for (int y = 0; y < 2; ++y)
+					for (float y = 0.0f; y < 2.0f; y += 1.0f)
 					{
-						for (int z = 0; z < 2; ++z)
+						for (float z = 0.0f; z < 2.0f; z += 1.0f)
 						{
-							const glm::vec4 pt = 
-							inv * glm::vec4(
-							2.0f * static_cast<float>(x) - 1.0f,
-							2.0f * static_cast<float>(y) - 1.0f,
-							2.0f * static_cast<float>(z) - 1.0f,
-							1.0f);
-							frustumCorners[i] = (glm::vec3(pt) / pt.w);
+							const glm::vec4 pt = inv * glm::vec4(2.0f * x - 1.0f, 2.0f * y - 1.0f, 2.0f * z - 1.0f, 1.0f);
+							frustumCorners[i] = glm::vec3(pt) / pt.w;
 							++i;
 						}
 					}
@@ -434,16 +429,35 @@ namespace ArcEngine
 			const auto view = m_Scene->GetAllEntitiesWith<TransformComponent, BoxColliderComponent>();
 			for (auto &&[entity, tc, bc] : view.each())
 			{
-				const glm::mat4 transform = Entity(entity, m_Scene.get()).GetWorldTransform() * glm::translate(glm::mat4(1.0f), bc.Offset) * glm::scale(glm::mat4(1.0f), 4.0f * bc.Size);
-				glm::mat4 transformFront = glm::translate(transform, glm::vec3(0.0f, 0.0f, bc.Size.z));
-				glm::mat4 transformBack = glm::translate(transform, glm::vec3(0.0f, 0.0f, -bc.Size.z));
-				glm::mat4 transformLeft = glm::translate(transform, glm::vec3(-bc.Size.x, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-				glm::mat4 transformRight = glm::translate(transformLeft, glm::vec3(0.0f, 0.0f, 2.0f * bc.Size.x));
+				const glm::mat4 transform = Entity(entity, m_Scene.get()).GetWorldTransform() * glm::translate(glm::mat4(1.0f), bc.Offset) * glm::scale(glm::mat4(1.0f), 2.0f * bc.Size);
 
-				Renderer2D::DrawRect(eastl::move(transformFront), color);
-				Renderer2D::DrawRect(eastl::move(transformBack), color);
-				Renderer2D::DrawRect(eastl::move(transformLeft), color);
-				Renderer2D::DrawRect(eastl::move(transformRight), color);
+				glm::vec3 frustumCorners[8];
+				size_t i = 0;
+				for (float x = 0.0f; x < 2.0f; x += 1.0f)
+				{
+					for (float y = 0.0f; y < 2.0f; y += 1.0f)
+					{
+						for (float z = 0.0f; z < 2.0f; z += 1.0f)
+						{
+							const glm::vec4 pt = transform * glm::vec4(2.0f * x - 1.0f, 2.0f * y - 1.0f, 2.0f * z - 1.0f, 1.0f);
+							frustumCorners[i] = glm::vec3(pt) / pt.w;
+							++i;
+						}
+					}
+				}
+
+				Renderer2D::DrawLine(frustumCorners[0], frustumCorners[1], color);
+				Renderer2D::DrawLine(frustumCorners[0], frustumCorners[2], color);
+				Renderer2D::DrawLine(frustumCorners[0], frustumCorners[4], color);
+				Renderer2D::DrawLine(frustumCorners[1], frustumCorners[3], color);
+				Renderer2D::DrawLine(frustumCorners[1], frustumCorners[5], color);
+				Renderer2D::DrawLine(frustumCorners[2], frustumCorners[3], color);
+				Renderer2D::DrawLine(frustumCorners[2], frustumCorners[6], color);
+				Renderer2D::DrawLine(frustumCorners[3], frustumCorners[7], color);
+				Renderer2D::DrawLine(frustumCorners[4], frustumCorners[5], color);
+				Renderer2D::DrawLine(frustumCorners[4], frustumCorners[6], color);
+				Renderer2D::DrawLine(frustumCorners[5], frustumCorners[7], color);
+				Renderer2D::DrawLine(frustumCorners[6], frustumCorners[7], color);
 			}
 		}
 
