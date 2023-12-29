@@ -130,11 +130,11 @@ namespace ArcEngine
 		m_Pipeline->Unbind();
 	}
 
-	Ref<Texture2D> Material::GetTexture(const eastl::string_view& name)
+	Ref<Texture2D> Material::GetTexture(const eastl::string_view name)
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto it = m_Indices.find_as(name.data());
+		const auto it = m_Indices.find_as(name.begin());
 		[[likely]]
 		if (it != m_Indices.end())
 		{
@@ -144,11 +144,11 @@ namespace ArcEngine
 		return nullptr;
 	}
 
-	void Material::SetTexture(const eastl::string_view& name, const Ref<Texture2D>& texture)
+	void Material::SetTexture(const eastl::string_view name, const Ref<Texture2D>& texture)
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto it = m_Indices.find_as(name.data());
+		const auto it = m_Indices.find_as(name.begin());
 		[[likely]]
 		if (it != m_Indices.end())
 		{
@@ -158,11 +158,11 @@ namespace ArcEngine
 		}
 	}
 
-	void* Material::GetData_Internal(const eastl::string_view& name)
+	void* Material::GetData_Internal(const eastl::string_view name)
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto it = m_Indices.find_as(name.data());
+		const auto it = m_Indices.find_as(name.begin());
 		[[likely]]
 		if (it != m_Indices.end())
 		{
@@ -172,11 +172,11 @@ namespace ArcEngine
 		return nullptr;
 	}
 
-	void Material::SetData_Internal(const eastl::string_view& name, const void* data)
+	void Material::SetData_Internal(const eastl::string_view name, const void* data)
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto it = m_Indices.find_as(name.data());
+		const auto it = m_Indices.find_as(name.begin());
 		[[likely]]
 		if (it != m_Indices.end())
 		{

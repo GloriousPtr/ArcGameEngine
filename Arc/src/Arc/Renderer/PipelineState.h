@@ -68,7 +68,7 @@ namespace ArcEngine
 		virtual bool Unbind() const = 0;
 
 		[[nodiscard]] virtual eastl::vector<MaterialProperty>& GetMaterialProperties() = 0;
-		[[nodiscard]] virtual uint32_t GetSlot(const eastl::string_view& name) = 0;
+		[[nodiscard]] virtual uint32_t GetSlot(const eastl::string_view name) = 0;
 
 		void SetData(const eastl::string_view name, const void* data, uint32_t size, uint32_t offset = 0)
 		{

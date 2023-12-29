@@ -44,9 +44,9 @@ namespace std
 			return ctx.end();
 		}
 
-		auto format(const eastl::string_view& input, format_context& ctx) const -> format_context::iterator
+		auto format(const eastl::string_view input, format_context& ctx) const -> format_context::iterator
 		{
-			return format_to(ctx.out(), "{}", input.data());
+			return format_to(ctx.out(), "{}", input.begin());
 		}
 	};
 

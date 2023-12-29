@@ -16,7 +16,7 @@ namespace ArcEngine
 		bool Unbind() const override;
 
 		[[nodiscard]] eastl::vector<MaterialProperty>& GetMaterialProperties() override { return m_MaterialProperties; }
-		[[nodiscard]] uint32_t GetSlot(const eastl::string_view& name) override { return m_BufferMap.at(name.data()); }
+		[[nodiscard]] uint32_t GetSlot(const eastl::string_view name) override { return m_BufferMap.at(name.begin()); }
 
 	private:
 		void SetDataImpl(const eastl::string_view name, const void* value, uint32_t size, uint32_t offset) override;
