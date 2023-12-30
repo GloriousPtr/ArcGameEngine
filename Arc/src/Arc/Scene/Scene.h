@@ -51,6 +51,7 @@ namespace ArcEngine
 		Entity Duplicate(Entity entity);
 		[[nodiscard]] bool HasEntity(UUID uuid) const;
 		[[nodiscard]] Entity GetEntity(UUID uuid);
+		[[nodiscard]] inline size_t GetEntityCount() const { return m_EntityMap.size(); }
 		[[nodiscard]] bool IsRunning() const { return m_IsRunning; }
 
 		void OnUpdateEditor([[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera);

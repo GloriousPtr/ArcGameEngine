@@ -65,7 +65,16 @@ namespace ArcEngine
 			{
 				ImGui::SameLine();
 				ImGui::SetCursorPosX(filterCursorPosX + ImGui::GetFontSize() * 0.5f);
-				ImGui::TextUnformatted(ARC_ICON_SEARCH " Search...");
+				if (m_Context)
+				{
+					ImGui::BeginDisabled(true);
+					ImGui::Text("%s %llu Entities", ARC_ICON_SEARCH, m_Context->GetEntityCount());
+					ImGui::EndDisabled();
+				}
+				else
+				{
+					ImGui::TextUnformatted(ARC_ICON_SEARCH " Search...");
+				}
 			}
 
 			const ImVec2 cursorPos = ImGui::GetCursorPos();
