@@ -350,6 +350,13 @@ namespace ArcEngine
 				const auto& component = srcEntity.GetComponent<Component>();
 				dst.emplace_or_replace<Component>(dstEntity, component);
 			}
+			if (entt::type_id<Component>() == entt::type_id<RelationshipComponent>())
+			{
+				if (Entity parent = srcEntity.GetParent())
+				{
+					parent.GetRelationship().Children.push_back(dstEntity.GetUUID());
+				}
+			}
 		}(), ...);
 	}
 
