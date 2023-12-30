@@ -714,21 +714,14 @@ namespace ArcEngine
 			const auto scriptView = m_Registry.view<ScriptComponent>();
 			for (auto &&[e, sc] : scriptView.each())
 			{
-				Entity entity = { e, this };
-				ARC_PROFILE_TAG("Entity", entity.GetTag().data());
-				ARC_PROFILE_TAG("EntityID", entity.GetUUID());
-
+				const Entity entity = { e, this };
 				for (const auto& className : sc.Classes)
 				{
-					ARC_PROFILE_TAG("ScriptInstantiate", className.c_str());
-
 					ScriptEngine::CreateInstance(entity, className);
 				}
 
 				for (const auto& className : sc.Classes)
 				{
-					ARC_PROFILE_TAG("Script", className.c_str());
-
 					ScriptEngine::GetInstance(entity, className)->InvokeOnCreate();
 				}
 			}
@@ -750,13 +743,8 @@ namespace ArcEngine
 			for (auto &&[e, sc] : scriptView.each())
 			{
 				const Entity entity = { e, this };
-				ARC_PROFILE_TAG("Entity", entity.GetTag().data());
-				ARC_PROFILE_TAG("EntityID", entity.GetUUID());
-
 				for (const auto& className : sc.Classes)
 				{
-					ARC_PROFILE_TAG("Script", className.c_str());
-
 					ScriptEngine::GetInstance(entity, className)->InvokeOnDestroy();
 					ScriptEngine::RemoveInstance(entity, className);
 				}
@@ -848,14 +836,9 @@ namespace ArcEngine
 			const auto scriptView = m_Registry.view<ScriptComponent>();
 			for (auto &&[e, sc] : scriptView.each())
 			{
-				Entity entity = { e, this };
-				ARC_PROFILE_TAG("Entity", entity.GetTag().data());
-				ARC_PROFILE_TAG("EntityID", entity.GetUUID());
-
-				for (const auto& className : sc.Classes)
+				const Entity entity = { e, this };
+				for (const auto className : sc.Classes)
 				{
-					ARC_PROFILE_TAG("Script", className.c_str());
-
 					ScriptEngine::GetInstance(entity, className)->InvokeOnUpdate(ts);
 				}
 			}
