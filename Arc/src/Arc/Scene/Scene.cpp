@@ -341,11 +341,11 @@ namespace ArcEngine
 	}
 
 	template<typename... Component>
-	static void CopyComponent(entt::registry& dst, Entity srcEntity, Entity dstEntity)
+	static void DuplicateEntityComponent(entt::registry& dst, Entity srcEntity, Entity dstEntity)
 	{
 		([&]()
 		{
-			if (entt::type_id<Component>() != entt::type_id<ScriptComponent>() && srcEntity.HasComponent<Component>())	// Currently not support duplicating ScriptComponent
+			if (srcEntity.HasComponent<Component>())
 			{
 				const auto& component = srcEntity.GetComponent<Component>();
 				dst.emplace_or_replace<Component>(dstEntity, component);
@@ -357,13 +357,14 @@ namespace ArcEngine
 					parent.GetRelationship().Children.push_back(dstEntity.GetUUID());
 				}
 			}
+			// TODO: Handle ScriptComponent copying with fields
 		}(), ...);
 	}
 
 	template<typename... Component>
-	static void CopyComponent(ComponentGroup<Component...>, entt::registry& dst, Entity srcEntity, Entity dstEntity)
+	static void DuplicateEntityComponent(ComponentGroup<Component...>, entt::registry& dst, Entity srcEntity, Entity dstEntity)
 	{
-		CopyComponent<Component...>(dst, srcEntity, dstEntity);
+		DuplicateEntityComponent<Component...>(dst, srcEntity, dstEntity);
 	}
 
 	Ref<Scene> Scene::CopyTo(const Ref<Scene>& other)
@@ -450,7 +451,7 @@ namespace ArcEngine
 
 		eastl::string name = entity.GetComponent<TagComponent>().Tag;
 		Entity duplicate = CreateEntity(name);
-		CopyComponent(AllComponents{}, m_Registry, entity, duplicate);
+		DuplicateEntityComponent(AllComponents{}, m_Registry, entity, duplicate);
 		return duplicate;
 	}
 
