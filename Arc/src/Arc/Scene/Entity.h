@@ -16,7 +16,7 @@ namespace ArcEngine
 		Entity(entt::entity handle, Scene* scene);
 
 		template<typename T, typename... Args>
-		T& AddComponent(Args&&... args) const
+		inline T& AddComponent(Args&&... args) const
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -27,7 +27,7 @@ namespace ArcEngine
 		}
 
 		template<typename T>
-		[[nodiscard]] T& GetComponent() const
+		[[nodiscard]] inline T& GetComponent() const
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -36,7 +36,7 @@ namespace ArcEngine
 		}
 
 		template<typename T>
-		[[nodiscard]] bool HasComponent() const
+		[[nodiscard]] inline bool HasComponent() const
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -45,7 +45,7 @@ namespace ArcEngine
 		}
 
 		template<typename T>
-		void RemoveComponent() const
+		inline void RemoveComponent() const
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -54,19 +54,19 @@ namespace ArcEngine
 		}
 
 		template<typename... Components>
-		[[nodiscard]] auto GetAllComponents() const
+		[[nodiscard]] inline auto GetAllComponents() const
 		{
 			ARC_PROFILE_SCOPE();
 
 			return m_Scene->m_Registry.get<Components...>(m_EntityHandle);
 		}
 
-		[[nodiscard]] UUID GetUUID() const { return GetComponent<IDComponent>().ID; }
-		[[nodiscard]] eastl::string_view GetTag() const { return GetComponent<TagComponent>().Tag; }
-		[[nodiscard]] TransformComponent& GetTransform() const { return GetComponent<TransformComponent>(); }
-		[[nodiscard]] RelationshipComponent& GetRelationship() const { return GetComponent<RelationshipComponent>(); }
+		[[nodiscard]] inline UUID GetUUID() const { return GetComponent<IDComponent>().ID; }
+		[[nodiscard]] inline eastl::string_view GetTag() const { return GetComponent<TagComponent>().Tag; }
+		[[nodiscard]] inline TransformComponent& GetTransform() const { return GetComponent<TransformComponent>(); }
+		[[nodiscard]] inline RelationshipComponent& GetRelationship() const { return GetComponent<RelationshipComponent>(); }
 		
-		[[nodiscard]] Entity GetParent() const
+		[[nodiscard]] inline Entity GetParent() const
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -77,7 +77,7 @@ namespace ArcEngine
 			return rc.Parent != 0 ? m_Scene->GetEntity(rc.Parent) : Entity {};
 		}
 
-		void SetParent(Entity parent) const
+		inline void SetParent(Entity parent) const
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -123,7 +123,7 @@ namespace ArcEngine
 			return eastl::move(parentTransform * glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale));
 		}
 
-		[[nodiscard]] glm::mat4 GetLocalTransform() const
+		[[nodiscard]] inline glm::mat4 GetLocalTransform() const
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -131,7 +131,7 @@ namespace ArcEngine
 			return eastl::move(glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale));
 		}
 
-		[[nodiscard]] Scene* GetScene() const { return m_Scene; }
+		[[nodiscard]] inline Scene* GetScene() const { return m_Scene; }
 
 		operator bool() const { return m_EntityHandle != entt::null && m_Scene != nullptr && m_Scene->m_Registry.valid(m_EntityHandle); }
 		operator entt::entity() const { return m_EntityHandle; }
