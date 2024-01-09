@@ -6,6 +6,14 @@
 
 #include "Arc/Core/PlatformDetection.h"
 
+#if defined(ARC_PLATFORM_WINDOWS)
+#define ARC_EXPORT extern "C" __declspec(dllexport)
+#elif defined(ARC_PLATFORM_LINUX)
+#define ARC_EXPORT extern "C" __attribute__((visibility("default")))
+#else
+#error Unsupported ARC_EXPORT platform
+#endif
+
 #ifdef ARC_DEBUG
 	#if defined(ARC_PLATFORM_WINDOWS)
 		#define ARC_DEBUGBREAK() __debugbreak()

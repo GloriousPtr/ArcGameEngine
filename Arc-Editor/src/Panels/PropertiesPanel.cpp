@@ -5,6 +5,7 @@
 #include <imgui/misc/cpp/imgui_stdlib.h>
 
 #include <Arc/Scene/EntitySerializer.h>
+#include <Arc/Scripting/ScriptEngineRegistry.h>
 
 #include "../Utils/UI.h"
 #include "../Utils/EditorTheme.h"
@@ -701,7 +702,7 @@ namespace ArcEngine
 			DrawParticleBySpeedModule("Rotation By Speed", props.RotationBySpeed, false, true);
 		});
 
-		DrawComponent<Rigidbody2DComponent>(ARC_ICON_RIGIDBODY_2D " Rigidbody 2D", entity, [](Rigidbody2DComponent& component)
+		DrawComponent<Rigidbody2DComponent>(ARC_ICON_RIGIDBODY_2D " Rigidbody 2D", entity, [entity](Rigidbody2DComponent& component)
 		{
 			UI::BeginProperties();
 
@@ -711,25 +712,40 @@ namespace ArcEngine
 			{
 				bool tmpBool = component.AutoMass;
 				if (UI::Property("Auto Mass", tmpBool))
-					component.AutoMass = tmpBool;
+					Rigidbody2DComponent_SetAutoMass(entity.GetUUID(), &tmpBool);
 
 				if (!component.AutoMass)
-					UI::Property("Mass", component.Mass, 0.01f, 10000.0f);
-				UI::Property("Linear Drag", component.LinearDrag);
-				UI::Property("Angular Drag", component.AngularDrag);
-				UI::Property("Gravity Scale", component.GravityScale);
+				{
+					if (UI::Property("Mass", component.Mass, 0.01f, 10000.0f))
+						Rigidbody2DComponent_SetMass(entity.GetUUID(), &component.Mass);
+				}
+
+				if (UI::Property("Linear Drag", component.LinearDrag))
+				{
+					component.LinearDrag = glm::max(component.LinearDrag, 0.0f);
+					Rigidbody2DComponent_SetLinearDrag(entity.GetUUID(), &component.LinearDrag);
+				}
+
+				if (UI::Property("Angular Drag", component.AngularDrag))
+				{
+					component.AngularDrag = glm::max(component.AngularDrag, 0.0f);
+					Rigidbody2DComponent_SetAngularDrag(entity.GetUUID(), &component.AngularDrag);
+				}
+
+				if (UI::Property("Gravity Scale", component.GravityScale))
+					Rigidbody2DComponent_SetGravityScale(entity.GetUUID(), &component.GravityScale);
 
 				tmpBool = component.AllowSleep;
 				if (UI::Property("Allow Sleep", tmpBool))
-					component.AllowSleep = tmpBool;
+					Rigidbody2DComponent_SetAllowSleep(entity.GetUUID(), &tmpBool);
 
 				tmpBool = component.Awake;
 				if (UI::Property("Awake", tmpBool))
-					component.Awake = tmpBool;
+					Rigidbody2DComponent_SetAwake(entity.GetUUID(), &tmpBool);
 
 				tmpBool = component.Continuous;
 				if (UI::Property("Continuous", tmpBool))
-					component.Continuous = tmpBool;
+					Rigidbody2DComponent_SetContinuous(entity.GetUUID(), &tmpBool);
 
 				tmpBool = component.Interpolation;
 				if (UI::Property("Interpolation", tmpBool))
@@ -737,10 +753,7 @@ namespace ArcEngine
 
 				tmpBool = component.FreezeRotation;
 				if (UI::Property("Freeze Rotation", tmpBool))
-					component.FreezeRotation = tmpBool;
-
-				component.LinearDrag = glm::max(component.LinearDrag, 0.0f);
-				component.AngularDrag = glm::max(component.AngularDrag, 0.0f);
+					Rigidbody2DComponent_SetFreezeRotation(entity.GetUUID(), &tmpBool);
 			}
 
 			UI::EndProperties();

@@ -136,7 +136,7 @@ namespace ArcEngine
 
 	struct Rigidbody2DComponent
 	{
-		enum class BodyType { Static = 0, Kinematic, Dynamic };
+		enum class BodyType : uint8_t { Static = 0, Kinematic, Dynamic };
 		
 		void* RuntimeBody = nullptr;
 
@@ -149,12 +149,12 @@ namespace ArcEngine
 		float LinearDrag = 0.0f;
 		float AngularDrag = 0.05f;
 		float GravityScale = 1.0f;
-		uint32_t AutoMass : 1 = 1;
-		uint32_t AllowSleep : 1 = 1;
-		uint32_t Awake : 1 = 1;
-		uint32_t Continuous : 1 = 0;
-		uint32_t Interpolation : 1 = 1;
-		uint32_t FreezeRotation : 1 = 0;
+		uint8_t AutoMass : 1 = 1;
+		uint8_t AllowSleep : 1 = 1;
+		uint8_t Awake : 1 = 1;
+		uint8_t Continuous : 1 = 0;
+		uint8_t Interpolation : 1 = 1;
+		uint8_t FreezeRotation : 1 = 0;
 	};
 
 	struct BoxCollider2DComponent
@@ -328,12 +328,12 @@ namespace ArcEngine
 		float LinearDrag = 0.0f;
 		float AngularDrag = 0.05f;
 		float GravityScale = 1.0f;
-		uint32_t AutoMass : 1 = 1;
-		uint32_t AllowSleep : 1 = 1;
-		uint32_t Awake : 1 = 1;
-		uint32_t Continuous : 1 = 0;
-		uint32_t Interpolation : 1 = 1;
-		uint32_t IsSensor : 1 = 0;
+		uint8_t AutoMass : 1 = 1;
+		uint8_t AllowSleep : 1 = 1;
+		uint8_t Awake : 1 = 1;
+		uint8_t Continuous : 1 = 0;
+		uint8_t Interpolation : 1 = 1;
+		uint8_t IsSensor : 1 = 0;
 		BodyType Type = BodyType::Dynamic;
 	};
 
