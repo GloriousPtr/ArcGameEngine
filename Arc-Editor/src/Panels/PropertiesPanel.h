@@ -36,8 +36,10 @@ namespace ArcEngine
 		void DrawComponents(Entity entity);
 		void DrawFileProperties(eastl::string_view filepath);
 
-		template<typename Component>
-		void DrawAddComponent(Entity entity, eastl::string_view name, eastl::string_view category = nullptr) const;
+		template<typename... Component>
+		void DrawAddComponent(Entity entity) const;
+		template<typename... Component>
+		void DrawAddComponent(ComponentGroup<Component...>, Entity entity) const;
 
 	private:
 		EditorContext m_Context = {};

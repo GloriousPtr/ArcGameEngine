@@ -12,9 +12,53 @@
 
 namespace ArcEngine
 {
+	struct ComponentInfo
+	{
+		eastl::string Name{};
+		eastl::string Category{};
+	};
+
+	static eastl::unordered_map<size_t, ComponentInfo> s_ComponentDataMap;
+
+	template<typename Component>
+	static void AddComponentName(eastl::string_view name, eastl::string_view category = "")
+	{
+		const size_t id = entt::type_id<Component>().hash();
+		s_ComponentDataMap.emplace(id, ComponentInfo{ name.begin(), category.begin() });
+	}
+
 	PropertiesPanel::PropertiesPanel(const char* name)
 			: BasePanel(name, ARC_ICON_INFO, true)
 	{
+		AddComponentName<SpriteRendererComponent>(ARC_ICON_SPRITE_RENDERER " Sprite Renderer", "2D");
+		AddComponentName<Rigidbody2DComponent>(ARC_ICON_RIGIDBODY_2D " Rigidbody 2D", "2D");
+		AddComponentName<BoxCollider2DComponent>(ARC_ICON_BOX_COLLIDER_2D " Box Collider 2D", "2D");
+		AddComponentName<CircleCollider2DComponent>(ARC_ICON_CIRCLE_COLLIDER_2D " Circle Collider 2D", "2D");
+		AddComponentName<PolygonCollider2DComponent>(ARC_ICON_POLYGON_COLLIDER_2D " Polygon Collider 2D", "2D");
+		AddComponentName<DistanceJoint2DComponent>(ARC_ICON_DISTANCE_JOINT_2D " Distance Joint 2D", "2D");
+		AddComponentName<SpringJoint2DComponent>(ARC_ICON_SPRING_JOINT_2D " Spring Joint 2D", "2D");
+		AddComponentName<HingeJoint2DComponent>(ARC_ICON_HINGE_JOINT_2D " Hinge Joint 2D", "2D");
+		AddComponentName<SliderJoint2DComponent>(ARC_ICON_SLIDER_JOINT_2D " Slider Joint 2D", "2D");
+		AddComponentName<WheelJoint2DComponent>(ARC_ICON_WHEEL_JOINT_2D " Wheel Joint 2D", "2D");
+		AddComponentName<BuoyancyEffector2DComponent>(ARC_ICON_BUOYANCY_EFFECTOR_2D " Buoyancy Effector 2D", "2D");
+
+		AddComponentName<SkyLightComponent>(ARC_ICON_SKYLIGHT " Sky Light", "3D");
+		AddComponentName<LightComponent>(ARC_ICON_LIGHT " Light", "3D");
+		AddComponentName<MeshComponent>(ARC_ICON_MESH " Mesh", "3D");
+		AddComponentName<RigidbodyComponent>(ARC_ICON_RIGIDBODY " Rigidbody", "3D");
+		AddComponentName<BoxColliderComponent>(ARC_ICON_BOX_COLLIDER " Box Collider", "3D");
+		AddComponentName<SphereColliderComponent>(ARC_ICON_SPHERE_COLLIDER " Sphere Collider", "3D");
+		AddComponentName<CapsuleColliderComponent>(ARC_ICON_CAPSULE_COLLIDER " Capsule Collider", "3D");
+		AddComponentName<TaperedCapsuleColliderComponent>(ARC_ICON_TAPERED_CAPSULE_COLLIDER " Tapered Capsule Collider", "3D");
+		AddComponentName<CylinderColliderComponent>(ARC_ICON_CYLINDER_COLLIDER " Cylinder Collider", "3D");
+
+		AddComponentName<AudioSourceComponent>(ARC_ICON_AUDIO_SOURCE " Audio", "Audio");
+		AddComponentName<AudioListenerComponent>(ARC_ICON_AUDIO_LISTENER " Audio Listener", "Audio");
+
+		AddComponentName<TransformComponent>(ARC_ICON_TRANSFORM " Transform");
+		AddComponentName<ParticleSystemComponent>(ARC_ICON_PARTICLE_SYSTEM " Particle System");
+		AddComponentName<CameraComponent>(ARC_ICON_CAMERA " Camera");
+		AddComponentName<ScriptComponent>(ARC_ICON_SCRIPT " Script");
 	}
 
 	void PropertiesPanel::OnImGuiRender()
@@ -50,7 +94,7 @@ namespace ArcEngine
 	}
 
 	template<typename T, typename UIFunction>
-	static void DrawComponent(eastl::string_view name, Entity entity, UIFunction uiFunction, const bool removable = true)
+	static void DrawComponent(Entity entity, UIFunction uiFunction, const bool removable = true)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -69,7 +113,7 @@ namespace ArcEngine
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
 
 			const size_t id = entt::type_id<T>().hash();
-			const bool open = ImGui::TreeNodeEx(reinterpret_cast<void*>(id), treeFlags, "%s", name.begin());
+			const bool open = ImGui::TreeNodeEx(reinterpret_cast<void*>(id), treeFlags, "%s", s_ComponentDataMap.at(id).Name.c_str());
 
 			bool removeComponent = false;
 			if(removable)
@@ -385,34 +429,7 @@ namespace ArcEngine
 
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 
-					DrawAddComponent<SpriteRendererComponent>(entity, ARC_ICON_SPRITE_RENDERER " Sprite Renderer", "2D");
-					DrawAddComponent<Rigidbody2DComponent>(entity, ARC_ICON_RIGIDBODY_2D " Rigidbody 2D", "2D");
-					DrawAddComponent<BoxCollider2DComponent>(entity, ARC_ICON_BOX_COLLIDER_2D " Box Collider 2D", "2D");
-					DrawAddComponent<CircleCollider2DComponent>(entity, ARC_ICON_CIRCLE_COLLIDER_2D " Circle Collider 2D", "2D");
-					DrawAddComponent<PolygonCollider2DComponent>(entity, ARC_ICON_POLYGON_COLLIDER_2D " Polygon Collider 2D", "2D");
-					DrawAddComponent<DistanceJoint2DComponent>(entity, ARC_ICON_DISTANCE_JOINT_2D " Distance Joint 2D", "2D");
-					DrawAddComponent<SpringJoint2DComponent>(entity, ARC_ICON_SPRING_JOINT_2D " Spring Joint 2D", "2D");
-					DrawAddComponent<HingeJoint2DComponent>(entity, ARC_ICON_HINGE_JOINT_2D " Hinge Joint 2D", "2D");
-					DrawAddComponent<SliderJoint2DComponent>(entity, ARC_ICON_SLIDER_JOINT_2D " Slider Joint 2D", "2D");
-					DrawAddComponent<WheelJoint2DComponent>(entity, ARC_ICON_WHEEL_JOINT_2D " Wheel Joint 2D", "2D");
-					DrawAddComponent<BuoyancyEffector2DComponent>(entity, ARC_ICON_BUOYANCY_EFFECTOR_2D " Buoyancy Effector 2D", "2D");
-
-					DrawAddComponent<SkyLightComponent>(entity, ARC_ICON_SKYLIGHT " Sky Light", "3D");
-					DrawAddComponent<LightComponent>(entity, ARC_ICON_LIGHT " Light", "3D");
-					DrawAddComponent<MeshComponent>(entity, ARC_ICON_MESH " Mesh", "3D");
-					DrawAddComponent<RigidbodyComponent>(entity, ARC_ICON_RIGIDBODY " Rigidbody", "3D");
-					DrawAddComponent<BoxColliderComponent>(entity, ARC_ICON_BOX_COLLIDER " Box Collider", "3D");
-					DrawAddComponent<SphereColliderComponent>(entity, ARC_ICON_SPHERE_COLLIDER " Sphere Collider", "3D");
-					DrawAddComponent<CapsuleColliderComponent>(entity, ARC_ICON_CAPSULE_COLLIDER " Capsule Collider", "3D");
-					DrawAddComponent<TaperedCapsuleColliderComponent>(entity, ARC_ICON_TAPERED_CAPSULE_COLLIDER " Tapered Capsule Collider", "3D");
-					DrawAddComponent<CylinderColliderComponent>(entity, ARC_ICON_CYLINDER_COLLIDER " Cylinder Collider", "3D");
-
-					DrawAddComponent<AudioSourceComponent>(entity, ARC_ICON_AUDIO_SOURCE " Audio", "Audio");
-					DrawAddComponent<AudioListenerComponent>(entity, ARC_ICON_AUDIO_LISTENER " Audio Listener", "Audio");
-
-					DrawAddComponent<ParticleSystemComponent>(entity, ARC_ICON_PARTICLE_SYSTEM " Particle System");
-					DrawAddComponent<CameraComponent>(entity, ARC_ICON_CAMERA " Camera");
-					DrawAddComponent<ScriptComponent>(entity, ARC_ICON_SCRIPT " Script");
+					DrawAddComponent(AllComponents{}, entity);
 
 					ImGui::PopStyleVar();
 					ImGui::EndPopup();
@@ -456,7 +473,7 @@ namespace ArcEngine
 		}
 
 		ImGui::BeginChild("PropertiesBody");
-		DrawComponent<TransformComponent>(ARC_ICON_TRANSFORM " Transform", entity, [](TransformComponent& component)
+		DrawComponent<TransformComponent>(entity, [](TransformComponent& component)
 		{
 			UI::BeginProperties();
 
@@ -471,7 +488,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		}, false);
 
-		DrawComponent<CameraComponent>(ARC_ICON_CAMERA " Camera", entity, [](CameraComponent& component)
+		DrawComponent<CameraComponent>(entity, [](CameraComponent& component)
 		{
 			auto& camera = component.Camera;
 
@@ -518,7 +535,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 		
-		DrawComponent<SpriteRendererComponent>(ARC_ICON_SPRITE_RENDERER " Sprite Renderer", entity, [&entity](SpriteRendererComponent& component)
+		DrawComponent<SpriteRendererComponent>(entity, [&entity](SpriteRendererComponent& component)
 		{
 			UI::BeginProperties();
 			UI::PropertyVector("Color", component.Color, true);
@@ -530,7 +547,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<MeshComponent>(ARC_ICON_MESH " Mesh", entity, [](MeshComponent& component)
+		DrawComponent<MeshComponent>(entity, [](MeshComponent& component)
 		{
 			if (ImGui::Button(component.MeshGeometry ? component.MeshGeometry->GetFilepath() : "null", { ImGui::GetContentRegionAvail().x, ImGui::GetFrameHeight() }))
 			{
@@ -576,7 +593,7 @@ namespace ArcEngine
 			}
 		});
 
-		DrawComponent<SkyLightComponent>(ARC_ICON_SKYLIGHT " Sky Light", entity, [](SkyLightComponent& component)
+		DrawComponent<SkyLightComponent>(entity, [](SkyLightComponent& component)
 		{
 			UI::BeginProperties();
 			UI::Property("Texture", component.Texture, component.Texture == nullptr ? 0 : component.Texture->GetHRDRendererID());
@@ -585,7 +602,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<LightComponent>(ARC_ICON_LIGHT " Light", entity, [](LightComponent& component)
+		DrawComponent<LightComponent>(entity, [](LightComponent& component)
 		{
 			UI::BeginProperties();
 			UI::PropertyEnum("Light Type", component.Type);
@@ -646,7 +663,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<ParticleSystemComponent>(ARC_ICON_PARTICLE_SYSTEM " Particle System", entity, [](const ParticleSystemComponent& component)
+		DrawComponent<ParticleSystemComponent>(entity, [](const ParticleSystemComponent& component)
 		{
 			auto& props = component.System->GetProperties();
 
@@ -702,7 +719,7 @@ namespace ArcEngine
 			DrawParticleBySpeedModule("Rotation By Speed", props.RotationBySpeed, false, true);
 		});
 
-		DrawComponent<Rigidbody2DComponent>(ARC_ICON_RIGIDBODY_2D " Rigidbody 2D", entity, [entity](Rigidbody2DComponent& component)
+		DrawComponent<Rigidbody2DComponent>(entity, [entity](Rigidbody2DComponent& component)
 		{
 			UI::BeginProperties();
 
@@ -759,7 +776,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<BoxCollider2DComponent>(ARC_ICON_BOX_COLLIDER_2D " Box Collider 2D", entity, [](BoxCollider2DComponent& component)
+		DrawComponent<BoxCollider2DComponent>(entity, [](BoxCollider2DComponent& component)
 		{
 			UI::BeginProperties();
 			UI::Property("Is Sensor", component.IsSensor);
@@ -778,7 +795,7 @@ namespace ArcEngine
 			}
 		});
 
-		DrawComponent<CircleCollider2DComponent>(ARC_ICON_CIRCLE_COLLIDER_2D " Circle Collider 2D", entity, [](CircleCollider2DComponent& component)
+		DrawComponent<CircleCollider2DComponent>(entity, [](CircleCollider2DComponent& component)
 		{
 			UI::BeginProperties();
 			UI::Property("Is Sensor", component.IsSensor);
@@ -797,7 +814,7 @@ namespace ArcEngine
 			}
 		});
 
-		DrawComponent<PolygonCollider2DComponent>(ARC_ICON_POLYGON_COLLIDER_2D " Polygon Collider 2D", entity, [](PolygonCollider2DComponent& component)
+		DrawComponent<PolygonCollider2DComponent>(entity, [](PolygonCollider2DComponent& component)
 		{
 			UI::BeginProperties();
 			UI::Property("Is Sensor", component.IsSensor);
@@ -817,7 +834,7 @@ namespace ArcEngine
 			}
 		});
 
-		DrawComponent<DistanceJoint2DComponent>(ARC_ICON_DISTANCE_JOINT_2D " Distance Joint 2D", entity, [&entity](DistanceJoint2DComponent& component)
+		DrawComponent<DistanceJoint2DComponent>(entity, [&entity](DistanceJoint2DComponent& component)
 		{
 			UI::BeginProperties();
 			UI::Property("Enable Collision", component.EnableCollision);
@@ -836,7 +853,7 @@ namespace ArcEngine
 			component.MaxDistanceBy = glm::max(component.MaxDistanceBy, 0.0f);
 		});
 
-		DrawComponent<SpringJoint2DComponent>(ARC_ICON_SPRING_JOINT_2D " Spring Joint 2D", entity, [&entity](SpringJoint2DComponent& component)
+		DrawComponent<SpringJoint2DComponent>(entity, [&entity](SpringJoint2DComponent& component)
 		{
 			UI::BeginProperties();
 			UI::Property("Enable Collision", component.EnableCollision);
@@ -858,7 +875,7 @@ namespace ArcEngine
 			component.Frequency = glm::max(component.Frequency, 0.0f);
 		});
 
-		DrawComponent<HingeJoint2DComponent>(ARC_ICON_HINGE_JOINT_2D " Hinge Joint 2D", entity, [&entity](HingeJoint2DComponent& component)
+		DrawComponent<HingeJoint2DComponent>(entity, [&entity](HingeJoint2DComponent& component)
 		{
 			UI::BeginProperties();
 			UI::Property("Enable Collision", component.EnableCollision);
@@ -893,7 +910,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<SliderJoint2DComponent>(ARC_ICON_SLIDER_JOINT_2D " Slider Joint 2D", entity, [&entity](SliderJoint2DComponent& component)
+		DrawComponent<SliderJoint2DComponent>(entity, [&entity](SliderJoint2DComponent& component)
 		{
 			UI::BeginProperties();
 			UI::Property("Enable Collision", component.EnableCollision);
@@ -927,7 +944,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<WheelJoint2DComponent>(ARC_ICON_WHEEL_JOINT_2D " Wheel Joint 2D", entity, [&entity](WheelJoint2DComponent& component)
+		DrawComponent<WheelJoint2DComponent>(entity, [&entity](WheelJoint2DComponent& component)
 		{
 			UI::BeginProperties();
 			UI::Property("Enable Collision", component.EnableCollision);
@@ -960,7 +977,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<BuoyancyEffector2DComponent>(ARC_ICON_BUOYANCY_EFFECTOR_2D " Buoyancy Effector 2D", entity, [](BuoyancyEffector2DComponent& component)
+		DrawComponent<BuoyancyEffector2DComponent>(entity, [](BuoyancyEffector2DComponent& component)
 		{
 			UI::BeginProperties();
 			UI::Property("Density", component.Density);
@@ -973,7 +990,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<RigidbodyComponent>(ARC_ICON_RIGIDBODY " Rigidbody", entity, [](RigidbodyComponent& component)
+		DrawComponent<RigidbodyComponent>(entity, [](RigidbodyComponent& component)
 		{
 			UI::BeginProperties();
 
@@ -1018,7 +1035,7 @@ namespace ArcEngine
 			UI::EndProperties();
 		});
 
-		DrawComponent<BoxColliderComponent>(ARC_ICON_BOX_COLLIDER " Box Collider", entity, [](BoxColliderComponent& component)
+		DrawComponent<BoxColliderComponent>(entity, [](BoxColliderComponent& component)
 		{
 			UI::BeginProperties();
 			UI::PropertyVector("Size", component.Size);
@@ -1031,7 +1048,7 @@ namespace ArcEngine
 			component.Density = glm::max(component.Density, 0.001f);
 		});
 
-		DrawComponent<SphereColliderComponent>(ARC_ICON_SPHERE_COLLIDER " Sphere Collider", entity, [](SphereColliderComponent& component)
+		DrawComponent<SphereColliderComponent>(entity, [](SphereColliderComponent& component)
 		{
 			UI::BeginProperties();
 			UI::Property("Radius", component.Radius);
@@ -1044,7 +1061,7 @@ namespace ArcEngine
 			component.Density = glm::max(component.Density, 0.001f);
 		});
 
-		DrawComponent<CapsuleColliderComponent>(ARC_ICON_CAPSULE_COLLIDER " Capsule Collider", entity, [](CapsuleColliderComponent& component)
+		DrawComponent<CapsuleColliderComponent>(entity, [](CapsuleColliderComponent& component)
 		{
 			UI::BeginProperties();
 			UI::Property("Height", component.Height);
@@ -1058,7 +1075,7 @@ namespace ArcEngine
 			component.Density = glm::max(component.Density, 0.001f);
 		});
 
-		DrawComponent<TaperedCapsuleColliderComponent>(ARC_ICON_TAPERED_CAPSULE_COLLIDER " Tapered Capsule Collider", entity, [](TaperedCapsuleColliderComponent& component)
+		DrawComponent<TaperedCapsuleColliderComponent>(entity, [](TaperedCapsuleColliderComponent& component)
 		{
 			UI::BeginProperties();
 			UI::Property("Height", component.Height);
@@ -1073,7 +1090,7 @@ namespace ArcEngine
 			component.Density = glm::max(component.Density, 0.001f);
 		});
 
-		DrawComponent<CylinderColliderComponent>(ARC_ICON_CYLINDER_COLLIDER " Cylinder Collider", entity, [](CylinderColliderComponent& component)
+		DrawComponent<CylinderColliderComponent>(entity, [](CylinderColliderComponent& component)
 		{
 			UI::BeginProperties();
 			UI::Property("Height", component.Height);
@@ -1087,7 +1104,7 @@ namespace ArcEngine
 			component.Density = glm::max(component.Density, 0.001f);
 		});
 
-		DrawComponent<ScriptComponent>(ARC_ICON_SCRIPT " Script", entity, [this, &entity, &framePadding](ScriptComponent& component)
+		DrawComponent<ScriptComponent>(entity, [this, &entity, &framePadding](ScriptComponent& component)
 		{
 			ImGui::Spacing();
 
@@ -1134,7 +1151,7 @@ namespace ArcEngine
 			DrawFields(entity, component);
 		});
 
-		DrawComponent<AudioSourceComponent>(ARC_ICON_AUDIO_SOURCE " Audio", entity, [&entity](AudioSourceComponent& component)
+		DrawComponent<AudioSourceComponent>(entity, [&entity](AudioSourceComponent& component)
 		{
 			auto& config = component.Config;
 
@@ -1207,7 +1224,7 @@ namespace ArcEngine
 			}
 		});
 
-		DrawComponent<AudioListenerComponent>(ARC_ICON_AUDIO_LISTENER " Audio Listener", entity, [](AudioListenerComponent& component)
+		DrawComponent<AudioListenerComponent>(entity, [](AudioListenerComponent& component)
 		{
 			auto& config = component.Config;
 			UI::BeginProperties();
@@ -1252,18 +1269,24 @@ namespace ArcEngine
 		}
 	}
 
-	template<typename Component>
-	void PropertiesPanel::DrawAddComponent(Entity entity, eastl::string_view name, eastl::string_view category) const
+	template<typename... Component>
+	void PropertiesPanel::DrawAddComponent(Entity entity) const
 	{
-		if (!entity.HasComponent<Component>())
+		([&]()
 		{
-			if (!m_Filter.IsActive())
+			if (!entity.HasComponent<Component>())
 			{
-				if (!category.empty())
+				const size_t id = entt::type_id<Component>().hash();
+				if (s_ComponentDataMap.find(id) == s_ComponentDataMap.end())
+					return;
+
+				ComponentInfo& componentInfo = s_ComponentDataMap.at(id);
+
+				if (!m_Filter.IsActive())
 				{
-					if (ImGui::BeginMenu(category.begin()))
+					if (ImGui::BeginMenu(!componentInfo.Category.empty() ? componentInfo.Category.c_str() : "Others"))
 					{
-						if (ImGui::MenuItem(name.begin()))
+						if (ImGui::MenuItem(componentInfo.Name.c_str()))
 						{
 							entity.AddComponent<Component>();
 							ImGui::CloseCurrentPopup();
@@ -1274,24 +1297,22 @@ namespace ArcEngine
 				}
 				else
 				{
-					if (ImGui::MenuItem(name.begin()))
+					if (m_Filter.IsActive() && m_Filter.PassFilter(componentInfo.Name.begin(), componentInfo.Name.end()))
 					{
-						entity.AddComponent<Component>();
-						ImGui::CloseCurrentPopup();
+						if (ImGui::MenuItem(componentInfo.Name.c_str()))
+						{
+							entity.AddComponent<Component>();
+							ImGui::CloseCurrentPopup();
+						}
 					}
 				}
 			}
-			else
-			{
-				if (m_Filter.IsActive() && m_Filter.PassFilter(name.begin(), name.end()))
-				{
-					if (ImGui::MenuItem(name.begin()))
-					{
-						entity.AddComponent<Component>();
-						ImGui::CloseCurrentPopup();
-					}
-				}
-			}
-		}
+		}(), ...);
+	}
+
+	template<typename... Component>
+	void PropertiesPanel::DrawAddComponent(ComponentGroup<Component...>, Entity entity) const
+	{
+		DrawAddComponent<Component...>(entity);
 	}
 }
