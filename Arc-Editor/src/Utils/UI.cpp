@@ -332,7 +332,7 @@ namespace ArcEngine
 		T min = static_cast<T>(field.Min);
 		T max = static_cast<T>(field.Max);
 
-		const ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
+		const ScriptInstance* scriptInstance = entity.GetComponent<ScriptComponent>().Classes.at_key(className.data());
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className);
@@ -376,7 +376,7 @@ namespace ArcEngine
 		const ScriptField& field = fieldMap.at(fieldName.begin());
 		eastl::string_view tooltip = field.Tooltip.empty() ? nullptr : field.Tooltip.c_str();
 
-		const ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
+		const ScriptInstance* scriptInstance = entity.GetComponent<ScriptComponent>().Classes.at_key(className.data());
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className);
@@ -420,7 +420,7 @@ namespace ArcEngine
 		const ScriptField& field = fieldMap.at(fieldName.begin());
 		eastl::string_view tooltip = field.Tooltip.empty() ? nullptr : field.Tooltip.c_str();
 
-		const ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
+		const ScriptInstance* scriptInstance = entity.GetComponent<ScriptComponent>().Classes.at_key(className.data());
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className);
@@ -463,7 +463,7 @@ namespace ArcEngine
 		const ScriptField& field = fieldMap.at(fieldName.begin());
 		eastl::string_view tooltip = field.Tooltip.empty() ? nullptr : field.Tooltip.c_str();
 
-		const ScriptInstance* scriptInstance = (ScriptEngine::HasInstance(entity, className) ? ScriptEngine::GetInstance(entity, className) : nullptr);
+		const ScriptInstance* scriptInstance = entity.GetComponent<ScriptComponent>().Classes.at_key(className.data());
 		if (!scriptInstance)
 		{
 			auto& fieldInstanceMap = ScriptEngine::GetFieldInstanceMap(entity, className);

@@ -720,7 +720,7 @@ namespace ArcEngine
 
 			out << YAML::Key << "Scripts" << YAML::BeginMap;
 			int i = 0;
-			for (const auto& className : sc.Classes)
+			for (const auto& [className, instance] : sc.Classes)
 			{
 				out << YAML::Key << i << YAML::BeginMap;
 				++i;
@@ -1312,7 +1312,7 @@ namespace ArcEngine
 						continue;
 					}
 
-					sc.Classes.emplace_back(scriptName);
+					sc.Classes[scriptName] = nullptr;
 
 					const auto& fields = ScriptEngine::GetFieldMap(scriptName.c_str());
 					auto& fieldInstances = ScriptEngine::GetFieldInstanceMap(deserializedEntity, scriptName.c_str());

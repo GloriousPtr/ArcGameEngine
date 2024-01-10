@@ -97,12 +97,12 @@ namespace ArcEngine
 			if (e1.HasComponent<ScriptComponent>())
 			{
 				const auto& sc = e1.GetComponent<ScriptComponent>();
-				for (const auto& className : sc.Classes)
+				for (const auto& [className, instance] : sc.Classes)
 				{
 					if (bSensor)
-						ScriptEngine::GetInstance(e1, className)->InvokeOnSensorEnter2D(collisionData);
+						instance->InvokeOnSensorEnter2D(collisionData);
 					else
-						ScriptEngine::GetInstance(e1, className)->InvokeOnCollisionEnter2D(collisionData);
+						instance->InvokeOnCollisionEnter2D(collisionData);
 				}
 			}
 
@@ -115,12 +115,12 @@ namespace ArcEngine
 			if (e2.HasComponent<ScriptComponent>())
 			{
 				const auto& sc = e2.GetComponent<ScriptComponent>();
-				for (const auto& className : sc.Classes)
+				for (const auto& [className, instance] : sc.Classes)
 				{
 					if (aSensor)
-						ScriptEngine::GetInstance(e2, className)->InvokeOnSensorEnter2D(collisionData);
+						instance->InvokeOnSensorEnter2D(collisionData);
 					else
-						ScriptEngine::GetInstance(e2, className)->InvokeOnCollisionEnter2D(collisionData);
+						instance->InvokeOnCollisionEnter2D(collisionData);
 				}
 			}
 		}
@@ -160,12 +160,12 @@ namespace ArcEngine
 			if (e1.HasComponent<ScriptComponent>())
 			{
 				const auto& sc = e1.GetComponent<ScriptComponent>();
-				for (const auto& className : sc.Classes)
+				for (const auto& [className, instance] : sc.Classes)
 				{
 					if (bSensor)
-						ScriptEngine::GetInstance(e1, className)->InvokeOnSensorExit2D(collisionData);
+						instance->InvokeOnSensorExit2D(collisionData);
 					else
-						ScriptEngine::GetInstance(e1, className)->InvokeOnCollisionExit2D(collisionData);
+						instance->InvokeOnCollisionExit2D(collisionData);
 				}
 			}
 
@@ -178,12 +178,12 @@ namespace ArcEngine
 			if (e2.HasComponent<ScriptComponent>())
 			{
 				const auto& sc = e2.GetComponent<ScriptComponent>();
-				for (const auto& className : sc.Classes)
+				for (const auto& [className, instance] : sc.Classes)
 				{
 					if (aSensor)
-						ScriptEngine::GetInstance(e2, className)->InvokeOnSensorExit2D(collisionData);
+						instance->InvokeOnSensorExit2D(collisionData);
 					else
-						ScriptEngine::GetInstance(e2, className)->InvokeOnCollisionExit2D(collisionData);
+						instance->InvokeOnCollisionExit2D(collisionData);
 				}
 			}
 		}
@@ -716,14 +716,14 @@ namespace ArcEngine
 			for (auto &&[e, sc] : scriptView.each())
 			{
 				const Entity entity = { e, this };
-				for (const auto& className : sc.Classes)
+				for (auto& [className, instance] : sc.Classes)
 				{
-					ScriptEngine::CreateInstance(entity, className);
+					instance = ScriptEngine::CreateInstance(entity, className);
 				}
 
-				for (const auto& className : sc.Classes)
+				for (const auto& [className, instance] : sc.Classes)
 				{
-					ScriptEngine::GetInstance(entity, className)->InvokeOnCreate();
+					instance->InvokeOnCreate();
 				}
 			}
 		}
@@ -743,11 +743,11 @@ namespace ArcEngine
 			const auto scriptView = m_Registry.view<ScriptComponent>();
 			for (auto &&[e, sc] : scriptView.each())
 			{
-				const Entity entity = { e, this };
-				for (const auto& className : sc.Classes)
+				for (auto& [className, instance] : sc.Classes)
 				{
-					ScriptEngine::GetInstance(entity, className)->InvokeOnDestroy();
-					ScriptEngine::RemoveInstance(entity, className);
+					instance->InvokeOnDestroy();
+					delete instance;
+					instance = nullptr;
 				}
 
 				sc.Classes.clear();
@@ -837,10 +837,10 @@ namespace ArcEngine
 			const auto scriptView = m_Registry.view<ScriptComponent>();
 			for (auto &&[e, sc] : scriptView.each())
 			{
-				const Entity entity = { e, this };
-				for (const auto className : sc.Classes)
+				for (const auto& [className, instance] : sc.Classes)
 				{
-					ScriptEngine::GetInstance(entity, className)->InvokeOnUpdate(ts);
+					ARC_CORE_ASSERT(instance, "Instance not found");
+					instance->InvokeOnUpdate(ts);
 				}
 			}
 		}

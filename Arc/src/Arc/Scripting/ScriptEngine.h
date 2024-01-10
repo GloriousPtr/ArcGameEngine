@@ -216,9 +216,6 @@ namespace ArcEngine
 
 		[[nodiscard]] static bool HasClass(eastl::string_view className);
 		static ScriptInstance* CreateInstance(Entity entity, eastl::string_view name);
-		[[nodiscard]] static bool HasInstance(Entity entity, eastl::string_view name);
-		[[nodiscard]] static ScriptInstance* GetInstance(Entity entity, eastl::string_view name);
-		static void RemoveInstance(Entity entity, eastl::string_view name);
 		
 		[[nodiscard]] static eastl::hash_map<eastl::string, Ref<ScriptClass>>& GetClasses();
 		[[nodiscard]] static const eastl::vector<eastl::string>& GetFields(eastl::string_view className);

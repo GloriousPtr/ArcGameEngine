@@ -66,9 +66,6 @@ namespace ArcEngine
 
 		eastl::hash_map<eastl::string, Ref<ScriptClass>> EntityClasses;
 		eastl::hash_map<UUID, eastl::hash_map<eastl::string, eastl::hash_map<eastl::string, ScriptFieldInstance>>> EntityFields;
-
-		using EntityInstanceMap = eastl::hash_map<UUID, eastl::hash_map<eastl::string, ScriptInstance*>>;
-		EntityInstanceMap EntityRuntimeInstances;
 	};
 
 
@@ -173,9 +170,37 @@ namespace ArcEngine
 		{
 			ARC_CORE_DEBUG("Registering {}", className);
 			s_ClassTypes[type] = className;
-			s_HasComponentFuncs[type] = [](const Entity& entity, DotnetType type) { return ScriptEngine::HasInstance(entity, s_ClassTypes.at(type)); };
+			s_HasComponentFuncs[type] = [](const Entity& entity, DotnetType type)
+			{
+				if (!entity.HasComponent<ScriptComponent>())
+					return false;
+
+				const ScriptComponent& comp = entity.GetComponent<ScriptComponent>();
+				auto it = comp.Classes.find(s_ClassTypes.at(type));
+				if (it != comp.Classes.end())
+				{
+					if (it->second)
+						return true;
+				}
+
+				return false;
+			};
 			s_AddComponentFuncs[type] = [](const Entity& entity, DotnetType type) { ScriptEngine::CreateInstance(entity, s_ClassTypes.at(type)); };
-			s_GetComponentFuncs[type] = [](const Entity& entity, DotnetType type) { return ScriptEngine::GetInstance(entity, s_ClassTypes.at(type))->GetHandle(); };
+			s_GetComponentFuncs[type] = [](const Entity& entity, DotnetType type)
+			{
+				if (!entity.HasComponent<ScriptComponent>())
+					return (GCHandle)nullptr;
+
+				const ScriptComponent& comp = entity.GetComponent<ScriptComponent>();
+				auto it = comp.Classes.find(s_ClassTypes.at(type));
+				if (it != comp.Classes.end())
+				{
+					if (it->second)
+						return it->second->GetHandle();
+				}
+
+				return (GCHandle)nullptr;
+			};
 		}
 	}
 
@@ -244,7 +269,6 @@ namespace ArcEngine
 
 		s_ScriptEngineData->EntityClasses.clear();
 		s_ScriptEngineData->EntityFields.clear();
-		s_ScriptEngineData->EntityRuntimeInstances.clear();
 
 		if (s_Reflection->UnloadAssemblies)
 			s_Reflection->UnloadAssemblies();
@@ -365,7 +389,6 @@ namespace ArcEngine
 
 		ARC_CORE_ASSERT(s_HasComponentFuncs.find(type) != s_HasComponentFuncs.end());
 		ARC_CORE_ASSERT(s_GetComponentFuncs.find(type) != s_GetComponentFuncs.end());
-		ARC_CORE_ASSERT(HasInstance(entity, s_ClassTypes.at(type)));
 
 		return s_GetComponentFuncs.at(type)(entity, type);
 	}
@@ -398,23 +421,7 @@ namespace ArcEngine
 
 		const auto& scriptClass = s_ScriptEngineData->EntityClasses.at(name.begin());
 		const UUID entityID = entity.GetUUID();
-		auto* instance = new ScriptInstance(scriptClass, entityID);
-		s_ScriptEngineData->EntityRuntimeInstances[entityID][name.begin()] = instance;
-		return instance;
-	}
-
-	bool ScriptEngine::HasInstance(Entity entity, eastl::string_view name)
-	{
-		ARC_PROFILE_SCOPE();
-
-		return s_ScriptEngineData->EntityRuntimeInstances[entity.GetUUID()].find_as(name) != s_ScriptEngineData->EntityRuntimeInstances[entity.GetUUID()].end();
-	}
-
-	ScriptInstance* ScriptEngine::GetInstance(Entity entity, eastl::string_view name)
-	{
-		ARC_PROFILE_SCOPE();
-
-		return s_ScriptEngineData->EntityRuntimeInstances.at(entity.GetUUID()).at(name.begin());
+		return new ScriptInstance(scriptClass, entityID);
 	}
 
 	bool ScriptEngine::HasClass(eastl::string_view className)
@@ -422,14 +429,6 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		return s_ScriptEngineData->EntityClasses.find_as(className) != s_ScriptEngineData->EntityClasses.end();
-	}
-
-	void ScriptEngine::RemoveInstance(Entity entity, eastl::string_view name)
-	{
-		ARC_PROFILE_SCOPE();
-
-		delete s_ScriptEngineData->EntityRuntimeInstances.at(entity.GetUUID()).at(name.begin());
-		s_ScriptEngineData->EntityRuntimeInstances[entity.GetUUID()].erase(name.begin());
 	}
 
 	const eastl::vector<eastl::string>& ScriptEngine::GetFields(eastl::string_view className)

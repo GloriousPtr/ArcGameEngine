@@ -1,5 +1,6 @@
 #pragma once
 
+#include <eastl/vector_map.h>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -394,7 +395,7 @@ namespace ArcEngine
 
 	struct ScriptComponent
 	{
-		eastl::vector<eastl::string> Classes;
+		eastl::vector_map<eastl::string, ScriptInstance*> Classes{};
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////

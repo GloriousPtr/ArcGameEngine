@@ -157,17 +157,17 @@ namespace ArcEngine
 			| ImGuiTreeNodeFlags_Framed
 			| ImGuiTreeNodeFlags_FramePadding;
 
-		eastl::string* toRemove = nullptr;
+		eastl::vector_map<eastl::string, ScriptInstance*>::const_iterator toRemove = nullptr;
 		
 		const float frameHeight = ImGui::GetFrameHeight();
 		const float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 
 		for (auto it = component.Classes.begin(); it != component.Classes.end(); ++it)
 		{
-			const eastl::string& className = *it;
+			const auto& klass = *it;
 
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight * 0.25f);
-			const bool open = ImGui::TreeNodeEx(it, treeFlags, "%s %s", ARC_ICON_LANGUAGE_CSHARP, className.c_str());
+			const bool open = ImGui::TreeNodeEx(it, treeFlags, "%s %s", ARC_ICON_LANGUAGE_CSHARP, klass.first.c_str());
 
 			{
 				ImGui::PushID(it);
@@ -192,11 +192,11 @@ namespace ArcEngine
 				ARC_PROFILE_SCOPE("UI Function");
 
 				// Public Fields
-				if (ScriptEngine::HasClass(className))
+				if (ScriptEngine::HasClass(klass.first))
 				{
 					UI::BeginProperties();
-					const auto& fields = ScriptEngine::GetFields(className);
-					auto& fieldMap = ScriptEngine::GetFieldMap(className);
+					const auto& fields = ScriptEngine::GetFields(klass.first);
+					auto& fieldMap = ScriptEngine::GetFieldMap(klass.first);
 					for (const auto& name : fields)
 					{
 						auto& field = fieldMap.at(name);
@@ -213,7 +213,7 @@ namespace ArcEngine
 							UI::BeginProperties();
 						}
 
-						UI::DrawField(entity, className, name);
+						UI::DrawField(entity, klass.first, name);
 					}
 					UI::EndProperties();
 				}
@@ -1135,12 +1135,12 @@ namespace ArcEngine
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 				for (const auto& [name, _] : classes)
 				{
-					const bool notFound = std::ranges::find(component.Classes, name) == component.Classes.end();
+					const bool notFound = component.Classes.find(name) == component.Classes.end();
 					if (notFound && (!m_Filter.IsActive() || (m_Filter.IsActive() && m_Filter.PassFilter(name.c_str()))))
 					{
 						if (ImGui::MenuItemEx(name.c_str(), ARC_ICON_LANGUAGE_CSHARP))
 						{
-							component.Classes.emplace_back(name);
+							component.Classes[name] = nullptr;
 						}
 					}
 				}
