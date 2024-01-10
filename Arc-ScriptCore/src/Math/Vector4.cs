@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
 using JetBrains.Annotations;
 
 namespace ArcEngine
@@ -11,13 +12,15 @@ namespace ArcEngine
 	[StructLayout(LayoutKind.Sequential)]
 	public struct Vector4 : IEquatable<Vector4>
 	{
-		public float x;
-		public float y;
-		public float z;
-		public float w;
+		public Vector128<float> xyzw;
 
-		public float magnitude { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return (float) Math.Sqrt(x* x + y* y + z* z + w* w); } }
-		public float sqrMagnitude { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return x * x + y * y + z * z + w * w; } }
+		public float x { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return this[0]; } [MethodImpl(MethodImplOptions.AggressiveInlining)] set { this[0] = value; } }
+		public float y { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return this[1]; } [MethodImpl(MethodImplOptions.AggressiveInlining)] set { this[1] = value; } }
+		public float z { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return this[2]; } [MethodImpl(MethodImplOptions.AggressiveInlining)] set { this[2] = value; } }
+		public float w { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return this[3]; } [MethodImpl(MethodImplOptions.AggressiveInlining)] set { this[3] = value; } }
+
+		public float magnitude { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return (float)Math.Sqrt(sqrMagnitude); } }
+		public float sqrMagnitude { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { Vector128<float> mul = xyzw * xyzw; return mul[0] + mul[1] + mul[2] + mul[3]; } }
 		public Vector4 normalized { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return this / magnitude; } }
 
 		public static Vector4 one { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return new Vector4(1.0f); } }
@@ -28,34 +31,31 @@ namespace ArcEngine
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Vector4(in float scalar)
 		{
-			x = y = z = w = scalar;
+			xyzw = Vector128.Create(scalar);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public Vector4(in Vector128<float> xyzw)
+		{
+			this.xyzw = xyzw;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Vector4(in float x, in float y,in float z, in float w)
 		{
-			this.x = x;
-			this.y = y;
-			this.z = z;
-			this.w = w;
+			xyzw = Vector128.Create(x, y, z, w);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Vector4(in Vector2 xy, in float z, in float w)
 		{
-			x = xy.x;
-			y = xy.y;
-			this.z = z;
-			this.w = w;
+			xyzw = Vector128.Create(xy.x, xy.y, z, w);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Vector4(in Vector2 xy, in Vector2 zw)
 		{
-			x = xy.x;
-			y = xy.y;
-			z = zw.x;
-			w = zw.y;
+			xyzw = Vector128.Create(xy.x, xy.y, zw.x, zw.y);
 		}
 
 		#endregion
@@ -67,48 +67,40 @@ namespace ArcEngine
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				switch (index)
-				{
-					case 0: return x;
-					case 1: return y;
-					case 2: return z;
-					case 3: return w;
-					default: throw new IndexOutOfRangeException();
-				}
+				if (index < 4)
+					return xyzw.GetElement(index);
+				else
+					throw new IndexOutOfRangeException();
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
-				switch (index)
-				{
-					case 0: x = value; break;
-					case 1: y = value; break;
-					case 2: z = value; break;
-					case 3: w = value; break;
-					default: throw new IndexOutOfRangeException();
-				}
+				if (index < 4)
+					xyzw = xyzw.WithElement(0, value);
+				else
+					throw new IndexOutOfRangeException();
 			}
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Vector4 operator +(in Vector4 left, in Vector4 right) { return new Vector4(left.x + right.x, left.y + right.y, left.z + right.z, left.w + right.w); }
+		public static Vector4 operator +(in Vector4 left, in Vector4 right) { return new Vector4(left.xyzw + right.xyzw); }
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Vector4 operator -(in Vector4 left, in Vector4 right) { return new Vector4(left.x - right.x, left.y - right.y, left.z - right.z, left.w - right.w); }
+		public static Vector4 operator -(in Vector4 left, in Vector4 right) { return new Vector4(left.xyzw - right.xyzw); }
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Vector4 operator *(in Vector4 left, in Vector4 right) { return new Vector4(left.x * right.x, left.y * right.y, left.z * right.z, left.w * right.w); }
+		public static Vector4 operator *(in Vector4 left, in Vector4 right) { return new Vector4(left.xyzw * right.xyzw); }
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Vector4 operator *(in Vector4 left, in float scalar ) { return new Vector4(left.x * scalar , left.y * scalar , left.z * scalar , left.w * scalar ); }
+		public static Vector4 operator *(in Vector4 left, in float scalar ) { return new Vector4(left.xyzw * scalar); }
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Vector4 operator *(in float scalar, in Vector4 right) { return new Vector4(scalar * right.x, scalar * right.y, scalar * right.z, scalar * right.w); }
+		public static Vector4 operator *(in float scalar, in Vector4 right) { return new Vector4(scalar * right.xyzw); }
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Vector4 operator /(in Vector4 left, in Vector4 right) { return new Vector4(left.x / right.x, left.y / right.y, left.z / right.z, left.w / right.w); }
+		public static Vector4 operator /(in Vector4 left, in Vector4 right) { return new Vector4(left.xyzw / right.xyzw); }
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Vector4 operator /(in Vector4 left, in float scalar ) { return new Vector4(left.x / scalar , left.y / scalar , left.z / scalar , left.w / scalar ); }
+		public static Vector4 operator /(in Vector4 left, in float scalar ) { return new Vector4(left.xyzw / Vector128.Create(scalar)); }
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static implicit operator Vector3(in Vector4 v) { return new Vector3(v.x, v.y, v.z); }
+		public static implicit operator Vector3(in Vector4 v) { return new Vector3(v.xyzw[0], v.xyzw[1], v.xyzw[2]); }
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static implicit operator Color(in Vector4 v) { return new Color(v.x, v.y, v.z, v.w); }
+		public static implicit operator Color(in Vector4 v) { return new Color(v.xyzw); }
 
 		#endregion
 
@@ -120,14 +112,14 @@ namespace ArcEngine
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override string ToString() { return "Vector4(" + x + ", " + y + ", " + z + ", " + w + ")"; }
+		public override string ToString() { return "Vector4(" + xyzw[0] + ", " + xyzw[1] + ", " + xyzw[2] + ", " + xyzw[3] + ")"; }
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector4 LerpUnclamped(Vector4 a, Vector4 b, float t) => Mathfs.Lerp(a, b, new Vector4(t));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Equals(Vector4 other)
 		{
-			return x == other.x && y == other.y && z == other.z && w == other.w;
+			return xyzw == other.xyzw;
 		}
 	}
 }

@@ -116,7 +116,7 @@ namespace ArcEngine {
 			switch(Direction) {
 				case 1:  return ( Mathfs.Min( a, value ), Mathfs.Max( b, value ) ); // forward - a is min, b is max
 				default: return ( Mathfs.Min( b, value ), Mathfs.Max( a, value ) ); // reversed - b is min, a is max
-			};
+			}
 		}
 		
 		/// <summary>Returns a version of this range, scaled around its start value</summary>

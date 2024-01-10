@@ -338,7 +338,7 @@ namespace ArcEngine {
 				case Axis.Y: return q.Up();
 				case Axis.Z: return q.Forward();
 				default    : throw new ArgumentOutOfRangeException( nameof(axis) );
-			};
+			}
 		}
 
 		/// <summary>Returns the X axis of this rotation (assumes this quaternion is normalized)</summary>

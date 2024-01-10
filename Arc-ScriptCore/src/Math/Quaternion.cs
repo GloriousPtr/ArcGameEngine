@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
 using JetBrains.Annotations;
 
 namespace ArcEngine
@@ -13,45 +14,61 @@ namespace ArcEngine
 	{
 		const MethodImplOptions INLINE = MethodImplOptions.AggressiveInlining;
 
-		public float x;
-		public float y;
-		public float z;
-		public float w;
+		public Vector128<float> xyzw;
+
+		public float x { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return this[0]; } [MethodImpl(MethodImplOptions.AggressiveInlining)] set { this[0] = value; } }
+		public float y { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return this[1]; } [MethodImpl(MethodImplOptions.AggressiveInlining)] set { this[1] = value; } }
+		public float z { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return this[2]; } [MethodImpl(MethodImplOptions.AggressiveInlining)] set { this[2] = value; } }
+		public float w { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return this[3]; } [MethodImpl(MethodImplOptions.AggressiveInlining)] set { this[3] = value; } }
 
 		[MethodImpl(INLINE)]
 		public Quaternion(in float x, in float y, in float z, in float w)
 		{
-			this.x = x;
-			this.y = y;
-			this.z = z;
-			this.w = w;
+			xyzw = Vector128.Create(x, y, z, w);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public Quaternion(in Vector128<float> xyzw)
+		{
+			this.xyzw = xyzw;
 		}
 
 		[MethodImpl(INLINE)]
 		public Quaternion(in Vector4 xyzw)
 		{
-			x = xyzw.x;
-			y = xyzw.y;
-			z = xyzw.z;
-			w = xyzw.w;
+			this.xyzw = xyzw.xyzw;
 		}
 
 		[MethodImpl(INLINE)]
 		public Quaternion(in Vector3 xyz, in float w)
 		{
-			x = xyz.x;
-			y = xyz.y;
-			z = xyz.z;
-			this.w = w;
+			xyzw = Vector128.Create(xyz.x, xyz.y, xyz.z, w);
 		}
 
 		[MethodImpl(INLINE)]
 		public Quaternion(in Vector2 xy, in Vector2 zw)
 		{
-			x = xy.x;
-			y = xy.y;
-			z = zw.x;
-			w = zw.y;
+			xyzw = Vector128.Create(xy.x, xy.y, zw.x, zw.y);
+		}
+
+		public float this[int index]
+		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get
+			{
+				if (index < 4)
+					return xyzw.GetElement(index);
+				else
+					throw new IndexOutOfRangeException();
+			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			set
+			{
+				if (index < 4)
+					xyzw = xyzw.WithElement(0, value);
+				else
+					throw new IndexOutOfRangeException();
+			}
 		}
 
 		[MethodImpl(INLINE)]

@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
 using JetBrains.Annotations;
 
 namespace ArcEngine
@@ -12,54 +13,48 @@ namespace ArcEngine
 	public struct Color : IEquatable<Color>
 	{
 		const MethodImplOptions INLINE = MethodImplOptions.AggressiveInlining;
+		public Vector128<float> rgba;
 
-		public float r;
-		public float g;
-		public float b;
-		public float a;
+		public float r { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return this[0]; } [MethodImpl(MethodImplOptions.AggressiveInlining)] set { this[0] = value; } }
+		public float g { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return this[1]; } [MethodImpl(MethodImplOptions.AggressiveInlining)] set { this[1] = value; } }
+		public float b { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return this[2]; } [MethodImpl(MethodImplOptions.AggressiveInlining)] set { this[2] = value; } }
+		public float a { [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return this[3]; } [MethodImpl(MethodImplOptions.AggressiveInlining)] set { this[3] = value; } }
 
 		#region Constructors
 
 		[MethodImpl(INLINE)]
 		public Color(in float r, in float g, in float b, in float a)
 		{
-			this.r = r;
-			this.g = g;
-			this.b = b;
-			this.a = a;
+			rgba = Vector128.Create(r, g, b, a);
+		}
+
+		public Color(in Vector128<float> rgba)
+		{
+			this.rgba = rgba;
 		}
 
 		[MethodImpl(INLINE)]
 		public Color(in Vector4 rgba)
 		{
-			r = rgba.x;
-			g = rgba.y;
-			b = rgba.z;
-			a = rgba.w;
+			this.rgba = rgba.xyzw;
 		}
 
 		[MethodImpl(INLINE)]
 		public Color(in Vector3 rgb, in float a)
 		{
-			r = rgb.x;
-			g = rgb.y;
-			b = rgb.z;
-			this.a = a;
+			rgba = Vector128.Create(rgb.x, rgb.y, rgb.z, a);
 		}
 
 		[MethodImpl(INLINE)]
 		public Color(in Vector2 rg, in Vector2 ba)
 		{
-			r = rg.x;
-			g = rg.y;
-			b = ba.x;
-			a = ba.y;
+			rgba = Vector128.Create(rg.x, rg.y, ba.x, ba.y);
 		}
 
 		#endregion
 
 		[MethodImpl(INLINE)]
-		public override string ToString() { return "Color(" + r + ", " + g + ", " + b + ", " + a + ")"; }
+		public override string ToString() { return "Color(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ", " + rgba[3] + ")"; }
 
 		[MethodImpl(INLINE)]
 		public string ToHtmlStringRGBA() => $"#{Mathfs.RoundToInt(r * 255.0f):X2}{Mathfs.RoundToInt(g * 255.0f):X2}{Mathfs.RoundToInt(b * 255.0f):X2}{Mathfs.RoundToInt(a * 255.0f):X2}";
@@ -70,7 +65,7 @@ namespace ArcEngine
 		[MethodImpl(INLINE)]
 		public bool Equals(Color other)
 		{
-			return r == other.r && g == other.g && b == other.b && a == other.a;
+			return rgba == other.rgba;
 		}
 
 		#region OverloadedOperators
@@ -80,32 +75,24 @@ namespace ArcEngine
 			[MethodImpl(INLINE)]
 			get
 			{
-				switch (index)
-				{
-					case 0: return r;
-					case 1: return g;
-					case 2: return b;
-					case 3: return a;
-					default: throw new IndexOutOfRangeException();
-				}
+				if (index < 4)
+					return rgba.GetElement(index);
+				else
+					throw new IndexOutOfRangeException();
 			}
 			[MethodImpl(INLINE)]
 			set
 			{
-				switch (index)
-				{
-					case 0: r = value; break;
-					case 1: g = value; break;
-					case 2: b = value; break;
-					case 3: a = value; break;
-					default: throw new IndexOutOfRangeException();
-				}
+				if (index < 4)
+					rgba = rgba.WithElement(0, value);
+				else
+					throw new IndexOutOfRangeException();
 			}
 		}
 
 		// Static Methods
 		[MethodImpl(INLINE)]
-		public static implicit operator Vector4(in Color color) { return new Vector4(color.r, color.g, color.b, color.a); }
+		public static implicit operator Vector4(in Color color) { return new Vector4(color.rgba); }
 		[MethodImpl(INLINE)]
 		public static implicit operator Vector3(in Color color) { return new Vector3(color.r, color.g, color.b); }
 
