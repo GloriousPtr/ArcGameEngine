@@ -81,7 +81,7 @@ namespace ArcEngine
 		RegisterManagedMethod(ReleaseObjectReference, void, GCHandle);
 		RegisterManagedMethod(GetClassNames, char**, DotnetAssembly, DotnetAssembly, const char*);
 		RegisterManagedMethod(GetMethod, DotnetMethod, GCHandle, const char*, int);
-		RegisterManagedMethod(InvokeMethod, void, DotnetMethod, void**, int);
+		RegisterManagedMethod(InvokeMethod, void, GCHandle, DotnetMethod, void**, int);
 		RegisterManagedMethod(IsDebuggerAttached, int);
 		RegisterManagedMethod(GetTypeFromName, DotnetType, DotnetAssembly, const char*);
 		RegisterManagedMethod(GetNameFromType, char*, DotnetType);
@@ -629,7 +629,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		if (m_OnCreateMethod)
-			s_Reflection->InvokeMethod(m_OnCreateMethod, nullptr, 0);
+			s_Reflection->InvokeMethod(m_Handle, m_OnCreateMethod, nullptr, 0);
 	}
 
 	void ScriptInstance::InvokeOnUpdate(float ts) const
@@ -639,7 +639,7 @@ namespace ArcEngine
 		if (m_OnUpdateMethod)
 		{
 			void* params = &ts;
-			s_Reflection->InvokeMethod(m_OnUpdateMethod, &params, 1);
+			s_Reflection->InvokeMethod(m_Handle, m_OnUpdateMethod, &params, 1);
 		}
 	}
 
@@ -648,7 +648,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		if (m_OnDestroyMethod)
-			s_Reflection->InvokeMethod(m_OnDestroyMethod, nullptr, 0);
+			s_Reflection->InvokeMethod(m_Handle, m_OnDestroyMethod, nullptr, 0);
 	}
 
 	void ScriptInstance::InvokeOnCollisionEnter2D(Collision2DData& other) const
@@ -656,7 +656,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		void* param = &other;
-		s_Reflection->InvokeMethod(m_OnCollisionEnter2DMethod, &param, 1);
+		s_Reflection->InvokeMethod(m_Handle, m_OnCollisionEnter2DMethod, &param, 1);
 	}
 
 	void ScriptInstance::InvokeOnCollisionExit2D(Collision2DData& other) const
@@ -664,7 +664,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 		
 		void* param = &other;
-		s_Reflection->InvokeMethod(m_OnCollisionExit2DMethod, &param, 1);
+		s_Reflection->InvokeMethod(m_Handle, m_OnCollisionExit2DMethod, &param, 1);
 	}
 
 	void ScriptInstance::InvokeOnSensorEnter2D(Collision2DData& other) const
@@ -672,7 +672,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		void* param = &other;
-		s_Reflection->InvokeMethod(m_OnSensorEnter2DMethod, &param, 1);
+		s_Reflection->InvokeMethod(m_Handle, m_OnSensorEnter2DMethod, &param, 1);
 	}
 
 	void ScriptInstance::InvokeOnSensorExit2D(Collision2DData& other) const
@@ -680,7 +680,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 		
 		void* param = &other;
-		s_Reflection->InvokeMethod(m_OnSensorExit2DMethod, &param, 1);
+		s_Reflection->InvokeMethod(m_Handle, m_OnSensorExit2DMethod, &param, 1);
 	}
 
     GCHandle ScriptInstance::GetHandle() const

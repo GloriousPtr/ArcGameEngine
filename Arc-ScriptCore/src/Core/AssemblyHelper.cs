@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
@@ -17,7 +16,7 @@ namespace ArcEngine
 		internal static Dictionary<ulong, Assembly> m_Assemblies = new Dictionary<ulong, Assembly>();
 		internal static HashSet<IntPtr> m_Allocations = new HashSet<IntPtr>();
 		internal static Dictionary<IntPtr, IntPtr[]> m_ArrayAllocations = new Dictionary<IntPtr, IntPtr[]>();
-		internal static Dictionary<ulong, Delegate> m_Delegates = new Dictionary<ulong, Delegate>();
+		internal static Dictionary<ulong, MethodInfo> m_Methods = new Dictionary<ulong, MethodInfo>();
 
 		internal static BindingFlags InstanceAll = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
 
@@ -254,7 +253,7 @@ namespace ArcEngine
 		}
 
 		[UnmanagedCallersOnly]
-		internal static IntPtr GetMethod(IntPtr objectPtr, IntPtr methodName, int parameterCount)
+		internal static IntPtr GetMethod(IntPtr objectPtr, IntPtr methodName)
 		{
 			try
 			{
@@ -270,26 +269,8 @@ namespace ArcEngine
 				if (method == null)
 					return IntPtr.Zero;
 
-				ParameterInfo[] parameters = method.GetParameters();
-				if (parameters.Length != parameterCount)
-					return IntPtr.Zero;
-
-				Type delegateType;
-				if (parameterCount > 0)
-				{
-					var parameterTypes = method.GetParameters().Select(p => p.ParameterType);
-					delegateType = Expression.GetDelegateType(parameterTypes.Append(method.ReturnType).ToArray());
-					if (delegateType == null)
-						return IntPtr.Zero;
-				}
-				else
-				{
-					delegateType = typeof(Action);
-				}
-
-				Delegate del = Delegate.CreateDelegate(delegateType, handle.Target, method);
 				ulong id = UUID();
-				m_Delegates[id] = del;
+				m_Methods[id] = method;
 				return (IntPtr)id;
 			}
 			catch (Exception ex)
@@ -300,23 +281,30 @@ namespace ArcEngine
 		}
 
 		[UnmanagedCallersOnly]
-		internal static void InvokeMethod(IntPtr methodId, IntPtr parameters, int parameterCount)
+		internal static void InvokeMethod(IntPtr objectPtr, IntPtr methodId, IntPtr parameters, int parameterCount)
 		{
 			try
 			{
-				Delegate del = m_Delegates[(ulong)methodId];
+				if (objectPtr == IntPtr.Zero || methodId == IntPtr.Zero)
+					return;
+
+				GCHandle handle = GCHandle.FromIntPtr(objectPtr);
+				if (handle == null || handle.Target == null)
+					return;
+
+				MethodInfo method = m_Methods[(ulong)methodId];
 
 				object[] obj = null;
 				if (parameters != IntPtr.Zero)
 				{
-					ParameterInfo[] methodParams = del.Method.GetParameters();
+					ParameterInfo[] methodParams = method.GetParameters();
 					int count = Math.Min(methodParams.Length, parameterCount);
 					obj = new object[count];
 					for (int i = 0; i < count; i++)
 						obj[i] = Marshal.PtrToStructure(Marshal.ReadIntPtr(parameters + (i * IntPtr.Size)), methodParams[i].ParameterType);
 				}
 
-				del.DynamicInvoke(obj);
+				method.Invoke(handle.Target, obj);
 			}
 			catch (Exception ex)
 			{
