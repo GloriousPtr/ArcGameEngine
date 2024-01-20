@@ -326,6 +326,9 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
+		if (s_Renderer2DData->LineVertexCount >= Renderer2DData::MaxVertices)
+			NextBatch();
+
 		s_Renderer2DData->LineVertexBufferPtr->Position = glm::vec4(p0, 1.0f);
 		s_Renderer2DData->LineVertexBufferPtr->Color = color;
 		s_Renderer2DData->LineVertexBufferPtr++;
