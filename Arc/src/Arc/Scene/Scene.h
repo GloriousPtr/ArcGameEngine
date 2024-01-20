@@ -36,7 +36,7 @@ namespace ArcEngine
 	public:
 		uint32_t VelocityIterations = 8;
 		uint32_t PositionIterations = 3;
-		glm::vec2 Gravity = { 0.0f, -9.8f };
+		glm::vec2 Gravity = { 0.0f, -9.80665f };
 
 		static constexpr EntityLayer StaticLayer  = BIT(0);
 		static constexpr EntityLayer DefaultLayer = BIT(1);
