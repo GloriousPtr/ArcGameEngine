@@ -3,6 +3,7 @@
 
 #include "Arc/Scene/Entity.h"
 #include "Arc/Scene/Scene.h"
+#include "Arc/Utils/Stopwatch.h"
 #include "EntitySerializer.h"
 
 namespace ArcEngine
@@ -41,6 +42,8 @@ namespace ArcEngine
 
 	bool SceneSerializer::Deserialize(eastl::string_view filepath) const
 	{
+		Stopwatch stopwatch;
+
 		std::ifstream stream(filepath.begin());
 		std::stringstream strStream;
 		strStream << stream.rdbuf();
@@ -57,6 +60,8 @@ namespace ArcEngine
 			for (const auto& entity : entities)
 				EntitySerializer::DeserializeEntity(entity, *m_Scene, true);
 		}
+
+		ARC_CORE_TRACE("Deserializing scene '{}' completed: {}s", sceneName, stopwatch.Stop());
 
 		return true;
 	}

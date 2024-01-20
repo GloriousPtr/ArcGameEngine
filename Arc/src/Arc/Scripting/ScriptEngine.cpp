@@ -8,6 +8,7 @@
 #include "Arc/Project/Project.h"
 #include "Arc/Scene/Entity.h"
 #include "Arc/Scene/Scene.h"
+#include "Arc/Utils/Stopwatch.h"
 #include "ProjectBuilder.h"
 #include "ScriptEngineRegistry.h"
 
@@ -322,19 +323,17 @@ namespace ArcEngine
 		if (!Project::GetActive())
 			return;
 
-		auto begin = std::chrono::high_resolution_clock::now();
-		ProjectBuilder::GenerateProjectFiles([asyncBuild, begin](bool generated)
+		Stopwatch stopwatch;
+		ProjectBuilder::GenerateProjectFiles([asyncBuild, &stopwatch](bool generated)
 		{
 			if (generated)
 			{
-				ProjectBuilder::BuildProject(asyncBuild, [begin](bool success)
+				ProjectBuilder::BuildProject(asyncBuild, [&stopwatch](bool success)
 				{
-					auto end = std::chrono::high_resolution_clock::now();
-					auto timeTaken = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-
+					const float ms = 1000.0f * stopwatch.Stop();
 					if (success)
 					{
-						ARC_CORE_INFO("Build Suceeded; Compile time: {0}ms", timeTaken);
+						ARC_CORE_INFO("Build Suceeded; Compile time: {0}ms", ms);
 
 						if (s_Reflection->UnloadAssemblies)
 							s_Reflection->UnloadAssemblies();
@@ -343,7 +342,7 @@ namespace ArcEngine
 					}
 					else
 					{
-						ARC_CORE_ERROR("Build Failed; Compile time: {0}ms", timeTaken);
+						ARC_CORE_ERROR("Build Failed; Compile time: {0}ms", ms);
 					}
 				});
 			}
