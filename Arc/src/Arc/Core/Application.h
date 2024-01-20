@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mutex>
-#include <chrono>
 
 #include "Arc/Core/Base.h"
 

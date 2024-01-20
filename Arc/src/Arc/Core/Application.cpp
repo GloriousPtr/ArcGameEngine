@@ -1,6 +1,8 @@
 #include "arcpch.h"
 #include "Arc/Core/Application.h"
 
+#include <EASTL/chrono.h>
+
 #include "Arc/Audio/AudioEngine.h"
 #include "Arc/Core/AssetManager.h"
 #include "Arc/Renderer/Renderer.h"
@@ -91,7 +93,7 @@ namespace ArcEngine
 
 	void Application::Run()
 	{
-		auto lastFrameTime = std::chrono::high_resolution_clock::now();
+		auto lastFrameTime = eastl::chrono::high_resolution_clock::now();
 		while (m_Running)
 		{
 			ARC_PROFILE_FRAME("CPUFrame");
@@ -122,8 +124,8 @@ namespace ArcEngine
 			
 			m_Window->OnUpdate();
 
-			const auto time = std::chrono::high_resolution_clock::now();
-			m_Timestep = std::chrono::duration<float>(time - lastFrameTime).count();
+			const auto time = eastl::chrono::high_resolution_clock::now();
+			m_Timestep = eastl::chrono::duration<float>(time - lastFrameTime).count();
 			lastFrameTime = time;
 		}
 	}
