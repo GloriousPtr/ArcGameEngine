@@ -24,7 +24,7 @@ namespace ArcEngine
 	{
 		if (force)
 		{
-			for (auto& particle : m_Particles)
+			for (Particle& particle : m_Particles)
 				particle.LifeRemaining = 0.0f;
 		}
 
@@ -69,7 +69,7 @@ namespace ArcEngine
 		
 		// Simulate
 		m_ActiveParticleCount = 0;
-		for (auto& particle : m_Particles)
+		for (Particle& particle : m_Particles)
 		{
 			if (particle.LifeRemaining <= 0.0f)
 				continue;
@@ -121,7 +121,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		for (const auto& particle : m_Particles)
+		for (const Particle& particle : m_Particles)
 		{
 			if (particle.LifeRemaining <= 0.0f)
 				continue;
@@ -149,7 +149,7 @@ namespace ArcEngine
 			if (++m_PoolIndex >= 10000)
 				m_PoolIndex = 0;
 
-			auto& particle = m_Particles[m_PoolIndex];
+			Particle& particle = m_Particles[m_PoolIndex];
 			
 			particle.Position = position;
 			particle.Position.x += RandomFloat(m_Properties.PositionStart.x, m_Properties.PositionEnd.x);

@@ -78,11 +78,15 @@ namespace ArcEngine
 
 	void Dx12RendererAPI::ComputeDispatch(uint32_t threadGroupCountX, uint32_t threadGroupCountY, uint32_t threadGroupCountZ)
 	{
+		ARC_PROFILE_SCOPE();
+
 		Dx12Context::GetGraphicsCommandList()->Dispatch(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
 	}
 
 	void Dx12RendererAPI::Execute()
 	{
+		ARC_PROFILE_SCOPE();
+
 		auto* commandList = Dx12Context::GetGraphicsCommandList();
 
 		commandList->Close();

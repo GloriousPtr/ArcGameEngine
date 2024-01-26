@@ -193,7 +193,7 @@ namespace ArcEngine
 
 		ARC_CORE_ASSERT(m_Count > index, "Constant buffer index can't be greater than count! Overflow!");
 
-		const auto gpuVirtualAddress = m_Allocation[Dx12Context::GetCurrentFrameIndex()]->GetResource()->GetGPUVirtualAddress() + m_AlignedStride * index;
+		const D3D12_GPU_VIRTUAL_ADDRESS gpuVirtualAddress = m_Allocation[Dx12Context::GetCurrentFrameIndex()]->GetResource()->GetGPUVirtualAddress() + m_AlignedStride * index;
 		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(m_RegisterIndex, gpuVirtualAddress);
 	}
 

@@ -187,7 +187,7 @@ namespace ArcEngine
 #define WRITE_FIELD_TYPE(Type, NativeType)										\
 			case Type:															\
 				{																\
-					auto value = field.GetDefaultValue<NativeType>();		\
+					NativeType value = field.GetDefaultValue<NativeType>();		\
 					TrySet(value, fieldNode);									\
 					fieldInstance.SetValue(value);								\
 				}																\

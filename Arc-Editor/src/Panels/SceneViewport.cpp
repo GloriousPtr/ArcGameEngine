@@ -192,7 +192,7 @@ namespace ArcEngine
 
 				if (m_SceneHierarchyPanel && m_GizmoType != -1)
 				{
-					ARC_PROFILE_SCOPE("Transform Gizmos");
+					ARC_PROFILE_SCOPE_NAME("Transform Gizmos");
 
 					EditorContext context = EditorLayer::GetInstance()->GetContext();
 					if (context.IsValid(EditorContextType::Entity))
@@ -304,7 +304,7 @@ namespace ArcEngine
 			EditorContext context = EditorLayer::GetInstance()->GetContext();
 			if (!m_SimulationRunning && context.IsValid(EditorContextType::Entity))
 			{
-				ARC_PROFILE_SCOPE("MiniViewport");
+				ARC_PROFILE_SCOPE_NAME("MiniViewport");
 
 				Entity selectedEntity = *context.As<Entity>();
 				if (selectedEntity && selectedEntity.HasComponent<CameraComponent>())

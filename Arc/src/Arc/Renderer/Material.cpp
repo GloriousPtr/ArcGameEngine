@@ -36,13 +36,13 @@ namespace ArcEngine
 		m_Textures.clear();
 		m_ConstantBuffer.reset();
 
-		const auto& materialProperties = m_Pipeline->GetMaterialProperties();
+		const eastl::vector<MaterialProperty>& materialProperties = m_Pipeline->GetMaterialProperties();
 		uint32_t whiteTexId = AssetManager::WhiteTexture()->GetIndex();
 
 		glm::vec4 one(1.0);
 		size_t cbSize = 0;
 		uint32_t cbSlot = 0;
-		for (auto& property : materialProperties)
+		for (const MaterialProperty& property : materialProperties)
 		{
 			if (property.Type == MaterialPropertyType::Texture2D)
 			{
@@ -103,7 +103,7 @@ namespace ArcEngine
 		[[likely]]
 		if (m_Pipeline->Bind())
 		{
-			for (auto& t : m_TextureBuffer)
+			for (const TextureSlot& t : m_TextureBuffer)
 			{
 				if (m_Textures[t.Index])
 					m_Textures[t.Index]->Bind(t.Slot);
@@ -134,7 +134,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto it = m_Indices.find_as(name.begin());
+		const eastl::hash_map<eastl::string, MaterialData>::iterator it = m_Indices.find_as(name.begin());
 		[[likely]]
 		if (it != m_Indices.end())
 		{
@@ -148,7 +148,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto it = m_Indices.find_as(name.begin());
+		const eastl::hash_map<eastl::string, MaterialData>::iterator it = m_Indices.find_as(name.begin());
 		[[likely]]
 		if (it != m_Indices.end())
 		{
@@ -162,7 +162,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto it = m_Indices.find_as(name.begin());
+		const eastl::hash_map<eastl::string, MaterialData>::iterator it = m_Indices.find_as(name.begin());
 		[[likely]]
 		if (it != m_Indices.end())
 		{
@@ -176,7 +176,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto it = m_Indices.find_as(name.begin());
+		const eastl::hash_map<eastl::string, MaterialData>::iterator it = m_Indices.find_as(name.begin());
 		[[likely]]
 		if (it != m_Indices.end())
 		{

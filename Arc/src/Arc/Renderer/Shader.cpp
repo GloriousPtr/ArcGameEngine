@@ -27,15 +27,15 @@ namespace ArcEngine
 		eastl::string name = nameStr.c_str();
 		ARC_CORE_ASSERT(!Exists(name.c_str()), "Shader already exists!");
 
-		const auto shader = Shader::Create(shaderPath, spec.Type);
+		const Ref<Shader> shader = Shader::Create(shaderPath, spec.Type);
 		if (!shader)
 			return nullptr;
 
-		auto pipeline = PipelineState::Create(shader, spec);
+		Ref<PipelineState> pipeline = PipelineState::Create(shader, spec);
 		m_Pipelines[name] = pipeline;
 		m_Shaders[name] = shader;
 
-		auto path = shaderPath.string();
+		std::string path = shaderPath.string();
 		m_ShaderPaths[shader->GetName()] = path.c_str();
 
 		return pipeline;
@@ -48,7 +48,7 @@ namespace ArcEngine
 		eastl::string shaderName;
 		for (const auto& [name, pipeline] : m_Pipelines)
 		{
-			const auto& it = m_ShaderPaths.find(name);
+			const eastl::hash_map<eastl::string, eastl::string>::iterator it = m_ShaderPaths.find(name);
 			if (it == m_ShaderPaths.end())
 				continue;
 

@@ -35,7 +35,7 @@ namespace ArcEngine
 			if (fixture->GetShape()->GetType() != b2Shape::e_circle)
 				return false;
 
-			const auto* circle = static_cast<b2CircleShape*>(fixture->GetShape());
+			const b2Shape* circle = fixture->GetShape();
 			const b2Vec2 position = fixture->GetBody()->GetPosition();
 			const float radius = circle->m_radius;
 
@@ -100,7 +100,7 @@ namespace ArcEngine
 				return false;
 
 			b2Vec2 cp1 = clipPolygon[clipPolygon.size() - 1];
-			for (const auto& cp2 : clipPolygon)
+			for (const b2Vec2 cp2 : clipPolygon)
 			{
 				if (outputVertices.empty())
 					return false;
@@ -108,7 +108,7 @@ namespace ArcEngine
 				eastl::vector<b2Vec2> inputList = outputVertices;
 				outputVertices.clear();
 				b2Vec2 s = inputList[inputList.size() - 1]; //last on the input list
-				for (const auto& e : inputList)
+				for (const b2Vec2 e : inputList)
 				{
 					if (Inside(cp1, cp2, e))
 					{
@@ -133,7 +133,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE();
 
-			const auto count = static_cast<int>(vs.size());
+			const size_t count = vs.size();
 			b2Assert(count >= 3);
 
 			b2Vec2 c = {};
@@ -146,7 +146,7 @@ namespace ArcEngine
 
 			constexpr float inv3 = 1.0f / 3.0f;
 
-			for (int32 i = 0; i < count; ++i)
+			for (size_t i = 0; i < count; ++i)
 			{
 				// Triangle vertices.
 				b2Vec2 p1 = pRef;

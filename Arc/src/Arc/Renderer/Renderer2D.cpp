@@ -81,7 +81,7 @@ namespace ArcEngine
 
 		s_Renderer2DData->QuadVertexBufferBase = new QuadVertex[Renderer2DData::MaxVertices];
 
-		const auto quadIndices = new uint32_t[Renderer2DData::MaxIndices];
+		uint32_t* quadIndices = new uint32_t[Renderer2DData::MaxIndices];
 
 		uint32_t offset = 0;
 		for (uint32_t i = 0; i < Renderer2DData::MaxIndices; i += 6)
@@ -108,7 +108,7 @@ namespace ArcEngine
 		}
 
 
-		auto& pipelineLibrary = Renderer::GetPipelineLibrary();
+		PipelineLibrary& pipelineLibrary = Renderer::GetPipelineLibrary();
 		{
 			const PipelineSpecification texture2dPippelineSpec
 			{
@@ -196,11 +196,11 @@ namespace ArcEngine
 
 		if(s_Renderer2DData->QuadIndexCount && s_Renderer2DData->RenderTarget && s_Renderer2DData->TexturePipeline->Bind())
 		{
-			ARC_PROFILE_SCOPE("Draw Quads");
+			ARC_PROFILE_SCOPE_NAME("Draw Quads");
 
 			s_Renderer2DData->RenderTarget->Bind();
 
-			const auto dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Renderer2DData->QuadVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Renderer2DData->QuadVertexBufferBase));
+			const uint32_t dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Renderer2DData->QuadVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Renderer2DData->QuadVertexBufferBase));
 			s_Renderer2DData->CameraConstantBuffer->Bind(0);
 			s_Renderer2DData->QuadVertexBuffer->SetData(s_Renderer2DData->QuadVertexBufferBase, dataSize);
 			s_Renderer2DData->TexturePipeline->SetData("Textures", s_Renderer2DData->TextureSlots.data(), sizeof(uint32_t) * s_Renderer2DData->TextureSlotIndex);
@@ -213,11 +213,11 @@ namespace ArcEngine
 		
 		if (s_Renderer2DData->LineVertexCount && s_Renderer2DData->RenderTarget && s_Renderer2DData->LinePipeline->Bind())
 		{
-			ARC_PROFILE_SCOPE("Draw Lines");
+			ARC_PROFILE_SCOPE_NAME("Draw Lines");
 
 			s_Renderer2DData->RenderTarget->Bind();
 
-			const auto dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Renderer2DData->LineVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Renderer2DData->LineVertexBufferBase));
+			const uint32_t dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Renderer2DData->LineVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Renderer2DData->LineVertexBufferBase));
 			s_Renderer2DData->LineVertexBuffer->SetData(s_Renderer2DData->LineVertexBufferBase, dataSize);
 			RenderCommand::DrawLines(s_Renderer2DData->LineVertexBuffer, s_Renderer2DData->LineVertexCount);
 			s_Renderer2DData->Stats.DrawCalls++;

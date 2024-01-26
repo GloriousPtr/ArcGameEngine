@@ -12,7 +12,7 @@ namespace ArcEngine
 
 	bool ProjectSerializer::Serialize(const std::filesystem::path& filepath) const
 	{
-		const auto& config = m_Project->GetConfig();
+		const ProjectConfig& config = m_Project->GetConfig();
 
 		YAML::Emitter out;
 		{
@@ -38,7 +38,7 @@ namespace ArcEngine
 
 	bool ProjectSerializer::Deserialize(const std::filesystem::path& filepath) const
 	{
-		auto& config = m_Project->GetConfig();
+		ProjectConfig& config = m_Project->GetConfig();
 
 		YAML::Node data;
 		try
@@ -51,7 +51,7 @@ namespace ArcEngine
 			return false;
 		}
 
-		auto projectNode = data["Project"];
+		YAML::Node projectNode = data["Project"];
 		if (!projectNode)
 			return false;
 
@@ -59,7 +59,7 @@ namespace ArcEngine
 		config.StartScene = projectNode["StartScene"].as<std::string>();
 		config.AssetDirectory = projectNode["AssetDirectory"].as<std::string>();
 		config.ScriptModulePath = projectNode["ScriptModulePath"].as<std::string>();
-		if (const auto& node = projectNode["BuildConfiguration"])
+		if (const YAML::Node& node = projectNode["BuildConfiguration"])
 		{
 			if (node.as<int>(-1) != -1)
 				config.BuildConfiguration = static_cast<ProjectConfig::BuildConfig>(node.as<int>());

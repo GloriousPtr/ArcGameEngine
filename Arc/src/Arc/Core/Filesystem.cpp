@@ -5,7 +5,7 @@ namespace ArcEngine
 {
 	bool Filesystem::IsPartOfDirectoryTree(const std::filesystem::path& filePath, const std::filesystem::path& rootPath)
 	{
-		const auto relPath = std::filesystem::relative(filePath, rootPath);
+		const std::filesystem::path relPath = std::filesystem::relative(filePath, rootPath);
 		return relPath.empty() || relPath.string().front() != '.';
 	}
 
@@ -31,7 +31,7 @@ namespace ArcEngine
 
 	bool Filesystem::WriteFileBinary(const std::filesystem::path& filepath, Buffer& buffer)
 	{
-		const auto parentPath = filepath.parent_path();
+		const std::filesystem::path parentPath = filepath.parent_path();
 		if (!std::filesystem::exists(parentPath))
 			std::filesystem::create_directories(parentPath);
 

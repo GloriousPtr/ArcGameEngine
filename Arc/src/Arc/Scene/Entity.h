@@ -73,7 +73,7 @@ namespace ArcEngine
 			if (!m_Scene)
 				return {};
 
-			const auto& rc = GetComponent<RelationshipComponent>();
+			const RelationshipComponent& rc = GetComponent<RelationshipComponent>();
 			return rc.Parent != 0 ? m_Scene->GetEntity(rc.Parent) : Entity {};
 		}
 
@@ -84,7 +84,7 @@ namespace ArcEngine
 			ARC_CORE_ASSERT(m_Scene->m_EntityMap.find(parent.GetUUID()) != m_Scene->m_EntityMap.end(), "Parent is not in the same scene as entity");
 			Deparent();
 			
-			auto& rc = GetComponent<RelationshipComponent>();
+			RelationshipComponent& rc = GetComponent<RelationshipComponent>();
 			rc.Parent = parent.GetUUID();
 			parent.GetRelationship().Children.emplace_back(GetUUID());
 		}
@@ -93,15 +93,15 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE();
 
-			auto& transform = GetRelationship();
+			RelationshipComponent& transform = GetRelationship();
 			const UUID uuid = GetUUID();
 			const Entity parentEntity = GetParent();
 			
 			if (!parentEntity)
 				return;
 
-			auto& parent = parentEntity.GetRelationship();
-			for (auto it = parent.Children.begin(); it != parent.Children.end(); ++it)
+			RelationshipComponent& parent = parentEntity.GetRelationship();
+			for (eastl::vector<UUID>::iterator it = parent.Children.begin(); it != parent.Children.end(); ++it)
 			{
 				if (*it == uuid)
 				{
@@ -116,8 +116,8 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE();
 
-			const auto& transform = GetTransform();
-			const auto& rc = GetRelationship();
+			const TransformComponent& transform = GetTransform();
+			const RelationshipComponent& rc = GetRelationship();
 			const Entity parent = m_Scene->GetEntity(rc.Parent);
 			const glm::mat4 parentTransform = parent ? parent.GetWorldTransform() : glm::mat4(1.0f);
 			return eastl::move(parentTransform * glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale));
@@ -127,7 +127,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE();
 
-			const auto& transform = GetTransform();
+			const TransformComponent& transform = GetTransform();
 			return eastl::move(glm::translate(glm::mat4(1.0f), transform.Translation) * glm::toMat4(glm::quat(transform.Rotation)) * glm::scale(glm::mat4(1.0f), transform.Scale));
 		}
 

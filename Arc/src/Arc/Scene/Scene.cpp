@@ -695,7 +695,7 @@ namespace ArcEngine
 
 		#pragma region VFX
 		{
-			ARC_PROFILE_SCOPE("Submit Particle Data");
+			ARC_PROFILE_SCOPE_NAME("Submit Particle Data");
 
 			const auto particleSystemView = m_Registry.view<ParticleSystemComponent>();
 			for (auto&& [e, psc] : particleSystemView.each())
@@ -1120,7 +1120,7 @@ namespace ArcEngine
 		const auto view = m_Registry.view<CameraComponent>();
 		for (const auto entity : view)
 		{
-			auto& cameraComponent = view.get<CameraComponent>(entity);
+			CameraComponent& cameraComponent = view.get<CameraComponent>(entity);
 			if (!cameraComponent.FixedAspectRatio)
 				cameraComponent.Camera.SetViewportSize(width, height);
 		}
@@ -1133,7 +1133,7 @@ namespace ArcEngine
 		const auto view = m_Registry.view<CameraComponent>();
 		for (auto entity : view)
 		{
-			const auto& camera = view.get<CameraComponent>(entity);
+			const CameraComponent& camera = view.get<CameraComponent>(entity);
 			if (camera.Primary)
 				return { entity, this };
 		}
@@ -1142,7 +1142,7 @@ namespace ArcEngine
 
 	void Scene::SortForSprites()
 	{
-		m_Registry.sort<SpriteRendererComponent>([](const auto& lhs, const auto& rhs)
+		m_Registry.sort<SpriteRendererComponent>([](const SpriteRendererComponent& lhs, const SpriteRendererComponent& rhs)
 		{
 			return lhs.SortingOrder < rhs.SortingOrder;
 		});
@@ -1154,7 +1154,7 @@ namespace ArcEngine
 
 		eastl::vector<Entity> lights;
 		{
-			ARC_PROFILE_SCOPE("Prepare Light Data");
+			ARC_PROFILE_SCOPE_NAME("Prepare Light Data");
 
 			const auto view = m_Registry.view<LightComponent>();
 			lights.reserve(view.size());
@@ -1163,7 +1163,7 @@ namespace ArcEngine
 		}
 		Entity skylight = {};
 		{
-			ARC_PROFILE_SCOPE("PrepareSkylightData");
+			ARC_PROFILE_SCOPE_NAME("PrepareSkylightData");
 
 			const auto view = m_Registry.view<SkyLightComponent>();
 			if (!view.empty())
@@ -1173,7 +1173,7 @@ namespace ArcEngine
 		Renderer3D::BeginScene(cameraData, skylight, eastl::move(lights));
 		// Meshes
 		{
-			ARC_PROFILE_SCOPE("Submit Mesh Data");
+			ARC_PROFILE_SCOPE_NAME("Submit Mesh Data");
 
 			const auto view = m_Registry.view<MeshComponent>();
 			for (auto &&[entity, meshComponent] : view.each())
@@ -1190,14 +1190,14 @@ namespace ArcEngine
 		
 		Renderer2D::BeginScene(cameraData, renderGraphData->CompositePassTarget);
 		{
-			ARC_PROFILE_SCOPE("Submit Particle Data");
+			ARC_PROFILE_SCOPE_NAME("Submit Particle Data");
 
 			const auto particleSystemView = m_Registry.view<ParticleSystemComponent>();
 			for (auto&& [e, psc] : particleSystemView.each())
 				psc.System->OnRender();
 		}
 		{
-			ARC_PROFILE_SCOPE("Submit 2D Data");
+			ARC_PROFILE_SCOPE_NAME("Submit 2D Data");
 
 			const auto view = m_Registry.view<SpriteRendererComponent>();
 			for (auto &&[entity, sprite] : view.each())

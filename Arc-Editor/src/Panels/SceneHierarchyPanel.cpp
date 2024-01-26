@@ -255,7 +255,7 @@ namespace ArcEngine
 
 		// Drag Drop
 		{
-			ARC_PROFILE_SCOPE("DragDrop");
+			ARC_PROFILE_SCOPE_NAME("DragDrop");
 
 			if (ImGui::BeginDragDropTarget())
 			{

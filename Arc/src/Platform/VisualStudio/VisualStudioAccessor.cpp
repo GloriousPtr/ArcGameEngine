@@ -138,7 +138,7 @@ namespace ArcEngine
 		DWORD dwPID;
 		GetWindowThreadProcessId(hwnd, &dwPID);
 
-		const auto pInfo = reinterpret_cast<ProcessInfo*>(lParam);
+		ProcessInfo* pInfo = reinterpret_cast<ProcessInfo*>(lParam);
 		if (dwPID == pInfo->ID && GetWindow(hwnd, GW_OWNER) == nullptr && IsWindowVisible(hwnd))
 		{
 			WINDOWPLACEMENT place = {};
@@ -172,7 +172,7 @@ namespace ArcEngine
 		std::string cmdArgs;
 		
 		constexpr auto versions = magic_enum::enum_values<VisualStudioVersion>();
-		for (const auto version : versions)
+		for (const VisualStudioVersion version : versions)
 		{
 			if (std::filesystem::exists(s_VisualStudioInstallLocation[version]))
 			{
@@ -245,7 +245,7 @@ namespace ArcEngine
 
 		s_OpenProjectFuture = std::async(std::launch::async, []()
 		{
-			const auto solutionPath = Project::GetSolutionPath();
+			const std::filesystem::path solutionPath = Project::GetSolutionPath();
 			if (!IsDteValid())
 			{
 				FindAndSetRunningInstance(solutionPath.string());
@@ -273,7 +273,7 @@ namespace ArcEngine
 
 		s_OpenFileFuture = std::async(std::launch::async, [filepath, goToLine, selectLine]()
 		{
-			const auto solutionPath = Project::GetSolutionPath();
+			const std::filesystem::path solutionPath = Project::GetSolutionPath();
 			if (!IsDteValid())
 			{
 				FindAndSetRunningInstance(solutionPath.string());
@@ -341,7 +341,7 @@ namespace ArcEngine
 
 		s_OpenProjectFuture = std::async(std::launch::async, []()
 		{
-			const auto solutionPath = Project::GetSolutionPath();
+			const std::filesystem::path solutionPath = Project::GetSolutionPath();
 			if (!IsDteValid())
 			{
 				FindAndSetRunningInstance(solutionPath.string());

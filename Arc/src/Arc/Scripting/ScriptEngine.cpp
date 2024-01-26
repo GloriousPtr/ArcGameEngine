@@ -177,7 +177,7 @@ namespace ArcEngine
 					return false;
 
 				const ScriptComponent& comp = entity.GetComponent<ScriptComponent>();
-				auto it = comp.Classes.find(s_ClassTypes.at(type));
+				eastl::vector_map<eastl::string, ScriptInstance*>::const_iterator it = comp.Classes.find(s_ClassTypes.at(type));
 				if (it != comp.Classes.end())
 				{
 					if (it->second)
@@ -193,7 +193,7 @@ namespace ArcEngine
 					return (GCHandle)nullptr;
 
 				const ScriptComponent& comp = entity.GetComponent<ScriptComponent>();
-				auto it = comp.Classes.find(s_ClassTypes.at(type));
+				eastl::vector_map<eastl::string, ScriptInstance*>::const_iterator it = comp.Classes.find(s_ClassTypes.at(type));
 				if (it != comp.Classes.end())
 				{
 					if (it->second)
@@ -288,11 +288,11 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 		
-		const auto project = Project::GetActive();
+		const Ref<Project> project = Project::GetActive();
 		if (!project)
 			return;
 
-		s_ScriptEngineData->ClientAssemblyPath = std::filesystem::absolute(Project::GetScriptModuleDirectory() / (Project::GetActive()->GetConfig().Name + ".dll").c_str()).string();
+		s_ScriptEngineData->ClientAssemblyPath = std::filesystem::absolute(Project::GetScriptModuleDirectory() / (project->GetConfig().Name + ".dll").c_str()).string();
 
 		s_ScriptEngineData->EntityClasses.clear();
 
@@ -310,7 +310,7 @@ namespace ArcEngine
 
 		RegisterComponent<TagComponent>();
 		RegisterComponent(AllComponents{});
-		const auto& scripts = ScriptEngine::GetClasses();
+		const eastl::hash_map<eastl::string, Ref<ScriptClass>>& scripts = ScriptEngine::GetClasses();
 		RegisterScriptComponent(s_ScriptEngineData->CoreAssembly, "ArcEngine.Entity");
 		for (const auto& [className, _] : scripts)
 			RegisterScriptComponent(s_ScriptEngineData->ClientAssembly, className);
@@ -418,7 +418,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto& scriptClass = s_ScriptEngineData->EntityClasses.at(name.begin());
+		const Ref<ScriptClass> scriptClass = s_ScriptEngineData->EntityClasses.at(name.begin());
 		const UUID entityID = entity.GetUUID();
 		return new ScriptInstance(scriptClass, entityID);
 	}
@@ -482,7 +482,7 @@ namespace ArcEngine
 	std::string ScriptClass::GetFieldValueString(GCHandle instance, const eastl::string_view fieldName) const
 	{
 		ARC_PROFILE_SCOPE();
-		auto string = s_Reflection->GetFieldValueString(instance, fieldName.begin());
+		char* string = s_Reflection->GetFieldValueString(instance, fieldName.begin());
 		std::string str = string ? string : "";
 		if (string)
 			s_Reflection->Free(string);
@@ -510,7 +510,7 @@ namespace ArcEngine
 
 				FieldType type = FieldType::Unknown;
 
-				auto typeName = s_Reflection->GetFieldTypeName(m_Assembly, className, fieldName.c_str());
+				char* typeName = s_Reflection->GetFieldTypeName(m_Assembly, className, fieldName.c_str());
 				if (!typeName)
 				{
 					ARC_CORE_WARN("Unsupported Field Type Name: TypeName is null");
@@ -518,7 +518,7 @@ namespace ArcEngine
 					continue;
 				}
 
-				const auto& fieldIt = s_ScriptFieldTypeMap.find_as(typeName);
+				eastl::hash_map<eastl::string, FieldType>::const_iterator fieldIt = s_ScriptFieldTypeMap.find_as(typeName);
 				if (fieldIt != s_ScriptFieldTypeMap.end())
 					type = fieldIt->second;
 				s_Reflection->Free(typeName);
@@ -538,11 +538,11 @@ namespace ArcEngine
 				else if (s_Reflection->FieldHasAttribute(m_Assembly, className, fieldName.c_str(), "ArcEngine.ShowInPropertiesAttribute"))
 					hidden = false;
 
-				auto header = s_Reflection->GetFieldDisplayName(m_Assembly, className, fieldName.c_str());
-				auto tooltip = s_Reflection->GetFieldTooltip(m_Assembly, className, fieldName.c_str());
+				char* header = s_Reflection->GetFieldDisplayName(m_Assembly, className, fieldName.c_str());
+				char* tooltip = s_Reflection->GetFieldTooltip(m_Assembly, className, fieldName.c_str());
 				Vec2 rangeMinMax = s_Reflection->GetFieldRange(m_Assembly, className, fieldName.c_str());
 
-				auto& scriptField = m_FieldsMap[fieldName];
+				ScriptField& scriptField = m_FieldsMap[fieldName];
 				scriptField.Name = fieldName;
 				if (scriptField.Name.size() > 1 && scriptField.Name[0] == '_')
 					scriptField.DisplayName = &scriptField.Name[1];
@@ -560,7 +560,7 @@ namespace ArcEngine
 
 				if (type == FieldType::String)
 				{
-					auto string = s_Reflection->GetFieldValueString(obj, fieldName.c_str());
+					char* string = s_Reflection->GetFieldValueString(obj, fieldName.c_str());
 					eastl::string str = string ? string : "";
 					if (string)
 						s_Reflection->Free(string);

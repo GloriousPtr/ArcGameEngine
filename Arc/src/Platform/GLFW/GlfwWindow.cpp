@@ -50,7 +50,7 @@ namespace ArcEngine
 		
 		if(s_GLFWWindowCount == 0)
 		{
-			ARC_PROFILE_SCOPE("glfwInit");
+			ARC_PROFILE_SCOPE_NAME("glfwInit");
 			
 			[[maybe_unused]] const int success = glfwInit();
 			ARC_CORE_ASSERT(success, "Could not initialize GLFW!");
@@ -58,7 +58,7 @@ namespace ArcEngine
 		}
 
 		{
-			ARC_PROFILE_SCOPE("glfwCreateWindow");
+			ARC_PROFILE_SCOPE_NAME("glfwCreateWindow");
 
 			#ifdef ARC_PLATFORM_WINDOWS
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -85,7 +85,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
-			auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+			WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 			data->Width = width;
 			data->Height = height;
 
@@ -97,7 +97,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
-			const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+			const WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 			WindowCloseEvent event;
 			data->EventCallback(event);
 		});
@@ -106,7 +106,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
-			const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+			const WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
 			switch (action)
 			{
@@ -137,7 +137,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
-			const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+			const WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
 			KeyTypedEvent event(static_cast<KeyCode>(keycode));
 			data->EventCallback(event);
@@ -147,7 +147,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
-			const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+			const WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
 			switch (action)
 			{
@@ -172,7 +172,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
-			const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+			const WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
 			MouseScrolledEvent event(static_cast<float>(xOffset), static_cast<float>(yOffset));
 			data->EventCallback(event);
@@ -182,7 +182,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
-			const auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+			const WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
 			MouseMovedEvent event(static_cast<float>(xPos), static_cast<float>(yPos));
 			data->EventCallback(event);

@@ -138,7 +138,7 @@ namespace ArcEngine
 
 			if(open)
 			{
-				ARC_PROFILE_SCOPE("UI Function");
+				ARC_PROFILE_SCOPE_NAME("UI Function");
 
 				uiFunction(component);
 				ImGui::TreePop();
@@ -189,7 +189,7 @@ namespace ArcEngine
 
 			if (open)
 			{
-				ARC_PROFILE_SCOPE("UI Function");
+				ARC_PROFILE_SCOPE_NAME("UI Function");
 
 				// Public Fields
 				if (ScriptEngine::HasClass(klass.first))

@@ -78,7 +78,7 @@ namespace ArcEngine
 			D3D12_SHADER_INPUT_BIND_DESC shaderInputBindDesc{};
 			reflection->GetResourceBindingDesc(i, &shaderInputBindDesc);
 
-			auto* cb = reflection->GetConstantBufferByIndex(i);
+			ID3D12ShaderReflectionConstantBuffer* cb = reflection->GetConstantBufferByIndex(i);
 			D3D12_SHADER_BUFFER_DESC constantBufferDesc{};
 			cb->GetDesc(&constantBufferDesc);
 
@@ -162,9 +162,8 @@ namespace ArcEngine
 			{
 				for (uint32_t var = 0; var < constantBufferDesc.Variables; ++var)
 				{
-					auto* variable = cb->GetVariableByIndex(var);
-
-					auto* variableType = variable->GetType();
+					ID3D12ShaderReflectionVariable* variable = cb->GetVariableByIndex(var);
+					ID3D12ShaderReflectionType* variableType = variable->GetType();
 					D3D12_SHADER_TYPE_DESC variableTypeDesc;
 					variableType->GetDesc(&variableTypeDesc);
 					MaterialPropertyType type = GetVariableType(variableTypeDesc);
@@ -287,9 +286,9 @@ namespace ArcEngine
 	{
 		using Microsoft::WRL::ComPtr;
 
-		const auto& graphicsSpec = m_Specification.GraphicsPipelineSpecs;
+		const GraphicsPipelineSpecification& graphicsSpec = m_Specification.GraphicsPipelineSpecs;
 
-		const auto* dxShader = reinterpret_cast<const Dx12Shader*>(shader.get());
+		const Dx12Shader* dxShader = reinterpret_cast<const Dx12Shader*>(shader.get());
 		const ComPtr<IDxcBlob> vertexShader = dxShader->m_ShaderBlobs.at(ShaderType::Vertex);
 		const ComPtr<IDxcBlob> pixelShader = dxShader->m_ShaderBlobs.at(ShaderType::Pixel);
 		const ComPtr<IDxcBlob> vertexReflection = dxShader->m_ReflectionBlobs.at(ShaderType::Vertex);
@@ -388,9 +387,9 @@ namespace ArcEngine
 
 		eastl::vector<D3D12_INPUT_ELEMENT_DESC> psoInputLayout;
 		psoInputLayout.reserve(inputLayout.size());
-		for (auto& i : inputLayout)
+		for (Layout& i : inputLayout)
 		{
-			constexpr auto classification = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			constexpr D3D12_INPUT_CLASSIFICATION classification = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
 			const D3D12_INPUT_ELEMENT_DESC desc{ i.Name.c_str(), i.Index, i.Format, 0, D3D12_APPEND_ALIGNED_ELEMENT, classification, 0 };
 			psoInputLayout.push_back(desc);
 		}
@@ -466,7 +465,7 @@ namespace ArcEngine
 		blendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 		psoDesc.BlendState.AlphaToCoverageEnable = FALSE;
 		psoDesc.BlendState.IndependentBlendEnable = FALSE;
-		for (auto& renderTargetDesc : psoDesc.BlendState.RenderTarget)
+		for (D3D12_RENDER_TARGET_BLEND_DESC& renderTargetDesc : psoDesc.BlendState.RenderTarget)
 			renderTargetDesc = blendDesc;
 
 		// RasterizerState
@@ -552,7 +551,7 @@ namespace ArcEngine
 	{
 		using Microsoft::WRL::ComPtr;
 
-		const auto* dxShader = reinterpret_cast<const Dx12Shader*>(shader.get());
+		const Dx12Shader* dxShader = reinterpret_cast<const Dx12Shader*>(shader.get());
 		const ComPtr<IDxcBlob> computeShader = dxShader->m_ShaderBlobs.at(ShaderType::Compute);
 		const ComPtr<IDxcBlob> computeReflection = dxShader->m_ReflectionBlobs.at(ShaderType::Compute);
 

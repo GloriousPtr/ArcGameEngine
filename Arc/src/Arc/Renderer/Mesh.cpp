@@ -68,7 +68,7 @@ namespace ArcEngine
 		if (!std::filesystem::exists(path))
 			return;
 
-		auto ext = path.extension();
+		const std::filesystem::path ext = path.extension();
 		bool supportedFile = ext == ".obj";
 		if (!supportedFile)
 		{
@@ -94,12 +94,12 @@ namespace ArcEngine
 			if (!reader.Warning().empty())
 				ARC_CORE_WARN("File: {0}. Warning: {1}", filepath, reader.Warning());
 
-			auto& attrib = reader.GetAttrib();
-			auto& shapes = reader.GetShapes();
-			auto& materials = reader.GetMaterials();
+			const tinyobj::attrib_t& attrib = reader.GetAttrib();
+			const std::vector<tinyobj::shape_t>& shapes = reader.GetShapes();
+			const std::vector<tinyobj::material_t>& materials = reader.GetMaterials();
 			
 			// Loop over shapes
-			for (const auto& shape : shapes)
+			for (const tinyobj::shape_t& shape : shapes)
 			{
 				eastl::vector<Vertex> vertices;
 				eastl::vector<uint32_t> indices;
@@ -110,7 +110,7 @@ namespace ArcEngine
 				size_t index_offset = 0;
 				for (size_t f = 0; f < shape.mesh.num_face_vertices.size(); f++)
 				{
-					auto fv = static_cast<size_t>(shape.mesh.num_face_vertices[f]);
+					size_t fv = static_cast<size_t>(shape.mesh.num_face_vertices[f]);
 
 					// Loop over vertices in the face.
 					for (size_t v = 0; v < fv; v++)
@@ -149,10 +149,10 @@ namespace ArcEngine
 							glm::vec2 uv1 = { attrib.texcoords[2 * uv1_index + 0], 1.0f - attrib.texcoords[2 * uv1_index + 1] };
 							glm::vec2 uv2 = { attrib.texcoords[2 * uv2_index + 0], 1.0f - attrib.texcoords[2 * uv2_index + 1] };
 
-							auto deltaPos1 = v1 - v0;
-							auto deltaPos2 = v2 - v0;
-							auto deltaUV1 = uv1 - uv0;
-							auto deltaUV2 = uv2 - uv0;
+							glm::highp_vec3 deltaPos1 = v1 - v0;
+							glm::highp_vec3 deltaPos2 = v2 - v0;
+							glm::highp_vec2 deltaUV1 = uv1 - uv0;
+							glm::highp_vec2 deltaUV2 = uv2 - uv0;
 
 							float det = deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x;
 							if (det == 0.0f)
@@ -167,8 +167,8 @@ namespace ArcEngine
 								vertex.Bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
 							}
 
-							auto t = glm::normalize(vertex.Tangent - vertex.Normal * glm::dot(vertex.Normal, vertex.Tangent));
-							auto b = glm::normalize(vertex.Bitangent - vertex.Normal * glm::dot(vertex.Normal, vertex.Bitangent));
+							glm::highp_vec3 t = glm::normalize(vertex.Tangent - vertex.Normal * glm::dot(vertex.Normal, vertex.Tangent));
+							glm::highp_vec3 b = glm::normalize(vertex.Bitangent - vertex.Normal * glm::dot(vertex.Normal, vertex.Bitangent));
 							float handedness = glm::dot(glm::cross(vertex.Normal, t), b);
 							if (handedness < 0.0f)
 							{
@@ -203,14 +203,14 @@ namespace ArcEngine
 
 				if (materialId >= 0)
 				{
-					const auto& material = materials.at(materialId);
+					const tinyobj::material_t& material = materials.at(materialId);
 					
-					const auto& materialProperties = submesh.Mat->GetProperties();
+					const eastl::vector<MaterialProperty>& materialProperties = submesh.Mat->GetProperties();
 					bool normalMapApplied = false;
 
 					std::filesystem::path dir = path.parent_path();
 
-					for (const auto& property : materialProperties)
+					for (const MaterialProperty& property : materialProperties)
 					{
 						if (property.Type == MaterialPropertyType::Texture2D ||
 							property.Type == MaterialPropertyType::Texture2DBindless)

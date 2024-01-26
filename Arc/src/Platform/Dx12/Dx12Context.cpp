@@ -157,7 +157,7 @@ namespace ArcEngine
 		WaitForGpu();
 		CloseHandle(s_Frames[Dx12Frame::CurrentBackBuffer].Fence.Event);
 
-		for (auto& frame : s_Frames)
+		for (Dx12Frame& frame : s_Frames)
 		{
 			s_RtvDescHeap.Free(frame.RtvHandle);
 			frame.RtvBuffer->Release();
@@ -343,7 +343,7 @@ namespace ArcEngine
 		Dx12Allocator::Init(s_Adapter, s_Device);
 
 		// Create Fences
-		for (auto& frame : s_Frames)
+		for (Dx12Frame& frame : s_Frames)
 		{
 			frame.Fence.Event = CreateEvent(nullptr, false, false, nullptr);
 			frame.Fence.Value = 0;
@@ -354,14 +354,14 @@ namespace ArcEngine
 
 		// Create allocators and command lists
 		int tempInt = 0;
-		for (auto& frame : s_Frames)
+		for (Dx12Frame& frame : s_Frames)
 		{
 			s_Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&(frame.GraphicsCommandAllocator)));
 			s_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, frame.GraphicsCommandAllocator, nullptr, IID_PPV_ARGS(&(frame.GraphicsCommandList)));
 
-			auto cmdAllocatorName = std::format("Graphics Command Allocator {}", tempInt);
+			const std::string cmdAllocatorName = std::format("Graphics Command Allocator {}", tempInt);
 			NameResource(frame.GraphicsCommandAllocator, cmdAllocatorName.c_str());
-			auto cmdListName = std::format("Graphics Command List {}", tempInt);
+			const std::string cmdListName = std::format("Graphics Command List {}", tempInt);
 			NameResource(frame.GraphicsCommandList, cmdListName.c_str());
 
 			frame.GraphicsCommandList->Close();
@@ -376,7 +376,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		auto& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
+		Dx12Frame& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
 
 		backFrame.CloseGraphicsCommands();
 
@@ -395,7 +395,7 @@ namespace ArcEngine
 		{
 			WaitForGpu();
 
-			for (auto& frame : s_Frames)
+			for (Dx12Frame& frame : s_Frames)
 			{
 				s_RtvDescHeap.Free(frame.RtvHandle);
 				frame.RtvBuffer->Release();
@@ -501,7 +501,7 @@ namespace ArcEngine
 		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<float>(s_Width), static_cast<float>(s_Height), 0.0f, 1.0f };
 		const D3D12_RECT scissorRect = { 0, 0, static_cast<long>(s_Width), static_cast<long>(s_Height) };
 
-		const auto& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
+		const Dx12Frame& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
 		auto* commandList = backFrame.GraphicsCommandList;
 
 		//backFrame.ResetGraphicsCommands();
@@ -526,7 +526,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
+		const Dx12Frame& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
 
 		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backFrame.RtvBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 		backFrame.GraphicsCommandList->ResourceBarrier(1, &barrier);
@@ -535,7 +535,9 @@ namespace ArcEngine
 
 	void Dx12Context::WaitForGpu()
 	{
-		auto& fence = s_Frames[Dx12Frame::CurrentBackBuffer].Fence;
+		ARC_PROFILE_SCOPE();
+
+		Dx12Fence& fence = s_Frames[Dx12Frame::CurrentBackBuffer].Fence;
 		UINT64& fenceValue = fence.Value;
 		++fenceValue;
 
@@ -550,13 +552,13 @@ namespace ArcEngine
 
 		// Create RTV
 		int tempInt = 0;
-		for (auto& frame : s_Frames)
+		for (Dx12Frame& frame : s_Frames)
 		{
 			s_Swapchain->GetBuffer(tempInt, IID_PPV_ARGS(&(frame.RtvBuffer)));
 			frame.RtvHandle = s_RtvDescHeap.Allocate();
 			s_Device->CreateRenderTargetView(frame.RtvBuffer, nullptr, frame.RtvHandle.CPU);
 
-			auto rtvFrameName = std::format("RTV Frame {}", tempInt);
+			const std::string rtvFrameName = std::format("RTV Frame {}", tempInt);
 			NameResource(frame.RtvBuffer, rtvFrameName.c_str());
 
 			++tempInt;
@@ -616,8 +618,8 @@ namespace ArcEngine
 		if (backFrame.DeferedReleasesFlag)
 		{
 			backFrame.DeferedReleasesFlag = false;
-			auto& resources = backFrame.DeferredReleases;
-			for (const auto& resource : resources)
+			eastl::vector<IUnknown*>& resources = backFrame.DeferredReleases;
+			for (IUnknown* resource : resources)
 			{
 				resource->Release();
 			}

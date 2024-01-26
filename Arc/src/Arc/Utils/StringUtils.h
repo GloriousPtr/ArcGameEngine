@@ -11,7 +11,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE();
 
-			const auto lastDot = filepath.find_last_of('.');
+			const size_t lastDot = filepath.find_last_of('.');
 			return filepath.substr(lastDot + 1, filepath.size() - lastDot);
 		}
 
@@ -19,10 +19,10 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE();
 
-			auto lastSlash = filepath.find_last_of("/\\");
+			size_t lastSlash = filepath.find_last_of("/\\");
 			lastSlash = lastSlash == eastl::string::npos ? 0 : lastSlash + 1;
-			const auto lastDot = filepath.rfind('.');
-			const auto count = lastDot == eastl::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
+			const size_t lastDot = filepath.rfind('.');
+			const size_t count = lastDot == eastl::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
 			return filepath.substr(lastSlash, count);
 		}
 
@@ -30,7 +30,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE();
 
-			auto lastSlash = filepath.find_last_of("/\\");
+			size_t lastSlash = filepath.find_last_of("/\\");
 			lastSlash = lastSlash == eastl::string::npos ? 0 : lastSlash + 1;
 			return filepath.substr(lastSlash, filepath.size());
 		}

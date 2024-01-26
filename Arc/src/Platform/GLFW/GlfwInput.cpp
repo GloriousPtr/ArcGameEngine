@@ -11,7 +11,7 @@ namespace ArcEngine
     {
         ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
-        auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+        GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
         const int state = glfwGetKey(window, static_cast<int32_t>(key));
         return state == GLFW_PRESS || state == GLFW_REPEAT;
     }
@@ -20,7 +20,7 @@ namespace ArcEngine
     {
         ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
-        auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+        GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
         const int state = glfwGetMouseButton(window, static_cast<int32_t>(button));
         return state == GLFW_PRESS;
     }
@@ -29,7 +29,7 @@ namespace ArcEngine
     {
         ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
-        auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+        GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
         double xpos;
         double ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
@@ -38,7 +38,7 @@ namespace ArcEngine
 
     void Input::SetMousePosition(const glm::vec2& position)
     {
-        auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+        GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
         glfwSetCursorPos(window, static_cast<double>(position.x), static_cast<double>(position.y));
     }
 }

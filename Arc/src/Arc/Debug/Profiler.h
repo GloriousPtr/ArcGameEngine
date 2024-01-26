@@ -285,12 +285,9 @@ namespace ArcEngine::Profile
 
 #define ARC_ENABLE_CPU_PROFILING 1
 #if ARC_ENABLE_CPU_PROFILING
-	#define FUNC_NAME									((OPTICK_CONCAT(autogen_description_, __LINE__))->flags & Optick::EventDescription::IS_CUSTOM_NAME)\
-														? OPTICK_CONCAT(autogen_description_, __LINE__)->name\
-														: ARC_FUNC_SIG
-
 	#define ARC_PROFILE_FRAME(NAME, ...)				OPTICK_FRAME(NAME, __VA_ARGS__) PIXScopedEvent(ArcEngine::Profile::GeneratePixColor(__FILE__, CONSTEVAL_LINE), NAME)
-	#define ARC_PROFILE_SCOPE(...)						OPTICK_EVENT(__VA_ARGS__) PIXScopedEvent(ArcEngine::Profile::GeneratePixColor(__FILE__, CONSTEVAL_LINE), FUNC_NAME)
+	#define ARC_PROFILE_SCOPE(...)						OPTICK_EVENT(__VA_ARGS__) PIXScopedEvent(ArcEngine::Profile::GeneratePixColor(__FILE__, CONSTEVAL_LINE), ARC_FUNC_SIG)
+	#define ARC_PROFILE_SCOPE_NAME(NAME)				OPTICK_EVENT(NAME) PIXScopedEvent(ArcEngine::Profile::GeneratePixColor(__FILE__, CONSTEVAL_LINE), NAME)
 	#define ARC_PROFILE_TAG(NAME, ...)					OPTICK_TAG(NAME, __VA_ARGS__) ArcEngine::Profile::PIXSetMarkerEx(NAME, __VA_ARGS__)
 	#define ARC_PROFILE_SCOPE_DYNAMIC(NAME)				OPTICK_EVENT_DYNAMIC(NAME) PIXScopedEvent(ArcEngine::Profile::GeneratePixColor(__FILE__, CONSTEVAL_LINE), NAME)
 	#define ARC_PROFILE_THREAD(NAME)					OPTICK_THREAD(NAME) SetThreadDescription(GetCurrentThread(), OPTICK_CONCAT(L, NAME))

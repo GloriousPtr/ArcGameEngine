@@ -109,7 +109,7 @@ namespace ArcEngine
 
 		s_Renderer3DData = CreateScope<Renderer3DData>();
 
-		auto& pipelineLibrary = Renderer::GetPipelineLibrary();
+		PipelineLibrary& pipelineLibrary = Renderer::GetPipelineLibrary();
 
 		{
 			PipelineSpecification spec
@@ -277,7 +277,7 @@ namespace ArcEngine
 
 		if (cubemap && s_Renderer3DData->CubemapPipeline->Bind())
 		{
-			auto& sky = cubemap.GetComponent<SkyLightComponent>();
+			SkyLightComponent& sky = cubemap.GetComponent<SkyLightComponent>();
 			const SkyboxData data
 			{
 				.SkyboxViewProjection = cameraData.Projection * glm::mat4(glm::mat3(cameraData.View)),
@@ -531,7 +531,7 @@ namespace ArcEngine
 		glm::vec4 params = { BloomClamp, 2.0f, 0.0f, 0.0f };
 
 		{
-			ARC_PROFILE_SCOPE("Prefilter");
+			ARC_PROFILE_SCOPE_NAME("Prefilter");
 
 			renderGraphData->PrefilteredFramebuffer->Bind();
 			//s_BloomShader->SetData("u_Threshold", threshold);
@@ -544,7 +544,7 @@ namespace ArcEngine
 		const size_t blurSamples = renderGraphData->BlurSamples;
 		FramebufferSpecification spec = renderGraphData->PrefilteredFramebuffer->GetSpecification();
 		{
-			ARC_PROFILE_SCOPE("Downsample");
+			ARC_PROFILE_SCOPE_NAME("Downsample");
 
 			//s_GaussianBlurShader->SetData("u_Texture", 0);
 			for (size_t i = 0; i < blurSamples; i++)
@@ -565,7 +565,7 @@ namespace ArcEngine
 		}
 		
 		{
-			ARC_PROFILE_SCOPE("Upsample");
+			ARC_PROFILE_SCOPE_NAME("Upsample");
 
 			//s_BloomShader->SetData("u_Threshold", threshold);
 			params = glm::vec4(BloomClamp, 3.0f, 1.0f, 1.0f);
@@ -676,12 +676,12 @@ namespace ArcEngine
 		bool shouldExecute = false;
 		if (s_Renderer3DData->Skylight)
 		{
-			ARC_PROFILE_SCOPE("Draw Skylight");
+			ARC_PROFILE_SCOPE_NAME("Draw Skylight");
 
 			[[likely]]
 			if (s_Renderer3DData->CubemapPipeline->Bind())
 			{
-				const auto& skylightComponent = s_Renderer3DData->Skylight.GetComponent<SkyLightComponent>();
+				const SkyLightComponent& skylightComponent = s_Renderer3DData->Skylight.GetComponent<SkyLightComponent>();
 				if (skylightComponent.Texture)
 				{
 					s_Renderer3DData->CubemapCB->Bind(0);
@@ -695,7 +695,7 @@ namespace ArcEngine
 		[[likely]]
 		if (s_Renderer3DData->RenderPipeline->Bind())
 		{
-			ARC_PROFILE_SCOPE("Draw Meshes");
+			ARC_PROFILE_SCOPE_NAME("Draw Meshes");
 
 			s_Renderer3DData->GlobalDataCB->Bind(0);
 			s_Renderer3DData->DirectionalLightsSB->Bind();
@@ -703,7 +703,7 @@ namespace ArcEngine
 			s_Renderer3DData->SpotLightsSB->Bind();
 
 			const std::span<MeshData> meshes(s_Renderer3DData->Meshes.data(), s_Renderer3DData->MeshInsertIndex);
-			for (const auto& meshData : meshes)
+			for (const MeshData& meshData : meshes)
 			{
 				meshData.Mat->Bind();
 				s_Renderer3DData->RenderPipeline->SetData("Transform", glm::value_ptr(meshData.Transform), sizeof(glm::mat4), 0);
@@ -725,11 +725,11 @@ namespace ArcEngine
 		RenderCommand::Clear();
 
 		{
-			ARC_PROFILE_SCOPE("Skylight");
+			ARC_PROFILE_SCOPE_NAME("Skylight");
 
 			if (s_Skylight)
 			{
-				const auto& skylightComponent = s_Skylight.GetComponent<SkyLightComponent>();
+				const SkylightComponent& skylightComponent = s_Skylight.GetComponent<SkyLightComponent>();
 				if (skylightComponent.Texture)
 				{
 					//RenderCommand::SetDepthMask(false);
@@ -746,11 +746,11 @@ namespace ArcEngine
 		}
 		
 		{
-			ARC_PROFILE_SCOPE("Draw Meshes");
+			ARC_PROFILE_SCOPE_NAME("Draw Meshes");
 
 			MeshComponent::CullModeType currentCullMode = MeshComponent::CullModeType::Unknown;
 			const std::span<MeshData> meshes(s_Renderer3DData->Meshes.data(), s_Renderer3DData->MeshInsertIndex);
-			for (const auto& meshData : meshes)
+			for (const MeshData& meshData : meshes)
 			{
 				meshData.Mat->Bind();
 				//s_Shader->SetData("u_Model", meshData.Transform);
@@ -793,7 +793,7 @@ namespace ArcEngine
 			//s_ShadowMapShader->SetData("u_ViewProjection", dirLightViewProj);
 
 			const std::span<MeshData> meshes(s_Renderer3DData->Meshes.data(), s_Renderer3DData->MeshInsertIndex);
-			for (auto it = meshes.rbegin(); it != meshes.rend(); ++it)
+			for (std::span<MeshData>::iterator it = meshes.rbegin(); it != meshes.rend(); ++it)
 			{
 				const MeshData& meshData = *it;
 				//s_ShadowMapShader->SetData("u_Model", meshData.Transform);

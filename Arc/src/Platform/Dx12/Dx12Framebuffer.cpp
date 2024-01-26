@@ -18,12 +18,12 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		for (auto& depthAttachment : m_DepthAttachment)
+		for (DepthFrame& depthAttachment : m_DepthAttachment)
 			depthAttachment.Release(false);
 
-		for (auto& colorAttachments : m_ColorAttachments)
+		for (eastl::vector<ColorFrame>& colorAttachments : m_ColorAttachments)
 		{
-			for (auto& attachment : colorAttachments)
+			for (ColorFrame& attachment : colorAttachments)
 				attachment.Release(false);
 		}
 	}
@@ -46,18 +46,18 @@ namespace ArcEngine
 		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 		auto* device = Dx12Context::GetDevice();
-		auto* srvDescriptorHeap = Dx12Context::GetSrvHeap();
-		auto* rtvDescriptorHeap = Dx12Context::GetRtvHeap();
-		auto* dsvDescriptorHeap = Dx12Context::GetDsvHeap();
+		DescriptorHeap* srvDescriptorHeap = Dx12Context::GetSrvHeap();
+		DescriptorHeap* rtvDescriptorHeap = Dx12Context::GetRtvHeap();
+		DescriptorHeap* dsvDescriptorHeap = Dx12Context::GetDsvHeap();
 
-		auto& attachments = m_Specification.Attachments.Attachments;
-		for (auto& attachment : attachments)
+		eastl::vector<FramebufferTextureSpecification>& attachments = m_Specification.Attachments.Attachments;
+		for (FramebufferTextureSpecification& attachment : attachments)
 		{
 			DXGI_FORMAT format = GetDxgiFormat(attachment.TextureFormat);
 
 			if (attachment.TextureFormat == FramebufferTextureFormat::DEPTH24STENCIL8)
 			{
-				constexpr auto state = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+				constexpr D3D12_RESOURCE_STATES state = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 
 				D3D12_CLEAR_VALUE defaultDepthClear{};
 				defaultDepthClear.Format = format;
@@ -75,7 +75,7 @@ namespace ArcEngine
 				dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
 
 				int i = 0;
-				for (auto& depthAttachment : m_DepthAttachment)
+				for (DepthFrame& depthAttachment : m_DepthAttachment)
 				{
 					D3D12MA::Allocation* allocation;
 					DescriptorHandle srvHandle = srvDescriptorHeap->Allocate();
@@ -95,7 +95,7 @@ namespace ArcEngine
 			}
 			else
 			{
-				constexpr auto state = D3D12_RESOURCE_STATE_RENDER_TARGET;
+				constexpr D3D12_RESOURCE_STATES state = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
 				D3D12_CLEAR_VALUE defaultColorClear{};
 				defaultColorClear.Format = format;
@@ -107,7 +107,7 @@ namespace ArcEngine
 				rtvDesc.Format = format;
 
 				int i = 0;
-				for (auto& colorAttachment : m_ColorAttachments)
+				for (eastl::vector<ColorFrame>& colorAttachment : m_ColorAttachments)
 				{
 					D3D12MA::Allocation* allocation;
 					DescriptorHandle srvHandle = srvDescriptorHeap->Allocate();
@@ -134,7 +134,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		auto* commandList = Dx12Context::GetGraphicsCommandList();
-		const auto backFrame = Dx12Context::GetCurrentFrameIndex();
+		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_DepthAttachment[backFrame].DsvHandle.CPU;
 		commandList->OMSetRenderTargets(static_cast<UINT>(m_RtvHandles[backFrame].size()), m_RtvHandles[backFrame].data(), true, dsvHandle.ptr != 0 ? &dsvHandle : nullptr);
@@ -154,9 +154,9 @@ namespace ArcEngine
 
 		auto* commandList = Dx12Context::GetGraphicsCommandList();
 
-		const auto rtv = Dx12Context::GetRtv();
-		const auto width = Dx12Context::GetWidth();
-		const auto height = Dx12Context::GetHeight();
+		const D3D12_CPU_DESCRIPTOR_HANDLE rtv = Dx12Context::GetRtv();
+		const uint32_t width = Dx12Context::GetWidth();
+		const uint32_t height = Dx12Context::GetHeight();
 
 		commandList->OMSetRenderTargets(1, &rtv, true, nullptr);
 
@@ -173,12 +173,12 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		auto* commandList = Dx12Context::GetGraphicsCommandList();
-		const auto backFrame = Dx12Context::GetCurrentFrameIndex();
+		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_DepthAttachment[backFrame].DsvHandle.CPU;
 
-		const auto& rtvHandles = m_RtvHandles[backFrame];
-		for (const auto& rtv : rtvHandles)
+		const eastl::vector<D3D12_CPU_DESCRIPTOR_HANDLE>& rtvHandles = m_RtvHandles[backFrame];
+		for (const D3D12_CPU_DESCRIPTOR_HANDLE rtv : rtvHandles)
 			commandList->ClearRenderTargetView(rtv, glm::value_ptr(m_ClearColor), 0, nullptr);
 		if (dsvHandle.ptr != 0)
 			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, m_ClearDepth.r, static_cast<UINT8>(m_ClearDepth.g), 0, nullptr);
@@ -188,7 +188,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto backFrame = Dx12Context::GetCurrentFrameIndex();
+		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
 		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(slot, m_ColorAttachments[backFrame][index].SrvHandle.GPU);
 	}
 
@@ -196,7 +196,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto backFrame = Dx12Context::GetCurrentFrameIndex();
+		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
 		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(slot, m_DepthAttachment[backFrame].SrvHandle.GPU);
 	}
 
@@ -213,27 +213,27 @@ namespace ArcEngine
 		m_Specification.Width = width;
 		m_Specification.Height = height;
 
-		for (auto& attachments : m_ReleasedColorAttachments)
+		for (eastl::vector<ColorFrame>& attachments : m_ReleasedColorAttachments)
 			attachments.clear();
-		for (auto& attachment : m_ReleasedDepthAttachment)
+		for (DepthFrame& attachment : m_ReleasedDepthAttachment)
 			attachment = {};
 
 		m_ReleasedColorAttachments = m_ColorAttachments;
 		m_ReleasedDepthAttachment = m_DepthAttachment;
 		
-		for (auto& depthAttachment : m_ReleasedDepthAttachment)
+		for (DepthFrame& depthAttachment : m_ReleasedDepthAttachment)
 			depthAttachment.Release(true);
-		for (auto& attachments : m_ReleasedColorAttachments)
+		for (eastl::vector<ColorFrame>& attachments : m_ReleasedColorAttachments)
 		{
-			for (auto& attachment : attachments)
+			for (ColorFrame& attachment : attachments)
 				attachment.Release(true);
 		}
 
-		for (auto& depthAttachment : m_DepthAttachment)
+		for (DepthFrame& depthAttachment : m_DepthAttachment)
 			depthAttachment = {};
-		for (auto& colorAttachments : m_ColorAttachments)
+		for (eastl::vector<ColorFrame>& colorAttachments : m_ColorAttachments)
 			colorAttachments.clear();
-		for (auto& rtvHandles : m_RtvHandles)
+		for (eastl::vector<D3D12_CPU_DESCRIPTOR_HANDLE>& rtvHandles : m_RtvHandles)
 			rtvHandles.clear();
 			
 		Invalidate();
@@ -243,12 +243,12 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto backFrame = Dx12Context::GetCurrentFrameIndex();
+		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
 
 		D3D12_RESOURCE_BARRIER barriers[20];
 		int numBarriers = 0;
-		auto& colorAttachments = m_ColorAttachments[backFrame];
-		for (auto& attachment : colorAttachments)
+		eastl::vector<ColorFrame>& colorAttachments = m_ColorAttachments[backFrame];
+		for (ColorFrame& attachment : colorAttachments)
 		{
 			barriers[numBarriers] = CD3DX12_RESOURCE_BARRIER::Transition(attachment.Allocation->GetResource(), attachment.State, colorAttachmentState);
 			attachment.State = colorAttachmentState;

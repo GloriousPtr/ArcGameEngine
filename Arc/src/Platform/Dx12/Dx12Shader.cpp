@@ -13,7 +13,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		auto nameStr = filepath.filename().string();
+		std::string nameStr = filepath.filename().string();
 		m_Name = nameStr.c_str();
 		m_Type = type;
 		Compile(filepath);
@@ -102,10 +102,10 @@ namespace ArcEngine
 		};
 		args.reserve(args.size() + arguments.size() + defines.size());
 		
-		for (const auto& arg : arguments)
+		for (const wchar_t* arg : arguments)
 			args.push_back(arg);
 
-		for (const auto& define : defines)
+		for (const wchar_t* define : defines)
 		{
 			args.push_back(L"-D");
 			args.push_back(define);
@@ -206,8 +206,8 @@ namespace ArcEngine
 		{
 			IDxcBlob* vertReflection = nullptr;
 			IDxcBlob* pixelReflection = nullptr;
-			auto* vertexShader = CompileShader(filepath, source, includeHandler, ShaderType::Vertex, args, defs, &vertReflection);
-			auto* pixelShader = CompileShader(filepath, source, includeHandler, ShaderType::Pixel, args, defs, &pixelReflection);
+			IDxcBlob* vertexShader = CompileShader(filepath, source, includeHandler, ShaderType::Vertex, args, defs, &vertReflection);
+			IDxcBlob* pixelShader = CompileShader(filepath, source, includeHandler, ShaderType::Pixel, args, defs, &pixelReflection);
 
 			if (!vertexShader || !pixelShader)
 			{
@@ -223,7 +223,7 @@ namespace ArcEngine
 		else if (m_Type == ShaderType::Compute)
 		{
 			IDxcBlob* computeReflection = nullptr;
-			auto* computeShader = CompileShader(filepath, source, includeHandler, ShaderType::Compute, args, defs, &computeReflection);
+			IDxcBlob* computeShader = CompileShader(filepath, source, includeHandler, ShaderType::Compute, args, defs, &computeReflection);
 
 			if (!computeShader)
 			{

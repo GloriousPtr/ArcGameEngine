@@ -82,7 +82,7 @@ namespace ArcEngine
 		dispatcher.Dispatch<WindowCloseEvent>(ARC_BIND_EVENT_FN(Application::OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(ARC_BIND_EVENT_FN(Application::OnWindowResize));
 
-		for (auto it = m_LayerStack->rbegin(); it != m_LayerStack->rend(); ++it)
+		for (eastl::vector<Layer*>::reverse_iterator it = m_LayerStack->rbegin(); it != m_LayerStack->rend(); ++it)
 		{
 			if (e.Handled)
 				break;
@@ -93,7 +93,7 @@ namespace ArcEngine
 
 	void Application::Run()
 	{
-		auto lastFrameTime = eastl::chrono::high_resolution_clock::now();
+		eastl::chrono::time_point lastFrameTime = eastl::chrono::high_resolution_clock::now();
 		while (m_Running)
 		{
 			ARC_PROFILE_FRAME("CPUFrame");
@@ -105,7 +105,7 @@ namespace ArcEngine
 			{
 				RenderCommand::BeginFrame();
 				{
-					ARC_PROFILE_SCOPE("LayerStack OnUpdate");
+					ARC_PROFILE_SCOPE_NAME("LayerStack OnUpdate");
 
 					for (Layer* layer : *m_LayerStack)
 						layer->OnUpdate(m_Timestep);	
@@ -113,7 +113,7 @@ namespace ArcEngine
 
 				m_ImGuiLayer->Begin();
 				{
-					ARC_PROFILE_SCOPE("LayerStack OnImGuiRender");
+					ARC_PROFILE_SCOPE_NAME("LayerStack OnImGuiRender");
 
 					for (Layer* layer : *m_LayerStack)
 						layer->OnImGuiRender();
@@ -124,7 +124,7 @@ namespace ArcEngine
 			
 			m_Window->OnUpdate();
 
-			const auto time = eastl::chrono::high_resolution_clock::now();
+			const eastl::chrono::time_point time = eastl::chrono::high_resolution_clock::now();
 			m_Timestep = eastl::chrono::duration<float>(time - lastFrameTime).count();
 			lastFrameTime = time;
 		}
@@ -165,7 +165,7 @@ namespace ArcEngine
 	{
 		std::scoped_lock<std::mutex> lock(m_MainThreadQueueMutex);
 
-		for (const auto& func : m_MainThreadQueue)
+		for (const std::function<void()>& func : m_MainThreadQueue)
 			func();
 
 		m_MainThreadQueue.clear();

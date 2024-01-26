@@ -8,12 +8,15 @@
 
 namespace ArcEngine
 {
+	using Texture2DMap = eastl::hash_map<eastl::string, Ref<Texture2D>>;
+	using TextureCubemapMap = eastl::hash_map<eastl::string, Ref<TextureCube>>;
+	using MeshMap = eastl::hash_map<eastl::string, Ref<Mesh>>;
+
 	inline static Ref<Texture2D> s_WhiteTexture;
 	inline static Ref<Texture2D> s_BlackTexture;
-	inline static eastl::hash_map<eastl::string, Ref<Texture2D>> m_Texture2DMap;
-	inline static eastl::hash_map<eastl::string, Ref<TextureCube>> m_TextureCubeMap;
-	inline static eastl::hash_map<eastl::string, Ref<Mesh>> m_MeshMap;
-	inline static eastl::vector<std::future<void>> m_Futures;
+	inline static Texture2DMap m_Texture2DMap;
+	inline static TextureCubemapMap m_TextureCubeMap;
+	inline static MeshMap m_MeshMap;
 
 	void AssetManager::Init()
 	{
@@ -38,7 +41,6 @@ namespace ArcEngine
 		m_Texture2DMap.clear();
 		m_TextureCubeMap.clear();
 		m_MeshMap.clear();
-		m_Futures.clear();
 	}
 
 	const Ref<Texture2D>& AssetManager::WhiteTexture()
@@ -55,7 +57,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto it = m_Texture2DMap.find_as(path);
+		const Texture2DMap::iterator it = m_Texture2DMap.find_as(path);
 		if (it != m_Texture2DMap.end())
 			return it->second;
 
@@ -68,7 +70,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto it = m_TextureCubeMap.find_as(path);
+		const TextureCubemapMap::iterator it = m_TextureCubeMap.find_as(path);
 		if (it != m_TextureCubeMap.end())
 			return it->second;
 
@@ -81,7 +83,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		const auto it = m_MeshMap.find_as(path);
+		const MeshMap::iterator it = m_MeshMap.find_as(path);
 		if (it != m_MeshMap.end())
 			return it->second;
 

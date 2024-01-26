@@ -18,7 +18,7 @@ namespace ArcEngine
 			}
 			else
 			{
-				const auto tempX = static_cast<float>(temp - 60);
+				const float tempX = static_cast<float>(temp - 60);
 				outColor = glm::dvec3(329.698727447 * glm::pow(tempX, -0.1332047592),
 					288.1221695283 * glm::pow(tempX, -0.0755148492),
 					255.0) / 255.0;

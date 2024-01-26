@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 #endif
 
 	ArcEngine::Log::Init();
-	auto* app = ArcEngine::CreateApplication({ argsNum, args });
+	ArcEngine::Application* app = ArcEngine::CreateApplication({ argsNum, args });
 	app->Run();
 	delete app;
 }

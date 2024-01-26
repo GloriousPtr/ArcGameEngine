@@ -140,7 +140,7 @@ namespace ArcEngine
 #endif
 
 		{
-			ARC_PROFILE_SCOPE("ImGui::End::Render");
+			ARC_PROFILE_SCOPE_NAME("ImGui::End::Render");
 			// Rendering
 			ImGui::Render();
 #ifdef ARC_PLATFORM_LINUX

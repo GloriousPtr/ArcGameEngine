@@ -39,7 +39,7 @@ namespace ArcEngine
 		for (uint32_t i = 0; i < capacity; ++i)
 			m_FreeHandles[i] = i;
 
-		for ([[maybe_unused]] const auto& deferedFreeIndices : m_DeferedFreeIndices)
+		for ([[maybe_unused]] const eastl::vector<uint32_t>& deferedFreeIndices : m_DeferedFreeIndices)
 		{
 			ARC_CORE_ASSERT(deferedFreeIndices.empty());
 		}
@@ -63,8 +63,8 @@ namespace ArcEngine
 		std::lock_guard lock(m_Mutex);
 		ARC_CORE_ASSERT(frameIndex < Dx12Context::FrameCount);
 
-		auto& indices = m_DeferedFreeIndices[frameIndex];
-		for (const auto index : indices)
+		eastl::vector<uint32_t>& indices = m_DeferedFreeIndices[frameIndex];
+		for (const uint32_t index : indices)
 		{
 			--m_Size;
 			m_FreeHandles[m_Size] = index;

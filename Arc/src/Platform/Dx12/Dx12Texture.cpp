@@ -30,7 +30,7 @@ namespace ArcEngine
 		int width, height, channels;
 		void* data = nullptr;
 		{
-			ARC_PROFILE_SCOPE("stbi_load Texture");
+			ARC_PROFILE_SCOPE_NAME("stbi_load Texture");
 			switch (m_Format)
 			{
 				case TextureFormat::None:		data = stbi_load(path.c_str(), &width, &height, &channels, m_Channels); break;
@@ -132,7 +132,7 @@ namespace ArcEngine
 
 		auto* commandList = Dx12Context::GetGraphicsCommandList();
 
-		auto& pipelineLibrary = Renderer::GetPipelineLibrary();
+		PipelineLibrary& pipelineLibrary = Renderer::GetPipelineLibrary();
 		const PipelineSpecification computeSpec = { .Type = ShaderType::Compute };
 		Ref<PipelineState> equirectToCubemapPipeline;
 		if (pipelineLibrary.Exists("EquirectangularToCubemap.hlsl"))
