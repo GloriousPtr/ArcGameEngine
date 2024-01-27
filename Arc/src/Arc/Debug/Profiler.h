@@ -290,7 +290,7 @@ namespace ArcEngine::Profile
 	#define ARC_PROFILE_SCOPE_NAME(NAME)				OPTICK_EVENT(NAME) PIXScopedEvent(ArcEngine::Profile::GeneratePixColor(__FILE__, CONSTEVAL_LINE), NAME)
 	#define ARC_PROFILE_TAG(NAME, ...)					OPTICK_TAG(NAME, __VA_ARGS__) ArcEngine::Profile::PIXSetMarkerEx(NAME, __VA_ARGS__)
 	#define ARC_PROFILE_SCOPE_DYNAMIC(NAME)				OPTICK_EVENT_DYNAMIC(NAME) PIXScopedEvent(ArcEngine::Profile::GeneratePixColor(__FILE__, CONSTEVAL_LINE), NAME)
-	#define ARC_PROFILE_THREAD(NAME)					OPTICK_THREAD(NAME) SetThreadDescription(GetCurrentThread(), OPTICK_CONCAT(L, NAME))
+	#define ARC_PROFILE_THREAD(NAME)					OPTICK_THREAD(NAME) SetThreadDescription(GetCurrentThread(), NAME)
 	#define ARC_PROFILE_CATEGORY(NAME, CATEGORY)		OPTICK_CATEGORY(NAME, (static_cast<Optick::Category::Type>(CATEGORY))) PIXScopedEvent(ArcEngine::Profile::Category::GetColor(CATEGORY), NAME)
 #else
 	#define ARC_PROFILE_FRAME(...)

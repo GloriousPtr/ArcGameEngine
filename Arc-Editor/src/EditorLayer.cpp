@@ -260,7 +260,7 @@ namespace ArcEngine
 						{
 							ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, EditorTheme::PopupItemSpacing);
 
-							if (ImGui::MenuItemEx("Reload Assemblies", ARC_ICON_RELOAD))
+							if (ImGui::MenuItemEx("Reload Assemblies", ARC_ICON_RELOAD, nullptr, false, ScriptEngine::CanBuild()))
 								ScriptEngine::ReloadAppDomain();
 
 							ImGui::PopStyleVar();

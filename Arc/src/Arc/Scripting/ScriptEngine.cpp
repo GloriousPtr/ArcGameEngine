@@ -5,6 +5,8 @@
 #include <coreclr_delegates.h>
 #include <hostfxr.h>
 
+#include "Arc/Core/Application.h"
+#include "Arc/Core/JobSystem.h"
 #include "Arc/Project/Project.h"
 #include "Arc/Scene/Entity.h"
 #include "Arc/Scene/Scene.h"
@@ -67,6 +69,8 @@ namespace ArcEngine
 
 		eastl::hash_map<eastl::string, Ref<ScriptClass>> EntityClasses;
 		eastl::hash_map<UUID, eastl::hash_map<eastl::string, eastl::hash_map<eastl::string, ScriptFieldInstance>>> EntityFields;
+
+		bool Building = false;
 	};
 
 
@@ -260,7 +264,6 @@ namespace ArcEngine
 		s_ScriptEngineData->DotnetClose(s_ScriptEngineData->DotnetRuntimeContext);
 		s_ScriptEngineData->DotnetRuntimeContext = nullptr;
 
-		LoadAssemblyHelper();
 		ReloadAppDomain();
 	}
 
@@ -276,12 +279,6 @@ namespace ArcEngine
 
 		s_Reflection.reset();
 		s_ScriptEngineData.reset();
-	}
-
-	void ScriptEngine::LoadAssemblyHelper()
-	{
-		ARC_PROFILE_SCOPE();
-		
 	}
 
 	void ScriptEngine::LoadCoreAndClientAssembly()
@@ -316,37 +313,51 @@ namespace ArcEngine
 			RegisterScriptComponent(s_ScriptEngineData->ClientAssembly, className);
 	}
 
+	bool ScriptEngine::CanBuild()
+	{
+		return !s_ScriptEngineData->Building;
+	}
+
 	void ScriptEngine::ReloadAppDomain(bool asyncBuild)
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (!Project::GetActive())
+		if (!s_ScriptEngineData->Building && !Project::GetActive())
 			return;
 
-		Stopwatch stopwatch;
-		ProjectBuilder::GenerateProjectFiles([asyncBuild, &stopwatch](bool generated)
-		{
-			if (generated)
-			{
-				ProjectBuilder::BuildProject(asyncBuild, [&stopwatch](bool success)
-				{
-					const float ms = 1000.0f * stopwatch.Stop();
-					if (success)
-					{
-						ARC_CORE_INFO("Build Suceeded; Compile time: {0}ms", ms);
+		s_ScriptEngineData->Building = true;
 
-						if (s_Reflection->UnloadAssemblies)
-							s_Reflection->UnloadAssemblies();
+		auto* scriptEngineData = s_ScriptEngineData.get();
+		auto* reflection = s_Reflection.get();
+		JobSystem::Execute([scriptEngineData, reflection]()
+		{
+			Stopwatch stopwatch;
+			if (ProjectBuilder::GenerateProjectFiles())
+			{
+				bool success = ProjectBuilder::BuildProject();
+				const float ms = 1000.0f * stopwatch.Stop();
+				if (success)
+				{
+					ARC_CORE_INFO("Build Succeeded; time: {0}ms", ms);
+					Application::Get().SubmitToMainThread([reflection]()
+					{
+						if (reflection->UnloadAssemblies)
+							reflection->UnloadAssemblies();
 
 						LoadCoreAndClientAssembly();
-					}
-					else
-					{
-						ARC_CORE_ERROR("Build Failed; Compile time: {0}ms", ms);
-					}
-				});
+					});
+				}
+				else
+				{
+					ARC_CORE_ERROR("Build Failed; time: {0}ms", ms);
+				}
 			}
+
+			Application::Get().SubmitToMainThread([scriptEngineData]() { scriptEngineData->Building = false; });
 		});
+
+		if (!asyncBuild)
+			JobSystem::Wait();
 	}
 
 	void ScriptEngine::LoadAssemblyClasses(DotnetAssembly assembly)

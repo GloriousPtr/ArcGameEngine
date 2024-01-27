@@ -8,6 +8,7 @@
 #include <glm/gtx/hash.hpp>
 
 #include "Arc/Core/AssetManager.h"
+#include "Arc/Core/JobSystem.h"
 #include "Arc/Renderer/Material.h"
 #include "Arc/Renderer/Shader.h"
 #include "Arc/Renderer/VertexArray.h"
@@ -98,165 +99,170 @@ namespace ArcEngine
 			const std::vector<tinyobj::shape_t>& shapes = reader.GetShapes();
 			const std::vector<tinyobj::material_t>& materials = reader.GetMaterials();
 			
+			std::mutex mtx;
+
 			// Loop over shapes
 			for (const tinyobj::shape_t& shape : shapes)
 			{
-				eastl::vector<Vertex> vertices;
-				eastl::vector<uint32_t> indices;
-				eastl::hash_map<Vertex, uint32_t> uniqueVertices{};
-
-				// Loop over faces(polygon)
-				int materialId = -1;
-				size_t index_offset = 0;
-				for (size_t f = 0; f < shape.mesh.num_face_vertices.size(); f++)
+				JobSystem::Execute([&shape, &materials, &attrib, &path, &mtx, this]()
 				{
-					size_t fv = static_cast<size_t>(shape.mesh.num_face_vertices[f]);
+					eastl::vector<Vertex> vertices;
+					eastl::vector<uint32_t> indices;
+					eastl::hash_map<Vertex, uint32_t> uniqueVertices{};
 
-					// Loop over vertices in the face.
-					for (size_t v = 0; v < fv; v++)
+					// Loop over faces(polygon)
+					int materialId = -1;
+					size_t index_offset = 0;
+					for (size_t f = 0; f < shape.mesh.num_face_vertices.size(); f++)
 					{
-						// access to vertex
-						tinyobj::index_t idx = shape.mesh.indices[index_offset + v];
+						size_t fv = static_cast<size_t>(shape.mesh.num_face_vertices[f]);
 
-						Vertex vertex;
-						vertex.Position.x = attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 0];
-						vertex.Position.y = attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 1];
-						vertex.Position.z = -attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 2];
-						if (idx.texcoord_index >= 0)
+						// Loop over vertices in the face.
+						for (size_t v = 0; v < fv; v++)
 						{
-							vertex.TexCoord.x = attrib.texcoords[2 * static_cast<size_t>(idx.texcoord_index) + 0];
-							vertex.TexCoord.y = 1.0f - attrib.texcoords[2 * static_cast<size_t>(idx.texcoord_index) + 1];
-						}
-						if (idx.normal_index >= 0)
-						{
-							vertex.Normal.x = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 0];
-							vertex.Normal.y = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 1];
-							vertex.Normal.z = -attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 2];
+							// access to vertex
+							tinyobj::index_t idx = shape.mesh.indices[index_offset + v];
 
-							int v0_index = shape.mesh.indices[index_offset + 0].vertex_index;
-							int v1_index = shape.mesh.indices[index_offset + 1].vertex_index;
-							int v2_index = shape.mesh.indices[index_offset + 2].vertex_index;
-
-							glm::vec3 v0 = { attrib.vertices[3 * v0_index + 0], attrib.vertices[3 * v0_index + 1], -attrib.vertices[3 * v0_index + 2] };
-							glm::vec3 v1 = { attrib.vertices[3 * v1_index + 0], attrib.vertices[3 * v1_index + 1], -attrib.vertices[3 * v1_index + 2] };
-							glm::vec3 v2 = { attrib.vertices[3 * v2_index + 0], attrib.vertices[3 * v2_index + 1], -attrib.vertices[3 * v2_index + 2] };
-
-							int uv0_index = shape.mesh.indices[index_offset + 0].texcoord_index;
-							int uv1_index = shape.mesh.indices[index_offset + 1].texcoord_index;
-							int uv2_index = shape.mesh.indices[index_offset + 2].texcoord_index;
-
-							glm::vec2 uv0 = { attrib.texcoords[2 * uv0_index + 0], 1.0f - attrib.texcoords[2 * uv0_index + 1] };
-							glm::vec2 uv1 = { attrib.texcoords[2 * uv1_index + 0], 1.0f - attrib.texcoords[2 * uv1_index + 1] };
-							glm::vec2 uv2 = { attrib.texcoords[2 * uv2_index + 0], 1.0f - attrib.texcoords[2 * uv2_index + 1] };
-
-							glm::highp_vec3 deltaPos1 = v1 - v0;
-							glm::highp_vec3 deltaPos2 = v2 - v0;
-							glm::highp_vec2 deltaUV1 = uv1 - uv0;
-							glm::highp_vec2 deltaUV2 = uv2 - uv0;
-
-							float det = deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x;
-							if (det == 0.0f)
+							Vertex vertex;
+							vertex.Position.x = attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 0];
+							vertex.Position.y = attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 1];
+							vertex.Position.z = -attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 2];
+							if (idx.texcoord_index >= 0)
 							{
-								vertex.Tangent = { 1.0f, 0.0f, 0.0f };
-								vertex.Bitangent = { 0.0f, 1.0f, 0.0f };
+								vertex.TexCoord.x = attrib.texcoords[2 * static_cast<size_t>(idx.texcoord_index) + 0];
+								vertex.TexCoord.y = 1.0f - attrib.texcoords[2 * static_cast<size_t>(idx.texcoord_index) + 1];
 							}
-							else
+							if (idx.normal_index >= 0)
 							{
-								float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-								vertex.Tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
-								vertex.Bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+								vertex.Normal.x = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 0];
+								vertex.Normal.y = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 1];
+								vertex.Normal.z = -attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 2];
+
+								int v0_index = shape.mesh.indices[index_offset + 0].vertex_index;
+								int v1_index = shape.mesh.indices[index_offset + 1].vertex_index;
+								int v2_index = shape.mesh.indices[index_offset + 2].vertex_index;
+
+								glm::vec3 v0 = { attrib.vertices[3 * v0_index + 0], attrib.vertices[3 * v0_index + 1], -attrib.vertices[3 * v0_index + 2] };
+								glm::vec3 v1 = { attrib.vertices[3 * v1_index + 0], attrib.vertices[3 * v1_index + 1], -attrib.vertices[3 * v1_index + 2] };
+								glm::vec3 v2 = { attrib.vertices[3 * v2_index + 0], attrib.vertices[3 * v2_index + 1], -attrib.vertices[3 * v2_index + 2] };
+
+								int uv0_index = shape.mesh.indices[index_offset + 0].texcoord_index;
+								int uv1_index = shape.mesh.indices[index_offset + 1].texcoord_index;
+								int uv2_index = shape.mesh.indices[index_offset + 2].texcoord_index;
+
+								glm::vec2 uv0 = { attrib.texcoords[2 * uv0_index + 0], 1.0f - attrib.texcoords[2 * uv0_index + 1] };
+								glm::vec2 uv1 = { attrib.texcoords[2 * uv1_index + 0], 1.0f - attrib.texcoords[2 * uv1_index + 1] };
+								glm::vec2 uv2 = { attrib.texcoords[2 * uv2_index + 0], 1.0f - attrib.texcoords[2 * uv2_index + 1] };
+
+								glm::highp_vec3 deltaPos1 = v1 - v0;
+								glm::highp_vec3 deltaPos2 = v2 - v0;
+								glm::highp_vec2 deltaUV1 = uv1 - uv0;
+								glm::highp_vec2 deltaUV2 = uv2 - uv0;
+
+								float det = deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x;
+								if (det == 0.0f)
+								{
+									vertex.Tangent = { 1.0f, 0.0f, 0.0f };
+									vertex.Bitangent = { 0.0f, 1.0f, 0.0f };
+								}
+								else
+								{
+									float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+									vertex.Tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+									vertex.Bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+								}
+
+								glm::highp_vec3 t = glm::normalize(vertex.Tangent - vertex.Normal * glm::dot(vertex.Normal, vertex.Tangent));
+								glm::highp_vec3 b = glm::normalize(vertex.Bitangent - vertex.Normal * glm::dot(vertex.Normal, vertex.Bitangent));
+								float handedness = glm::dot(glm::cross(vertex.Normal, t), b);
+								if (handedness < 0.0f)
+								{
+									vertex.Tangent = -vertex.Tangent;
+									vertex.Bitangent = -vertex.Bitangent;
+								}
 							}
 
-							glm::highp_vec3 t = glm::normalize(vertex.Tangent - vertex.Normal * glm::dot(vertex.Normal, vertex.Tangent));
-							glm::highp_vec3 b = glm::normalize(vertex.Bitangent - vertex.Normal * glm::dot(vertex.Normal, vertex.Bitangent));
-							float handedness = glm::dot(glm::cross(vertex.Normal, t), b);
-							if (handedness < 0.0f)
+							if (uniqueVertices.count(vertex) == 0)
 							{
-								vertex.Tangent = -vertex.Tangent;
-								vertex.Bitangent = -vertex.Bitangent;
+								uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+								vertices.push_back(vertex);
 							}
-						}
 
-						if (uniqueVertices.count(vertex) == 0)
-						{
-							uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-							vertices.push_back(vertex);
+							indices.push_back(uniqueVertices[vertex]);
 						}
+						index_offset += fv;
 
-						indices.push_back(uniqueVertices[vertex]);
+						// per-face material
+						materialId = shape.mesh.material_ids[f];
 					}
-					index_offset += fv;
 
-					// per-face material
-					materialId = shape.mesh.material_ids[f];
-				}
+					std::lock_guard lock(mtx);
 
-				Ref<VertexArray> vertexArray = VertexArray::Create();
+					Ref<VertexArray> vertexArray = VertexArray::Create();
 
-				Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(reinterpret_cast<float*>(vertices.data()), static_cast<uint32_t>(sizeof(Vertex) * vertices.size()), sizeof(Vertex));
-				vertexArray->AddVertexBuffer(vertexBuffer);
+					Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(reinterpret_cast<float*>(vertices.data()), static_cast<uint32_t>(sizeof(Vertex) * vertices.size()), sizeof(Vertex));
+					vertexArray->AddVertexBuffer(vertexBuffer);
 
-				Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices.data(), indices.size());
-				vertexArray->SetIndexBuffer(indexBuffer);
+					Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices.data(), indices.size());
+					vertexArray->SetIndexBuffer(indexBuffer);
 
-				const Submesh& submesh = m_Submeshes.emplace_back(shape.name.c_str(), CreateRef<Material>(), vertexArray);
+					const Submesh& submesh = m_Submeshes.emplace_back(shape.name.c_str(), CreateRef<Material>(), vertexArray);
 
-				if (materialId >= 0)
-				{
-					const tinyobj::material_t& material = materials.at(materialId);
-					
-					const eastl::vector<MaterialProperty>& materialProperties = submesh.Mat->GetProperties();
-					bool normalMapApplied = false;
-
-					std::filesystem::path dir = path.parent_path();
-
-					for (const MaterialProperty& property : materialProperties)
+					if (materialId >= 0)
 					{
-						if (property.Type == MaterialPropertyType::Texture2D ||
-							property.Type == MaterialPropertyType::Texture2DBindless)
+						const tinyobj::material_t& material = materials.at(materialId);
+
+						const eastl::vector<MaterialProperty>& materialProperties = submesh.Mat->GetProperties();
+
+						std::filesystem::path dir = path.parent_path();
+
+						for (const MaterialProperty& property : materialProperties)
 						{
-							if (!material.diffuse_texname.empty() &&
-								(property.Name.find("albedo") != eastl::string::npos || property.Name.find("Albedo") != eastl::string::npos ||
-									property.Name.find("diff") != eastl::string::npos || property.Name.find("Diff") != eastl::string::npos))
+							if (property.Type == MaterialPropertyType::Texture2D ||
+								property.Type == MaterialPropertyType::Texture2DBindless)
 							{
-								eastl::string pathStr = (dir / material.diffuse_texname).string().c_str();
-								submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr));
+								if (!material.diffuse_texname.empty() &&
+									(property.Name.find("albedo") != eastl::string::npos || property.Name.find("Albedo") != eastl::string::npos ||
+										property.Name.find("diff") != eastl::string::npos || property.Name.find("Diff") != eastl::string::npos))
+								{
+									eastl::string pathStr = (dir / material.diffuse_texname).string().c_str();
+									submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr));
+								}
+
+								if (!material.normal_texname.empty() &&
+									(property.Name.find("norm") != eastl::string::npos || property.Name.find("Norm") != eastl::string::npos ||
+										property.Name.find("height") != eastl::string::npos || property.Name.find("Height") != eastl::string::npos))
+								{
+									std::string pathStr = (dir / material.normal_texname).string();
+									submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr.c_str()));
+								}
+								else if (!material.bump_texname.empty() &&
+									(property.Name.find("norm") != eastl::string::npos || property.Name.find("Norm") != eastl::string::npos ||
+										property.Name.find("height") != eastl::string::npos || property.Name.find("Height") != eastl::string::npos))
+								{
+									std::string pathStr = (dir / material.bump_texname).string();
+									submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr.c_str()));
+								}
+
+								if (!material.emissive_texname.empty() &&
+									(property.Name.find("emissi") != eastl::string::npos || property.Name.find("Emissi") != eastl::string::npos))
+								{
+									std::string pathStr = (dir / material.emissive_texname).string();
+									submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr.c_str()));
+								}
 							}
 
-							if (!material.normal_texname.empty() &&
+							if (property.Type == MaterialPropertyType::Bool &&
 								(property.Name.find("norm") != eastl::string::npos || property.Name.find("Norm") != eastl::string::npos ||
 									property.Name.find("height") != eastl::string::npos || property.Name.find("Height") != eastl::string::npos))
 							{
-								std::string pathStr = (dir / material.normal_texname).string();
-								submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr.c_str()));
-								normalMapApplied = true;
+								submesh.Mat->SetData(property.Name, 1);
 							}
-							else if (!material.bump_texname.empty() &&
-								(property.Name.find("norm") != eastl::string::npos || property.Name.find("Norm") != eastl::string::npos ||
-									property.Name.find("height") != eastl::string::npos || property.Name.find("Height") != eastl::string::npos))
-							{
-								std::string pathStr = (dir / material.bump_texname).string();
-								submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr.c_str()));
-								normalMapApplied = true;
-							}
-
-							if (!material.emissive_texname.empty() &&
-								(property.Name.find("emissi") != eastl::string::npos || property.Name.find("Emissi") != eastl::string::npos))
-							{
-								std::string pathStr = (dir / material.emissive_texname).string();
-								submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr.c_str()));
-							}
-						}
-
-						if (property.Type == MaterialPropertyType::Bool && normalMapApplied &&
-							(property.Name.find("norm") != eastl::string::npos || property.Name.find("Norm") != eastl::string::npos ||
-								property.Name.find("height") != eastl::string::npos || property.Name.find("Height") != eastl::string::npos))
-						{
-							submesh.Mat->SetData(property.Name, 1);
 						}
 					}
-				}
+				});
 			}
+			JobSystem::Wait();
 		}
 
 		m_Filepath = filepath;

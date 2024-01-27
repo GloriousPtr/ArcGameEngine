@@ -201,10 +201,8 @@ namespace ArcEngine
 	public:
 		static void Init();
 		static void Shutdown();
-		static void LoadAssemblyHelper();
-		static void LoadCoreAndClientAssembly();
+		[[nodiscard]] static bool CanBuild();
 		static void ReloadAppDomain(bool asyncBuild = true);
-		static void LoadAssemblyClasses(DotnetAssembly assembly);
 
 		static void AddComponent(Entity entity, DotnetType type);
 		[[nodiscard]] static bool HasComponent(Entity entity, DotnetType type);
@@ -224,6 +222,10 @@ namespace ArcEngine
 
 		static void SetScene(Scene* scene) { s_CurrentScene = scene; }
 		[[nodiscard]] static Scene* GetScene() { return s_CurrentScene; }
+		
+	private:
+		static void LoadCoreAndClientAssembly();
+		static void LoadAssemblyClasses(DotnetAssembly assembly);
 
 	private:
 		static Scene* s_CurrentScene;

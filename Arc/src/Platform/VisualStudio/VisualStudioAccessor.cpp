@@ -326,7 +326,7 @@ namespace ArcEngine
 
 	void VisualStudioAccessor::AddFile(const std::string& filepath, bool open)
 	{
-		ProjectBuilder::GenerateProjectFiles(nullptr);
+		ProjectBuilder::GenerateProjectFiles();
 		if (open)
 			OpenFile(filepath);
 	}

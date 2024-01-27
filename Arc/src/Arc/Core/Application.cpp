@@ -5,6 +5,7 @@
 
 #include "Arc/Audio/AudioEngine.h"
 #include "Arc/Core/AssetManager.h"
+#include "Arc/Core/JobSystem.h"
 #include "Arc/Renderer/Renderer.h"
 #include "Arc/Scripting/ScriptEngine.h"
 
@@ -29,6 +30,7 @@ namespace ArcEngine
 		m_Window = Window::Create(WindowProps(m_Specification.Name));
 		m_Window->SetEventCallBack(ARC_BIND_EVENT_FN(Application::OnEvent));
 
+		JobSystem::Init();
 		AssetManager::Init();
 		Renderer::Init();
 		AudioEngine::Init();
@@ -51,6 +53,7 @@ namespace ArcEngine
 		AudioEngine::Shutdown();
 		Renderer::Shutdown();
 		AssetManager::Shutdown();
+		JobSystem::Wait();
 
 		OPTICK_SHUTDOWN()
 	}
@@ -97,7 +100,7 @@ namespace ArcEngine
 		while (m_Running)
 		{
 			ARC_PROFILE_FRAME("CPUFrame");
-			ARC_PROFILE_THREAD("MainThread");
+			ARC_PROFILE_THREAD(L"MainThread");
 
 			ExecuteMainThreadQueue();
 
