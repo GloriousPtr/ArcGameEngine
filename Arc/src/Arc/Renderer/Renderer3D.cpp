@@ -692,26 +692,29 @@ namespace ArcEngine
 			}
 		}
 
-		[[likely]]
-		if (s_Renderer3DData->RenderPipeline->Bind())
+		if (s_Renderer3DData->MeshInsertIndex > 0)
 		{
-			ARC_PROFILE_SCOPE_NAME("Draw Meshes");
-
-			s_Renderer3DData->GlobalDataCB->Bind(0);
-			s_Renderer3DData->DirectionalLightsSB->Bind();
-			s_Renderer3DData->PointLightsSB->Bind();
-			s_Renderer3DData->SpotLightsSB->Bind();
-
-			const std::span<MeshData> meshes(s_Renderer3DData->Meshes.data(), s_Renderer3DData->MeshInsertIndex);
-			for (const MeshData& meshData : meshes)
+			[[likely]]
+			if (s_Renderer3DData->RenderPipeline->Bind())
 			{
-				meshData.Mat->Bind();
-				s_Renderer3DData->RenderPipeline->SetData("Transform", glm::value_ptr(meshData.Transform), sizeof(glm::mat4), 0);
-				RenderCommand::DrawIndexed(meshData.Geometry);
-				s_Renderer3DData->Stats.DrawCalls++;
-				s_Renderer3DData->Stats.IndexCount += meshData.Geometry->GetIndexBuffer()->GetCount();
+				ARC_PROFILE_SCOPE_NAME("Draw Meshes");
+
+				s_Renderer3DData->GlobalDataCB->Bind(0);
+				s_Renderer3DData->DirectionalLightsSB->Bind();
+				s_Renderer3DData->PointLightsSB->Bind();
+				s_Renderer3DData->SpotLightsSB->Bind();
+
+				const std::span < MeshData > meshes(s_Renderer3DData->Meshes.data(), s_Renderer3DData->MeshInsertIndex);
+				for (const MeshData& meshData : meshes)
+				{
+					meshData.Mat->Bind();
+					s_Renderer3DData->RenderPipeline->SetData("Transform", glm::value_ptr(meshData.Transform), sizeof(glm::mat4), 0);
+					RenderCommand::DrawIndexed(meshData.Geometry);
+					s_Renderer3DData->Stats.DrawCalls++;
+					s_Renderer3DData->Stats.IndexCount += meshData.Geometry->GetIndexBuffer()->GetCount();
+				}
+				shouldExecute = true;
 			}
-			shouldExecute = true;
 		}
 
 		if (shouldExecute)

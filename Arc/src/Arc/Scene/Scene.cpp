@@ -1170,23 +1170,27 @@ namespace ArcEngine
 				skylight = Entity(*view.begin(), this);
 		}
 		
-		Renderer3D::BeginScene(cameraData, skylight, eastl::move(lights));
-		// Meshes
 		{
-			ARC_PROFILE_SCOPE_NAME("Submit Mesh Data");
-
 			const auto view = m_Registry.view<MeshComponent>();
-			for (auto &&[entity, meshComponent] : view.each())
+			if (!lights.empty() || skylight || view.size() > 0)
 			{
-				if (meshComponent.MeshGeometry && meshComponent.MeshGeometry->GetSubmeshCount() != 0)
+				// Meshes
+				Renderer3D::BeginScene(cameraData, skylight, eastl::move(lights));
 				{
-					ARC_CORE_ASSERT(meshComponent.MeshGeometry->GetSubmeshCount() > meshComponent.SubmeshIndex, "Trying to access submesh index that does not exist!");
-					auto& submesh = meshComponent.MeshGeometry->GetSubmesh(meshComponent.SubmeshIndex);
-					Renderer3D::SubmitMesh(Entity(entity, this).GetWorldTransform(), submesh.Mat, submesh.Geometry);
+					ARC_PROFILE_SCOPE_NAME("Submit Mesh Data");
+					for (auto &&[entity, meshComponent] : view.each())
+					{
+						if (meshComponent.MeshGeometry && meshComponent.MeshGeometry->GetSubmeshCount() != 0)
+						{
+							ARC_CORE_ASSERT(meshComponent.MeshGeometry->GetSubmeshCount() > meshComponent.SubmeshIndex, "Trying to access submesh index that does not exist!");
+							auto& submesh = meshComponent.MeshGeometry->GetSubmesh(meshComponent.SubmeshIndex);
+							Renderer3D::SubmitMesh(Entity(entity, this).GetWorldTransform(), submesh.Mat, submesh.Geometry);
+						}
+					}
 				}
+				Renderer3D::EndScene(renderGraphData);
 			}
 		}
-		Renderer3D::EndScene(renderGraphData);
 		
 		Renderer2D::BeginScene(cameraData, renderGraphData->CompositePassTarget);
 		{
