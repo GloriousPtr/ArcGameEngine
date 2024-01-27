@@ -888,13 +888,13 @@ namespace ArcEngine
 					{
 						if (stepped)
 						{
-							JPH::Vec3 position = body->GetPosition();
-							JPH::Vec3 rotation = body->GetRotation().GetEulerAngles();
-
 							rb.PreviousTranslation = rb.Translation;
 							rb.PreviousRotation = rb.Rotation;
+
+							const JPH::Vec3 position = body->GetPosition();
+							const JPH::Quat rotation = body->GetRotation();
 							rb.Translation = { position.GetX(), position.GetY(), position.GetZ() };
-							rb.Rotation = glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ());
+							rb.Rotation = { rotation.GetX(), rotation.GetY(), rotation.GetZ(), rotation.GetW() };
 						}
 
 						tc.Translation = glm::lerp(rb.PreviousTranslation, rb.Translation, interpolationFactor);
@@ -902,13 +902,13 @@ namespace ArcEngine
 					}
 					else
 					{
-						JPH::Vec3 position = body->GetPosition();
-						JPH::Vec3 rotation = body->GetRotation().GetEulerAngles();
-
 						rb.PreviousTranslation = rb.Translation;
 						rb.PreviousRotation = rb.Rotation;
+
+						const JPH::Vec3 position = body->GetPosition();
+						const JPH::Quat rotation = body->GetRotation();
 						rb.Translation = { position.GetX(), position.GetY(), position.GetZ() };
-						rb.Rotation = glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ());
+						rb.Rotation = { rotation.GetX(), rotation.GetY(), rotation.GetZ(), rotation.GetW() };
 						tc.Translation = rb.Translation;
 						tc.Rotation = glm::eulerAngles(rb.Rotation);
 					}
@@ -930,23 +930,22 @@ namespace ArcEngine
 					{
 						if (stepped)
 						{
-							b2Vec2 position = body->GetPosition();
 							rb.PreviousTranslationRotation = rb.TranslationRotation;
+							const b2Vec2 position = body->GetPosition();
 							rb.TranslationRotation = { position.x, position.y, body->GetAngle() };
 						}
 
-						glm::vec3 lerpedTranslationRotation = glm::lerp(rb.PreviousTranslationRotation, rb.TranslationRotation, interpolationFactor);
+						const glm::vec3 lerpedTranslationRotation = glm::lerp(rb.PreviousTranslationRotation, rb.TranslationRotation, interpolationFactor);
 						tc.Translation.x = lerpedTranslationRotation.x;
 						tc.Translation.y = lerpedTranslationRotation.y;
 						tc.Rotation.z = lerpedTranslationRotation.z;
 					}
 					else
 					{
-						b2Vec2 position = body->GetPosition();
-
 						rb.PreviousTranslationRotation = rb.TranslationRotation;
-						rb.TranslationRotation = { position.x, position.y, body->GetAngle() };
 
+						const b2Vec2 position = body->GetPosition();
+						rb.TranslationRotation = { position.x, position.y, body->GetAngle() };
 						tc.Translation.x = rb.TranslationRotation.x;
 						tc.Translation.y = rb.TranslationRotation.y;
 						tc.Rotation.z = rb.TranslationRotation.z;
