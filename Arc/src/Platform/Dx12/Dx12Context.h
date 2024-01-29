@@ -10,6 +10,9 @@ struct ID3D12GraphicsCommandList9;
 struct ID3D12CommandQueue;
 struct ID3D12DescriptorHeap;
 
+typedef ID3D12GraphicsCommandList9 D3D12GraphicsCommandList;
+typedef ID3D12Device11 D3D12Device;
+
 namespace ArcEngine
 {
 	class DescriptorHeap;
@@ -27,9 +30,10 @@ namespace ArcEngine
 		void SwapBuffers() override;
 		void SetSyncInterval(uint32_t value) override;
 
-		static void Execute(ID3D12GraphicsCommandList9* commandList);
-		static ID3D12Device11* GetDevice();
-		static ID3D12GraphicsCommandList9* GetNewGraphicsCommandList();
+		static D3D12Device* GetDevice();
+		static GraphicsCommandList BeginRecordingCommandList();
+		static void EndRecordingCommandList(GraphicsCommandList commandList, bool execute = false);
+		static void ExecuteCommandList(GraphicsCommandList commandList);
 		static D3D12_CPU_DESCRIPTOR_HANDLE GetRtv();
 		static int GetSwapChainFormat();
 		static uint32_t GetCurrentFrameIndex();

@@ -11,7 +11,7 @@ namespace ArcEngine
 	{
 	}
 
-	void Dx12VertexArray::Bind(void* commandList) const
+	void Dx12VertexArray::Bind(GraphicsCommandList commandList) const
 	{
 		m_VertexBuffers[0]->Bind(commandList);
 		m_IndexBuffer->Bind(commandList);

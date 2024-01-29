@@ -65,7 +65,7 @@ namespace ArcEngine
 		Ref<Texture2D> BRDFLutTexture;
 		Ref<PipelineState> RenderPipeline;
 		Ref<PipelineState> CubemapPipeline;
-		void* CommandList;
+		GraphicsCommandList CommandList;
 
 		Ref<VertexBuffer> CubeVertexBuffer;
 
@@ -270,7 +270,7 @@ namespace ArcEngine
 			.NumSpotLights = 0
 		};
 
-		s_Renderer3DData->CommandList = RenderCommand::GetNewGraphicsCommandList();
+		s_Renderer3DData->CommandList = RenderCommand::BeginRecordingCommandList();
 		if (s_Renderer3DData->RenderPipeline->Bind(s_Renderer3DData->CommandList))
 		{
 			SetupLightsData();
@@ -295,6 +295,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		Flush(renderTarget);
+		RenderCommand::EndRecordingCommandList(s_Renderer3DData->CommandList);
 	}
 
 	void Renderer3D::DrawCube()

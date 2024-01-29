@@ -239,14 +239,14 @@ namespace ArcEngine
 			m_RootSignature->Release();
 	}
 
-	bool Dx12PipelineState::Bind(void* commandList) const
+	bool Dx12PipelineState::Bind(GraphicsCommandList commandList) const
 	{
 		ARC_PROFILE_SCOPE();
 
 		if (!m_RootSignature || !m_PipelineState)
 			return false;
 
-		auto* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		auto* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 
 		ID3D12DescriptorHeap* descriptorHeap = Dx12Context::GetSrvHeap()->Heap();
 		cmdList->SetDescriptorHeaps(1, &descriptorHeap);
@@ -261,25 +261,25 @@ namespace ArcEngine
 		return true;
 	}
 
-	bool Dx12PipelineState::Unbind(void* commandList) const
+	bool Dx12PipelineState::Unbind(GraphicsCommandList commandList) const
 	{
 		ARC_PROFILE_SCOPE();
 
 		if (!m_RootSignature || !m_PipelineState)
 			return false;
 
-		auto* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		auto* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 		cmdList->SetGraphicsRootSignature(nullptr);
 		cmdList->SetPipelineState(nullptr);
 		return true;
 	}
 
-	void Dx12PipelineState::SetDataImpl(void* commandList, const eastl::string_view name, const void* data, uint32_t size, uint32_t offset)
+	void Dx12PipelineState::SetDataImpl(GraphicsCommandList commandList, const eastl::string_view name, const void* data, uint32_t size, uint32_t offset)
 	{
 		ARC_PROFILE_SCOPE();
 
 		const int32_t slot = m_BufferMap.at(name.data());
-		auto* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		auto* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 		cmdList->SetGraphicsRoot32BitConstants(slot, size / 4, data, offset);
 	}
 

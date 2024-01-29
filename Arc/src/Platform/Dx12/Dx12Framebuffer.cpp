@@ -129,11 +129,11 @@ namespace ArcEngine
 		}
 	}
 
-	void Dx12Framebuffer::Bind(void* commandList)
+	void Dx12Framebuffer::Bind(GraphicsCommandList commandList)
 	{
 		ARC_PROFILE_SCOPE();
 
-		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 
 		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
 
@@ -147,13 +147,13 @@ namespace ArcEngine
 		cmdList->RSSetScissorRects(1, &scissor);
 	}
 
-	void Dx12Framebuffer::Unbind(void* commandList)
+	void Dx12Framebuffer::Unbind(GraphicsCommandList commandList)
 	{
 		ARC_PROFILE_SCOPE();
 
 		TransitionTo(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE rtv = Dx12Context::GetRtv();
 		const uint32_t width = Dx12Context::GetWidth();
@@ -169,11 +169,11 @@ namespace ArcEngine
 		TransitionTo(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 	}
 
-	void Dx12Framebuffer::Clear(void* commandList)
+	void Dx12Framebuffer::Clear(GraphicsCommandList commandList)
 	{
 		ARC_PROFILE_SCOPE();
 
-		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_DepthAttachment[backFrame].DsvHandle.CPU;
@@ -185,20 +185,20 @@ namespace ArcEngine
 			cmdList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, m_ClearDepth.r, static_cast<UINT8>(m_ClearDepth.g), 0, nullptr);
 	}
 
-	void Dx12Framebuffer::BindColorAttachment(void* commandList, uint32_t index, uint32_t slot)
+	void Dx12Framebuffer::BindColorAttachment(GraphicsCommandList commandList, uint32_t index, uint32_t slot)
 	{
 		ARC_PROFILE_SCOPE();
 
 		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
-		reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList)->SetGraphicsRootDescriptorTable(slot, m_ColorAttachments[backFrame][index].SrvHandle.GPU);
+		reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->SetGraphicsRootDescriptorTable(slot, m_ColorAttachments[backFrame][index].SrvHandle.GPU);
 	}
 
-	void Dx12Framebuffer::BindDepthAttachment(void* commandList, uint32_t slot)
+	void Dx12Framebuffer::BindDepthAttachment(GraphicsCommandList commandList, uint32_t slot)
 	{
 		ARC_PROFILE_SCOPE();
 
 		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
-		reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList)->SetGraphicsRootDescriptorTable(slot, m_DepthAttachment[backFrame].SrvHandle.GPU);
+		reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->SetGraphicsRootDescriptorTable(slot, m_DepthAttachment[backFrame].SrvHandle.GPU);
 	}
 
 	void Dx12Framebuffer::Resize(uint32_t width, uint32_t height)
@@ -240,7 +240,7 @@ namespace ArcEngine
 		Invalidate();
 	}
 
-	void Dx12Framebuffer::TransitionTo(void* commandList, D3D12_RESOURCE_STATES colorAttachmentState, D3D12_RESOURCE_STATES depthAttachmentState)
+	void Dx12Framebuffer::TransitionTo(GraphicsCommandList commandList, D3D12_RESOURCE_STATES colorAttachmentState, D3D12_RESOURCE_STATES depthAttachmentState)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -261,6 +261,6 @@ namespace ArcEngine
 			m_DepthAttachment[backFrame].State = depthAttachmentState;
 			++numBarriers;
 		}
-		reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList)->ResourceBarrier(numBarriers, barriers);
+		reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->ResourceBarrier(numBarriers, barriers);
 	}
 }

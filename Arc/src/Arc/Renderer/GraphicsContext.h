@@ -3,6 +3,7 @@
 namespace ArcEngine
 {
 	using WindowHandle = void*;
+	using GraphicsCommandList = void*;
 
 	class GraphicsContext
 	{

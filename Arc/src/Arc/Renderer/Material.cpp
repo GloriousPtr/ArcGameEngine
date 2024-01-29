@@ -96,7 +96,7 @@ namespace ArcEngine
 		m_ConstantBuffer = ConstantBuffer::Create(static_cast<uint32_t>(cbSize), 1, cbSlot);
 	}
 
-	void Material::Bind(void* commandList) const
+	void Material::Bind(GraphicsCommandList commandList) const
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -123,7 +123,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Material::Unbind(void* commandList) const
+	void Material::Unbind(GraphicsCommandList commandList) const
 	{
 		ARC_PROFILE_SCOPE();
 

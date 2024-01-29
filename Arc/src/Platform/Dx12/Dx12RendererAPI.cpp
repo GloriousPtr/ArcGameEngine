@@ -23,11 +23,11 @@ namespace ArcEngine
 		m_Context->ResizeSwapchain(width, height);
 	}
 
-	void Dx12RendererAPI::SetClearColor(void* commandList, const glm::vec4& color)
+	void Dx12RendererAPI::SetClearColor(GraphicsCommandList commandList, const glm::vec4& color)
 	{
 		ARC_PROFILE_SCOPE();
 		
-		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 		cmdList->ClearRenderTargetView(Dx12Context::GetRtv(), glm::value_ptr(color), 0, nullptr);
 	}
 
@@ -35,55 +35,60 @@ namespace ArcEngine
 	{
 	}
 
-	void Dx12RendererAPI::DrawIndexed(void* commandList, const Ref<VertexArray>& vertexArray, uint32_t indexCount)
+	void Dx12RendererAPI::DrawIndexed(GraphicsCommandList commandList, const Ref<VertexArray>& vertexArray, uint32_t indexCount)
 	{
 		ARC_PROFILE_SCOPE();
 
 		vertexArray->Bind(commandList);
 		indexCount = indexCount == 0 ? vertexArray->GetIndexBuffer()->GetCount() : indexCount;
 
-		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		cmdList->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
 	}
 
-	void Dx12RendererAPI::Draw(void* commandList, const Ref<VertexBuffer>& vertexBuffer, uint32_t vertexCount)
+	void Dx12RendererAPI::Draw(GraphicsCommandList commandList, const Ref<VertexBuffer>& vertexBuffer, uint32_t vertexCount)
 	{
 		ARC_PROFILE_SCOPE();
 
 		vertexBuffer->Bind(commandList);
-		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		cmdList->DrawInstanced(vertexCount, 1, 0, 0);
 	}
 
-	void Dx12RendererAPI::DrawLines(void* commandList, const Ref<VertexBuffer>& vertexBuffer, uint32_t vertexCount)
+	void Dx12RendererAPI::DrawLines(GraphicsCommandList commandList, const Ref<VertexBuffer>& vertexBuffer, uint32_t vertexCount)
 	{
 		ARC_PROFILE_SCOPE();
 
 		vertexBuffer->Bind(commandList);
-		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 		cmdList->DrawInstanced(vertexCount, 1, 0, 0);
 	}
 
-	void Dx12RendererAPI::ComputeDispatch(void* commandList, uint32_t threadGroupCountX, uint32_t threadGroupCountY, uint32_t threadGroupCountZ)
+	void Dx12RendererAPI::ComputeDispatch(GraphicsCommandList commandList, uint32_t threadGroupCountX, uint32_t threadGroupCountY, uint32_t threadGroupCountZ)
 	{
 		ARC_PROFILE_SCOPE();
 
-		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 		cmdList->Dispatch(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
 	}
 
-	void* Dx12RendererAPI::GetNewGraphicsCommandList()
+	GraphicsCommandList Dx12RendererAPI::BeginRecordingCommandList()
 	{
-		return m_Context->GetNewGraphicsCommandList();
+		return m_Context->BeginRecordingCommandList();
 	}
 	
-	void Dx12RendererAPI::Execute(void* commandList)
+	void Dx12RendererAPI::EndRecordingCommandList(GraphicsCommandList commandList, bool execute)
+	{
+		return m_Context->EndRecordingCommandList(commandList, execute);
+	}
+
+	void Dx12RendererAPI::ExecuteCommandList(GraphicsCommandList commandList)
 	{
 		ARC_PROFILE_SCOPE();
 
-		m_Context->Execute(reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList));
+		m_Context->ExecuteCommandList(commandList);
 	}
 }

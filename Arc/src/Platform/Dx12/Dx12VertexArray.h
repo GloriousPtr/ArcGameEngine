@@ -13,7 +13,7 @@ namespace ArcEngine
 		Dx12VertexArray(const Dx12VertexArray& other) = default;
 		Dx12VertexArray(Dx12VertexArray&& other) = default;
 
-		void Bind(void* commandList) const override;
+		void Bind(GraphicsCommandList commandList) const override;
 		void AddVertexBuffer(Ref<VertexBuffer>& vertexBuffer) override;
 		void SetIndexBuffer(Ref<IndexBuffer>& indexBuffer) override;
 		[[nodiscard]] const eastl::vector<Ref<VertexBuffer>>& GetVertexBuffer() const override { return m_VertexBuffers; }

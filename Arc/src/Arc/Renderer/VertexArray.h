@@ -12,7 +12,7 @@ namespace ArcEngine
 	public:
 		virtual ~VertexArray() = default;
 		
-		virtual void Bind(void* commandList) const = 0;
+		virtual void Bind(GraphicsCommandList commandList) const = 0;
 
 		virtual void AddVertexBuffer(Ref<VertexBuffer>& vertexBuffer) = 0;
 		virtual void SetIndexBuffer(Ref<IndexBuffer>& indexBuffer) = 0;

@@ -105,9 +105,9 @@ namespace ArcEngine
 	inline static ID3D12Device11* s_Device;
 	inline static IDXGISwapChain4* s_Swapchain;
 	inline static ID3D12CommandQueue* s_CommandQueue;
-	inline static eastl::vector<ID3D12GraphicsCommandList9*> s_CommandLists;
-	inline static eastl::vector<ID3D12GraphicsCommandList9*> s_CommandListsInUse;
-	inline static eastl::hash_map<ID3D12GraphicsCommandList9*, ID3D12CommandAllocator*> s_CommandListAllocatorMap;
+	inline static eastl::stack<D3D12GraphicsCommandList*> s_CommandLists;
+	inline static eastl::vector<D3D12GraphicsCommandList*> s_CommandListsToSubmit;
+	inline static eastl::hash_map<D3D12GraphicsCommandList*, ID3D12CommandAllocator*> s_CommandListAllocatorMap;
 	inline static Dx12Frame s_Frames[Dx12Context::FrameCount];
 
 	inline static std::mutex s_DeferredReleasesMutex{};
@@ -349,7 +349,7 @@ namespace ArcEngine
 		for (uint32_t i = 0; i < 100; ++i)
 		{
 			ID3D12CommandAllocator* cmdAllocator;
-			ID3D12GraphicsCommandList9* cmdList;
+			D3D12GraphicsCommandList* cmdList;
 			s_Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdAllocator));
 			s_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocator, nullptr, IID_PPV_ARGS(&cmdList));
 
@@ -362,7 +362,7 @@ namespace ArcEngine
 			cmdAllocator->Reset();
 			cmdList->Reset(cmdAllocator, nullptr);
 
-			s_CommandLists.emplace_back(cmdList);
+			s_CommandLists.push(cmdList);
 			s_CommandListAllocatorMap[cmdList] = cmdAllocator;
 		}
 	}
@@ -377,14 +377,13 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE_NAME("ExecuteCommandLists");
 
 			const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backFrame.RtvBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-			for (ID3D12GraphicsCommandList9* cmdList : s_CommandListsInUse)
+			for (D3D12GraphicsCommandList* cmdList : s_CommandListsToSubmit)
 			{
 				cmdList->ResourceBarrier(1, &barrier);
-				cmdList->Close();
 			}
 
-			ID3D12CommandList** cmdListsInUse = reinterpret_cast<ID3D12CommandList**>(s_CommandListsInUse.data());
-			s_CommandQueue->ExecuteCommandLists(static_cast<uint32_t>(s_CommandListsInUse.size()), cmdListsInUse);
+			ID3D12CommandList** cmdListsInUse = reinterpret_cast<ID3D12CommandList**>(s_CommandListsToSubmit.data());
+			s_CommandQueue->ExecuteCommandLists(static_cast<uint32_t>(s_CommandListsToSubmit.size()), cmdListsInUse);
 		}
 
 		WaitForGpu();
@@ -417,14 +416,16 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE_NAME("CommandListsBookKeeping");
 			ID3D12DescriptorHeap* descriptorHeap = GetSrvHeap()->Heap();
-			for (ID3D12GraphicsCommandList9* cmdList : s_CommandListsInUse)
+			for (D3D12GraphicsCommandList* cmdList : s_CommandListsToSubmit)
 			{
+				s_CommandLists.push(cmdList);
+
 				ID3D12CommandAllocator* cmdAllocator = s_CommandListAllocatorMap.at(cmdList);
 				cmdAllocator->Reset();
 				cmdList->Reset(cmdAllocator, nullptr);
 				cmdList->SetDescriptorHeaps(1, &descriptorHeap);
 			}
-			s_CommandListsInUse.clear();
+			s_CommandListsToSubmit.clear();
 		}
 	}
 
@@ -441,16 +442,16 @@ namespace ArcEngine
 		return s_Device;
 	}
 
-	ID3D12GraphicsCommandList9* Dx12Context::GetNewGraphicsCommandList()
+	GraphicsCommandList Dx12Context::BeginRecordingCommandList()
 	{
-		ARC_CORE_ASSERT(s_CommandListsInUse.size() < s_CommandLists.size(), "Not enough command lists in pool");
+		ARC_CORE_ASSERT(s_CommandLists.size() > 0, "Not enough command lists in pool");
 
 		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<float>(s_Width), static_cast<float>(s_Height), 0.0f, 1.0f };
 		const D3D12_RECT scissorRect = { 0, 0, static_cast<long>(s_Width), static_cast<long>(s_Height) };
 
 		const Dx12Frame& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
-		auto* commandList = s_CommandLists[s_CommandListsInUse.size()];
-		s_CommandListsInUse.emplace_back(commandList);
+		D3D12GraphicsCommandList* commandList = s_CommandLists.top();
+		s_CommandLists.pop();
 
 		if (backFrame.DeferedReleasesFlag || backFrame.DeferedReleasesFlagHandles)
 		{
@@ -468,6 +469,20 @@ namespace ArcEngine
 		commandList->RSSetScissorRects(1, &scissorRect);
 
 		return commandList;
+	}
+
+	void Dx12Context::EndRecordingCommandList(GraphicsCommandList commandList, bool execute)
+	{
+		if (execute)
+		{
+			ExecuteCommandList(commandList);
+		}
+		else
+		{
+			D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
+			cmdList->Close();
+			s_CommandListsToSubmit.emplace_back(cmdList);
+		}
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE Dx12Context::GetRtv()
@@ -522,27 +537,27 @@ namespace ArcEngine
 		s_Frames[Dx12Frame::CurrentBackBuffer].DeferedReleasesFlagHandles = true;
 	}
 
-	void Dx12Context::Execute(ID3D12GraphicsCommandList9* commandList)
+	void Dx12Context::ExecuteCommandList(GraphicsCommandList commandList)
 	{
 		ARC_PROFILE_SCOPE();
 
-		auto* it = eastl::find(s_CommandListsInUse.begin(), s_CommandListsInUse.end(), commandList);
-		if (it != s_CommandListsInUse.end())
-			s_CommandListsInUse.erase(it);
-
-		auto* cmdAllocator = s_CommandListAllocatorMap.at(commandList);
+		D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
+		
+		auto* cmdAllocator = s_CommandListAllocatorMap.at(cmdList);
 
 		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(s_Frames[Dx12Frame::CurrentBackBuffer].RtvBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-		commandList->ResourceBarrier(1, &barrier);
-		commandList->Close();
-		ID3D12CommandList* commandLists[] = { commandList };
+		cmdList->ResourceBarrier(1, &barrier);
+		cmdList->Close();
+		ID3D12CommandList* commandLists[] = { cmdList };
 		s_CommandQueue->ExecuteCommandLists(1, commandLists);
 		WaitForGpu();
 		cmdAllocator->Reset();
-		commandList->Reset(cmdAllocator, nullptr);
+		cmdList->Reset(cmdAllocator, nullptr);
 
 		ID3D12DescriptorHeap* descriptorHeap = GetSrvHeap()->Heap();
-		commandList->SetDescriptorHeaps(1, &descriptorHeap);
+		cmdList->SetDescriptorHeaps(1, &descriptorHeap);
+
+		s_CommandLists.push(cmdList);
 	}
 
 	void Dx12Context::WaitForGpu()

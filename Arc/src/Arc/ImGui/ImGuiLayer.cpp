@@ -136,7 +136,7 @@ namespace ArcEngine
 		io.DisplaySize = ImVec2(static_cast<float>(window.GetWidth()), static_cast<float>(window.GetHeight()));
 
 #ifdef ARC_PLATFORM_WINDOWS
-		auto* commandList = Dx12Context::GetNewGraphicsCommandList();
+		GraphicsCommandList commandList = Dx12Context::BeginRecordingCommandList();
 #endif
 
 		{
@@ -146,7 +146,7 @@ namespace ArcEngine
 #ifdef ARC_PLATFORM_LINUX
 #endif
 #ifdef ARC_PLATFORM_WINDOWS
-			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), reinterpret_cast<ID3D12GraphicsCommandList*>(commandList));
 #endif
 		}
 
@@ -157,6 +157,7 @@ namespace ArcEngine
 #ifdef ARC_PLATFORM_WINDOWS
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault(nullptr, commandList);
+			Dx12Context::EndRecordingCommandList(commandList);
 #endif
 		}
 	}

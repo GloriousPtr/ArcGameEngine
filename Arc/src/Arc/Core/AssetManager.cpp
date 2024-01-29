@@ -23,7 +23,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		void* commandList = RenderCommand::GetNewGraphicsCommandList();
+		GraphicsCommandList commandList = RenderCommand::BeginRecordingCommandList();
 		s_WhiteTexture = Texture2D::Create(1, 1, TextureFormat::RGBA8);
 		uint32_t whiteTextureData = 0xffffffff;
 		s_WhiteTexture->SetData(commandList, &whiteTextureData, sizeof(uint32_t));
@@ -31,6 +31,7 @@ namespace ArcEngine
 		s_BlackTexture = Texture2D::Create(1, 1, TextureFormat::RGBA8);
 		uint32_t blackTextureData = 0x000000ff;
 		s_BlackTexture->SetData(commandList, &blackTextureData, sizeof(uint32_t));
+		RenderCommand::EndRecordingCommandList(commandList);
 	}
 
 	void AssetManager::Shutdown()

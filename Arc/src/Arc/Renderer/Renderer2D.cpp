@@ -36,7 +36,7 @@ namespace ArcEngine
 		static constexpr uint32_t MaxTextureSlots = 32;
 
 		Ref<Framebuffer> RenderTarget = nullptr;
-		void* CommandList = nullptr;
+		GraphicsCommandList CommandList = nullptr;
 
 		Ref<ConstantBuffer> CameraConstantBuffer;
 		Ref<VertexArray> QuadVertexArray;
@@ -162,7 +162,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		s_Renderer2DData->RenderTarget = renderTarget;
-		s_Renderer2DData->CommandList = RenderCommand::GetNewGraphicsCommandList();
+		s_Renderer2DData->CommandList = RenderCommand::BeginRecordingCommandList();
 		if (s_Renderer2DData->TexturePipeline->Bind(s_Renderer2DData->CommandList))
 		{
 			s_Renderer2DData->CameraConstantBuffer->Bind(s_Renderer2DData->CommandList, 0);
@@ -177,6 +177,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		Flush();
+		RenderCommand::EndRecordingCommandList(s_Renderer2DData->CommandList);
 	}
 
 	void Renderer2D::StartBatch()
@@ -196,7 +197,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		void* commandList = s_Renderer2DData->CommandList;
+		GraphicsCommandList commandList = s_Renderer2DData->CommandList;
 		s_Renderer2DData->RenderTarget->Bind(commandList);
 
 		if(s_Renderer2DData->QuadIndexCount && s_Renderer2DData->RenderTarget && s_Renderer2DData->TexturePipeline->Bind(commandList))
@@ -227,6 +228,8 @@ namespace ArcEngine
 	void Renderer2D::NextBatch()
 	{
 		Flush();
+		RenderCommand::EndRecordingCommandList(s_Renderer2DData->CommandList, true);
+		s_Renderer2DData->CommandList = RenderCommand::BeginRecordingCommandList();
 		StartBatch();
 	}
 
