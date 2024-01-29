@@ -239,47 +239,48 @@ namespace ArcEngine
 			m_RootSignature->Release();
 	}
 
-	bool Dx12PipelineState::Bind() const
+	bool Dx12PipelineState::Bind(void* commandList) const
 	{
 		ARC_PROFILE_SCOPE();
 
 		if (!m_RootSignature || !m_PipelineState)
 			return false;
 
-		auto* commandList = Dx12Context::GetGraphicsCommandList();
+		auto* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
 
 		ID3D12DescriptorHeap* descriptorHeap = Dx12Context::GetSrvHeap()->Heap();
-		commandList->SetDescriptorHeaps(1, &descriptorHeap);
+		cmdList->SetDescriptorHeaps(1, &descriptorHeap);
 
 		if (m_Specification.Type == ShaderType::Vertex || m_Specification.Type == ShaderType::Pixel)
-			commandList->SetGraphicsRootSignature(m_RootSignature);
+			cmdList->SetGraphicsRootSignature(m_RootSignature);
 		else if (m_Specification.Type == ShaderType::Compute)
-			commandList->SetComputeRootSignature(m_RootSignature);
+			cmdList->SetComputeRootSignature(m_RootSignature);
 
-		commandList->SetPipelineState(m_PipelineState);
+		cmdList->SetPipelineState(m_PipelineState);
 
 		return true;
 	}
 
-	bool Dx12PipelineState::Unbind() const
+	bool Dx12PipelineState::Unbind(void* commandList) const
 	{
 		ARC_PROFILE_SCOPE();
 
 		if (!m_RootSignature || !m_PipelineState)
 			return false;
 
-		auto* commandList = Dx12Context::GetGraphicsCommandList();
-		commandList->SetGraphicsRootSignature(nullptr);
-		commandList->SetPipelineState(nullptr);
+		auto* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		cmdList->SetGraphicsRootSignature(nullptr);
+		cmdList->SetPipelineState(nullptr);
 		return true;
 	}
 
-	void Dx12PipelineState::SetDataImpl(const eastl::string_view name, const void* data, uint32_t size, uint32_t offset)
+	void Dx12PipelineState::SetDataImpl(void* commandList, const eastl::string_view name, const void* data, uint32_t size, uint32_t offset)
 	{
 		ARC_PROFILE_SCOPE();
 
 		const int32_t slot = m_BufferMap.at(name.data());
-		Dx12Context::GetGraphicsCommandList()->SetGraphicsRoot32BitConstants(slot, size / 4, data, offset);
+		auto* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		cmdList->SetGraphicsRoot32BitConstants(slot, size / 4, data, offset);
 	}
 
 	void Dx12PipelineState::MakeGraphicsPipeline(const Ref<Shader>& shader)

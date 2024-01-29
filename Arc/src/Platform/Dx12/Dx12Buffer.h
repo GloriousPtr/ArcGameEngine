@@ -20,9 +20,9 @@ namespace ArcEngine
 		Dx12VertexBuffer(const Dx12VertexBuffer& other) = default;
 		Dx12VertexBuffer(Dx12VertexBuffer&& other) = default;
 
-		void Bind() const override;
+		void Bind(void* commandList) const override;
 
-		void SetData(const void* data, uint32_t size) override;
+		void SetData(void* commandList, const void* data, uint32_t size) override;
 
 	private:
 		D3D12MA::Allocation*				m_UploadAllocation = nullptr;
@@ -39,7 +39,7 @@ namespace ArcEngine
 		Dx12IndexBuffer(const Dx12IndexBuffer& other) = default;
 		Dx12IndexBuffer(Dx12IndexBuffer&& other) = default;
 
-		void Bind() const override;
+		void Bind(void* commandList) const override;
 
 		[[nodiscard]] uint32_t GetCount() const override { return m_Count; }
 
@@ -57,7 +57,7 @@ namespace ArcEngine
 		~Dx12ConstantBuffer() override;
 
 		void SetData(const void* data, uint32_t size, uint32_t index) override;
-		void Bind(uint32_t index) const override;
+		void Bind(void* commandList, uint32_t index) const override;
 
 	private:
 		DescriptorHandle				m_Handle[Dx12Context::FrameCount]{};
@@ -75,7 +75,7 @@ namespace ArcEngine
 		~Dx12StructuredBuffer() override;
 
 		void SetData(const void* data, uint32_t size, uint32_t index) override;
-		void Bind() const override;
+		void Bind(void* commandList) const override;
 
 	private:
 		DescriptorHandle				m_Handle[Dx12Context::FrameCount]{};

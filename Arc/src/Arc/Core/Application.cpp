@@ -106,7 +106,6 @@ namespace ArcEngine
 
 			if(!m_Minimized)
 			{
-				RenderCommand::BeginFrame();
 				{
 					ARC_PROFILE_SCOPE_NAME("LayerStack OnUpdate");
 
@@ -122,7 +121,6 @@ namespace ArcEngine
 						layer->OnImGuiRender();
 				}
 				m_ImGuiLayer->End();
-				RenderCommand::EndFrame();
 			}
 			
 			m_Window->OnUpdate();

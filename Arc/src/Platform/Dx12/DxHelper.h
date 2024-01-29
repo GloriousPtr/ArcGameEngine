@@ -104,7 +104,7 @@ namespace ArcEngine::Dx12Utils
 		}
 	}
 
-	static void SetTextureData(D3D12MA::Allocation* imageAllocation, D3D12MA::Allocation* uploadImageAllocation, TextureFormat format, uint32_t width, uint32_t height, const void* data)
+	static void SetTextureData(ID3D12GraphicsCommandList9* commandList, D3D12MA::Allocation* imageAllocation, D3D12MA::Allocation* uploadImageAllocation, TextureFormat format, uint32_t width, uint32_t height, const void* data)
 	{
 		[[likely]]
 		if (data && imageAllocation && uploadImageAllocation && width && height)
@@ -116,7 +116,6 @@ namespace ArcEngine::Dx12Utils
 			srcData.RowPitch = rowPitch;
 			srcData.SlicePitch = rowPitch * height;
 
-			auto* commandList = Dx12Context::GetGraphicsCommandList();
 			UpdateSubresources(commandList, imageAllocation->GetResource(), uploadImageAllocation->GetResource(), 0, 0, 1, &srcData);
 			const auto transition = CD3DX12_RESOURCE_BARRIER::Transition(imageAllocation->GetResource(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 			commandList->ResourceBarrier(1, &transition);
@@ -124,7 +123,7 @@ namespace ArcEngine::Dx12Utils
 		}
 	}
 
-	[[maybe_unused]] static void CreateTexture(D3D12MA::Allocation** imageAllocation, D3D12MA::Allocation** uploadImageAllocation, D3D12_SRV_DIMENSION dimension, TextureFormat format, uint32_t width, uint32_t height, uint16_t depth, const void* data, DescriptorHandle* srvHandle, DescriptorHandle* uavHandle)
+	[[maybe_unused]] static void CreateTexture(ID3D12GraphicsCommandList9* commandList, D3D12MA::Allocation** imageAllocation, D3D12MA::Allocation** uploadImageAllocation, D3D12_SRV_DIMENSION dimension, TextureFormat format, uint32_t width, uint32_t height, uint16_t depth, const void* data, DescriptorHandle* srvHandle, DescriptorHandle* uavHandle)
 	{
 		ARC_CORE_ASSERT(imageAllocation);
 		ARC_CORE_ASSERT(uploadImageAllocation);
@@ -145,7 +144,7 @@ namespace ArcEngine::Dx12Utils
 
 		if (data)
 		{
-			SetTextureData(*imageAllocation, *uploadImageAllocation, format, width, height, data);
+			SetTextureData(commandList, *imageAllocation, *uploadImageAllocation, format, width, height, data);
 		}
 
 		if (srvHandle)

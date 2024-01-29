@@ -24,18 +24,18 @@ namespace ArcEngine
 
 		void Invalidate();
 
-		void Bind() override;
-		void Unbind() override;
-		void Clear() override;
-		void BindColorAttachment(uint32_t index, uint32_t slot) override;
-		void BindDepthAttachment(uint32_t slot) override;
+		void Bind(void* commandList) override;
+		void Unbind(void* commandList) override;
+		void Clear(void* commandList) override;
+		void BindColorAttachment(void* commandList, uint32_t index, uint32_t slot) override;
+		void BindDepthAttachment(void* commandList, uint32_t slot) override;
 		void Resize(uint32_t width, uint32_t height) override;
 		[[nodiscard]] uint64_t GetColorAttachmentRendererID(uint32_t index) const override { return m_ColorAttachments[Dx12Context::GetCurrentFrameIndex()][index].SrvHandle.GPU.ptr; }
 		[[nodiscard]] uint64_t GetDepthAttachmentRendererID() const override { return m_DepthAttachment[Dx12Context::GetCurrentFrameIndex()].DsvHandle.GPU.ptr; }
 		[[nodiscard]] const FramebufferSpecification& GetSpecification() const override { return m_Specification; }
 
 	private:
-		void TransitionTo(D3D12_RESOURCE_STATES colorAttachmentState, D3D12_RESOURCE_STATES depthAttachmentState);
+		void TransitionTo(void* commandList, D3D12_RESOURCE_STATES colorAttachmentState, D3D12_RESOURCE_STATES depthAttachmentState);
 
 	private:
 		FramebufferSpecification m_Specification;

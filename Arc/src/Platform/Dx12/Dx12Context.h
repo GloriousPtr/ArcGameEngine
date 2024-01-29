@@ -27,14 +27,9 @@ namespace ArcEngine
 		void SwapBuffers() override;
 		void SetSyncInterval(uint32_t value) override;
 
-		void OnBeginFrame() const;
-		void OnEndFrame() const;
-
-		static void WaitForGpu();
+		static void Execute(ID3D12GraphicsCommandList9* commandList);
 		static ID3D12Device11* GetDevice();
-		static ID3D12CommandQueue* GetCommandQueue();
-		static ID3D12CommandAllocator* GetGraphicsCommandAllocator();
-		static ID3D12GraphicsCommandList9* GetGraphicsCommandList();
+		static ID3D12GraphicsCommandList9* GetNewGraphicsCommandList();
 		static D3D12_CPU_DESCRIPTOR_HANDLE GetRtv();
 		static int GetSwapChainFormat();
 		static uint32_t GetCurrentFrameIndex();
@@ -50,6 +45,7 @@ namespace ArcEngine
 		static uint32_t GetHeight();
 
 	private:
+		static void WaitForGpu();
 		void CreateRTV() const;
 		void CreateSwapchain() const;
 		void ResizeSwapchain(uint32_t width, uint32_t height);

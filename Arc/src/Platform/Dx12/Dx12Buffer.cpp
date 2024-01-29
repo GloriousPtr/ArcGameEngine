@@ -63,7 +63,7 @@ namespace ArcEngine
 
 		CreateBuffer(&m_UploadAllocation, size, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ);
 		SetBufferData(m_UploadAllocation, vertices, size);
-		Dx12Context::GetGraphicsCommandList()->CopyBufferRegion(m_Allocation->GetResource(), 0, m_UploadAllocation->GetResource(), 0, size);
+		Dx12Context::GetNewGraphicsCommandList()->CopyBufferRegion(m_Allocation->GetResource(), 0, m_UploadAllocation->GetResource(), 0, size);
 	}
 
 	Dx12VertexBuffer::~Dx12VertexBuffer()
@@ -76,28 +76,29 @@ namespace ArcEngine
 			m_Allocation->Release();
 	}
 
-	void Dx12VertexBuffer::Bind() const
+	void Dx12VertexBuffer::Bind(void* commandList) const
 	{
 		ARC_PROFILE_SCOPE();
 
-		Dx12Context::GetGraphicsCommandList()->IASetVertexBuffers(0, 1, &m_BufferView);
+		reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList)->IASetVertexBuffers(0, 1, &m_BufferView);
 	}
 
-	void Dx12VertexBuffer::SetData(const void* data, uint32_t size)
+	void Dx12VertexBuffer::SetData(void* commandList, const void* data, uint32_t size)
 	{
 		ARC_PROFILE_SCOPE();
 
 		ID3D12Resource* resource = m_Allocation->GetResource();
 		ID3D12Resource* uploadResource = m_UploadAllocation->GetResource();
+		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
 
 		const auto toCommonBarrier = CD3DX12_RESOURCE_BARRIER::Transition(resource, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
-		Dx12Context::GetGraphicsCommandList()->ResourceBarrier(1, &toCommonBarrier);
+		cmdList->ResourceBarrier(1, &toCommonBarrier);
 
 		SetBufferData(m_UploadAllocation, data, size);
-		Dx12Context::GetGraphicsCommandList()->CopyBufferRegion(resource, 0, uploadResource, 0, size);
+		cmdList->CopyBufferRegion(resource, 0, uploadResource, 0, size);
 
 		const auto toVertexBarrier = CD3DX12_RESOURCE_BARRIER::Transition(resource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-		Dx12Context::GetGraphicsCommandList()->ResourceBarrier(1, &toVertexBarrier);
+		cmdList->ResourceBarrier(1, &toVertexBarrier);
 	}
 
 
@@ -119,7 +120,7 @@ namespace ArcEngine
 
 		CreateBuffer(&m_UploadAllocation, size, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ);
 		SetBufferData(m_UploadAllocation, indices, size);
-		Dx12Context::GetGraphicsCommandList()->CopyBufferRegion(m_Allocation->GetResource(), 0, m_UploadAllocation->GetResource(), 0, size);
+		Dx12Context::GetNewGraphicsCommandList()->CopyBufferRegion(m_Allocation->GetResource(), 0, m_UploadAllocation->GetResource(), 0, size);
 	}
 
 	Dx12IndexBuffer::~Dx12IndexBuffer()
@@ -132,11 +133,11 @@ namespace ArcEngine
 			m_Allocation->Release();
 	}
 
-	void Dx12IndexBuffer::Bind() const
+	void Dx12IndexBuffer::Bind(void* commandList) const
 	{
 		ARC_PROFILE_SCOPE();
 
-		Dx12Context::GetGraphicsCommandList()->IASetIndexBuffer(&m_BufferView);
+		reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList)->IASetIndexBuffer(&m_BufferView);
 	}
 
 
@@ -187,14 +188,14 @@ namespace ArcEngine
 		SetBufferData(m_Allocation[Dx12Context::GetCurrentFrameIndex()], data, size == 0 ? m_Stride : size, m_AlignedStride * index);
 	}
 
-	void Dx12ConstantBuffer::Bind(uint32_t index) const
+	void Dx12ConstantBuffer::Bind(void* commandList, uint32_t index) const
 	{
 		ARC_PROFILE_SCOPE();
 
 		ARC_CORE_ASSERT(m_Count > index, "Constant buffer index can't be greater than count! Overflow!");
 
 		const D3D12_GPU_VIRTUAL_ADDRESS gpuVirtualAddress = m_Allocation[Dx12Context::GetCurrentFrameIndex()]->GetResource()->GetGPUVirtualAddress() + m_AlignedStride * index;
-		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(m_RegisterIndex, gpuVirtualAddress);
+		reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList)->SetGraphicsRootConstantBufferView(m_RegisterIndex, gpuVirtualAddress);
 	}
 
 
@@ -248,10 +249,10 @@ namespace ArcEngine
 		SetBufferData(m_Allocation[Dx12Context::GetCurrentFrameIndex()], data, size == 0 ? m_Stride * m_Count : size, m_Stride * index);
 	}
 
-	void Dx12StructuredBuffer::Bind() const
+	void Dx12StructuredBuffer::Bind(void* commandList) const
 	{
 		ARC_PROFILE_SCOPE();
 
-		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(m_RegisterIndex, m_Handle[Dx12Context::GetCurrentFrameIndex()].GPU);
+		reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList)->SetGraphicsRootDescriptorTable(m_RegisterIndex, m_Handle[Dx12Context::GetCurrentFrameIndex()].GPU);
 	}
 }

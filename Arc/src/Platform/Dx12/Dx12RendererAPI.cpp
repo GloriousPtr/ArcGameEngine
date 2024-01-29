@@ -18,86 +18,72 @@ namespace ArcEngine
 		m_Context = reinterpret_cast<Dx12Context*>(Application::Get().GetWindow().GetGraphicsContext().get());
 	}
 
-	void Dx12RendererAPI::BeginFrame()
-	{
-		m_Context->OnBeginFrame();
-	}
-
-	void Dx12RendererAPI::EndFrame()
-	{
-		m_Context->OnEndFrame();
-	}
-
 	void Dx12RendererAPI::SetViewport([[maybe_unused]] uint32_t x, [[maybe_unused]] uint32_t y, uint32_t width, uint32_t height)
 	{
 		m_Context->ResizeSwapchain(width, height);
 	}
 
-	void Dx12RendererAPI::SetClearColor(const glm::vec4& color)
+	void Dx12RendererAPI::SetClearColor(void* commandList, const glm::vec4& color)
 	{
 		ARC_PROFILE_SCOPE();
-
-		Dx12Context::GetGraphicsCommandList()->ClearRenderTargetView(Dx12Context::GetRtv(), glm::value_ptr(color), 0, nullptr);
+		
+		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		cmdList->ClearRenderTargetView(Dx12Context::GetRtv(), glm::value_ptr(color), 0, nullptr);
 	}
 
 	void Dx12RendererAPI::Clear()
 	{
 	}
 
-	void Dx12RendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
+	void Dx12RendererAPI::DrawIndexed(void* commandList, const Ref<VertexArray>& vertexArray, uint32_t indexCount)
 	{
 		ARC_PROFILE_SCOPE();
 
-		vertexArray->Bind();
+		vertexArray->Bind(commandList);
 		indexCount = indexCount == 0 ? vertexArray->GetIndexBuffer()->GetCount() : indexCount;
 
-		auto* commandList = Dx12Context::GetGraphicsCommandList();
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		commandList->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
+		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		cmdList->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
 	}
 
-	void Dx12RendererAPI::Draw(const Ref<VertexBuffer>& vertexBuffer, uint32_t vertexCount)
+	void Dx12RendererAPI::Draw(void* commandList, const Ref<VertexBuffer>& vertexBuffer, uint32_t vertexCount)
 	{
 		ARC_PROFILE_SCOPE();
 
-		vertexBuffer->Bind();
-		auto* commandList = Dx12Context::GetGraphicsCommandList();
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		commandList->DrawInstanced(vertexCount, 1, 0, 0);
+		vertexBuffer->Bind(commandList);
+		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		cmdList->DrawInstanced(vertexCount, 1, 0, 0);
 	}
 
-	void Dx12RendererAPI::DrawLines(const Ref<VertexBuffer>& vertexBuffer, uint32_t vertexCount)
+	void Dx12RendererAPI::DrawLines(void* commandList, const Ref<VertexBuffer>& vertexBuffer, uint32_t vertexCount)
 	{
 		ARC_PROFILE_SCOPE();
 
-		vertexBuffer->Bind();
-		auto* commandList = Dx12Context::GetGraphicsCommandList();
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
-		commandList->DrawInstanced(vertexCount, 1, 0, 0);
+		vertexBuffer->Bind(commandList);
+		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+		cmdList->DrawInstanced(vertexCount, 1, 0, 0);
 	}
 
-	void Dx12RendererAPI::ComputeDispatch(uint32_t threadGroupCountX, uint32_t threadGroupCountY, uint32_t threadGroupCountZ)
+	void Dx12RendererAPI::ComputeDispatch(void* commandList, uint32_t threadGroupCountX, uint32_t threadGroupCountY, uint32_t threadGroupCountZ)
 	{
 		ARC_PROFILE_SCOPE();
 
-		Dx12Context::GetGraphicsCommandList()->Dispatch(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
+		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+		cmdList->Dispatch(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
 	}
 
-	void Dx12RendererAPI::Execute()
+	void* Dx12RendererAPI::GetNewGraphicsCommandList()
+	{
+		return m_Context->GetNewGraphicsCommandList();
+	}
+	
+	void Dx12RendererAPI::Execute(void* commandList)
 	{
 		ARC_PROFILE_SCOPE();
 
-		auto* commandList = Dx12Context::GetGraphicsCommandList();
-
-		commandList->Close();
-		ID3D12CommandList* commandLists[] = { Dx12Context::GetGraphicsCommandList() };
-		Dx12Context::GetCommandQueue()->ExecuteCommandLists(1, commandLists);
-
-		Dx12Context::WaitForGpu();
-		Dx12Context::GetGraphicsCommandAllocator()->Reset();
-		commandList->Reset(Dx12Context::GetGraphicsCommandAllocator(), nullptr);
-
-		ID3D12DescriptorHeap* descriptorHeap = Dx12Context::GetSrvHeap()->Heap();
-		commandList->SetDescriptorHeaps(1, &descriptorHeap);
+		m_Context->Execute(reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList));
 	}
 }

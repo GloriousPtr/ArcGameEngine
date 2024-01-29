@@ -42,8 +42,8 @@ namespace ArcEngine
 		Material(Material&& other) = default;
 
 		void Invalidate();
-		void Bind() const;
-		void Unbind() const;
+		void Bind(void* commandList) const;
+		void Unbind(void* commandList) const;
 
 		[[nodiscard]] Ref<Texture2D> GetTexture(const eastl::string_view name);
 		[[nodiscard]] eastl::vector<MaterialProperty>& GetProperties() const { return m_Pipeline->GetMaterialProperties(); }

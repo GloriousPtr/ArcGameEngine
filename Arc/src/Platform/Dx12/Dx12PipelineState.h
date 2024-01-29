@@ -12,14 +12,14 @@ namespace ArcEngine
 		Dx12PipelineState(const Ref<Shader>& shader, const PipelineSpecification& spec);
 		~Dx12PipelineState() override;
 
-		[[nodiscard]] bool Bind() const override;
-		bool Unbind() const override;
+		[[nodiscard]] bool Bind(void* commandList) const override;
+		bool Unbind(void* commandList) const override;
 
 		[[nodiscard]] eastl::vector<MaterialProperty>& GetMaterialProperties() override { return m_MaterialProperties; }
 		[[nodiscard]] uint32_t GetSlot(const eastl::string_view name) override { return m_BufferMap.at(name.begin()); }
 
 	private:
-		void SetDataImpl(const eastl::string_view name, const void* value, uint32_t size, uint32_t offset) override;
+		void SetDataImpl(void* commandList, const eastl::string_view name, const void* value, uint32_t size, uint32_t offset) override;
 		void MakeGraphicsPipeline(const Ref<Shader>& shader);
 		void MakeComputePipeline(const Ref<Shader>& shader);
 

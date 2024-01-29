@@ -34,9 +34,9 @@ namespace ArcEngine
 		[[nodiscard]] virtual uint32_t GetIndex() const = 0;
 		[[nodiscard]] virtual const eastl::string& GetPath() const = 0;
 
-		virtual void SetData(const TextureData data, [[maybe_unused]] uint32_t size) = 0;
+		virtual void SetData(void* commandList, const TextureData data, [[maybe_unused]] uint32_t size) = 0;
 		
-		virtual void Bind(uint32_t slot = 0) const = 0;
+		virtual void Bind(void* commandList, uint32_t slot = 0) const = 0;
 
 		bool operator==(const Texture& other) const { return GetRendererID() == other.GetRendererID(); }
 

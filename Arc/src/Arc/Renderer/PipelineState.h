@@ -64,19 +64,19 @@ namespace ArcEngine
 	public:
 		virtual ~PipelineState() = default;
 
-		[[nodiscard]] virtual bool Bind() const = 0;
-		virtual bool Unbind() const = 0;
+		[[nodiscard]] virtual bool Bind(void* commandList) const = 0;
+		virtual bool Unbind(void* commandList) const = 0;
 
 		[[nodiscard]] virtual eastl::vector<MaterialProperty>& GetMaterialProperties() = 0;
 		[[nodiscard]] virtual uint32_t GetSlot(const eastl::string_view name) = 0;
 
-		void SetData(const eastl::string_view name, const void* data, uint32_t size, uint32_t offset = 0)
+		void SetData(void* commandList, const eastl::string_view name, const void* data, uint32_t size, uint32_t offset = 0)
 		{
-			SetDataImpl(name, data, size, offset);
+			SetDataImpl(commandList, name, data, size, offset);
 		}
 
 	private:
-		virtual void SetDataImpl(const eastl::string_view name, const void* data, uint32_t size, uint32_t offset) = 0;
+		virtual void SetDataImpl(void* commandList, const eastl::string_view name, const void* data, uint32_t size, uint32_t offset) = 0;
 
 	public:
 		static Ref<PipelineState> Create(const Ref<Shader>& shader, const PipelineSpecification& spec);

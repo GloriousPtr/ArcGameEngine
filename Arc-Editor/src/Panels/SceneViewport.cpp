@@ -135,7 +135,7 @@ namespace ArcEngine
 		m_EditorCamera.OnUpdate(timestep);
 
 		// Update scene
-		m_RenderGraphData->CompositePassTarget->Clear();
+		m_RenderGraphData->CompositePassTarget->Clear(RenderCommand::GetNewGraphicsCommandList());
 		if (m_SimulationRunning)
 		{
 			m_Scene->OnUpdateRuntime(timestep, m_RenderGraphData, m_UseEditorCamera ? &m_EditorCamera : nullptr);

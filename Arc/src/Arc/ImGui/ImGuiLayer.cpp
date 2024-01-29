@@ -136,7 +136,7 @@ namespace ArcEngine
 		io.DisplaySize = ImVec2(static_cast<float>(window.GetWidth()), static_cast<float>(window.GetHeight()));
 
 #ifdef ARC_PLATFORM_WINDOWS
-		auto* commandList = Dx12Context::GetGraphicsCommandList();
+		auto* commandList = Dx12Context::GetNewGraphicsCommandList();
 #endif
 
 		{

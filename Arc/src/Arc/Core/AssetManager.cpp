@@ -3,8 +3,9 @@
 
 #include "Arc/Core/Application.h"
 #include "Arc/Renderer/Mesh.h"
-#include "Arc/Renderer/Texture.h"
+#include "Arc/Renderer/RenderCommand.h"
 #include "Arc/Utils/StringUtils.h"
+#include "Arc/Renderer/Texture.h"
 
 namespace ArcEngine
 {
@@ -22,13 +23,14 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
+		void* commandList = RenderCommand::GetNewGraphicsCommandList();
 		s_WhiteTexture = Texture2D::Create(1, 1, TextureFormat::RGBA8);
 		uint32_t whiteTextureData = 0xffffffff;
-		s_WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
+		s_WhiteTexture->SetData(commandList, &whiteTextureData, sizeof(uint32_t));
 
 		s_BlackTexture = Texture2D::Create(1, 1, TextureFormat::RGBA8);
 		uint32_t blackTextureData = 0x000000ff;
-		s_BlackTexture->SetData(&blackTextureData, sizeof(uint32_t));
+		s_BlackTexture->SetData(commandList, &blackTextureData, sizeof(uint32_t));
 	}
 
 	void AssetManager::Shutdown()

@@ -35,7 +35,8 @@ namespace ArcEngine
 		static constexpr uint32_t MaxIndices = MaxQuads * 6;
 		static constexpr uint32_t MaxTextureSlots = 32;
 
-		Ref<Framebuffer> RenderTarget;
+		Ref<Framebuffer> RenderTarget = nullptr;
+		void* CommandList = nullptr;
 
 		Ref<ConstantBuffer> CameraConstantBuffer;
 		Ref<VertexArray> QuadVertexArray;
@@ -161,9 +162,10 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		s_Renderer2DData->RenderTarget = renderTarget;
-		if (s_Renderer2DData->TexturePipeline->Bind())
+		s_Renderer2DData->CommandList = RenderCommand::GetNewGraphicsCommandList();
+		if (s_Renderer2DData->TexturePipeline->Bind(s_Renderer2DData->CommandList))
 		{
-			s_Renderer2DData->CameraConstantBuffer->Bind(0);
+			s_Renderer2DData->CameraConstantBuffer->Bind(s_Renderer2DData->CommandList, 0);
 			s_Renderer2DData->CameraConstantBuffer->SetData(&viewProjection, sizeof(CameraData), 0);
 		}
 
@@ -194,37 +196,32 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if(s_Renderer2DData->QuadIndexCount && s_Renderer2DData->RenderTarget && s_Renderer2DData->TexturePipeline->Bind())
+		void* commandList = s_Renderer2DData->CommandList;
+		s_Renderer2DData->RenderTarget->Bind(commandList);
+
+		if(s_Renderer2DData->QuadIndexCount && s_Renderer2DData->RenderTarget && s_Renderer2DData->TexturePipeline->Bind(commandList))
 		{
 			ARC_PROFILE_SCOPE_NAME("Draw Quads");
 
-			s_Renderer2DData->RenderTarget->Bind();
-
 			const uint32_t dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Renderer2DData->QuadVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Renderer2DData->QuadVertexBufferBase));
-			s_Renderer2DData->CameraConstantBuffer->Bind(0);
-			s_Renderer2DData->QuadVertexBuffer->SetData(s_Renderer2DData->QuadVertexBufferBase, dataSize);
-			s_Renderer2DData->TexturePipeline->SetData("Textures", s_Renderer2DData->TextureSlots.data(), sizeof(uint32_t) * s_Renderer2DData->TextureSlotIndex);
-			RenderCommand::DrawIndexed(s_Renderer2DData->QuadVertexArray, s_Renderer2DData->QuadIndexCount);
+			s_Renderer2DData->CameraConstantBuffer->Bind(commandList, 0);
+			s_Renderer2DData->QuadVertexBuffer->SetData(commandList, s_Renderer2DData->QuadVertexBufferBase, dataSize);
+			s_Renderer2DData->TexturePipeline->SetData(commandList, "Textures", s_Renderer2DData->TextureSlots.data(), sizeof(uint32_t) * s_Renderer2DData->TextureSlotIndex);
+			RenderCommand::DrawIndexed(commandList, s_Renderer2DData->QuadVertexArray, s_Renderer2DData->QuadIndexCount);
 			s_Renderer2DData->Stats.DrawCalls++;
-
-			RenderCommand::Execute();
-			s_Renderer2DData->RenderTarget->Unbind();
 		}
 		
-		if (s_Renderer2DData->LineVertexCount && s_Renderer2DData->RenderTarget && s_Renderer2DData->LinePipeline->Bind())
+		if (s_Renderer2DData->LineVertexCount && s_Renderer2DData->RenderTarget && s_Renderer2DData->LinePipeline->Bind(commandList))
 		{
 			ARC_PROFILE_SCOPE_NAME("Draw Lines");
 
-			s_Renderer2DData->RenderTarget->Bind();
-
 			const uint32_t dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Renderer2DData->LineVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Renderer2DData->LineVertexBufferBase));
-			s_Renderer2DData->LineVertexBuffer->SetData(s_Renderer2DData->LineVertexBufferBase, dataSize);
-			RenderCommand::DrawLines(s_Renderer2DData->LineVertexBuffer, s_Renderer2DData->LineVertexCount);
+			s_Renderer2DData->LineVertexBuffer->SetData(commandList, s_Renderer2DData->LineVertexBufferBase, dataSize);
+			RenderCommand::DrawLines(commandList, s_Renderer2DData->LineVertexBuffer, s_Renderer2DData->LineVertexCount);
 			s_Renderer2DData->Stats.DrawCalls++;
-
-			RenderCommand::Execute();
-			s_Renderer2DData->RenderTarget->Unbind();
 		}
+
+		s_Renderer2DData->RenderTarget->Unbind(commandList);
 	}
 
 	void Renderer2D::NextBatch()

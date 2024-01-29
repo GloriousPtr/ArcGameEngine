@@ -96,38 +96,38 @@ namespace ArcEngine
 		m_ConstantBuffer = ConstantBuffer::Create(static_cast<uint32_t>(cbSize), 1, cbSlot);
 	}
 
-	void Material::Bind() const
+	void Material::Bind(void* commandList) const
 	{
 		ARC_PROFILE_SCOPE();
 
 		[[likely]]
-		if (m_Pipeline->Bind())
+		if (m_Pipeline->Bind(commandList))
 		{
 			for (const TextureSlot& t : m_TextureBuffer)
 			{
 				if (m_Textures[t.Index])
-					m_Textures[t.Index]->Bind(t.Slot);
+					m_Textures[t.Index]->Bind(commandList, t.Slot);
 				else
-					AssetManager::WhiteTexture()->Bind(t.Slot);
+					AssetManager::WhiteTexture()->Bind(commandList, t.Slot);
 			}
 
 			if (!m_BindlessTextureBuffer.empty())
 			{
-				m_Pipeline->SetData("Textures", m_BindlessTextureBuffer.data(), static_cast<uint32_t>(sizeof(uint32_t) * m_BindlessTextureBuffer.size()), 0);
+				m_Pipeline->SetData(commandList, "Textures", m_BindlessTextureBuffer.data(), static_cast<uint32_t>(sizeof(uint32_t) * m_BindlessTextureBuffer.size()), 0);
 			}
 			if (!m_CBBuffer.empty())
 			{
-				m_ConstantBuffer->Bind(0);
+				m_ConstantBuffer->Bind(commandList, 0);
 				m_ConstantBuffer->SetData(m_CBBuffer.data(), static_cast<uint32_t>(sizeof(float) * m_CBBuffer.size()), 0);
 			}
 		}
 	}
 
-	void Material::Unbind() const
+	void Material::Unbind(void* commandList) const
 	{
 		ARC_PROFILE_SCOPE();
 
-		m_Pipeline->Unbind();
+		m_Pipeline->Unbind(commandList);
 	}
 
 	Ref<Texture2D> Material::GetTexture(const eastl::string_view name)

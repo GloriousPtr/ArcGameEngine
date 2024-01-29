@@ -11,10 +11,10 @@ namespace ArcEngine
 	{
 	}
 
-	void Dx12VertexArray::Bind() const
+	void Dx12VertexArray::Bind(void* commandList) const
 	{
-		m_VertexBuffers[0]->Bind();
-		m_IndexBuffer->Bind();
+		m_VertexBuffers[0]->Bind(commandList);
+		m_IndexBuffer->Bind(commandList);
 	}
 
 	void Dx12VertexArray::AddVertexBuffer(Ref<VertexBuffer>& vertexBuffer)

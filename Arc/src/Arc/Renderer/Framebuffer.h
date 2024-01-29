@@ -56,12 +56,12 @@ namespace ArcEngine
 	public:
 		virtual ~Framebuffer() = default;
 		
-		virtual void Bind() = 0;
-		virtual void Unbind() = 0;
-		virtual void Clear() = 0;
+		virtual void Bind(void* commandList) = 0;
+		virtual void Unbind(void* commandList) = 0;
+		virtual void Clear(void* commandList) = 0;
 
-		virtual void BindColorAttachment(uint32_t index, uint32_t slot) = 0;
-		virtual void BindDepthAttachment(uint32_t slot) = 0;
+		virtual void BindColorAttachment(void* commandList, uint32_t index, uint32_t slot) = 0;
+		virtual void BindDepthAttachment(void* commandList, uint32_t slot) = 0;
 
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 		

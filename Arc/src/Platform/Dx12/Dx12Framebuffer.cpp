@@ -129,75 +129,76 @@ namespace ArcEngine
 		}
 	}
 
-	void Dx12Framebuffer::Bind()
+	void Dx12Framebuffer::Bind(void* commandList)
 	{
 		ARC_PROFILE_SCOPE();
 
-		auto* commandList = Dx12Context::GetGraphicsCommandList();
+		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
+
 		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_DepthAttachment[backFrame].DsvHandle.CPU;
-		commandList->OMSetRenderTargets(static_cast<UINT>(m_RtvHandles[backFrame].size()), m_RtvHandles[backFrame].data(), true, dsvHandle.ptr != 0 ? &dsvHandle : nullptr);
+		cmdList->OMSetRenderTargets(static_cast<UINT>(m_RtvHandles[backFrame].size()), m_RtvHandles[backFrame].data(), true, dsvHandle.ptr != 0 ? &dsvHandle : nullptr);
 
 		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, (float)m_Specification.Width, (float)m_Specification.Height, 0.0f, 1.0f };
 		const D3D12_RECT scissor = { 0, 0, static_cast<LONG>(m_Specification.Width), static_cast<LONG>(m_Specification.Height) };
 
-		commandList->RSSetViewports(1, &viewport);
-		commandList->RSSetScissorRects(1, &scissor);
+		cmdList->RSSetViewports(1, &viewport);
+		cmdList->RSSetScissorRects(1, &scissor);
 	}
 
-	void Dx12Framebuffer::Unbind()
+	void Dx12Framebuffer::Unbind(void* commandList)
 	{
 		ARC_PROFILE_SCOPE();
 
-		TransitionTo(D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		TransitionTo(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-		auto* commandList = Dx12Context::GetGraphicsCommandList();
+		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE rtv = Dx12Context::GetRtv();
 		const uint32_t width = Dx12Context::GetWidth();
 		const uint32_t height = Dx12Context::GetHeight();
 
-		commandList->OMSetRenderTargets(1, &rtv, true, nullptr);
+		cmdList->OMSetRenderTargets(1, &rtv, true, nullptr);
 
 		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, (float)width, (float)height, 0.0f, 1.0f };
 		const D3D12_RECT scissorRect = { 0, 0, static_cast<LONG>(width), static_cast<LONG>(height) };
-		commandList->RSSetViewports(1, &viewport);
-		commandList->RSSetScissorRects(1, &scissorRect);
+		cmdList->RSSetViewports(1, &viewport);
+		cmdList->RSSetScissorRects(1, &scissorRect);
 
-		TransitionTo(D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		TransitionTo(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 	}
 
-	void Dx12Framebuffer::Clear()
+	void Dx12Framebuffer::Clear(void* commandList)
 	{
 		ARC_PROFILE_SCOPE();
 
-		auto* commandList = Dx12Context::GetGraphicsCommandList();
+		ID3D12GraphicsCommandList9* cmdList = reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList);
 		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_DepthAttachment[backFrame].DsvHandle.CPU;
 
 		const eastl::vector<D3D12_CPU_DESCRIPTOR_HANDLE>& rtvHandles = m_RtvHandles[backFrame];
 		for (const D3D12_CPU_DESCRIPTOR_HANDLE rtv : rtvHandles)
-			commandList->ClearRenderTargetView(rtv, glm::value_ptr(m_ClearColor), 0, nullptr);
+			cmdList->ClearRenderTargetView(rtv, glm::value_ptr(m_ClearColor), 0, nullptr);
 		if (dsvHandle.ptr != 0)
-			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, m_ClearDepth.r, static_cast<UINT8>(m_ClearDepth.g), 0, nullptr);
+			cmdList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, m_ClearDepth.r, static_cast<UINT8>(m_ClearDepth.g), 0, nullptr);
 	}
 
-	void Dx12Framebuffer::BindColorAttachment(uint32_t index, uint32_t slot)
+	void Dx12Framebuffer::BindColorAttachment(void* commandList, uint32_t index, uint32_t slot)
 	{
 		ARC_PROFILE_SCOPE();
 
 		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
-		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(slot, m_ColorAttachments[backFrame][index].SrvHandle.GPU);
+		reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList)->SetGraphicsRootDescriptorTable(slot, m_ColorAttachments[backFrame][index].SrvHandle.GPU);
 	}
 
-	void Dx12Framebuffer::BindDepthAttachment(uint32_t slot)
+	void Dx12Framebuffer::BindDepthAttachment(void* commandList, uint32_t slot)
 	{
 		ARC_PROFILE_SCOPE();
 
 		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
-		Dx12Context::GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(slot, m_DepthAttachment[backFrame].SrvHandle.GPU);
+		reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList)->SetGraphicsRootDescriptorTable(slot, m_DepthAttachment[backFrame].SrvHandle.GPU);
 	}
 
 	void Dx12Framebuffer::Resize(uint32_t width, uint32_t height)
@@ -239,7 +240,7 @@ namespace ArcEngine
 		Invalidate();
 	}
 
-	void Dx12Framebuffer::TransitionTo(D3D12_RESOURCE_STATES colorAttachmentState, D3D12_RESOURCE_STATES depthAttachmentState)
+	void Dx12Framebuffer::TransitionTo(void* commandList, D3D12_RESOURCE_STATES colorAttachmentState, D3D12_RESOURCE_STATES depthAttachmentState)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -260,6 +261,6 @@ namespace ArcEngine
 			m_DepthAttachment[backFrame].State = depthAttachmentState;
 			++numBarriers;
 		}
-		Dx12Context::GetGraphicsCommandList()->ResourceBarrier(numBarriers, barriers);
+		reinterpret_cast<ID3D12GraphicsCommandList9*>(commandList)->ResourceBarrier(numBarriers, barriers);
 	}
 }

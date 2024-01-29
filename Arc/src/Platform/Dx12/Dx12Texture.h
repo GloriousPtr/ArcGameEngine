@@ -27,9 +27,9 @@ namespace ArcEngine
 		[[nodiscard]] uint32_t GetIndex() const override;
 		[[nodiscard]] const eastl::string& GetPath() const override { return m_Path; }
 
-		void SetData(const TextureData data, [[maybe_unused]] uint32_t size) override;
+		void SetData(void* commandList, const TextureData data, [[maybe_unused]] uint32_t size) override;
 
-		void Bind(uint32_t slot = 0) const override;
+		void Bind(void* commandList, uint32_t slot = 0) const override;
 
 	private:
 		TextureFormat						m_Format = TextureFormat::None;
@@ -56,9 +56,9 @@ namespace ArcEngine
 		[[nodiscard]] uint32_t GetIndex() const override;
 		[[nodiscard]] const eastl::string& GetPath() const override { return m_Path; }
 
-		void SetData(const TextureData data, [[maybe_unused]] uint32_t size) override;
+		void SetData(void* commandList, const TextureData data, [[maybe_unused]] uint32_t size) override;
 
-		void Bind(uint32_t slot = 0) const override;
+		void Bind(void* commandList, uint32_t slot = 0) const override;
 
 		void BindIrradianceMap([[maybe_unused]] uint32_t slot) const override {}
 		void BindRadianceMap([[maybe_unused]] uint32_t slot) const override {}
