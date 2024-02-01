@@ -135,7 +135,7 @@ namespace ArcEngine
 		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_DepthAttachment[backFrame].DsvHandle.CPU;
-		cmdList->OMSetRenderTargets(static_cast<UINT>(m_RtvHandles[backFrame].size()), m_RtvHandles[backFrame].data(), true, dsvHandle.ptr != 0 ? &dsvHandle : nullptr);
+		cmdList->OMSetRenderTargets(static_cast<UINT>(m_RtvHandles[backFrame].size()), m_RtvHandles[backFrame].data(), false, dsvHandle.ptr != 0 ? &dsvHandle : nullptr);
 
 		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, (float)m_Specification.Width, (float)m_Specification.Height, 0.0f, 1.0f };
 		const D3D12_RECT scissor = { 0, 0, static_cast<LONG>(m_Specification.Width), static_cast<LONG>(m_Specification.Height) };
