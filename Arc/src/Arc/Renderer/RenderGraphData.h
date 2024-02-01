@@ -15,18 +15,18 @@ namespace ArcEngine
 
 	struct RenderGraphData
 	{
-		Ref<Framebuffer> CompositePassTarget;
+		//Ref<Framebuffer> CompositePassTarget;
 		Ref<Framebuffer> RenderPassTarget;
 		Ref<Framebuffer> LightingPassTarget;
-		Ref<Framebuffer> FXAAPassTarget;
-
+		//Ref<Framebuffer> FXAAPassTarget;
+		/*
 		static constexpr size_t MaxBlurSamples = 6;
 		size_t BlurSamples = MaxBlurSamples;
 		Ref<Framebuffer> PrefilteredFramebuffer;
 		Ref<Framebuffer> TempBlurFramebuffers[MaxBlurSamples];
 		Ref<Framebuffer> DownsampledFramebuffers[MaxBlurSamples];
 		Ref<Framebuffer> UpsampledFramebuffers[MaxBlurSamples];
-
+		*/
 		RenderGraphData(uint32_t width, uint32_t height)
 		{
 			ARC_PROFILE_SCOPE();
@@ -38,6 +38,7 @@ namespace ArcEngine
 				height = 1;
 			}
 			
+			/*
 			{
 				FramebufferSpecification spec;
 				spec.Attachments = { FramebufferTextureFormat::R11G11B10F, FramebufferTextureFormat::Depth };
@@ -46,12 +47,12 @@ namespace ArcEngine
 				spec.Name = "Composite Pass Framebuffer";
 				CompositePassTarget = Framebuffer::Create(spec);
 			}
-
+			*/
 			{
 				FramebufferSpecification spec;
 				spec.Attachments = {
 					FramebufferTextureFormat::RGBA8,				// Albedo
-					FramebufferTextureFormat::RG16F,				// Normal
+					FramebufferTextureFormat::RGBA16F,				// Normal
 					FramebufferTextureFormat::RGBA8,				// Metallic, Roughness, AO
 					FramebufferTextureFormat::RGBA8,				// rgb: EmissionColor, a: intensity
 					FramebufferTextureFormat::Depth
@@ -70,9 +71,10 @@ namespace ArcEngine
 				spec.Name = "Lighting Pass Framebuffer";
 				LightingPassTarget = Framebuffer::Create(spec);
 				spec.Name = "FXAA Pass Framebuffer";
-				FXAAPassTarget = Framebuffer::Create(spec);
+				//FXAAPassTarget = Framebuffer::Create(spec);
 			}
 
+			/*
 			width /= 2;
 			height /= 2;
 			FramebufferSpecification bloomSpec;
@@ -102,17 +104,18 @@ namespace ArcEngine
 				DownsampledFramebuffers[i] = Framebuffer::Create(blurSpec);
 				UpsampledFramebuffers[i] = Framebuffer::Create(blurSpec);
 			}
+			*/
 		}
 
 		void Resize(uint32_t width, uint32_t height)
 		{
 			ARC_PROFILE_SCOPE();
 
-			CompositePassTarget->Resize(width, height);
+			//CompositePassTarget->Resize(width, height);
 			RenderPassTarget->Resize(width, height);
 			LightingPassTarget->Resize(width, height);
-			FXAAPassTarget->Resize(width, height);
-
+			//FXAAPassTarget->Resize(width, height);
+			/*
 			width /= 2;
 			height /= 2;
 			PrefilteredFramebuffer->Resize(width, height);
@@ -132,6 +135,7 @@ namespace ArcEngine
 				DownsampledFramebuffers[i]->Resize(width, height);
 				UpsampledFramebuffers[i]->Resize(width, height);
 			}
+			*/
 		}
 	};
 }

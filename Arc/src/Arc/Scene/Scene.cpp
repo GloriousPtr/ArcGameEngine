@@ -1174,6 +1174,7 @@ namespace ArcEngine
 			if (!lights.empty() || skylight || view.size() > 0)
 			{
 				// Meshes
+				Renderer3D::ReserveMeshes(view.size());
 				Renderer3D::BeginScene(cameraData, skylight, eastl::move(lights));
 				{
 					ARC_PROFILE_SCOPE_NAME("Submit Mesh Data");
@@ -1183,7 +1184,7 @@ namespace ArcEngine
 						{
 							ARC_CORE_ASSERT(meshComponent.MeshGeometry->GetSubmeshCount() > meshComponent.SubmeshIndex, "Trying to access submesh index that does not exist!");
 							auto& submesh = meshComponent.MeshGeometry->GetSubmesh(meshComponent.SubmeshIndex);
-							Renderer3D::SubmitMesh(Entity(entity, this).GetWorldTransform(), submesh.Mat, submesh.Geometry);
+							Renderer3D::SubmitMesh(Entity(entity, this).GetWorldTransform(), submesh);
 						}
 					}
 				}
@@ -1191,7 +1192,7 @@ namespace ArcEngine
 			}
 		}
 		
-		Renderer2D::BeginScene(cameraData, renderGraphData->CompositePassTarget);
+		Renderer2D::BeginScene(cameraData, renderGraphData->RenderPassTarget);
 		{
 			ARC_PROFILE_SCOPE_NAME("Submit Particle Data");
 

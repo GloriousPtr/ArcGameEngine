@@ -31,7 +31,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (FramebufferSpecification spec = m_RenderGraphData->CompositePassTarget->GetSpecification();
+		if (FramebufferSpecification spec = m_RenderGraphData->LightingPassTarget->GetSpecification();
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized fb is invalid
 			(spec.Width != static_cast<uint32_t>(m_ViewportSize.x) || spec.Height != static_cast<uint32_t>(m_ViewportSize.y)))
 		{
@@ -135,9 +135,6 @@ namespace ArcEngine
 		m_EditorCamera.OnUpdate(timestep);
 
 		// Update scene
-		GraphicsCommandList commandList = RenderCommand::BeginRecordingCommandList();
-		m_RenderGraphData->CompositePassTarget->Clear(commandList);
-		RenderCommand::EndRecordingCommandList(commandList);
 		if (m_SimulationRunning)
 		{
 			m_Scene->OnUpdateRuntime(timestep, m_RenderGraphData, m_UseEditorCamera ? &m_EditorCamera : nullptr);
@@ -174,7 +171,7 @@ namespace ArcEngine
 			ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 			m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
-			const uint64_t textureID = m_RenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
+			const uint64_t textureID = m_RenderGraphData->LightingPassTarget->GetColorAttachmentRendererID(0);
 			ImGui::Image(reinterpret_cast<ImTextureID>(textureID), ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ARC_UI_UV_0, ARC_UI_UV_1);
 
 			if (m_SceneHierarchyPanel)
@@ -353,7 +350,7 @@ namespace ArcEngine
 			.Position = glm::vec4(m_EditorCamera.GetPosition(), 1.0f)
 		};
 
-		Renderer2D::BeginScene(cameraData, m_RenderGraphData->CompositePassTarget);
+		Renderer2D::BeginScene(cameraData, m_RenderGraphData->RenderPassTarget);
 		{
 			constexpr glm::vec4 color = glm::vec4(1.0f);
 

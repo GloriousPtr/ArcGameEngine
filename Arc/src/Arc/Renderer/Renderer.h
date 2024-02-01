@@ -11,6 +11,8 @@ namespace ArcEngine
 		glm::mat4 CameraProjection{};
 		glm::mat4 CameraViewProjection{};
 		glm::vec4 CameraPosition{};
+		glm::mat4 InvCameraView{};
+		glm::mat4 InvCameraProjection{};
 		uint32_t NumDirectionalLights = 0;
 		uint32_t NumPointLights = 0;
 		uint32_t NumSpotLights = 0;

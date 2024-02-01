@@ -27,9 +27,10 @@ namespace ArcEngine
 		static void BeginScene(const CameraData& cameraData, Entity cubemap, eastl::vector<Entity>&& lights);
 		static void EndScene(const Ref<RenderGraphData>& renderTarget);
 
-		static void DrawCube();
-		static void DrawQuad();
-		static void SubmitMesh(glm::mat4&& transform, Ref<Material>& material, Ref<VertexArray>& geometry);
+		static void DrawCube(GraphicsCommandList cl);
+		static void DrawQuad(GraphicsCommandList cl);
+		static void ReserveMeshes(size_t count);
+		static void SubmitMesh(const glm::mat4& transform, Submesh& submesh);
 
 		struct Statistics
 		{
@@ -41,8 +42,7 @@ namespace ArcEngine
 		[[nodiscard]] static Statistics GetStats();
 
 	private:
-		static void SetupGlobalData();
-		static void SetupLightsData();
+		static void SetupLightsData(GraphicsCommandList cl);
 		static void Flush(const Ref<RenderGraphData>& renderGraphData);
 		static void FXAAPass(const Ref<RenderGraphData>& renderGraphData);
 		static void CompositePass(const Ref<RenderGraphData>& renderGraphData);

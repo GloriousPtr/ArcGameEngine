@@ -15,6 +15,8 @@ cbuffer GlobalData : register(b1, space0)
 	float4x4 CameraProjection;
 	float4x4 CameraViewProjection;
 	float4 CameraPosition;
+	float4x4 InvCameraView;
+	float4x4 InvCameraProjection;
 	uint NumDirectionalLights = 0;
 	uint NumPointLights = 0;
 	uint NumSpotLights = 0;
@@ -48,6 +50,22 @@ StructuredBuffer<SpotLight> SpotLights : register (t2, space0);
 
 
 
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+///// Reconstruct position from depth and view/projection //////////////////////////////////////////
+//// https://gamedev.stackexchange.com/questions/108856/fast-position-reconstruction-from-depth ////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+float3 WorldPosFromDepth(float2 uv, float depth)
+{
+	float x = uv.x * 2 - 1;
+    float y = (1 - uv.y) * 2 - 1;
+	float4 clipSpace = float4(x, y, depth, 1.0);
+	float4 viewSpace = mul(InvCameraProjection, clipSpace);
+	viewSpace /= viewSpace.w;
+	float4 worldSpace = mul(InvCameraView, viewSpace);
+	return worldSpace.xyz;
+}
 
 // N: Normal, H: Halfway, a2: pow(roughness, 2)
 float DistributionGGX(const float3 N, const float3 H, const float a2)

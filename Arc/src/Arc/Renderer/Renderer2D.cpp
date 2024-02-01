@@ -120,7 +120,7 @@ namespace ArcEngine
 					.Primitive = PrimitiveType::Triangle,
 					.FillMode = FillModeType::Solid,
 					.DepthFormat = FramebufferTextureFormat::None,
-					.OutputFormats = { FramebufferTextureFormat::R11G11B10F }
+					.OutputFormats = { FramebufferTextureFormat::RGBA8 }
 				}
 			};
 			s_Renderer2DData->TexturePipeline = pipelineLibrary.Load("assets/shaders/Texture.hlsl", texture2dPippelineSpec);
@@ -138,7 +138,7 @@ namespace ArcEngine
 					.Primitive = PrimitiveType::Line,
 					.FillMode = FillModeType::Solid,
 					.DepthFormat = FramebufferTextureFormat::None,
-					.OutputFormats = { FramebufferTextureFormat::R11G11B10F }
+					.OutputFormats = { FramebufferTextureFormat::RGBA8 }
 				}
 			};
 			s_Renderer2DData->LinePipeline = pipelineLibrary.Load("assets/shaders/Line.hlsl", linePippelineSpec);

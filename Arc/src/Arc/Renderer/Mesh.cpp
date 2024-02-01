@@ -22,15 +22,13 @@ namespace ArcEngine
 		glm::vec2 TexCoord = glm::vec2(0.0f);
 		glm::vec3 Normal = glm::vec3(0.0f);
 		glm::vec3 Tangent = glm::vec3(0.0f);
-		glm::vec3 Bitangent = glm::vec3(0.0f);
 
 		bool operator==(const Vertex& other) const
 		{
-			return	Position == other.Position &&
+			return Position == other.Position &&
 				TexCoord == other.TexCoord &&
 				Normal == other.Normal &&
-				Tangent == other.Tangent &&
-				Bitangent == other.Bitangent;
+				Tangent == other.Tangent;
 		}
 	};
 }
@@ -45,8 +43,7 @@ namespace eastl
 			const std::size_t h2 = std::hash<glm::vec2>{}(vertex.TexCoord);
 			const std::size_t h3 = std::hash<glm::vec3>{}(vertex.Normal);
 			const std::size_t h4 = std::hash<glm::vec3>{}(vertex.Tangent);
-			const std::size_t h5 = std::hash<glm::vec3>{}(vertex.Bitangent);
-			return h1 ^ (h2 << 1) ^ (h3 << 2) ^ (h4 << 3) ^ (h5 << 4);
+			return h1 ^ (h2 << 1) ^ (h3 << 2) ^ (h4 << 3);
 		}
 	};
 }
@@ -137,7 +134,7 @@ namespace ArcEngine
 								vertex.Normal.x = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 0];
 								vertex.Normal.y = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 1];
 								vertex.Normal.z = -attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 2];
-
+								
 								int v0_index = shape.mesh.indices[index_offset + 0].vertex_index;
 								int v1_index = shape.mesh.indices[index_offset + 1].vertex_index;
 								int v2_index = shape.mesh.indices[index_offset + 2].vertex_index;
@@ -154,32 +151,16 @@ namespace ArcEngine
 								glm::vec2 uv1 = { attrib.texcoords[2 * uv1_index + 0], 1.0f - attrib.texcoords[2 * uv1_index + 1] };
 								glm::vec2 uv2 = { attrib.texcoords[2 * uv2_index + 0], 1.0f - attrib.texcoords[2 * uv2_index + 1] };
 
-								glm::highp_vec3 deltaPos1 = v1 - v0;
-								glm::highp_vec3 deltaPos2 = v2 - v0;
-								glm::highp_vec2 deltaUV1 = uv1 - uv0;
-								glm::highp_vec2 deltaUV2 = uv2 - uv0;
+								glm::vec3 edge1 = v1 - v0;
+								glm::vec3 edge2 = v2 - v0;
+								glm::vec2 deltaUV1 = uv1 - uv0;
+								glm::vec2 deltaUV2 = uv2 - uv0;
 
-								float det = deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x;
-								if (det == 0.0f)
-								{
-									vertex.Tangent = { 1.0f, 0.0f, 0.0f };
-									vertex.Bitangent = { 0.0f, 1.0f, 0.0f };
-								}
-								else
-								{
-									float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-									vertex.Tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
-									vertex.Bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
-								}
+								float det = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
 
-								glm::highp_vec3 t = glm::normalize(vertex.Tangent - vertex.Normal * glm::dot(vertex.Normal, vertex.Tangent));
-								glm::highp_vec3 b = glm::normalize(vertex.Bitangent - vertex.Normal * glm::dot(vertex.Normal, vertex.Bitangent));
-								float handedness = glm::dot(glm::cross(vertex.Normal, t), b);
-								if (handedness < 0.0f)
-								{
-									vertex.Tangent = -vertex.Tangent;
-									vertex.Bitangent = -vertex.Bitangent;
-								}
+								vertex.Tangent.x = det * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+								vertex.Tangent.y = det * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+								vertex.Tangent.z = det * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
 							}
 
 							if (uniqueVertices.count(vertex) == 0)
