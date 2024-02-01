@@ -43,7 +43,6 @@ namespace ArcEngine
 		indexCount = indexCount == 0 ? vertexArray->GetIndexBuffer()->GetCount() : indexCount;
 
 		D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
-		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		cmdList->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
 	}
 
@@ -53,7 +52,6 @@ namespace ArcEngine
 
 		vertexBuffer->Bind(commandList);
 		D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
-		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		cmdList->DrawInstanced(vertexCount, 1, 0, 0);
 	}
 
@@ -63,7 +61,6 @@ namespace ArcEngine
 
 		vertexBuffer->Bind(commandList);
 		D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
-		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 		cmdList->DrawInstanced(vertexCount, 1, 0, 0);
 	}
 

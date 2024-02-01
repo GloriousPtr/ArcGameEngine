@@ -130,13 +130,11 @@ namespace ArcEngine::Dx12Utils
 
 		DXGI_FORMAT dxFormat = Dx12FormatFromTextureFormat(format);
 
-		const auto resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(dxFormat, width, height, depth, 1, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
+		const auto resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(dxFormat, width, height, depth, 1, 1, 0, uavHandle ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE);
 		Dx12Allocator::CreateTextureResource(D3D12_HEAP_TYPE_DEFAULT, &resourceDesc, D3D12_RESOURCE_STATE_COPY_DEST, imageAllocation);
 		ID3D12Resource* resource = (*imageAllocation)->GetResource();
 		resource->SetName(L"Image Allocation");
 
-		D3D12MA::ALLOCATION_DESC uploadAllocation{};
-		uploadAllocation.HeapType = D3D12_HEAP_TYPE_UPLOAD;
 		const auto uploadBufferSize = GetRequiredIntermediateSize(resource, 0, 1);
 		const auto uploadBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
 		Dx12Allocator::CreateTextureResource(D3D12_HEAP_TYPE_UPLOAD, &uploadBufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, uploadImageAllocation);

@@ -100,34 +100,23 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		[[likely]]
-		if (m_Pipeline->Bind(commandList))
+		for (const TextureSlot& t : m_TextureBuffer)
 		{
-			for (const TextureSlot& t : m_TextureBuffer)
-			{
-				if (m_Textures[t.Index])
-					m_Textures[t.Index]->Bind(commandList, t.Slot);
-				else
-					AssetManager::WhiteTexture()->Bind(commandList, t.Slot);
-			}
-
-			if (!m_BindlessTextureBuffer.empty())
-			{
-				m_Pipeline->SetData(commandList, "Textures", m_BindlessTextureBuffer.data(), static_cast<uint32_t>(sizeof(uint32_t) * m_BindlessTextureBuffer.size()), 0);
-			}
-			if (!m_CBBuffer.empty())
-			{
-				m_ConstantBuffer->Bind(commandList, 0);
-				m_ConstantBuffer->SetData(m_CBBuffer.data(), static_cast<uint32_t>(sizeof(float) * m_CBBuffer.size()), 0);
-			}
+			if (m_Textures[t.Index])
+				m_Textures[t.Index]->Bind(commandList, t.Slot);
+			else
+				AssetManager::WhiteTexture()->Bind(commandList, t.Slot);
 		}
-	}
 
-	void Material::Unbind(GraphicsCommandList commandList) const
-	{
-		ARC_PROFILE_SCOPE();
-
-		m_Pipeline->Unbind(commandList);
+		if (!m_BindlessTextureBuffer.empty())
+		{
+			m_Pipeline->SetData(commandList, "Textures", m_BindlessTextureBuffer.data(), static_cast<uint32_t>(sizeof(uint32_t) * m_BindlessTextureBuffer.size()), 0);
+		}
+		if (!m_CBBuffer.empty())
+		{
+			m_ConstantBuffer->Bind(commandList, 0);
+			m_ConstantBuffer->SetData(m_CBBuffer.data(), static_cast<uint32_t>(sizeof(float) * m_CBBuffer.size()), 0);
+		}
 	}
 
 	Ref<Texture2D> Material::GetTexture(const eastl::string_view name)

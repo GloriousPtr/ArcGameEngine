@@ -43,7 +43,6 @@ namespace ArcEngine
 
 		void Invalidate();
 		void Bind(GraphicsCommandList commandList) const;
-		void Unbind(GraphicsCommandList commandList) const;
 
 		[[nodiscard]] Ref<Texture2D> GetTexture(const eastl::string_view name);
 		[[nodiscard]] eastl::vector<MaterialProperty>& GetProperties() const { return m_Pipeline->GetMaterialProperties(); }

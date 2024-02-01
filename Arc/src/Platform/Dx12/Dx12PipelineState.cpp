@@ -248,8 +248,16 @@ namespace ArcEngine
 
 		auto* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 
-		ID3D12DescriptorHeap* descriptorHeap = Dx12Context::GetSrvHeap()->Heap();
-		cmdList->SetDescriptorHeaps(1, &descriptorHeap);
+		if (m_Specification.Type == ShaderType::Pixel || m_Specification.Type == ShaderType::Vertex)
+		{
+			switch (m_Specification.GraphicsPipelineSpecs.Primitive)
+			{
+				case PrimitiveType::Triangle:	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); break;
+				case PrimitiveType::Line:		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST); break;
+				case PrimitiveType::Point:		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST); break;
+				default: ARC_CORE_ASSERT(false, "Unsupported Primitive Type");
+			}
+		}
 
 		if (m_Specification.Type == ShaderType::Vertex || m_Specification.Type == ShaderType::Pixel)
 			cmdList->SetGraphicsRootSignature(m_RootSignature);
@@ -397,7 +405,7 @@ namespace ArcEngine
 
 
 		constexpr uint32_t numSamplers = 1;
-		CD3DX12_STATIC_SAMPLER_DESC samplers[1];
+		CD3DX12_STATIC_SAMPLER_DESC samplers[numSamplers];
 		samplers[0].Init(0, D3D12_FILTER_ANISOTROPIC);
 
 		// Create root signature.

@@ -32,9 +32,6 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		D3D12MA::ALLOCATION_DESC allocationDesc{};
-		allocationDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
-
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;

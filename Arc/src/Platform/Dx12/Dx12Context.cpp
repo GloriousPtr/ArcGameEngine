@@ -371,17 +371,9 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		Dx12Frame& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
 
 		{
 			ARC_PROFILE_SCOPE_NAME("ExecuteCommandLists");
-
-			const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backFrame.RtvBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-			for (D3D12GraphicsCommandList* cmdList : s_CommandListsToSubmit)
-			{
-				cmdList->ResourceBarrier(1, &barrier);
-			}
-
 			ID3D12CommandList** cmdListsInUse = reinterpret_cast<ID3D12CommandList**>(s_CommandListsToSubmit.data());
 			s_CommandQueue->ExecuteCommandLists(static_cast<uint32_t>(s_CommandListsToSubmit.size()), cmdListsInUse);
 		}
@@ -415,7 +407,6 @@ namespace ArcEngine
 
 		{
 			ARC_PROFILE_SCOPE_NAME("CommandListsBookKeeping");
-			ID3D12DescriptorHeap* descriptorHeap = GetSrvHeap()->Heap();
 			for (D3D12GraphicsCommandList* cmdList : s_CommandListsToSubmit)
 			{
 				s_CommandLists.push(cmdList);
@@ -423,7 +414,6 @@ namespace ArcEngine
 				ID3D12CommandAllocator* cmdAllocator = s_CommandListAllocatorMap.at(cmdList);
 				cmdAllocator->Reset();
 				cmdList->Reset(cmdAllocator, nullptr);
-				cmdList->SetDescriptorHeaps(1, &descriptorHeap);
 			}
 			s_CommandListsToSubmit.clear();
 		}
@@ -480,6 +470,8 @@ namespace ArcEngine
 		else
 		{
 			D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
+			const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(s_Frames[Dx12Frame::CurrentBackBuffer].RtvBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+			cmdList->ResourceBarrier(1, &barrier);
 			cmdList->Close();
 			s_CommandListsToSubmit.emplace_back(cmdList);
 		}
@@ -554,8 +546,6 @@ namespace ArcEngine
 		cmdAllocator->Reset();
 		cmdList->Reset(cmdAllocator, nullptr);
 
-		ID3D12DescriptorHeap* descriptorHeap = GetSrvHeap()->Heap();
-		cmdList->SetDescriptorHeaps(1, &descriptorHeap);
 
 		s_CommandLists.push(cmdList);
 	}
@@ -567,7 +557,6 @@ namespace ArcEngine
 		Dx12Fence& fence = s_Frames[Dx12Frame::CurrentBackBuffer].Fence;
 		UINT64& fenceValue = fence.Value;
 		++fenceValue;
-
 		s_CommandQueue->Signal(fence.Fence, fenceValue);
 		fence.Fence->SetEventOnCompletion(fenceValue, fence.Event);
 		WaitForSingleObject(fence.Event, INFINITE);
