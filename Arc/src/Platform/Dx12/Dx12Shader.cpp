@@ -184,8 +184,8 @@ namespace ArcEngine
 
 		const eastl::vector<const wchar_t*> args
 		{
-#ifdef ARC_DEBUG
 			DXC_ARG_DEBUG,
+#ifdef ARC_DEBUG
 			DXC_ARG_SKIP_OPTIMIZATIONS,
 #else
 			DXC_ARG_OPTIMIZATION_LEVEL3,
