@@ -5,6 +5,9 @@
 
 namespace ArcEngine
 {
+	constexpr const char* MaterialPropertiesSlotName = "MaterialProperties";
+	constexpr const char* BindlessTexturesSlotName = "Textures";
+
 	enum class CullModeType : uint8_t { None = 0, Back, Front };
 	enum class PrimitiveType : uint8_t { Triangle, Line, Point };
 	enum class FillModeType : uint8_t { Solid, Wireframe };
@@ -70,13 +73,15 @@ namespace ArcEngine
 		[[nodiscard]] virtual eastl::vector<MaterialProperty>& GetMaterialProperties() = 0;
 		[[nodiscard]] virtual uint32_t GetSlot(const eastl::string_view name) = 0;
 
-		void SetData(GraphicsCommandList commandList, const eastl::string_view name, const void* data, uint32_t size, uint32_t offset = 0)
-		{
-			SetDataImpl(commandList, name, data, size, offset);
-		}
+		virtual void RegisterCB(eastl::string_view name, uint32_t size) = 0;
+		virtual void RegisterSB(eastl::string_view name, uint32_t stride, uint32_t count) = 0;
 
-	private:
-		virtual void SetDataImpl(GraphicsCommandList commandList, const eastl::string_view name, const void* data, uint32_t size, uint32_t offset) = 0;
+		virtual void BindCB(GraphicsCommandList commandList, uint32_t crc) = 0;
+		virtual void BindSB(GraphicsCommandList commandList, uint32_t crc) = 0;
+
+		virtual void SetRSData(GraphicsCommandList commandList, eastl::string_view name, const void* data, uint32_t size, uint32_t offset = 0) = 0;
+		virtual void SetCBData(GraphicsCommandList commandList, uint32_t crc, const void* data, uint32_t size, uint32_t offset = 0) = 0;
+		virtual void SetSBData(GraphicsCommandList commandList, uint32_t crc, const void* data, uint32_t size, uint32_t index) = 0;
 
 	public:
 		static Ref<PipelineState> Create(const Ref<Shader>& shader, const PipelineSpecification& spec);

@@ -21,6 +21,7 @@
 #include <EASTL/array.h>
 #include <EASTL/fixed_vector.h>
 #include <EASTL/vector.h>
+#include <EASTL/vector_map.h>
 #include <EASTL/hash_map.h>
 #include <EASTL/map.h>
 #include <EASTL/unordered_map.h>

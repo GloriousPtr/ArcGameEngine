@@ -6,7 +6,6 @@ namespace ArcEngine
 {
 	class Shader;
 	class PipelineState;
-	class ConstantBuffer;
 	struct RenderGraphData;
 	struct CameraData;
 	class Entity;

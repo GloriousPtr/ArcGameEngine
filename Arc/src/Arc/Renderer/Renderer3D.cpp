@@ -54,12 +54,6 @@ namespace ArcEngine
 	{
 		Renderer3D::Statistics Stats;
 		eastl::vector<MeshData> Meshes;
-		Ref<ConstantBuffer> GlobalDataCB;
-		Ref<ConstantBuffer> GlobalDataCBLighting;
-		Ref<ConstantBuffer> CubemapCB;
-		Ref<StructuredBuffer> DirectionalLightsSB;
-		Ref<StructuredBuffer> PointLightsSB;
-		Ref<StructuredBuffer> SpotLightsSB;
 		Ref<Texture2D> BRDFLutTexture;
 		Ref<PipelineState> RenderPipeline;
 		Ref<PipelineState> CubemapPipeline;
@@ -163,12 +157,12 @@ namespace ArcEngine
 			s_Renderer3DData->CubemapPipeline = pipelineLibrary.Load("assets/shaders/Cubemap.hlsl", spec);
 		}
 
-		s_Renderer3DData->GlobalDataCB = ConstantBuffer::Create(sizeof(GlobalData), 1, s_Renderer3DData->RenderPipeline->GetSlot("GlobalData"));
-		s_Renderer3DData->GlobalDataCBLighting = ConstantBuffer::Create(sizeof(GlobalData), 1, s_Renderer3DData->LightingPipeline->GetSlot("GlobalData"));
-		s_Renderer3DData->CubemapCB = ConstantBuffer::Create(sizeof(SkyboxData), 1, s_Renderer3DData->CubemapPipeline->GetSlot("SkyboxData"));
-		s_Renderer3DData->DirectionalLightsSB = StructuredBuffer::Create(sizeof(DirectionalLightData), MAX_NUM_DIR_LIGHTS, s_Renderer3DData->LightingPipeline->GetSlot("DirectionalLights"));
-		s_Renderer3DData->PointLightsSB = StructuredBuffer::Create(sizeof(PointLightData), MAX_NUM_POINT_LIGHTS, s_Renderer3DData->LightingPipeline->GetSlot("PointLights"));
-		s_Renderer3DData->SpotLightsSB = StructuredBuffer::Create(sizeof(SpotLightData), MAX_NUM_SPOT_LIGHTS, s_Renderer3DData->LightingPipeline->GetSlot("SpotLights"));
+		s_Renderer3DData->RenderPipeline->RegisterCB("GlobalData", sizeof(GlobalData));
+		s_Renderer3DData->LightingPipeline->RegisterCB("GlobalData", sizeof(GlobalData));
+		s_Renderer3DData->CubemapPipeline->RegisterCB("SkyboxData", sizeof(SkyboxData));
+		s_Renderer3DData->LightingPipeline->RegisterSB("DirectionalLights", sizeof(DirectionalLightData), MAX_NUM_DIR_LIGHTS);
+		s_Renderer3DData->LightingPipeline->RegisterSB("PointLights", sizeof(PointLightData), MAX_NUM_POINT_LIGHTS);
+		s_Renderer3DData->LightingPipeline->RegisterSB("SpotLights", sizeof(SpotLightData), MAX_NUM_SPOT_LIGHTS);
 
 #if 0
 		s_BRDFLutTexture = Texture2D::Create("Resources/Renderer/BRDF_LUT.jpg");
@@ -291,14 +285,12 @@ namespace ArcEngine
 		if (s_Renderer3DData->LightingPipeline->Bind(cl))
 		{
 			SetupLightsData(cl);
-			s_Renderer3DData->GlobalDataCBLighting->Bind(cl, 0);
-			s_Renderer3DData->GlobalDataCBLighting->SetData(&(s_Renderer3DData->GlobalData), sizeof(GlobalData), 0);
+			s_Renderer3DData->LightingPipeline->SetCBData(cl, CRC32("GlobalData"), &(s_Renderer3DData->GlobalData), sizeof(GlobalData));
 		}
 
 		if (s_Renderer3DData->RenderPipeline->Bind(cl))
 		{
-			s_Renderer3DData->GlobalDataCB->Bind(cl, 0);
-			s_Renderer3DData->GlobalDataCB->SetData(&(s_Renderer3DData->GlobalData), sizeof(GlobalData), 0);
+			s_Renderer3DData->RenderPipeline->SetCBData(cl, CRC32("GlobalData"), &(s_Renderer3DData->GlobalData), sizeof(GlobalData));
 		}
 		
 		if (cubemap && s_Renderer3DData->CubemapPipeline->Bind(cl))
@@ -309,8 +301,7 @@ namespace ArcEngine
 				.SkyboxViewProjection = cameraData.Projection * glm::mat4(glm::mat3(cameraData.View)),
 				.RotationIntensity = { sky.Rotation, sky.Intensity }
 			};
-			s_Renderer3DData->CubemapCB->Bind(cl, 0);
-			s_Renderer3DData->CubemapCB->SetData(&data, sizeof(SkyboxData), 0);
+			s_Renderer3DData->CubemapPipeline->SetCBData(cl, CRC32("SkyboxData"), &data, sizeof(SkyboxData));
 		}
 		RenderCommand::EndRecordingCommandList(cl);
 	}
@@ -450,12 +441,9 @@ namespace ArcEngine
 			s_Renderer3DData->GlobalData.NumPointLights = numPointLights;
 			s_Renderer3DData->GlobalData.NumSpotLights = numSpotLights;
 
-			s_Renderer3DData->DirectionalLightsSB->Bind(cl);
-			s_Renderer3DData->DirectionalLightsSB->SetData(dlData.data(), sizeof(DirectionalLightData) * numDirectionalLights, 0);
-			s_Renderer3DData->PointLightsSB->Bind(cl);
-			s_Renderer3DData->PointLightsSB->SetData(plData.data(), sizeof(PointLightData) * numPointLights, 0);
-			s_Renderer3DData->SpotLightsSB->Bind(cl);
-			s_Renderer3DData->SpotLightsSB->SetData(slData.data(), sizeof(SpotLightData) * numSpotLights, 0);
+			s_Renderer3DData->LightingPipeline->SetSBData(cl, CRC32("DirectionalLights"), dlData.data(), sizeof(DirectionalLightData) * numDirectionalLights, 0);
+			s_Renderer3DData->LightingPipeline->SetSBData(cl, CRC32("PointLights"), plData.data(), sizeof(PointLightData) * numPointLights, 0);
+			s_Renderer3DData->LightingPipeline->SetSBData(cl, CRC32("SpotLights"), slData.data(), sizeof(SpotLightData) * numSpotLights, 0);
 		}
 #if 0
 		{
@@ -626,10 +614,10 @@ namespace ArcEngine
 		renderGraphData->LightingPassTarget->Bind(cl);
 		if (s_Renderer3DData->LightingPipeline->Bind(cl))
 		{
-			s_Renderer3DData->GlobalDataCBLighting->Bind(cl, 0);
-			s_Renderer3DData->DirectionalLightsSB->Bind(cl);
-			s_Renderer3DData->PointLightsSB->Bind(cl);
-			s_Renderer3DData->SpotLightsSB->Bind(cl);
+			s_Renderer3DData->LightingPipeline->BindCB(cl, CRC32("GlobalData"));
+			s_Renderer3DData->LightingPipeline->BindSB(cl, CRC32("DirectionalLights"));
+			s_Renderer3DData->LightingPipeline->BindSB(cl, CRC32("PointLights"));
+			s_Renderer3DData->LightingPipeline->BindSB(cl, CRC32("SpotLights"));
 
 			renderGraphData->RenderPassTarget->BindColorAttachment(cl, 0, s_Renderer3DData->LightingPipeline->GetSlot("Albedo"));
 			renderGraphData->RenderPassTarget->BindColorAttachment(cl, 1, s_Renderer3DData->LightingPipeline->GetSlot("Normal"));
@@ -723,7 +711,7 @@ namespace ArcEngine
 				const SkyLightComponent& skylightComponent = s_Renderer3DData->Skylight.GetComponent<SkyLightComponent>();
 				if (skylightComponent.Texture)
 				{
-					s_Renderer3DData->CubemapCB->Bind(cl, 0);
+					s_Renderer3DData->CubemapPipeline->BindCB(cl, CRC32("SkyboxData"));
 					skylightComponent.Texture->Bind(cl, s_Renderer3DData->CubemapPipeline->GetSlot("EnvironmentTexture"));
 					DrawCube(cl);
 				}
@@ -737,12 +725,12 @@ namespace ArcEngine
 			{
 				ARC_PROFILE_SCOPE_NAME("Draw Meshes");
 
-				s_Renderer3DData->GlobalDataCB->Bind(cl, 0);
+				s_Renderer3DData->RenderPipeline->BindCB(cl, CRC32("GlobalData"));
 
 				for (const MeshData& meshData : s_Renderer3DData->Meshes)
 				{
 					meshData.SubmeshGeometry.Mat->Bind(cl);
-					s_Renderer3DData->RenderPipeline->SetData(cl, "Transform", glm::value_ptr(meshData.Transform), sizeof(glm::mat4), 0);
+					s_Renderer3DData->RenderPipeline->SetRSData(cl, "Transform", glm::value_ptr(meshData.Transform), sizeof(glm::mat4));
 					RenderCommand::DrawIndexed(cl, meshData.SubmeshGeometry.Geometry);
 					s_Renderer3DData->Stats.DrawCalls++;
 					s_Renderer3DData->Stats.IndexCount += meshData.SubmeshGeometry.Geometry->GetIndexBuffer()->GetCount();

@@ -198,4 +198,15 @@ namespace ArcEngine::Dx12Utils
 			Dx12Context::GetDevice()->CreateUnorderedAccessView(resource, nullptr, &uavDesc, uavHandle->CPU);
 		}
 	}
+
+	static void SetBufferData(const D3D12MA::Allocation* allocation, const void* data, uint32_t size, uint32_t offset = 0)
+	{
+		ID3D12Resource* resource = allocation->GetResource();
+		constexpr D3D12_RANGE readRange{ 0, 0 };
+		void* dst;
+		resource->Map(0, &readRange, &dst);
+		dst = (char*)dst + offset;
+		memcpy(dst, data, size);
+		resource->Unmap(0, nullptr);
+	}
 }

@@ -34,14 +34,12 @@ namespace ArcEngine
 		m_TextureBuffer.clear();
 		m_CBBuffer.clear();
 		m_Textures.clear();
-		m_ConstantBuffer.reset();
 
 		const eastl::vector<MaterialProperty>& materialProperties = m_Pipeline->GetMaterialProperties();
 		uint32_t whiteTexId = AssetManager::WhiteTexture()->GetIndex();
 
 		glm::vec4 one(1.0);
-		size_t cbSize = 0;
-		uint32_t cbSlot = 0;
+		int32_t cbSize = 0;
 		for (const MaterialProperty& property : materialProperties)
 		{
 			if (property.Type == MaterialPropertyType::Texture2D)
@@ -63,7 +61,6 @@ namespace ArcEngine
 			else
 			{
 				cbSize = property.StartOffsetInBytes + property.SizeInBytes;
-				cbSlot = property.Slot;
 
 				const uint32_t buffIndex = property.StartOffsetInBytes / sizeof(float);
 				m_Indices.emplace(property.Name, MaterialData(property.Type, 0, buffIndex, property.SizeInBytes));
@@ -93,7 +90,7 @@ namespace ArcEngine
 			}
 		}
 
-		m_ConstantBuffer = ConstantBuffer::Create(static_cast<uint32_t>(cbSize), 1, cbSlot);
+		m_Pipeline->RegisterCB(MaterialPropertiesSlotName, cbSize);
 	}
 
 	void Material::Bind(GraphicsCommandList commandList) const
@@ -110,12 +107,11 @@ namespace ArcEngine
 
 		if (!m_BindlessTextureBuffer.empty())
 		{
-			m_Pipeline->SetData(commandList, "Textures", m_BindlessTextureBuffer.data(), static_cast<uint32_t>(sizeof(uint32_t) * m_BindlessTextureBuffer.size()), 0);
+			m_Pipeline->SetRSData(commandList, BindlessTexturesSlotName, m_BindlessTextureBuffer.data(), static_cast<uint32_t>(sizeof(uint32_t) * m_BindlessTextureBuffer.size()));
 		}
 		if (!m_CBBuffer.empty())
 		{
-			m_ConstantBuffer->Bind(commandList, 0);
-			m_ConstantBuffer->SetData(m_CBBuffer.data(), static_cast<uint32_t>(sizeof(float) * m_CBBuffer.size()), 0);
+			m_Pipeline->SetCBData(commandList, CRC32(MaterialPropertiesSlotName), m_CBBuffer.data(), static_cast<uint32_t>(sizeof(float) * m_CBBuffer.size()));
 		}
 	}
 

@@ -38,7 +38,6 @@ namespace ArcEngine
 		Ref<Framebuffer> RenderTarget = nullptr;
 		GraphicsCommandList CommandList = nullptr;
 
-		Ref<ConstantBuffer> CameraConstantBuffer;
 		Ref<VertexArray> QuadVertexArray;
 		Ref<VertexBuffer> QuadVertexBuffer;
 		Ref<PipelineState> TexturePipeline;
@@ -126,7 +125,7 @@ namespace ArcEngine
 			s_Renderer2DData->TexturePipeline = pipelineLibrary.Load("assets/shaders/Texture.hlsl", texture2dPippelineSpec);
 		}
 
-		s_Renderer2DData->CameraConstantBuffer = ConstantBuffer::Create(sizeof(CameraData), 1, s_Renderer2DData->TexturePipeline->GetSlot("GlobalData"));
+		s_Renderer2DData->TexturePipeline->RegisterCB("GlobalData", sizeof(CameraData));
 
 		{
 			const PipelineSpecification linePippelineSpec
@@ -165,8 +164,7 @@ namespace ArcEngine
 		s_Renderer2DData->CommandList = RenderCommand::BeginRecordingCommandList();
 		if (s_Renderer2DData->TexturePipeline->Bind(s_Renderer2DData->CommandList))
 		{
-			s_Renderer2DData->CameraConstantBuffer->Bind(s_Renderer2DData->CommandList, 0);
-			s_Renderer2DData->CameraConstantBuffer->SetData(&viewProjection, sizeof(CameraData), 0);
+			s_Renderer2DData->TexturePipeline->SetCBData(s_Renderer2DData->CommandList, CRC32("GlobalData"), &viewProjection, sizeof(CameraData));
 		}
 
 		StartBatch();
@@ -205,9 +203,9 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE_NAME("Draw Quads");
 
 			const uint32_t dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Renderer2DData->QuadVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Renderer2DData->QuadVertexBufferBase));
-			s_Renderer2DData->CameraConstantBuffer->Bind(commandList, 0);
+			s_Renderer2DData->TexturePipeline->BindCB(commandList, CRC32("GlobalData"));
 			s_Renderer2DData->QuadVertexBuffer->SetData(commandList, s_Renderer2DData->QuadVertexBufferBase, dataSize);
-			s_Renderer2DData->TexturePipeline->SetData(commandList, "Textures", s_Renderer2DData->TextureSlots.data(), sizeof(uint32_t) * s_Renderer2DData->TextureSlotIndex);
+			s_Renderer2DData->TexturePipeline->SetRSData(commandList, BindlessTexturesSlotName, s_Renderer2DData->TextureSlots.data(), sizeof(uint32_t) * s_Renderer2DData->TextureSlotIndex);
 			RenderCommand::DrawIndexed(commandList, s_Renderer2DData->QuadVertexArray, s_Renderer2DData->QuadIndexCount);
 			s_Renderer2DData->Stats.DrawCalls++;
 		}

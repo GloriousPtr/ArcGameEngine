@@ -89,8 +89,8 @@ namespace ArcEngine
 
 			bool tex = shaderInputBindDesc.Type == D3D_SIT_TEXTURE;
 			bool cbuffer = shaderInputBindDesc.Type == D3D_SIT_CBUFFER;
-			bool bindlessTextures = cbuffer && bufferName == "Textures";
-			bool materialProperties = bufferName == "MaterialProperties";
+			bool bindlessTextures = cbuffer && bufferName == BindlessTexturesSlotName;
+			bool materialProperties = bufferName == MaterialPropertiesSlotName;
 
 			CD3DX12_ROOT_PARAMETER1 rootParameter;
 			switch (shaderInputBindDesc.Type)
@@ -233,6 +233,26 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
+		for (auto& [slot, cb] : m_ConstantBufferMap)
+		{
+			for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
+			{
+				Dx12Context::GetSrvHeap()->Free(cb.Handle[i]);
+				if (cb.Allocation[i])
+					cb.Allocation[i]->Release();
+			}
+		}
+
+		for (auto& [slot, sb] : m_StructuredBufferMap)
+		{
+			for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
+			{
+				Dx12Context::GetSrvHeap()->Free(sb.Handle[i]);
+				if (sb.Allocation[i])
+					sb.Allocation[i]->Release();
+			}
+		}
+
 		if (m_PipelineState)
 			m_PipelineState->Release();
 		if (m_RootSignature)
@@ -282,13 +302,19 @@ namespace ArcEngine
 		return true;
 	}
 
-	void Dx12PipelineState::SetDataImpl(GraphicsCommandList commandList, const eastl::string_view name, const void* data, uint32_t size, uint32_t offset)
+	void Dx12PipelineState::SetRSData(GraphicsCommandList commandList, eastl::string_view name, const void* data, uint32_t size, uint32_t offset)
 	{
 		ARC_PROFILE_SCOPE();
 
-		const int32_t slot = m_BufferMap.at(name.data());
+		eastl::hash_map<eastl::string, uint32_t>::iterator it = m_BufferMap.find(name.data());
+		if (it == m_BufferMap.end())
+		{
+			ARC_CORE_ERROR("Failed to register {}, Not found!", name.begin());
+			return;
+		}
+
 		auto* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
-		cmdList->SetGraphicsRoot32BitConstants(slot, size / 4, data, offset);
+		cmdList->SetGraphicsRoot32BitConstants(it->second, size / 4, data, offset);
 	}
 
 	void Dx12PipelineState::MakeGraphicsPipeline(const Ref<Shader>& shader)
@@ -647,5 +673,153 @@ namespace ArcEngine
 		}
 
 		m_PipelineState->SetName(shaderName);
+	}
+
+	void Dx12PipelineState::RegisterCB(eastl::string_view name, uint32_t size)
+	{
+		ARC_PROFILE_SCOPE();
+
+		eastl::hash_map<eastl::string, uint32_t>::iterator it = m_BufferMap.find(name.data());
+		if (it == m_BufferMap.end())
+		{
+			ARC_CORE_ERROR("Failed to register {}, Not found!", name.begin());
+			return;
+		}
+
+		const uint32_t id = CRC32_Runtime(name);
+		if (m_ConstantBufferMap.find(id) != m_ConstantBufferMap.end())
+			return;
+
+		ConstantBuffer& cb = m_ConstantBufferMap[id];
+
+		cb.RegisterIndex = it->second;
+		cb.AlignedSize = (size + 255) & ~255;
+
+		const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(cb.AlignedSize);
+
+		for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
+		{
+			Dx12Allocator::CreateBufferResource(D3D12_HEAP_TYPE_UPLOAD, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, &(cb.Allocation[i]));
+
+			D3D12_CONSTANT_BUFFER_VIEW_DESC desc{};
+			desc.BufferLocation = cb.Allocation[i]->GetResource()->GetGPUVirtualAddress();
+			desc.SizeInBytes = cb.AlignedSize;
+			cb.Handle[i] = Dx12Context::GetSrvHeap()->Allocate();
+			Dx12Context::GetDevice()->CreateConstantBufferView(&desc, cb.Handle[i].CPU);
+		}
+	}
+
+	void Dx12PipelineState::RegisterSB(eastl::string_view name, uint32_t stride, uint32_t count)
+	{
+		ARC_PROFILE_SCOPE();
+
+		eastl::hash_map<eastl::string, uint32_t>::iterator it = m_BufferMap.find(name.data());
+		if (it == m_BufferMap.end())
+		{
+			ARC_CORE_ERROR("Failed to register {}, Not found!", name.begin());
+			return;
+		}
+
+		const uint32_t id = CRC32_Runtime(name);
+		if (m_StructuredBufferMap.find(id) != m_StructuredBufferMap.end())
+			return;
+
+		uint32_t slot = it->second;
+		StructuredBuffer& sb = m_StructuredBufferMap[id];
+		
+		sb.RegisterIndex = slot;
+		sb.Stride = stride;
+		sb.Count = count;
+
+		const uint32_t size = stride * count;
+		const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(size);
+
+		for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
+		{
+			Dx12Allocator::CreateBufferResource(D3D12_HEAP_TYPE_UPLOAD, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, &(sb.Allocation[i]));
+
+			D3D12_SHADER_RESOURCE_VIEW_DESC desc{};
+			desc.Format = DXGI_FORMAT_UNKNOWN;
+			desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+			desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			desc.Buffer.StructureByteStride = sb.Stride;
+			desc.Buffer.NumElements = sb.Count;
+			desc.Buffer.FirstElement = 0;
+			desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+			sb.Handle[i] = Dx12Context::GetSrvHeap()->Allocate();
+			Dx12Context::GetDevice()->CreateShaderResourceView(sb.Allocation[i]->GetResource(), &desc, sb.Handle[i].CPU);
+		}
+	}
+
+	void Dx12PipelineState::BindCB(GraphicsCommandList commandList, uint32_t crc)
+	{
+		ARC_PROFILE_SCOPE();
+
+		auto it = m_ConstantBufferMap.find(crc);
+		if (it == m_ConstantBufferMap.end())
+		{
+			ARC_CORE_ERROR("Failed to find CRC: ({}) to bind a Constant Buffer", crc);
+			return;
+		}
+
+		ConstantBuffer& cb = it->second;
+
+		ARC_CORE_ASSERT(cb.Count > index, "Constant buffer index can't be greater than count! Overflow!");
+		const D3D12_GPU_VIRTUAL_ADDRESS gpuVirtualAddress = cb.Allocation[Dx12Context::GetCurrentFrameIndex()]->GetResource()->GetGPUVirtualAddress();
+		reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->SetGraphicsRootConstantBufferView(cb.RegisterIndex, gpuVirtualAddress);
+	}
+
+	void Dx12PipelineState::BindSB(GraphicsCommandList commandList, uint32_t crc)
+	{
+		ARC_PROFILE_SCOPE();
+
+		auto it = m_StructuredBufferMap.find(crc);
+		if (it == m_StructuredBufferMap.end())
+		{
+			ARC_CORE_ERROR("Failed to find CRC: ({}) to bind a Structured Buffer", crc);
+			return;
+		}
+
+		StructuredBuffer& sb = it->second;
+		reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->SetGraphicsRootDescriptorTable(sb.RegisterIndex, sb.Handle[Dx12Context::GetCurrentFrameIndex()].GPU);
+	}
+	
+	void Dx12PipelineState::SetCBData(GraphicsCommandList commandList, uint32_t crc, const void* data, uint32_t size, uint32_t offset)
+	{
+		ARC_PROFILE_SCOPE();
+
+		auto it = m_ConstantBufferMap.find(crc);
+		if (it == m_ConstantBufferMap.end())
+		{
+			ARC_CORE_ERROR("Failed to find CRC: ({}) to set data in a Constant Buffer", crc);
+			return;
+		}
+
+		ConstantBuffer& cb = it->second;
+
+		ARC_CORE_ASSERT(cb.Count > index, "Constant buffer index can't be greater than count! Overflow!");
+		D3D12MA::Allocation* allocation = cb.Allocation[Dx12Context::GetCurrentFrameIndex()];
+		const D3D12_GPU_VIRTUAL_ADDRESS gpuVirtualAddress = allocation->GetResource()->GetGPUVirtualAddress();
+		reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->SetGraphicsRootConstantBufferView(cb.RegisterIndex, gpuVirtualAddress);
+		Dx12Utils::SetBufferData(allocation, data, size == 0 ? cb.AlignedSize : size, offset);
+	}
+	
+	void Dx12PipelineState::SetSBData(GraphicsCommandList commandList, uint32_t crc, const void* data, uint32_t size, uint32_t index)
+	{
+		ARC_PROFILE_SCOPE();
+
+		auto it = m_StructuredBufferMap.find(crc);
+		if (it == m_StructuredBufferMap.end())
+		{
+			ARC_CORE_ERROR("Failed to find CRC: ({}) to set data in a Structured Buffer", crc);
+			return;
+		}
+
+		StructuredBuffer& sb = it->second;
+
+		ARC_CORE_ASSERT(sb.Count > index, "Structured buffer index can't be greater than count! Overflow!");
+		uint32_t currentFrameIndex = Dx12Context::GetCurrentFrameIndex();
+		reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->SetGraphicsRootDescriptorTable(sb.RegisterIndex, sb.Handle[currentFrameIndex].GPU);
+		Dx12Utils::SetBufferData(sb.Allocation[currentFrameIndex], data, size == 0 ? sb.Stride * sb.Count : size, sb.Stride * index);
 	}
 }

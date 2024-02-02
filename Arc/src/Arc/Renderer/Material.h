@@ -5,7 +5,6 @@
 namespace ArcEngine
 {
 	class Texture2D;
-	class ConstantBuffer;
 
 	struct TextureSlot
 	{
@@ -73,6 +72,5 @@ namespace ArcEngine
 		eastl::vector<uint32_t>							m_BindlessTextureBuffer;
 		eastl::vector<float>							m_CBBuffer;
 		eastl::vector<Ref<Texture2D>>					m_Textures;
-		Ref<ConstantBuffer>								m_ConstantBuffer;
 	};
 }
