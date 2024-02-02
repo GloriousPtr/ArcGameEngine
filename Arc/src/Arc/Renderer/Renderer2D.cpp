@@ -162,10 +162,8 @@ namespace ArcEngine
 
 		s_Renderer2DData->RenderTarget = renderTarget;
 		s_Renderer2DData->CommandList = RenderCommand::BeginRecordingCommandList();
-		if (s_Renderer2DData->TexturePipeline->Bind(s_Renderer2DData->CommandList))
-		{
-			s_Renderer2DData->TexturePipeline->SetCBData(s_Renderer2DData->CommandList, CRC32("GlobalData"), &viewProjection, sizeof(CameraData));
-		}
+		s_Renderer2DData->TexturePipeline->Bind(s_Renderer2DData->CommandList);
+		s_Renderer2DData->TexturePipeline->SetCBData(s_Renderer2DData->CommandList, CRC32("GlobalData"), &viewProjection, sizeof(CameraData));
 
 		StartBatch();
 	}
@@ -195,32 +193,37 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		GraphicsCommandList commandList = s_Renderer2DData->CommandList;
-		s_Renderer2DData->RenderTarget->Bind(commandList);
-
-		if(s_Renderer2DData->QuadIndexCount && s_Renderer2DData->RenderTarget && s_Renderer2DData->TexturePipeline->Bind(commandList))
+		if (s_Renderer2DData->RenderTarget)
 		{
-			ARC_PROFILE_SCOPE_NAME("Draw Quads");
+			GraphicsCommandList commandList = s_Renderer2DData->CommandList;
+			s_Renderer2DData->RenderTarget->Bind(commandList);
 
-			const uint32_t dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Renderer2DData->QuadVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Renderer2DData->QuadVertexBufferBase));
-			s_Renderer2DData->TexturePipeline->BindCB(commandList, CRC32("GlobalData"));
-			s_Renderer2DData->QuadVertexBuffer->SetData(commandList, s_Renderer2DData->QuadVertexBufferBase, dataSize);
-			s_Renderer2DData->TexturePipeline->SetRSData(commandList, BindlessTexturesSlotName, s_Renderer2DData->TextureSlots.data(), sizeof(uint32_t) * s_Renderer2DData->TextureSlotIndex);
-			RenderCommand::DrawIndexed(commandList, s_Renderer2DData->QuadVertexArray, s_Renderer2DData->QuadIndexCount);
-			s_Renderer2DData->Stats.DrawCalls++;
+			s_Renderer2DData->TexturePipeline->Bind(commandList);
+			if (s_Renderer2DData->QuadIndexCount)
+			{
+				ARC_PROFILE_SCOPE_NAME("Draw Quads");
+
+				const uint32_t dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Renderer2DData->QuadVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Renderer2DData->QuadVertexBufferBase));
+				s_Renderer2DData->TexturePipeline->BindCB(commandList, CRC32("GlobalData"));
+				s_Renderer2DData->QuadVertexBuffer->SetData(commandList, s_Renderer2DData->QuadVertexBufferBase, dataSize);
+				s_Renderer2DData->TexturePipeline->SetRSData(commandList, BindlessTexturesSlotName, s_Renderer2DData->TextureSlots.data(), sizeof(uint32_t) * s_Renderer2DData->TextureSlotIndex);
+				RenderCommand::DrawIndexed(commandList, s_Renderer2DData->QuadVertexArray, s_Renderer2DData->QuadIndexCount);
+				s_Renderer2DData->Stats.DrawCalls++;
+			}
+
+			s_Renderer2DData->LinePipeline->Bind(commandList);
+			if (s_Renderer2DData->LineVertexCount)
+			{
+				ARC_PROFILE_SCOPE_NAME("Draw Lines");
+
+				const uint32_t dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Renderer2DData->LineVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Renderer2DData->LineVertexBufferBase));
+				s_Renderer2DData->LineVertexBuffer->SetData(commandList, s_Renderer2DData->LineVertexBufferBase, dataSize);
+				RenderCommand::DrawLines(commandList, s_Renderer2DData->LineVertexBuffer, s_Renderer2DData->LineVertexCount);
+				s_Renderer2DData->Stats.DrawCalls++;
+			}
+
+			s_Renderer2DData->RenderTarget->Unbind(commandList);
 		}
-		
-		if (s_Renderer2DData->LineVertexCount && s_Renderer2DData->RenderTarget && s_Renderer2DData->LinePipeline->Bind(commandList))
-		{
-			ARC_PROFILE_SCOPE_NAME("Draw Lines");
-
-			const uint32_t dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Renderer2DData->LineVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Renderer2DData->LineVertexBufferBase));
-			s_Renderer2DData->LineVertexBuffer->SetData(commandList, s_Renderer2DData->LineVertexBufferBase, dataSize);
-			RenderCommand::DrawLines(commandList, s_Renderer2DData->LineVertexBuffer, s_Renderer2DData->LineVertexCount);
-			s_Renderer2DData->Stats.DrawCalls++;
-		}
-
-		s_Renderer2DData->RenderTarget->Unbind(commandList);
 	}
 
 	void Renderer2D::NextBatch()

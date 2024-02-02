@@ -259,12 +259,9 @@ namespace ArcEngine
 			m_RootSignature->Release();
 	}
 
-	bool Dx12PipelineState::Bind(GraphicsCommandList commandList) const
+	void Dx12PipelineState::Bind(GraphicsCommandList commandList) const
 	{
 		ARC_PROFILE_SCOPE();
-
-		if (!m_RootSignature || !m_PipelineState)
-			return false;
 
 		auto* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 
@@ -285,21 +282,15 @@ namespace ArcEngine
 			cmdList->SetComputeRootSignature(m_RootSignature);
 
 		cmdList->SetPipelineState(m_PipelineState);
-
-		return true;
 	}
 
-	bool Dx12PipelineState::Unbind(GraphicsCommandList commandList) const
+	void Dx12PipelineState::Unbind(GraphicsCommandList commandList) const
 	{
 		ARC_PROFILE_SCOPE();
-
-		if (!m_RootSignature || !m_PipelineState)
-			return false;
 
 		auto* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 		cmdList->SetGraphicsRootSignature(nullptr);
 		cmdList->SetPipelineState(nullptr);
-		return true;
 	}
 
 	void Dx12PipelineState::SetRSData(GraphicsCommandList commandList, eastl::string_view name, const void* data, uint32_t size, uint32_t offset)

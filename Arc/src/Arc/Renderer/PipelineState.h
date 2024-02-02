@@ -67,8 +67,8 @@ namespace ArcEngine
 	public:
 		virtual ~PipelineState() = default;
 
-		[[nodiscard]] virtual bool Bind(GraphicsCommandList commandList) const = 0;
-		virtual bool Unbind(GraphicsCommandList commandList) const = 0;
+		virtual void Bind(GraphicsCommandList commandList) const = 0;
+		virtual void Unbind(GraphicsCommandList commandList) const = 0;
 
 		[[nodiscard]] virtual eastl::vector<MaterialProperty>& GetMaterialProperties() = 0;
 		[[nodiscard]] virtual uint32_t GetSlot(const eastl::string_view name) = 0;

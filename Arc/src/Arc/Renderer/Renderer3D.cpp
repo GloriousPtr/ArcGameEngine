@@ -282,19 +282,17 @@ namespace ArcEngine
 		};
 
 		GraphicsCommandList cl = RenderCommand::BeginRecordingCommandList();
-		if (s_Renderer3DData->LightingPipeline->Bind(cl))
-		{
-			SetupLightsData(cl);
-			s_Renderer3DData->LightingPipeline->SetCBData(cl, CRC32("GlobalData"), &(s_Renderer3DData->GlobalData), sizeof(GlobalData));
-		}
 
-		if (s_Renderer3DData->RenderPipeline->Bind(cl))
-		{
-			s_Renderer3DData->RenderPipeline->SetCBData(cl, CRC32("GlobalData"), &(s_Renderer3DData->GlobalData), sizeof(GlobalData));
-		}
+		s_Renderer3DData->LightingPipeline->Bind(cl);
+		SetupLightsData(cl);
+		s_Renderer3DData->LightingPipeline->SetCBData(cl, CRC32("GlobalData"), &(s_Renderer3DData->GlobalData), sizeof(GlobalData));
+
+		s_Renderer3DData->RenderPipeline->Bind(cl);
+		s_Renderer3DData->RenderPipeline->SetCBData(cl, CRC32("GlobalData"), &(s_Renderer3DData->GlobalData), sizeof(GlobalData));
 		
-		if (cubemap && s_Renderer3DData->CubemapPipeline->Bind(cl))
+		if (cubemap)
 		{
+			s_Renderer3DData->CubemapPipeline->Bind(cl);
 			SkyLightComponent& sky = cubemap.GetComponent<SkyLightComponent>();
 			const SkyboxData data
 			{
@@ -612,20 +610,17 @@ namespace ArcEngine
 		GraphicsCommandList cl = RenderCommand::BeginRecordingCommandList();
 		renderGraphData->LightingPassTarget->Clear(cl);
 		renderGraphData->LightingPassTarget->Bind(cl);
-		if (s_Renderer3DData->LightingPipeline->Bind(cl))
-		{
-			s_Renderer3DData->LightingPipeline->BindCB(cl, CRC32("GlobalData"));
-			s_Renderer3DData->LightingPipeline->BindSB(cl, CRC32("DirectionalLights"));
-			s_Renderer3DData->LightingPipeline->BindSB(cl, CRC32("PointLights"));
-			s_Renderer3DData->LightingPipeline->BindSB(cl, CRC32("SpotLights"));
-
-			renderGraphData->RenderPassTarget->BindColorAttachment(cl, 0, s_Renderer3DData->LightingPipeline->GetSlot("Albedo"));
-			renderGraphData->RenderPassTarget->BindColorAttachment(cl, 1, s_Renderer3DData->LightingPipeline->GetSlot("Normal"));
-			renderGraphData->RenderPassTarget->BindColorAttachment(cl, 2, s_Renderer3DData->LightingPipeline->GetSlot("MetalicRoughnessAO"));
-			renderGraphData->RenderPassTarget->BindColorAttachment(cl, 3, s_Renderer3DData->LightingPipeline->GetSlot("Emission"));
-			renderGraphData->RenderPassTarget->BindDepthAttachment(cl, s_Renderer3DData->LightingPipeline->GetSlot("Depth"));
-			DrawQuad(cl);
-		}
+		s_Renderer3DData->LightingPipeline->Bind(cl);
+		s_Renderer3DData->LightingPipeline->BindCB(cl, CRC32("GlobalData"));
+		s_Renderer3DData->LightingPipeline->BindSB(cl, CRC32("DirectionalLights"));
+		s_Renderer3DData->LightingPipeline->BindSB(cl, CRC32("PointLights"));
+		s_Renderer3DData->LightingPipeline->BindSB(cl, CRC32("SpotLights"));
+		renderGraphData->RenderPassTarget->BindColorAttachment(cl, 0, s_Renderer3DData->LightingPipeline->GetSlot("Albedo"));
+		renderGraphData->RenderPassTarget->BindColorAttachment(cl, 1, s_Renderer3DData->LightingPipeline->GetSlot("Normal"));
+		renderGraphData->RenderPassTarget->BindColorAttachment(cl, 2, s_Renderer3DData->LightingPipeline->GetSlot("MetalicRoughnessAO"));
+		renderGraphData->RenderPassTarget->BindColorAttachment(cl, 3, s_Renderer3DData->LightingPipeline->GetSlot("Emission"));
+		renderGraphData->RenderPassTarget->BindDepthAttachment(cl, s_Renderer3DData->LightingPipeline->GetSlot("Depth"));
+		DrawQuad(cl);
 		renderGraphData->LightingPassTarget->Unbind(cl);
 		RenderCommand::EndRecordingCommandList(cl);
 
@@ -705,38 +700,32 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE_NAME("Draw Skylight");
 
-			[[likely]]
-			if (s_Renderer3DData->CubemapPipeline->Bind(cl))
+			s_Renderer3DData->CubemapPipeline->Bind(cl);
+			const SkyLightComponent& skylightComponent = s_Renderer3DData->Skylight.GetComponent<SkyLightComponent>();
+			if (skylightComponent.Texture)
 			{
-				const SkyLightComponent& skylightComponent = s_Renderer3DData->Skylight.GetComponent<SkyLightComponent>();
-				if (skylightComponent.Texture)
-				{
-					s_Renderer3DData->CubemapPipeline->BindCB(cl, CRC32("SkyboxData"));
-					skylightComponent.Texture->Bind(cl, s_Renderer3DData->CubemapPipeline->GetSlot("EnvironmentTexture"));
-					DrawCube(cl);
-				}
+				s_Renderer3DData->CubemapPipeline->BindCB(cl, CRC32("SkyboxData"));
+				skylightComponent.Texture->Bind(cl, s_Renderer3DData->CubemapPipeline->GetSlot("EnvironmentTexture"));
+				DrawCube(cl);
 			}
 		}
 
 		if (!s_Renderer3DData->Meshes.empty())
 		{
-			[[likely]]
-			if (s_Renderer3DData->RenderPipeline->Bind(cl))
+			ARC_PROFILE_SCOPE_NAME("Draw Meshes");
+
+			s_Renderer3DData->RenderPipeline->Bind(cl);
+			s_Renderer3DData->RenderPipeline->BindCB(cl, CRC32("GlobalData"));
+			for (const MeshData& meshData : s_Renderer3DData->Meshes)
 			{
-				ARC_PROFILE_SCOPE_NAME("Draw Meshes");
-
-				s_Renderer3DData->RenderPipeline->BindCB(cl, CRC32("GlobalData"));
-
-				for (const MeshData& meshData : s_Renderer3DData->Meshes)
-				{
-					meshData.SubmeshGeometry.Mat->Bind(cl);
-					s_Renderer3DData->RenderPipeline->SetRSData(cl, "Transform", glm::value_ptr(meshData.Transform), sizeof(glm::mat4));
-					RenderCommand::DrawIndexed(cl, meshData.SubmeshGeometry.Geometry);
-					s_Renderer3DData->Stats.DrawCalls++;
-					s_Renderer3DData->Stats.IndexCount += meshData.SubmeshGeometry.Geometry->GetIndexBuffer()->GetCount();
-				}
+				meshData.SubmeshGeometry.Mat->Bind(cl);
+				s_Renderer3DData->RenderPipeline->SetRSData(cl, "Transform", glm::value_ptr(meshData.Transform), sizeof(glm::mat4));
+				RenderCommand::DrawIndexed(cl, meshData.SubmeshGeometry.Geometry);
+				s_Renderer3DData->Stats.DrawCalls++;
+				s_Renderer3DData->Stats.IndexCount += meshData.SubmeshGeometry.Geometry->GetIndexBuffer()->GetCount();
 			}
 		}
+
 		renderTarget->Unbind(cl);
 		RenderCommand::EndRecordingCommandList(cl);
 
