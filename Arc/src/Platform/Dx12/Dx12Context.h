@@ -29,6 +29,7 @@ namespace ArcEngine
 		void Init() override;
 		void SwapBuffers() override;
 		void SetSyncInterval(uint32_t value) override;
+		void GetStats(Stats& stats) override;
 
 		static D3D12Device* GetDevice();
 		static GraphicsCommandList BeginRecordingCommandList();

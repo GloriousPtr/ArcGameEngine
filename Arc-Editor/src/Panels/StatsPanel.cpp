@@ -3,6 +3,7 @@
 #include <Icons.h>
 
 #include "../Utils/UI.h"
+#include <Arc/Renderer/GraphicsContext.h>
 
 namespace ArcEngine
 {
@@ -63,10 +64,24 @@ namespace ArcEngine
 				ImGui::Text("Indices: %d", stats.IndexCount);
 			}
 
+			Window& window = Application::Get().GetWindow();
+
+			ImGui::Separator();
+			{
+				GraphicsContext::Stats gpuStats;
+				window.GetGraphicsContext()->GetStats(gpuStats);
+
+				ImGui::TextUnformatted("GPU");
+				ImGui::Text("Heaps: %u (%.2f MB)", gpuStats.BlockCount, static_cast<double>(gpuStats.BlockBytes) / (1024.0 * 1024.0));
+				ImGui::Text("Allocations: %u (%.2f MB)", gpuStats.AllocationCount, static_cast<double>(gpuStats.AllocationBytes) / (1024.0 * 1024.0));
+				ImGui::Text("Usage : %.2f/%.2f MB", static_cast<double>(gpuStats.UsageBytes) / (1024.0 * 1024.0), static_cast<double>(gpuStats.BudgetBytes) / (1024.0 * 1024.0));
+			}
+
 			UI::BeginProperties();
-			bool vSync = Application::Get().GetWindow().IsVSync();
+
+			bool vSync = window.IsVSync();
 			if (UI::Property("VSync Enabled", vSync))
-				Application::Get().GetWindow().SetVSync(vSync);
+				window.SetVSync(vSync);
 			UI::EndProperties();
 
 			ImGui::PlotLines("##FPS", m_FpsValues, static_cast<int>(size));

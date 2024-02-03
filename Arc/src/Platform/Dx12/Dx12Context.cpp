@@ -427,6 +427,18 @@ namespace ArcEngine
 							m_PresentFlags & ~DXGI_PRESENT_ALLOW_TEARING;
 	}
 
+	void Dx12Context::GetStats(Stats& stats)
+	{
+		D3D12MA::Budget budget;
+		Dx12Allocator::GetStats(budget);
+		stats.BlockCount = budget.Stats.BlockCount;
+		stats.AllocationCount = budget.Stats.AllocationCount;
+		stats.BlockBytes = budget.Stats.BlockBytes;
+		stats.AllocationBytes = budget.Stats.AllocationBytes;
+		stats.UsageBytes = budget.UsageBytes;
+		stats.BudgetBytes = budget.BudgetBytes;
+	}
+
 	ID3D12Device11* Dx12Context::GetDevice()
 	{
 		return s_Device;

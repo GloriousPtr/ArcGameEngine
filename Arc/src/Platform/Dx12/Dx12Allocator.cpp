@@ -58,4 +58,9 @@ namespace ArcEngine
 
 		s_Allocator->CreateResource(&defaultAllocation, resourceDesc, initialState, clearValue, outAllocation, IID_NULL, nullptr);
 	}
+
+	void Dx12Allocator::GetStats(D3D12MA::Budget& budget)
+	{
+		s_Allocator->GetBudget(&budget, nullptr);
+	}
 }
