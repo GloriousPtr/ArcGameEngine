@@ -74,7 +74,7 @@ namespace ArcEngine
 	public:
 		[[nodiscard]] static Ref<TextureCube> Create(const eastl::string& path, TextureFormat format);
 
-		virtual void BindIrradianceMap(uint32_t slot) const = 0;
+		virtual void BindIrradianceMap(GraphicsCommandList commandList, uint32_t slot) const = 0;
 		virtual void BindRadianceMap(uint32_t slot) const = 0;
 
 		[[nodiscard]] virtual uint64_t GetHRDRendererID() const = 0;

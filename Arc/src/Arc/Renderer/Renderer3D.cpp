@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include "RenderGraphData.h"
 #include "Framebuffer.h"
+#include "Arc/Core/AssetManager.h"
 #include "Arc/Renderer/VertexArray.h"
 #include "Arc/Renderer/Material.h"
 #include "Arc/Renderer/Shader.h"
@@ -159,6 +160,7 @@ namespace ArcEngine
 
 		s_Renderer3DData->RenderPipeline->RegisterCB("GlobalData", sizeof(GlobalData));
 		s_Renderer3DData->LightingPipeline->RegisterCB("GlobalData", sizeof(GlobalData));
+		s_Renderer3DData->LightingPipeline->RegisterCB("Properties", sizeof(glm::vec2));
 		s_Renderer3DData->CubemapPipeline->RegisterCB("SkyboxData", sizeof(SkyboxData));
 		s_Renderer3DData->LightingPipeline->RegisterSB("DirectionalLights", sizeof(DirectionalLightData), MAX_NUM_DIR_LIGHTS);
 		s_Renderer3DData->LightingPipeline->RegisterSB("PointLights", sizeof(PointLightData), MAX_NUM_POINT_LIGHTS);
@@ -607,11 +609,24 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
+		glm::vec2 skyIntensityRotation(0.0f);
+		Ref<TextureCube> skyTexture = nullptr;
+		if (s_Renderer3DData->Skylight)
+		{
+			const SkyLightComponent& skylightComponent = s_Renderer3DData->Skylight.GetComponent<SkyLightComponent>();
+			if (skylightComponent.Texture)
+			{
+				skyTexture = skylightComponent.Texture;
+				skyIntensityRotation = { skylightComponent.Intensity, skylightComponent.Rotation };
+			}
+		}
+
 		GraphicsCommandList cl = RenderCommand::BeginRecordingCommandList();
 		renderGraphData->LightingPassTarget->Clear(cl);
 		renderGraphData->LightingPassTarget->Bind(cl);
 		s_Renderer3DData->LightingPipeline->Bind(cl);
 		s_Renderer3DData->LightingPipeline->BindCB(cl, CRC32("GlobalData"));
+		s_Renderer3DData->LightingPipeline->SetCBData(cl, CRC32("Properties"), &skyIntensityRotation, sizeof(glm::vec2));
 		s_Renderer3DData->LightingPipeline->BindSB(cl, CRC32("DirectionalLights"));
 		s_Renderer3DData->LightingPipeline->BindSB(cl, CRC32("PointLights"));
 		s_Renderer3DData->LightingPipeline->BindSB(cl, CRC32("SpotLights"));
@@ -620,6 +635,14 @@ namespace ArcEngine
 		renderGraphData->RenderPassTarget->BindColorAttachment(cl, 2, s_Renderer3DData->LightingPipeline->GetSlot("MetalicRoughnessAO"));
 		renderGraphData->RenderPassTarget->BindColorAttachment(cl, 3, s_Renderer3DData->LightingPipeline->GetSlot("Emission"));
 		renderGraphData->RenderPassTarget->BindDepthAttachment(cl, s_Renderer3DData->LightingPipeline->GetSlot("Depth"));
+		if (skyTexture)
+		{
+			skyTexture->BindIrradianceMap(cl, s_Renderer3DData->LightingPipeline->GetSlot("IrradianceMap"));
+		}
+		else
+		{
+			AssetManager::BlackTexture()->Bind(cl, s_Renderer3DData->LightingPipeline->GetSlot("IrradianceMap"));
+		}
 		DrawQuad(cl);
 		renderGraphData->LightingPassTarget->Unbind(cl);
 		RenderCommand::EndRecordingCommandList(cl);

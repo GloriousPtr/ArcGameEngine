@@ -23,6 +23,7 @@ cbuffer GlobalData : register(b1, space0)
 }
 
 SamplerState Sampler : register(s0);
+SamplerState LinearClampSampler : register(s1);
 
 struct DirectionalLight
 {

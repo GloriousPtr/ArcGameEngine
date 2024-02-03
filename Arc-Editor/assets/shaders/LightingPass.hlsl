@@ -25,8 +25,60 @@ Texture2D Normal : register(t1, space1);
 Texture2D MetalicRoughnessAO : register(t2, space1);
 Texture2D Emission : register(t3, space1);
 Texture2D<float> Depth : register(t4, space1);
+TextureCube<float4> IrradianceMap : register(t5, space1);
+
+cbuffer Properties : register(b0, space1)
+{
+	float IrradianceIntensity;
+	float EnvironmentRotation;
+}
 
 RWTexture2DArray<float4> OutputTexture : register(u0);
+
+struct Params
+{
+	float3 Albedo;
+	float Roughness;
+	float Metalness;
+
+	float3 WorldPos;
+	float3 Normal;
+	float3 View;
+	float NdotV;
+};
+
+float3 RotateVectorAboutY(float angle, float3 vec)
+{
+	angle = radians(angle);
+	float3x3 rotationMatrix =
+	{
+		float3(cos(angle), 0.0, sin(angle)),
+		float3(0.0, 1.0, 0.0),
+		float3(-sin(angle), 0.0, cos(angle))
+	};
+	return mul(rotationMatrix, vec);
+}
+
+float3 IBL(float3 F0, Params p)
+{
+	float NoV = clamp(p.NdotV, 0.0, 1.0);
+	float3 F = FresnelSchlickRoughness(NoV, F0, p.Roughness);
+	float3 kd = (1.0 - F) * (1.0 - p.Metalness);
+
+	float3 irradiance = IrradianceMap.Sample(Sampler, RotateVectorAboutY(EnvironmentRotation, p.Normal)).rgb;
+	float3 diffuseIBL = p.Albedo * irradiance;
+
+	/*
+	int envRadianceTexLevels = textureQueryLevels(u_RadianceMap);
+	vec3 Lr = 2.0 * m_Params.NdotV * m_Params.Normal - m_Params.View;
+	vec3 specularIrradiance = textureLod(u_RadianceMap, RotateVectorAboutY(u_EnvironmentRotation, Lr), m_Params.Roughness * envRadianceTexLevels).rgb;
+*/
+	//vec2 specularBRDF = texture(u_BRDFLutMap, vec2(NoV, m_Params.Roughness)).rg;
+	//vec3 specularIBL = specularIrradiance * (F); //* specularBRDF.x + specularBRDF.y);
+	
+	return (kd * diffuseIBL /*+ specularIBL*/) * IrradianceIntensity;
+}
+
 
 float4 PS_Main(VertexOut input) : SV_TARGET
 {
@@ -45,8 +97,19 @@ float4 PS_Main(VertexOut input) : SV_TARGET
 
 	float3 view = normalize(CameraPosition.xyz - worldPosition);
 	float NdotV = max(dot(normal, view), 0.0);
+	
+	
+	Params params;
+	params.Albedo = albedo.rgb;
+	params.Roughness = Roughness;
+	params.Metalness = Metalness;
+	params.WorldPos = worldPosition;
+	params.Normal = normal;
+	params.View = view;
+	params.NdotV = NdotV;
+	
 
-	float3 F0 = float3(0.4, 0.4, 0.4);
+	float3 F0 = float3(0.04, 0.04, 0.04);
 	F0 = lerp(F0, albedo.rgb, Metalness);
 
 	float a2 = Roughness * Roughness;
@@ -137,7 +200,7 @@ float4 PS_Main(VertexOut input) : SV_TARGET
 		Lo += (kd * (albedo.rgb / PI) + specular) * radiance * NdotL;
 	}
 
-	float3 ambient = albedo.rgb * 0.5f;
+	float3 ambient = IBL(F0, params) * mra.b;
 	float3 color = Lo + ambient + (emission.rgb);
 
 	return float4(color, 1.0);

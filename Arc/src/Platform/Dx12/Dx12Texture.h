@@ -60,7 +60,7 @@ namespace ArcEngine
 
 		void Bind(GraphicsCommandList commandList, uint32_t slot = 0) const override;
 
-		void BindIrradianceMap([[maybe_unused]] uint32_t slot) const override {}
+		void BindIrradianceMap(GraphicsCommandList commandList, uint32_t slot) const override;
 		void BindRadianceMap([[maybe_unused]] uint32_t slot) const override {}
 		[[nodiscard]] uint64_t GetHRDRendererID() const override { return m_HDRHandle.GPU.ptr; }
 
@@ -72,11 +72,15 @@ namespace ArcEngine
 		DescriptorHandle					m_HDRHandle{};
 		DescriptorHandle					m_SrvHandle{};
 		DescriptorHandle					m_UavHandle{};
+		DescriptorHandle					m_IrrSrvHandle{};
+		DescriptorHandle					m_IrrUavHandle{};
 		D3D12_GPU_DESCRIPTOR_HANDLE			m_HeapStart{};
 
 		D3D12MA::Allocation*				m_HDRImageAllocation = nullptr;
 		D3D12MA::Allocation*				m_HDRUploadImageAllocation = nullptr;
 		D3D12MA::Allocation*				m_ImageAllocation = nullptr;
 		D3D12MA::Allocation*				m_UploadImageAllocation = nullptr;
+		D3D12MA::Allocation*				m_IrrImageAllocation = nullptr;
+		D3D12MA::Allocation*				m_IrrUploadImageAllocation = nullptr;
 	};
 }

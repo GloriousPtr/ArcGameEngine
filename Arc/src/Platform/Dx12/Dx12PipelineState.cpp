@@ -421,9 +421,10 @@ namespace ArcEngine
 		}
 
 
-		constexpr uint32_t numSamplers = 1;
+		constexpr uint32_t numSamplers = 2;
 		CD3DX12_STATIC_SAMPLER_DESC samplers[numSamplers];
 		samplers[0].Init(0, D3D12_FILTER_ANISOTROPIC);
+		samplers[1].Init(1, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_WRAP);
 
 		// Create root signature.
 		D3D12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc
@@ -613,9 +614,10 @@ namespace ArcEngine
 			AppendMaterials(reflect, rootParams, rootDescriptors, &rootDescriptorsEnd, m_MaterialProperties, m_BufferMap);
 		}
 
-		constexpr uint32_t numSamplers = 1;
-		CD3DX12_STATIC_SAMPLER_DESC samplers[1];
+		constexpr uint32_t numSamplers = 2;
+		CD3DX12_STATIC_SAMPLER_DESC samplers[numSamplers];
 		samplers[0].Init(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+		samplers[1].Init(1, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
 		// Create root signature.
 		D3D12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc
