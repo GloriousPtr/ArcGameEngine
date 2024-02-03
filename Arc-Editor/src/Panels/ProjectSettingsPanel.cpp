@@ -3,7 +3,6 @@
 #include <Icons.h>
 
 #include "../Utils/UI.h"
-#include <imgui/misc/cpp/imgui_stdlib.h>
 
 namespace ArcEngine
 {
@@ -83,41 +82,36 @@ namespace ArcEngine
 			if (ImGui::TreeNode("Collision Matrix"))
 			{
 				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 50.0f);
-				const int colCount = static_cast<int>(layerCollisionMask.size()) + 1;
-				if (ImGui::BeginTable("table1", colCount, ImGuiTableFlags_SizingFixedFit))
+				const int colCount = static_cast<int>(layerCollisionMask.size());
+				if (ImGui::BeginTable("table1", colCount + 1, ImGuiTableFlags_SizingFixedFit))
 				{
+					ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
+					for (int c = colCount - 1; c >= 0; --c)
+					{
+						EntityLayer colLayer = BIT(c);
+						const char* columnLayerName = layerCollisionMask.at(colLayer).Name.c_str();
+						ImGui::TableSetupColumn(columnLayerName, ImGuiTableColumnFlags_AngledHeader | ImGuiTableColumnFlags_WidthFixed);
+					}
+					ImGui::TableAngledHeadersRow();
 					int i = 0;
 					for (int row = 0; row < colCount; ++row)
 					{
 						ImGui::TableNextRow();
-						for (int column = 0; column < colCount; ++column)
+						for (int column = 0; column < colCount + 1; ++column)
 						{
 							ImGui::TableSetColumnIndex(column);
 
-							if (row == 0 && column == 0)
-								continue;
-
-							const int r = row - 1;
-							if (column == 0 && row != 0)
+							if (column == 0)
 							{
-								EntityLayer rowLayer = BIT(r);
+								EntityLayer rowLayer = BIT(row);
 								const char* rowLayerName = layerCollisionMask.at(rowLayer).Name.c_str();
 
 								ImGui::TextUnformatted(rowLayerName);
 								continue;
 							}
 
-							const int c = colCount - 1 - column;
-							if (row == 0 && column != 0)
-							{
-								EntityLayer colLayer = BIT(c);
-								const char* columnLayerName = layerCollisionMask.at(colLayer).Name.c_str();
-
-								auto* drawList = ImGui::GetWindowDrawList();
-								UI::AddTextVertical(drawList, columnLayerName, ImGui::GetCursorScreenPos(), ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }));
-								continue;
-							}
-
+							const int r = row;
+							const int c = colCount - column;
 							if (c < r)
 								continue;
 
@@ -132,7 +126,7 @@ namespace ArcEngine
 							ImGui::PushID(i);
 							++i;
 
-							const bool disabled = c == 0 && r == 0;
+							const bool disabled = rowLayer == 1 && colLayer == 1;
 							if (disabled)
 							{
 								if (on)
