@@ -755,7 +755,6 @@ namespace ArcEngine
 
 		ConstantBuffer& cb = it->second;
 
-		ARC_CORE_ASSERT(cb.Count > index, "Constant buffer index can't be greater than count! Overflow!");
 		const D3D12_GPU_VIRTUAL_ADDRESS gpuVirtualAddress = cb.Allocation[Dx12Context::GetCurrentFrameIndex()]->GetResource()->GetGPUVirtualAddress();
 		reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->SetGraphicsRootConstantBufferView(cb.RegisterIndex, gpuVirtualAddress);
 	}
@@ -788,7 +787,6 @@ namespace ArcEngine
 
 		ConstantBuffer& cb = it->second;
 
-		ARC_CORE_ASSERT(cb.Count > index, "Constant buffer index can't be greater than count! Overflow!");
 		D3D12MA::Allocation* allocation = cb.Allocation[Dx12Context::GetCurrentFrameIndex()];
 		const D3D12_GPU_VIRTUAL_ADDRESS gpuVirtualAddress = allocation->GetResource()->GetGPUVirtualAddress();
 		reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->SetGraphicsRootConstantBufferView(cb.RegisterIndex, gpuVirtualAddress);
