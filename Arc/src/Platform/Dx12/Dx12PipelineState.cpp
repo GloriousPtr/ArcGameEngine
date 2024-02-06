@@ -293,14 +293,16 @@ namespace ArcEngine
 		cmdList->SetPipelineState(nullptr);
 	}
 
-	void Dx12PipelineState::SetRSData(GraphicsCommandList commandList, eastl::string_view name, const void* data, uint32_t size, uint32_t offset)
+	void Dx12PipelineState::SetRSData(GraphicsCommandList commandList, uint32_t crc, const void* data, uint32_t size, uint32_t offset)
 	{
 		ARC_PROFILE_SCOPE();
+		OPTICK_GPU_CONTEXT(reinterpret_cast<ID3D12CommandList*>(commandList));
+		OPTICK_GPU_EVENT("Dx12PipelineState::SetDataImpl");
 
-		eastl::hash_map<eastl::string, uint32_t>::iterator it = m_BufferMap.find(name.data());
-		if (it == m_BufferMap.end())
+		eastl::hash_map<uint32_t, uint32_t>::iterator it = m_CrcBufferMap.find(crc);
+		if (it == m_CrcBufferMap.end())
 		{
-			ARC_CORE_ERROR("Failed to register {}, Not found!", name.begin());
+			ARC_CORE_ERROR("Failed to register root signature data {}, Not found!", crc);
 			return;
 		}
 
@@ -409,6 +411,11 @@ namespace ArcEngine
 			}
 
 			AppendMaterials(reflect, rootParams, rootDescriptors, &rootDescriptorsEnd, m_MaterialProperties, m_BufferMap);
+		}
+
+		for (const auto& [name, slot] : m_BufferMap)
+		{
+			m_CrcBufferMap.emplace(CRC32_Runtime(name), slot);
 		}
 
 		eastl::vector<D3D12_INPUT_ELEMENT_DESC> psoInputLayout;
@@ -614,6 +621,11 @@ namespace ArcEngine
 			AppendMaterials(reflect, rootParams, rootDescriptors, &rootDescriptorsEnd, m_MaterialProperties, m_BufferMap);
 		}
 
+		for (const auto& [name, slot] : m_BufferMap)
+		{
+			m_CrcBufferMap.emplace(CRC32_Runtime(name), slot);
+		}
+
 		constexpr uint32_t numSamplers = 2;
 		CD3DX12_STATIC_SAMPLER_DESC samplers[numSamplers];
 		samplers[0].Init(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
@@ -668,22 +680,21 @@ namespace ArcEngine
 		m_PipelineState->SetName(shaderName);
 	}
 
-	void Dx12PipelineState::RegisterCB(eastl::string_view name, uint32_t size)
+	void Dx12PipelineState::RegisterCB(uint32_t crc, uint32_t size)
 	{
 		ARC_PROFILE_SCOPE();
 
-		eastl::hash_map<eastl::string, uint32_t>::iterator it = m_BufferMap.find(name.data());
-		if (it == m_BufferMap.end())
+		eastl::hash_map<uint32_t, uint32_t>::iterator it = m_CrcBufferMap.find(crc);
+		if (it == m_CrcBufferMap.end())
 		{
-			ARC_CORE_ERROR("Failed to register {}, Not found!", name.begin());
+			ARC_CORE_ERROR("Failed to register constant buffer with CRC {}, Not found!", crc);
 			return;
 		}
 
-		const uint32_t id = CRC32_Runtime(name);
-		if (m_ConstantBufferMap.find(id) != m_ConstantBufferMap.end())
+		if (m_ConstantBufferMap.find(crc) != m_ConstantBufferMap.end())
 			return;
 
-		ConstantBuffer& cb = m_ConstantBufferMap[id];
+		ConstantBuffer& cb = m_ConstantBufferMap[crc];
 
 		cb.RegisterIndex = it->second;
 		cb.AlignedSize = (size + 255) & ~255;
@@ -702,23 +713,22 @@ namespace ArcEngine
 		}
 	}
 
-	void Dx12PipelineState::RegisterSB(eastl::string_view name, uint32_t stride, uint32_t count)
+	void Dx12PipelineState::RegisterSB(uint32_t crc, uint32_t stride, uint32_t count)
 	{
 		ARC_PROFILE_SCOPE();
 
-		eastl::hash_map<eastl::string, uint32_t>::iterator it = m_BufferMap.find(name.data());
-		if (it == m_BufferMap.end())
+		eastl::hash_map<uint32_t, uint32_t>::iterator it = m_CrcBufferMap.find(crc);
+		if (it == m_CrcBufferMap.end())
 		{
-			ARC_CORE_ERROR("Failed to register {}, Not found!", name.begin());
+			ARC_CORE_ERROR("Failed to register structured buffer with CRC {}, Not found!", crc);
 			return;
 		}
 
-		const uint32_t id = CRC32_Runtime(name);
-		if (m_StructuredBufferMap.find(id) != m_StructuredBufferMap.end())
+		if (m_StructuredBufferMap.find(crc) != m_StructuredBufferMap.end())
 			return;
 
 		uint32_t slot = it->second;
-		StructuredBuffer& sb = m_StructuredBufferMap[id];
+		StructuredBuffer& sb = m_StructuredBufferMap[crc];
 		
 		sb.RegisterIndex = slot;
 		sb.Stride = stride;

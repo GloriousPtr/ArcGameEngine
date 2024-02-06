@@ -90,7 +90,7 @@ namespace ArcEngine
 			}
 		}
 
-		m_Pipeline->RegisterCB(MaterialPropertiesSlotName, cbSize);
+		m_Pipeline->RegisterCB(CRC32(MaterialPropertiesSlotName), cbSize);
 	}
 
 	void Material::Bind(GraphicsCommandList commandList) const
@@ -107,7 +107,7 @@ namespace ArcEngine
 
 		if (!m_BindlessTextureBuffer.empty())
 		{
-			m_Pipeline->SetRSData(commandList, BindlessTexturesSlotName, m_BindlessTextureBuffer.data(), static_cast<uint32_t>(sizeof(uint32_t) * m_BindlessTextureBuffer.size()));
+			m_Pipeline->SetRSData(commandList, CRC32(BindlessTexturesSlotName), m_BindlessTextureBuffer.data(), static_cast<uint32_t>(sizeof(uint32_t) * m_BindlessTextureBuffer.size()));
 		}
 		if (!m_CBBuffer.empty())
 		{

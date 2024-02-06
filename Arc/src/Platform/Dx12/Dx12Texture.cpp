@@ -151,8 +151,8 @@ namespace ArcEngine
 			};
 			cmdListNative->ResourceBarrier(2, barrierIn);
 
-			cmdListNative->SetComputeRootDescriptorTable(equirectToCubemapPipeline->GetSlot("InputTexture"), m_HDRHandle.GPU);
-			cmdListNative->SetComputeRootDescriptorTable(equirectToCubemapPipeline->GetSlot("OutputTexture"), m_UavHandle.GPU);
+			cmdListNative->SetComputeRootDescriptorTable(equirectToCubemapPipeline->GetSlot(CRC32("InputTexture")), m_HDRHandle.GPU);
+			cmdListNative->SetComputeRootDescriptorTable(equirectToCubemapPipeline->GetSlot(CRC32("OutputTexture")), m_UavHandle.GPU);
 			cmdListNative->Dispatch(m_Width / 32, m_Height / 32, 6);
 
 			const D3D12_RESOURCE_BARRIER barrierOut[]
@@ -185,8 +185,8 @@ namespace ArcEngine
 			};
 			cmdListNative->ResourceBarrier(2, barrierIn2);
 
-			cmdListNative->SetComputeRootDescriptorTable(irradiancePipeline->GetSlot("cubeMapTexture"), m_SrvHandle.GPU);
-			cmdListNative->SetComputeRootDescriptorTable(irradiancePipeline->GetSlot("outputIrradianceMap"), m_IrrUavHandle.GPU);
+			cmdListNative->SetComputeRootDescriptorTable(irradiancePipeline->GetSlot(CRC32("cubeMapTexture")), m_SrvHandle.GPU);
+				cmdListNative->SetComputeRootDescriptorTable(irradiancePipeline->GetSlot(CRC32("outputIrradianceMap")), m_IrrUavHandle.GPU);
 			cmdListNative->Dispatch(32, 32, 6);
 
 			const D3D12_RESOURCE_BARRIER barrierOut2[]

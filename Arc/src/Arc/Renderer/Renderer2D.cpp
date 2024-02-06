@@ -125,7 +125,7 @@ namespace ArcEngine
 			s_Renderer2DData->TexturePipeline = pipelineLibrary.Load("assets/shaders/Texture.hlsl", texture2dPippelineSpec);
 		}
 
-		s_Renderer2DData->TexturePipeline->RegisterCB("GlobalData", sizeof(CameraData));
+		s_Renderer2DData->TexturePipeline->RegisterCB(CRC32("GlobalData"), sizeof(CameraData));
 
 		{
 			const PipelineSpecification linePippelineSpec
@@ -206,7 +206,7 @@ namespace ArcEngine
 				const uint32_t dataSize = static_cast<uint32_t>(reinterpret_cast<uint8_t*>(s_Renderer2DData->QuadVertexBufferPtr) - reinterpret_cast<uint8_t*>(s_Renderer2DData->QuadVertexBufferBase));
 				s_Renderer2DData->TexturePipeline->BindCB(commandList, CRC32("GlobalData"));
 				s_Renderer2DData->QuadVertexBuffer->SetData(commandList, s_Renderer2DData->QuadVertexBufferBase, dataSize);
-				s_Renderer2DData->TexturePipeline->SetRSData(commandList, BindlessTexturesSlotName, s_Renderer2DData->TextureSlots.data(), sizeof(uint32_t) * s_Renderer2DData->TextureSlotIndex);
+				s_Renderer2DData->TexturePipeline->SetRSData(commandList, CRC32(BindlessTexturesSlotName), s_Renderer2DData->TextureSlots.data(), sizeof(uint32_t) * s_Renderer2DData->TextureSlotIndex);
 				RenderCommand::DrawIndexed(commandList, s_Renderer2DData->QuadVertexArray, s_Renderer2DData->QuadIndexCount);
 				s_Renderer2DData->Stats.DrawCalls++;
 			}
