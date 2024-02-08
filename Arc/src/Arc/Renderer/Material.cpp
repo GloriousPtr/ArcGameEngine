@@ -36,7 +36,7 @@ namespace ArcEngine
 		m_Textures.clear();
 
 		const eastl::vector<MaterialProperty>& materialProperties = m_Pipeline->GetMaterialProperties();
-		uint32_t whiteTexId = AssetManager::WhiteTexture()->GetIndex();
+		uint32_t whiteTexId = AssetManager::WhiteTexture()->GetHeapIndex();
 
 		glm::vec4 one(1.0);
 		int32_t cbSize = 0;
@@ -139,7 +139,7 @@ namespace ArcEngine
 		{
 			m_Textures[it->second.Index] = texture;
 			if (it->second.Type == MaterialPropertyType::Texture2DBindless)
-				m_BindlessTextureBuffer[it->second.BufferIndex] = texture ? texture->GetIndex() : AssetManager::WhiteTexture()->GetIndex();
+				m_BindlessTextureBuffer[it->second.BufferIndex] = texture ? texture->GetHeapIndex() : AssetManager::WhiteTexture()->GetHeapIndex();
 		}
 	}
 

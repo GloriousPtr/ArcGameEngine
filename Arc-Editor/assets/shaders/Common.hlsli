@@ -24,11 +24,16 @@ cbuffer GlobalData : register(b1, space0)
 
 SamplerState Sampler : register(s0);
 SamplerState LinearClampSampler : register(s1);
+SamplerState PointClampSampler : register(s2);
 
 struct DirectionalLight
 {
 	float4 Direction;
 	float4 Color;				// rgb: color, a: intensity
+	
+	// Used for directional and spot lights
+	float4x4 ViewProj;
+	float4 QualityTextureBias;
 };
 
 struct PointLight

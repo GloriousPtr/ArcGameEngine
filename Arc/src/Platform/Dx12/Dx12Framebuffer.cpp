@@ -83,7 +83,7 @@ namespace ArcEngine
 					device->CreateShaderResourceView(resource, &srvDesc, srvHandle.CPU);
 					device->CreateDepthStencilView(resource, &dsvDesc, dsvHandle.CPU);
 
-					depthAttachment = { state, allocation, srvHandle, dsvHandle };
+					depthAttachment = { allocation, srvHandle, dsvHandle, srvDescriptorHeap->HeapIndexGPU(srvHandle), state};
 
 					std::string resourceName = std::format("Depth Resource ({}): {}", i, m_Specification.Name);
 					NameResource(allocation, resourceName.c_str());
@@ -115,7 +115,7 @@ namespace ArcEngine
 					device->CreateShaderResourceView(resource, &srvDesc, srvHandle.CPU);
 					device->CreateRenderTargetView(resource, &rtvDesc, rtvHandle.CPU);
 
-					colorAttachment.emplace_back(state, allocation, srvHandle, rtvHandle);
+					colorAttachment.emplace_back(allocation, srvHandle, rtvHandle, srvDescriptorHeap->HeapIndexGPU(srvHandle), state);
 					m_RtvHandles[i].emplace_back(rtvHandle.CPU);
 
 					std::string resourceName = std::format("Color Resource ({}): {}", i, m_Specification.Name);

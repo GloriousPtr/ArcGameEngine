@@ -24,7 +24,7 @@ namespace ArcEngine
 		[[nodiscard]] uint32_t GetHeight() const override { return m_Height; }
 		[[nodiscard]] TextureFormat GetTextureFormat() const override { return m_Format; }
 		[[nodiscard]] uint64_t GetRendererID() const override { return m_Handle.GPU.ptr; }
-		[[nodiscard]] uint32_t GetIndex() const override;
+		[[nodiscard]] uint32_t GetHeapIndex() const override { return m_HeapIndex; }
 		[[nodiscard]] const eastl::string& GetPath() const override { return m_Path; }
 
 		void SetData(GraphicsCommandList commandList, const TextureData data, [[maybe_unused]] uint32_t size) override;
@@ -38,7 +38,7 @@ namespace ArcEngine
 		uint32_t							m_Channels = 0;
 		eastl::string						m_Path{};
 		DescriptorHandle					m_Handle{};
-		D3D12_GPU_DESCRIPTOR_HANDLE			m_HeapStart{};
+		uint32_t							m_HeapIndex{};
 		D3D12MA::Allocation*				m_ImageAllocation = nullptr;
 		D3D12MA::Allocation*				m_UploadImageAllocation = nullptr;
 	};
@@ -53,7 +53,8 @@ namespace ArcEngine
 		[[nodiscard]] uint32_t GetHeight() const override { return m_Height; }
 		[[nodiscard]] TextureFormat GetTextureFormat() const override { return m_Format; }
 		[[nodiscard]] uint64_t GetRendererID() const override { return m_SrvHandle.GPU.ptr; }
-		[[nodiscard]] uint32_t GetIndex() const override;
+		[[nodiscard]] uint32_t GetHeapIndex() const override { return m_SrvHeapIndex; }
+		[[nodiscard]] uint32_t GetIrradianceHeapIndex() const { return m_IrrSrvHeapIndex; }
 		[[nodiscard]] const eastl::string& GetPath() const override { return m_Path; }
 
 		void SetData(GraphicsCommandList commandList, const TextureData data, [[maybe_unused]] uint32_t size) override;
@@ -74,7 +75,8 @@ namespace ArcEngine
 		DescriptorHandle					m_UavHandle{};
 		DescriptorHandle					m_IrrSrvHandle{};
 		DescriptorHandle					m_IrrUavHandle{};
-		D3D12_GPU_DESCRIPTOR_HANDLE			m_HeapStart{};
+		uint32_t							m_SrvHeapIndex{};
+		uint32_t							m_IrrSrvHeapIndex{};
 
 		D3D12MA::Allocation*				m_HDRImageAllocation = nullptr;
 		D3D12MA::Allocation*				m_HDRUploadImageAllocation = nullptr;

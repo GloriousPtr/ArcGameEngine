@@ -69,6 +69,8 @@ namespace ArcEngine
 		
 		[[nodiscard]] virtual uint64_t GetColorAttachmentRendererID(uint32_t index = 0) const = 0;
 		[[nodiscard]] virtual uint64_t GetDepthAttachmentRendererID() const = 0;
+		[[nodiscard]] virtual uint32_t GetColorAttachmentHeapIndex(uint32_t index) const = 0;
+		[[nodiscard]] virtual uint32_t GetDepthAttachmentHeapIndex() const = 0;
 		
 		[[nodiscard]] virtual const FramebufferSpecification& GetSpecification() const = 0;
 		

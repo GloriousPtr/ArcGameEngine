@@ -109,14 +109,21 @@ namespace ArcEngine
 		float Range = 1.0f;
 		float CutOffAngle = glm::radians(12.5f);
 		float OuterCutOffAngle = glm::radians(17.5f);
-		
+		float ShadowBias = 0.01f;
+		float NearPlane = -60.0f;
+		float FarPlane = 60.0f;
+
 		LightType Type = LightType::Point;
 		ShadowQualityType ShadowQuality = ShadowQualityType::UltraSoft;
 		bool UseColorTemperatureMode = false;
 
 		LightComponent()
 		{
-			const FramebufferSpecification spec{ 2048, 2048, { FramebufferTextureFormat::Depth } };
+			FramebufferSpecification spec;
+			spec.Attachments = { FramebufferTextureFormat::Depth };
+			spec.Width = 2048;
+			spec.Height = 2048;
+			spec.Name = "Shadowmap Framebuffer";
 			ShadowMapFramebuffer = Framebuffer::Create(spec);
 		}
 	};

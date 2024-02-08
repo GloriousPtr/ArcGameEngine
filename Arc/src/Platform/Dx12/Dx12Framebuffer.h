@@ -32,6 +32,8 @@ namespace ArcEngine
 		void Resize(uint32_t width, uint32_t height) override;
 		[[nodiscard]] uint64_t GetColorAttachmentRendererID(uint32_t index) const override { return m_ColorAttachments[Dx12Context::GetCurrentFrameIndex()][index].SrvHandle.GPU.ptr; }
 		[[nodiscard]] uint64_t GetDepthAttachmentRendererID() const override { return m_DepthAttachment[Dx12Context::GetCurrentFrameIndex()].DsvHandle.GPU.ptr; }
+		[[nodiscard]] uint32_t GetColorAttachmentHeapIndex(uint32_t index) const override { return m_ColorAttachments[Dx12Context::GetCurrentFrameIndex()][index].HeapIndex; }
+		[[nodiscard]] uint32_t GetDepthAttachmentHeapIndex() const override { return m_DepthAttachment[Dx12Context::GetCurrentFrameIndex()].HeapIndex; }
 		[[nodiscard]] const FramebufferSpecification& GetSpecification() const override { return m_Specification; }
 
 	private:
@@ -42,15 +44,16 @@ namespace ArcEngine
 
 		struct ColorFrame
 		{
-			D3D12_RESOURCE_STATES		State = D3D12_RESOURCE_STATE_RENDER_TARGET;
 			D3D12MA::Allocation*		Allocation = nullptr;
 			DescriptorHandle			SrvHandle{};
 			DescriptorHandle			RtvHandle{};
+			uint32_t					HeapIndex = 0xFFFFFFFF;
+			D3D12_RESOURCE_STATES		State = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
 			ColorFrame() = default;
 
-			ColorFrame(D3D12_RESOURCE_STATES state, D3D12MA::Allocation* allocation, DescriptorHandle srvHandle, DescriptorHandle rtvHandle)
-				: State(state), Allocation(allocation), SrvHandle(srvHandle), RtvHandle(rtvHandle)
+			ColorFrame(D3D12MA::Allocation* allocation, DescriptorHandle srvHandle, DescriptorHandle rtvHandle, uint32_t heapIndex, D3D12_RESOURCE_STATES state)
+				: Allocation(allocation), SrvHandle(srvHandle), RtvHandle(rtvHandle), HeapIndex(heapIndex), State(state)
 			{
 			}
 
@@ -80,15 +83,16 @@ namespace ArcEngine
 
 		struct DepthFrame
 		{
-			D3D12_RESOURCE_STATES		State = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 			D3D12MA::Allocation*		Allocation = nullptr;
 			DescriptorHandle			SrvHandle{};
 			DescriptorHandle			DsvHandle{};
+			uint32_t					HeapIndex = 0xFFFFFFFF;
+			D3D12_RESOURCE_STATES		State = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 
 			DepthFrame() = default;
 
-			DepthFrame(D3D12_RESOURCE_STATES state, D3D12MA::Allocation* allocation, DescriptorHandle srvHandle, DescriptorHandle dsvHandle)
-				: State(state), Allocation(allocation), SrvHandle(srvHandle), DsvHandle(dsvHandle)
+			DepthFrame(D3D12MA::Allocation* allocation, DescriptorHandle srvHandle, DescriptorHandle dsvHandle, uint32_t heapIndex, D3D12_RESOURCE_STATES state)
+				: Allocation(allocation), SrvHandle(srvHandle), DsvHandle(dsvHandle), HeapIndex(heapIndex), State(state)
 			{
 			}
 

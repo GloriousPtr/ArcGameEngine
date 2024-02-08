@@ -31,10 +31,30 @@ namespace ArcEngine
 		glm::vec2 RotationIntensity;
 	};
 
+	struct DepthShaderProperties
+	{
+		glm::mat4 ViewProjection;
+	};
+
+	struct LightingShaderProperties
+	{
+		uint32_t AlbedoTexture;
+		uint32_t NormalTexture;
+		uint32_t MRATexture;
+		uint32_t EmissiveTexture;
+		uint32_t DepthTexture;
+		uint32_t IrradianceTexture;
+
+		float SkyboxIntensity;
+		float SkyboxRotation;
+	};
+
 	struct DirectionalLightData
 	{
 		glm::vec4 Direction;
 		glm::vec4 Color;				// rgb: color, a: intensity
+		glm::mat4 ViewProjection;
+		glm::vec4 QualityTextureBias;
 	};
 
 	struct PointLightData
@@ -56,6 +76,7 @@ namespace ArcEngine
 		Renderer3D::Statistics Stats;
 		eastl::vector<MeshData> Meshes;
 		Ref<Texture2D> BRDFLutTexture;
+		Ref<PipelineState> DepthPipeline;
 		Ref<PipelineState> RenderPipeline;
 		Ref<PipelineState> CubemapPipeline;
 		Ref<PipelineState> LightingPipeline;
@@ -72,14 +93,10 @@ namespace ArcEngine
 	static Scope<Renderer3DData> s_Renderer3DData;
 
 #if 0
-	Ref<PipelineState> Renderer3D::s_LightingShader;
-	Ref<PipelineState> Renderer3D::s_ShadowMapShader;
-	Ref<PipelineState> Renderer3D::s_CubemapShader;
 	Ref<PipelineState> Renderer3D::s_GaussianBlurShader;
 	Ref<PipelineState> Renderer3D::s_FxaaShader;
 	Ref<PipelineState> Renderer3D::s_HdrShader;
 	Ref<PipelineState> Renderer3D::s_BloomShader;
-	Ref<VertexBuffer> Renderer3D::s_CubeVertexBuffer;
 
 	Ref<Texture2D> Renderer3D::s_BRDFLutTexture;
 
@@ -105,77 +122,76 @@ namespace ArcEngine
 
 		PipelineLibrary& pipelineLibrary = Renderer::GetPipelineLibrary();
 
+		s_Renderer3DData->DepthPipeline = pipelineLibrary.Load("assets/shaders/DepthShader.hlsl",
 		{
-			PipelineSpecification spec
+			.Type = ShaderType::VertexOnly,
+			.GraphicsPipelineSpecs
 			{
-				.Type = ShaderType::Pixel,
-				.GraphicsPipelineSpecs
-				{
-					.CullMode = CullModeType::Back,
-					.Primitive = PrimitiveType::Triangle,
-					.FillMode = FillModeType::Solid,
-					.DepthFunc = DepthFuncType::Less,
-					.DepthFormat = FramebufferTextureFormat::Depth,
-					.OutputFormats = {	FramebufferTextureFormat::RGBA8,				// Albedo
-										FramebufferTextureFormat::RGBA16F,				// Normal
-										FramebufferTextureFormat::RGBA8,				// Metallic, Roughness, AO
-										FramebufferTextureFormat::RGBA8,				// rgb: EmissionColor, a: intensity
-									 }
-				}
-			};
-			s_Renderer3DData->RenderPipeline = pipelineLibrary.Load("assets/shaders/PBR.hlsl", spec);
-		}
-
+				.CullMode = CullModeType::Back,
+				.Primitive = PrimitiveType::Triangle,
+				.FillMode = FillModeType::Solid,
+				.DepthFunc = DepthFuncType::Less,
+				.DepthFormat = FramebufferTextureFormat::Depth
+			}
+		});
+		s_Renderer3DData->RenderPipeline = pipelineLibrary.Load("assets/shaders/PBR.hlsl",
 		{
-			PipelineSpecification spec
-			{ 
-				.Type = ShaderType::Pixel,
-				.GraphicsPipelineSpecs
-				{
-					.CullMode = CullModeType::Back,
-					.Primitive = PrimitiveType::Triangle,
-					.FillMode = FillModeType::Solid,
-					.DepthFormat = FramebufferTextureFormat::None,
-					.OutputFormats = { FramebufferTextureFormat::R11G11B10F }
-				}
-			};
-			s_Renderer3DData->LightingPipeline = pipelineLibrary.Load("assets/shaders/LightingPass.hlsl", spec);
-		}
-
-		{
-			PipelineSpecification spec
+			.Type = ShaderType::Pixel,
+			.GraphicsPipelineSpecs
 			{
-				.Type = ShaderType::Pixel,
-				.GraphicsPipelineSpecs
-				{
-					.CullMode = CullModeType::Front,
-					.Primitive = PrimitiveType::Triangle,
-					.FillMode = FillModeType::Solid,
-					.DepthFormat = FramebufferTextureFormat::None,
-					.OutputFormats = {FramebufferTextureFormat::RGBA8}
-				}
-			};
-			s_Renderer3DData->CubemapPipeline = pipelineLibrary.Load("assets/shaders/Cubemap.hlsl", spec);
-		}
+				.CullMode = CullModeType::Back,
+				.Primitive = PrimitiveType::Triangle,
+				.FillMode = FillModeType::Solid,
+				.DepthFunc = DepthFuncType::Less,
+				.DepthFormat = FramebufferTextureFormat::Depth,
+				.OutputFormats = {	FramebufferTextureFormat::RGBA8,				// Albedo
+									FramebufferTextureFormat::RGBA16F,				// Normal
+									FramebufferTextureFormat::RGBA8,				// Metallic, Roughness, AO
+									FramebufferTextureFormat::RGBA8,				// rgb: EmissionColor, a: intensity
+									}
+			}
+		});
+		s_Renderer3DData->LightingPipeline = pipelineLibrary.Load("assets/shaders/LightingPass.hlsl",
+		{ 
+			.Type = ShaderType::Pixel,
+			.GraphicsPipelineSpecs
+			{
+				.CullMode = CullModeType::Back,
+				.Primitive = PrimitiveType::Triangle,
+				.FillMode = FillModeType::Solid,
+				.DepthFormat = FramebufferTextureFormat::None,
+				.OutputFormats = { FramebufferTextureFormat::R11G11B10F }
+			}
+		});
+		s_Renderer3DData->CubemapPipeline = pipelineLibrary.Load("assets/shaders/Cubemap.hlsl",
+		{
+			.Type = ShaderType::Pixel,
+			.GraphicsPipelineSpecs
+			{
+				.CullMode = CullModeType::Front,
+				.Primitive = PrimitiveType::Triangle,
+				.FillMode = FillModeType::Solid,
+				.DepthFormat = FramebufferTextureFormat::None,
+				.OutputFormats = {FramebufferTextureFormat::RGBA8}
+			}
+		});
 
+		s_Renderer3DData->DepthPipeline->RegisterCB(CRC32("Properties"), sizeof(DepthShaderProperties));
 		s_Renderer3DData->RenderPipeline->RegisterCB(CRC32("GlobalData"), sizeof(GlobalData));
 		s_Renderer3DData->LightingPipeline->RegisterCB(CRC32("GlobalData"), sizeof(GlobalData));
-		s_Renderer3DData->LightingPipeline->RegisterCB(CRC32("Properties"), sizeof(glm::vec2));
+		s_Renderer3DData->LightingPipeline->RegisterCB(CRC32("Properties"), sizeof(LightingShaderProperties));
 		s_Renderer3DData->CubemapPipeline->RegisterCB(CRC32("SkyboxData"), sizeof(SkyboxData));
 		s_Renderer3DData->LightingPipeline->RegisterSB(CRC32("DirectionalLights"), sizeof(DirectionalLightData), MAX_NUM_DIR_LIGHTS);
 		s_Renderer3DData->LightingPipeline->RegisterSB(CRC32("PointLights"), sizeof(PointLightData), MAX_NUM_POINT_LIGHTS);
 		s_Renderer3DData->LightingPipeline->RegisterSB(CRC32("SpotLights"), sizeof(SpotLightData), MAX_NUM_SPOT_LIGHTS);
-
+		
 #if 0
 		s_BRDFLutTexture = Texture2D::Create("Resources/Renderer/BRDF_LUT.jpg");
 
-		s_ShadowMapShader = pipelineLibrary.Load("assets/shaders/DepthShader.glsl", spec);
-		s_CubemapShader = pipelineLibrary.Load("assets/shaders/Cubemap.glsl", spec);
 		s_GaussianBlurShader = pipelineLibrary.Load("assets/shaders/GaussianBlur.glsl", spec);
 		s_FxaaShader = pipelineLibrary.Load("assets/shaders/FXAA.glsl", spec);
 		s_HdrShader = pipelineLibrary.Load("assets/shaders/HDR.glsl", spec);
 		s_BloomShader = pipelineLibrary.Load("assets/shaders/Bloom.glsl", spec);
-		s_LightingShader = pipelineLibrary.Load("assets/shaders/LightingPass.glsl", spec);
 #endif
 		// Cube-map
 		{
@@ -381,6 +397,17 @@ namespace ArcEngine
 		return s_Renderer3DData->Stats;
 	}
 
+	static glm::mat4 CalcDirectionalLightViewProjection(const glm::mat4& worldTransform, float nearPlane, float farPlane, glm::vec4& outDirection)
+	{
+		glm::mat4 lightProjection = glm::orthoRH_ZO(-20.0f, 20.0f, -20.0f, 20.0f, nearPlane, farPlane);
+		outDirection = worldTransform * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
+		glm::vec3 pos = worldTransform[3];
+		glm::vec3 dir = glm::normalize(glm::vec3(outDirection));
+		glm::vec3 lookAt = pos + dir;
+		glm::mat4 dirLightView = glm::lookAt(pos, lookAt, glm::vec3(0, 1, 0));
+		return lightProjection * dirLightView;
+	}
+
 	void Renderer3D::SetupLightsData(GraphicsCommandList cl)
 	{
 		ARC_PROFILE_SCOPE();
@@ -403,11 +430,15 @@ namespace ArcEngine
 				{
 					case LightComponent::LightType::Directional:
 						{
-							dlData[numDirectionalLights] =
+							glm::vec4 dir(0.0f, 0.0f, 1.0f, 0.0f);
+							DirectionalLightData& dirLightData = dlData[numDirectionalLights];
+							dirLightData =
 							{
-								.Direction = worldTransform * glm::vec4(0, 0, 1, 0),
-								.Color = glm::vec4(lightComponent.Color, lightComponent.Intensity)
+								.Color = glm::vec4(lightComponent.Color, lightComponent.Intensity),
+								.ViewProjection = CalcDirectionalLightViewProjection(worldTransform, lightComponent.NearPlane, lightComponent.FarPlane, dir),
+								.QualityTextureBias = glm::vec4(lightComponent.ShadowQuality, lightComponent.ShadowMapFramebuffer->GetDepthAttachmentHeapIndex(), lightComponent.ShadowBias, 1.0f)
 							};
+							dirLightData.Direction = dir;
 							++numDirectionalLights;
 						}
 						break;
@@ -445,46 +476,6 @@ namespace ArcEngine
 			s_Renderer3DData->LightingPipeline->SetSBData(cl, CRC32("PointLights"), plData.data(), sizeof(PointLightData) * numPointLights, 0);
 			s_Renderer3DData->LightingPipeline->SetSBData(cl, CRC32("SpotLights"), slData.data(), sizeof(SpotLightData) * numSpotLights, 0);
 		}
-#if 0
-		{
-			uint32_t numLights = 0;
-			constexpr uint32_t size = sizeof(DirectionalLightData);
-
-			for (Entity e : s_SceneLights)
-			{
-				const LightComponent& lightComponent = e.GetComponent<LightComponent>();
-				if (lightComponent.Type != LightComponent::LightType::Directional)
-					continue;
-
-				glm::mat4 worldTransform = e.GetWorldTransform();
-			
-				// Based off of +Z direction
-				glm::vec4 zDir = worldTransform * glm::vec4(0, 0, 1, 0);
-				float near_plane = -100.0f, far_plane = 100.0f;
-				glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
-				glm::vec3 pos = worldTransform[3];
-				glm::vec3 dir = glm::normalize(glm::vec3(zDir));
-				glm::vec3 lookAt = pos + dir;
-				glm::mat4 dirLightView = glm::lookAt(pos, lookAt, glm::vec3(0, 1 ,0));
-				glm::mat4 dirLightViewProj = lightProjection * dirLightView;
-
-				DirectionalLightData dirLightData = 
-				{
-					glm::vec4(pos, static_cast<uint32_t>(lightComponent.ShadowQuality)),
-					glm::vec4(lightComponent.Color, lightComponent.Intensity),
-					zDir,
-					dirLightViewProj
-				};
-
-				s_UbPointLights->Bind(numLights);
-				s_UbDirectionalLights->SetData(&dirLightData, size, numLights);
-
-				numLights++;
-			}
-
-			s_NumDirectionalLights = numLights;
-		}
-#endif
 	}
 
 	void Renderer3D::CompositePass([[maybe_unused]] const Ref<RenderGraphData>& renderGraphData)
@@ -609,16 +600,28 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		glm::vec2 skyIntensityRotation(0.0f);
-		Ref<TextureCube> skyTexture = nullptr;
+		LightingShaderProperties lightingShaderProperties =
+		{
+			.AlbedoTexture = renderGraphData->RenderPassTarget->GetColorAttachmentHeapIndex(0),
+			.NormalTexture = renderGraphData->RenderPassTarget->GetColorAttachmentHeapIndex(1),
+			.MRATexture = renderGraphData->RenderPassTarget->GetColorAttachmentHeapIndex(2),
+			.EmissiveTexture = renderGraphData->RenderPassTarget->GetColorAttachmentHeapIndex(3),
+			.DepthTexture = renderGraphData->RenderPassTarget->GetDepthAttachmentHeapIndex(),
+			.IrradianceTexture = AssetManager::BlackTexture()->GetHeapIndex(),
+
+			.SkyboxIntensity = 0.0f,
+			.SkyboxRotation = 0.0f,
+		};
+
 		if (s_Renderer3DData->Skylight)
 		{
 			const SkyLightComponent& skylightComponent = s_Renderer3DData->Skylight.GetComponent<SkyLightComponent>();
 			if (skylightComponent.Texture)
 			{
-				skyTexture = skylightComponent.Texture;
-				skyIntensityRotation = { skylightComponent.Intensity, skylightComponent.Rotation };
-			}
+				lightingShaderProperties.IrradianceTexture = skylightComponent.Texture->GetIrradianceHeapIndex();
+				lightingShaderProperties.SkyboxIntensity = skylightComponent.Intensity;
+				lightingShaderProperties.SkyboxRotation = skylightComponent.Rotation;
+			};
 		}
 
 		GraphicsCommandList cl = RenderCommand::BeginRecordingCommandList();
@@ -626,23 +629,10 @@ namespace ArcEngine
 		renderGraphData->LightingPassTarget->Bind(cl);
 		s_Renderer3DData->LightingPipeline->Bind(cl);
 		s_Renderer3DData->LightingPipeline->BindCB(cl, CRC32("GlobalData"));
-		s_Renderer3DData->LightingPipeline->SetCBData(cl, CRC32("Properties"), &skyIntensityRotation, sizeof(glm::vec2));
+		s_Renderer3DData->LightingPipeline->SetCBData(cl, CRC32("Properties"), &lightingShaderProperties, sizeof(LightingShaderProperties));
 		s_Renderer3DData->LightingPipeline->BindSB(cl, CRC32("DirectionalLights"));
 		s_Renderer3DData->LightingPipeline->BindSB(cl, CRC32("PointLights"));
 		s_Renderer3DData->LightingPipeline->BindSB(cl, CRC32("SpotLights"));
-		renderGraphData->RenderPassTarget->BindColorAttachment(cl, 0, s_Renderer3DData->LightingPipeline->GetSlot(CRC32("Albedo")));
-		renderGraphData->RenderPassTarget->BindColorAttachment(cl, 1, s_Renderer3DData->LightingPipeline->GetSlot(CRC32("Normal")));
-		renderGraphData->RenderPassTarget->BindColorAttachment(cl, 2, s_Renderer3DData->LightingPipeline->GetSlot(CRC32("MetalicRoughnessAO")));
-		renderGraphData->RenderPassTarget->BindColorAttachment(cl, 3, s_Renderer3DData->LightingPipeline->GetSlot(CRC32("Emission")));
-		renderGraphData->RenderPassTarget->BindDepthAttachment(cl, s_Renderer3DData->LightingPipeline->GetSlot(CRC32("Depth")));
-		if (skyTexture)
-		{
-			skyTexture->BindIrradianceMap(cl, s_Renderer3DData->LightingPipeline->GetSlot(CRC32("IrradianceMap")));
-		}
-		else
-		{
-			AssetManager::BlackTexture()->Bind(cl, s_Renderer3DData->LightingPipeline->GetSlot(CRC32("IrradianceMap")));
-		}
 		DrawQuad(cl);
 		renderGraphData->LightingPassTarget->Unbind(cl);
 		RenderCommand::EndRecordingCommandList(cl);
@@ -751,89 +741,46 @@ namespace ArcEngine
 
 		renderTarget->Unbind(cl);
 		RenderCommand::EndRecordingCommandList(cl);
-
-#if 0
-		renderTarget->Bind();
-		//RenderCommand::SetBlendState(false);
-		RenderCommand::SetClearColor(glm::vec4(0.0f));
-		RenderCommand::Clear();
-
-		{
-			ARC_PROFILE_SCOPE_NAME("Skylight");
-
-			if (s_Skylight)
-			{
-				const SkylightComponent& skylightComponent = s_Skylight.GetComponent<SkyLightComponent>();
-				if (skylightComponent.Texture)
-				{
-					//RenderCommand::SetDepthMask(false);
-
-					skylightComponent.Texture->Bind(0);
-					//s_CubemapShader->SetData("u_Intensity", skylightComponent.Intensity);
-					//s_CubemapShader->SetData("u_Rotation", skylightComponent.Rotation);
-
-					DrawCube();
-
-					//RenderCommand::SetDepthMask(true);
-				}
-			}
-		}
-		
-		{
-			ARC_PROFILE_SCOPE_NAME("Draw Meshes");
-
-			MeshComponent::CullModeType currentCullMode = MeshComponent::CullModeType::Unknown;
-			const std::span<MeshData> meshes(s_Renderer3DData->Meshes.data(), s_Renderer3DData->MeshInsertIndex);
-			for (const MeshData& meshData : meshes)
-			{
-				meshData.Mat->Bind();
-				//s_Shader->SetData("u_Model", meshData.Transform);
-				
-				RenderCommand::DrawIndexed(meshData.Geometry);
-				s_Stats.DrawCalls++;
-				s_Stats.IndexCount += meshData.Geometry->GetIndexBuffer()->GetCount();
-			}
-		}
-#endif
 	}
 
 	void Renderer3D::ShadowMapPass()
 	{
 		ARC_PROFILE_SCOPE();
-#if 0
-		for (const auto& lightEntity : s_SceneLights)
+
+		if (s_Renderer3DData->Meshes.empty())
+			return;
+
+		GraphicsCommandList cl = RenderCommand::BeginRecordingCommandList();
+		s_Renderer3DData->DepthPipeline->Bind(cl);
+
+		for (const Entity lightEntity : s_Renderer3DData->SceneLights)
 		{
 			const LightComponent& light = lightEntity.GetComponent<LightComponent>();
 			if (light.Type != LightComponent::LightType::Directional)
 				continue;
 
-			light.ShadowMapFramebuffer->Bind();
-			RenderCommand::Clear();
+			light.ShadowMapFramebuffer->Clear(cl);
+			light.ShadowMapFramebuffer->Bind(cl);
 
-			glm::mat4 transform = lightEntity.GetWorldTransform();
-			constexpr float nearPlane = -100.0f;
-			constexpr float farPlane = 100.0f;
+			glm::mat4 worldTransform = lightEntity.GetWorldTransform();
+			glm::vec4 zDir(0.0f, 0.0f, 1.0f, 0.0f);
 			
-			glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, nearPlane, farPlane);
-			
-			glm::vec4 zDir = transform * glm::vec4(0, 0, 1, 0);
-
-			glm::vec3 pos = transform[3];
-			glm::vec3 dir = glm::normalize(glm::vec3(zDir));
-			glm::vec3 lookAt = pos + dir;
-			glm::mat4 dirLightView = glm::lookAt(pos, lookAt, glm::vec3(0, 1 ,0));
-			glm::mat4 dirLightViewProj = lightProjection * dirLightView;
-
-			//s_ShadowMapShader->SetData("u_ViewProjection", dirLightViewProj);
-
-			const std::span<MeshData> meshes(s_Renderer3DData->Meshes.data(), s_Renderer3DData->MeshInsertIndex);
-			for (std::span<MeshData>::iterator it = meshes.rbegin(); it != meshes.rend(); ++it)
+			DepthShaderProperties properties =
 			{
-				const MeshData& meshData = *it;
-				//s_ShadowMapShader->SetData("u_Model", meshData.Transform);
-				RenderCommand::DrawIndexed(meshData.Geometry);
+				.ViewProjection = CalcDirectionalLightViewProjection(worldTransform, light.NearPlane, light.FarPlane, zDir)
+			};
+
+			s_Renderer3DData->DepthPipeline->SetCBData(cl, CRC32("Properties"), &properties, sizeof(DepthShaderProperties));
+
+			for (const MeshData& meshData : s_Renderer3DData->Meshes)
+			{
+				s_Renderer3DData->DepthPipeline->SetRSData(cl, CRC32("Transform"), glm::value_ptr(meshData.Transform), sizeof(glm::mat4));
+				RenderCommand::DrawIndexed(cl, meshData.SubmeshGeometry.Geometry);
 			}
+
+			light.ShadowMapFramebuffer->Unbind(cl);
 		}
-#endif
+
+		RenderCommand::EndRecordingCommandList(cl);
 	}
 }

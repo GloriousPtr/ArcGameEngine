@@ -652,6 +652,9 @@ namespace ArcEngine
 			}
 			else
 			{
+				UI::Property("Shadow Bias", component.ShadowBias);
+				UI::Property("Near Plane", component.NearPlane);
+				UI::Property("Far Plane", component.FarPlane);
 				UI::PropertyEnum("Shadow Quality Type", component.ShadowQuality);
 
 				uint64_t textureID = component.ShadowMapFramebuffer->GetDepthAttachmentRendererID();

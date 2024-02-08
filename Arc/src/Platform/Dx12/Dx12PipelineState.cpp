@@ -4,6 +4,7 @@
 #include <dxcapi.h>
 #include <d3d12shader.h>
 
+#include "Arc/Utils/StlHelper.h"
 #include "DxHelper.h"
 #include "Dx12Framebuffer.h"
 #include "Dx12Shader.h"
@@ -317,10 +318,10 @@ namespace ArcEngine
 		const GraphicsPipelineSpecification& graphicsSpec = m_Specification.GraphicsPipelineSpecs;
 
 		const Dx12Shader* dxShader = reinterpret_cast<const Dx12Shader*>(shader.get());
-		const ComPtr<IDxcBlob> vertexShader = dxShader->m_ShaderBlobs.at(ShaderType::Vertex);
-		const ComPtr<IDxcBlob> pixelShader = dxShader->m_ShaderBlobs.at(ShaderType::Pixel);
-		const ComPtr<IDxcBlob> vertexReflection = dxShader->m_ReflectionBlobs.at(ShaderType::Vertex);
-		const ComPtr<IDxcBlob> pixelReflection = dxShader->m_ReflectionBlobs.at(ShaderType::Pixel);
+		const ComPtr<IDxcBlob> vertexShader = eastl::try_at<ShaderType, IDxcBlob*>(dxShader->m_ShaderBlobs, ShaderType::Vertex, nullptr);
+		const ComPtr<IDxcBlob> pixelShader = eastl::try_at<ShaderType, IDxcBlob*>(dxShader->m_ShaderBlobs, ShaderType::Pixel, nullptr);
+		const ComPtr<IDxcBlob> vertexReflection = eastl::try_at<ShaderType, IDxcBlob*>(dxShader->m_ReflectionBlobs, ShaderType::Vertex, nullptr);
+		const ComPtr<IDxcBlob> pixelReflection = eastl::try_at<ShaderType, IDxcBlob*>(dxShader->m_ReflectionBlobs, ShaderType::Pixel, nullptr);
 
 		ComPtr<IDxcUtils> utils = nullptr;
 		ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&utils)), "DxcUtils creation failed!");
@@ -428,10 +429,11 @@ namespace ArcEngine
 		}
 
 
-		constexpr uint32_t numSamplers = 2;
+		constexpr uint32_t numSamplers = 3;
 		CD3DX12_STATIC_SAMPLER_DESC samplers[numSamplers];
 		samplers[0].Init(0, D3D12_FILTER_ANISOTROPIC);
 		samplers[1].Init(1, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_WRAP);
+		samplers[2].Init(2, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
 		// Create root signature.
 		D3D12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc
@@ -485,10 +487,16 @@ namespace ArcEngine
 		// PSO /////////////////////////////////////////////////////////////////////
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 		psoDesc.pRootSignature = m_RootSignature;
-		psoDesc.VS.pShaderBytecode = vertexShader->GetBufferPointer();
-		psoDesc.VS.BytecodeLength = vertexShader->GetBufferSize();
-		psoDesc.PS.pShaderBytecode = pixelShader->GetBufferPointer();
-		psoDesc.PS.BytecodeLength = pixelShader->GetBufferSize();
+		if (vertexShader)
+		{
+			psoDesc.VS.pShaderBytecode = vertexShader->GetBufferPointer();
+			psoDesc.VS.BytecodeLength = vertexShader->GetBufferSize();
+		}
+		if (pixelShader)
+		{
+			psoDesc.PS.pShaderBytecode = pixelShader->GetBufferPointer();
+			psoDesc.PS.BytecodeLength = pixelShader->GetBufferSize();
+		}
 
 		// BlendState
 		D3D12_RENDER_TARGET_BLEND_DESC blendDesc;
@@ -626,10 +634,11 @@ namespace ArcEngine
 			m_CrcBufferMap.emplace(CRC32_Runtime(name), slot);
 		}
 
-		constexpr uint32_t numSamplers = 2;
+		constexpr uint32_t numSamplers = 3;
 		CD3DX12_STATIC_SAMPLER_DESC samplers[numSamplers];
 		samplers[0].Init(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
 		samplers[1].Init(1, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		samplers[2].Init(2, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
 		// Create root signature.
 		D3D12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc

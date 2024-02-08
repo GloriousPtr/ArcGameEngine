@@ -209,16 +209,20 @@ namespace ArcEngine
 			IDxcBlob* vertexShader = CompileShader(filepath, source, includeHandler, ShaderType::Vertex, args, defs, &vertReflection);
 			IDxcBlob* pixelShader = CompileShader(filepath, source, includeHandler, ShaderType::Pixel, args, defs, &pixelReflection);
 
-			if (!vertexShader || !pixelShader)
+			// We always expect a vertex shader in graphics pipeline
+			if (!vertexShader)
 			{
 				ARC_CORE_ERROR("Failed to compile shader: {}", filepath);
 				return;
 			}
 
 			m_ShaderBlobs[ShaderType::Vertex] = vertexShader;
-			m_ShaderBlobs[ShaderType::Pixel] = pixelShader;
-			m_ReflectionBlobs[ShaderType::Vertex] = vertReflection;
-			m_ReflectionBlobs[ShaderType::Pixel] = pixelReflection;
+			if (pixelShader)
+				m_ShaderBlobs[ShaderType::Pixel] = pixelShader;
+			if (vertReflection)
+				m_ReflectionBlobs[ShaderType::Vertex] = vertReflection;
+			if (pixelReflection)
+				m_ReflectionBlobs[ShaderType::Pixel] = pixelReflection;
 		}
 		else if (m_Type == ShaderType::Compute)
 		{
@@ -232,7 +236,8 @@ namespace ArcEngine
 			}
 
 			m_ShaderBlobs[ShaderType::Compute] = computeShader;
-			m_ReflectionBlobs[ShaderType::Compute] = computeReflection;
+			if (computeReflection)
+				m_ReflectionBlobs[ShaderType::Compute] = computeReflection;
 		}
 	}
 }

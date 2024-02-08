@@ -143,7 +143,7 @@ namespace ArcEngine
 			s_Renderer2DData->LinePipeline = pipelineLibrary.Load("assets/shaders/Line.hlsl", linePippelineSpec);
 		}
 
-		s_Renderer2DData->TextureSlots[0] = AssetManager::WhiteTexture()->GetIndex();
+		s_Renderer2DData->TextureSlots[0] = AssetManager::WhiteTexture()->GetHeapIndex();
 	}
 
 	void Renderer2D::Shutdown()
@@ -288,7 +288,7 @@ namespace ArcEngine
 		{
 			for (uint32_t i = 1; i < s_Renderer2DData->TextureSlotIndex; i++)
 			{
-				if(s_Renderer2DData->TextureSlots[i] == texture->GetIndex())
+				if(s_Renderer2DData->TextureSlots[i] == texture->GetHeapIndex())
 				{
 					textureIndex = i;
 					break;
@@ -301,7 +301,7 @@ namespace ArcEngine
 					NextBatch();
 				
 				textureIndex = s_Renderer2DData->TextureSlotIndex;
-				s_Renderer2DData->TextureSlots[textureIndex] = texture->GetIndex();
+				s_Renderer2DData->TextureSlots[textureIndex] = texture->GetHeapIndex();
 				s_Renderer2DData->TextureSlotIndex++;
 			}
 		}

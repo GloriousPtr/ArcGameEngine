@@ -38,6 +38,7 @@ namespace ArcEngine
 		[[nodiscard]] constexpr uint32_t Size() const { return m_Size; }
 		[[nodiscard]] constexpr uint32_t DescriptorSize() const { return m_DescriptorSize; }
 		[[nodiscard]] constexpr bool IsShaderVisible() const { return m_GpuStart.ptr != 0; }
+		[[nodiscard]] uint32_t HeapIndexGPU(const DescriptorHandle& handle) { return static_cast<uint32_t>(handle.GPU.ptr - m_GpuStart.ptr) / m_DescriptorSize; }
 
 	private:
 		ID3D12DescriptorHeap*				m_Heap = nullptr;

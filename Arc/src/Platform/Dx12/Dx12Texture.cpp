@@ -13,8 +13,9 @@ namespace ArcEngine
 		: m_Format(format), m_Width(width), m_Height(height)
 	{
 		m_Channels = ChannelCountFromFormat(m_Format);
-		m_Handle = Dx12Context::GetSrvHeap()->Allocate();
-		m_HeapStart = Dx12Context::GetSrvHeap()->GpuStart();
+		DescriptorHeap* srvHeap = Dx12Context::GetSrvHeap();
+		m_Handle = srvHeap->Allocate();
+		m_HeapIndex = srvHeap->HeapIndexGPU(m_Handle);
 		GraphicsCommandList commandList = Dx12Context::BeginRecordingCommandList();
 		Dx12Utils::CreateTexture(reinterpret_cast<D3D12GraphicsCommandList*>(commandList), &m_ImageAllocation, &m_UploadImageAllocation, D3D12_SRV_DIMENSION_TEXTURE2D, m_Format, m_Width, m_Height, 1, nullptr, &m_Handle, nullptr);
 		Dx12Context::EndRecordingCommandList(commandList);
@@ -55,8 +56,9 @@ namespace ArcEngine
 		m_Width = width;
 		m_Height = height;
 
-		m_Handle = Dx12Context::GetSrvHeap()->Allocate();
-		m_HeapStart = Dx12Context::GetSrvHeap()->GpuStart();
+		DescriptorHeap* srvHeap = Dx12Context::GetSrvHeap();
+		m_Handle = srvHeap->Allocate();
+		m_HeapIndex = srvHeap->HeapIndexGPU(m_Handle);
 		GraphicsCommandList commandList = Dx12Context::BeginRecordingCommandList();
 		Dx12Utils::CreateTexture(reinterpret_cast<D3D12GraphicsCommandList*>(commandList), &m_ImageAllocation, &m_UploadImageAllocation, D3D12_SRV_DIMENSION_TEXTURE2D, m_Format, m_Width, m_Height, 1, data, &m_Handle, nullptr);
 		Dx12Context::EndRecordingCommandList(commandList);
@@ -76,11 +78,6 @@ namespace ArcEngine
 			m_UploadImageAllocation->Release();
 		if (m_ImageAllocation)
 			m_ImageAllocation->Release();
-	}
-
-	uint32_t Dx12Texture2D::GetIndex() const
-	{
-		return static_cast<uint32_t>(m_Handle.GPU.ptr - m_HeapStart.ptr) / Dx12Context::GetSrvHeap()->DescriptorSize();
 	}
 
 	void Dx12Texture2D::SetData(GraphicsCommandList commandList, const TextureData data, [[maybe_unused]] uint32_t size)
@@ -107,12 +104,15 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		m_HDRHandle = Dx12Context::GetSrvHeap()->Allocate();
-		m_UavHandle = Dx12Context::GetSrvHeap()->Allocate();
-		m_SrvHandle = Dx12Context::GetSrvHeap()->Allocate();
-		m_IrrUavHandle = Dx12Context::GetSrvHeap()->Allocate();
-		m_IrrSrvHandle = Dx12Context::GetSrvHeap()->Allocate();
-		m_HeapStart = Dx12Context::GetSrvHeap()->GpuStart();
+		DescriptorHeap* srvHeap = Dx12Context::GetSrvHeap();
+		m_HDRHandle = srvHeap->Allocate();
+		m_UavHandle = srvHeap->Allocate();
+		m_SrvHandle = srvHeap->Allocate();
+		m_IrrUavHandle = srvHeap->Allocate();
+		m_IrrSrvHandle = srvHeap->Allocate();
+
+		m_SrvHeapIndex = srvHeap->HeapIndexGPU(m_SrvHandle);
+		m_IrrSrvHeapIndex = srvHeap->HeapIndexGPU(m_IrrSrvHandle);
 
 		GraphicsCommandList cmdList = Dx12Context::BeginRecordingCommandList();
 		int width, height, channels;
@@ -223,11 +223,6 @@ namespace ArcEngine
 			m_IrrUploadImageAllocation->Release();
 		if (m_IrrImageAllocation)
 			m_IrrImageAllocation->Release();
-	}
-
-	uint32_t Dx12TextureCube::GetIndex() const
-	{
-		return static_cast<uint32_t>(m_SrvHandle.GPU.ptr - m_HeapStart.ptr) / Dx12Context::GetSrvHeap()->DescriptorSize();
 	}
 
 	void Dx12TextureCube::SetData(GraphicsCommandList commandList, const TextureData data, [[maybe_unused]] uint32_t size)

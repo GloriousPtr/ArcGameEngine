@@ -33,7 +33,7 @@ namespace ArcEngine
 		[[nodiscard]] virtual uint32_t GetHeight() const = 0;
 		[[nodiscard]] virtual TextureFormat GetTextureFormat() const = 0;
 		[[nodiscard]] virtual uint64_t GetRendererID() const = 0;
-		[[nodiscard]] virtual uint32_t GetIndex() const = 0;
+		[[nodiscard]] virtual uint32_t GetHeapIndex() const = 0;
 		[[nodiscard]] virtual const eastl::string& GetPath() const = 0;
 
 		virtual void SetData(GraphicsCommandList commandList, const TextureData data, [[maybe_unused]] uint32_t size) = 0;
@@ -73,6 +73,8 @@ namespace ArcEngine
 	{
 	public:
 		[[nodiscard]] static Ref<TextureCube> Create(const eastl::string& path, TextureFormat format);
+
+		[[nodiscard]] virtual uint32_t GetIrradianceHeapIndex() const = 0;
 
 		virtual void BindIrradianceMap(GraphicsCommandList commandList, uint32_t slot) const = 0;
 		virtual void BindRadianceMap(uint32_t slot) const = 0;
