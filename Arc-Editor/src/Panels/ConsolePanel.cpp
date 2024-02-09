@@ -26,8 +26,8 @@ namespace ArcEngine
 		s_MessageBufferRenderFilter |= Log::Level::Error;
 		s_MessageBufferRenderFilter |= Log::Level::Critical;
 
-		ExternalConsoleSink::SetConsoleSink_HandleFlush([this](eastl::string_view message, const char* filepath, const char* function, int32_t line, Log::Level level){ AddMessage(message, filepath, function, line, level); });
 		m_MessageBuffer = eastl::vector<Scope<ConsolePanel::Message>>(m_Capacity);
+		ExternalConsoleSink::SetConsoleSink_HandleFlush([this](eastl::string_view message, const char* filepath, const char* function, int32_t line, Log::Level level){ AddMessage(message, filepath, function, line, level); });
 	}
 
 	ConsolePanel::~ConsolePanel()

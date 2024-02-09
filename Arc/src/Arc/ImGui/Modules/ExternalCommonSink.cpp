@@ -3,5 +3,6 @@
 
 namespace ArcEngine
 {
+	std::function<void()> ExternalConsoleSink::OnFlushChanged;
 	std::function<void(eastl::string_view, const char*, const char*, int32_t, Log::Level)> ExternalConsoleSink::OnFlush;
 }

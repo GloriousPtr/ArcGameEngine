@@ -29,6 +29,12 @@ namespace ArcEngine
 		explicit ExternalConsoleSink(bool forceFlush = false, uint8_t bufferCapacity = 10)
 			: m_MessageBufferCapacity(forceFlush ? 1 : bufferCapacity), m_MessageBuffer(eastl::vector<Ref<Message>>(forceFlush ? 1 : bufferCapacity))
 		{
+			OnFlushChanged = [this]()
+			{
+				for (const Ref<Message> msg : m_StaleMessageBuffer)
+					OnFlush(msg->Buffer, msg->CallerPath, msg->CallerFunction, msg->CallerLine, msg->Level);
+				m_StaleMessageBuffer.clear();
+			};
 		}
 		ExternalConsoleSink(const ExternalConsoleSink&) = delete;
 		ExternalConsoleSink& operator=(const ExternalConsoleSink&) = delete;
@@ -39,6 +45,7 @@ namespace ArcEngine
 			ARC_PROFILE_SCOPE();
 
 			OnFlush = func;
+			OnFlushChanged();
 		}
 
 	protected:
@@ -48,6 +55,9 @@ namespace ArcEngine
 
 			if (OnFlush == nullptr)
 			{
+				spdlog::memory_buf_t formatted;
+				base_sink<std::mutex>::formatter_->format(msg, formatted);
+				m_StaleMessageBuffer.push_back(CreateRef<Message>(eastl::string_view(formatted.data(), formatted.size()), msg.source.filename, msg.source.funcname, msg.source.line, GetMessageLevel(msg.level)));
 				flush_();
 				return;
 			}
@@ -92,7 +102,9 @@ namespace ArcEngine
 		uint8_t m_MessagesBuffered = 0;
 		uint8_t m_MessageBufferCapacity;
 		eastl::vector<Ref<Message>> m_MessageBuffer;
+		eastl::vector<Ref<Message>> m_StaleMessageBuffer;
 
+		static std::function<void()> OnFlushChanged;
 		static std::function<void(eastl::string_view, const char*, const char*, int32_t, Log::Level)> OnFlush;
 	};
 }
