@@ -40,6 +40,9 @@ namespace ArcEngine
 		m_BufferView.SizeInBytes = size;
 
 		CreateBuffer(&m_UploadAllocation, size, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ);
+
+		NameResource(m_Allocation, "VertexBufferAllocation");
+		NameResource(m_UploadAllocation, "VertexBufferUpload");
 	}
 
 	Dx12VertexBuffer::Dx12VertexBuffer(const float* vertices, uint32_t size, uint32_t stride)
@@ -52,6 +55,10 @@ namespace ArcEngine
 		m_BufferView.SizeInBytes = size;
 
 		CreateBuffer(&m_UploadAllocation, size, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ);
+
+		NameResource(m_Allocation, "VertexBufferAllocation");
+		NameResource(m_UploadAllocation, "VertexBufferUpload");
+
 		Dx12Utils::SetBufferData(m_UploadAllocation, vertices, size);
 		GraphicsCommandList commandList = Dx12Context::BeginRecordingCommandList();
 		reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->CopyBufferRegion(m_Allocation->GetResource(), 0, m_UploadAllocation->GetResource(), 0, size);
@@ -63,9 +70,9 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		if (m_UploadAllocation)
-			m_UploadAllocation->Release();
+			Dx12Context::DeferredRelease(m_UploadAllocation);
 		if (m_Allocation)
-			m_Allocation->Release();
+			Dx12Context::DeferredRelease(m_Allocation);
 	}
 
 	void Dx12VertexBuffer::Bind(GraphicsCommandList commandList) const
@@ -112,6 +119,10 @@ namespace ArcEngine
 
 		CreateBuffer(&m_UploadAllocation, size, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ);
 		Dx12Utils::SetBufferData(m_UploadAllocation, indices, size);
+
+		NameResource(m_Allocation, "IndexBufferAllocation");
+		NameResource(m_UploadAllocation, "IndexBufferUpload");
+
 		GraphicsCommandList commandList = Dx12Context::BeginRecordingCommandList();
 		reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->CopyBufferRegion(m_Allocation->GetResource(), 0, m_UploadAllocation->GetResource(), 0, size);
 		Dx12Context::EndRecordingCommandList(commandList);
@@ -122,9 +133,9 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		if (m_UploadAllocation)
-			m_UploadAllocation->Release();
+			Dx12Context::DeferredRelease(m_UploadAllocation);
 		if (m_Allocation)
-			m_Allocation->Release();
+			Dx12Context::DeferredRelease(m_Allocation);
 	}
 
 	void Dx12IndexBuffer::Bind(GraphicsCommandList commandList) const

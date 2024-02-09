@@ -59,24 +59,14 @@ namespace ArcEngine
 		return false;
 	}
 
-	struct Dx12Fence
-	{
-		ID3D12Fence* Fence = nullptr;
-		uint64_t Value{};
-		HANDLE Event{};
-	};
-
 	struct Dx12Frame
 	{
-		Dx12Fence Fence{};
 		ID3D12Resource* RtvBuffer = nullptr;
 		DescriptorHandle RtvHandle{};
 
 		eastl::vector<IUnknown*> DeferredReleases{};
 		bool DeferedReleasesFlag = false;
 		bool DeferedReleasesFlagHandles = false;
-
-		inline static uint32_t CurrentBackBuffer = 0;
 	};
 
 	[[maybe_unused]] static void DebugMessageCallback(
@@ -105,10 +95,15 @@ namespace ArcEngine
 	inline static ID3D12Device11* s_Device;
 	inline static IDXGISwapChain4* s_Swapchain;
 	inline static ID3D12CommandQueue* s_CommandQueue;
-	inline static eastl::stack<D3D12GraphicsCommandList*> s_CommandLists;
-	inline static eastl::vector<D3D12GraphicsCommandList*> s_CommandListsToSubmit;
-	inline static eastl::hash_map<D3D12GraphicsCommandList*, ID3D12CommandAllocator*> s_CommandListAllocatorMap;
+	inline static eastl::stack<D3D12GraphicsCommandList*> s_CommandLists[Dx12Context::FrameCount];
+	inline static eastl::vector<D3D12GraphicsCommandList*> s_CommandListsToSubmit[Dx12Context::FrameCount];
+	inline static eastl::hash_map<D3D12GraphicsCommandList*, ID3D12CommandAllocator*> s_CommandListAllocatorMap[Dx12Context::FrameCount];
 	inline static Dx12Frame s_Frames[Dx12Context::FrameCount];
+
+	inline static ID3D12Fence* s_Fence = nullptr;
+	inline static HANDLE s_FenceEvent;
+	inline static uint64_t s_FenceValues[Dx12Context::FrameCount]{};
+	inline static uint32_t s_FrameIndex = 0;
 
 	inline static std::mutex s_DeferredReleasesMutex{};
 	inline static DescriptorHeap s_RtvDescHeap{ D3D12_DESCRIPTOR_HEAP_TYPE_RTV };
@@ -144,20 +139,24 @@ namespace ArcEngine
 		using namespace Microsoft::WRL;
 
 		WaitForGpu();
-		CloseHandle(s_Frames[Dx12Frame::CurrentBackBuffer].Fence.Event);
+		CloseHandle(s_FenceEvent);
 
-		for (auto& [cmdList, cmdAlloc] : s_CommandListAllocatorMap)
+		for (auto& cmdListAllocMap : s_CommandListAllocatorMap)
 		{
-			cmdList->Release();
-			cmdAlloc->Release();
+			for (auto& [cmdList, cmdAlloc] : cmdListAllocMap)
+			{
+				cmdList->Release();
+				cmdAlloc->Release();
+			}
 		}
 
 		for (Dx12Frame& frame : s_Frames)
 		{
 			s_RtvDescHeap.Free(frame.RtvHandle);
 			frame.RtvBuffer->Release();
-			frame.Fence.Fence->Release();
 		}
+
+		s_Fence->Release();
 
 		for (uint32_t i = 0; i < FrameCount; ++i)
 			ProcessDeferredReleases(i);
@@ -335,35 +334,32 @@ namespace ArcEngine
 
 		Dx12Allocator::Init(s_Adapter, s_Device);
 
-		// Create Fences
-		for (Dx12Frame& frame : s_Frames)
-		{
-			frame.Fence.Event = CreateEvent(nullptr, false, false, nullptr);
-			frame.Fence.Value = 0;
-			s_Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&(frame.Fence.Fence)));
-		}
-
 		CreateSwapchain();
 
+		// Create Fence
+		s_FenceEvent = CreateEvent(nullptr, false, false, nullptr);
+		s_Device->CreateFence(s_FenceValues[s_FrameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&s_Fence));
+
 		// Create allocators and command lists
-		for (uint32_t i = 0; i < 100; ++i)
+		for (uint32_t frameIdx = 0; frameIdx < Dx12Context::FrameCount; ++frameIdx)
 		{
-			ID3D12CommandAllocator* cmdAllocator;
-			D3D12GraphicsCommandList* cmdList;
-			s_Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdAllocator));
-			s_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocator, nullptr, IID_PPV_ARGS(&cmdList));
+			for (uint32_t i = 0; i < 1000; ++i)
+			{
+				ID3D12CommandAllocator* cmdAllocator;
+				D3D12GraphicsCommandList* cmdList;
+				s_Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdAllocator));
+				s_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocator, nullptr, IID_PPV_ARGS(&cmdList));
 
-			const std::string cmdAllocatorName = std::format("Graphics Command Allocator {}", i);
-			NameResource(cmdAllocator, cmdAllocatorName.c_str());
-			const std::string cmdListName = std::format("Graphics Command List {}", i);
-			NameResource(cmdList, cmdListName.c_str());
+				const std::string cmdAllocatorName = std::format("Graphics Command Allocator {}", i);
+				NameResource(cmdAllocator, cmdAllocatorName.c_str());
+				const std::string cmdListName = std::format("Graphics Command List {}", i);
+				NameResource(cmdList, cmdListName.c_str());
 
-			cmdList->Close();
-			cmdAllocator->Reset();
-			cmdList->Reset(cmdAllocator, nullptr);
+				cmdList->Close();
 
-			s_CommandLists.push(cmdList);
-			s_CommandListAllocatorMap[cmdList] = cmdAllocator;
+				s_CommandLists[frameIdx].push(cmdList);
+				s_CommandListAllocatorMap[frameIdx][cmdList] = cmdAllocator;
+			}
 		}
 	}
 
@@ -371,19 +367,54 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-
+		uint32_t frameIndex = s_FrameIndex;
 		{
 			ARC_PROFILE_SCOPE_NAME("ExecuteCommandLists");
-			ID3D12CommandList** cmdListsInUse = reinterpret_cast<ID3D12CommandList**>(s_CommandListsToSubmit.data());
-			s_CommandQueue->ExecuteCommandLists(static_cast<uint32_t>(s_CommandListsToSubmit.size()), cmdListsInUse);
+			ID3D12CommandList** cmdListsInUse = reinterpret_cast<ID3D12CommandList**>(s_CommandListsToSubmit[frameIndex].data());
+			s_CommandQueue->ExecuteCommandLists(static_cast<uint32_t>(s_CommandListsToSubmit[frameIndex].size()), cmdListsInUse);
 		}
 
-		WaitForGpu();
+		{
+			ARC_PROFILE_CATEGORY("Present", ArcEngine::Profile::Category::Wait);
+			s_Swapchain->Present(m_SyncInterval, m_PresentFlags);
+		}
+
+		// Move to next frame
+		{
+			ARC_PROFILE_SCOPE_NAME("MoveToNextFrame");
+
+			// Schedule a Signal command in the queue.
+			const UINT64 currentFenceValue = s_FenceValues[s_FrameIndex];
+			s_CommandQueue->Signal(s_Fence, currentFenceValue);
+
+			// Update the frame index.
+			s_FrameIndex = s_Swapchain->GetCurrentBackBufferIndex();
+
+			// If the next frame is not ready to be rendered yet, wait until it is ready.
+			if (s_Fence->GetCompletedValue() < s_FenceValues[s_FrameIndex])
+			{
+				s_Fence->SetEventOnCompletion(s_FenceValues[s_FrameIndex], s_FenceEvent);
+				WaitForSingleObjectEx(s_FenceEvent, INFINITE, false);
+			}
+
+			// Set the fence value for the next frame.
+			s_FenceValues[s_FrameIndex] = currentFenceValue + 1;
+		}
 
 		{
-			ARC_PROFILE_SCOPE_NAME("SwapchainPresent");
-			s_Swapchain->Present(m_SyncInterval, m_PresentFlags);
-			Dx12Frame::CurrentBackBuffer = s_Swapchain->GetCurrentBackBufferIndex();
+			ARC_PROFILE_SCOPE_NAME("CommandListsBookKeeping");
+			for (D3D12GraphicsCommandList* cmdList : s_CommandListsToSubmit[frameIndex])
+			{
+				s_CommandLists[frameIndex].push(cmdList);
+			}
+			s_CommandListsToSubmit[frameIndex].clear();
+		}
+
+		const Dx12Frame& backFrame = s_Frames[s_FrameIndex];
+		if (backFrame.DeferedReleasesFlag || backFrame.DeferedReleasesFlagHandles)
+		{
+			WaitForGpu();
+			ProcessDeferredReleases(s_FrameIndex);
 		}
 
 		if (m_ShouldResize)
@@ -403,19 +434,6 @@ namespace ArcEngine
 			s_Swapchain->ResizeBuffers(swapchainDesc.BufferCount, s_Width, s_Height, swapchainDesc.Format, swapchainDesc.Flags);
 			CreateRTV();
 			m_ShouldResize = false;
-		}
-
-		{
-			ARC_PROFILE_SCOPE_NAME("CommandListsBookKeeping");
-			for (D3D12GraphicsCommandList* cmdList : s_CommandListsToSubmit)
-			{
-				s_CommandLists.push(cmdList);
-
-				ID3D12CommandAllocator* cmdAllocator = s_CommandListAllocatorMap.at(cmdList);
-				cmdAllocator->Reset();
-				cmdList->Reset(cmdAllocator, nullptr);
-			}
-			s_CommandListsToSubmit.clear();
 		}
 	}
 
@@ -446,19 +464,20 @@ namespace ArcEngine
 
 	GraphicsCommandList Dx12Context::BeginRecordingCommandList()
 	{
-		ARC_CORE_ASSERT(s_CommandLists.size() > 0, "Not enough command lists in pool");
+		const Dx12Frame& backFrame = s_Frames[s_FrameIndex];
+		const uint32_t frameIndex = s_FrameIndex;
+
+		ARC_CORE_ASSERT(s_CommandLists[frameIndex].size() > 0, "Not enough command lists in pool");
 
 		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<float>(s_Width), static_cast<float>(s_Height), 0.0f, 1.0f };
 		const D3D12_RECT scissorRect = { 0, 0, static_cast<long>(s_Width), static_cast<long>(s_Height) };
 
-		const Dx12Frame& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
-		D3D12GraphicsCommandList* commandList = s_CommandLists.top();
-		s_CommandLists.pop();
+		D3D12GraphicsCommandList* commandList = s_CommandLists[frameIndex].top();
+		s_CommandLists[frameIndex].pop();
 
-		if (backFrame.DeferedReleasesFlag || backFrame.DeferedReleasesFlagHandles)
-		{
-			ProcessDeferredReleases(Dx12Frame::CurrentBackBuffer);
-		}
+		ID3D12CommandAllocator* cmdAllocator = s_CommandListAllocatorMap[frameIndex].at(commandList);
+		cmdAllocator->Reset();
+		commandList->Reset(cmdAllocator, nullptr);
 
 		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backFrame.RtvBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		commandList->ResourceBarrier(1, &barrier);
@@ -482,16 +501,16 @@ namespace ArcEngine
 		else
 		{
 			D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
-			const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(s_Frames[Dx12Frame::CurrentBackBuffer].RtvBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+			const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(s_Frames[s_FrameIndex].RtvBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 			cmdList->ResourceBarrier(1, &barrier);
 			cmdList->Close();
-			s_CommandListsToSubmit.emplace_back(cmdList);
+			s_CommandListsToSubmit[s_FrameIndex].emplace_back(cmdList);
 		}
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE Dx12Context::GetRtv()
 	{
-		return s_Frames[Dx12Frame::CurrentBackBuffer].RtvHandle.CPU;
+		return s_Frames[s_FrameIndex].RtvHandle.CPU;
 	}
 
 	DescriptorHeap* Dx12Context::GetSrvHeap()
@@ -533,45 +552,40 @@ namespace ArcEngine
 
 	uint32_t Dx12Context::GetCurrentFrameIndex()
 	{
-		return Dx12Frame::CurrentBackBuffer;
+		return s_FrameIndex;
 	}
 
 	void Dx12Context::SetDeferredReleaseFlag()
 	{
-		s_Frames[Dx12Frame::CurrentBackBuffer].DeferedReleasesFlagHandles = true;
+		s_Frames[s_FrameIndex].DeferedReleasesFlagHandles = true;
 	}
 
 	void Dx12Context::ExecuteCommandList(GraphicsCommandList commandList)
 	{
 		ARC_PROFILE_SCOPE();
-
+		
 		D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 		
-		auto* cmdAllocator = s_CommandListAllocatorMap.at(cmdList);
-
-		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(s_Frames[Dx12Frame::CurrentBackBuffer].RtvBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(s_Frames[s_FrameIndex].RtvBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 		cmdList->ResourceBarrier(1, &barrier);
 		cmdList->Close();
 		ID3D12CommandList* commandLists[] = { cmdList };
 		s_CommandQueue->ExecuteCommandLists(1, commandLists);
 		WaitForGpu();
-		cmdAllocator->Reset();
-		cmdList->Reset(cmdAllocator, nullptr);
 
-
-		s_CommandLists.push(cmdList);
+		s_CommandLists[s_FrameIndex].push(cmdList);
 	}
 
 	void Dx12Context::WaitForGpu()
 	{
-		ARC_PROFILE_SCOPE();
+		ARC_PROFILE_CATEGORY("WaitForGpu", ArcEngine::Profile::Category::Wait);
 
-		Dx12Fence& fence = s_Frames[Dx12Frame::CurrentBackBuffer].Fence;
-		UINT64& fenceValue = fence.Value;
-		++fenceValue;
-		s_CommandQueue->Signal(fence.Fence, fenceValue);
-		fence.Fence->SetEventOnCompletion(fenceValue, fence.Event);
-		WaitForSingleObject(fence.Event, INFINITE);
+		uint64_t& fenceValue = s_FenceValues[s_FrameIndex];
+		s_CommandQueue->Signal(s_Fence, fenceValue);
+		s_Fence->SetEventOnCompletion(fenceValue, s_FenceEvent);
+		WaitForSingleObjectEx(s_FenceEvent, INFINITE, false);
+
+		s_FenceValues[s_FrameIndex]++;
 	}
 
 	void Dx12Context::CreateRTV() const
@@ -606,14 +620,14 @@ namespace ArcEngine
 		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		swapChainDesc.SampleDesc.Count = 1;
-		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING | DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 		IDXGISwapChain1* newSwapchain;
 		s_Factory->CreateSwapChainForHwnd(s_CommandQueue, m_Hwnd, &swapChainDesc, nullptr, nullptr, &newSwapchain);
 		s_Swapchain = reinterpret_cast<IDXGISwapChain4*>(newSwapchain);
 		
 		CreateRTV();
 
-		Dx12Frame::CurrentBackBuffer = s_Swapchain->GetCurrentBackBufferIndex();
+		s_FrameIndex = s_Swapchain->GetCurrentBackBufferIndex();
 	}
 
 	void Dx12Context::ResizeSwapchain(uint32_t width, uint32_t height)
@@ -657,7 +671,7 @@ namespace ArcEngine
 
 	void Dx12Context::DeferredRelease(IUnknown* resource)
 	{
-		Dx12Frame& backFrame = s_Frames[Dx12Frame::CurrentBackBuffer];
+		Dx12Frame& backFrame = s_Frames[s_FrameIndex];
 		std::lock_guard lock(s_DeferredReleasesMutex);
 		backFrame.DeferredReleases.push_back(resource);
 		backFrame.DeferedReleasesFlag = true;

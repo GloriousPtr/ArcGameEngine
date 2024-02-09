@@ -57,27 +57,13 @@ namespace ArcEngine
 			{
 			}
 
-			void Release(bool deferred)
+			inline void Release()
 			{
 				State = D3D12_RESOURCE_STATE_COMMON;
 
-				if (SrvHandle.IsValid())
-					Dx12Context::GetSrvHeap()->Free(SrvHandle);
-				if (RtvHandle.IsValid())
-					Dx12Context::GetRtvHeap()->Free(RtvHandle);
-				if (Allocation)
-				{
-					if (deferred)
-					{
-						Dx12Context::DeferredRelease(Allocation);
-						Allocation = nullptr;
-					}
-					else
-					{
-						Allocation->Release();
-						Allocation = nullptr;
-					}
-				}
+				if (SrvHandle.IsValid())	Dx12Context::GetSrvHeap()->Free(SrvHandle);
+				if (RtvHandle.IsValid())	Dx12Context::GetRtvHeap()->Free(RtvHandle);
+				if (Allocation)				Dx12Context::DeferredRelease(Allocation);
 			}
 		};
 
@@ -96,27 +82,13 @@ namespace ArcEngine
 			{
 			}
 
-			void Release(bool deferred)
+			void Release()
 			{
 				State = D3D12_RESOURCE_STATE_COMMON;
 
-				if (SrvHandle.IsValid())
-					Dx12Context::GetSrvHeap()->Free(SrvHandle);
-				if (DsvHandle.IsValid())
-					Dx12Context::GetDsvHeap()->Free(DsvHandle);
-				if (Allocation)
-				{
-					if (deferred)
-					{
-						Dx12Context::DeferredRelease(Allocation);
-						Allocation = nullptr;
-					}
-					else
-					{
-						Allocation->Release();
-						Allocation = nullptr;
-					}
-				}
+				if (SrvHandle.IsValid())	Dx12Context::GetSrvHeap()->Free(SrvHandle);
+				if (DsvHandle.IsValid())	Dx12Context::GetDsvHeap()->Free(DsvHandle);
+				if (Allocation)				Dx12Context::DeferredRelease(Allocation);
 			}
 		};
 
@@ -125,9 +97,6 @@ namespace ArcEngine
 		eastl::array<DepthFrame, Dx12Context::FrameCount>										m_DepthAttachment{};
 		glm::vec4																				m_ClearColor = glm::vec4(0.0f);
 		glm::vec2																				m_ClearDepth = glm::vec2(1.0f, 0.0f);
-
-		eastl::array<eastl::vector<ColorFrame>, Dx12Context::FrameCount>						m_ReleasedColorAttachments{};
-		eastl::array<DepthFrame, Dx12Context::FrameCount>										m_ReleasedDepthAttachment{};
 
 	public:
 

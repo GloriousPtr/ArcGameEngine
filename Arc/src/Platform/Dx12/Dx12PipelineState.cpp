@@ -240,7 +240,7 @@ namespace ArcEngine
 			{
 				Dx12Context::GetSrvHeap()->Free(cb.Handle[i]);
 				if (cb.Allocation[i])
-					cb.Allocation[i]->Release();
+					Dx12Context::DeferredRelease(cb.Allocation[i]);
 			}
 		}
 
@@ -250,14 +250,14 @@ namespace ArcEngine
 			{
 				Dx12Context::GetSrvHeap()->Free(sb.Handle[i]);
 				if (sb.Allocation[i])
-					sb.Allocation[i]->Release();
+					Dx12Context::DeferredRelease(sb.Allocation[i]);
 			}
 		}
 
 		if (m_PipelineState)
-			m_PipelineState->Release();
+			Dx12Context::DeferredRelease(m_PipelineState);
 		if (m_RootSignature)
-			m_RootSignature->Release();
+			Dx12Context::DeferredRelease(m_RootSignature);
 	}
 
 	void Dx12PipelineState::Bind(GraphicsCommandList commandList) const

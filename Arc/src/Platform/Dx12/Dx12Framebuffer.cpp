@@ -19,12 +19,16 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		for (DepthFrame& depthAttachment : m_DepthAttachment)
-			depthAttachment.Release(false);
+		{
+			depthAttachment.Release();
+		}
 
 		for (eastl::vector<ColorFrame>& colorAttachments : m_ColorAttachments)
 		{
 			for (ColorFrame& attachment : colorAttachments)
-				attachment.Release(false);
+			{
+				attachment.Release();
+			}
 		}
 	}
 
@@ -211,20 +215,12 @@ namespace ArcEngine
 		m_Specification.Width = width;
 		m_Specification.Height = height;
 
-		for (eastl::vector<ColorFrame>& attachments : m_ReleasedColorAttachments)
-			attachments.clear();
-		for (DepthFrame& attachment : m_ReleasedDepthAttachment)
-			attachment = {};
-
-		m_ReleasedColorAttachments = m_ColorAttachments;
-		m_ReleasedDepthAttachment = m_DepthAttachment;
-		
-		for (DepthFrame& depthAttachment : m_ReleasedDepthAttachment)
-			depthAttachment.Release(true);
-		for (eastl::vector<ColorFrame>& attachments : m_ReleasedColorAttachments)
+		for (DepthFrame& depthAttachment : m_DepthAttachment)
+			depthAttachment.Release();
+		for (eastl::vector<ColorFrame>& attachments : m_ColorAttachments)
 		{
 			for (ColorFrame& attachment : attachments)
-				attachment.Release(true);
+				attachment.Release();
 		}
 
 		for (DepthFrame& depthAttachment : m_DepthAttachment)

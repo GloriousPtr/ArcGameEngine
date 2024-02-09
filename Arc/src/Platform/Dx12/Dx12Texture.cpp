@@ -75,9 +75,9 @@ namespace ArcEngine
 		Dx12Context::GetSrvHeap()->Free(m_Handle);
 
 		if (m_UploadImageAllocation)
-			m_UploadImageAllocation->Release();
+			Dx12Context::DeferredRelease(m_UploadImageAllocation);
 		if (m_ImageAllocation)
-			m_ImageAllocation->Release();
+			Dx12Context::DeferredRelease(m_ImageAllocation);
 	}
 
 	void Dx12Texture2D::SetData(GraphicsCommandList commandList, const TextureData data, [[maybe_unused]] uint32_t size)
@@ -210,19 +210,19 @@ namespace ArcEngine
 		Dx12Context::GetSrvHeap()->Free(m_IrrSrvHandle);
 
 		if (m_HDRUploadImageAllocation)
-			m_HDRUploadImageAllocation->Release();
+			Dx12Context::DeferredRelease(m_HDRUploadImageAllocation);
 		if (m_HDRImageAllocation)
-			m_HDRImageAllocation->Release();
+			Dx12Context::DeferredRelease(m_HDRImageAllocation);
 
 		if (m_UploadImageAllocation)
-			m_UploadImageAllocation->Release();
+			Dx12Context::DeferredRelease(m_UploadImageAllocation);
 		if (m_ImageAllocation)
-			m_ImageAllocation->Release();
+			Dx12Context::DeferredRelease(m_ImageAllocation);
 
 		if (m_IrrUploadImageAllocation)
-			m_IrrUploadImageAllocation->Release();
+			Dx12Context::DeferredRelease(m_IrrUploadImageAllocation);
 		if (m_IrrImageAllocation)
-			m_IrrImageAllocation->Release();
+			Dx12Context::DeferredRelease(m_IrrImageAllocation);
 	}
 
 	void Dx12TextureCube::SetData(GraphicsCommandList commandList, const TextureData data, [[maybe_unused]] uint32_t size)

@@ -94,6 +94,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
+		Dx12Context::WaitForGpu();
+
 #ifdef ARC_PLATFORM_LINUX
 #endif
 #ifdef ARC_PLATFORM_WINDOWS
