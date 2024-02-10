@@ -67,7 +67,9 @@ namespace ArcEngine
 	public:
 		virtual ~PipelineState() = default;
 
-		virtual void Bind(GraphicsCommandList commandList) const = 0;
+		virtual void Recompile(const Ref<Shader>& shader) = 0;
+
+		[[nodiscard]] virtual bool Bind(GraphicsCommandList commandList) const = 0;
 		virtual void Unbind(GraphicsCommandList commandList) const = 0;
 
 		[[nodiscard]] virtual eastl::vector<MaterialProperty>& GetMaterialProperties() = 0;

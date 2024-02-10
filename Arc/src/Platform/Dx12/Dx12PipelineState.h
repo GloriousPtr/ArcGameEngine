@@ -17,7 +17,9 @@ namespace ArcEngine
 		Dx12PipelineState(const Ref<Shader>& shader, const PipelineSpecification& spec);
 		~Dx12PipelineState() override;
 
-		void Bind(GraphicsCommandList commandList) const override;
+		void Recompile(const Ref<Shader>& shader) override;
+
+		[[nodiscard]] bool Bind(GraphicsCommandList commandList) const override;
 		void Unbind(GraphicsCommandList commandList) const override;
 
 		[[nodiscard]] eastl::vector<MaterialProperty>& GetMaterialProperties() override { return m_MaterialProperties; }

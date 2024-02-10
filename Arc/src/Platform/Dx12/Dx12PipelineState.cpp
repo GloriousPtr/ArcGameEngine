@@ -260,13 +260,60 @@ namespace ArcEngine
 			Dx12Context::DeferredRelease(m_RootSignature);
 	}
 
-	void Dx12PipelineState::Bind(GraphicsCommandList commandList) const
+	void Dx12PipelineState::Recompile(const Ref<Shader>& shader)
+	{
+
+		for (auto& [slot, cb] : m_ConstantBufferMap)
+		{
+			for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
+			{
+				Dx12Context::GetSrvHeap()->Free(cb.Handle[i]);
+				if (cb.Allocation[i])
+					Dx12Context::DeferredRelease(cb.Allocation[i]);
+			}
+		}
+
+		for (auto& [slot, sb] : m_StructuredBufferMap)
+		{
+			for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
+			{
+				Dx12Context::GetSrvHeap()->Free(sb.Handle[i]);
+				if (sb.Allocation[i])
+					Dx12Context::DeferredRelease(sb.Allocation[i]);
+			}
+		}
+
+		if (m_PipelineState)
+			Dx12Context::DeferredRelease(m_PipelineState);
+		if (m_RootSignature)
+			Dx12Context::DeferredRelease(m_RootSignature);
+
+		m_MaterialProperties.clear();
+		m_BufferMap.clear();
+		m_CrcBufferMap.clear();
+		m_ConstantBufferMap.clear();
+		m_StructuredBufferMap.clear();
+
+		switch (m_Specification.Type)
+		{
+			case ShaderType::None:  ARC_CORE_ASSERT(false, "Failed to create pipeline with unknown type"); break;
+			case ShaderType::Vertex:
+			case ShaderType::Pixel: MakeGraphicsPipeline(shader); break;
+			case ShaderType::Compute: MakeComputePipeline(shader); break;
+			default: ARC_CORE_ASSERT(false, "Failed to create pipeline with unknown type"); break;
+		}
+	}
+
+	bool Dx12PipelineState::Bind(GraphicsCommandList commandList) const
 	{
 		ARC_PROFILE_SCOPE();
 
+		if (!m_PipelineState || !m_RootSignature)
+			return false;
+
 		auto* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 
-		if (m_Specification.Type == ShaderType::Pixel || m_Specification.Type == ShaderType::Vertex)
+		if (m_Specification.Type == ShaderType::Vertex || m_Specification.Type == ShaderType::Pixel)
 		{
 			switch (m_Specification.GraphicsPipelineSpecs.Primitive)
 			{
@@ -275,14 +322,16 @@ namespace ArcEngine
 				case PrimitiveType::Point:		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST); break;
 				default: ARC_CORE_ASSERT(false, "Unsupported Primitive Type");
 			}
+
+			cmdList->SetGraphicsRootSignature(m_RootSignature);
+		}
+		else if (m_Specification.Type == ShaderType::Compute)
+		{
+			cmdList->SetComputeRootSignature(m_RootSignature);
 		}
 
-		if (m_Specification.Type == ShaderType::Vertex || m_Specification.Type == ShaderType::Pixel)
-			cmdList->SetGraphicsRootSignature(m_RootSignature);
-		else if (m_Specification.Type == ShaderType::Compute)
-			cmdList->SetComputeRootSignature(m_RootSignature);
-
 		cmdList->SetPipelineState(m_PipelineState);
+		return true;
 	}
 
 	void Dx12PipelineState::Unbind(GraphicsCommandList commandList) const
@@ -297,8 +346,6 @@ namespace ArcEngine
 	void Dx12PipelineState::SetRSData(GraphicsCommandList commandList, uint32_t crc, const void* data, uint32_t size, uint32_t offset)
 	{
 		ARC_PROFILE_SCOPE();
-		OPTICK_GPU_CONTEXT(reinterpret_cast<ID3D12CommandList*>(commandList));
-		OPTICK_GPU_EVENT("Dx12PipelineState::SetDataImpl");
 
 		eastl::hash_map<uint32_t, uint32_t>::iterator it = m_CrcBufferMap.find(crc);
 		if (it == m_CrcBufferMap.end())
@@ -322,6 +369,12 @@ namespace ArcEngine
 		const ComPtr<IDxcBlob> pixelShader = eastl::try_at<ShaderType, IDxcBlob*>(dxShader->m_ShaderBlobs, ShaderType::Pixel, nullptr);
 		const ComPtr<IDxcBlob> vertexReflection = eastl::try_at<ShaderType, IDxcBlob*>(dxShader->m_ReflectionBlobs, ShaderType::Vertex, nullptr);
 		const ComPtr<IDxcBlob> pixelReflection = eastl::try_at<ShaderType, IDxcBlob*>(dxShader->m_ReflectionBlobs, ShaderType::Pixel, nullptr);
+
+		if (!vertexShader)
+		{
+			ARC_CORE_ERROR("Failed to create PSO for shader: {}", dxShader->GetName());
+			return;
+		}
 
 		ComPtr<IDxcUtils> utils = nullptr;
 		ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&utils)), "DxcUtils creation failed!");
@@ -591,7 +644,8 @@ namespace ArcEngine
 			ARC_CORE_ERROR("Failed to create Pipeline State. Shader: {}", shader->GetName());
 		}
 
-		m_PipelineState->SetName(shaderName);
+		if (m_PipelineState)
+			m_PipelineState->SetName(shaderName);
 	}
 
 	void Dx12PipelineState::MakeComputePipeline(const Ref<Shader>& shader)
@@ -601,6 +655,12 @@ namespace ArcEngine
 		const Dx12Shader* dxShader = reinterpret_cast<const Dx12Shader*>(shader.get());
 		const ComPtr<IDxcBlob> computeShader = dxShader->m_ShaderBlobs.at(ShaderType::Compute);
 		const ComPtr<IDxcBlob> computeReflection = dxShader->m_ReflectionBlobs.at(ShaderType::Compute);
+
+		if (!computeShader)
+		{
+			ARC_CORE_ERROR("Failed to create PSO for shader: {}", dxShader->GetName());
+			return;
+		}
 
 		ComPtr<IDxcUtils> utils = nullptr;
 		ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&utils)), "DxcUtils creation failed!");
@@ -686,7 +746,8 @@ namespace ArcEngine
 			ARC_CORE_ERROR("Failed to create Pipeline State. Shader: {}", shader->GetName());
 		}
 
-		m_PipelineState->SetName(shaderName);
+		if (m_PipelineState)
+			m_PipelineState->SetName(shaderName);
 	}
 
 	void Dx12PipelineState::RegisterCB(uint32_t crc, uint32_t size)

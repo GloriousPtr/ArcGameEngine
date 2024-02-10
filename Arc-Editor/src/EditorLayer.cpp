@@ -249,7 +249,6 @@ namespace ArcEngine
 							if (ImGui::MenuItemEx("Reload Shaders", ARC_ICON_RELOAD))
 							{
 								Renderer::GetPipelineLibrary().ReloadAll();
-								Renderer3D::Init();
 							}
 
 							ImGui::PopStyleVar();

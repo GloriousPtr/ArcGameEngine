@@ -26,7 +26,7 @@ namespace ArcEngine
 	void Dx12RendererAPI::SetClearColor(GraphicsCommandList commandList, const glm::vec4& color)
 	{
 		ARC_PROFILE_SCOPE();
-		
+
 		D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
 		cmdList->ClearRenderTargetView(Dx12Context::GetRtv(), glm::value_ptr(color), 0, nullptr);
 	}
@@ -74,11 +74,15 @@ namespace ArcEngine
 
 	GraphicsCommandList Dx12RendererAPI::BeginRecordingCommandList()
 	{
+		ARC_PROFILE_SCOPE();
+
 		return m_Context->BeginRecordingCommandList();
 	}
 	
 	void Dx12RendererAPI::EndRecordingCommandList(GraphicsCommandList commandList, bool execute)
 	{
+		ARC_PROFILE_SCOPE();
+
 		return m_Context->EndRecordingCommandList(commandList, execute);
 	}
 

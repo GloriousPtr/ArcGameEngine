@@ -48,11 +48,12 @@ namespace ArcEngine
 		eastl::string shaderName;
 		for (const auto& [name, pipeline] : m_Pipelines)
 		{
-			const eastl::hash_map<eastl::string, eastl::string>::iterator it = m_ShaderPaths.find(name);
-			if (it == m_ShaderPaths.end())
+			const eastl::hash_map<eastl::string, Ref<Shader>>::iterator it = m_Shaders.find(name);
+			if (it == m_Shaders.end())
 				continue;
 
-			//pipeline->Recompile(it->second);
+			it->second->Recompile(m_ShaderPaths.at(name).c_str());
+			pipeline->Recompile(it->second);
 		}
 	}
 

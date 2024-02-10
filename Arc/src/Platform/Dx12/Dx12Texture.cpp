@@ -143,24 +143,26 @@ namespace ArcEngine
 			else
 				equirectToCubemapPipeline = pipelineLibrary.Load("assets/shaders/EquirectangularToCubemap.hlsl", computeSpec);
 
-			equirectToCubemapPipeline->Bind(cmdList);
-			const D3D12_RESOURCE_BARRIER barrierIn[]
+			if (equirectToCubemapPipeline->Bind(cmdList))
 			{
-				CD3DX12_RESOURCE_BARRIER::Transition(m_HDRImageAllocation->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE),
-				CD3DX12_RESOURCE_BARRIER::Transition(m_ImageAllocation->GetResource(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_UNORDERED_ACCESS),
-			};
-			cmdListNative->ResourceBarrier(2, barrierIn);
+				const D3D12_RESOURCE_BARRIER barrierIn[]
+				{
+					CD3DX12_RESOURCE_BARRIER::Transition(m_HDRImageAllocation->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE),
+					CD3DX12_RESOURCE_BARRIER::Transition(m_ImageAllocation->GetResource(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_UNORDERED_ACCESS),
+				};
+				cmdListNative->ResourceBarrier(2, barrierIn);
 
-			cmdListNative->SetComputeRootDescriptorTable(equirectToCubemapPipeline->GetSlot(CRC32("InputTexture")), m_HDRHandle.GPU);
-			cmdListNative->SetComputeRootDescriptorTable(equirectToCubemapPipeline->GetSlot(CRC32("OutputTexture")), m_UavHandle.GPU);
-			cmdListNative->Dispatch(m_Width / 32, m_Height / 32, 6);
+				cmdListNative->SetComputeRootDescriptorTable(equirectToCubemapPipeline->GetSlot(CRC32("InputTexture")), m_HDRHandle.GPU);
+				cmdListNative->SetComputeRootDescriptorTable(equirectToCubemapPipeline->GetSlot(CRC32("OutputTexture")), m_UavHandle.GPU);
+				cmdListNative->Dispatch(m_Width / 32, m_Height / 32, 6);
 
-			const D3D12_RESOURCE_BARRIER barrierOut[]
-			{
-				CD3DX12_RESOURCE_BARRIER::Transition(m_HDRImageAllocation->GetResource(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
-				CD3DX12_RESOURCE_BARRIER::Transition(m_ImageAllocation->GetResource(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE)
-			};
-			cmdListNative->ResourceBarrier(2, barrierOut);
+				const D3D12_RESOURCE_BARRIER barrierOut[]
+				{
+					CD3DX12_RESOURCE_BARRIER::Transition(m_HDRImageAllocation->GetResource(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE),
+					CD3DX12_RESOURCE_BARRIER::Transition(m_ImageAllocation->GetResource(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE)
+				};
+				cmdListNative->ResourceBarrier(2, barrierOut);
+			}
 			RenderCommand::ExecuteCommandList(cmdList);
 		}
 
@@ -177,24 +179,26 @@ namespace ArcEngine
 			else
 				irradiancePipeline = pipelineLibrary.Load("assets/shaders/Irradiance.hlsl", computeSpec);
 
-			irradiancePipeline->Bind(cmdList);
-			const D3D12_RESOURCE_BARRIER barrierIn2[]
+			if (irradiancePipeline->Bind(cmdList))
 			{
-				CD3DX12_RESOURCE_BARRIER::Transition(m_ImageAllocation->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE),
-				CD3DX12_RESOURCE_BARRIER::Transition(m_IrrImageAllocation->GetResource(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_UNORDERED_ACCESS),
-			};
-			cmdListNative->ResourceBarrier(2, barrierIn2);
+				const D3D12_RESOURCE_BARRIER barrierIn2[]
+				{
+					CD3DX12_RESOURCE_BARRIER::Transition(m_ImageAllocation->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE),
+					CD3DX12_RESOURCE_BARRIER::Transition(m_IrrImageAllocation->GetResource(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_UNORDERED_ACCESS),
+				};
+				cmdListNative->ResourceBarrier(2, barrierIn2);
 
-			cmdListNative->SetComputeRootDescriptorTable(irradiancePipeline->GetSlot(CRC32("cubeMapTexture")), m_SrvHandle.GPU);
+				cmdListNative->SetComputeRootDescriptorTable(irradiancePipeline->GetSlot(CRC32("cubeMapTexture")), m_SrvHandle.GPU);
 				cmdListNative->SetComputeRootDescriptorTable(irradiancePipeline->GetSlot(CRC32("outputIrradianceMap")), m_IrrUavHandle.GPU);
-			cmdListNative->Dispatch(32, 32, 6);
+				cmdListNative->Dispatch(32, 32, 6);
 
-			const D3D12_RESOURCE_BARRIER barrierOut2[]
-			{
-				CD3DX12_RESOURCE_BARRIER::Transition(m_ImageAllocation->GetResource(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE),
-				CD3DX12_RESOURCE_BARRIER::Transition(m_IrrImageAllocation->GetResource(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE)
-			};
-			cmdListNative->ResourceBarrier(2, barrierOut2);
+				const D3D12_RESOURCE_BARRIER barrierOut2[]
+				{
+					CD3DX12_RESOURCE_BARRIER::Transition(m_ImageAllocation->GetResource(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE),
+					CD3DX12_RESOURCE_BARRIER::Transition(m_IrrImageAllocation->GetResource(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE)
+				};
+				cmdListNative->ResourceBarrier(2, barrierOut2);
+			}
 			RenderCommand::ExecuteCommandList(cmdList);
 		}
 	}

@@ -127,7 +127,7 @@ namespace ArcEngine
 				ComPtr<IDxcBlobUtf8> errors;
 				compileResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr);
 				if (errors && errors->GetStringLength() > 0)
-					ARC_CORE_ERROR("Shader compilation error: {}", errors->GetStringPointer());
+					ARC_CORE_ERROR("Shader compilation: {}: {}", filepath, errors->GetStringPointer());
 				else
 					ARC_CORE_ERROR("Shader compilation error with no information!");
 			}
