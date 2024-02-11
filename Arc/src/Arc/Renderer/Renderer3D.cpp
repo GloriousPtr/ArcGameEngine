@@ -49,6 +49,17 @@ namespace ArcEngine
 		float SkyboxRotation;
 	};
 
+	struct CompositeShaderProperties
+	{
+		glm::vec4 VignetteColor; // rgb: color, a: intensity
+		glm::vec4 VignetteOffset; // xy: offset, z: useMask, w: enable/disable effect
+		float TonemapExposure;
+		uint32_t TonemapType; // 0 None/ExposureBased, 1: ACES, 2: Filmic, 3: Uncharted
+
+		uint32_t MainTexture;
+		uint32_t VignetteMask;
+	};
+
 	struct DirectionalLightData
 	{
 		glm::vec4 Direction;
@@ -80,6 +91,7 @@ namespace ArcEngine
 		Ref<PipelineState> RenderPipeline;
 		Ref<PipelineState> CubemapPipeline;
 		Ref<PipelineState> LightingPipeline;
+		Ref<PipelineState> CompositePipeline;
 		GraphicsCommandList CommandList;
 
 		Ref<VertexBuffer> CubeVertexBuffer;
@@ -92,6 +104,11 @@ namespace ArcEngine
 
 	static Scope<Renderer3DData> s_Renderer3DData;
 
+	Renderer3D::TonemappingType Renderer3D::Tonemapping = Renderer3D::TonemappingType::ACES;
+	float Renderer3D::Exposure = 1.0f;
+	glm::vec4 Renderer3D::VignetteColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.25f);	// rgb: color, a: intensity
+	glm::vec4 Renderer3D::VignetteOffset = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);	// xy: offset, z: useMask, w: enable/disable effect
+	Ref<Texture2D> Renderer3D::VignetteMask = nullptr;
 #if 0
 	Ref<PipelineState> Renderer3D::s_GaussianBlurShader;
 	Ref<PipelineState> Renderer3D::s_FxaaShader;
@@ -100,8 +117,6 @@ namespace ArcEngine
 
 	Ref<Texture2D> Renderer3D::s_BRDFLutTexture;
 
-	Renderer3D::TonemappingType Renderer3D::Tonemapping = Renderer3D::TonemappingType::ACES;
-	float Renderer3D::Exposure = 1.0f;
 	bool Renderer3D::UseBloom = true;
 	float Renderer3D::BloomStrength = 0.1f;
 	float Renderer3D::BloomThreshold = 1.0f;
@@ -109,9 +124,6 @@ namespace ArcEngine
 	float Renderer3D::BloomClamp = 100.0f;
 	bool Renderer3D::UseFXAA = true;
 	glm::vec2 Renderer3D::FXAAThreshold = glm::vec2(0.0078125f, 0.125f);		// x: current threshold, y: relative threshold
-	glm::vec4 Renderer3D::VignetteColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.25f);	// rgb: color, a: intensity
-	glm::vec4 Renderer3D::VignetteOffset = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);	// xy: offset, z: useMask, w: enable/disable effect
-	Ref<Texture2D> Renderer3D::VignetteMask = nullptr;
 #endif
 
 	void Renderer3D::Init()
@@ -163,6 +175,18 @@ namespace ArcEngine
 				.OutputFormats = { FramebufferTextureFormat::R11G11B10F }
 			}
 		});
+		s_Renderer3DData->CompositePipeline = pipelineLibrary.Load("assets/shaders/CompositePass.hlsl",
+		{
+			.Type = ShaderType::Pixel,
+			.GraphicsPipelineSpecs
+			{
+				.CullMode = CullModeType::Back,
+				.Primitive = PrimitiveType::Triangle,
+				.FillMode = FillModeType::Solid,
+				.DepthFormat = FramebufferTextureFormat::None,
+				.OutputFormats = { FramebufferTextureFormat::R11G11B10F }
+			}
+		});
 		s_Renderer3DData->CubemapPipeline = pipelineLibrary.Load("assets/shaders/Cubemap.hlsl",
 		{
 			.Type = ShaderType::Pixel,
@@ -180,6 +204,7 @@ namespace ArcEngine
 		s_Renderer3DData->RenderPipeline->RegisterCB(CRC32("GlobalData"), sizeof(GlobalData));
 		s_Renderer3DData->LightingPipeline->RegisterCB(CRC32("GlobalData"), sizeof(GlobalData));
 		s_Renderer3DData->LightingPipeline->RegisterCB(CRC32("Properties"), sizeof(LightingShaderProperties));
+		s_Renderer3DData->CompositePipeline->RegisterCB(CRC32("Properties"), sizeof(CompositeShaderProperties));
 		s_Renderer3DData->CubemapPipeline->RegisterCB(CRC32("SkyboxData"), sizeof(SkyboxData));
 		s_Renderer3DData->LightingPipeline->RegisterSB(CRC32("DirectionalLights"), sizeof(DirectionalLightData), MAX_NUM_DIR_LIGHTS);
 		s_Renderer3DData->LightingPipeline->RegisterSB(CRC32("PointLights"), sizeof(PointLightData), MAX_NUM_POINT_LIGHTS);
@@ -487,38 +512,50 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-#if 0
-		renderGraphData->CompositePassTarget->Bind();
-		const glm::vec4 tonemappingParams = { static_cast<int>(Tonemapping), Exposure, 0.0f, 0.0f };
-
-		/*
-		s_HdrShader->SetData("u_TonemappParams", tonemappingParams);
-		s_HdrShader->SetData("u_BloomStrength", UseBloom ? BloomStrength : -1.0f);
-		s_HdrShader->SetData("u_Texture", 0);
-		s_HdrShader->SetData("u_BloomTexture", 1);
-		s_HdrShader->SetData("u_VignetteMask", 2);
-		*/
-
-		if (UseFXAA)
-			renderGraphData->FXAAPassTarget->BindColorAttachment(0, 0);
-		else
-			renderGraphData->LightingPassTarget->BindColorAttachment(0, 0);
-
-		if (UseBloom)
-			renderGraphData->UpsampledFramebuffers[0]->BindColorAttachment(0, 1);
-
-		/* 
-		if (VignetteOffset.a > 0.0f)
+		GraphicsCommandList cl = RenderCommand::BeginRecordingCommandList();
+		renderGraphData->CompositePassTarget->Bind(cl);
+		renderGraphData->CompositePassTarget->Clear(cl);
+		if (s_Renderer3DData->CompositePipeline->Bind(cl))
 		{
-			s_HdrShader->SetData("u_VignetteColor", VignetteColor);
-			if (VignetteMask)
-				VignetteMask->Bind(2);
-		}
-		s_HdrShader->SetData("u_VignetteOffset", VignetteOffset);
-		*/
+			CompositeShaderProperties props =
+			{
+				.VignetteColor = VignetteColor,
+				.VignetteOffset = VignetteOffset,
+				.TonemapExposure = Exposure,
+				.TonemapType = static_cast<uint32_t>(Tonemapping),
 
-		DrawQuad();
-#endif
+				.MainTexture = renderGraphData->LightingPassTarget->GetColorAttachmentHeapIndex(0),
+				.VignetteMask = VignetteMask ? VignetteMask->GetHeapIndex() : 0xFFFFFFFF,
+			};
+			s_Renderer3DData->CompositePipeline->SetCBData(cl, CRC32("Properties"), &props, sizeof(CompositeShaderProperties));
+
+			/*
+			s_HdrShader->SetData("u_TonemappParams", tonemappingParams);
+			s_HdrShader->SetData("u_BloomStrength", UseBloom ? BloomStrength : -1.0f);
+			s_HdrShader->SetData("u_Texture", 0);
+			s_HdrShader->SetData("u_BloomTexture", 1);
+			s_HdrShader->SetData("u_VignetteMask", 2);
+
+			if (UseFXAA)
+				renderGraphData->FXAAPassTarget->BindColorAttachment(0, 0);
+			else
+				renderGraphData->LightingPassTarget->BindColorAttachment(0, 0);
+
+			if (UseBloom)
+				renderGraphData->UpsampledFramebuffers[0]->BindColorAttachment(0, 1);
+
+			if (VignetteOffset.a > 0.0f)
+			{
+				s_HdrShader->SetData("u_VignetteColor", VignetteColor);
+				if (VignetteMask)
+					VignetteMask->Bind(2);
+			}
+			s_HdrShader->SetData("u_VignetteOffset", VignetteOffset);
+			*/
+
+			DrawQuad(cl);
+			RenderCommand::EndRecordingCommandList(cl);
+		}
 	}
 
 	void Renderer3D::BloomPass([[maybe_unused]] const Ref<RenderGraphData>& renderGraphData)

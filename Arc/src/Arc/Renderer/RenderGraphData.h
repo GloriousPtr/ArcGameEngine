@@ -15,7 +15,7 @@ namespace ArcEngine
 
 	struct RenderGraphData
 	{
-		//Ref<Framebuffer> CompositePassTarget;
+		Ref<Framebuffer> CompositePassTarget;
 		Ref<Framebuffer> RenderPassTarget;
 		Ref<Framebuffer> LightingPassTarget;
 		//Ref<Framebuffer> FXAAPassTarget;
@@ -38,7 +38,6 @@ namespace ArcEngine
 				height = 1;
 			}
 			
-			/*
 			{
 				FramebufferSpecification spec;
 				spec.Attachments = { FramebufferTextureFormat::R11G11B10F, FramebufferTextureFormat::Depth };
@@ -47,7 +46,7 @@ namespace ArcEngine
 				spec.Name = "Composite Pass Framebuffer";
 				CompositePassTarget = Framebuffer::Create(spec);
 			}
-			*/
+			
 			{
 				FramebufferSpecification spec;
 				spec.Attachments = {
@@ -111,7 +110,7 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE();
 
-			//CompositePassTarget->Resize(width, height);
+			CompositePassTarget->Resize(width, height);
 			RenderPassTarget->Resize(width, height);
 			LightingPassTarget->Resize(width, height);
 			//FXAAPassTarget->Resize(width, height);

@@ -119,7 +119,7 @@ namespace ArcEngine
 					.Primitive = PrimitiveType::Triangle,
 					.FillMode = FillModeType::Solid,
 					.DepthFormat = FramebufferTextureFormat::None,
-					.OutputFormats = { FramebufferTextureFormat::RGBA8 }
+					.OutputFormats = { FramebufferTextureFormat::R11G11B10F }
 				}
 			};
 			s_Renderer2DData->TexturePipeline = pipelineLibrary.Load("assets/shaders/Texture.hlsl", texture2dPippelineSpec);
@@ -137,7 +137,7 @@ namespace ArcEngine
 					.Primitive = PrimitiveType::Line,
 					.FillMode = FillModeType::Solid,
 					.DepthFormat = FramebufferTextureFormat::None,
-					.OutputFormats = { FramebufferTextureFormat::RGBA8 }
+					.OutputFormats = { FramebufferTextureFormat::R11G11B10F }
 				}
 			};
 			s_Renderer2DData->LinePipeline = pipelineLibrary.Load("assets/shaders/Line.hlsl", linePippelineSpec);
@@ -156,12 +156,15 @@ namespace ArcEngine
 		s_Renderer2DData.reset();
 	}
 
-	void Renderer2D::BeginScene(const CameraData& viewProjection, Ref<Framebuffer>& renderTarget)
+	void Renderer2D::BeginScene(const CameraData& viewProjection, Ref<Framebuffer>& renderTarget, bool clearRenderTarget)
 	{
 		ARC_PROFILE_SCOPE();
 
 		s_Renderer2DData->RenderTarget = renderTarget;
+
 		s_Renderer2DData->CommandList = RenderCommand::BeginRecordingCommandList();
+		if (clearRenderTarget)
+			s_Renderer2DData->RenderTarget->Clear(s_Renderer2DData->CommandList);
 		if (s_Renderer2DData->TexturePipeline->Bind(s_Renderer2DData->CommandList))
 			s_Renderer2DData->TexturePipeline->SetCBData(s_Renderer2DData->CommandList, CRC32("GlobalData"), &viewProjection, sizeof(CameraData));
 

@@ -14,22 +14,18 @@ namespace ArcEngine
 	void RendererSettingsPanel::OnImGuiRender()
 	{
 		ARC_PROFILE_SCOPE();
-#if 0
 		if (OnBegin())
 		{
 			UI::BeginProperties();
 			{
 				UI::Property("Exposure", Renderer3D::Exposure, 0.0f, 0.0f, "Sets the exposure value.");
-
-				const char* tonemapTypeStrings[] = { "None", "ACES", "Filmic", "Uncharted" };
-				int index = static_cast<int>(Renderer3D::Tonemapping);
-				if (UI::Property("Tonemapping", index, tonemapTypeStrings, 4, "Choose the desired tonemapping algorithm."))
-					Renderer3D::Tonemapping = static_cast<Renderer3D::TonemappingType>(index);
+				UI::PropertyEnum<Renderer3D::TonemappingType>("Tonemapping", Renderer3D::Tonemapping, "Choose the desired tonemapping algorithm.");
 			}
 			UI::EndProperties();
 
 			constexpr ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
 
+#if 0
 			if (ImGui::TreeNodeEx("Bloom", treeNodeFlags))
 			{
 				UI::BeginProperties();
@@ -62,6 +58,7 @@ namespace ArcEngine
 
 				ImGui::TreePop();
 			}
+#endif
 
 			if (ImGui::TreeNodeEx("Vignette", treeNodeFlags))
 			{
@@ -99,6 +96,5 @@ namespace ArcEngine
 
 			OnEnd();
 		}
-#endif
 	}
 }

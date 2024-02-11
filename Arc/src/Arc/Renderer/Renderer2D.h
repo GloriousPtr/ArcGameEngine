@@ -12,7 +12,7 @@ namespace ArcEngine
 		static void Init();
 		static void Shutdown();
 		
-		static void BeginScene(const CameraData& viewProjection, Ref<Framebuffer>& renderTarget);
+		static void BeginScene(const CameraData& viewProjection, Ref<Framebuffer>& renderTarget, bool clearRenderTarget);
 		static void EndScene();
 		static void Flush();
 

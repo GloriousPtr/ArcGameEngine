@@ -1169,11 +1169,13 @@ namespace ArcEngine
 				skylight = Entity(*view.begin(), this);
 		}
 		
+		bool shouldClearRenderPass = true;
 		{
 			const auto view = m_Registry.view<MeshComponent>();
 			if (!lights.empty() || skylight || view.size() > 0)
 			{
 				// Meshes
+				shouldClearRenderPass = false;
 				Renderer3D::ReserveMeshes(view.size());
 				Renderer3D::BeginScene(cameraData, skylight, eastl::move(lights));
 				{
@@ -1192,7 +1194,7 @@ namespace ArcEngine
 			}
 		}
 		
-		Renderer2D::BeginScene(cameraData, renderGraphData->RenderPassTarget);
+		Renderer2D::BeginScene(cameraData, renderGraphData->CompositePassTarget, shouldClearRenderPass);
 		{
 			ARC_PROFILE_SCOPE_NAME("Submit Particle Data");
 

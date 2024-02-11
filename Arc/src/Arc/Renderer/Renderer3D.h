@@ -50,29 +50,16 @@ namespace ArcEngine
 		static void RenderPass(const Ref<Framebuffer>& renderTarget);
 		static void ShadowMapPass();
 
-#if 0
-	private:
-		static Ref<PipelineState> s_LightingShader;
-		static Ref<PipelineState> s_ShadowMapShader;
-		static Ref<PipelineState> s_CubemapShader;
-		static Ref<PipelineState> s_GaussianBlurShader;
-		static Ref<PipelineState> s_FxaaShader;
-		static Ref<PipelineState> s_HdrShader;
-		static Ref<PipelineState> s_BloomShader;
-		static Ref<VertexArray> s_QuadVertexArray;
-		static Ref<VertexBuffer> s_CubeVertexBuffer;
-		static Ref<ConstantBuffer> s_UbPointLights;
-		static Ref<ConstantBuffer> s_UbDirectionalLights;
-
-		static Entity s_Skylight;
-		static eastl::vector<Entity> s_SceneLights;
-
 	public:
 
 		enum class TonemappingType { None = 0, ACES, Filmic, Uncharted };
 
 		static TonemappingType Tonemapping;
 		static float Exposure;
+		static glm::vec4 VignetteColor;			// rgb: color, a: intensity
+		static glm::vec4 VignetteOffset;		// xy: offset, z: useMask, w: enable/disable effect
+		static Ref<Texture2D> VignetteMask;
+#if 0
 		static bool UseBloom;
 		static float BloomStrength;
 		static float BloomThreshold;
@@ -80,9 +67,6 @@ namespace ArcEngine
 		static float BloomClamp;
 		static bool UseFXAA;
 		static glm::vec2 FXAAThreshold;			// x: current threshold, y: relative threshold
-		static glm::vec4 VignetteColor;			// rgb: color, a: intensity
-		static glm::vec4 VignetteOffset;		// xy: offset, z: useMask, w: enable/disable effect
-		static Ref<Texture2D> VignetteMask;
 #endif
 	};
 }
