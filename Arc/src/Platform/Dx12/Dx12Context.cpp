@@ -98,6 +98,7 @@ namespace ArcEngine
 	inline static eastl::stack<D3D12GraphicsCommandList*> s_CommandLists[Dx12Context::FrameCount];
 	inline static eastl::vector<D3D12GraphicsCommandList*> s_CommandListsToSubmit[Dx12Context::FrameCount];
 	inline static eastl::hash_map<D3D12GraphicsCommandList*, ID3D12CommandAllocator*> s_CommandListAllocatorMap[Dx12Context::FrameCount];
+	inline static std::mutex s_CommandListMtx;
 	inline static Dx12Frame s_Frames[Dx12Context::FrameCount];
 
 	inline static ID3D12Fence* s_Fence = nullptr;
@@ -403,11 +404,13 @@ namespace ArcEngine
 
 		{
 			ARC_PROFILE_SCOPE_NAME("CommandListsBookKeeping");
+			s_CommandListMtx.lock();
 			for (D3D12GraphicsCommandList* cmdList : s_CommandListsToSubmit[frameIndex])
 			{
 				s_CommandLists[frameIndex].push(cmdList);
 			}
 			s_CommandListsToSubmit[frameIndex].clear();
+			s_CommandListMtx.unlock();
 		}
 
 		const Dx12Frame& backFrame = s_Frames[s_FrameIndex];
@@ -467,15 +470,16 @@ namespace ArcEngine
 		const Dx12Frame& backFrame = s_Frames[s_FrameIndex];
 		const uint32_t frameIndex = s_FrameIndex;
 
+		s_CommandListMtx.lock();
 		ARC_CORE_ASSERT(s_CommandLists[frameIndex].size() > 0, "Not enough command lists in pool");
+		D3D12GraphicsCommandList* commandList = s_CommandLists[frameIndex].top();
+		s_CommandLists[frameIndex].pop();
+		ID3D12CommandAllocator* cmdAllocator = s_CommandListAllocatorMap[frameIndex].at(commandList);
+		s_CommandListMtx.unlock();
 
 		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<float>(s_Width), static_cast<float>(s_Height), 0.0f, 1.0f };
 		const D3D12_RECT scissorRect = { 0, 0, static_cast<long>(s_Width), static_cast<long>(s_Height) };
 
-		D3D12GraphicsCommandList* commandList = s_CommandLists[frameIndex].top();
-		s_CommandLists[frameIndex].pop();
-
-		ID3D12CommandAllocator* cmdAllocator = s_CommandListAllocatorMap[frameIndex].at(commandList);
 		cmdAllocator->Reset();
 		commandList->Reset(cmdAllocator, nullptr);
 
@@ -504,7 +508,9 @@ namespace ArcEngine
 			const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(s_Frames[s_FrameIndex].RtvBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 			cmdList->ResourceBarrier(1, &barrier);
 			cmdList->Close();
+			s_CommandListMtx.lock();
 			s_CommandListsToSubmit[s_FrameIndex].emplace_back(cmdList);
+			s_CommandListMtx.unlock();
 		}
 	}
 
@@ -573,7 +579,9 @@ namespace ArcEngine
 		s_CommandQueue->ExecuteCommandLists(1, commandLists);
 		WaitForGpu();
 
+		s_CommandListMtx.lock();
 		s_CommandLists[s_FrameIndex].push(cmdList);
+		s_CommandListMtx.unlock();
 	}
 
 	void Dx12Context::WaitForGpu()

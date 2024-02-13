@@ -26,8 +26,10 @@ cbuffer Properties : register(b0, space1)
 	float4 VignetteOffset; // xy: offset, z: useMask, w: enable/disable effect
 	float TonemapExposure;
 	uint TonemapType; // 0 None/ExposureBased, 1: ACES, 2: Filmic, 3: Uncharted
+	float BloomStrength;
 	
 	uint MainTexture;
+	uint BloomTexture;
 	uint VignetteMask;
 }
 
@@ -80,6 +82,10 @@ float4 PS_Main(VertexOut i) : SV_TARGET
 	
 	Texture2D mainTex = ResourceDescriptorHeap[MainTexture];
 	float3 color = mainTex.Sample(Sampler, i.UV).rgb;
+	
+	Texture2D bloomTex = ResourceDescriptorHeap[BloomTexture];
+	if (BloomStrength > 0.0f)
+		color += bloomTex.Sample(Sampler, i.UV).rgb * BloomStrength;
 	
 	// tone mapping
 	float3 result = float3(1.0, 0.0, 1.0);

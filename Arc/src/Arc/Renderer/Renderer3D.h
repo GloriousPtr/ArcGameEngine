@@ -59,12 +59,12 @@ namespace ArcEngine
 		static glm::vec4 VignetteColor;			// rgb: color, a: intensity
 		static glm::vec4 VignetteOffset;		// xy: offset, z: useMask, w: enable/disable effect
 		static Ref<Texture2D> VignetteMask;
-#if 0
 		static bool UseBloom;
 		static float BloomStrength;
 		static float BloomThreshold;
 		static float BloomKnee;
 		static float BloomClamp;
+#if 0
 		static bool UseFXAA;
 		static glm::vec2 FXAAThreshold;			// x: current threshold, y: relative threshold
 #endif

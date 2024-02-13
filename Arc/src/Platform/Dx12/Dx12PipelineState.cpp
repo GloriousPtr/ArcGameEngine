@@ -234,13 +234,16 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		for (auto& [slot, cb] : m_ConstantBufferMap)
+		for (auto& [slot, cbs] : m_ConstantBufferMap)
 		{
-			for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
+			for (auto& cb : cbs)
 			{
-				Dx12Context::GetSrvHeap()->Free(cb.Handle[i]);
-				if (cb.Allocation[i])
-					Dx12Context::DeferredRelease(cb.Allocation[i]);
+				for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
+				{
+					Dx12Context::GetSrvHeap()->Free(cb.Handle[i]);
+					if (cb.Allocation[i])
+						Dx12Context::DeferredRelease(cb.Allocation[i]);
+				}
 			}
 		}
 
@@ -263,13 +266,16 @@ namespace ArcEngine
 	void Dx12PipelineState::Recompile(const Ref<Shader>& shader)
 	{
 
-		for (auto& [slot, cb] : m_ConstantBufferMap)
+		for (auto& [slot, cbs] : m_ConstantBufferMap)
 		{
-			for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
+			for (auto& cb : cbs)
 			{
-				Dx12Context::GetSrvHeap()->Free(cb.Handle[i]);
-				if (cb.Allocation[i])
-					Dx12Context::DeferredRelease(cb.Allocation[i]);
+				for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
+				{
+					Dx12Context::GetSrvHeap()->Free(cb.Handle[i]);
+					if (cb.Allocation[i])
+						Dx12Context::DeferredRelease(cb.Allocation[i]);
+				}
 			}
 		}
 
@@ -482,11 +488,12 @@ namespace ArcEngine
 		}
 
 
-		constexpr uint32_t numSamplers = 3;
+		constexpr uint32_t numSamplers = 4;
 		CD3DX12_STATIC_SAMPLER_DESC samplers[numSamplers];
 		samplers[0].Init(0, D3D12_FILTER_ANISOTROPIC);
 		samplers[1].Init(1, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_WRAP);
 		samplers[2].Init(2, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		samplers[3].Init(3, D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
 		// Create root signature.
 		D3D12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc
@@ -694,11 +701,12 @@ namespace ArcEngine
 			m_CrcBufferMap.emplace(CRC32_Runtime(name), slot);
 		}
 
-		constexpr uint32_t numSamplers = 3;
+		constexpr uint32_t numSamplers = 4;
 		CD3DX12_STATIC_SAMPLER_DESC samplers[numSamplers];
 		samplers[0].Init(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
 		samplers[1].Init(1, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 		samplers[2].Init(2, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		samplers[3].Init(3, D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
 		// Create root signature.
 		D3D12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc
@@ -750,7 +758,7 @@ namespace ArcEngine
 			m_PipelineState->SetName(shaderName);
 	}
 
-	void Dx12PipelineState::RegisterCB(uint32_t crc, uint32_t size)
+	void Dx12PipelineState::RegisterCB(uint32_t crc, uint32_t size, uint32_t count)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -764,22 +772,28 @@ namespace ArcEngine
 		if (m_ConstantBufferMap.find(crc) != m_ConstantBufferMap.end())
 			return;
 
-		ConstantBuffer& cb = m_ConstantBufferMap[crc];
+		eastl::vector<ConstantBuffer>& cbs = m_ConstantBufferMap[crc];
 
-		cb.RegisterIndex = it->second;
-		cb.AlignedSize = (size + 255) & ~255;
-
-		const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(cb.AlignedSize);
-
-		for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
+		for (uint32_t c = 0; c < count; ++c)
 		{
-			Dx12Allocator::CreateBufferResource(D3D12_HEAP_TYPE_UPLOAD, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, &(cb.Allocation[i]));
+			ConstantBuffer cb;
+			cb.RegisterIndex = it->second;
+			cb.AlignedSize = (size + 255) & ~255;
 
-			D3D12_CONSTANT_BUFFER_VIEW_DESC desc{};
-			desc.BufferLocation = cb.Allocation[i]->GetResource()->GetGPUVirtualAddress();
-			desc.SizeInBytes = cb.AlignedSize;
-			cb.Handle[i] = Dx12Context::GetSrvHeap()->Allocate();
-			Dx12Context::GetDevice()->CreateConstantBufferView(&desc, cb.Handle[i].CPU);
+			const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(cb.AlignedSize);
+
+			for (uint32_t i = 0; i < Dx12Context::FrameCount; ++i)
+			{
+				Dx12Allocator::CreateBufferResource(D3D12_HEAP_TYPE_UPLOAD, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, &(cb.Allocation[i]));
+
+				D3D12_CONSTANT_BUFFER_VIEW_DESC desc{};
+				desc.BufferLocation = cb.Allocation[i]->GetResource()->GetGPUVirtualAddress();
+				desc.SizeInBytes = cb.AlignedSize;
+				cb.Handle[i] = Dx12Context::GetSrvHeap()->Allocate();
+				Dx12Context::GetDevice()->CreateConstantBufferView(&desc, cb.Handle[i].CPU);
+			}
+
+			cbs.push_back(cb);
 		}
 	}
 
@@ -824,7 +838,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Dx12PipelineState::BindCB(GraphicsCommandList commandList, uint32_t crc)
+	void Dx12PipelineState::BindCB(GraphicsCommandList commandList, uint32_t crc, uint32_t index)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -835,7 +849,7 @@ namespace ArcEngine
 			return;
 		}
 
-		ConstantBuffer& cb = it->second;
+		ConstantBuffer& cb = it->second[index];
 
 		const D3D12_GPU_VIRTUAL_ADDRESS gpuVirtualAddress = cb.Allocation[Dx12Context::GetCurrentFrameIndex()]->GetResource()->GetGPUVirtualAddress();
 		reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->SetGraphicsRootConstantBufferView(cb.RegisterIndex, gpuVirtualAddress);
@@ -856,7 +870,7 @@ namespace ArcEngine
 		reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->SetGraphicsRootDescriptorTable(sb.RegisterIndex, sb.Handle[Dx12Context::GetCurrentFrameIndex()].GPU);
 	}
 	
-	void Dx12PipelineState::SetCBData(GraphicsCommandList commandList, uint32_t crc, const void* data, uint32_t size, uint32_t offset)
+	void Dx12PipelineState::SetCBData(GraphicsCommandList commandList, uint32_t crc, const void* data, uint32_t size, uint32_t index)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -867,12 +881,12 @@ namespace ArcEngine
 			return;
 		}
 
-		ConstantBuffer& cb = it->second;
+		ConstantBuffer& cb = it->second[index];
 
 		D3D12MA::Allocation* allocation = cb.Allocation[Dx12Context::GetCurrentFrameIndex()];
 		const D3D12_GPU_VIRTUAL_ADDRESS gpuVirtualAddress = allocation->GetResource()->GetGPUVirtualAddress();
 		reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->SetGraphicsRootConstantBufferView(cb.RegisterIndex, gpuVirtualAddress);
-		Dx12Utils::SetBufferData(allocation, data, size == 0 ? cb.AlignedSize : size, offset);
+		Dx12Utils::SetBufferData(allocation, data, size == 0 ? cb.AlignedSize : size, 0);
 	}
 	
 	void Dx12PipelineState::SetSBData(GraphicsCommandList commandList, uint32_t crc, const void* data, uint32_t size, uint32_t index)

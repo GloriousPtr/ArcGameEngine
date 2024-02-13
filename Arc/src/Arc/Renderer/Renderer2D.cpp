@@ -228,8 +228,6 @@ namespace ArcEngine
 					s_Renderer2DData->Stats.DrawCalls++;
 				}
 			}
-
-			s_Renderer2DData->RenderTarget->Unbind(commandList);
 		}
 	}
 

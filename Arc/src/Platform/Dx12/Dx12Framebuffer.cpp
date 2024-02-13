@@ -138,6 +138,30 @@ namespace ArcEngine
 
 		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
 
+		D3D12_RESOURCE_BARRIER barriers[20];
+		int numBarriers = 0;
+		eastl::vector<ColorFrame>& colorAttachments = m_ColorAttachments[backFrame];
+		for (ColorFrame& attachment : colorAttachments)
+		{
+			if (attachment.State == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE)
+			{
+				barriers[numBarriers] = CD3DX12_RESOURCE_BARRIER::Transition(attachment.Allocation->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+				attachment.State = D3D12_RESOURCE_STATE_RENDER_TARGET;
+				++numBarriers;
+			}
+		}
+		if (m_DepthAttachment[backFrame].Allocation)
+		{
+			if (m_DepthAttachment[backFrame].State == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE)
+			{
+				barriers[numBarriers] = CD3DX12_RESOURCE_BARRIER::Transition(m_DepthAttachment[backFrame].Allocation->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+				m_DepthAttachment[backFrame].State = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+				++numBarriers;
+			}
+		}
+		if (numBarriers > 0)
+			reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->ResourceBarrier(numBarriers, barriers);
+
 		const D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_DepthAttachment[backFrame].DsvHandle.CPU;
 		cmdList->OMSetRenderTargets(static_cast<UINT>(m_RtvHandles[backFrame].size()), m_RtvHandles[backFrame].data(), false, dsvHandle.ptr != 0 ? &dsvHandle : nullptr);
 
@@ -148,26 +172,29 @@ namespace ArcEngine
 		cmdList->RSSetScissorRects(1, &scissor);
 	}
 
-	void Dx12Framebuffer::Unbind(GraphicsCommandList commandList)
+	void Dx12Framebuffer::Transition(GraphicsCommandList commandList)
 	{
 		ARC_PROFILE_SCOPE();
 
-		TransitionTo(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
 
-		D3D12GraphicsCommandList* cmdList = reinterpret_cast<D3D12GraphicsCommandList*>(commandList);
-
-		const D3D12_CPU_DESCRIPTOR_HANDLE rtv = Dx12Context::GetRtv();
-		const uint32_t width = Dx12Context::GetWidth();
-		const uint32_t height = Dx12Context::GetHeight();
-
-		cmdList->OMSetRenderTargets(1, &rtv, true, nullptr);
-
-		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, (float)width, (float)height, 0.0f, 1.0f };
-		const D3D12_RECT scissorRect = { 0, 0, static_cast<LONG>(width), static_cast<LONG>(height) };
-		cmdList->RSSetViewports(1, &viewport);
-		cmdList->RSSetScissorRects(1, &scissorRect);
-
-		TransitionTo(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		D3D12_RESOURCE_BARRIER barriers[20];
+		int numBarriers = 0;
+		eastl::vector<ColorFrame>& colorAttachments = m_ColorAttachments[backFrame];
+		for (ColorFrame& attachment : colorAttachments)
+		{
+			barriers[numBarriers] = CD3DX12_RESOURCE_BARRIER::Transition(attachment.Allocation->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			attachment.State = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+			++numBarriers;
+		}
+		if (m_DepthAttachment[backFrame].Allocation)
+		{
+			barriers[numBarriers] = CD3DX12_RESOURCE_BARRIER::Transition(m_DepthAttachment[backFrame].Allocation->GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			m_DepthAttachment[backFrame].State = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+			++numBarriers;
+		}
+		if (numBarriers > 0)
+			reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->ResourceBarrier(numBarriers, barriers);
 	}
 
 	void Dx12Framebuffer::Clear(GraphicsCommandList commandList)
@@ -231,29 +258,5 @@ namespace ArcEngine
 			rtvHandles.clear();
 			
 		Invalidate();
-	}
-
-	void Dx12Framebuffer::TransitionTo(GraphicsCommandList commandList, D3D12_RESOURCE_STATES colorAttachmentState, D3D12_RESOURCE_STATES depthAttachmentState)
-	{
-		ARC_PROFILE_SCOPE();
-
-		const uint32_t backFrame = Dx12Context::GetCurrentFrameIndex();
-
-		D3D12_RESOURCE_BARRIER barriers[20];
-		int numBarriers = 0;
-		eastl::vector<ColorFrame>& colorAttachments = m_ColorAttachments[backFrame];
-		for (ColorFrame& attachment : colorAttachments)
-		{
-			barriers[numBarriers] = CD3DX12_RESOURCE_BARRIER::Transition(attachment.Allocation->GetResource(), attachment.State, colorAttachmentState);
-			attachment.State = colorAttachmentState;
-			++numBarriers;
-		}
-		if (m_DepthAttachment[backFrame].Allocation)
-		{
-			barriers[numBarriers] = CD3DX12_RESOURCE_BARRIER::Transition(m_DepthAttachment[backFrame].Allocation->GetResource(), m_DepthAttachment[backFrame].State, depthAttachmentState);
-			m_DepthAttachment[backFrame].State = depthAttachmentState;
-			++numBarriers;
-		}
-		reinterpret_cast<D3D12GraphicsCommandList*>(commandList)->ResourceBarrier(numBarriers, barriers);
 	}
 }

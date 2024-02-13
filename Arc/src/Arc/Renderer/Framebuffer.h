@@ -59,8 +59,8 @@ namespace ArcEngine
 		virtual ~Framebuffer() = default;
 		
 		virtual void Bind(GraphicsCommandList commandList) = 0;
-		virtual void Unbind(GraphicsCommandList commandList) = 0;
 		virtual void Clear(GraphicsCommandList commandList) = 0;
+		virtual void Transition(GraphicsCommandList commandList) = 0;
 
 		virtual void BindColorAttachment(GraphicsCommandList commandList, uint32_t index, uint32_t slot) = 0;
 		virtual void BindDepthAttachment(GraphicsCommandList commandList, uint32_t slot) = 0;

@@ -19,14 +19,14 @@ namespace ArcEngine
 		Ref<Framebuffer> RenderPassTarget;
 		Ref<Framebuffer> LightingPassTarget;
 		//Ref<Framebuffer> FXAAPassTarget;
-		/*
+		
 		static constexpr size_t MaxBlurSamples = 6;
 		size_t BlurSamples = MaxBlurSamples;
 		Ref<Framebuffer> PrefilteredFramebuffer;
 		Ref<Framebuffer> TempBlurFramebuffers[MaxBlurSamples];
 		Ref<Framebuffer> DownsampledFramebuffers[MaxBlurSamples];
 		Ref<Framebuffer> UpsampledFramebuffers[MaxBlurSamples];
-		*/
+		
 		RenderGraphData(uint32_t width, uint32_t height)
 		{
 			ARC_PROFILE_SCOPE();
@@ -73,7 +73,6 @@ namespace ArcEngine
 				//FXAAPassTarget = Framebuffer::Create(spec);
 			}
 
-			/*
 			width /= 2;
 			height /= 2;
 			FramebufferSpecification bloomSpec;
@@ -103,7 +102,6 @@ namespace ArcEngine
 				DownsampledFramebuffers[i] = Framebuffer::Create(blurSpec);
 				UpsampledFramebuffers[i] = Framebuffer::Create(blurSpec);
 			}
-			*/
 		}
 
 		void Resize(uint32_t width, uint32_t height)
@@ -114,7 +112,7 @@ namespace ArcEngine
 			RenderPassTarget->Resize(width, height);
 			LightingPassTarget->Resize(width, height);
 			//FXAAPassTarget->Resize(width, height);
-			/*
+			
 			width /= 2;
 			height /= 2;
 			PrefilteredFramebuffer->Resize(width, height);
@@ -134,7 +132,6 @@ namespace ArcEngine
 				DownsampledFramebuffers[i]->Resize(width, height);
 				UpsampledFramebuffers[i]->Resize(width, height);
 			}
-			*/
 		}
 	};
 }

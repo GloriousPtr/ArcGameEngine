@@ -75,14 +75,14 @@ namespace ArcEngine
 		[[nodiscard]] virtual eastl::vector<MaterialProperty>& GetMaterialProperties() = 0;
 		[[nodiscard]] virtual uint32_t GetSlot(const uint32_t crc) = 0;
 
-		virtual void RegisterCB(uint32_t crc, uint32_t size) = 0;
+		virtual void RegisterCB(uint32_t crc, uint32_t size, uint32_t count = 1) = 0;
 		virtual void RegisterSB(uint32_t crc, uint32_t stride, uint32_t count) = 0;
 
-		virtual void BindCB(GraphicsCommandList commandList, uint32_t crc) = 0;
+		virtual void BindCB(GraphicsCommandList commandList, uint32_t crc, uint32_t index = 0) = 0;
 		virtual void BindSB(GraphicsCommandList commandList, uint32_t crc) = 0;
 
 		virtual void SetRSData(GraphicsCommandList commandList, uint32_t crc, const void* data, uint32_t size, uint32_t offset = 0) = 0;
-		virtual void SetCBData(GraphicsCommandList commandList, uint32_t crc, const void* data, uint32_t size, uint32_t offset = 0) = 0;
+		virtual void SetCBData(GraphicsCommandList commandList, uint32_t crc, const void* data, uint32_t size, uint32_t index = 0) = 0;
 		virtual void SetSBData(GraphicsCommandList commandList, uint32_t crc, const void* data, uint32_t size, uint32_t index) = 0;
 
 	public:

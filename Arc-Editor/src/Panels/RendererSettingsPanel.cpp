@@ -25,7 +25,6 @@ namespace ArcEngine
 
 			constexpr ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
 
-#if 0
 			if (ImGui::TreeNodeEx("Bloom", treeNodeFlags))
 			{
 				UI::BeginProperties();
@@ -47,6 +46,8 @@ namespace ArcEngine
 
 				ImGui::TreePop();
 			}
+
+#if 0
 
 			if (ImGui::TreeNodeEx("FXAA", treeNodeFlags))
 			{

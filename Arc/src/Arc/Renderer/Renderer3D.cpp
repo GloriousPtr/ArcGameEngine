@@ -5,6 +5,7 @@
 #include "RenderGraphData.h"
 #include "Framebuffer.h"
 #include "Arc/Core/AssetManager.h"
+#include "Arc/Core/JobSystem.h"
 #include "Arc/Renderer/VertexArray.h"
 #include "Arc/Renderer/Material.h"
 #include "Arc/Renderer/Shader.h"
@@ -55,9 +56,26 @@ namespace ArcEngine
 		glm::vec4 VignetteOffset; // xy: offset, z: useMask, w: enable/disable effect
 		float TonemapExposure;
 		uint32_t TonemapType; // 0 None/ExposureBased, 1: ACES, 2: Filmic, 3: Uncharted
+		float BloomStrength;
 
 		uint32_t MainTexture;
+		uint32_t BloomTexture;
 		uint32_t VignetteMask;
+	};
+
+	struct BlooomShaderProperties
+	{
+		glm::vec4 Threshold; // x: threshold value (linear), y: knee, z: knee * 2, w: 0.25 / knee
+		glm::vec4 Params; // x: clamp, y: <1-unsampled, <2-downsample, <3-upsample, z: <1-prefilter, <=1-no prefilter, w: unused
+
+		uint32_t Texture;
+		uint32_t AdditiveTexture;
+	};
+
+	struct GaussianBlurhaderProperties
+	{
+		uint32_t MainTexture;
+		uint32_t Horizontal;
 	};
 
 	struct DirectionalLightData
@@ -92,7 +110,8 @@ namespace ArcEngine
 		Ref<PipelineState> CubemapPipeline;
 		Ref<PipelineState> LightingPipeline;
 		Ref<PipelineState> CompositePipeline;
-		GraphicsCommandList CommandList;
+		Ref<PipelineState> BloomPipeline;
+		Ref<PipelineState> GaussianBlurPipeline;
 
 		Ref<VertexBuffer> CubeVertexBuffer;
 		Ref<VertexArray> QuadVertexArray;
@@ -109,6 +128,11 @@ namespace ArcEngine
 	glm::vec4 Renderer3D::VignetteColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.25f);	// rgb: color, a: intensity
 	glm::vec4 Renderer3D::VignetteOffset = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);	// xy: offset, z: useMask, w: enable/disable effect
 	Ref<Texture2D> Renderer3D::VignetteMask = nullptr;
+	bool Renderer3D::UseBloom = true;
+	float Renderer3D::BloomStrength = 0.1f;
+	float Renderer3D::BloomThreshold = 1.0f;
+	float Renderer3D::BloomKnee = 0.1f;
+	float Renderer3D::BloomClamp = 100.0f;
 #if 0
 	Ref<PipelineState> Renderer3D::s_GaussianBlurShader;
 	Ref<PipelineState> Renderer3D::s_FxaaShader;
@@ -116,12 +140,6 @@ namespace ArcEngine
 	Ref<PipelineState> Renderer3D::s_BloomShader;
 
 	Ref<Texture2D> Renderer3D::s_BRDFLutTexture;
-
-	bool Renderer3D::UseBloom = true;
-	float Renderer3D::BloomStrength = 0.1f;
-	float Renderer3D::BloomThreshold = 1.0f;
-	float Renderer3D::BloomKnee = 0.1f;
-	float Renderer3D::BloomClamp = 100.0f;
 	bool Renderer3D::UseFXAA = true;
 	glm::vec2 Renderer3D::FXAAThreshold = glm::vec2(0.0078125f, 0.125f);		// x: current threshold, y: relative threshold
 #endif
@@ -187,6 +205,30 @@ namespace ArcEngine
 				.OutputFormats = { FramebufferTextureFormat::R11G11B10F }
 			}
 		});
+		s_Renderer3DData->BloomPipeline = pipelineLibrary.Load("assets/shaders/BloomPass.hlsl",
+		{
+			.Type = ShaderType::Pixel,
+			.GraphicsPipelineSpecs
+			{
+				.CullMode = CullModeType::Back,
+				.Primitive = PrimitiveType::Triangle,
+				.FillMode = FillModeType::Solid,
+				.DepthFormat = FramebufferTextureFormat::None,
+				.OutputFormats = { FramebufferTextureFormat::R11G11B10F }
+			}
+		});
+		s_Renderer3DData->GaussianBlurPipeline = pipelineLibrary.Load("assets/shaders/GaussianBlurShader.hlsl",
+		{
+			.Type = ShaderType::Pixel,
+			.GraphicsPipelineSpecs
+			{
+				.CullMode = CullModeType::Back,
+				.Primitive = PrimitiveType::Triangle,
+				.FillMode = FillModeType::Solid,
+				.DepthFormat = FramebufferTextureFormat::None,
+				.OutputFormats = { FramebufferTextureFormat::R11G11B10F }
+			}
+		});
 		s_Renderer3DData->CubemapPipeline = pipelineLibrary.Load("assets/shaders/Cubemap.hlsl",
 		{
 			.Type = ShaderType::Pixel,
@@ -205,6 +247,8 @@ namespace ArcEngine
 		s_Renderer3DData->LightingPipeline->RegisterCB(CRC32("GlobalData"), sizeof(GlobalData));
 		s_Renderer3DData->LightingPipeline->RegisterCB(CRC32("Properties"), sizeof(LightingShaderProperties));
 		s_Renderer3DData->CompositePipeline->RegisterCB(CRC32("Properties"), sizeof(CompositeShaderProperties));
+		s_Renderer3DData->BloomPipeline->RegisterCB(CRC32("Properties"), sizeof(BlooomShaderProperties), RenderGraphData::MaxBlurSamples + 1);
+		s_Renderer3DData->GaussianBlurPipeline->RegisterCB(CRC32("Properties"), sizeof(GaussianBlurhaderProperties), RenderGraphData::MaxBlurSamples * 2);
 		s_Renderer3DData->CubemapPipeline->RegisterCB(CRC32("SkyboxData"), sizeof(SkyboxData));
 		s_Renderer3DData->LightingPipeline->RegisterSB(CRC32("DirectionalLights"), sizeof(DirectionalLightData), MAX_NUM_DIR_LIGHTS);
 		s_Renderer3DData->LightingPipeline->RegisterSB(CRC32("PointLights"), sizeof(PointLightData), MAX_NUM_POINT_LIGHTS);
@@ -389,11 +433,16 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		ShadowMapPass();
-		RenderPass(renderGraphData->RenderPassTarget);
-		LightingPass(renderGraphData);
-		BloomPass(renderGraphData);
+		JobSystem::Execute([&renderGraphData]() {
+			ShadowMapPass();
+			RenderPass(renderGraphData->RenderPassTarget);
+			LightingPass(renderGraphData);
+		});
+		JobSystem::Execute([&renderGraphData]() {
+			BloomPass(renderGraphData);
+		});
 		FXAAPass(renderGraphData);
+		JobSystem::Wait();
 		CompositePass(renderGraphData);
 	}
 
@@ -523,8 +572,10 @@ namespace ArcEngine
 				.VignetteOffset = VignetteOffset,
 				.TonemapExposure = Exposure,
 				.TonemapType = static_cast<uint32_t>(Tonemapping),
+				.BloomStrength = BloomStrength,
 
 				.MainTexture = renderGraphData->LightingPassTarget->GetColorAttachmentHeapIndex(0),
+				.BloomTexture = UseBloom ? renderGraphData->UpsampledFramebuffers[0]->GetColorAttachmentHeapIndex(0) : 0xFFFFFFFF,
 				.VignetteMask = VignetteMask ? VignetteMask->GetHeapIndex() : 0xFFFFFFFF,
 			};
 			s_Renderer3DData->CompositePipeline->SetCBData(cl, CRC32("Properties"), &props, sizeof(CompositeShaderProperties));
@@ -562,22 +613,29 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-#if 0
 		if (!UseBloom)
 			return;
 
 		const glm::vec4 threshold = { BloomThreshold, BloomKnee, BloomKnee * 2.0f, 0.25f / BloomKnee };
 		glm::vec4 params = { BloomClamp, 2.0f, 0.0f, 0.0f };
 
+		GraphicsCommandList cl = RenderCommand::BeginRecordingCommandList();
 		{
 			ARC_PROFILE_SCOPE_NAME("Prefilter");
 
-			renderGraphData->PrefilteredFramebuffer->Bind();
-			//s_BloomShader->SetData("u_Threshold", threshold);
-			//s_BloomShader->SetData("u_Params", params);
-			//s_BloomShader->SetData("u_Texture", 0);
-			renderGraphData->LightingPassTarget->BindColorAttachment(0, 0);
-			DrawQuad();
+			renderGraphData->PrefilteredFramebuffer->Bind(cl);
+			if (s_Renderer3DData->BloomPipeline->Bind(cl))
+			{
+				BlooomShaderProperties props =
+				{
+					.Threshold = threshold,
+					.Params = params,
+					.Texture = renderGraphData->LightingPassTarget->GetColorAttachmentHeapIndex(0),
+				};
+				s_Renderer3DData->BloomPipeline->SetCBData(cl, CRC32("Properties"), &props, sizeof(BlooomShaderProperties), 0);
+				DrawQuad(cl);
+				renderGraphData->PrefilteredFramebuffer->Transition(cl);
+			}
 		}
 
 		const size_t blurSamples = renderGraphData->BlurSamples;
@@ -585,57 +643,77 @@ namespace ArcEngine
 		{
 			ARC_PROFILE_SCOPE_NAME("Downsample");
 
-			//s_GaussianBlurShader->SetData("u_Texture", 0);
-			for (size_t i = 0; i < blurSamples; i++)
+			if (s_Renderer3DData->GaussianBlurPipeline->Bind(cl))
 			{
-				renderGraphData->TempBlurFramebuffers[i]->Bind();
-				//s_GaussianBlurShader->SetData("u_Horizontal", static_cast<int>(true));
-				if (i == 0)
-					renderGraphData->PrefilteredFramebuffer->BindColorAttachment(0, 0);
-				else
-					renderGraphData->DownsampledFramebuffers[i - 1]->BindColorAttachment(0, 0);
-				DrawQuad();
+				GaussianBlurhaderProperties props;
+				uint32_t offset = 0;
+				for (size_t i = 0; i < blurSamples; i++)
+				{
+					renderGraphData->TempBlurFramebuffers[i]->Bind(cl);
+					props.Horizontal = 1;
+					if (i == 0)
+						props.MainTexture = renderGraphData->PrefilteredFramebuffer->GetColorAttachmentHeapIndex(0);
+					else
+						props.MainTexture = renderGraphData->DownsampledFramebuffers[i - 1]->GetColorAttachmentHeapIndex(0);
+					s_Renderer3DData->GaussianBlurPipeline->SetCBData(cl, CRC32("Properties"), &props, sizeof(GaussianBlurhaderProperties), offset);
+					DrawQuad(cl);
+					renderGraphData->TempBlurFramebuffers[i]->Transition(cl);
 
-				renderGraphData->DownsampledFramebuffers[i]->Bind();
-				//s_GaussianBlurShader->SetData("u_Horizontal", static_cast<int>(false));
-				renderGraphData->TempBlurFramebuffers[i]->BindColorAttachment(0, 0);
-				DrawQuad();
+					renderGraphData->DownsampledFramebuffers[i]->Bind(cl);
+					props.Horizontal = 0;
+					props.MainTexture = renderGraphData->TempBlurFramebuffers[i]->GetColorAttachmentHeapIndex(0);
+					s_Renderer3DData->GaussianBlurPipeline->SetCBData(cl, CRC32("Properties"), &props, sizeof(GaussianBlurhaderProperties), offset + 1);
+					DrawQuad(cl);
+					renderGraphData->DownsampledFramebuffers[i]->Transition(cl);
+
+					offset += 2;
+				}
 			}
 		}
 		
 		{
 			ARC_PROFILE_SCOPE_NAME("Upsample");
 
-			//s_BloomShader->SetData("u_Threshold", threshold);
-			params = glm::vec4(BloomClamp, 3.0f, 1.0f, 1.0f);
-			//s_BloomShader->SetData("u_Params", params);
-			//s_BloomShader->SetData("u_Texture", 0);
-			//s_BloomShader->SetData("u_AdditiveTexture", 1);
-			const size_t upsampleCount = blurSamples - 1;
-			for (size_t i = upsampleCount; i > 0; i--)
+			if (s_Renderer3DData->BloomPipeline->Bind(cl))
 			{
-				renderGraphData->UpsampledFramebuffers[i]->Bind();
-			
-				if (i == upsampleCount)
+				params = glm::vec4(BloomClamp, 3.0f, 1.0f, 1.0f);
+				BlooomShaderProperties props =
 				{
-					renderGraphData->DownsampledFramebuffers[upsampleCount]->BindColorAttachment(0, 0);
-					renderGraphData->DownsampledFramebuffers[upsampleCount - 1]->BindColorAttachment(0, 1);
-				}
-				else
+					.Threshold = threshold,
+					.Params = params,
+				};
+				const size_t upsampleCount = blurSamples - 1;
+				uint32_t offset = 1;
+				for (size_t i = upsampleCount; i > 0; i--)
 				{
-					renderGraphData->DownsampledFramebuffers[i]->BindColorAttachment(0, 0);
-					renderGraphData->UpsampledFramebuffers[i + 1]->BindColorAttachment(0, 1);
-				}
-				DrawQuad();
-			}
+					renderGraphData->UpsampledFramebuffers[i]->Bind(cl);
 
-			renderGraphData->UpsampledFramebuffers[0]->Bind();
-			params = glm::vec4(BloomClamp, 3.0f, 1.0f, 0.0f);
-			//s_BloomShader->SetData("u_Params", params);
-			renderGraphData->UpsampledFramebuffers[1]->BindColorAttachment(0, 0);
-			DrawQuad();
+					if (i == upsampleCount)
+					{
+						props.Texture = renderGraphData->DownsampledFramebuffers[upsampleCount]->GetColorAttachmentHeapIndex(0);
+						props.AdditiveTexture = renderGraphData->DownsampledFramebuffers[upsampleCount - 1]->GetColorAttachmentHeapIndex(0);
+					}
+					else
+					{
+						props.Texture = renderGraphData->DownsampledFramebuffers[i]->GetColorAttachmentHeapIndex(0);
+						props.AdditiveTexture = renderGraphData->UpsampledFramebuffers[i + 1]->GetColorAttachmentHeapIndex(0);
+					}
+					s_Renderer3DData->BloomPipeline->SetCBData(cl, CRC32("Properties"), &props, sizeof(BlooomShaderProperties), offset);
+					DrawQuad(cl);
+					renderGraphData->UpsampledFramebuffers[i]->Transition(cl);
+
+					offset++;
+				}
+
+				renderGraphData->UpsampledFramebuffers[0]->Bind(cl);
+				props.Params = glm::vec4(BloomClamp, 3.0f, 1.0f, 0.0f);
+				props.Texture = renderGraphData->UpsampledFramebuffers[1]->GetColorAttachmentHeapIndex(0);
+				s_Renderer3DData->BloomPipeline->SetCBData(cl, CRC32("Properties"), &props, sizeof(BlooomShaderProperties), offset);
+				DrawQuad(cl);
+				renderGraphData->UpsampledFramebuffers[0]->Transition(cl);
+			}
 		}
-#endif
+		RenderCommand::EndRecordingCommandList(cl);
 	}
 
 	void Renderer3D::LightingPass(const Ref<RenderGraphData>& renderGraphData)
@@ -667,8 +745,8 @@ namespace ArcEngine
 		}
 
 		GraphicsCommandList cl = RenderCommand::BeginRecordingCommandList();
-		renderGraphData->LightingPassTarget->Clear(cl);
 		renderGraphData->LightingPassTarget->Bind(cl);
+		renderGraphData->LightingPassTarget->Clear(cl);
 		if (s_Renderer3DData->LightingPipeline->Bind(cl))
 		{
 			s_Renderer3DData->LightingPipeline->BindCB(cl, CRC32("GlobalData"));
@@ -678,7 +756,6 @@ namespace ArcEngine
 			s_Renderer3DData->LightingPipeline->BindSB(cl, CRC32("SpotLights"));
 			DrawQuad(cl);
 		}
-		renderGraphData->LightingPassTarget->Unbind(cl);
 		RenderCommand::EndRecordingCommandList(cl);
 
 #if 0
@@ -750,8 +827,8 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		GraphicsCommandList cl = RenderCommand::BeginRecordingCommandList();
-		renderTarget->Clear(cl);
 		renderTarget->Bind(cl);
+		renderTarget->Clear(cl);
 
 		if (s_Renderer3DData->Skylight)
 		{
@@ -787,7 +864,6 @@ namespace ArcEngine
 			}
 		}
 
-		renderTarget->Unbind(cl);
 		RenderCommand::EndRecordingCommandList(cl);
 	}
 
@@ -807,8 +883,8 @@ namespace ArcEngine
 				if (light.Type != LightComponent::LightType::Directional)
 					continue;
 
-				light.ShadowMapFramebuffer->Clear(cl);
 				light.ShadowMapFramebuffer->Bind(cl);
+				light.ShadowMapFramebuffer->Clear(cl);
 
 				glm::mat4 worldTransform = lightEntity.GetWorldTransform();
 				glm::vec4 zDir(0.0f, 0.0f, 1.0f, 0.0f);
@@ -825,8 +901,6 @@ namespace ArcEngine
 					s_Renderer3DData->DepthPipeline->SetRSData(cl, CRC32("Transform"), glm::value_ptr(meshData.Transform), sizeof(glm::mat4));
 					RenderCommand::DrawIndexed(cl, meshData.SubmeshGeometry.Geometry);
 				}
-
-				light.ShadowMapFramebuffer->Unbind(cl);
 			}
 		}
 

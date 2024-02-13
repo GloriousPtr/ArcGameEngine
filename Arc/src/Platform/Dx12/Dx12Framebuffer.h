@@ -25,7 +25,7 @@ namespace ArcEngine
 		void Invalidate();
 
 		void Bind(GraphicsCommandList commandList) override;
-		void Unbind(GraphicsCommandList commandList) override;
+		void Transition(GraphicsCommandList commandList) override;
 		void Clear(GraphicsCommandList commandList) override;
 		void BindColorAttachment(GraphicsCommandList commandList, uint32_t index, uint32_t slot) override;
 		void BindDepthAttachment(GraphicsCommandList commandList, uint32_t slot) override;
@@ -35,9 +35,6 @@ namespace ArcEngine
 		[[nodiscard]] uint32_t GetColorAttachmentHeapIndex(uint32_t index) const override { return m_ColorAttachments[Dx12Context::GetCurrentFrameIndex()][index].HeapIndex; }
 		[[nodiscard]] uint32_t GetDepthAttachmentHeapIndex() const override { return m_DepthAttachment[Dx12Context::GetCurrentFrameIndex()].HeapIndex; }
 		[[nodiscard]] const FramebufferSpecification& GetSpecification() const override { return m_Specification; }
-
-	private:
-		void TransitionTo(GraphicsCommandList commandList, D3D12_RESOURCE_STATES colorAttachmentState, D3D12_RESOURCE_STATES depthAttachmentState);
 
 	private:
 		FramebufferSpecification m_Specification;
