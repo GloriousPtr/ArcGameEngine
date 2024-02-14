@@ -92,4 +92,9 @@ namespace ArcEngine
 
 		m_Context->ExecuteCommandList(commandList);
 	}
+
+	void Dx12RendererAPI::Flush()
+	{
+		m_Context->Flush();
+	}
 }

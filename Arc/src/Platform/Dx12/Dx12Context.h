@@ -50,7 +50,10 @@ namespace ArcEngine
 		static uint32_t GetHeight();
 
 	private:
+		void Flush();
+		void Flush_Internal(bool swapBuffers);
 		static void WaitForGpu();
+
 		void CreateRTV() const;
 		void CreateSwapchain() const;
 		void ResizeSwapchain(uint32_t width, uint32_t height);

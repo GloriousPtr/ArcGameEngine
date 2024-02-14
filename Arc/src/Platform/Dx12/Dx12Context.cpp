@@ -340,6 +340,7 @@ namespace ArcEngine
 		// Create Fence
 		s_FenceEvent = CreateEvent(nullptr, false, false, nullptr);
 		s_Device->CreateFence(s_FenceValues[s_FrameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&s_Fence));
+		s_FenceValues[s_FrameIndex]++;
 
 		// Create allocators and command lists
 		for (uint32_t frameIdx = 0; frameIdx < Dx12Context::FrameCount; ++frameIdx)
@@ -368,57 +369,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		uint32_t frameIndex = s_FrameIndex;
-		{
-			ARC_PROFILE_SCOPE_NAME("ExecuteCommandLists");
-			ID3D12CommandList** cmdListsInUse = reinterpret_cast<ID3D12CommandList**>(s_CommandListsToSubmit[frameIndex].data());
-			s_CommandQueue->ExecuteCommandLists(static_cast<uint32_t>(s_CommandListsToSubmit[frameIndex].size()), cmdListsInUse);
-		}
-
-		{
-			ARC_PROFILE_CATEGORY("Present", ArcEngine::Profile::Category::Wait);
-			s_Swapchain->Present(m_SyncInterval, m_PresentFlags);
-		}
-
-		// Move to next frame
-		{
-			ARC_PROFILE_SCOPE_NAME("MoveToNextFrame");
-
-			// Schedule a Signal command in the queue.
-			const UINT64 currentFenceValue = s_FenceValues[s_FrameIndex];
-			s_CommandQueue->Signal(s_Fence, currentFenceValue);
-
-			// Update the frame index.
-			s_FrameIndex = s_Swapchain->GetCurrentBackBufferIndex();
-
-			// If the next frame is not ready to be rendered yet, wait until it is ready.
-			if (s_Fence->GetCompletedValue() < s_FenceValues[s_FrameIndex])
-			{
-				s_Fence->SetEventOnCompletion(s_FenceValues[s_FrameIndex], s_FenceEvent);
-				WaitForSingleObjectEx(s_FenceEvent, INFINITE, false);
-			}
-
-			// Set the fence value for the next frame.
-			s_FenceValues[s_FrameIndex] = currentFenceValue + 1;
-		}
-
-		{
-			ARC_PROFILE_SCOPE_NAME("CommandListsBookKeeping");
-			s_CommandListMtx.lock();
-			for (D3D12GraphicsCommandList* cmdList : s_CommandListsToSubmit[frameIndex])
-			{
-				s_CommandLists[frameIndex].push(cmdList);
-			}
-			s_CommandListsToSubmit[frameIndex].clear();
-			s_CommandListMtx.unlock();
-		}
-
-		const Dx12Frame& backFrame = s_Frames[s_FrameIndex];
-		if (backFrame.DeferedReleasesFlag || backFrame.DeferedReleasesFlagHandles)
-		{
-			WaitForGpu();
-			ProcessDeferredReleases(s_FrameIndex);
-		}
+		Flush_Internal(true);
 
 		if (m_ShouldResize)
 		{
@@ -594,6 +545,64 @@ namespace ArcEngine
 		WaitForSingleObjectEx(s_FenceEvent, INFINITE, false);
 
 		s_FenceValues[s_FrameIndex]++;
+	}
+
+	void Dx12Context::Flush()
+	{
+		Flush_Internal(false);
+	}
+
+	void Dx12Context::Flush_Internal(bool swapBuffers)
+	{
+		const uint32_t frameIndex = s_FrameIndex;
+
+		if (s_CommandListsToSubmit[frameIndex].empty())
+			return;
+
+		{
+			ARC_PROFILE_SCOPE_NAME("ExecuteCommandLists");
+			ID3D12CommandList** cmdListsInUse = reinterpret_cast<ID3D12CommandList**>(s_CommandListsToSubmit[frameIndex].data());
+			s_CommandQueue->ExecuteCommandLists(static_cast<uint32_t>(s_CommandListsToSubmit[frameIndex].size()), cmdListsInUse);
+		}
+
+		if (swapBuffers)
+		{
+			ARC_PROFILE_CATEGORY("Present", ArcEngine::Profile::Category::Wait);
+			s_Swapchain->Present(m_SyncInterval, m_PresentFlags);
+		}
+
+		// Move to next frame
+		{
+			ARC_PROFILE_SCOPE_NAME("MoveToNextFrame");
+
+			const UINT64 currentFenceValue = s_FenceValues[s_FrameIndex];
+			s_CommandQueue->Signal(s_Fence, currentFenceValue);
+			s_FrameIndex = s_Swapchain->GetCurrentBackBufferIndex();
+			if (s_Fence->GetCompletedValue() < s_FenceValues[s_FrameIndex])
+			{
+				s_Fence->SetEventOnCompletion(s_FenceValues[s_FrameIndex], s_FenceEvent);
+				WaitForSingleObjectEx(s_FenceEvent, INFINITE, false);
+			}
+			s_FenceValues[s_FrameIndex] = currentFenceValue + 1;
+		}
+
+		{
+			ARC_PROFILE_SCOPE_NAME("CommandListsBookKeeping");
+			s_CommandListMtx.lock();
+			for (D3D12GraphicsCommandList* cmdList : s_CommandListsToSubmit[frameIndex])
+			{
+				s_CommandLists[frameIndex].push(cmdList);
+			}
+			s_CommandListsToSubmit[frameIndex].clear();
+			s_CommandListMtx.unlock();
+		}
+
+		const Dx12Frame& backFrame = s_Frames[s_FrameIndex];
+		if (backFrame.DeferedReleasesFlag || backFrame.DeferedReleasesFlagHandles)
+		{
+			WaitForGpu();
+			ProcessDeferredReleases(s_FrameIndex);
+		}
 	}
 
 	void Dx12Context::CreateRTV() const

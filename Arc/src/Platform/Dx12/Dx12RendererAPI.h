@@ -23,6 +23,7 @@ namespace ArcEngine
 		GraphicsCommandList BeginRecordingCommandList() override;
 		void EndRecordingCommandList(GraphicsCommandList commandList, bool execute = false) override;
 		void ExecuteCommandList(GraphicsCommandList commandList) override;
+		void Flush() override;
 
 	private:
 		Dx12Context* m_Context = nullptr;

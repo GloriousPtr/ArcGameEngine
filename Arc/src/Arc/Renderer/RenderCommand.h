@@ -61,6 +61,11 @@ namespace ArcEngine
 			s_RendererAPI->ExecuteCommandList(commandList);
 		}
 
+		inline static void Flush()
+		{
+			s_RendererAPI->Flush();
+		}
+
 	private:
 		static Scope<RendererAPI> s_RendererAPI;
 	};

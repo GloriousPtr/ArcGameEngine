@@ -134,6 +134,9 @@ namespace ArcEngine
 
 		m_EditorCamera.OnUpdate(timestep);
 
+		// Need to flush GPU in case we are having multiple viewports!
+		RenderCommand::Flush();
+
 		// Update scene
 		if (m_SimulationRunning)
 		{
@@ -152,7 +155,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		//ImVec2 windowPadding = ImGui::GetStyle().WindowPadding;
+		ImVec2 windowPadding = ImGui::GetStyle().WindowPadding;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		if (OnBegin(ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))
@@ -297,7 +300,6 @@ namespace ArcEngine
 				ImGui::EndGroup();
 			}
 
-#if 0
 			// Showing mini camera viewport if selected entity has a CameraComponent
 			ImVec2 endCursorPos = ImGui::GetContentRegionMax();
 			EditorContext context = EditorLayer::GetInstance()->GetContext();
@@ -318,10 +320,8 @@ namespace ArcEngine
 						.Position = glm::vec4(selectedEntity.GetTransform().Translation, 1.0f)
 					};
 
-					m_MiniViewportRenderGraphData->RenderPassTarget->Bind();
-					m_MiniViewportRenderGraphData->CompositePassTarget->Clear();
+					RenderCommand::Flush();
 					m_Scene->OnRender(m_MiniViewportRenderGraphData, cameraData);
-					m_MiniViewportRenderGraphData->RenderPassTarget->Unbind();
 
 					ImGui::SetItemAllowOverlap();
 					const ImVec2 miniViewportSize = { m_ViewportSize.x * m_MiniViewportSizeMultiplier, m_ViewportSize.y * m_MiniViewportSizeMultiplier };
@@ -330,7 +330,6 @@ namespace ArcEngine
 					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), ImVec2{ miniViewportSize.x, miniViewportSize.y }, ARC_UI_UV_0, ARC_UI_UV_1, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
 				}
 			}
-#endif
 
 			OnEnd();
 		}

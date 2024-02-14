@@ -31,6 +31,7 @@ namespace ArcEngine
 		virtual GraphicsCommandList BeginRecordingCommandList() = 0;
 		virtual void EndRecordingCommandList(GraphicsCommandList commandList, bool execute = false) = 0;
 		virtual void ExecuteCommandList(GraphicsCommandList commandList) = 0;
+		virtual void Flush() = 0;
 
 		[[nodiscard]] static API GetAPI() { return s_API; }
 		[[nodiscard]] static Scope<RendererAPI> Create();
