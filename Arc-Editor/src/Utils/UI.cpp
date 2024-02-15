@@ -133,7 +133,9 @@ namespace ArcEngine
 			id = texture == nullptr ? 0 : texture->GetHRDRendererID();
 		if (id == 0)
 			id = AssetManager::BlackTexture()->GetRendererID();
-		ImGui::ImageButton(reinterpret_cast<ImTextureID>(id), { buttonSize, buttonSize }, ARC_UI_UV_0, ARC_UI_UV_1, 0);
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 0.0f });
+		ImGui::ImageButton("##TextureProperty", reinterpret_cast<ImTextureID>(id), { buttonSize, buttonSize }, ARC_UI_UV_0, ARC_UI_UV_1);
+		ImGui::PopStyleVar();
 		if (texture && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 		{
 			ImGui::BeginTooltip();
@@ -193,7 +195,9 @@ namespace ArcEngine
 			id = texture == nullptr ? 0 : texture->GetRendererID();
 		if (id == 0)
 			id = AssetManager::BlackTexture()->GetRendererID();
-		ImGui::ImageButton(reinterpret_cast<ImTextureID>(id), { buttonSize, buttonSize }, ARC_UI_UV_0, ARC_UI_UV_1, 0);
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 0.0f });
+		ImGui::ImageButton("##TextureProperty3D", reinterpret_cast<ImTextureID>(id), { buttonSize, buttonSize }, ARC_UI_UV_0, ARC_UI_UV_1);
+		ImGui::PopStyleVar();
 		if (texture && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
 		{
 			ImGui::BeginTooltip();

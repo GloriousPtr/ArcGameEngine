@@ -630,7 +630,7 @@ namespace ArcEngine
 		const ImVec2 region = ImGui::GetContentRegionAvail();
 		ImGui::InvisibleButton("##DragDropTargetAssetPanelBody", region);
 		
-		ImGui::SetItemAllowOverlap();
+		ImGui::SetNextItemAllowOverlap();
 		ImGui::SetCursorPos(cursorPos);
 
 		if (ImGui::BeginTable("BodyTable", columnCount, flags))
@@ -749,12 +749,12 @@ namespace ArcEngine
 
 					// Foreground Image
 					ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
-					ImGui::SetItemAllowOverlap();
+					ImGui::SetNextItemAllowOverlap();
 					ImGui::Image(whiteTexId, { backgroundThumbnailSize.x - padding * 2.0f, backgroundThumbnailSize.y - padding * 2.0f }, { 0, 0 }, { 1, 1 }, EditorTheme::WindowBgAlternativeColor);
 
 					// Thumbnail Image
 					ImGui::SetCursorPos({ cursorPos.x + thumbnailPadding * 0.75f, cursorPos.y + thumbnailPadding });
-					ImGui::SetItemAllowOverlap();
+					ImGui::SetNextItemAllowOverlap();
 					ImGui::Image(reinterpret_cast<ImTextureID>(textureId), { thumbnailSize, thumbnailSize }, ARC_UI_UV_0, ARC_UI_UV_1);
 
 					// Type Color frame

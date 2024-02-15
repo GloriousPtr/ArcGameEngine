@@ -323,7 +323,7 @@ namespace ArcEngine
 					RenderCommand::Flush();
 					m_Scene->OnRender(m_MiniViewportRenderGraphData, cameraData);
 
-					ImGui::SetItemAllowOverlap();
+					ImGui::SetNextItemAllowOverlap();
 					const ImVec2 miniViewportSize = { m_ViewportSize.x * m_MiniViewportSizeMultiplier, m_ViewportSize.y * m_MiniViewportSizeMultiplier };
 					ImGui::SetCursorPos({ endCursorPos.x - miniViewportSize.x - windowPadding.x, endCursorPos.y - miniViewportSize.y - windowPadding.y });
 					const uint64_t textureId = m_MiniViewportRenderGraphData->CompositePassTarget->GetColorAttachmentRendererID(0);
