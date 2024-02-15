@@ -641,6 +641,8 @@ namespace ArcEngine
 		IDXGISwapChain1* newSwapchain;
 		s_Factory->CreateSwapChainForHwnd(s_CommandQueue, m_Hwnd, &swapChainDesc, nullptr, nullptr, &newSwapchain);
 		s_Swapchain = reinterpret_cast<IDXGISwapChain4*>(newSwapchain);
+
+		s_Factory->MakeWindowAssociation(m_Hwnd, DXGI_MWA_NO_ALT_ENTER);
 		
 		CreateRTV();
 
