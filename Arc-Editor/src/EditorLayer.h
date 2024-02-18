@@ -74,11 +74,12 @@ namespace ArcEngine
 		eastl::vector<Scope<PropertiesPanel>> m_Properties;
 		eastl::vector<Scope<AssetPanel>> m_AssetPanels;
 
+		glm::vec2 m_LastMousePosition = glm::vec2(0.0f);
+		float m_TopMenuBarHeight = 6.0f;
 		bool m_ShowNewProjectModal = false;
 		bool m_ShowSceneHierarchyPanel = true;
+		bool m_Fullscreen = false;
 		bool m_ShowDemoWindow = false;
-		float m_TopMenuBarHeight = 6.0f;
-		glm::vec2 m_LastMousePosition = glm::vec2(0.0f);
 
 		static EditorLayer* s_Instance;
 	};
