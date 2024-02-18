@@ -162,11 +162,11 @@ namespace ArcEngine
 
 		JPH::RegisterTypes();
 
-		s_Physics3DData->TempAllocator = CreateScope<JPH::TempAllocatorImpl>(10 * 1024 * 1024);
+		s_Physics3DData->TempAllocator = CreateScope<JPH::TempAllocatorImpl>(1000 * 1024 * 1024);
 		s_Physics3DData->JobSystem = CreateScope<JPH::JobSystemThreadPool>(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, static_cast<int>(JPH::thread::hardware_concurrency()) - 1);
-		constexpr JPH::uint cMaxBodies = 65536;
+		constexpr JPH::uint cMaxBodies = 6553600;
 		constexpr JPH::uint cNumBodyMutexes = 0;
-		constexpr JPH::uint cMaxBodyPairs = 65536;
+		constexpr JPH::uint cMaxBodyPairs = 6553600;
 		constexpr JPH::uint cMaxContactConstraints = 10240;
 
 		s_Physics3DData->BPLayerInterface = CreateScope<BPLayerInterfaceImpl>();
