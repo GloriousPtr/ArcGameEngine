@@ -56,7 +56,7 @@ namespace ArcEngine
 	};
 
 	static uint32_t numThreads = 0;
-	ThreadSafeRingBuffer<std::function<void()>, 256> jobPool;
+	ThreadSafeRingBuffer<eastl::function<void()>, 256> jobPool;
 	std::condition_variable wakeCondition;
 	std::mutex wakeMutex;
 	uint64_t currentLabel = 0;
@@ -73,7 +73,7 @@ namespace ArcEngine
 			std::thread worker([threadID]() {
 				std::wstring name = std::format(L"Worker {}", threadID);
 				ARC_PROFILE_THREAD(name.c_str());
-				std::function<void()> job;
+				eastl::function<void()> job;
 
 				while (true)
 				{
@@ -100,7 +100,7 @@ namespace ArcEngine
 		std::this_thread::yield();
 	}
 
-	void JobSystem::Execute(const std::function<void()>& job)
+	void JobSystem::Execute(const eastl::function<void()>& job)
 	{
 		currentLabel += 1;
 		while (!jobPool.push_back(job))
@@ -108,7 +108,7 @@ namespace ArcEngine
 		wakeCondition.notify_one();
 	}
 
-	void JobSystem::ExecuteParallel(uint32_t jobCount, uint32_t groupSize, const std::function<void(uint32_t jobIndex, uint32_t groupIndex)>& job)
+	void JobSystem::ExecuteParallel(uint32_t jobCount, uint32_t groupSize, const eastl::function<void(uint32_t jobIndex, uint32_t groupIndex)>& job)
 	{
 		if (jobCount == 0 || groupSize == 0)
 			return;

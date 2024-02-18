@@ -449,10 +449,7 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		eastl::string name = entity.GetComponent<TagComponent>().Tag;
-		Entity duplicate = CreateEntity(name);
-		DuplicateEntityComponent(AllComponents{}, m_Registry, entity, duplicate);
-		return duplicate;
+		return DuplicateInternal(entity, {});
 	}
 
 	bool Scene::HasEntity(UUID uuid) const
@@ -1212,6 +1209,28 @@ namespace ArcEngine
 			}
 		}
 		Renderer2D::EndScene();
+	}
+
+	Entity Scene::DuplicateInternal(Entity entity, Entity parent)
+	{
+		eastl::string name = entity.GetComponent<TagComponent>().Tag;
+		Entity duplicate = CreateEntity(name);
+		UUID dupId = duplicate.GetUUID();
+		DuplicateEntityComponent(AllComponents{}, m_Registry, entity, duplicate);
+		RelationshipComponent& rc = duplicate.GetComponent<RelationshipComponent>();
+		if (!parent)
+			parent = entity.GetParent();
+		rc.Parent = parent ? parent.GetUUID() : UUID(0u);
+		rc.Children.clear();
+		RelationshipComponent& erc = entity.GetComponent<RelationshipComponent>();
+		eastl::vector<UUID> children = erc.Children;
+		for (UUID id : children)
+		{
+			rc.Children.push_back(id);
+			if (Entity child = GetEntity(id))
+				DuplicateInternal(child, duplicate);
+		}
+		return duplicate;
 	}
 
 	void Scene::CreateRigidbody(Entity entity, const TransformComponent& transform, RigidbodyComponent& component) const

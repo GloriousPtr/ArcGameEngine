@@ -71,6 +71,7 @@ namespace ArcEngine
 		}
 
 	private:
+		Entity DuplicateInternal(Entity entity, Entity parent);
 		void CreateRigidbody(Entity entity, const TransformComponent& transform, RigidbodyComponent& component) const;
 		void CreateRigidbody2D(Entity entity, const TransformComponent& transform, Rigidbody2DComponent& component) const;
 		void CreateBoxCollider2D(Entity entity, const TransformComponent& transform, const Rigidbody2DComponent& rb, BoxCollider2DComponent& component) const;
