@@ -247,9 +247,20 @@ namespace ArcEngine
 					m_EditorCamera.SetYaw(yaw);	
 				}
 
-				// Transform Gizmos Button Group
-				float frameHeight = 1.3f * ImGui::GetFrameHeight();
 				ImVec2 framePadding = ImGui::GetStyle().FramePadding;
+				float frameHeight = 1.3f * ImGui::GetFrameHeight();
+
+				ImGui::SetNextItemAllowOverlap();
+				{
+					char resolution[32] = { 0 };
+					sprintf_s(&resolution[0], 32, "%ux%u", static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
+					ImVec2 resolutionTextSize = ImGui::CalcTextSize(resolution);
+					ImVec2 resolutionTextPosition = { ImGui::GetCursorPosX() + m_ViewportSize.x - resolutionTextSize.x - framePadding.x, startCursorPos.y + framePadding.y };
+					ImGui::SetCursorPos({ resolutionTextPosition.x, resolutionTextPosition.y });
+					ImGui::TextUnformatted(resolution);
+				}
+
+				// Transform Gizmos Button Group
 				ImVec2 buttonSize = { frameHeight, frameHeight };
 				float buttonCount = 6.0f;
 				ImVec2 gizmoPosition = { m_ViewportBounds[0].x + m_GizmoPosition.x, m_ViewportBounds[0].y + m_GizmoPosition.y };
