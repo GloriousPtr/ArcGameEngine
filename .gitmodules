@@ -19,6 +19,3 @@
 [submodule "Arc/vendor/yaml-cpp"]
 	path = Arc/vendor/yaml-cpp
 	url = https://github.com/MohitSethi99/yaml-cpp.git
-[submodule "Arc/vendor/D3D12MA/D3D12MemoryAllocator"]
-	path = Arc/vendor/D3D12MA/D3D12MemoryAllocator
-	url = https://github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator.git
