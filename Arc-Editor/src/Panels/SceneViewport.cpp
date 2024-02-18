@@ -31,25 +31,20 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		if (FramebufferSpecification spec = m_RenderGraphData->CompositePassTarget->GetSpecification();
-			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized fb is invalid
-			(spec.Width != static_cast<uint32_t>(m_ViewportSize.x) || spec.Height != static_cast<uint32_t>(m_ViewportSize.y)))
 		{
-			m_Resizing = true;
-			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
+			glm::uvec2 viewportSize = { static_cast<uint32_t>(m_ViewportSize.x) , static_cast<uint32_t>(m_ViewportSize.y) };
+			const FramebufferSpecification spec = m_RenderGraphData->CompositePassTarget->GetSpecification();
+			if (viewportSize.x > 0.0f && viewportSize.y > 0.0f && // zero sized fb is invalid
+				(spec.Width != viewportSize.x || spec.Height != viewportSize.y))
+			{
+				m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
+				auto miniViewportSize = m_ViewportSize * m_MiniViewportSizeMultiplier;
+				m_MiniViewportRenderGraphData->Resize(static_cast<uint32_t>(miniViewportSize.x), static_cast<uint32_t>(miniViewportSize.y));
+				m_RenderGraphData->Resize(viewportSize.x, viewportSize.y);
+			}
+
+			m_Scene->OnViewportResize(viewportSize.x, viewportSize.y);
 		}
-
-		glm::ivec2 viewportSize = { static_cast<uint32_t>(m_ViewportSize.x) , static_cast<uint32_t>(m_ViewportSize.y) };
-		if (m_Resizing && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
-		{
-			m_Resizing = false;
-
-			auto miniViewportSize = m_ViewportSize * m_MiniViewportSizeMultiplier;
-			m_MiniViewportRenderGraphData->Resize(static_cast<uint32_t>(miniViewportSize.x), static_cast<uint32_t>(miniViewportSize.y));
-			m_RenderGraphData->Resize(viewportSize.x, viewportSize.y);
-		}
-
-		m_Scene->OnViewportResize(viewportSize.x, viewportSize.y);
 
 		if (!m_SimulationRunning && m_UseEditorCamera)
 		{
