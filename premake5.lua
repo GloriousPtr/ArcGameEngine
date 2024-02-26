@@ -35,6 +35,7 @@ workspace "Arc"
 
 -- Library directories relavtive to root folder (solution directory)
 LibDir = {}
+LibDir["assimp"] = "%{wks.location}/Arc/vendor/assimp/lib"
 LibDir["dotnet"] = "%{wks.location}/Arc/vendor/dotnet"
 
 -- Bin directories relavtive to root folder (solution directory)
@@ -58,23 +59,22 @@ IncludeDir["dotnet"] = "%{wks.location}/Arc/vendor/dotnet"
 IncludeDir["miniaudio"] = "%{wks.location}/Arc/vendor/miniaudio"
 IncludeDir["icons"] = "%{wks.location}/Arc/vendor/icons/include"
 IncludeDir["JoltPhysics"] = "%{wks.location}/Arc/vendor/JoltPhysics/JoltPhysics"
-IncludeDir["tinyobj"] = "%{wks.location}/Arc/vendor/tinyobj"
-IncludeDir["tinygltf"] = "%{wks.location}/Arc/vendor/tinygltf"
 IncludeDir["D3D12MA"] = "%{wks.location}/Arc/vendor/D3D12MA/D3D12MemoryAllocator/include"
 IncludeDir["magic_enum"] = "%{wks.location}/Arc/vendor/magic_enum"
 IncludeDir["EASTL"] = "%{wks.location}/Arc/vendor/EASTL/include"
 IncludeDir["EABase"] = "%{wks.location}/Arc/vendor/EABase/include/Common"
+IncludeDir["assimp"] = "%{wks.location}/Arc/vendor/assimp/include"
 
 group "Dependencies"
+	include "Arc/vendor/box2d"
+	include "Arc/vendor/D3D12MA"
+	include "Arc/vendor/EASTL"
 	include "Arc/vendor/GLFW"
 	include "Arc/vendor/Glad"
 	include "Arc/vendor/imgui"
-	include "Arc/vendor/yaml-cpp"
-	include "Arc/vendor/optick"
-	include "Arc/vendor/box2d"
 	include "Arc/vendor/JoltPhysics"
-	include "Arc/vendor/D3D12MA"
-	include "Arc/vendor/EASTL"
+	include "Arc/vendor/optick"
+	include "Arc/vendor/yaml-cpp"
 
 group ""
 

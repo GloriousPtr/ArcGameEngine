@@ -84,8 +84,8 @@ project "Arc-Editor"
 
 	postbuildcommands
 	{
-		-- Nethost
-		'{ECHO} ====== Copying Nethost ======',
+		'{ECHO} ====== Copying Dependencies ======',
+		'{COPYFILE} %{LibDir.assimp}/assimp-vc143-mt.dll "%{cfg.targetdir}"',
 		'{COPYFILE} %{LibDir.dotnet}/nethost.dll "%{cfg.targetdir}"',
 	}
 
@@ -93,6 +93,7 @@ project "Arc-Editor"
 		systemversion "latest"
 		links
 		{
+			"%{LibDir.assimp}/assimp-vc143-mt.lib",
 			"%{LibDir.dotnet}/nethost.lib",
 
 			"opengl.dll",

@@ -401,7 +401,7 @@ namespace ArcEngine
 				{
 					m_Context->CreateEntity(name).AddComponent<SpriteRendererComponent>().Texture = AssetManager::GetTexture2D(path);
 				}
-				else if (ext == "obj" || ext == "fbx")
+				else if (ext == "obj" || ext == "fbx" || ext == "gltf")
 				{
 					const auto& mesh = AssetManager::GetMesh(path);
 					const Entity parent = m_Context->CreateEntity(mesh->GetName());

@@ -243,8 +243,6 @@ float4 PS_Main(VertexOut input) : SV_TARGET
 	float3 normal = Normal.Sample(Sampler, uv).xyz;
 	float4 mra = MetalicRoughnessAO.Sample(Sampler, uv);
 	float4 emission = Emission.Sample(Sampler, uv);
-	if (emission.r > 0.1f)
-		emission = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float depth = Depth.Sample(Sampler, uv);
 	float3 worldPosition = WorldPosFromDepth(uv, depth);
 	float Metalness = mra.r;
@@ -360,7 +358,7 @@ float4 PS_Main(VertexOut input) : SV_TARGET
 	}
 
 	float3 ambient = IBL(F0, params) * mra.b;
-	float3 color = Lo + ambient + (emission.rgb);
+	float3 color = Lo + ambient + (emission.rgb * emission.a * 255.0f);
 
 	return float4(color, 1.0);
 }

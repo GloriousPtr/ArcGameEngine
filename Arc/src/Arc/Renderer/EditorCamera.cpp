@@ -7,7 +7,7 @@
 namespace ArcEngine
 {
 	EditorCamera::EditorCamera(float fov, float aspectRatio, float nearClip, float farClip)
-		: Camera(glm::perspective(fov, aspectRatio, nearClip, farClip)), m_Fov(fov), m_AspectRatio(aspectRatio), m_NearClip(nearClip), m_FarClip(farClip)
+		: Camera(glm::perspectiveRH_ZO(fov, aspectRatio, nearClip, farClip)), m_Fov(fov), m_AspectRatio(aspectRatio), m_NearClip(nearClip), m_FarClip(farClip)
 	{
 	}
 
@@ -36,6 +36,6 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 
 		m_AspectRatio = width / height;
-		m_Projection = glm::perspective(m_Fov, m_AspectRatio, m_NearClip, m_FarClip);
+		m_Projection = glm::perspectiveRH_ZO(m_Fov, m_AspectRatio, m_NearClip, m_FarClip);
 	}
 }

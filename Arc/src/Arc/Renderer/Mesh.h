@@ -1,5 +1,9 @@
 #pragma once
 
+struct aiNode;
+struct aiMesh;
+struct aiScene;
+
 namespace ArcEngine
 {
 	class VertexArray;
@@ -32,8 +36,13 @@ namespace ArcEngine
 		[[nodiscard]] const char* GetFilepath() const { return m_Filepath.c_str(); }
 
 	private:
-		eastl::string m_Name;
-		eastl::string m_Filepath;
-		eastl::vector<Submesh> m_Submeshes;
+		void ProcessNode(const aiNode* node, const aiScene* scene, const char* filepath);
+		void ProcessMesh(aiMesh* mesh, const aiScene* scene, const char* filepath, const char* nodeName);
+
+	private:
+		eastl::string m_Name{};
+		eastl::string m_Filepath{};
+		eastl::vector<Submesh> m_Submeshes{};
+		std::mutex m_SubmeshesMutex{};
 	};
 }

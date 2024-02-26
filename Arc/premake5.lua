@@ -47,6 +47,7 @@ project "Arc"
 	externalincludedirs
 	{
 		"vendor/spdlog/include",
+		"%{IncludeDir.assimp}",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
@@ -61,8 +62,6 @@ project "Arc"
 		"%{IncludeDir.miniaudio}",
 		"%{IncludeDir.icons}",
 		"%{IncludeDir.JoltPhysics}",
-		"%{IncludeDir.tinyobj}",
-		"%{IncludeDir.tinygltf}",
 		"%{IncludeDir.magic_enum}",
 		"%{IncludeDir.EABase}",
 		"%{IncludeDir.EASTL}",
@@ -87,8 +86,8 @@ project "Arc"
 
 	postbuildcommands
 	{
-		-- Nethost
-		'{ECHO} ====== Copying Nethost ======',
+		'{ECHO} ====== Copying Dependencies ======',
+		'{COPYFILE} %{LibDir.assimp}/assimp-vc143-mt.dll "%{cfg.targetdir}"',
 		'{COPYFILE} %{LibDir.dotnet}/nethost.dll "%{cfg.targetdir}"',
 	}
 
@@ -105,6 +104,7 @@ project "Arc"
 		{
 			"D3D12MA",
 
+			"%{LibDir.assimp}/assimp-vc143-mt.dll",
 			"%{LibDir.dotnet}/nethost.dll",
 
 			"opengl.dll",

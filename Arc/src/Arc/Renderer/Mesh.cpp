@@ -1,8 +1,9 @@
 #include "arcpch.h"
 #include "Mesh.h"
 
-#define TINYOBJLOADER_IMPLEMENTATION
-#include <tiny_obj_loader.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
@@ -21,30 +22,6 @@ namespace ArcEngine
 		glm::vec3 Position = glm::vec3(0.0f);
 		glm::vec2 TexCoord = glm::vec2(0.0f);
 		glm::vec3 Normal = glm::vec3(0.0f);
-		glm::vec3 Tangent = glm::vec3(0.0f);
-
-		bool operator==(const Vertex& other) const
-		{
-			return Position == other.Position &&
-				TexCoord == other.TexCoord &&
-				Normal == other.Normal &&
-				Tangent == other.Tangent;
-		}
-	};
-}
-
-namespace eastl
-{
-	template<> struct hash<ArcEngine::Vertex>
-	{
-		size_t operator()(ArcEngine::Vertex const& vertex) const noexcept
-		{
-			const std::size_t h1 = std::hash<glm::vec3>{}(vertex.Position);
-			const std::size_t h2 = std::hash<glm::vec2>{}(vertex.TexCoord);
-			const std::size_t h3 = std::hash<glm::vec3>{}(vertex.Normal);
-			const std::size_t h4 = std::hash<glm::vec3>{}(vertex.Tangent);
-			return h1 ^ (h2 << 1) ^ (h3 << 2) ^ (h4 << 3);
-		}
 	};
 }
 
@@ -66,185 +43,45 @@ namespace ArcEngine
 		if (!std::filesystem::exists(path))
 			return;
 
-		const std::filesystem::path ext = path.extension();
-		bool supportedFile = ext == ".obj";
-		if (!supportedFile)
+		Assimp::Importer importer;
+		importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 80.0f);
+		uint32_t meshImportFlags = 0;
+
+		eastl::string filePath = eastl::string(filepath);
+		auto lastDot = filePath.find_last_of(".");
+		eastl::string name = filePath.substr(lastDot + 1, filePath.size() - lastDot);
+		if (name != "assbin")
 		{
-			ARC_CORE_ERROR("{} file(s) not supported: {}", ext, filepath);
+			meshImportFlags |=
+				aiProcess_MakeLeftHanded |					// for D3D
+				aiProcess_FlipUVs |							// for D3D
+				aiProcess_Triangulate |
+				aiProcess_SortByPType |
+				aiProcess_GenNormals |
+				aiProcess_GenUVCoords |
+				aiProcess_TransformUVCoords |
+				//aiProcess_OptimizeGraph |
+				aiProcess_OptimizeMeshes |
+				aiProcess_JoinIdenticalVertices |
+				aiProcess_ImproveCacheLocality |
+				aiProcess_PreTransformVertices |
+				aiProcess_LimitBoneWeights |
+				aiProcess_ValidateDataStructure |
+				aiProcess_GlobalScale;
+		}
+
+		const aiScene* scene = importer.ReadFile(filepath, meshImportFlags);
+
+		if (!scene)
+		{
+			ARC_CORE_ERROR("Could not import the file: {0}. Error: {1}", filepath, importer.GetErrorString());
 			return;
 		}
 
-		if (ext == ".obj")
-		{
-			tinyobj::ObjReaderConfig reader_config;
-
-			tinyobj::ObjReader reader;
-
-			if (!reader.ParseFromFile(filepath, reader_config))
-			{
-				if (!reader.Error().empty())
-				{
-					ARC_CORE_ERROR("Could not import the file: {0}. Error: {1}", filepath, reader.Error());
-					return;
-				}
-			}
-
-			if (!reader.Warning().empty())
-				ARC_CORE_WARN("File: {0}. Warning: {1}", filepath, reader.Warning());
-
-			const tinyobj::attrib_t& attrib = reader.GetAttrib();
-			const std::vector<tinyobj::shape_t>& shapes = reader.GetShapes();
-			const std::vector<tinyobj::material_t>& materials = reader.GetMaterials();
-			
-			std::mutex mtx;
-
-			// Loop over shapes
-			for (const tinyobj::shape_t& shape : shapes)
-			{
-				JobSystem::Execute([&shape, &materials, &attrib, &path, &mtx, this]()
-				{
-					eastl::vector<Vertex> vertices;
-					eastl::vector<uint32_t> indices;
-					eastl::hash_map<Vertex, uint32_t> uniqueVertices{};
-
-					// Loop over faces(polygon)
-					int materialId = -1;
-					size_t index_offset = 0;
-					for (size_t f = 0; f < shape.mesh.num_face_vertices.size(); f++)
-					{
-						size_t fv = static_cast<size_t>(shape.mesh.num_face_vertices[f]);
-
-						// Loop over vertices in the face.
-						for (size_t v = 0; v < fv; v++)
-						{
-							// access to vertex
-							tinyobj::index_t idx = shape.mesh.indices[index_offset + v];
-
-							Vertex vertex;
-							vertex.Position.x = attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 0];
-							vertex.Position.y = attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 1];
-							vertex.Position.z = -attrib.vertices[3 * static_cast<size_t>(idx.vertex_index) + 2];
-							if (idx.texcoord_index >= 0)
-							{
-								vertex.TexCoord.x = attrib.texcoords[2 * static_cast<size_t>(idx.texcoord_index) + 0];
-								vertex.TexCoord.y = 1.0f - attrib.texcoords[2 * static_cast<size_t>(idx.texcoord_index) + 1];
-							}
-							if (idx.normal_index >= 0)
-							{
-								vertex.Normal.x = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 0];
-								vertex.Normal.y = attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 1];
-								vertex.Normal.z = -attrib.normals[3 * static_cast<size_t>(idx.normal_index) + 2];
-								
-								int v0_index = shape.mesh.indices[index_offset + 0].vertex_index;
-								int v1_index = shape.mesh.indices[index_offset + 1].vertex_index;
-								int v2_index = shape.mesh.indices[index_offset + 2].vertex_index;
-
-								glm::vec3 v0 = { attrib.vertices[3 * v0_index + 0], attrib.vertices[3 * v0_index + 1], -attrib.vertices[3 * v0_index + 2] };
-								glm::vec3 v1 = { attrib.vertices[3 * v1_index + 0], attrib.vertices[3 * v1_index + 1], -attrib.vertices[3 * v1_index + 2] };
-								glm::vec3 v2 = { attrib.vertices[3 * v2_index + 0], attrib.vertices[3 * v2_index + 1], -attrib.vertices[3 * v2_index + 2] };
-
-								int uv0_index = shape.mesh.indices[index_offset + 0].texcoord_index;
-								int uv1_index = shape.mesh.indices[index_offset + 1].texcoord_index;
-								int uv2_index = shape.mesh.indices[index_offset + 2].texcoord_index;
-
-								glm::vec2 uv0 = { attrib.texcoords[2 * uv0_index + 0], 1.0f - attrib.texcoords[2 * uv0_index + 1] };
-								glm::vec2 uv1 = { attrib.texcoords[2 * uv1_index + 0], 1.0f - attrib.texcoords[2 * uv1_index + 1] };
-								glm::vec2 uv2 = { attrib.texcoords[2 * uv2_index + 0], 1.0f - attrib.texcoords[2 * uv2_index + 1] };
-
-								glm::vec3 edge1 = v1 - v0;
-								glm::vec3 edge2 = v2 - v0;
-								glm::vec2 deltaUV1 = uv1 - uv0;
-								glm::vec2 deltaUV2 = uv2 - uv0;
-
-								float det = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
-
-								vertex.Tangent.x = det * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
-								vertex.Tangent.y = det * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
-								vertex.Tangent.z = det * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
-							}
-
-							if (uniqueVertices.count(vertex) == 0)
-							{
-								uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-								vertices.push_back(vertex);
-							}
-
-							indices.push_back(uniqueVertices[vertex]);
-						}
-						index_offset += fv;
-
-						// per-face material
-						materialId = shape.mesh.material_ids[f];
-					}
-
-					std::lock_guard lock(mtx);
-
-					Ref<VertexArray> vertexArray = VertexArray::Create();
-
-					Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(reinterpret_cast<float*>(vertices.data()), static_cast<uint32_t>(sizeof(Vertex) * vertices.size()), sizeof(Vertex));
-					vertexArray->AddVertexBuffer(vertexBuffer);
-
-					Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices.data(), indices.size());
-					vertexArray->SetIndexBuffer(indexBuffer);
-
-					const Submesh& submesh = m_Submeshes.emplace_back(shape.name.c_str(), CreateRef<Material>(), vertexArray);
-
-					if (materialId >= 0)
-					{
-						const tinyobj::material_t& material = materials.at(materialId);
-
-						const eastl::vector<MaterialProperty>& materialProperties = submesh.Mat->GetProperties();
-
-						std::filesystem::path dir = path.parent_path();
-
-						for (const MaterialProperty& property : materialProperties)
-						{
-							if (property.Type == MaterialPropertyType::Texture2D ||
-								property.Type == MaterialPropertyType::Texture2DBindless)
-							{
-								if (!material.diffuse_texname.empty() &&
-									(property.Name.find("albedo") != eastl::string::npos || property.Name.find("Albedo") != eastl::string::npos ||
-										property.Name.find("diff") != eastl::string::npos || property.Name.find("Diff") != eastl::string::npos))
-								{
-									eastl::string pathStr = (dir / material.diffuse_texname).string().c_str();
-									submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr));
-								}
-
-								if (!material.normal_texname.empty() &&
-									(property.Name.find("norm") != eastl::string::npos || property.Name.find("Norm") != eastl::string::npos ||
-										property.Name.find("height") != eastl::string::npos || property.Name.find("Height") != eastl::string::npos))
-								{
-									std::string pathStr = (dir / material.normal_texname).string();
-									submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr.c_str()));
-								}
-								else if (!material.bump_texname.empty() &&
-									(property.Name.find("norm") != eastl::string::npos || property.Name.find("Norm") != eastl::string::npos ||
-										property.Name.find("height") != eastl::string::npos || property.Name.find("Height") != eastl::string::npos))
-								{
-									std::string pathStr = (dir / material.bump_texname).string();
-									submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr.c_str()));
-								}
-
-								if (!material.emissive_texname.empty() &&
-									(property.Name.find("emissi") != eastl::string::npos || property.Name.find("Emissi") != eastl::string::npos))
-								{
-									std::string pathStr = (dir / material.emissive_texname).string();
-									submesh.Mat->SetTexture(property.Name, AssetManager::GetTexture2D(pathStr.c_str()));
-								}
-							}
-
-							if (property.Type == MaterialPropertyType::Bool &&
-								(property.Name.find("norm") != eastl::string::npos || property.Name.find("Norm") != eastl::string::npos ||
-									property.Name.find("height") != eastl::string::npos || property.Name.find("Height") != eastl::string::npos))
-							{
-								submesh.Mat->SetData(property.Name, 1);
-							}
-						}
-					}
-				});
-			}
-			JobSystem::Wait();
-		}
+		JobSystem::Wait();
+		ProcessNode(scene->mRootNode, scene, filepath);
+		JobSystem::Wait();
+		m_Name = StringUtils::GetName(filepath);
 
 		m_Filepath = filepath;
 		m_Name = StringUtils::GetName(filepath);
@@ -257,5 +94,134 @@ namespace ArcEngine
 		ARC_CORE_ASSERT(index < m_Submeshes.size(), "Submesh index out of bounds");
 
 		return m_Submeshes[index];
+	}
+
+	void Mesh::ProcessNode(const aiNode* node, const aiScene* scene, const char* filepath)
+	{
+		ARC_PROFILE_SCOPE();
+
+		for (unsigned int i = 0; i < node->mNumMeshes; i++)
+		{
+			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+			JobSystem::Execute([mesh, scene, filepath, node, this]() { ProcessMesh(mesh, scene, filepath, node->mName.C_Str()); });
+		}
+
+		for (unsigned int i = 0; i < node->mNumChildren; i++)
+			ProcessNode(node->mChildren[i], scene, filepath);
+	}
+
+	eastl::vector<Ref<Texture2D>> LoadMaterialTextures(const aiMaterial* mat, aiTextureType type, const std::filesystem::path& filepath)
+	{
+		ARC_PROFILE_SCOPE();
+
+		std::filesystem::path path = filepath.parent_path();
+		eastl::vector<Ref<Texture2D>> textures;
+		for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+		{
+			aiString str;
+			mat->GetTexture(type, i, &str);
+			std::filesystem::path texturePath = path / str.C_Str();
+			std::string texturePathString = texturePath.string();
+			Ref<Texture2D> texture = AssetManager::GetTexture2D(texturePathString.c_str());
+			textures.emplace_back(texture);
+		}
+		return textures;
+	}
+
+	void Mesh::ProcessMesh(aiMesh* mesh, const aiScene* scene, const char* filepath, const char* nodeName)
+	{
+		ARC_PROFILE_SCOPE();
+
+		eastl::vector<Vertex> vertices;
+		vertices.reserve(mesh->mNumVertices);
+		eastl::vector<uint32_t> indices;
+
+		for (size_t i = 0; i < mesh->mNumVertices; i++)
+		{
+			Vertex vertex;
+
+			const auto& vertexPosition = mesh->mVertices[i];
+			vertex.Position = { vertexPosition.x, vertexPosition.y, vertexPosition.z };
+
+			if (mesh->mTextureCoords[0])
+				vertex.TexCoord = glm::vec2(static_cast<float>(mesh->mTextureCoords[0][i].x), static_cast<float>(mesh->mTextureCoords[0][i].y));
+
+			const auto& normal = mesh->mNormals[i];
+			vertex.Normal = { normal.x, normal.y, normal.z };
+
+			vertices.emplace_back(vertex);
+		}
+
+		for (size_t i = 0; i < mesh->mNumFaces; i++)
+		{
+			aiFace face = mesh->mFaces[i];
+			indices.reserve(face.mNumIndices);
+			for (size_t j = 0; j < face.mNumIndices; j++)
+				indices.emplace_back(face.mIndices[j]);
+		}
+
+		Ref<VertexArray> vertexArray = VertexArray::Create();
+
+		Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(reinterpret_cast<float*>(vertices.data()), static_cast<uint32_t>(sizeof(Vertex) * vertices.size()), sizeof(Vertex));
+		vertexArray->AddVertexBuffer(vertexBuffer);
+
+		Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices.data(), indices.size());
+		vertexArray->SetIndexBuffer(indexBuffer);
+
+		std::lock_guard lock(m_SubmeshesMutex);
+
+		const Submesh& submesh = m_Submeshes.emplace_back(nodeName, CreateRef<Material>(), vertexArray);
+
+		const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+		eastl::vector<Ref<Texture2D>> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, filepath);
+		eastl::vector<Ref<Texture2D>> normalMaps = LoadMaterialTextures(material, aiTextureType_NORMALS, filepath);
+		eastl::vector<Ref<Texture2D>> heightMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, filepath);
+		eastl::vector<Ref<Texture2D>> emissiveMaps = LoadMaterialTextures(material, aiTextureType_EMISSIVE, filepath);
+
+		const eastl::vector<MaterialProperty>& materialProperties = submesh.Mat->GetProperties();
+
+		bool normalMapApplied = false;
+		for (const auto& property : materialProperties)
+		{
+			const auto& name = property.Name;
+			
+			if (property.Type == MaterialPropertyType::Texture2D ||	property.Type == MaterialPropertyType::Texture2DBindless)
+			{
+				if (!diffuseMaps.empty() &&
+					(name.find("albedo") != eastl::string::npos || name.find("Albedo") != eastl::string::npos ||
+						name.find("diff") != eastl::string::npos || name.find("Diff") != eastl::string::npos))
+				{
+					submesh.Mat->SetTexture(property.Name, diffuseMaps[0]);
+				}
+
+				if (!normalMaps.empty() &&
+					(name.find("norm") != eastl::string::npos || name.find("Norm") != eastl::string::npos ||
+						name.find("height") != eastl::string::npos || name.find("Height") != eastl::string::npos))
+				{
+					submesh.Mat->SetTexture(property.Name, normalMaps[0]);
+					normalMapApplied = true;
+				}
+				else if (!heightMaps.empty() &&
+					(name.find("norm") != eastl::string::npos || name.find("Norm") != eastl::string::npos ||
+						name.find("height") != eastl::string::npos || name.find("Height") != eastl::string::npos))
+				{
+					submesh.Mat->SetTexture(property.Name, heightMaps[0]);
+					normalMapApplied = true;
+				}
+
+				if (!emissiveMaps.empty() &&
+					(name.find("emissi") != eastl::string::npos || name.find("Emissi") != eastl::string::npos))
+				{
+					submesh.Mat->SetTexture(property.Name, emissiveMaps[0]);
+				}
+			}
+
+			if (property.Type == MaterialPropertyType::Bool && normalMapApplied &&
+				(name.find("norm") != eastl::string::npos || name.find("Norm") != eastl::string::npos ||
+					name.find("height") != eastl::string::npos || name.find("Height") != eastl::string::npos))
+			{
+				submesh.Mat->SetData(property.Name, 1);
+			}
+		}
 	}
 }

@@ -6,7 +6,6 @@ struct VertexIn
 	float3 Position			: POSITION;
 	float2 UV				: TEXCOORD;
 	float3 Normal			: NORMAL;
-	float3 Tangent			: TANGENT;
 };
 
 struct VertexOut
@@ -17,17 +16,29 @@ struct VertexOut
 	float2 UV				: TEXCOORD;
 };
 
+float4 GenerateTangent(float3 normal)
+{
+	float3 tangent = cross(normal, float3(0.0f, 1.0f, 0.0));
+	tangent = normalize(lerp(cross(normal, float3(1.0f, 0.0f, 0.0f)), tangent, step(MIN_FLOAT_VALUE, dot(tangent, tangent))));
+
+	return float4(tangent, 1.0f);
+}
+
 VertexOut VS_Main(VertexIn v)
 {
 	VertexOut output;
 	float4 worldPosition = mul(Model, float4(v.Position, 1.0f));
 	output.Position = mul(CameraViewProjection, worldPosition);
-	output.Normal = normalize(mul(Model, float4(v.Normal, 0.0f)).xyz);
 
-	float3 Bitangent = cross(v.Normal, v.Tangent);
-	float3 T = normalize(mul(Model, float4(v.Tangent, 0.0f)).xyz);
-	float3 B = normalize(mul(Model, float4(Bitangent, 0.0f)).xyz);
-	output.TBN = transpose(float3x3(T, B, output.Normal));
+	float3 tangent = GenerateTangent(v.Normal).xyz;
+	float3 bitangent = cross(v.Normal, tangent);
+	
+	float3x3 mat = (float3x3)Model;
+	float3 T = normalize(mul(tangent, mat));
+	float3 N = normalize(mul(v.Normal, mat));
+	float3 B = normalize(mul(bitangent, mat));
+	output.Normal = N;
+	output.TBN = transpose(float3x3(T, B, N));
 	output.UV = v.UV;
 	return output;
 }
@@ -45,6 +56,7 @@ cbuffer MaterialProperties : register(b1, space1)
 	float4 AlbedoColor = float4(1.0f, 0.0f, 1.0f, 1.0f);
 	float Roughness = 1.0f;
 	float Metalness = 0.0f;
+	float EmissiveIntensity = 1.0f;
 	float AlphaCutoffThreshold = 0.01f;
 }
 
@@ -68,11 +80,11 @@ PixelOut PS_Main(VertexOut input)
 	float4 albedo = albedoTexture.Sample(Sampler, input.UV);
 	float3 normal = NormalTexture ? normalize(mul(input.TBN, normalTexture.Sample(Sampler, input.UV).rgb * 2.0f - 1.0f)) : input.Normal;
 	float4 mra = mraTexture.Sample(Sampler, input.UV);
-	float4 emissive = emissiveTexture.Sample(Sampler, input.UV);
+	float3 emissive = emissiveTexture.Sample(Sampler, input.UV).rgb;
 
 	pixel.Albedo = albedo * AlbedoColor;
 	pixel.Normal = float4(normal, 1.0f);
 	pixel.MetalicRoughnessAO = float4(mra.r * Metalness, mra.g * Roughness, mra.b, 1.0f);
-	pixel.Emission = emissive;
+	pixel.Emission = float4(emissive, EmissiveIntensity / 255.0f);
 	return pixel;
 }
