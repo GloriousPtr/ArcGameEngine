@@ -46,14 +46,16 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		return Input::IsKeyPressed(key);
+		const bool pressed = Input::IsKeyPressed(key);
+		return pressed;
 	}
 
 	ARC_EXPORT bool Input_IsMouseButtonPressed(MouseCode button)
 	{
 		ARC_PROFILE_SCOPE();
 
-		return Input::IsMouseButtonPressed(button);
+		const bool pressed = Input::IsMouseButtonPressed(button);
+		return pressed;
 	}
 
 	ARC_EXPORT void Input_GetMousePosition(glm::vec2* outMousePosition)
@@ -78,7 +80,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		return ScriptEngine::HasComponent(GetEntity(entityID), type);
+		const bool hasComponent = ScriptEngine::HasComponent(GetEntity(entityID), type);
+		return hasComponent;
 	}
 
 	ARC_EXPORT void Entity_AddComponent(uint64_t entityID, void* type)
@@ -92,7 +95,8 @@ namespace ArcEngine
 	{
 		ARC_PROFILE_SCOPE();
 
-		return ScriptEngine::GetComponent(GetEntity(entityID), type);
+		const GCHandle handle = ScriptEngine::GetComponent(GetEntity(entityID), type);
+		return handle;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
