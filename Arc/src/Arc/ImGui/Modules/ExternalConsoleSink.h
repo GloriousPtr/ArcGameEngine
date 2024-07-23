@@ -31,7 +31,7 @@ namespace ArcEngine
 		{
 			OnFlushChanged = [this]()
 			{
-				for (const Ref<Message> msg : m_StaleMessageBuffer)
+				for (const Ref<Message>& msg : m_StaleMessageBuffer)
 					OnFlush(msg->Buffer, msg->CallerPath, msg->CallerFunction, msg->CallerLine, msg->Level);
 				m_StaleMessageBuffer.clear();
 			};
@@ -77,7 +77,7 @@ namespace ArcEngine
 			if (OnFlush == nullptr)
 				return;
 
-			for (const Ref<Message> msg : m_MessageBuffer)
+			for (const Ref<Message>& msg : m_MessageBuffer)
 				OnFlush(msg->Buffer, msg->CallerPath, msg->CallerFunction, msg->CallerLine, msg->Level);
 
 			m_MessagesBuffered = 0;
