@@ -56,8 +56,8 @@ namespace ArcEngine
 		[[nodiscard]] inline size_t GetEntityCount() const { return m_EntityMap.size(); }
 		[[nodiscard]] bool IsRunning() const { return m_IsRunning; }
 
-		void OnUpdateEditor(WorkQueue* queue, [[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera);
-		void OnUpdateRuntime(WorkQueue* queue, [[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera = nullptr);
+		void OnUpdateEditor(WorkQueue* queue, Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera);
+		void OnUpdateRuntime(WorkQueue* queue, Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera = nullptr);
 		void OnRender(WorkQueue* queue, const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData);
 		void OnRuntimeStart();
 		void OnRuntimeStop();
@@ -81,7 +81,7 @@ namespace ArcEngine
 		void CreatePolygonCollider2D(Entity entity, const Rigidbody2DComponent& rb, PolygonCollider2DComponent& component) const;
 
 		template<typename T>
-		void OnComponentAdded([[maybe_unused]] Entity entity, [[maybe_unused]] T& component);
+		void OnComponentAdded(Entity entity, T& component);
 	
 	private:
 

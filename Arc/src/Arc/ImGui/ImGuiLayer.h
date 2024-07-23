@@ -12,7 +12,7 @@ namespace ArcEngine
 
 		void OnAttach() override;
 		void OnDetach() override;
-		void OnEvent([[maybe_unused]] Event& e) override;
+		void OnEvent(Event& e) override;
 
 		void Begin() const;
 		void End() const;

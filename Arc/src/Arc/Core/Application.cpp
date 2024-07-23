@@ -137,7 +137,7 @@ namespace ArcEngine
 		m_MainThreadQueue.emplace_back(function);
 	}
 
-	bool Application::OnWindowClose([[maybe_unused]] const WindowCloseEvent& e)
+	bool Application::OnWindowClose(const WindowCloseEvent& e)
 	{
 		ARC_PROFILE_SCOPE();
 

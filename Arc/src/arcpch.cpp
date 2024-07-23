@@ -37,7 +37,7 @@ void operator delete(void* ptr, size_t size) noexcept
 	free(ptr);
 }
 
-void* operator new[](size_t size, [[maybe_unused]] const char* pName, [[maybe_unused]] int flags, [[maybe_unused]] unsigned debugFlags, [[maybe_unused]] const char* file, [[maybe_unused]] int line)
+void* operator new[](size_t size, const char* pName, int flags, unsigned debugFlags, const char* file, int line)
 {
 	if (size == 0)
 		++size;
@@ -46,7 +46,7 @@ void* operator new[](size_t size, [[maybe_unused]] const char* pName, [[maybe_un
 	return malloc(size);
 }
 
-void* operator new[](size_t size, [[maybe_unused]] size_t alignment, [[maybe_unused]] size_t alignmentOffset, [[maybe_unused]] const char* pName, [[maybe_unused]] int flags, [[maybe_unused]] unsigned debugFlags, [[maybe_unused]] const char* file, [[maybe_unused]] int line)
+void* operator new[](size_t size, size_t alignment, size_t alignmentOffset, const char* pName, int flags, unsigned debugFlags, const char* file, int line)
 {
 	if (size == 0)
 		++size;

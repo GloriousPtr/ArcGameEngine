@@ -122,7 +122,6 @@ namespace ArcEngine
 	public:
 		virtual ~ObjectLayerPairFilterImpl()
 		{
-			[[maybe_unused]] int a = 6;
 		}
 
 		[[nodiscard]] bool ShouldCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2) const

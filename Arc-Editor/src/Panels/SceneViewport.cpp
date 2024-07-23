@@ -27,7 +27,7 @@ namespace ArcEngine
 		m_EditorCamera.SetViewportSize(width, height);
 	}
 
-	void SceneViewport::OnUpdate([[maybe_unused]] Timestep timestep, WorkQueue* queue)
+	void SceneViewport::OnUpdate(Timestep timestep, WorkQueue* queue)
 	{
 		ARC_PROFILE_SCOPE();
 

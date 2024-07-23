@@ -73,7 +73,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 	}
 
-	void EditorLayer::OnUpdate([[maybe_unused]] Timestep ts, WorkQueue* queue)
+	void EditorLayer::OnUpdate(Timestep ts, WorkQueue* queue)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -602,7 +602,7 @@ namespace ArcEngine
 		m_LastMousePosition = { mousePosition.x, mousePosition.y };
 	}
 
-	void EditorLayer::OnEvent([[maybe_unused]] Event& e)
+	void EditorLayer::OnEvent(Event& e)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -679,7 +679,7 @@ namespace ArcEngine
 		ImGui::End();
 	}
 
-	bool EditorLayer::OnKeyPressed([[maybe_unused]] const KeyPressedEvent& e)
+	bool EditorLayer::OnKeyPressed(const KeyPressedEvent& e)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -843,12 +843,12 @@ namespace ArcEngine
 		return false;
 	}
 
-	bool EditorLayer::OnMouseButtonPressed([[maybe_unused]] const MouseButtonPressedEvent& e) const
+	bool EditorLayer::OnMouseButtonPressed(const MouseButtonPressedEvent& e) const
 	{
 		return false;
 	}
 
-	bool EditorLayer::OnMouseButtonReleased([[maybe_unused]] const MouseButtonReleasedEvent& e) const
+	bool EditorLayer::OnMouseButtonReleased(const MouseButtonReleasedEvent& e) const
 	{
 		return false;
 	}

@@ -30,7 +30,7 @@ namespace ArcEngine
 		return ret;
 	}
 
-	eastl::string FileDialogs::OpenFile([[maybe_unused]] const char* filter)
+	eastl::string FileDialogs::OpenFile(const char* filter)
 	{
 		GtkWidget* dialog;
 		int res;
@@ -57,7 +57,7 @@ namespace ArcEngine
 		return ret;
 	}
 
-	eastl::string FileDialogs::SaveFile([[maybe_unused]] const char* filter)
+	eastl::string FileDialogs::SaveFile(const char* filter)
 	{
 		GtkWidget* dialog;
 		GtkFileChooser* chooser;

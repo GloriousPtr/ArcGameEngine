@@ -156,8 +156,8 @@ namespace ArcEngine
 			if (type)
 			{
 				ARC_CORE_DEBUG("Registering {}", name);
-				s_HasComponentFuncs[type] = [](const Entity& entity, [[maybe_unused]] DotnetType) { return entity.HasComponent<Component>(); };
-				s_AddComponentFuncs[type] = [](const Entity& entity, [[maybe_unused]] DotnetType) { entity.AddComponent<Component>(); };
+				s_HasComponentFuncs[type] = [](const Entity& entity, DotnetType) { return entity.HasComponent<Component>(); };
+				s_AddComponentFuncs[type] = [](const Entity& entity, DotnetType) { entity.AddComponent<Component>(); };
 			}
 		}(), ...);
 	}
@@ -228,7 +228,7 @@ namespace ArcEngine
 		char_t buffer[MAX_PATH];
 		size_t bufferSize{ std::size(buffer) };
 
-		[[maybe_unused]] int result{ get_hostfxr_path_handle(buffer, &bufferSize, nullptr) };
+		int result{ get_hostfxr_path_handle(buffer, &bufferSize, nullptr) };
 		ARC_CORE_ASSERT(result == 0, "get_hostfxr_path failed, provided buffer is too small");
 
 		HMODULE handleHostFxr{ LoadLibraryW(buffer) };
@@ -318,7 +318,7 @@ namespace ArcEngine
 		return !s_ScriptEngineData->Building;
 	}
 
-	void ScriptEngine::ReloadAppDomain([[maybe_unused]] bool asyncBuild)
+	void ScriptEngine::ReloadAppDomain(bool asyncBuild)
 	{
 		ARC_PROFILE_SCOPE();
 

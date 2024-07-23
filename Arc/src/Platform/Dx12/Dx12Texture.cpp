@@ -80,7 +80,7 @@ namespace ArcEngine
 			Dx12Context::DeferredRelease(m_ImageAllocation);
 	}
 
-	void Dx12Texture2D::SetData(GraphicsCommandList commandList, const TextureData data, [[maybe_unused]] uint32_t size)
+	void Dx12Texture2D::SetData(GraphicsCommandList commandList, const TextureData data, uint32_t size)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -229,7 +229,7 @@ namespace ArcEngine
 			Dx12Context::DeferredRelease(m_IrrImageAllocation);
 	}
 
-	void Dx12TextureCube::SetData(GraphicsCommandList commandList, const TextureData data, [[maybe_unused]] uint32_t size)
+	void Dx12TextureCube::SetData(GraphicsCommandList commandList, const TextureData data, uint32_t size)
 	{
 		ARC_PROFILE_SCOPE();
 

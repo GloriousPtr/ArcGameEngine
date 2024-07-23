@@ -18,7 +18,7 @@ namespace ArcEngine
 	{
 	}
 
-	void SceneHierarchyPanel::OnUpdate([[maybe_unused]] Timestep ts, WorkQueue* queue)
+	void SceneHierarchyPanel::OnUpdate(Timestep ts, WorkQueue* queue)
 	{
 		const EditorContext& context = EditorLayer::GetInstance()->GetContext();
 		m_SelectedEntity = (context.IsValid(EditorContextType::Entity) ? *context.As<Entity>() : Entity({}));

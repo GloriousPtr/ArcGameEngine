@@ -20,7 +20,7 @@ extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\
 
 namespace ArcEngine
 {
-	[[maybe_unused]] static const char* GetVendorName(UINT vendorId)
+	static const char* GetVendorName(UINT vendorId)
 	{
 		if (vendorId == 0x1002)
 			return "Advanced Micro Devices, Inc. (AMD)";
@@ -69,12 +69,12 @@ namespace ArcEngine
 		bool DeferedReleasesFlagHandles = false;
 	};
 
-	[[maybe_unused]] static void DebugMessageCallback(
-		[[maybe_unused]] D3D12_MESSAGE_CATEGORY category,
-		[[maybe_unused]] D3D12_MESSAGE_SEVERITY severity,
-		[[maybe_unused]] D3D12_MESSAGE_ID id,
-		[[maybe_unused]] LPCSTR pDescription,
-		[[maybe_unused]] void* pContext)
+	static void DebugMessageCallback(
+		D3D12_MESSAGE_CATEGORY category,
+		D3D12_MESSAGE_SEVERITY severity,
+		D3D12_MESSAGE_ID id,
+		LPCSTR pDescription,
+		void* pContext)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -313,7 +313,7 @@ namespace ArcEngine
 #endif // ENABLE_DX12_DEBUG_MESSAGES
 #endif // ARC_CORE_DEBUG
 
-		[[maybe_unused]] bool heapInitResult = true;
+		bool heapInitResult = true;
 		heapInitResult &= s_RtvDescHeap.Init(4096, false);
 		heapInitResult &= s_DsvDescHeap.Init(4096, false);
 		heapInitResult &= s_SrvDescHeap.Init(8092, true);

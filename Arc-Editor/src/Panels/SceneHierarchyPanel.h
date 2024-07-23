@@ -20,7 +20,7 @@ namespace ArcEngine
 		SceneHierarchyPanel& operator=(const SceneHierarchyPanel& other) = delete;
 		SceneHierarchyPanel& operator=(SceneHierarchyPanel&& other) = delete;
 
-		void OnUpdate([[maybe_unused]] Timestep ts, WorkQueue* queue) override;
+		void OnUpdate(Timestep ts, WorkQueue* queue) override;
 		void OnImGuiRender(WorkQueue* queue) override;
 
 		void SetContext(Scene* context);

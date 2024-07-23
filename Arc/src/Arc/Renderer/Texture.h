@@ -36,7 +36,7 @@ namespace ArcEngine
 		[[nodiscard]] virtual uint32_t GetHeapIndex() const = 0;
 		[[nodiscard]] virtual const eastl::string& GetPath() const = 0;
 
-		virtual void SetData(GraphicsCommandList commandList, const TextureData data, [[maybe_unused]] uint32_t size) = 0;
+		virtual void SetData(GraphicsCommandList commandList, const TextureData data, uint32_t size) = 0;
 		
 		virtual void Bind(GraphicsCommandList commandList, uint32_t slot = 0) const = 0;
 

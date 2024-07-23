@@ -20,9 +20,9 @@ namespace ArcEngine
 		void OnAttach() override;
 		void OnDetach() override;
 
-		void OnUpdate([[maybe_unused]] Timestep ts, WorkQueue* queue) override;
+		void OnUpdate(Timestep ts, WorkQueue* queue) override;
 		void OnImGuiRender(WorkQueue* queue) override;
-		void OnEvent([[maybe_unused]] Event& e) override;
+		void OnEvent(Event& e) override;
 
 		void SetContext(EditorContextType type, const char* data, size_t size) { m_SelectedContext.Set(type, data, size); }
 		void ResetContext() { m_SelectedContext.Reset(); }
@@ -35,9 +35,9 @@ namespace ArcEngine
 	private:
 		void BeginDockspace(const char* name) const;
 		void EndDockspace() const;
-		bool OnKeyPressed([[maybe_unused]] const KeyPressedEvent& e);
-		[[nodiscard]] bool OnMouseButtonPressed([[maybe_unused]] const MouseButtonPressedEvent& e) const;
-		[[nodiscard]] bool OnMouseButtonReleased([[maybe_unused]] const MouseButtonReleasedEvent& e) const;
+		bool OnKeyPressed(const KeyPressedEvent& e);
+		[[nodiscard]] bool OnMouseButtonPressed(const MouseButtonPressedEvent& e) const;
+		[[nodiscard]] bool OnMouseButtonReleased(const MouseButtonReleasedEvent& e) const;
 
 		void OpenProject(eastl::string_view path);
 		void OpenProject();

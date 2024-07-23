@@ -63,7 +63,7 @@ namespace ArcEngine
 
 	private:
 		void Run();
-		[[nodiscard]] bool OnWindowClose([[maybe_unused]] const WindowCloseEvent& e);
+		[[nodiscard]] bool OnWindowClose(const WindowCloseEvent& e);
 		[[nodiscard]] bool OnWindowResize(const WindowResizeEvent& e);
 		void ExecuteMainThreadQueue();
 

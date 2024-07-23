@@ -27,7 +27,7 @@ namespace ArcEngine
 		AssetPanel& operator=(const AssetPanel& other) = delete;
 		AssetPanel& operator=(AssetPanel&& other) = delete;
 
-		void OnUpdate([[maybe_unused]] Timestep ts, WorkQueue* queue) override;
+		void OnUpdate(Timestep ts, WorkQueue* queue) override;
 		void OnImGuiRender(WorkQueue* queue) override;
 
 		void Invalidate();

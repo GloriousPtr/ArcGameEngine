@@ -188,21 +188,21 @@ namespace ArcEngine
 			}
 		}
 		
-		void PreSolve([[maybe_unused]] b2Contact* contact, [[maybe_unused]] const b2Manifold* oldManifold) override
+		void PreSolve(b2Contact* contact, const b2Manifold* oldManifold) override
 		{
 			ARC_PROFILE_SCOPE();
 
 			/* Handle pre solve */
 		}
 
-		void PostSolve([[maybe_unused]] b2Contact* contact, [[maybe_unused]] const b2ContactImpulse* impulse) override
+		void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) override
 		{
 			ARC_PROFILE_SCOPE();
 
 			/* Handle post solve */
 		}
 
-		void OnUpdate([[maybe_unused]] Timestep ts)
+		void OnUpdate(Timestep ts)
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -264,7 +264,7 @@ namespace ArcEngine
 	public:
 		virtual ~Physics3DContactListener() = default;
 
-		JPH::ValidateResult	OnContactValidate([[maybe_unused]] const JPH::Body& inBody1, [[maybe_unused]] const JPH::Body& inBody2, [[maybe_unused]] JPH::RVec3Arg inBaseOffset, [[maybe_unused]] const JPH::CollideShapeResult& inCollisionResult) override
+		JPH::ValidateResult	OnContactValidate(const JPH::Body& inBody1, const JPH::Body& inBody2, JPH::RVec3Arg inBaseOffset, const JPH::CollideShapeResult& inCollisionResult) override
 		{
 			return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
 		}
@@ -283,7 +283,7 @@ namespace ArcEngine
 			OverrideContactSettings(inBody1, inBody2, inManifold, ioSettings);
 		}
 
-		void OnContactRemoved([[maybe_unused]] const JPH::SubShapeIDPair& inSubShapePair) override
+		void OnContactRemoved(const JPH::SubShapeIDPair& inSubShapePair) override
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -296,14 +296,14 @@ namespace ArcEngine
 	public:
 		virtual ~Physics3DBodyActivationListener() = default;
 
-		void OnBodyActivated([[maybe_unused]] const JPH::BodyID& inBodyID, [[maybe_unused]] JPH::uint64 inBodyUserData) override
+		void OnBodyActivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
 		{
 			ARC_PROFILE_SCOPE();
 
 			/* Body Activated */
 		}
 
-		void OnBodyDeactivated([[maybe_unused]] const JPH::BodyID& inBodyID, [[maybe_unused]] JPH::uint64 inBodyUserData) override
+		void OnBodyDeactivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
 		{
 			ARC_PROFILE_SCOPE();
 
@@ -799,7 +799,7 @@ namespace ArcEngine
 		#pragma endregion
 	}
 
-	void Scene::OnUpdateEditor(WorkQueue* queue, [[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera)
+	void Scene::OnUpdateEditor(WorkQueue* queue, Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -823,7 +823,7 @@ namespace ArcEngine
 		OnRender(queue, renderGraphData, cameraData);
 	}
 
-	void Scene::OnUpdateRuntime(WorkQueue* queue, [[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera)
+	void Scene::OnUpdateRuntime(WorkQueue* queue, Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -1494,86 +1494,86 @@ namespace ArcEngine
 	}
 
 	template<typename T>
-	void Scene::OnComponentAdded([[maybe_unused]] Entity entity, [[maybe_unused]] T& component)
+	void Scene::OnComponentAdded(Entity entity, T& component)
 	{
 	}
 
 	template<>
-	void Scene::OnComponentAdded<IDComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] IDComponent& component)
+	void Scene::OnComponentAdded<IDComponent>(Entity entity, IDComponent& component)
 	{
 		/* On IDComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<TransformComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] TransformComponent& component)
+	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component)
 	{
 		/* On TransformComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<RelationshipComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] RelationshipComponent& component)
+	void Scene::OnComponentAdded<RelationshipComponent>(Entity entity, RelationshipComponent& component)
 	{
 		/* On RelationshipComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<PrefabComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] PrefabComponent& component)
+	void Scene::OnComponentAdded<PrefabComponent>(Entity entity, PrefabComponent& component)
 	{
 		/* On PrefabComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<CameraComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] CameraComponent& component)
+	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
 	{
 		/* On CameraComponent added */
 		component.Camera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
 	}
 
 	template<>
-	void Scene::OnComponentAdded<SpriteRendererComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] SpriteRendererComponent& component)
+	void Scene::OnComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component)
 	{
 		/* On SpriteRendererComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<TagComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] TagComponent& component)
+	void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent& component)
 	{
 		/* On TagComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<MeshComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] MeshComponent& component)
+	void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& component)
 	{
 		/* On MeshComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<SkyLightComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] SkyLightComponent& component)
+	void Scene::OnComponentAdded<SkyLightComponent>(Entity entity, SkyLightComponent& component)
 	{
 		/* On SkyLightComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<LightComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] LightComponent& component)
+	void Scene::OnComponentAdded<LightComponent>(Entity entity, LightComponent& component)
 	{
 		/* On LightComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<ParticleSystemComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] ParticleSystemComponent& component)
+	void Scene::OnComponentAdded<ParticleSystemComponent>(Entity entity, ParticleSystemComponent& component)
 	{
 		/* On ParticleSystemComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<Rigidbody2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] Rigidbody2DComponent& component)
+	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component)
 	{
 		/* On Rigidbody2DComponent added */
 		CreateRigidbody2D(entity, entity.GetComponent<TransformComponent>(), component);
 	}
 
 	template<>
-	void Scene::OnComponentAdded<BoxCollider2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] BoxCollider2DComponent& component)
+	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
 	{
 		/* On BoxCollider2DComponent added */
 		if (entity.HasComponent<Rigidbody2DComponent>())
@@ -1581,14 +1581,14 @@ namespace ArcEngine
 	}
 	
 	template<>
-	void Scene::OnComponentAdded<CircleCollider2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] CircleCollider2DComponent& component)
+	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component)
 	{
 		if (entity.HasComponent<Rigidbody2DComponent>())
 			CreateCircleCollider2D(entity, entity.GetComponent<TransformComponent>(), entity.GetComponent<Rigidbody2DComponent>(), component);
 	}
 
 	template<>
-	void Scene::OnComponentAdded<PolygonCollider2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] PolygonCollider2DComponent& component)
+	void Scene::OnComponentAdded<PolygonCollider2DComponent>(Entity entity, PolygonCollider2DComponent& component)
 	{
 		/* On CircleCollider2DComponent added */
 		if (entity.HasComponent<Rigidbody2DComponent>())
@@ -1596,50 +1596,50 @@ namespace ArcEngine
 	}
 
 	template<>
-	void Scene::OnComponentAdded<DistanceJoint2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] DistanceJoint2DComponent& component)
+	void Scene::OnComponentAdded<DistanceJoint2DComponent>(Entity entity, DistanceJoint2DComponent& component)
 	{
 		/* On DistanceJoint2DComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<SpringJoint2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] SpringJoint2DComponent& component)
+	void Scene::OnComponentAdded<SpringJoint2DComponent>(Entity entity, SpringJoint2DComponent& component)
 	{
 		/* On SpringJoint2DComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<HingeJoint2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] HingeJoint2DComponent& component)
+	void Scene::OnComponentAdded<HingeJoint2DComponent>(Entity entity, HingeJoint2DComponent& component)
 	{
 		/* On HingeJoint2DComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<SliderJoint2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] SliderJoint2DComponent& component)
+	void Scene::OnComponentAdded<SliderJoint2DComponent>(Entity entity, SliderJoint2DComponent& component)
 	{
 		/* On SliderJoint2DComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<WheelJoint2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] WheelJoint2DComponent& component)
+	void Scene::OnComponentAdded<WheelJoint2DComponent>(Entity entity, WheelJoint2DComponent& component)
 	{
 		/* On WheelJoint2DComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<BuoyancyEffector2DComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] BuoyancyEffector2DComponent& component)
+	void Scene::OnComponentAdded<BuoyancyEffector2DComponent>(Entity entity, BuoyancyEffector2DComponent& component)
 	{
 		/* On BuoyancyEffector2DComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<RigidbodyComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] RigidbodyComponent& component)
+	void Scene::OnComponentAdded<RigidbodyComponent>(Entity entity, RigidbodyComponent& component)
 	{
 		/* On RigidbodyComponent added */
 		CreateRigidbody(entity, entity.GetComponent<TransformComponent>(), component);
 	}
 
 	template<>
-	void Scene::OnComponentAdded<BoxColliderComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] BoxColliderComponent& component)
+	void Scene::OnComponentAdded<BoxColliderComponent>(Entity entity, BoxColliderComponent& component)
 	{
 		/* On BoxColliderComponent added */
 		if (entity.HasComponent<RigidbodyComponent>())
@@ -1647,7 +1647,7 @@ namespace ArcEngine
 	}
 
 	template<>
-	void Scene::OnComponentAdded<SphereColliderComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] SphereColliderComponent& component)
+	void Scene::OnComponentAdded<SphereColliderComponent>(Entity entity, SphereColliderComponent& component)
 	{
 		/* On SphereColliderComponent added */
 		if (entity.HasComponent<RigidbodyComponent>())
@@ -1655,7 +1655,7 @@ namespace ArcEngine
 	}
 
 	template<>
-	void Scene::OnComponentAdded<CapsuleColliderComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] CapsuleColliderComponent& component)
+	void Scene::OnComponentAdded<CapsuleColliderComponent>(Entity entity, CapsuleColliderComponent& component)
 	{
 		/* On SphereColliderComponent added */
 		if (entity.HasComponent<RigidbodyComponent>())
@@ -1663,7 +1663,7 @@ namespace ArcEngine
 	}
 
 	template<>
-	void Scene::OnComponentAdded<TaperedCapsuleColliderComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] TaperedCapsuleColliderComponent& component)
+	void Scene::OnComponentAdded<TaperedCapsuleColliderComponent>(Entity entity, TaperedCapsuleColliderComponent& component)
 	{
 		/* On SphereColliderComponent added */
 		if (entity.HasComponent<RigidbodyComponent>())
@@ -1671,7 +1671,7 @@ namespace ArcEngine
 	}
 
 	template<>
-	void Scene::OnComponentAdded<CylinderColliderComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] CylinderColliderComponent& component)
+	void Scene::OnComponentAdded<CylinderColliderComponent>(Entity entity, CylinderColliderComponent& component)
 	{
 		/* On SphereColliderComponent added */
 		if (entity.HasComponent<RigidbodyComponent>())
@@ -1679,19 +1679,19 @@ namespace ArcEngine
 	}
 
 	template<>
-	void Scene::OnComponentAdded<ScriptComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] ScriptComponent& component)
+	void Scene::OnComponentAdded<ScriptComponent>(Entity entity, ScriptComponent& component)
 	{
 		/* On ScriptComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<AudioSourceComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] AudioSourceComponent& component)
+	void Scene::OnComponentAdded<AudioSourceComponent>(Entity entity, AudioSourceComponent& component)
 	{
 		/* On AudioSourceComponent added */
 	}
 
 	template<>
-	void Scene::OnComponentAdded<AudioListenerComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] AudioListenerComponent& component)
+	void Scene::OnComponentAdded<AudioListenerComponent>(Entity entity, AudioListenerComponent& component)
 	{
 		/* On AudioListenerComponent added */
 	}

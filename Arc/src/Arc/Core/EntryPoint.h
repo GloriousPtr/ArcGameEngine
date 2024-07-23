@@ -10,7 +10,7 @@
 extern ArcEngine::Application* ArcEngine::CreateApplication(ApplicationCommandLineArgs args);
 
 #if defined(ARC_PLATFORM_WINDOWS) && defined(ARC_DIST)
-int WinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINSTANCE hPrevInstance, [[maybe_unused]] char*, [[maybe_unused]] int nShowCmd)
+int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char*, int nShowCmd)
 #else
 int main(int argc, char** argv)
 #endif

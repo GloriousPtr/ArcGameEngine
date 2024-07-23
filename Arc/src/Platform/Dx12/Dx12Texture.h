@@ -27,7 +27,7 @@ namespace ArcEngine
 		[[nodiscard]] uint32_t GetHeapIndex() const override { return m_HeapIndex; }
 		[[nodiscard]] const eastl::string& GetPath() const override { return m_Path; }
 
-		void SetData(GraphicsCommandList commandList, const TextureData data, [[maybe_unused]] uint32_t size) override;
+		void SetData(GraphicsCommandList commandList, const TextureData data, uint32_t size) override;
 
 		void Bind(GraphicsCommandList commandList, uint32_t slot = 0) const override;
 
@@ -57,12 +57,12 @@ namespace ArcEngine
 		[[nodiscard]] uint32_t GetIrradianceHeapIndex() const override { return m_IrrSrvHeapIndex; }
 		[[nodiscard]] const eastl::string& GetPath() const override { return m_Path; }
 
-		void SetData(GraphicsCommandList commandList, const TextureData data, [[maybe_unused]] uint32_t size) override;
+		void SetData(GraphicsCommandList commandList, const TextureData data, uint32_t size) override;
 
 		void Bind(GraphicsCommandList commandList, uint32_t slot = 0) const override;
 
 		void BindIrradianceMap(GraphicsCommandList commandList, uint32_t slot) const override;
-		void BindRadianceMap([[maybe_unused]] uint32_t slot) const override {}
+		void BindRadianceMap(uint32_t slot) const override {}
 		[[nodiscard]] uint64_t GetHRDRendererID() const override { return m_HDRHandle.GPU.ptr; }
 
 	private:

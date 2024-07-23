@@ -108,7 +108,7 @@ namespace ArcEngine
 		Dx12Context::GetSrvHeap()->Free(s_DescriptorHandle);
 	}
 
-	void ImGuiLayer::OnEvent([[maybe_unused]] Event& e)
+	void ImGuiLayer::OnEvent(Event& e)
 	{
 		if(m_BlockEvents)
 		{

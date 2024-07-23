@@ -18,7 +18,7 @@ namespace ArcEngine
 		m_Context = reinterpret_cast<Dx12Context*>(Application::Get().GetWindow().GetGraphicsContext().get());
 	}
 
-	void Dx12RendererAPI::SetViewport([[maybe_unused]] uint32_t x, [[maybe_unused]] uint32_t y, uint32_t width, uint32_t height)
+	void Dx12RendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 	{
 		m_Context->ResizeSwapchain(width, height);
 	}

@@ -123,7 +123,7 @@ namespace ArcEngine::Dx12Utils
 		}
 	}
 
-	[[maybe_unused]] static void CreateTexture(ID3D12GraphicsCommandList9* commandList, D3D12MA::Allocation** imageAllocation, D3D12MA::Allocation** uploadImageAllocation, D3D12_SRV_DIMENSION dimension, TextureFormat format, uint32_t width, uint32_t height, uint16_t depth, const void* data, DescriptorHandle* srvHandle, DescriptorHandle* uavHandle)
+	static void CreateTexture(ID3D12GraphicsCommandList9* commandList, D3D12MA::Allocation** imageAllocation, D3D12MA::Allocation** uploadImageAllocation, D3D12_SRV_DIMENSION dimension, TextureFormat format, uint32_t width, uint32_t height, uint16_t depth, const void* data, DescriptorHandle* srvHandle, DescriptorHandle* uavHandle)
 	{
 		ARC_CORE_ASSERT(imageAllocation);
 		ARC_CORE_ASSERT(uploadImageAllocation);

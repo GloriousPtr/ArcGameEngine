@@ -102,7 +102,7 @@ namespace ArcEngine
 			data->EventCallback(event);
 		});
 
-		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, [[maybe_unused]] int scancode, [[maybe_unused]] int action, [[maybe_unused]] int mods)
+		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 		{
 			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
@@ -143,7 +143,7 @@ namespace ArcEngine
 			data->EventCallback(event);
 		});
 		
-		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, [[maybe_unused]] int action, [[maybe_unused]] int mods)
+		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
 		{
 			ARC_PROFILE_CATEGORY("Input", Profile::Category::Input);
 
@@ -189,7 +189,7 @@ namespace ArcEngine
 		});
 
 #ifdef ARC_PLATFORM_WINDOWS
-		glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, [[maybe_unused]] int xPos, [[maybe_unused]] int yPos, int* hit)
+		glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, int xPos, int yPos, int* hit)
 		{
 			*hit = static_cast<WindowData*>(glfwGetWindowUserPointer(window))->OverTitlebar ? 1 : 0;
 		});
