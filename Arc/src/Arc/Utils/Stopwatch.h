@@ -1,29 +1,41 @@
 #pragma once
 
-#include <EASTL/chrono.h>
+//#include <Window.h>
 
 namespace ArcEngine
 {
 	class Stopwatch
 	{
 	public:
+		static void Init()
+		{
+			QueryPerformanceFrequency(&Frequency);
+		}
+
 		Stopwatch()
-			: m_Start(eastl::chrono::high_resolution_clock::now())
+			: StartCounter(__rdtsc())
 		{
 		}
 
 		inline void Reset()
 		{
-			m_Start = eastl::chrono::high_resolution_clock::now();
+			StartCounter = __rdtsc();
+			QueryPerformanceCounter(&StartTimer);
 		}
 
 		// In seconds
 		inline float Stop()
 		{
-			return eastl::chrono::duration<float>(eastl::chrono::high_resolution_clock::now() - m_Start).count();
+			EndCounter = __rdtsc();
+			QueryPerformanceCounter(&EndTimer);
+			return (float) (EndTimer.QuadPart - StartTimer.QuadPart) / Frequency.QuadPart;
 		}
 
-	private:
-		eastl::chrono::time_point<eastl::chrono::high_resolution_clock> m_Start {};
+		uint64_t StartCounter;
+		uint64_t EndCounter;
+		LARGE_INTEGER StartTimer;
+		LARGE_INTEGER EndTimer;
+
+		inline static LARGE_INTEGER Frequency;
 	};
 }

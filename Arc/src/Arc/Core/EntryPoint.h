@@ -1,6 +1,7 @@
 #pragma once
 #include "Arc/Core/Base.h"
 #include "Arc/Core/Application.h"
+#include "Arc/Utils/Stopwatch.h"
 
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
@@ -27,6 +28,7 @@ int main(int argc, char** argv)
 	char** args = argv;
 #endif
 
+	ArcEngine::Stopwatch::Init();
 	ArcEngine::Log::Init();
 	ArcEngine::Application* app = ArcEngine::CreateApplication({ argsNum, args });
 	app->Run();

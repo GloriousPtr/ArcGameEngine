@@ -54,7 +54,7 @@ namespace ArcEngine
 		[[nodiscard]] TextureFormat GetTextureFormat() const override { return m_Format; }
 		[[nodiscard]] uint64_t GetRendererID() const override { return m_SrvHandle.GPU.ptr; }
 		[[nodiscard]] uint32_t GetHeapIndex() const override { return m_SrvHeapIndex; }
-		[[nodiscard]] uint32_t GetIrradianceHeapIndex() const { return m_IrrSrvHeapIndex; }
+		[[nodiscard]] uint32_t GetIrradianceHeapIndex() const override { return m_IrrSrvHeapIndex; }
 		[[nodiscard]] const eastl::string& GetPath() const override { return m_Path; }
 
 		void SetData(GraphicsCommandList commandList, const TextureData data, [[maybe_unused]] uint32_t size) override;

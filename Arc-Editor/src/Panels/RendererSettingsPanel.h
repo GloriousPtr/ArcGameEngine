@@ -15,6 +15,6 @@ namespace ArcEngine
 		RendererSettingsPanel& operator=(const RendererSettingsPanel& other) = delete;
 		RendererSettingsPanel& operator=(RendererSettingsPanel&& other) = delete;
 
-		void OnImGuiRender() override;
+		void OnImGuiRender(WorkQueue* queue) override;
 	};
 }

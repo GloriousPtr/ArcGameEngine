@@ -11,7 +11,7 @@ namespace ArcEngine
 	{
 	}
 
-	void ProjectSettingsPanel::OnImGuiRender()
+	void ProjectSettingsPanel::OnImGuiRender(WorkQueue* queue)
 	{
 		ARC_PROFILE_SCOPE();
 

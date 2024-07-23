@@ -5,7 +5,7 @@
 #include "RenderGraphData.h"
 #include "Framebuffer.h"
 #include "Arc/Core/AssetManager.h"
-#include "Arc/Core/JobSystem.h"
+#include "Arc/Core/QueueSystem.h"
 #include "Arc/Renderer/VertexArray.h"
 #include "Arc/Renderer/Material.h"
 #include "Arc/Renderer/Shader.h"
@@ -396,11 +396,11 @@ namespace ArcEngine
 		RenderCommand::EndRecordingCommandList(cl);
 	}
 
-	void Renderer3D::EndScene(const Ref<RenderGraphData>& renderTarget)
+	void Renderer3D::EndScene(WorkQueue* queue, const Ref<RenderGraphData>& renderTarget)
 	{
 		ARC_PROFILE_SCOPE();
 
-		Flush(renderTarget);
+		Flush(queue, renderTarget);
 		s_Renderer3DData->Meshes.clear();
 	}
 
@@ -429,20 +429,24 @@ namespace ArcEngine
 		s_Renderer3DData->Meshes.emplace_back(transform, submesh);
 	}
 
-	void Renderer3D::Flush(const Ref<RenderGraphData>& renderGraphData)
+	__forceinline void Renderer3D::Flush(WorkQueue* queue, const Ref<RenderGraphData>& renderGraphData)
 	{
 		ARC_PROFILE_SCOPE();
 
-		JobSystem::Execute([&renderGraphData]() {
+		QueueSystem::AddEntry(queue, [](WorkQueue* queue, void* data)
+		{
+			RenderGraphData* renderGraphData = (RenderGraphData*)data;
 			ShadowMapPass();
 			RenderPass(renderGraphData->RenderPassTarget);
 			LightingPass(renderGraphData);
-		});
-		JobSystem::Execute([&renderGraphData]() {
+		}, renderGraphData.get());
+		QueueSystem::AddEntry(queue, [](WorkQueue* queue, void* data)
+		{
+			RenderGraphData* renderGraphData = (RenderGraphData*)data;
 			BloomPass(renderGraphData);
-		});
+		}, renderGraphData.get());
+		QueueSystem::CompleteAllWork(queue);
 		FXAAPass(renderGraphData);
-		JobSystem::Wait();
 		CompositePass(renderGraphData);
 	}
 
@@ -609,7 +613,7 @@ namespace ArcEngine
 		}
 	}
 
-	void Renderer3D::BloomPass([[maybe_unused]] const Ref<RenderGraphData>& renderGraphData)
+	void Renderer3D::BloomPass([[maybe_unused]] const RenderGraphData* renderGraphData)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -716,7 +720,7 @@ namespace ArcEngine
 		RenderCommand::EndRecordingCommandList(cl);
 	}
 
-	void Renderer3D::LightingPass(const Ref<RenderGraphData>& renderGraphData)
+	void Renderer3D::LightingPass(const RenderGraphData* renderGraphData)
 	{
 		ARC_PROFILE_SCOPE();
 

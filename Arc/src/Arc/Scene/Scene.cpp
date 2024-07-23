@@ -799,7 +799,7 @@ namespace ArcEngine
 		#pragma endregion
 	}
 
-	void Scene::OnUpdateEditor([[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera)
+	void Scene::OnUpdateEditor(WorkQueue* queue, [[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -820,10 +820,10 @@ namespace ArcEngine
 			.ViewProjection = camera.GetViewProjection(),
 			.Position = glm::vec4(camera.GetPosition(), 1.0f)
 		};
-		OnRender(renderGraphData, cameraData);
+		OnRender(queue, renderGraphData, cameraData);
 	}
 
-	void Scene::OnUpdateRuntime([[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera)
+	void Scene::OnUpdateRuntime(WorkQueue* queue, [[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -1098,7 +1098,7 @@ namespace ArcEngine
 			}
 		}
 
-		OnRender(renderGraphData, cameraData);
+		OnRender(queue, renderGraphData, cameraData);
 		#pragma endregion
 	}
 
@@ -1144,7 +1144,7 @@ namespace ArcEngine
 		});
 	}
 
-	void Scene::OnRender(const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData)
+	void Scene::OnRender(WorkQueue* queue, const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData)
 	{
 		ARC_PROFILE_CATEGORY("Rendering", Profile::Category::Rendering);
 
@@ -1187,7 +1187,7 @@ namespace ArcEngine
 						}
 					}
 				}
-				Renderer3D::EndScene(renderGraphData);
+				Renderer3D::EndScene(queue, renderGraphData);
 			}
 		}
 		
@@ -1215,7 +1215,6 @@ namespace ArcEngine
 	{
 		eastl::string name = entity.GetComponent<TagComponent>().Tag;
 		Entity duplicate = CreateEntity(name);
-		UUID dupId = duplicate.GetUUID();
 		DuplicateEntityComponent(AllComponents{}, m_Registry, entity, duplicate);
 		RelationshipComponent& rc = duplicate.GetComponent<RelationshipComponent>();
 		if (!parent)

@@ -1,10 +1,10 @@
 #include "arcpch.h"
 
-size_t g_ArcAllocationSize = 0;
+std::atomic<uint64_t> g_ArcAllocationSize = 0;
 
 namespace ArcEngine::Allocation
 {
-	size_t GetSize() { return g_ArcAllocationSize; }
+	uint64_t GetSize() { return g_ArcAllocationSize; }
 
 	void* New(size_t size)
 	{

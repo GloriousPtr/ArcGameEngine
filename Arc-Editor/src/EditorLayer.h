@@ -20,8 +20,8 @@ namespace ArcEngine
 		void OnAttach() override;
 		void OnDetach() override;
 
-		void OnUpdate([[maybe_unused]] Timestep ts) override;
-		void OnImGuiRender() override;
+		void OnUpdate([[maybe_unused]] Timestep ts, WorkQueue* queue) override;
+		void OnImGuiRender(WorkQueue* queue) override;
 		void OnEvent([[maybe_unused]] Event& e) override;
 
 		void SetContext(EditorContextType type, const char* data, size_t size) { m_SelectedContext.Set(type, data, size); }

@@ -3,6 +3,7 @@
 #include <mutex>
 
 #include "Arc/Core/Base.h"
+#include "Arc/Core/QueueSystem.h"
 
 #include "Arc/Core/Window.h"
 #include "Arc/Core/LayerStack.h"
@@ -55,7 +56,7 @@ namespace ArcEngine
 
 		[[nodiscard]] ImGuiLayer* GetImGuiLayer() const { return m_ImGuiLayer.get(); }
 
-		[[nodiscard]] static size_t GetAllocatedMemorySize();
+		[[nodiscard]] static uint64_t GetAllocatedMemorySize();
 		[[nodiscard]] static Application& Get();
 		
 		void SubmitToMainThread(const std::function<void()>& function);
@@ -77,6 +78,7 @@ namespace ArcEngine
 
 		eastl::vector<std::function<void()>> m_MainThreadQueue;
 		std::mutex m_MainThreadQueueMutex;
+		WorkQueue m_WorkQueue = {};
 
 	private:
 		friend int ::WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR argv, int argc);

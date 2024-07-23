@@ -18,7 +18,7 @@ namespace ArcEngine
 	{
 	}
 
-	void SceneHierarchyPanel::OnUpdate([[maybe_unused]] Timestep ts)
+	void SceneHierarchyPanel::OnUpdate([[maybe_unused]] Timestep ts, WorkQueue* queue)
 	{
 		const EditorContext& context = EditorLayer::GetInstance()->GetContext();
 		m_SelectedEntity = (context.IsValid(EditorContextType::Entity) ? *context.As<Entity>() : Entity({}));
@@ -29,7 +29,7 @@ namespace ArcEngine
 		}
 	}
 
-	void SceneHierarchyPanel::OnImGuiRender()
+	void SceneHierarchyPanel::OnImGuiRender(WorkQueue* queue)
 	{
 		ARC_PROFILE_SCOPE();
 

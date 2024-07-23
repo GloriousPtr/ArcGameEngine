@@ -16,6 +16,6 @@ namespace ArcEngine
 		ProjectSettingsPanel& operator=(const ProjectSettingsPanel& other) = delete;
 		ProjectSettingsPanel& operator=(ProjectSettingsPanel&& other) = delete;
 
-		void OnImGuiRender() override;
+		void OnImGuiRender(WorkQueue* queue) override;
 	};
 }

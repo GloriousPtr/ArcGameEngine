@@ -73,7 +73,7 @@ namespace ArcEngine
 		ARC_PROFILE_SCOPE();
 	}
 
-	void EditorLayer::OnUpdate([[maybe_unused]] Timestep ts)
+	void EditorLayer::OnUpdate([[maybe_unused]] Timestep ts, WorkQueue* queue)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -110,14 +110,14 @@ namespace ArcEngine
 			}
 		}
 
-		m_SceneHierarchyPanel.OnUpdate(ts);
+		m_SceneHierarchyPanel.OnUpdate(ts, queue);
 
 		const bool useEditorCamera = m_SceneState == SceneState::Edit || m_SceneState == SceneState::Pause || m_SceneState == SceneState::Step;
 		for (const auto& panel : m_Viewports)
 		{
 			if (panel->Showing)
 			{
-				panel->OnUpdate(ts);
+				panel->OnUpdate(ts, queue);
 				panel->SetUseEditorCamera(useEditorCamera);
 			}
 		}
@@ -125,17 +125,17 @@ namespace ArcEngine
 		for (const auto& panel : m_AssetPanels)
 		{
 			if (panel->Showing)
-				panel->OnUpdate(ts);
+				panel->OnUpdate(ts, queue);
 		}
 		
 		for (const auto& panel : m_Panels)
 		{
 			if (panel->Showing)
-				panel->OnUpdate(ts);
+				panel->OnUpdate(ts, queue);
 		}
 	}
 
-	void EditorLayer::OnImGuiRender()
+	void EditorLayer::OnImGuiRender(WorkQueue* queue)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -482,7 +482,7 @@ namespace ArcEngine
 			// HIERARCHY /////////////////////////////////////////////////////////////
 			//////////////////////////////////////////////////////////////////////////
 			if (m_ShowSceneHierarchyPanel && !m_Fullscreen)
-				m_SceneHierarchyPanel.OnImGuiRender();
+				m_SceneHierarchyPanel.OnImGuiRender(queue);
 
 			//////////////////////////////////////////////////////////////////////////
 			// SCENE VIEWPORTS ///////////////////////////////////////////////////////
@@ -490,7 +490,7 @@ namespace ArcEngine
 			for (const auto& viewportPanel : m_Viewports)
 			{
 				if (viewportPanel->Showing)
-					viewportPanel->OnImGuiRender();
+					viewportPanel->OnImGuiRender(queue);
 			}
 
 			if (!m_Fullscreen)
@@ -501,7 +501,7 @@ namespace ArcEngine
 				for (const auto& assetPanel : m_AssetPanels)
 				{
 					if (assetPanel->Showing)
-						assetPanel->OnImGuiRender();
+						assetPanel->OnImGuiRender(queue);
 				}
 
 				//////////////////////////////////////////////////////////////////////////
@@ -510,7 +510,7 @@ namespace ArcEngine
 				for (const auto& panel : m_Panels)
 				{
 					if (panel->Showing)
-						panel->OnImGuiRender();
+						panel->OnImGuiRender(queue);
 				}
 
 				//////////////////////////////////////////////////////////////////////////
@@ -521,12 +521,12 @@ namespace ArcEngine
 					if (propertyPanel->Showing)
 					{
 						propertyPanel->SetContext(m_SelectedContext);
-						propertyPanel->OnImGuiRender();
+						propertyPanel->OnImGuiRender(queue);
 					}
 				}
 
 				if (m_ConsolePanel.Showing)
-					m_ConsolePanel.OnImGuiRender();
+					m_ConsolePanel.OnImGuiRender(queue);
 			}
 
 			if (m_ShowNewProjectModal)

@@ -325,7 +325,7 @@ namespace ArcEngine
 		);
 	}
 
-	void AssetPanel::OnUpdate([[maybe_unused]] Timestep ts)
+	void AssetPanel::OnUpdate([[maybe_unused]] Timestep ts, WorkQueue* queue)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -344,7 +344,7 @@ namespace ArcEngine
 		}
 	}
 
-	void AssetPanel::OnImGuiRender()
+	void AssetPanel::OnImGuiRender(WorkQueue* queue)
 	{
 		ARC_PROFILE_SCOPE();
 

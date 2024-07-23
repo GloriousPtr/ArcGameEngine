@@ -15,7 +15,7 @@ namespace ArcEngine
 		StatsPanel& operator=(const StatsPanel& other) = delete;
 		StatsPanel& operator=(StatsPanel&& other) = delete;
 
-		void OnImGuiRender() override;
+		void OnImGuiRender(WorkQueue* queue) override;
 
 	private:
 		float m_FpsValues[50];

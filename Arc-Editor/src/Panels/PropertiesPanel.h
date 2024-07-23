@@ -20,7 +20,7 @@ namespace ArcEngine
 		PropertiesPanel& operator=(const PropertiesPanel& other) = delete;
 		PropertiesPanel& operator=(PropertiesPanel&& other) = delete;
 
-		void OnImGuiRender() override;
+		void OnImGuiRender(WorkQueue* queue) override;
 
 		void SetContext(const EditorContext& context)
 		{

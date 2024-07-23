@@ -61,7 +61,7 @@ namespace ArcEngine
 		AddComponentName<ScriptComponent>(ARC_ICON_SCRIPT " Script");
 	}
 
-	void PropertiesPanel::OnImGuiRender()
+	void PropertiesPanel::OnImGuiRender(WorkQueue* queue)
 	{
 		ARC_PROFILE_SCOPE();
 

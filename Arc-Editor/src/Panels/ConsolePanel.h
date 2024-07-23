@@ -41,7 +41,7 @@ namespace ArcEngine
 		void Clear();
 		void SetFocus() const;
 
-		void OnImGuiRender() override;
+		void OnImGuiRender(WorkQueue* queue) override;
 
 	private:
 		void ImGuiRenderHeader();

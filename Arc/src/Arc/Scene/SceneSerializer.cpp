@@ -61,7 +61,7 @@ namespace ArcEngine
 				EntitySerializer::DeserializeEntity(entity, *m_Scene, true);
 		}
 
-		ARC_CORE_TRACE("Deserializing scene '{}' completed: {}s", sceneName, stopwatch.Stop());
+		ARC_CORE_TRACE("Deserializing scene '{}' completed: {:.2f}ms", sceneName, stopwatch.Stop() * 1000.0f);
 
 		return true;
 	}

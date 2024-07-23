@@ -12,7 +12,7 @@ namespace ArcEngine
 	{
 	}
 
-	void StatsPanel::OnImGuiRender()
+	void StatsPanel::OnImGuiRender(WorkQueue* queue)
 	{
 		ARC_PROFILE_SCOPE();
 		

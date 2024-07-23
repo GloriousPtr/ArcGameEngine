@@ -27,7 +27,7 @@ namespace ArcEngine
 		m_EditorCamera.SetViewportSize(width, height);
 	}
 
-	void SceneViewport::OnUpdate([[maybe_unused]] Timestep timestep)
+	void SceneViewport::OnUpdate([[maybe_unused]] Timestep timestep, WorkQueue* queue)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -135,18 +135,18 @@ namespace ArcEngine
 		// Update scene
 		if (m_SimulationRunning)
 		{
-			m_Scene->OnUpdateRuntime(timestep, m_RenderGraphData, m_UseEditorCamera ? &m_EditorCamera : nullptr);
+			m_Scene->OnUpdateRuntime(queue, timestep, m_RenderGraphData, m_UseEditorCamera ? &m_EditorCamera : nullptr);
 			if (m_UseEditorCamera)
 				OnOverlayRender();
 		}
 		else
 		{
-			m_Scene->OnUpdateEditor(timestep, m_RenderGraphData, m_EditorCamera);
+			m_Scene->OnUpdateEditor(queue, timestep, m_RenderGraphData, m_EditorCamera);
 			OnOverlayRender();
 		}
 	}
 
-	void SceneViewport::OnImGuiRender()
+	void SceneViewport::OnImGuiRender(WorkQueue* queue)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -327,7 +327,7 @@ namespace ArcEngine
 					};
 
 					RenderCommand::Flush();
-					m_Scene->OnRender(m_MiniViewportRenderGraphData, cameraData);
+					m_Scene->OnRender(queue, m_MiniViewportRenderGraphData, cameraData);
 
 					ImGui::SetNextItemAllowOverlap();
 					const ImVec2 miniViewportSize = { m_ViewportSize.x * m_MiniViewportSizeMultiplier, m_ViewportSize.y * m_MiniViewportSizeMultiplier };

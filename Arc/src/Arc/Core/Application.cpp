@@ -5,7 +5,7 @@
 
 #include "Arc/Audio/AudioEngine.h"
 #include "Arc/Core/AssetManager.h"
-#include "Arc/Core/JobSystem.h"
+#include "Arc/Core/QueueSystem.h"
 #include "Arc/Renderer/Renderer.h"
 #include "Arc/Scripting/ScriptEngine.h"
 
@@ -30,7 +30,7 @@ namespace ArcEngine
 		m_Window = Window::Create(WindowProps(m_Specification.Name));
 		m_Window->SetEventCallBack(ARC_BIND_EVENT_FN(Application::OnEvent));
 
-		JobSystem::Init();
+		QueueSystem::Init(&m_WorkQueue);
 		AssetManager::Init();
 		Renderer::Init();
 		AudioEngine::Init();
@@ -53,7 +53,6 @@ namespace ArcEngine
 		AudioEngine::Shutdown();
 		Renderer::Shutdown();
 		AssetManager::Shutdown();
-		JobSystem::Wait();
 
 		OPTICK_SHUTDOWN()
 	}
@@ -65,7 +64,7 @@ namespace ArcEngine
 		m_Running = false;
 	}
 
-	size_t Application::GetAllocatedMemorySize()
+	uint64_t Application::GetAllocatedMemorySize()
 	{
 		return Allocation::GetSize();
 	}
@@ -110,7 +109,7 @@ namespace ArcEngine
 					ARC_PROFILE_SCOPE_NAME("LayerStack OnUpdate");
 
 					for (Layer* layer : *m_LayerStack)
-						layer->OnUpdate(m_Timestep);	
+						layer->OnUpdate(m_Timestep, &m_WorkQueue);
 				}
 
 				m_ImGuiLayer->Begin();
@@ -118,7 +117,7 @@ namespace ArcEngine
 					ARC_PROFILE_SCOPE_NAME("LayerStack OnImGuiRender");
 
 					for (Layer* layer : *m_LayerStack)
-						layer->OnImGuiRender();
+						layer->OnImGuiRender(&m_WorkQueue);
 				}
 				m_ImGuiLayer->End();
 			}

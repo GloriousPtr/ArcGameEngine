@@ -73,7 +73,7 @@ namespace ArcEngine
 		m_BufferBegin = 0;
 	}
 
-	void ConsolePanel::OnImGuiRender()
+	void ConsolePanel::OnImGuiRender(WorkQueue* queue)
 	{
 		ARC_PROFILE_SCOPE();
 

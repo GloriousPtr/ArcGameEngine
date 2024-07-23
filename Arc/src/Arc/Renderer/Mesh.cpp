@@ -9,7 +9,7 @@
 #include <glm/gtx/hash.hpp>
 
 #include "Arc/Core/AssetManager.h"
-#include "Arc/Core/JobSystem.h"
+#include "Arc/Core/QueueSystem.h"
 #include "Arc/Renderer/Material.h"
 #include "Arc/Renderer/Shader.h"
 #include "Arc/Renderer/VertexArray.h"
@@ -78,9 +78,10 @@ namespace ArcEngine
 			return;
 		}
 
-		JobSystem::Wait();
+		//JobSystem::Wait();
 		ProcessNode(scene->mRootNode, scene, filepath);
-		JobSystem::Wait();
+		//QueueSystem::CompleteAllWork(nullptr);
+		//JobSystem::Wait();
 		m_Name = StringUtils::GetName(filepath);
 
 		m_Filepath = filepath;
@@ -102,8 +103,27 @@ namespace ArcEngine
 
 		for (unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
+			/*
+			struct ProcessMeshData
+			{
+				Mesh* meshClass;
+				
+				unsigned int meshIndex;
+				const aiNode* node;
+				const aiScene* scene;
+				const char* filepath;
+			};
+			ProcessMeshData meshData = { this, i, node, scene, filepath };
+			QueueSystem::AddEntry(nullptr, [](WorkQueue* queue, void* data)
+			{
+				ProcessMeshData meshData = *(ProcessMeshData*)data;
+				aiMesh* mesh = meshData.scene->mMeshes[meshData.node->mMeshes[meshData.meshIndex]];
+				meshData.meshClass->ProcessMesh(mesh, meshData.scene, meshData.filepath, meshData.node->mName.C_Str());
+			}, &meshData);
+			*/
+			//JobSystem::Execute([mesh, scene, filepath, node, this]() { ProcessMesh(mesh, scene, filepath, node->mName.C_Str()); });
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			JobSystem::Execute([mesh, scene, filepath, node, this]() { ProcessMesh(mesh, scene, filepath, node->mName.C_Str()); });
+			ProcessMesh(mesh, scene, filepath, node->mName.C_Str());
 		}
 
 		for (unsigned int i = 0; i < node->mNumChildren; i++)

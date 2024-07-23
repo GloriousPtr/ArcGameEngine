@@ -6,7 +6,7 @@
 #include <hostfxr.h>
 
 #include "Arc/Core/Application.h"
-#include "Arc/Core/JobSystem.h"
+#include "Arc/Core/QueueSystem.h"
 #include "Arc/Project/Project.h"
 #include "Arc/Scene/Entity.h"
 #include "Arc/Scene/Scene.h"
@@ -251,7 +251,7 @@ namespace ArcEngine
 			s_ScriptEngineData->DotnetClose(s_ScriptEngineData->DotnetRuntimeContext);
 			ARC_CORE_ASSERT(false, "Runtime initialization failed ");
 		}
-
+		
 		result = s_ScriptEngineData->RuntimeDelegate(s_ScriptEngineData->DotnetRuntimeContext, hdt_load_assembly_and_get_function_pointer, (void**)&s_ScriptEngineData->DotnetLoadAssemblyAndFunc);
 		if (result != 0 || s_ScriptEngineData->DotnetRuntimeContext == nullptr || s_ScriptEngineData->DotnetLoadAssemblyAndFunc == nullptr)
 		{
@@ -318,7 +318,7 @@ namespace ArcEngine
 		return !s_ScriptEngineData->Building;
 	}
 
-	void ScriptEngine::ReloadAppDomain(bool asyncBuild)
+	void ScriptEngine::ReloadAppDomain([[maybe_unused]] bool asyncBuild)
 	{
 		ARC_PROFILE_SCOPE();
 
@@ -329,7 +329,7 @@ namespace ArcEngine
 
 		auto* scriptEngineData = s_ScriptEngineData.get();
 		auto* reflection = s_Reflection.get();
-		JobSystem::Execute([scriptEngineData, reflection]()
+		//JobSystem::Execute([scriptEngineData, reflection]()
 		{
 			Stopwatch stopwatch;
 			if (ProjectBuilder::GenerateProjectFiles())
@@ -354,10 +354,10 @@ namespace ArcEngine
 			}
 
 			Application::Get().SubmitToMainThread([scriptEngineData]() { scriptEngineData->Building = false; });
-		});
+		}//);
 
-		if (!asyncBuild)
-			JobSystem::Wait();
+		//if (!asyncBuild)
+			//JobSystem::Wait();
 	}
 
 	void ScriptEngine::LoadAssemblyClasses(DotnetAssembly assembly)
@@ -418,6 +418,9 @@ namespace ArcEngine
 	bool ScriptEngine::IsDebuggerAttached()
 	{
 		ARC_PROFILE_SCOPE();
+
+		if (!s_Reflection)
+			return false;
 
 		if (!s_Reflection->IsDebuggerAttached)
 			return false;

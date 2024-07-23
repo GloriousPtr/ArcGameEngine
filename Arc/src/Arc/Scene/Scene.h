@@ -7,6 +7,8 @@
 
 namespace ArcEngine
 {
+	struct WorkQueue;
+
 	class Entity;
 	class EditorCamera;
 	struct CameraData;
@@ -54,9 +56,9 @@ namespace ArcEngine
 		[[nodiscard]] inline size_t GetEntityCount() const { return m_EntityMap.size(); }
 		[[nodiscard]] bool IsRunning() const { return m_IsRunning; }
 
-		void OnUpdateEditor([[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera);
-		void OnUpdateRuntime([[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera = nullptr);
-		void OnRender(const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData);
+		void OnUpdateEditor(WorkQueue* queue, [[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera& camera);
+		void OnUpdateRuntime(WorkQueue* queue, [[maybe_unused]] Timestep ts, const Ref<RenderGraphData>& renderGraphData, const EditorCamera* overrideCamera = nullptr);
+		void OnRender(WorkQueue* queue, const Ref<RenderGraphData>& renderGraphData, const CameraData& cameraData);
 		void OnRuntimeStart();
 		void OnRuntimeStop();
 

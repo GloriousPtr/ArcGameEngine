@@ -59,7 +59,7 @@
 
 namespace ArcEngine::Allocation
 {
-	size_t GetSize();
+	uint64_t GetSize();
 	void* New(size_t size);
 	void Free(void* ptr, size_t size);
 }
