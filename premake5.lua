@@ -21,9 +21,15 @@ workspace "Arc"
 		"MultiProcessorCompile"
 	}
 
+	defines
+	{
+		"GLM_FORCE_SWIZZLE",
+	}
+
 	filter { "action:vs2022" }
 		linkoptions { "/ignore:4006" }
 		buildoptions { "/bigobj", "/Zc:char8_t-" }
+		disablewarnings "4100"
 	filter { "action:vs2022", "toolset:clang" }
 		buildoptions { "/showFilenames", "/Zc:char8_t-" }
 	filter "system:linux"

@@ -295,6 +295,7 @@ namespace ArcEngine::Profile
 #else
 	#define ARC_PROFILE_FRAME(...)
 	#define ARC_PROFILE_SCOPE(...)
+	#define ARC_PROFILE_SCOPE_NAME(NAME)
 	#define ARC_PROFILE_TAG(NAME, ...)
 	#define ARC_PROFILE_SCOPE_DYNAMIC(NAME)
 	#define ARC_PROFILE_THREAD(...)
