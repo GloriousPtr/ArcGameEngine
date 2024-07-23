@@ -1,5 +1,8 @@
 #include "arcpch.h"
 
+#include "Arc/Core/Buffer.h"
+#include "Arc/Core/Filesystem.h"
+#include "Arc/Utils/StringUtils.h"
 #include "Arc/Project/Project.h"
 #include "Arc/Scripting/ProjectBuilder.h"
 
@@ -146,40 +149,43 @@ namespace ArcEngine
 
 		// Errors
 		{
-			FILE* errors = nullptr;
-			fopen_s(&errors, "AssemblyBuildErrors.log", "r");
+			ScopedBuffer buf = Filesystem::ReadFileBinary("AssemblyBuildErrors.log");
+			char* errors = buf.As<char>();
+			char* start = errors + 3;
+			uint64_t sz = buf.Size();
 
 			if (errors != nullptr)
 			{
-				char buffer[4096];
-				while (fgets(buffer, sizeof(buffer), errors))
+				for (uint64_t i = 3; i < sz; ++i)
 				{
-					const size_t newLine = std::string_view(buffer).size() - 1;
-					buffer[newLine] = '\0';
-					ARC_CORE_ERROR(buffer);
-					success = false;
+					if (errors[i] == '\n' || errors[i] == 0)
+					{
+						errors[i] = 0;
+						ARC_CORE_ERROR(start);
+						start = &errors[i + 1];
+					}
 				}
-
-				fclose(errors);
 			}
 		}
 
 		// Warnings
 		{
-			FILE* warns;
-			fopen_s(&warns, "AssemblyBuildWarnings.log", "r");
+			ScopedBuffer buf = Filesystem::ReadFileBinary("AssemblyBuildWarnings.log");
+			char* warns = buf.As<char>();
+			char* start = warns + 3;
+			uint64_t sz = buf.Size();
 
 			if (warns != nullptr)
 			{
-				char buffer[1024];
-				while (fgets(buffer, sizeof(buffer), warns))
+				for (uint64_t i = 3; i < sz; ++i)
 				{
-					const size_t newLine = std::string_view(buffer).size() - 1;
-					buffer[newLine] = '\0';
-					ARC_APP_WARN(buffer);
+					if (warns[i] == '\n' || warns[i] == 0)
+					{
+						warns[i] = 0;
+						ARC_CORE_ERROR(start);
+						start = &warns[i + 1];
+					}
 				}
-
-				fclose(warns);
 			}
 		}
 
