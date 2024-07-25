@@ -25,6 +25,7 @@ namespace ArcEngine
 	struct Win32ThreadInfo
 	{
 		WorkQueue* Queue;
+		wchar_t Name[32];
 	};
 
 	class QueueSystem

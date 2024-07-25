@@ -10,6 +10,7 @@ namespace ArcEngine
 		Win32ThreadInfo* threadInfo = (Win32ThreadInfo*)lpParam;
 		for (;;)
 		{
+			ARC_PROFILE_THREAD(threadInfo->Name);
 			if (DoNextWorkQueueEntry(threadInfo->Queue))
 			{
 				WaitForSingleObjectEx(threadInfo->Queue->SemaphoreHandle, INFINITE, FALSE);
@@ -18,7 +19,7 @@ namespace ArcEngine
 	}
 
 	#define ArrayCount(a) (sizeof(a)/sizeof(*(a)))
-	static Win32ThreadInfo threadInfos[6];
+	static Win32ThreadInfo threadInfos[16];
 	void QueueSystem::Init([[]]WorkQueue* queue)
 	{
 		constexpr uint32_t InitialCount = 0;
@@ -33,9 +34,8 @@ namespace ArcEngine
 			DWORD threadId;
 			HANDLE threadHandle = CreateThread(0, 0, ThreadProccc, info, 0, &threadId);
 
-			WCHAR buffer[256];
-			wsprintf(buffer, L"Queue Thread %u", threadIndex);
-			SetThreadDescription(threadHandle, buffer);
+			wsprintf(info->Name, L"Queue Thread %u", threadIndex);
+			SetThreadDescription(threadHandle, info->Name);
 			CloseHandle(threadHandle);
 		}
 	}
@@ -49,7 +49,7 @@ namespace ArcEngine
 		WorkQueueEntry* entry = queue->Entries + originalNextEntryToWrite;
 		entry->Callback = callback;
 		entry->Data = data;
-		InterlockedIncrement((LONG volatile *)&queue->CompletionGoal);
+		++queue->CompletionGoal;
 		_WriteBarrier();
 		_mm_sfence();
 		queue->NextEntryToWrite = newNextEntryToWrite;
