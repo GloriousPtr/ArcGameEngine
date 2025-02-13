@@ -13,6 +13,7 @@
 #include "Arc/Renderer/ParticleSystem.h"
 #include "Arc/Renderer/Texture.h"
 #include "Arc/Scene/SceneCamera.h"
+#include "Arc/Utils/ColorUtils.h"
 
 namespace ArcEngine
 {
@@ -39,7 +40,6 @@ namespace ArcEngine
 			: Tag(tag) {}
 	};
 	
-	class Entity;
 	struct TransformComponent
 	{
 		glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
@@ -60,10 +60,10 @@ namespace ArcEngine
 
 	struct SpriteRendererComponent
 	{
-		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
 		Ref<Texture2D> Texture = nullptr;
 		glm::vec2 Tiling = glm::vec2(1.0f);
 		glm::vec2 Offset = glm::vec2(0.0f);
+		Color Tint = Color{ 0xFFFFFFFF };
 		int32_t SortingOrder = 0;
 	};
 

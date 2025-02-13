@@ -119,12 +119,12 @@ namespace ArcEngine
 		/// <summary>
 		/// Sprite tint color
 		/// </summary>
-		public Color tint
+		public uint tint
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				InternalCalls.SpriteRendererComponent_GetColor(entityID, out Color v);
+				InternalCalls.SpriteRendererComponent_GetColor(entityID, out uint v);
 				return v;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]

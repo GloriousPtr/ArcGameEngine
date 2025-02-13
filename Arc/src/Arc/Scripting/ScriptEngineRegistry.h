@@ -37,8 +37,8 @@ namespace ArcEngine
 	ARC_EXPORT const char* TagComponent_GetTag(uint64_t entityID);
 	ARC_EXPORT void TagComponent_SetTag(uint64_t entityID, const char* tag);
 
-	ARC_EXPORT void SpriteRendererComponent_GetColor(uint64_t entityID, glm::vec4* outTint);
-	ARC_EXPORT void SpriteRendererComponent_SetColor(uint64_t entityID, const glm::vec4* tint);
+	ARC_EXPORT void SpriteRendererComponent_GetColor(uint64_t entityID, uint32_t* outTint);
+	ARC_EXPORT void SpriteRendererComponent_SetColor(uint64_t entityID, const uint32_t* tint);
 	ARC_EXPORT void SpriteRendererComponent_GetTiling(uint64_t entityID, glm::vec2* outTiling);
 	ARC_EXPORT void SpriteRendererComponent_SetTiling(uint64_t entityID, const glm::vec2* tiling);
 	ARC_EXPORT void SpriteRendererComponent_GetOffset(uint64_t entityID, glm::vec2* outOffset);

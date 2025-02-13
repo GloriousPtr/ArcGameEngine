@@ -182,18 +182,18 @@ namespace ArcEngine
 	// Sprite Renderer ////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
-	ARC_EXPORT void SpriteRendererComponent_GetColor(uint64_t entityID, glm::vec4* outTint)
+	ARC_EXPORT void SpriteRendererComponent_GetColor(uint64_t entityID, uint32_t* outTint)
 	{
 		ARC_PROFILE_SCOPE();
 
-		*outTint = GetEntity(entityID).GetComponent<SpriteRendererComponent>().Color;
+		*outTint = GetEntity(entityID).GetComponent<SpriteRendererComponent>().Tint.rgba;
 	}
 
-	ARC_EXPORT void SpriteRendererComponent_SetColor(uint64_t entityID, const glm::vec4* tint)
+	ARC_EXPORT void SpriteRendererComponent_SetColor(uint64_t entityID, const uint32_t* tint)
 	{
 		ARC_PROFILE_SCOPE();
 
-		GetEntity(entityID).GetComponent<SpriteRendererComponent>().Color = *tint;
+		GetEntity(entityID).GetComponent<SpriteRendererComponent>().Tint.rgba = *tint;
 	}
 
 	ARC_EXPORT void SpriteRendererComponent_GetTiling(uint64_t entityID, glm::vec2* outTiling)

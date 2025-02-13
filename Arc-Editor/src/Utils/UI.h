@@ -104,6 +104,28 @@ namespace ArcEngine
 			return modified;
 		}
 
+		// Color
+		static bool PropertyColor(eastl::string_view label, Color& value, eastl::string_view tooltip = nullptr)
+		{
+			ColorF color = ColorFFromColor(value);
+			BeginPropertyGrid(label, tooltip);
+			bool modified;
+			modified = ImGui::ColorEdit4(s_IDBuffer, glm::value_ptr(color.rgba));
+			value = ColorFromColorF(color);
+			EndPropertyGrid();
+			return modified;
+		}
+
+		// ColorF
+		static bool PropertyColor(eastl::string_view label, ColorF& value, eastl::string_view tooltip = nullptr)
+		{
+			BeginPropertyGrid(label, tooltip);
+			bool modified;
+			modified = ImGui::ColorEdit4(s_IDBuffer, glm::value_ptr(value.rgba));
+			EndPropertyGrid();
+			return modified;
+		}
+
 		// Bool
 		static bool Property(eastl::string_view label, bool& flag, eastl::string_view tooltip = nullptr);
 

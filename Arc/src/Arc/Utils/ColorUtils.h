@@ -2,6 +2,46 @@
 
 namespace ArcEngine
 {
+#define IM_COL32_R_SHIFT    0
+#define IM_COL32_G_SHIFT    8
+#define IM_COL32_B_SHIFT    16
+#define IM_COL32_A_SHIFT    24
+
+	struct Color
+	{
+		uint32_t rgba = 0xFFFFFFFF;
+	};
+
+	struct ColorF
+	{
+		glm::vec4 rgba = glm::vec4(1.0f);
+	};
+
+	static inline float Saturate(float f) { return (f < 0.0f) ? 0.0f : (f > 1.0f) ? 1.0f : f; }
+
+	[[maybe_unused]]
+	static Color ColorFromColorF(const ColorF& in)
+	{
+		glm::vec4 rgba = in.rgba;
+		uint32_t out;
+		out = ((uint32_t)((int)(Saturate(rgba.r) * 255.0f + 0.5f))) << IM_COL32_R_SHIFT;
+		out |= ((uint32_t)((int)(Saturate(rgba.g) * 255.0f + 0.5f))) << IM_COL32_G_SHIFT;
+		out |= ((uint32_t)((int)(Saturate(rgba.b) * 255.0f + 0.5f))) << IM_COL32_B_SHIFT;
+		out |= ((uint32_t)((int)(Saturate(rgba.a) * 255.0f + 0.5f))) << IM_COL32_A_SHIFT;
+		return Color{ out };
+	}
+
+	[[maybe_unused]]
+	static ColorF ColorFFromColor(Color in)
+	{
+		float s = 1.0f / 255.0f;
+		return ColorF(
+			glm::vec4(((in.rgba >> IM_COL32_R_SHIFT) & 0xFF) * s,
+			((in.rgba >> IM_COL32_G_SHIFT) & 0xFF) * s,
+			((in.rgba >> IM_COL32_B_SHIFT) & 0xFF) * s,
+			((in.rgba >> IM_COL32_A_SHIFT) & 0xFF) * s));
+	}
+
 	class ColorUtils
 	{
 	public:

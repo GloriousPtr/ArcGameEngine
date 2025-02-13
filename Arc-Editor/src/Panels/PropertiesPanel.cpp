@@ -538,7 +538,8 @@ namespace ArcEngine
 		DrawComponent<SpriteRendererComponent>(entity, [&entity](SpriteRendererComponent& component)
 		{
 			UI::BeginProperties();
-			UI::PropertyVector("Color", component.Color, true);
+
+			UI::PropertyColor("Color", component.Tint);
 			UI::Property("Texture", component.Texture);
 			if (UI::Property("Sorting Order", component.SortingOrder))
 				entity.GetScene()->SortForSprites();

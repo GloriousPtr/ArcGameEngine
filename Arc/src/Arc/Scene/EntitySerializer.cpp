@@ -275,7 +275,7 @@ namespace ArcEngine
 			out << YAML::BeginMap;
 
 			const auto& spriteRendererComponent = entity.GetComponent<SpriteRendererComponent>();
-			out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.Color;
+			out << YAML::Key << "Tint" << YAML::Value << spriteRendererComponent.Tint.rgba;
 			out << YAML::Key << "SortingOrder" << YAML::Value << spriteRendererComponent.SortingOrder;
 			out << YAML::Key << "Tiling" << YAML::Value << spriteRendererComponent.Tiling;
 			out << YAML::Key << "Offset" << YAML::Value << spriteRendererComponent.Offset;
@@ -919,7 +919,14 @@ namespace ArcEngine
 		if (const auto& spriteRenderer = entity["SpriteRendererComponent"])
 		{
 			auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
-			TrySet(src.Color, spriteRenderer["Color"]);
+
+			if (auto& colorNode = spriteRenderer["Color"])
+			{
+				ColorF color;
+				TrySet(color.rgba, colorNode);
+				src.Tint = ColorFromColorF(color);
+			}
+			TrySet(src.Tint.rgba, spriteRenderer["Tint"]);
 			TrySet(src.SortingOrder, spriteRenderer["SortingOrder"]);
 			TrySet(src.Tiling, spriteRenderer["Tiling"]);
 			TrySet(src.Offset, spriteRenderer["Offset"]);

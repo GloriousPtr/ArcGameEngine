@@ -101,11 +101,11 @@ namespace ArcEngine
 
 		[DllImport(ArcEngineDLL, CallingConvention = CallingConvention.Cdecl)]
 		[SuppressGCTransition]
-		internal static extern void SpriteRendererComponent_GetColor(ulong entityID, out Color tint);
+		internal static extern void SpriteRendererComponent_GetColor(ulong entityID, out uint tint);
 		
 		[DllImport(ArcEngineDLL, CallingConvention = CallingConvention.Cdecl)]
 		[SuppressGCTransition]
-		internal static extern void SpriteRendererComponent_SetColor(ulong entityID, ref Color tint);
+		internal static extern void SpriteRendererComponent_SetColor(ulong entityID, ref uint tint);
 		
 		[DllImport(ArcEngineDLL, CallingConvention = CallingConvention.Cdecl)]
 		[SuppressGCTransition]

@@ -1205,7 +1205,8 @@ namespace ArcEngine
 			const auto view = m_Registry.view<SpriteRendererComponent>();
 			for (auto &&[entity, sprite] : view.each())
 			{
-				Renderer2D::DrawQuad(Entity(entity, this).GetWorldTransform(), sprite.Texture, sprite.Color, sprite.Tiling, sprite.Offset);
+				ColorF color = ColorFFromColor(sprite.Tint);
+				Renderer2D::DrawQuad(Entity(entity, this).GetWorldTransform(), sprite.Texture, color.rgba, sprite.Tiling, sprite.Offset);
 			}
 		}
 		Renderer2D::EndScene();
