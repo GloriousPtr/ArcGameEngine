@@ -6,7 +6,7 @@
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcGameEngine&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcGameEngine)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcGameEngine&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcGameEngine)
 
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-blue?style=flat-square)
+![Platform](https://img.shields.io/badge/platform-Windows%20%28Primary%29%20%7C%20Linux%20%28Experimental%29-blue?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/MohitSethi99/ArcEngine?color=blue&style=flat-square)
 ![Size](https://img.shields.io/github/repo-size/MohitSethi99/ArcEngine?style=flat-square)
 
@@ -24,8 +24,27 @@ I develop it in my spare time as a personal project, so expect frequent periods 
 ```
 git clone --recursive https://github.com/MohitSethi99/ArcGameEngine.git
 ```
-- Arc Game Engine is built in a Windows environment, using Visual Studio 2022.
-- Execute the script `scripts/Win-GenProjects.bat` to generate the solution and project files.
+
+### Windows
+- Arc Game Engine is primarily developed in a Windows environment using Visual Studio 2022.
+- Run `scripts/Win-GenProjects.bat` to generate the solution and project files.
+
+### Linux (Experimental)
+Linux support is available but experimental. Tested with Clang 18.1.3 on Ubuntu/Debian.
+
+1. Install dependencies:
+   ```bash
+   # Debian/Ubuntu
+   sudo apt install build-essential clang libc++-dev libstdc++-14-dev
+   # Or use the provided script:
+   ./scripts/InstallDependencies.sh
+   ```
+2. Generate Makefiles and build:
+   ```bash
+   ./scripts/GenerateMake.sh && make config=debug -j$(nproc)
+   ```
+
+> **Note:** Windows remains the primary development platform. Linux builds may require additional maintenance as the project evolves.
 
 ## Current Features
 

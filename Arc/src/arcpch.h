@@ -9,6 +9,7 @@
 	#endif
 #endif
 
+#include <cstdint>
 #include <sstream>
 
 #include <future>

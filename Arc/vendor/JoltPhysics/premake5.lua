@@ -34,10 +34,7 @@ project "JoltPhysics"
 		pic "On"
 		systemversion "latest"
 		cppdialect "C++20"
-
-	filter "configurations:Debug"
-		runtime "Debug"
-		symbols "on"
+                forceincludes { "cstdint" }
 
 	filter "configurations:Release"
 		runtime "Release"
