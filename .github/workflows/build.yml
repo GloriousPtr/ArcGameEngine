@@ -64,7 +64,7 @@ jobs:
         run: |
           msbuild /m /p:Configuration=${{matrix.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}} /t:rebuild /nodeReuse:false
       
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: "Arc_Windows_${{matrix.COMPILER}}_${{matrix.BUILD_CONFIGURATION}}"
           path: "${{ github.workspace }}/bin/${{matrix.BUILD_CONFIGURATION}}-windows-x86_64"
@@ -94,7 +94,7 @@ jobs:
       - name: Run Build
         run: make config=${{matrix.BUILD_CONFIGURATION}} -j$(nproc)
       
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: "Arc_Clang_${{matrix.BUILD_CONFIGURATION}}"
           path: "${{ github.workspace }}/bin/${{matrix.BUILD_CONFIGURATION}}-linux-x86_64"
