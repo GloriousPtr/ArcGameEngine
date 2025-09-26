@@ -1,16 +1,16 @@
 # Arc Game Engine
 
-[![Build Status](https://github.com/MohitSethi99/ArcEngine/workflows/build/badge.svg)](https://github.com/MohitSethi99/ArcEngine/actions?workflow=build)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcGameEngine&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcGameEngine)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcGameEngine&metric=bugs)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcGameEngine)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcGameEngine&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcGameEngine)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=MohitSethi99_ArcGameEngine&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=MohitSethi99_ArcGameEngine)
+[![Build Status](https://github.com/GloriousPtr/ArcGameEngine/workflows/build/badge.svg)](https://github.com/GloriousPtr/ArcGameEngine/actions?workflow=build)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=GloriousPtr_ArcGameEngine&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=GloriousPtr_ArcGameEngine)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=GloriousPtr_ArcGameEngine&metric=bugs)](https://sonarcloud.io/summary/new_code?id=GloriousPtr_ArcGameEngine)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=GloriousPtr_ArcGameEngine&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=GloriousPtr_ArcGameEngine)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=GloriousPtr_ArcGameEngine&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=GloriousPtr_ArcGameEngine)
 
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-blue?style=flat-square)
-![GitHub](https://img.shields.io/github/license/MohitSethi99/ArcEngine?color=blue&style=flat-square)
-![Size](https://img.shields.io/github/repo-size/MohitSethi99/ArcEngine?style=flat-square)
+![GitHub](https://img.shields.io/github/license/GloriousPtr/ArcGameEngine?color=blue&style=flat-square)
+![Size](https://img.shields.io/github/repo-size/GloriousPtr/ArcGameEngine?style=flat-square)
 
-![ARC](https://MohitSethi99.github.io/images/ArcGameEngine/Sponza.jpg)
+![ARC](https://gloriousptr.github.io/images/ArcGameEngine/Sponza.jpg)
 
 ## About
 
@@ -22,7 +22,7 @@ I develop it in my spare time as a personal project, so expect frequent periods 
 
 - Clone Arc Game Engine using git. Make sure you do a ```--recursive``` clone!
 ```
-git clone --recursive https://github.com/MohitSethi99/ArcGameEngine.git
+git clone --recursive https://github.com/GloriousPtr/ArcGameEngine.git
 ```
 - Arc Game Engine is built in a Windows environment, using Visual Studio 2022.
 - Execute the script `scripts/Win-GenProjects.bat` to generate the solution and project files.
@@ -58,9 +58,10 @@ Right now, Arc Game Engine is very bare-bones. Its most remarkable features are:
 
 ## Feature Showcase
 
-[![Arc Game Engine Showcase](https://MohitSethi99.github.io/images/ArcGameEngine/VideoThumbnail.jpg)](https://youtu.be/bUqAVP7_XAw)
+[![Arc Game Engine Showcase](https://gloriousptr.github.io/images/ArcGameEngine/VideoThumbnail.jpg)](https://youtu.be/bUqAVP7_XAw)
 
 ## Dependencies
+LOC: `scc --include-ext=cpp,h,cs,hlsl,hlsli,glsl --count-as=hlsl:glsl,hlsli:glsl --exclude-dir=Arc/vendor`
 
 Arc Game Engine has the following dependencies:
 
